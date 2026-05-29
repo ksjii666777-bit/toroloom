@@ -1,0 +1,39 @@
+{
+  "name": "toroloom-backend",
+  "version": "1.0.0",
+  "description": "Toroloom backend API server with broker integration (Zerodha Kite Connect / Angel One SmartAPI)",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "kiteconnect": "^5.3.0",
+    "mongodb": "^7.2.0",
+    "pg": "^8.21.0",
+    "prom-client": "^15.1.3",
+    "smartapi-javascript": "^1.0.27",
+    "uuid": "^11.0.3",
+    "ws": "^8.18.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.9.1",
+    "@types/pg": "^8.20.0",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.18.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "~5.6.3",
+    "vitest": "^4.1.7"
+  }
+}

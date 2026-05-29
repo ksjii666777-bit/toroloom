@@ -1,0 +1,158 @@
+# ============================================================================
+# Toroloom — Production Deployment
+# ============================================================================
+#
+# Start:   docker compose -f docker-compose.prod.yml up -d
+# Stop:    docker compose -f docker-compose.prod.yml down
+# Logs:    docker compose -f docker-compose.prod.yml logs -f backend
+# Rebuild: docker compose -f docker-compose.prod.yml up -d --build backend
+# Reset:   docker compose -f docker-compose.prod.yml down -v
+#
+# The backend listens on port 3000 (REST API + WebSocket).
+# A reverse proxy (nginx, Caddy, Traefik) should terminate TLS and forward
+# /api/* and /ws to this service.  See DEPLOY.md for production recipes.
+#
+# Databases are NOT exposed to the internet. They are only accessible
+# within the Docker internal network.  If you need to connect from the
+# host (e.g. for admin tools), use a Docker exec or bind to localhost.
+# ============================================================================
+
+services:
+  # ──── Backend API + WebSocket Server ──────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: toroloom-backend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      # ── Core ─────────────────────────────────────────────────────
+      NODE_ENV: production
+      PORT: '3000'
+      JWT_SECRET: '${JWT_SECRET:-change-me-in-production}'
+      JWT_EXPIRES_IN: '${JWT_EXPIRES_IN:-7d}'
+
+      # ── Data source (mock for demos, live for real brokers) ─────
+      DATA_SOURCE: '${DATA_SOURCE:-mock}'
+      BROKER: '${BROKER:-mock}'
+
+      # ── Storage backend ──────────────────────────────────────────
+      # Options: memory | postgres | mongodb
+      # IMPORTANT: When using postgres or mongodb, ensure the
+      # corresponding database service below is configured correctly.
+      # The credentials in DATABASE_URL / MONGODB_URI must match the
+      # database service's POSTGRES_PASSWORD / MONGO_PASSWORD.
+      STORAGE_BACKEND: '${STORAGE_BACKEND:-memory}'
+      DATABASE_URL: '${DATABASE_URL:-postgresql://toroloom:${POSTGRES_PASSWORD:-toroloom_prod}@postgres:5432/toroloom}'
+      MONGODB_URI: '${MONGODB_URI:-mongodb://toroloom:${MONGO_PASSWORD:-toroloom_prod}@mongodb:27017}'
+      MONGODB_DB_NAME: '${MONGODB_DB_NAME:-toroloom}'
+
+      # ── Zerodha Kite Connect (optional) ──────────────────────────
+      ZERODHA_API_KEY: '${ZERODHA_API_KEY:-}'
+      ZERODHA_API_SECRET: '${ZERODHA_API_SECRET:-}'
+      ZERODHA_ACCESS_TOKEN: '${ZERODHA_ACCESS_TOKEN:-}'
+      ZERODHA_REQUEST_TOKEN: '${ZERODHA_REQUEST_TOKEN:-}'
+
+      # ── Angel One SmartAPI (optional) ────────────────────────────
+      ANGEL_CLIENT_ID: '${ANGEL_CLIENT_ID:-}'
+      ANGEL_API_KEY: '${ANGEL_API_KEY:-}'
+      ANGEL_ACCESS_TOKEN: '${ANGEL_ACCESS_TOKEN:-}'
+      ANGEL_PASSWORD: '${ANGEL_PASSWORD:-}'
+      ANGEL_TOTP: '${ANGEL_TOTP:-}'
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+      mongodb:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    # ── Resource limits (adjust to your server) ────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1'
+    #       memory: 512M
+
+  # ──── PostgreSQL (primary relational store) ───────────────────────────────
+  #
+  # Not required when STORAGE_BACKEND=memory.
+  # When using in-memory mode, databases are skipped automatically
+  # (required: false). To skip databases explicitly:
+  #   docker compose -f docker-compose.prod.yml up -d backend --no-deps
+  #
+  # Requires Docker Compose v2.20+ for required: false support.
+  #
+  postgres:
+    image: postgres:16-alpine
+    container_name: toroloom-postgres
+    restart: unless-stopped
+    # Not exposed to the internet. Connect from host via:
+    #   docker exec -it toroloom-postgres psql -U toroloom toroloom
+    ports:
+      - '127.0.0.1:5432:5432'
+    environment:
+      POSTGRES_USER: toroloom
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD:-toroloom_prod}'
+      POSTGRES_DB: toroloom
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/scripts/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U toroloom -d toroloom']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+  # ──── MongoDB (document store for flexible schemas) ──────────────────────
+  #
+  # Not required when STORAGE_BACKEND=memory.
+  # When using in-memory mode, databases are skipped automatically
+  # (required: false). To skip databases explicitly:
+  #   docker compose -f docker-compose.prod.yml up -d backend --no-deps
+  #
+  # Requires Docker Compose v2.20+ for required: false support.
+  #
+  mongodb:
+    image: mongo:7-jammy
+    container_name: toroloom-mongodb
+    restart: unless-stopped
+    # Not exposed to the internet. Connect from host via:
+    #   docker exec -it toroloom-mongodb mongosh -u toroloom -p $MONGO_PASSWORD
+    ports:
+      - '127.0.0.1:27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: toroloom
+      MONGO_INITDB_ROOT_PASSWORD: '${MONGO_PASSWORD:-toroloom_prod}'
+      MONGO_INITDB_DATABASE: toroloom
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+volumes:
+  pgdata:
+  mongodata:

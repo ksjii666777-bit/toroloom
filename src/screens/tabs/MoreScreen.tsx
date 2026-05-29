@@ -1,0 +1,478 @@
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
+import { useAuthStore } from '../../store/authStore';
+import { useGamificationStore } from '../../store/gamificationStore';
+import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import Card from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
+import { SkeletonBlock, PortfolioSkeleton, SkeletonCard } from '../../components/ui/SkeletonLoader';
+
+const { width } = Dimensions.get('window');
+
+const menuItems = [
+  { section: 'Investments', items: [
+    { icon: 'wallet', label: 'Fund Dashboard', color: '#00C853', screen: 'FundsDashboard' },
+    { icon: 'pie-chart', label: 'Mutual Funds', color: '#6C63FF', screen: 'MutualFunds' },
+    { icon: 'calendar', label: 'My SIPs', color: '#00D2FF', screen: 'SIPs' },
+    { icon: 'document-text', label: 'Trade History', color: '#FFC107', screen: 'TradeHistory' },
+    { icon: 'analytics', label: 'Reports', color: '#FF6B6B', screen: 'Reports' },
+  ]},
+  { section: 'Learn & Grow', items: [
+    { icon: 'school', label: 'Courses', color: '#00C853', screen: 'Learn' },
+    { icon: 'chatbubbles', label: 'Community', color: '#6C63FF', screen: 'Community' },
+    { icon: 'bulb', label: 'AI Insights', color: '#FFC107', screen: 'AIInsights' },
+    { icon: 'trophy', label: 'Achievements', color: '#FF6B6B', screen: 'Achievements' },
+  ]},
+  { section: 'Account', items: [
+    { icon: 'person', label: 'Profile & KYC', color: '#00D2FF', screen: 'Profile' },
+    { icon: 'notifications', label: 'Notifications', color: '#FF6B6B', screen: 'Notifications' },
+    { icon: 'settings', label: 'Settings', color: '#6E6E9A', screen: 'Settings' },
+    { icon: 'help-circle', label: 'Help & Support', color: '#00C853', screen: 'Help' },
+  ]},
+];
+
+const quickActions = [
+  { icon: 'add-circle', label: 'Add Funds', gradient: GRADIENTS.success },
+  { icon: 'arrow-up-circle', label: 'Withdraw', gradient: GRADIENTS.danger },
+  { icon: 'swap-horizontal', label: 'Transfer', gradient: GRADIENTS.primary },
+  { icon: 'qr-code', label: 'UPI', gradient: GRADIENTS.accent },
+];
+
+export default function MoreScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { user, logout } = useAuthStore();
+  const { userLevel, badges } = useGamificationStore();
+  const unlockedCount = badges.filter(b => b.unlocked).length;
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1500);
+  }, []);
+
+  const { getAnimatedStyle: getQaStyle } = useStaggeredAnimation(quickActions.length, {
+    initialDelay: 100,
+    staggerDelay: 80,
+    duration: 400,
+  });
+
+  const { getAnimatedStyle: getMenuSectionStyle } = useStaggeredAnimation(menuItems.length, {
+    initialDelay: 150,
+    staggerDelay: 120,
+    duration: 450,
+  });
+
+  const { getAnimatedStyle: getBadgeStyle } = useStaggeredAnimation(badges.slice(0, 8).length, {
+    initialDelay: 200,
+    staggerDelay: 40,
+    duration: 300,
+  });
+
+  const handleQuickAction = (label: string) => {
+    switch (label) {
+      case 'Add Funds':
+        navigation.navigate('AddFunds');
+        break;
+      case 'Withdraw':
+        navigation.navigate('Withdraw');
+        break;
+      case 'Transfer':
+        navigation.navigate('Transfer');
+        break;
+      case 'UPI':
+        navigation.navigate('UPI');
+        break;
+      default:
+        Alert.alert(
+          label,
+          `${label} feature is coming soon. We'll notify you when it's ready!`,
+          [{ text: 'OK' }]
+        );
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <SkeletonBlock width="30%" height={28} />
+          </View>
+          <View style={{ paddingHorizontal: SPACING.xl }}>
+            <SkeletonBlock width="100%" height={100} borderRadius={BORDER_RADIUS.xl} />
+            <View style={{ height: SPACING.lg }} />
+            <SkeletonBlock width="100%" height={56} borderRadius={BORDER_RADIUS.md} />
+            <View style={{ height: SPACING.xl }} />
+            {[1, 2, 3].map(i => (
+              <View key={i}>
+                <SkeletonBlock width="25%" height={12} />
+                <View style={{ height: SPACING.md }} />
+                <View style={{ flexDirection: 'row', gap: SPACING.md }}>
+                  {[1, 2, 3, 4].map(j => (
+                    <View key={j} style={{ alignItems: 'center', gap: 4 }}>
+                      <SkeletonBlock width={48} height={48} borderRadius={14} />
+                      <SkeletonBlock width={40} height={10} />
+                    </View>
+                  ))}
+                </View>
+                <View style={{ height: SPACING.xl }} />
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.bgSecondary}
+          />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>More</Text>
+        </View>
+
+        {/* Profile Card */}
+        <AnimatedPressable onPress={() => navigation.navigate('Profile')} haptic="medium" scaleTo={0.97}>
+          <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.profileGradient}>
+            <View style={styles.profileRow}>
+              <View style={styles.profileAvatar}>
+                <Text style={styles.avatarText}>{user?.name?.[0] || 'R'}</Text>
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileName}>{user?.name || 'Rahul Sharma'}</Text>
+                <Text style={styles.profileEmail}>{user?.email || 'rahul@email.com'}</Text>
+                <View style={styles.profileBadges}>
+                  <Badge label={`Level ${userLevel.level}`} variant="primary" />
+                  <Badge label="KYC Verified" variant="success" />
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
+            </View>
+          </LinearGradient>
+        </AnimatedPressable>
+
+        {/* Quick Actions */}
+        <View style={styles.quickActionsRow}>
+          {quickActions.map((action, i) => (
+            <Animated.View key={i} style={getQaStyle(i)}>
+              <AnimatedPressable onPress={() => handleQuickAction(action.label)} haptic="light" scaleTo={0.92}>
+                <View style={styles.quickActionWrapper}>
+                  <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
+                    <Ionicons name={action.icon as any} size={22} color={colors.white} />
+                  </LinearGradient>
+                  <Text style={styles.qaLabel}>{action.label}</Text>
+                </View>
+              </AnimatedPressable>
+            </Animated.View>
+          ))}
+        </View>
+
+        {/* Balance Card */}
+        <Card style={styles.balanceCard}>
+          <View style={styles.balanceRow}>
+            <View>
+              <Text style={styles.balanceLabel}>Available Balance</Text>
+              <Text style={styles.balanceValue}>₹{((user?.balance || 2500000) / 100000).toFixed(1)}L</Text>
+            </View>
+            <View style={styles.balanceActions}>
+              <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>
+                <View style={styles.balanceBtn}>
+                  <Text style={styles.balanceBtnText}>Add</Text>
+                </View>
+              </AnimatedPressable>
+              <AnimatedPressable onPress={() => navigation.navigate('Withdraw')} haptic="light" scaleTo={0.95}>
+                <View style={[styles.balanceBtn, styles.balanceBtnOutline]}>
+                  <Text style={styles.balanceBtnOutlineText}>Withdraw</Text>
+                </View>
+              </AnimatedPressable>
+            </View>
+          </View>
+        </Card>
+
+        {/* Menu Sections */}
+        {menuItems.map((section, idx) => (
+          <Animated.View key={idx} style={[styles.menuSection, getMenuSectionStyle(idx)]}>
+            <Text style={styles.menuSectionTitle}>{section.section}</Text>
+            <View style={styles.menuGrid}>
+              {section.items.map((item, i) => (
+                <AnimatedPressable
+                  key={i}
+                  onPress={() => navigation.navigate(item.screen)}
+                  haptic="selection"
+                  scaleTo={0.93}
+                >
+                  <View style={styles.menuItem}>
+                    <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
+                      <Ionicons name={item.icon as any} size={22} color={item.color} />
+                    </View>
+                    <Text style={styles.menuLabel}>{item.label}</Text>
+                  </View>
+                </AnimatedPressable>
+              ))}
+            </View>
+          </Animated.View>
+        ))}
+
+        {/* Achievements Preview */}
+        <AnimatedPressable onPress={() => navigation.navigate('Achievements')} haptic="light" scaleTo={0.98}>
+          <Card title="Achievements" subtitle={`${unlockedCount}/${badges.length} unlocked`}>
+            <View style={styles.badgesGrid}>
+              {badges.slice(0, 8).map((badge, i) => (
+                <Animated.View key={badge.id} style={getBadgeStyle(i)}>
+                  <View style={[styles.badgeItem, !badge.unlocked && styles.badgeLocked]}>
+                    <Text style={styles.badgeIcon}>{badge.icon}</Text>
+                    {!badge.unlocked && (
+                      <View style={styles.lockOverlay}>
+                        <Ionicons name="lock-closed" size={12} color={colors.textMuted} />
+                      </View>
+                    )}
+                  </View>
+                </Animated.View>
+              ))}
+            </View>
+          </Card>
+        </AnimatedPressable>
+
+        {/* Logout */}
+        <AnimatedPressable onPress={logout} haptic="warning" scaleTo={0.97}>
+          <View style={styles.logoutBtn}>
+            <Ionicons name="log-out-outline" size={20} color={colors.danger} />
+            <Text style={styles.logoutText}>Log Out</Text>
+          </View>
+        </AnimatedPressable>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </View>
+  );
+}
+
+const createStyles = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+    paddingHorizontal: SPACING.xl,
+  },
+  header: {
+    paddingTop: 60,
+    marginBottom: SPACING.lg,
+  },
+  title: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.title,
+    color: colors.text,
+  },
+  profileGradient: {
+    padding: SPACING.xl,
+    borderRadius: BORDER_RADIUS.xl,
+    marginBottom: SPACING.lg,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.xxl,
+    color: colors.white,
+  },
+  profileInfo: {
+    flex: 1,
+    marginLeft: SPACING.md,
+  },
+  profileName: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.lg,
+    color: colors.white,
+  },
+  profileEmail: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 2,
+  },
+  profileBadges: {
+    flexDirection: 'row',
+    marginTop: SPACING.sm,
+    gap: SPACING.sm,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.lg,
+  },
+  quickActionWrapper: {
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  qaIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  qaLabel: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.text,
+  },
+  balanceCard: {
+    marginBottom: SPACING.xxl,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  balanceLabel: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.textSecondary,
+  },
+  balanceValue: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.xxl,
+    color: colors.text,
+    marginTop: 4,
+  },
+  balanceActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  balanceBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  balanceBtnText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.white,
+  },
+  balanceBtnOutline: {
+    backgroundColor: colors.transparent,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  balanceBtnOutlineText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.primary,
+  },
+  menuSection: {
+    marginBottom: SPACING.xxl,
+  },
+  menuSectionTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: SPACING.md,
+  },
+  menuGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.md,
+  },
+  menuItem: {
+    width: (width - 64 - 48) / 4,
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  menuIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuLabel: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.text,
+    textAlign: 'center',
+  },
+  badgesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    paddingTop: SPACING.md,
+  },
+  badgeItem: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.bgCardLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  badgeIcon: {
+    fontSize: 20,
+  },
+  badgeLocked: {
+    opacity: 0.4,
+  },
+  lockOverlay: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: colors.bgCard,
+    borderRadius: 6,
+    padding: 1,
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.lg,
+    marginTop: SPACING.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.divider,
+  },
+  logoutText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.md,
+    color: colors.danger,
+  },
+});

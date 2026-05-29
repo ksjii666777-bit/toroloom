@@ -1,0 +1,55 @@
+# ============================================================================
+# Toroloom — Development Database Services
+# ============================================================================
+# Start:   docker compose up -d
+# Stop:    docker compose down
+# Reset:   docker compose down -v
+#
+# Services:
+#   postgres  — Primary relational store (port 5432)
+#   mongodb   — Document store for flexible schemas (port 27017)
+# ============================================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: toroloom-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: toroloom
+      POSTGRES_PASSWORD: toroloom_dev
+      POSTGRES_DB: toroloom
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Schema is auto-migrated by PostgreSQLStorage.migrate() on app startup.
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U toroloom -d toroloom']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  mongodb:
+    image: mongo:7-jammy
+    container_name: toroloom-mongodb
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: toroloom
+      MONGO_INITDB_ROOT_PASSWORD: toroloom_dev
+      MONGO_INITDB_DATABASE: toroloom
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  pgdata:
+  mongodata:

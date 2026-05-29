@@ -1,0 +1,515 @@
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
+import { usePortfolioStore } from '../../store/portfolioStore';
+import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { formatCurrency, formatPercent } from '../../utils/formatters';
+import PortfolioHolding from '../../components/PortfolioHolding';
+import Card from '../../components/ui/Card';
+import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
+import { SkeletonBlock, SkeletonCard, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
+
+const { width } = Dimensions.get('window');
+
+export default function PortfolioScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { holdings, trades } = usePortfolioStore();
+  const [view, setView] = useState<'holdings' | 'trades'>('holdings');
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1500);
+  }, []);
+
+  const portfolioValue = holdings.reduce((sum, h) => sum + h.currentValue, 0) || 1250000;
+  const invested = holdings.reduce((sum, h) => sum + h.totalInvested, 0) || 1100000;
+  const pnl = portfolioValue - invested;
+  const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
+
+  const holdingsCount = holdings.length;
+  const winningCount = holdings.filter(h => h.pnl > 0).length;
+  const { getAnimatedStyle: getHoldingsStyle } = useStaggeredAnimation(holdingsCount, {
+    initialDelay: 200,
+    staggerDelay: 70,
+    duration: 400,
+  });
+  const { getAnimatedStyle: getTradesStyle } = useStaggeredAnimation(trades.length, {
+    initialDelay: 200,
+    staggerDelay: 50,
+    duration: 350,
+  });
+
+  // Animated mini chart bars
+  const barAnims = useRef([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    Animated.stagger(50, barAnims.map((anim, i) =>
+      Animated.spring(anim, {
+        toValue: 1,
+        useNativeDriver: true,
+        delay: i * 30,
+        speed: 8,
+        bounciness: 6,
+      })
+    )).start();
+  }, [barAnims]);
+
+  // Animated stat numbers
+  const countUpAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    countUpAnim.setValue(0);
+    Animated.timing(countUpAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [portfolioValue, countUpAnim]);
+
+  const animatedPortfolioValue = countUpAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [invested, portfolioValue],
+  });
+
+  const barHeights = [22, 35, 18, 42, 28, 48, 52, 38, 30, 45];
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <SkeletonBlock width="40%" height={28} />
+            <View style={{ height: 4 }} />
+            <SkeletonBlock width="30%" height={14} />
+          </View>
+          <View style={styles.paddingHorizontal}>
+            <PortfolioSkeleton />
+            <SkeletonBlock width="100%" height={40} borderRadius={8} />
+            <View style={{ height: SPACING.lg }} />
+            {[1, 2, 3].map(i => <SkeletonCard key={i} hasAvatar hasAction={false} />)}
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.bgSecondary}
+          />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Portfolio</Text>
+          <Text style={styles.subtitle}>Track your investments</Text>
+        </View>
+
+        {/* Portfolio Summary */}
+        <View style={styles.paddingHorizontal}>
+          <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summaryCard}>
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Invested</Text>
+                <Text style={styles.summaryValue}>{formatCurrency(invested, true)}</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Current Value</Text>
+                <Text style={styles.summaryValue}>{formatCurrency(portfolioValue, true)}</Text>
+              </View>
+            </View>
+
+            <View style={styles.pnlContainer}>
+              <Text style={styles.pnlLabel}>Total Returns</Text>
+              <View style={styles.pnlRow}>
+                <Text style={[styles.pnlValue, { color: pnl >= 0 ? colors.marketUp : colors.marketDown }]}>
+                  {pnl >= 0 ? '+' : ''}{formatCurrency(pnl, true)}
+                </Text>
+                <View style={[styles.pnlBadge, { backgroundColor: pnl >= 0 ? '#00C85320' : '#FF174420' }]}>
+                  <Ionicons name={pnl >= 0 ? 'caret-up' : 'caret-down'} size={16} color={pnl >= 0 ? colors.marketUp : colors.marketDown} />
+                  <Text style={[styles.pnlBadgeText, { color: pnl >= 0 ? colors.marketUp : colors.marketDown }]}>
+                    {formatPercent(pnlPercent)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Animated Mini Chart */}
+            <View style={styles.miniChartRow}>
+              {barHeights.map((height, i) => {
+                const scaleY = barAnims[i]?.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 1],
+                }) || new Animated.Value(1);
+                const isUp = i > 6;
+                return (
+                  <View key={i} style={styles.barContainer}>
+                    <Animated.View
+                      style={[
+                        styles.bar,
+                        {
+                          height: height,
+                          backgroundColor: isUp ? colors.marketUp : colors.border,
+                          transform: [{ scaleY }],
+                        },
+                      ]}
+                    />
+                  </View>
+                );
+              })}
+            </View>
+
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{holdingsCount}</Text>
+                <Text style={styles.statLabel}>Holdings</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{trades.length}</Text>
+                <Text style={styles.statLabel}>Trades</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{winningCount}/{holdingsCount}</Text>
+                <Text style={styles.statLabel}>Winning</Text>
+              </View>
+            </View>
+          </LinearGradient>
+        </View>
+
+        {/* View Toggle */}
+        <View style={[styles.paddingHorizontal, styles.toggleContainer]}>
+          <View style={styles.toggle}>
+            <TouchableOpacity
+              style={[styles.toggleBtn, view === 'holdings' && styles.toggleBtnActive]}
+              onPress={() => setView('holdings')}
+            >
+              <Text style={[styles.toggleText, view === 'holdings' && styles.toggleTextActive]}>
+                Holdings ({holdings.length})
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleBtn, view === 'trades' && styles.toggleBtnActive]}
+              onPress={() => setView('trades')}
+            >
+              <Text style={[styles.toggleText, view === 'trades' && styles.toggleTextActive]}>
+                Recent Trades
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Content */}
+        <View style={styles.paddingHorizontal}>
+          {view === 'holdings' ? (
+            holdings.length > 0 ? (
+              holdings.map((holding, i) => (
+                <Animated.View key={holding.id} style={getHoldingsStyle(i)}>
+                  <PortfolioHolding
+                    holding={holding}
+                    onPress={(h) => navigation.navigate('StockDetail', { stockId: h.stockId, symbol: h.symbol })}
+                  />
+                </Animated.View>
+              ))
+            ) : (
+              <Card>
+                <View style={styles.emptyState}>
+                  <Ionicons name="wallet-outline" size={56} color={colors.textMuted} />
+                  <Text style={styles.emptyTitle}>No Holdings Yet</Text>
+                  <Text style={styles.emptySubtitle}>Start investing to build your portfolio</Text>
+                  <View style={{ marginTop: SPACING.lg }}>
+                    <AnimatedPressable onPress={() => navigation.navigate('Markets')} haptic="medium">
+                      <View style={[styles.exploreBtn, { backgroundColor: colors.primary }]}>
+                        <Ionicons name="trending-up" size={18} color={colors.white} />
+                        <Text style={styles.exploreBtnText}>Explore Markets</Text>
+                      </View>
+                    </AnimatedPressable>
+                  </View>
+                </View>
+              </Card>
+            )
+          ) : (
+            trades.map((trade, i) => (
+              <Animated.View key={trade.id} style={getTradesStyle(i)}>
+                <AnimatedPressable
+                  onPress={() => navigation.navigate('StockDetail', { stockId: trade.stockId, symbol: trade.symbol })}
+                  haptic="selection"
+                  scaleTo={0.98}
+                >
+                  <View style={styles.tradeItem}>
+                    <View style={styles.tradeLeft}>
+                      <View style={[styles.tradeType, { backgroundColor: trade.type === 'buy' ? '#00C85320' : '#FF174420' }]}>
+                        <Ionicons name={trade.type === 'buy' ? 'arrow-down' : 'arrow-up'} size={14} color={trade.type === 'buy' ? colors.marketUp : colors.marketDown} />
+                      </View>
+                      <View>
+                        <Text style={styles.tradeSymbol}>{trade.symbol}</Text>
+                        <Text style={styles.tradeName}>{trade.name}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.tradeRight}>
+                      <Text style={styles.tradeQty}>{trade.quantity} × {formatCurrency(trade.price)}</Text>
+                      <Text style={[styles.tradeTotal, { color: trade.type === 'buy' ? colors.text : colors.marketUp }]}>
+                        {trade.type === 'buy' ? '-' : '+'}{formatCurrency(trade.total, true)}
+                      </Text>
+                    </View>
+                  </View>
+                </AnimatedPressable>
+              </Animated.View>
+            ))
+          )}
+        </View>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </View>
+  );
+}
+
+const createStyles = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  paddingHorizontal: {
+    paddingHorizontal: SPACING.xl,
+  },
+  header: {
+    paddingTop: 60,
+    paddingHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+  },
+  title: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.title,
+    color: colors.text,
+  },
+  subtitle: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.md,
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  summaryCard: {
+    padding: SPACING.xl,
+    borderRadius: BORDER_RADIUS.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: SPACING.lg,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  summaryItem: {
+    flex: 1,
+  },
+  summaryLabel: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textSecondary,
+  },
+  summaryValue: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.xl,
+    color: colors.text,
+    marginTop: 4,
+  },
+  summaryDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: colors.border,
+    marginHorizontal: SPACING.lg,
+  },
+  pnlContainer: {
+    marginTop: SPACING.lg,
+    paddingTop: SPACING.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.divider,
+  },
+  pnlLabel: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.textSecondary,
+  },
+  pnlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginTop: SPACING.xs,
+  },
+  pnlValue: {
+    ...FONTS.black,
+    fontSize: FONTS.size.xxxl,
+  },
+  pnlBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.full,
+    gap: 2,
+  },
+  pnlBadgeText: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  miniChartRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 56,
+    gap: 4,
+    marginTop: SPACING.lg,
+  },
+  barContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  bar: {
+    width: '100%',
+    borderRadius: 2,
+    minHeight: 2,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    marginTop: SPACING.lg,
+    gap: SPACING.xl,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.lg,
+    color: colors.text,
+  },
+  statLabel: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  toggleContainer: {
+    marginBottom: SPACING.lg,
+  },
+  toggle: {
+    flexDirection: 'row',
+    backgroundColor: colors.bgInput,
+    borderRadius: BORDER_RADIUS.md,
+    padding: 4,
+  },
+  toggleBtn: {
+    flex: 1,
+    paddingVertical: SPACING.sm,
+    alignItems: 'center',
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  toggleBtnActive: {
+    backgroundColor: colors.primary,
+  },
+  toggleText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.textMuted,
+  },
+  toggleTextActive: {
+    color: colors.white,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xxxl,
+    gap: SPACING.sm,
+  },
+  emptyTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.lg,
+    color: colors.text,
+  },
+  emptySubtitle: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+  exploreBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  exploreBtnText: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    color: colors.white,
+  },
+  tradeItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.bgCard,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  tradeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  tradeType: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tradeSymbol: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    color: colors.text,
+  },
+  tradeName: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textMuted,
+  },
+  tradeRight: {
+    alignItems: 'flex-end',
+  },
+  tradeQty: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.textSecondary,
+  },
+  tradeTotal: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    marginTop: 2,
+  },
+});
