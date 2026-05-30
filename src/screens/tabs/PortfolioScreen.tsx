@@ -50,38 +50,45 @@ export default function PortfolioScreen({ navigation }: any) {
     duration: 350,
   });
 
-  // Animated mini chart bars
+  // Animated mini chart bars with spring stagger
   const barAnims = useRef([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
-    Animated.stagger(50, barAnims.map((anim, i) =>
+    Animated.stagger(40, barAnims.map((anim, i) =>
       Animated.spring(anim, {
         toValue: 1,
         useNativeDriver: true,
         delay: i * 30,
-        speed: 8,
-        bounciness: 6,
+        speed: 10,
+        bounciness: 8,
       })
     )).start();
   }, [barAnims]);
 
-  // Animated stat numbers
+  // Animated count-up effect for numbers
   const countUpAnim = useRef(new Animated.Value(0)).current;
+  const [displayProgress, setDisplayProgress] = useState(0);
   useEffect(() => {
     countUpAnim.setValue(0);
     Animated.timing(countUpAnim, {
       toValue: 1,
-      duration: 800,
+      duration: 1000,
       useNativeDriver: false,
     }).start();
+    const listener = countUpAnim.addListener(({ value }) => {
+      setDisplayProgress(value);
+    });
+    return () => countUpAnim.removeListener(listener);
   }, [portfolioValue, countUpAnim]);
 
-  const animatedPortfolioValue = countUpAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [invested, portfolioValue],
-  });
+  // Smooth transition values
+  const displayInvested = invested;
+  const displayPortfolio = invested + (portfolioValue - invested) * displayProgress;
+  const displayPnl = displayPortfolio - invested;
+  const displayPnlPercent = invested > 0 ? (displayPnl / invested) * 100 : 0;
 
   const barHeights = [22, 35, 18, 42, 28, 48, 52, 38, 30, 45];
+  const barColors = [false, false, false, true, true, true, true, false, true, true]; // which bars are 'up'
 
   if (isLoading) {
     return (
@@ -130,25 +137,25 @@ export default function PortfolioScreen({ navigation }: any) {
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Invested</Text>
-                <Text style={styles.summaryValue}>{formatCurrency(invested, true)}</Text>
+                <Text style={styles.summaryValue}>{formatCurrency(displayInvested, true)}</Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Current Value</Text>
-                <Text style={styles.summaryValue}>{formatCurrency(portfolioValue, true)}</Text>
+                <Text style={styles.summaryValue}>{formatCurrency(displayPortfolio, true)}</Text>
               </View>
             </View>
 
             <View style={styles.pnlContainer}>
               <Text style={styles.pnlLabel}>Total Returns</Text>
               <View style={styles.pnlRow}>
-                <Text style={[styles.pnlValue, { color: pnl >= 0 ? colors.marketUp : colors.marketDown }]}>
-                  {pnl >= 0 ? '+' : ''}{formatCurrency(pnl, true)}
+                <Text style={[styles.pnlValue, { color: displayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
+                  {displayPnl >= 0 ? '+' : ''}{formatCurrency(displayPnl, true)}
                 </Text>
-                <View style={[styles.pnlBadge, { backgroundColor: pnl >= 0 ? '#00C85320' : '#FF174420' }]}>
-                  <Ionicons name={pnl >= 0 ? 'caret-up' : 'caret-down'} size={16} color={pnl >= 0 ? colors.marketUp : colors.marketDown} />
-                  <Text style={[styles.pnlBadgeText, { color: pnl >= 0 ? colors.marketUp : colors.marketDown }]}>
-                    {formatPercent(pnlPercent)}
+                <View style={[styles.pnlBadge, { backgroundColor: displayPnl >= 0 ? '#00C85320' : '#FF174420' }]}>
+                  <Ionicons name={displayPnl >= 0 ? 'caret-up' : 'caret-down'} size={16} color={displayPnl >= 0 ? colors.marketUp : colors.marketDown} />
+                  <Text style={[styles.pnlBadgeText, { color: displayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
+                    {formatPercent(displayPnlPercent)}
                   </Text>
                 </View>
               </View>
@@ -161,7 +168,7 @@ export default function PortfolioScreen({ navigation }: any) {
                   inputRange: [0, 1],
                   outputRange: [0, 1],
                 }) || new Animated.Value(1);
-                const isUp = i > 6;
+                const isUp = barColors[i];
                 return (
                   <View key={i} style={styles.barContainer}>
                     <Animated.View
@@ -171,6 +178,7 @@ export default function PortfolioScreen({ navigation }: any) {
                           height: height,
                           backgroundColor: isUp ? colors.marketUp : colors.border,
                           transform: [{ scaleY }],
+                          opacity: scaleY,
                         },
                       ]}
                     />

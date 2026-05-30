@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View, ViewStyle } from 'react-native';
+import React, { useMemo, useCallback, useRef } from 'react';
+import { Text, StyleSheet, ActivityIndicator, View, ViewStyle, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, FONTS, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import AnimatedPressable from './AnimatedPressable';
 
 interface ButtonProps {
   title: string;
@@ -76,31 +77,39 @@ export default function Button({
     </View>
   );
 
-  if (variant === 'outline' || variant === 'ghost') {
+  const isOutline = variant === 'outline' || variant === 'ghost';
+  const paddingStyle = { paddingVertical: sizeStyle.paddingVertical, paddingHorizontal: sizeStyle.paddingHorizontal };
+
+  if (isOutline) {
     return (
-      <TouchableOpacity
+      <AnimatedPressable
         onPress={onPress}
         disabled={isDisabled}
-        activeOpacity={0.7}
+        scaleTo={0.97}
+        haptic="light"
+        highlight
+        highlightColor={colors.primary}
+        borderRadius={BORDER_RADIUS.lg}
         style={[
           styles.base,
           variant === 'outline' && styles.outline,
-          { paddingVertical: sizeStyle.paddingVertical, paddingHorizontal: sizeStyle.paddingHorizontal },
+          paddingStyle,
           isDisabled && styles.disabled,
           style,
         ]}
       >
         {content}
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   }
 
   if (btnGradient) {
     return (
-      <TouchableOpacity
+      <AnimatedPressable
         onPress={onPress}
         disabled={isDisabled}
-        activeOpacity={0.8}
+        scaleTo={0.97}
+        haptic="light"
         style={[isDisabled && styles.disabled, style]}
       >
         <LinearGradient
@@ -110,30 +119,34 @@ export default function Button({
           style={[
             styles.base,
             styles.gradientBase,
-            { paddingVertical: sizeStyle.paddingVertical, paddingHorizontal: sizeStyle.paddingHorizontal },
+            paddingStyle,
           ]}
         >
           {content}
         </LinearGradient>
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   }
 
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.7}
+      scaleTo={0.97}
+      haptic="light"
+      highlight
+      highlightColor={colors.primary}
+      borderRadius={BORDER_RADIUS.lg}
       style={[
         styles.base,
         styles.solid,
-        { paddingVertical: sizeStyle.paddingVertical, paddingHorizontal: sizeStyle.paddingHorizontal },
+        paddingStyle,
         isDisabled && styles.disabled,
         style,
       ]}
     >
       {content}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 
@@ -142,6 +155,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: BORDER_RADIUS.lg,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   gradientBase: {
     borderRadius: BORDER_RADIUS.lg,

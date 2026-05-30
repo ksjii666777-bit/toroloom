@@ -112,6 +112,9 @@ export default function WatchlistScreen({ navigation }: any) {
               onPress={() => setActiveWatchlist(w.id)}
               haptic="selection"
               scaleTo={0.95}
+              highlight
+              highlightColor={colors.primary}
+              borderRadius={BORDER_RADIUS.full}
             >
               <Animated.View
                 style={[

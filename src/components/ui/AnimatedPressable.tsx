@@ -1,7 +1,8 @@
 import React, { useRef, useMemo, useCallback } from 'react';
-import { TouchableWithoutFeedback, View, Animated, StyleSheet, ViewStyle } from 'react-native';
+import { TouchableWithoutFeedback, View, Animated, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { BORDER_RADIUS } from '../../constants/theme';
 
 interface AnimatedPressableProps {
   children: React.ReactNode;
@@ -12,9 +13,14 @@ interface AnimatedPressableProps {
   disabled?: boolean;
   scaleTo?: number;
   haptic?: 'light' | 'medium' | 'heavy' | 'selection' | 'none' | 'success' | 'warning' | 'error';
-  style?: ViewStyle;
-  containerStyle?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
   activeOpacity?: number;
+  /** Show a background highlight overlay on press-in */
+  highlight?: boolean;
+  /** Color of the highlight overlay (default: primary color at low opacity) */
+  highlightColor?: string;
+  borderRadius?: number;
 }
 
 export default function AnimatedPressable({
@@ -29,10 +35,14 @@ export default function AnimatedPressable({
   style,
   containerStyle,
   activeOpacity = 0.9,
+  highlight = false,
+  highlightColor,
+  borderRadius = BORDER_RADIUS.md,
 }: AnimatedPressableProps) {
   const { colors } = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
+  const highlightAnim = useRef(new Animated.Value(0)).current;
 
   const triggerHaptic = useCallback(() => {
     switch (haptic) {
@@ -49,7 +59,7 @@ export default function AnimatedPressable({
 
   const handlePressIn = useCallback(() => {
     onPressIn?.();
-    Animated.parallel([
+    const anims: Animated.CompositeAnimation[] = [
       Animated.spring(scaleAnim, {
         toValue: scaleTo,
         useNativeDriver: true,
@@ -61,12 +71,22 @@ export default function AnimatedPressable({
         duration: 80,
         useNativeDriver: true,
       }),
-    ]).start();
-  }, [scaleAnim, opacityAnim, scaleTo, activeOpacity, onPressIn]);
+    ];
+    if (highlight) {
+      anims.push(
+        Animated.timing(highlightAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: false,
+        })
+      );
+    }
+    Animated.parallel(anims).start();
+  }, [scaleAnim, opacityAnim, highlightAnim, scaleTo, activeOpacity, highlight, onPressIn]);
 
   const handlePressOut = useCallback(() => {
     onPressOut?.();
-    Animated.parallel([
+    const anims: Animated.CompositeAnimation[] = [
       Animated.spring(scaleAnim, {
         toValue: 1,
         useNativeDriver: true,
@@ -78,8 +98,18 @@ export default function AnimatedPressable({
         duration: 120,
         useNativeDriver: true,
       }),
-    ]).start();
-  }, [scaleAnim, opacityAnim, onPressOut]);
+    ];
+    if (highlight) {
+      anims.push(
+        Animated.timing(highlightAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: false,
+        })
+      );
+    }
+    Animated.parallel(anims).start();
+  }, [scaleAnim, opacityAnim, highlightAnim, highlight, onPressOut]);
 
   const handlePress = useCallback(() => {
     if (disabled) return;
@@ -98,6 +128,12 @@ export default function AnimatedPressable({
     opacity: opacityAnim,
   }), [scaleAnim, opacityAnim]);
 
+  const hColor = highlightColor || colors.primary;
+  const hOpacity = highlightAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.12],
+  });
+
   return (
     <TouchableWithoutFeedback
       onPressIn={!disabled ? handlePressIn : undefined}
@@ -107,6 +143,19 @@ export default function AnimatedPressable({
       disabled={disabled}
     >
       <Animated.View style={[style, animatedStyle, containerStyle]}>
+        {highlight && (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                borderRadius,
+                backgroundColor: hColor,
+                opacity: hOpacity,
+              },
+            ]}
+          />
+        )}
         {children}
       </Animated.View>
     </TouchableWithoutFeedback>

@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import React, { useMemo, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
@@ -12,6 +12,10 @@ interface CardProps {
   gradient?: readonly [string, string];
   style?: ViewStyle;
   noPadding?: boolean;
+  /** Enable entry animation (fade-in + slide-up) */
+  animated?: boolean;
+  /** Delay before entry animation starts (ms) */
+  animationDelay?: number;
 }
 
 export default function Card({
@@ -22,12 +26,48 @@ export default function Card({
   gradient,
   style,
   noPadding = false,
+  animated = false,
+  animationDelay = 0,
 }: CardProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const content = (
-    <View style={[styles.container, gradient && styles.gradientContainer, style]}>
+  // Entry animation
+  const entryAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (animated) {
+      Animated.spring(entryAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        delay: animationDelay,
+        speed: 12,
+        bounciness: 6,
+      }).start();
+    }
+  }, [animated, animationDelay, entryAnim]);
+
+  const animatedEntryStyle = animated ? {
+    opacity: entryAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 1],
+    }),
+    transform: [{
+      translateY: entryAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [20, 0],
+      }),
+    }],
+  } : {};
+
+  return (
+    <Animated.View
+      style={[
+        styles.container,
+        gradient && styles.gradientContainer,
+        animatedEntryStyle,
+        style,
+      ]}
+    >
       {gradient && (
         <View style={StyleSheet.absoluteFill}>
           <LinearGradient
@@ -50,10 +90,8 @@ export default function Card({
       <View style={[!noPadding && styles.content]}>
         {children}
       </View>
-    </View>
+    </Animated.View>
   );
-
-  return content;
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
@@ -63,6 +101,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
   gradientContainer: {
     borderWidth: 0,

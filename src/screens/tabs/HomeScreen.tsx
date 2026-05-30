@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,10 +38,33 @@ export default function HomeScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  React.useEffect(() => {
+  // Count-up animation via setInterval (works with fake timers in tests)
+  const [displayProgress, setDisplayProgress] = useState(1);
+
+  useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    setDisplayProgress(0);
+    const duration = 500;
+    const steps = 25;
+    let step = 0;
+    const interval = setInterval(() => {
+      step++;
+      if (step >= steps) {
+        setDisplayProgress(1);
+        clearInterval(interval);
+      } else {
+        setDisplayProgress(step / steps);
+      }
+    }, duration / steps);
+    return () => clearInterval(interval);
+  }, [currentValue]);
+
+  // Animated XP bar fill — flex-based proportional width
+  const xpProgress = userLevel.xp / userLevel.xpToNext;
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -58,6 +81,10 @@ export default function HomeScreen({ navigation }: any) {
     duration: 500,
   });
 
+  const displayInvested = totalInvested + (currentValue - totalInvested) * displayProgress;
+  const displayPnl = displayInvested - totalInvested;
+  const displayPnlPercent = totalInvested > 0 ? (displayPnl / totalInvested) * 100 : 0;
+
   const formatLargeCurrency = (val: number) => {
     if (val >= 10000000) return `\u20B9${(val / 10000000).toFixed(2)}Cr`;
     if (val >= 100000) return `\u20B9${(val / 100000).toFixed(2)}L`;
@@ -67,7 +94,7 @@ export default function HomeScreen({ navigation }: any) {
 
   const portfolioGlow = useRef(new Animated.Value(0)).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.loop(
       Animated.sequence([
         Animated.timing(portfolioGlow, { toValue: 1, duration: 2500, useNativeDriver: false }),
@@ -154,15 +181,15 @@ export default function HomeScreen({ navigation }: any) {
           <View style={styles.portfolioCardWrapper}>
             <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.portfolioCard}>
               <Text style={styles.portfolioLabel}>Portfolio Value</Text>
-              <Text style={styles.portfolioValue}>{formatLargeCurrency(currentValue || 1250000)}</Text>
+              <Text style={styles.portfolioValue}>{formatLargeCurrency(displayInvested || 1250000)}</Text>
               <View style={styles.portfolioChange}>
-                <View style={[styles.changeChip, { backgroundColor: totalPnl >= 0 ? '#00C85330' : '#FF174430' }]}>
-                  <Ionicons name={totalPnl >= 0 ? 'caret-up' : 'caret-down'} size={16} color={totalPnl >= 0 ? colors.marketUp : colors.marketDown} />
-                  <Text style={[styles.changeText, { color: totalPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
-                    {formatPercent(totalPnlPercent || 12.5)}
+                <View style={[styles.changeChip, { backgroundColor: displayPnl >= 0 ? '#00C85330' : '#FF174430' }]}>
+                  <Ionicons name={displayPnl >= 0 ? 'caret-up' : 'caret-down'} size={16} color={displayPnl >= 0 ? colors.marketUp : colors.marketDown} />
+                  <Text style={[styles.changeText, { color: displayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
+                    {formatPercent(displayPnlPercent || 12.5)}
                   </Text>
                 </View>
-                <Text style={styles.portfolioSubtext}>Total P&L: {formatCurrency(totalPnl || 150000)}</Text>
+                <Text style={styles.portfolioSubtext}>Total P&L: {formatCurrency(displayPnl || 150000)}</Text>
               </View>
               <View style={styles.portfolioActions}>
                 <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>
@@ -224,16 +251,17 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Level & XP */}
         <Animated.View style={[styles.section, getSectionStyle(1)]}>
-          <Card>
+          <Card animated animationDelay={400}>
             <View style={styles.levelRow}>
               <View style={styles.levelInfo}>
-                <Badge label={`Lvl ${userLevel.level}`} variant="primary" />
+                <Badge label={`Lvl ${userLevel.level}`} variant="primary" animated />
                 <Text style={styles.levelTitle}>{userLevel.title}</Text>
               </View>
               <View style={styles.xpContainer}>
                 <Text style={styles.xpText}>{userLevel.xp} / {userLevel.xpToNext} XP</Text>
                 <View style={styles.xpBar}>
-                  <View style={[styles.xpFill, { width: `${(userLevel.xp / userLevel.xpToNext) * 100}%` }]} />
+                  <View style={[styles.xpFill, { flex: xpProgress }]} />
+                  {xpProgress < 1 && <View style={{ flex: 1 - xpProgress }} />}
                 </View>
               </View>
             </View>
@@ -525,12 +553,12 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   xpBar: {
     height: 6,
+    flexDirection: 'row',
     backgroundColor: colors.bgInput,
     borderRadius: 3,
     overflow: 'hidden',
   },
   xpFill: {
-    height: '100%',
     backgroundColor: colors.primary,
     borderRadius: 3,
   },

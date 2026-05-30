@@ -1,11 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 interface BadgeProps {
   label: string;
   variant?: 'primary' | 'success' | 'danger' | 'warning' | 'info' | 'neutral';
   size?: 'small' | 'medium';
+  /** Enable pop-in entrance animation */
+  animated?: boolean;
+  /** Delay before animation starts (ms) */
+  animationDelay?: number;
 }
 
 const badgeColors = {
@@ -17,14 +21,28 @@ const badgeColors = {
   neutral: { bg: '#6E6E9A20', text: '#6E6E9A' },
 };
 
-export default function Badge({ label, variant = 'primary', size = 'small' }: BadgeProps) {
+export default function Badge({ label, variant = 'primary', size = 'small', animated = false, animationDelay = 0 }: BadgeProps) {
   const colors = badgeColors[variant];
-  
+  const scaleAnim = useRef(new Animated.Value(animated ? 0 : 1)).current;
+
+  useEffect(() => {
+    if (animated) {
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        delay: animationDelay,
+        speed: 14,
+        bounciness: 8,
+      }).start();
+    }
+  }, [animated, animationDelay, scaleAnim]);
+
   return (
-    <View style={[
+    <Animated.View style={[
       styles.badge,
       { backgroundColor: colors.bg },
       size === 'medium' && styles.badgeMedium,
+      { transform: [{ scale: scaleAnim }] },
     ]}>
       <View style={[styles.dot, { backgroundColor: colors.text }]} />
       <Text style={[
@@ -34,7 +52,7 @@ export default function Badge({ label, variant = 'primary', size = 'small' }: Ba
       ]}>
         {label}
       </Text>
-    </View>
+    </Animated.View>
   );
 }
 

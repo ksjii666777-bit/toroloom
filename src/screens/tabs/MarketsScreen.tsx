@@ -70,6 +70,13 @@ export default function MarketsScreen({ navigation }: any) {
     outputRange: [colors.border, colors.primary],
   });
 
+  // Sector chip entrance stagger
+  const { getAnimatedStyle: getSectorStyle } = useStaggeredAnimation(SECTORS.length, {
+    initialDelay: 100,
+    staggerDelay: 30,
+    duration: 300,
+  });
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -146,19 +153,23 @@ export default function MarketsScreen({ navigation }: any) {
             style={styles.sectorScroll}
             contentContainerStyle={styles.sectorContent}
           >
-            {SECTORS.map((sector) => (
-              <AnimatedPressable
-                key={sector}
-                onPress={() => setSelectedSector(sector)}
-                haptic="selection"
-                scaleTo={0.95}
-              >
-                <View style={[styles.sectorChip, selectedSector === sector && styles.sectorChipActive]}>
-                  <Text style={[styles.sectorText, selectedSector === sector && styles.sectorTextActive]}>
-                    {sector}
-                  </Text>
-                </View>
-              </AnimatedPressable>
+            {SECTORS.map((sector, i) => (
+              <Animated.View key={sector} style={getSectorStyle(i)}>
+                <AnimatedPressable
+                  onPress={() => setSelectedSector(sector)}
+                  haptic="selection"
+                  scaleTo={0.95}
+                  highlight
+                  highlightColor={colors.primary}
+                  borderRadius={BORDER_RADIUS.full}
+                >
+                  <View style={[styles.sectorChip, selectedSector === sector && styles.sectorChipActive]}>
+                    <Text style={[styles.sectorText, selectedSector === sector && styles.sectorTextActive]}>
+                      {sector}
+                    </Text>
+                  </View>
+                </AnimatedPressable>
+              </Animated.View>
             ))}
           </ScrollView>
         )}
