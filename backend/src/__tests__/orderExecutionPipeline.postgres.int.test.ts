@@ -225,6 +225,13 @@ describe('OrderExecutionPipeline — PostgreSQL Integration', () => {
     // Seed a realized loss so total P&L plus BUY impact triggers lockdown
     profile.today.realizedPnL = -1;
 
+    // Drain any pending fire-and-forget persists from setup (resetDaily,
+    // setPortfolioValue, updateLimits) so the evaluate() call below is
+    // guaranteed to be the last write to the database, preventing race
+    // conditions where a stale profile (lockdown=NONE) overwrites the
+    // lockdown=ACTIVE state.
+    await riskEngine.drain(TEST_USER);
+
     // Execute a large BUY — estimatedPnl = -2890 * 10 = -28900 → total loss = -28901 >> ₹1
     const result = await pipeline.execute(buyParams({ quantity: 10 }));
     expect(result.success).toBe(false);

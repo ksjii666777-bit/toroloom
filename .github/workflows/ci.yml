@@ -55,10 +55,43 @@ jobs:
       - name: TypeScript compilation check
         run: npx tsc --noEmit
 
-      - name: Run unit tests (excluding integration tests)
-        run: npx vitest run --reporter=verbose --exclude='**/*.int.test.ts'
+      - name: Run unit tests with coverage (excluding integration tests)
+        run: npx vitest run --reporter=verbose --coverage --exclude='**/*.int.test.ts'
         env:
           NODE_ENV: test
+
+      - name: Upload backend coverage report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          retention-days: 14
+
+      # Post coverage summary to the GitHub Actions job summary (visible in
+      # the Actions UI itself, not just on PRs). Reads the already-generated
+      # coverage/coverage-summary.json — no need to re-run tests.
+      - name: Post coverage summary to job summary
+        if: always()
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8'));
+            const t = p.total;
+            const fmt = (o) => o.pct + '% (' + o.covered + '/' + o.total + ')';
+            const summary = [
+              '### Backend Coverage',
+              '',
+              '| Statements | Branches | Functions | Lines |',
+              '|------------|----------|-----------|-------|',
+              '| ' + fmt(t.statements) + ' | ' + fmt(t.branches) + ' | ' + fmt(t.functions) + ' | ' + fmt(t.lines) + ' |',
+              '',
+              '> Thresholds: statements 40% | branches 38% | functions 35% | lines 40%',
+              ''
+            ].join('\n');
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+          "
 
   # ── Frontend: TypeScript compilation + vitest unit tests + coverage ─────
   frontend:
