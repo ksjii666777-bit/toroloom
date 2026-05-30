@@ -1,0 +1,142 @@
+# =============================================================================
+# Empty State Views — UI Edge Case Flow
+# =============================================================================
+# Verifies that screens render proper empty states when there's no data:
+#   1. Watchlist — "Empty Watchlist"
+#   2. Portfolio — "No Holdings Yet"
+#   3. Trade History — "No Trades Found"
+#   4. Mutual Funds → SIP tab — "No Active SIPs"
+#   5. Fund Dashboard — "No transactions yet"
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# ── Login first ──────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back! 👋"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 1. Watchlist — Empty State
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "Watchlist"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Watchlist"
+- assertVisible:
+    text: "Monitor your favorite stocks"
+
+# Verify empty state content
+- assertVisible:
+    text: "Empty Watchlist"
+- assertVisible:
+    text: "Add stocks from the Markets tab to track them here"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 2. Portfolio — Empty State (Holdings)
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "Portfolio"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Portfolio"
+- assertVisible:
+    text: "Track your investments"
+
+# Verify empty holdings state
+- assertVisible:
+    text: "No Holdings Yet"
+- assertVisible:
+    text: "Start investing to build your portfolio"
+- assertVisible:
+    text: "Explore Markets"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 3. More → Trade History — Empty State
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "More"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"
+
+# Navigate to Trade History
+- tapOn:
+    text: "Trade History"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Trade History"
+- assertVisible:
+    text: "0 total trades"
+
+# Verify empty state
+- assertVisible:
+    text: "No Trades Found"
+- assertVisible:
+    text: "Start trading to see your history here"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 4. More → Mutual Funds → SIP tab — Empty State
+# ═══════════════════════════════════════════════════════════════════════════
+# Go back from Trade History, then navigate to Mutual Funds
+- tapOn:
+    point: "11%,7%"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"
+
+# Navigate to Mutual Funds
+- tapOn:
+    text: "Mutual Funds"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Mutual Funds"
+
+# Switch to "My SIPs" tab (the second toggle button)
+- tapOn:
+    text: "My SIPs"
+- waitForAnimationToEnd
+
+# Verify empty state for SIPs
+- assertVisible:
+    text: "No Active SIPs"
+- assertVisible:
+    text: "Start a SIP to invest regularly and build wealth over time"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 5. More → Fund Dashboard — Empty State
+# ═══════════════════════════════════════════════════════════════════════════
+# Go back from Mutual Funds, then navigate to Fund Dashboard
+- tapOn:
+    point: "11%,7%"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"
+
+# Navigate to Fund Dashboard
+- tapOn:
+    text: "Fund Dashboard"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Funds Dashboard"
+
+# Scroll down to Recent Transactions section
+- scrollUntilVisible:
+    element:
+      text: "No transactions yet"
+    direction: DOWN
+
+# Verify empty state
+- assertVisible:
+    text: "No transactions yet"
+- assertVisible:
+    text: "Add Funds"

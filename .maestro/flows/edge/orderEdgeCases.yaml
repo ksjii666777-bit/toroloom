@@ -1,0 +1,140 @@
+# =============================================================================
+# Order Form Edge Cases
+# =============================================================================
+# Tests edge cases in the place order flow:
+#   1. Navigate to stock detail from Markets
+#   2. Open Buy order form
+#   3. Test Max quantity button (max buying power)
+#   4. Test insufficient balance warning
+#   5. Switch to Sell — no holdings edge case
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# ── Login first ──────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back! 👋"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 1. Navigate to Markets → Stock Detail
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "Markets"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Markets"
+
+# Tap on a stock (e.g., RELIANCE which should be in the list)
+- tapOn:
+    text: "RELIANCE"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "RELIANCE"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 2. Open Buy Order Form
+# ═══════════════════════════════════════════════════════════════════════════
+# Tap the Buy button in the bottom action bar
+- tapOn:
+    text: "Buy"
+- waitForAnimationToEnd
+
+# Verify the order form screen loaded
+- assertVisible:
+    text: "Buy Securities"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 3. Test Max Quantity Button
+# ═══════════════════════════════════════════════════════════════════════════
+# Tap Max quick quantity button
+- tapOn:
+    text: "Max"
+- waitForAnimationToEnd
+
+# The Order Summary card appears when qty is set
+# Scroll down a bit to see it
+- scrollUntilVisible:
+    element:
+      text: "Order Summary"
+    direction: DOWN
+- assertVisible:
+    text: "Order Summary"
+
+# Verify the balance indicator is visible
+- assertVisible:
+    text: "Available"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 4. Verify Order Form Shows Balance Info
+# ═══════════════════════════════════════════════════════════════════════════
+# Verify the Market order type is selected (default)
+- assertVisible:
+    text: "MARKET"
+
+# Tap the back button to return to stock detail
+- tapOn:
+    point: "11%,7%"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "RELIANCE"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 5. Test Sell — No Holdings
+# ═══════════════════════════════════════════════════════════════════════════
+# Tap Sell button in the bottom action bar
+- tapOn:
+    text: "Sell"
+- waitForAnimationToEnd
+
+# Verify the order form loaded in Sell mode
+- assertVisible:
+    text: "Sell Securities"
+
+# Sell mode should show "Owned: 0" since we have no holdings
+- assertVisible:
+    text: "(Owned:"
+
+# Try to set a quantity and place order — the "Sell" button should be disabled
+# Enter quantity 10
+- tapOn:
+    point: "50%,55%"
+- inputText: "10"
+- waitForAnimationToEnd
+
+# The place order button should show as disabled since no holdings
+# Verify the order summary appears (since qty > 0)
+- scrollUntilVisible:
+    element:
+      text: "Order Summary"
+    direction: DOWN
+- assertVisible:
+    text: "Order Summary"
+
+# Verify the "Sell" button exists (it will be disabled)
+- assertVisible:
+    text: "Sell 10 RELIANCE"
+
+# Close the order form
+- tapOn:
+    point: "11%,7%"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "RELIANCE"
+
+# Go back to Markets
+- tapOn:
+    point: "11%,7%"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Markets"

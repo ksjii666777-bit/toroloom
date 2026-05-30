@@ -1,0 +1,66 @@
+# =============================================================================
+# Login Error Handling — Edge Case Flow
+# =============================================================================
+# Tests form validation and error messages on the login screen:
+#   1. Empty fields → "Please enter email and password"
+#   2. Invalid credentials → "Invalid credentials. Try again."
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# ── 1. Empty fields validation ────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back! 👋"
+
+# Tap Log In without entering any credentials
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd
+
+# Verify the validation error message appears
+- assertVisible:
+    text: "Please enter email and password"
+
+# ── 2. Invalid credentials ───────────────────────────────────────────────
+# Enter email but wrong password
+- tapOn:
+    text: "Enter your email"
+- inputText: "wrong@email.com"
+
+- tapOn:
+    text: "Enter your password"
+- inputText: "wrongpassword123"
+
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd
+
+# Verify the invalid credentials error message appears
+- assertVisible:
+    text: "Invalid credentials. Try again."
+
+# ── 3. Verify the form is still interactive after errors ──────────────────
+# Clear and retype — ensure inputs are still functional
+- tapOn:
+    text: "Enter your email"
+- eraseText
+- inputText: ${TEST_EMAIL}
+
+- tapOn:
+    text: "Enter your password"
+- eraseText
+- inputText: ${TEST_PASSWORD}
+
+# Error should still be visible until we tap Log In (it gets cleared on submit)
+- assertVisible:
+    text: "Invalid credentials. Try again."
+
+# Tap Log In with valid credentials
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify successful login — we should see the home screen
+- assertVisible:
+    text: "Good Morning,"
