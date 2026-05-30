@@ -54,6 +54,11 @@ Thumbs.db
 # ===================== TypeScript =====================
 *.tsbuildinfo
 
+# ===================== AI / Codebuff =====================
+.claude/
+AGENTS.md
+CLAUDE.md
+
 # ===================== Misc =====================
 *.pem
 *.envrc
