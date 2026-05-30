@@ -125,12 +125,16 @@ jobs:
             console.log('Backend coverage badge: ' + lines + '% (' + color + ')');
           "
 
+      # Note: upload-artifact paths are relative to the workspace root,
+      # NOT the job's defaults.run.working-directory. The badge JSON was
+      # created at backend/badge-artifact/ (because working-directory is
+      # backend), so we must specify backend/badge-artifact/ here.
       - name: Upload backend coverage badge
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backend-coverage-badge
-          path: badge-artifact/
+          path: backend/badge-artifact/
           retention-days: 7
 
   # ── Frontend: TypeScript compilation + vitest unit tests + coverage ─────
