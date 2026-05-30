@@ -41,7 +41,12 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "vitest run --reporter=verbose",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:int": "bash scripts/run-integration-tests.sh",
+    "test:int:coverage": "bash scripts/run-integration-tests.sh --coverage",
+    "test:int:up": "bash scripts/run-integration-tests.sh --keep",
+    "test:int:coverage:up": "bash scripts/run-integration-tests.sh --coverage --keep",
+    "test:int:down": "bash scripts/run-integration-tests.sh --down"
   },
   "private": true
 }

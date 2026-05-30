@@ -179,6 +179,10 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
     // Wait for 1 tick to propagate through the risk engine
     await client.waitForTicks(1);
 
+    // Drain pending persists to guarantee the tick's P&L update has
+    // been written to MongoDB before we load from it.
+    await riskEngine.drain(TEST_USER.userId);
+
     // Load the profile from MongoDB — the tick should have updated
     // the unrealized P&L to a different value
     const persistedAfter = await storage.loadRiskProfile(TEST_USER.userId);
@@ -205,6 +209,13 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
     client.ws.send(JSON.stringify({ type: 'subscribe', symbols: ['RELIANCE'] }));
     await client.nextMessage(); // subscribed
     await client.waitForTicks(1);
+
+    // Close the WebSocket client BEFORE triggering lockdown. The
+    // updateUnrealizedPnL() method has an else-branch that releases
+    // lockdown when the total P&L recovers. If a tick arrives after
+    // we set the lockdown but before the persist completes, it would
+    // release the lockdown and the DB would show status=NONE.
+    client.close();
 
     // Configure a razor-thin loss limit so the next P&L update triggers lockdown
     const profile = riskEngine.getProfile(TEST_USER.userId);
@@ -277,6 +288,9 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
     await client.nextMessage(); // pnl_update
     await client.nextMessage(); // authenticated
 
+    // Close the client so no ticks arrive during lockdown manipulation
+    client.close();
+
     // Trigger lockdown
     const profile = riskEngine.getProfile(TEST_USER.userId);
     profile.limits.dailyLossLimit = 1;
@@ -298,7 +312,5 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
     expect(persisted!.lockdown.triggeredAt).toBeNull();
     expect(persisted!.lockdown.triggerLoss).toBeNull();
     expect(persisted!.settingsFrozen).toBe(false);
-
-    client.close();
   });
 });

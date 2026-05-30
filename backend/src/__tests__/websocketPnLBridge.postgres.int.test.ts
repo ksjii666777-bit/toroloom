@@ -207,6 +207,13 @@ describe('WebSocket → RiskEngine P&L Bridge — PostgreSQL Integration', () =>
     await client.nextMessage(); // subscribed
     await client.waitForTicks(1);
 
+    // Close the WebSocket client BEFORE triggering lockdown. The
+    // updateUnrealizedPnL() method has an else-branch that releases
+    // lockdown when the total P&L recovers. If a tick arrives after
+    // we set the lockdown but before the persist completes, it would
+    // release the lockdown and the DB would show status=NONE.
+    client.close();
+
     // Configure a razor-thin loss limit so the next P&L update triggers lockdown
     const profile = riskEngine.getProfile(TEST_USER.userId);
     profile.limits.dailyLossLimit = 1; // ₹1 — absurdly tight for test
@@ -230,8 +237,6 @@ describe('WebSocket → RiskEngine P&L Bridge — PostgreSQL Integration', () =>
     expect(persisted!.lockdown.triggerLoss).toBeGreaterThanOrEqual(99_999);
     expect(persisted!.lockdown.breachedLimit).toBe('daily_loss');
     expect(persisted!.settingsFrozen).toBe(true);
-
-    client.close();
   });
 
   // ──────────────── 4. Load from Storage ────────────────
@@ -278,6 +283,9 @@ describe('WebSocket → RiskEngine P&L Bridge — PostgreSQL Integration', () =>
     await client.nextMessage(); // pnl_update
     await client.nextMessage(); // authenticated
 
+    // Close the client so no ticks arrive during lockdown manipulation
+    client.close();
+
     // Trigger lockdown
     const profile = riskEngine.getProfile(TEST_USER.userId);
     profile.limits.dailyLossLimit = 1;
@@ -299,7 +307,5 @@ describe('WebSocket → RiskEngine P&L Bridge — PostgreSQL Integration', () =>
     expect(persisted!.lockdown.triggeredAt).toBeNull();
     expect(persisted!.lockdown.triggerLoss).toBeNull();
     expect(persisted!.settingsFrozen).toBe(false);
-
-    client.close();
   });
 });
