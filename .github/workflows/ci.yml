@@ -93,6 +93,37 @@ jobs:
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
           "
 
+      # Explicit coverage threshold gate — fails the build if any metric
+      # drops below the configured minimum. Threshold values are mirrored
+      # from backend/vitest.config.ts coverage.thresholds and must be kept
+      # in sync.
+      - name: Check coverage thresholds
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8'));
+            const t = p.total;
+            const thresholds = {
+              statements: 40,
+              branches: 38,
+              functions: 35,
+              lines: 40,
+            };
+            let failed = false;
+            for (const [key, threshold] of Object.entries(thresholds)) {
+              const actual = t[key].pct;
+              const status = actual >= threshold ? 'PASS' : 'FAIL';
+              console.log(status + ': ' + key + ' ' + actual + '% (threshold: ' + threshold + '%)');
+              if (actual < threshold) failed = true;
+            }
+            if (failed) {
+              console.log('BACKEND COVERAGE THRESHOLDS NOT MET — failing build');
+              process.exit(1);
+            }
+            console.log('All backend coverage thresholds met!');
+          "
+
       # Generate shields.io-compatible badge JSON from coverage summary.
       # Uploaded as an artifact so the coverage-badge job can combine both
       # frontend and backend badges and deploy them to gh-pages.
@@ -198,6 +229,36 @@ jobs:
               ''
             ].join('\n');
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+          "
+
+      # Explicit coverage threshold gate — fails the build if any metric
+      # drops below the configured minimum. Threshold values are mirrored
+      # from vitest.config.ts coverage.thresholds and must be kept in sync.
+      - name: Check coverage thresholds
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8'));
+            const t = p.total;
+            const thresholds = {
+              statements: 75,
+              branches: 65,
+              functions: 70,
+              lines: 75,
+            };
+            let failed = false;
+            for (const [key, threshold] of Object.entries(thresholds)) {
+              const actual = t[key].pct;
+              const status = actual >= threshold ? 'PASS' : 'FAIL';
+              console.log(status + ': ' + key + ' ' + actual + '% (threshold: ' + threshold + '%)');
+              if (actual < threshold) failed = true;
+            }
+            if (failed) {
+              console.log('FRONTEND COVERAGE THRESHOLDS NOT MET — failing build');
+              process.exit(1);
+            }
+            console.log('All frontend coverage thresholds met!');
           "
 
       # Post a coverage summary comment on pull requests
