@@ -131,6 +131,31 @@ jobs:
           path: coverage/
           retention-days: 14
 
+      # Post coverage summary to the GitHub Actions job summary (visible in
+      # the Actions UI itself, not just on PRs). Reads the already-generated
+      # coverage/coverage-summary.json — no need to re-run tests.
+      - name: Post coverage summary to job summary
+        if: always()
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8'));
+            const t = p.total;
+            const fmt = (o) => o.pct + '% (' + o.covered + '/' + o.total + ')';
+            const summary = [
+              '### Frontend Coverage',
+              '',
+              '| Statements | Branches | Functions | Lines |',
+              '|------------|----------|-----------|-------|',
+              '| ' + fmt(t.statements) + ' | ' + fmt(t.branches) + ' | ' + fmt(t.functions) + ' | ' + fmt(t.lines) + ' |',
+              '',
+              '> Thresholds: statements 75% | branches 65% | functions 70% | lines 75%',
+              ''
+            ].join('\n');
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+          "
+
       # Post a coverage summary comment on pull requests
       - name: PR coverage comment
         uses: davelosert/vitest-coverage-report-action@v2
