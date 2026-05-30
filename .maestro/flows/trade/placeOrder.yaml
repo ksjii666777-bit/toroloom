@@ -1,0 +1,246 @@
+# =============================================================================
+# PlaceOrder Screen — End-to-End Test
+# =============================================================================
+# Tests the full order placement flow:
+#   1. Login and navigate to Markets → Stock Detail
+#   2. Open Buy order form from stock detail
+#   3. Verify form layout: header, stock info, toggles, selectors
+#   4. Toggle between Buy and Sell
+#   5. Change order type (MARKET → LIMIT → SL → SL-M → back to MARKET)
+#   6. Change product type (CNC → MIS)
+#   7. Set quantity via quick preset buttons
+#   8. Verify Order Summary card appears with cost breakdown
+#   9. Place the order
+#   10. Verify confirmation modal appears with order details
+#   11. Tap Done and return to stock detail
+# =============================================================================
+# Uses testID-based targeting where available for robustness.
+# Coordinate taps are only used as last resort for elements without
+# text labels or testIDs (e.g., +/- quantity adjust buttons).
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# ── 1. Login ──────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back! 👋"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 2. Navigate: Markets → Stock Detail → Buy
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "Markets"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Markets"
+
+# Tap first visible stock (RELIANCE is always listed)
+- tapOn:
+    text: "RELIANCE"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "RELIANCE"
+
+# Tap Buy button in bottom action bar to open PlaceOrderScreen
+- tapOn:
+    text: "Buy"
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 3. Verify PlaceOrder Form — Initial Layout (Buy mode, MARKET, CNC)
+# ═══════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: "Buy Securities"
+
+# Verify stock info is displayed in the header
+- assertVisible:
+    text: "RELIANCE"
+
+# Verify buy toggle is active (the text "Buy" is visible on the toggle)
+- assertVisible:
+    text: "Buy"
+- assertVisible:
+    text: "Sell"
+
+# Verify default selections are visible
+- assertVisible:
+    text: "MARKET"
+- assertVisible:
+    text: "CNC"
+- assertVisible:
+    text: "ORDER TYPE"
+- assertVisible:
+    text: "PRODUCT TYPE"
+
+# Verify quick quantity presets are visible
+- assertVisible:
+    text: "10"
+- assertVisible:
+    text: "50"
+- assertVisible:
+    text: "100"
+- assertVisible:
+    text: "Max"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 4. Toggle to Sell Mode, Then Back to Buy
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    id: "sellToggle"
+- waitForAnimationToEnd
+
+# Header should now show "Sell Securities"
+- assertVisible:
+    text: "Sell Securities"
+
+# Toggle back to Buy for the order placement flow
+- tapOn:
+    id: "buyToggle"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Buy Securities"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 5. Cycle Through Order Types
+# ═══════════════════════════════════════════════════════════════════════════
+# Default is MARKET — tap LIMIT
+- tapOn:
+    id: "orderType_LIMIT"
+- waitForAnimationToEnd
+
+# Limit price input should appear
+- assertVisible:
+    text: "LIMIT PRICE (₹)"
+
+# Tap SL (Stop Loss) — adds trigger price field
+- tapOn:
+    id: "orderType_SL"
+- waitForAnimationToEnd
+
+# Trigger price input should appear alongside limit price
+- assertVisible:
+    text: "TRIGGER PRICE (₹)"
+
+# Tap SL-M (Stop Loss Market) — both price fields stay visible
+- tapOn:
+    id: "orderType_SL-M"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "LIMIT PRICE (₹)"
+- assertVisible:
+    text: "TRIGGER PRICE (₹)"
+
+# Tap back to MARKET for the actual order placement
+- tapOn:
+    id: "orderType_MARKET"
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 6. Change Product Type to MIS (Intraday)
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    id: "productType_MIS"
+- waitForAnimationToEnd
+
+# Verify the description changed to mention intraday
+- assertVisible:
+    text: "Intraday"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 7. Set Quantity Using Quick Preset
+# ═══════════════════════════════════════════════════════════════════════════
+# Use the "50" quick quantity button
+- tapOn:
+    id: "quickQty_50"
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 8. Verify Order Summary Card
+# ═══════════════════════════════════════════════════════════════════════════
+- scrollUntilVisible:
+    element:
+      text: "Order Summary"
+    direction: DOWN
+- assertVisible:
+    text: "Order Summary"
+
+# Verify cost breakdown within the summary card
+- assertVisible:
+    text: "Quantity"
+- assertVisible:
+    text: "Price per share"
+- assertVisible:
+    text: "Estimated Total"
+- assertVisible:
+    text: "Est. Charges"
+- assertVisible:
+    text: "Grand Total"
+
+# Verify balance indicator shows available balance with sufficient funds
+- assertVisible:
+    text: "Available"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 9. Place the Order
+# ═══════════════════════════════════════════════════════════════════════════
+# Scroll down to the bottom action bar to find the place order button
+- scrollUntilVisible:
+    element:
+      text: "Buy 50 RELIANCE"
+    direction: DOWN
+
+# The bottom bar (Buy 50 RELIANCE) is fixed-position and always visible
+- assertVisible:
+    text: "Buy 50 RELIANCE"
+
+# Tap the place order button
+- tapOn:
+    text: "Buy 50 RELIANCE"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 10. Verify Confirmation Modal
+# ═══════════════════════════════════════════════════════════════════════════
+# Wait for the 1.5s simulated network delay + modal animation
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# Verify confirmation modal is visible
+- assertVisible:
+    text: "Order Placed Successfully!"
+
+# Verify order details in the confirmation summary
+- assertVisible:
+    text: "Bought 50 shares of RELIANCE"
+- assertVisible:
+    text: "Market · MIS"
+
+# Verify confirmation labels are present
+- assertVisible:
+    text: "Order Type"
+- assertVisible:
+    text: "Price"
+- assertVisible:
+    text: "Total"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 11. Dismiss Confirmation → Return to Stock Detail
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    id: "doneBtn"
+- waitForAnimationToEnd
+
+# Should navigate back to StockDetail screen
+- assertVisible:
+    text: "RELIANCE"
