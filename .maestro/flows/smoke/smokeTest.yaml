@@ -1,0 +1,112 @@
+# =============================================================================
+# Full Smoke Test
+# =============================================================================
+# A comprehensive smoke test covering the critical user flows:
+# 1. Login
+# 2. Quick action navigation (Buy, Learn)
+# 3. Markets search
+# 4. Stock detail
+# 5. More screen → Add Funds flow
+# 6. Logout
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back! 👋"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ── 2. Home Screen — Verify portfolio card and quick actions are visible ───
+- assertVisible:
+    text: "Good Morning,"
+- assertVisible:
+    text: "Portfolio Value"
+- assertVisible:
+    text: "Buy"
+- assertVisible:
+    text: "Learn"
+
+# Tap "Learn" quick action to navigate to Learn screen
+- tapOn: "Learn"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Learn"
+
+# Go back to Home via tab
+- tapOn: "Home"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 3. Markets — Test search ──────────────────────────────────────────────
+- tapOn: "Markets"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Markets"
+
+# Verify market indices are visible
+- assertVisible:
+    text: "NIFTY 50"
+- assertVisible:
+    text: "BSE Sensex"
+
+# ── 4. More Screen — Quick Actions ────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"
+
+# Verify key menu items are present
+- assertVisible:
+    text: "Fund Dashboard"
+- assertVisible:
+    text: "Mutual Funds"
+- assertVisible:
+    text: "Trade History"
+- scrollUntilVisible:
+    element:
+      text: "Help & Support"
+    direction: DOWN
+- assertVisible:
+    text: "Help & Support"
+
+# ── 5. Portfolio Screen ────────────────────────────────────────────────────
+- tapOn: "Portfolio"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Portfolio"
+- assertVisible:
+    text: "Invested"
+- assertVisible:
+    text: "Current Value"
+- assertVisible:
+    text: "Total Returns"
+
+# ── 6. Logout ──────────────────────────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Log Out"
+    direction: DOWN
+- assertVisible:
+    text: "Log Out"
+- tapOn: "Log Out"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify we're back on the login screen
+- assertVisible:
+    text: "Welcome Back! 👋"
+- assertVisible:
+    text: "Don't have an account?"

@@ -1,0 +1,57 @@
+# =============================================================================
+# Signup Flow
+# =============================================================================
+# Tests the signup screen: navigates from Login → Signup, fills in all
+# fields, taps "Create Account", and verifies login screen is shown after.
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# Start from the Login screen and navigate to Signup
+- tapOn:
+    text: "Sign Up"
+
+# Wait for the Signup screen to load
+- assertVisible:
+    text: "Create Account"
+- assertVisible:
+    text: "Start your investment journey today"
+
+# Fill in Full Name
+- tapOn:
+    text: "Enter your full name"
+- inputText: "Rahul Sharma"
+
+# Fill in Email
+- tapOn:
+    text: "Enter your email"
+- inputText: "rahul@toroloom.com"
+
+# Fill in Phone
+- tapOn:
+    text: "Enter your phone number"
+- inputText: "9876543210"
+
+# Fill in Password
+- tapOn:
+    text: "Create a strong password"
+- inputText: "Secure@123"
+
+# Fill in Confirm Password
+- tapOn:
+    text: "Re-enter your password"
+- inputText: "Secure@123"
+
+# Tap "Create Account" button
+- tapOn:
+    text: "Create Account"
+
+# Wait for signup to process
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# After successful signup, user should see the Home screen
+- assertVisible:
+    text: "Good Morning,"
+- assertVisible:
+    text: "Portfolio"

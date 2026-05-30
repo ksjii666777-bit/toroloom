@@ -1,0 +1,36 @@
+# =============================================================================
+# Login Flow
+# =============================================================================
+# Tests the login screen: fills in email + password, taps "Log In", and
+# verifies the user lands on the Home screen.
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# Wait for the login screen to load
+- assertVisible:
+    text: "Welcome Back! 👋"
+
+# Fill in email field (targeted by placeholder text)
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+
+# Fill in password field (targeted by placeholder text)
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+
+# Tap the "Log In" button
+- tapOn:
+    text: "Log In"
+
+# Wait for navigation to complete — verify we're on the Home screen
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Assert the Home screen is visible after login
+- assertVisible:
+    text: "Good Morning,"
+- assertVisible:
+    text: "Markets"

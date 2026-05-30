@@ -16,6 +16,7 @@ interface InputProps {
   multiline?: boolean;
   style?: ViewStyle;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  testID?: string;
 }
 
 export default function Input({
@@ -30,6 +31,7 @@ export default function Input({
   multiline = false,
   style,
   autoCapitalize = 'none',
+  testID,
 }: InputProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -64,6 +66,7 @@ export default function Input({
           keyboardType={keyboardType}
           multiline={multiline}
           autoCapitalize={autoCapitalize}
+          testID={testID}
           selectionColor={colors.primary}
         />
         {secureTextEntry && (

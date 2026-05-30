@@ -46,7 +46,10 @@
     "test:int:coverage": "bash scripts/run-integration-tests.sh --coverage",
     "test:int:up": "bash scripts/run-integration-tests.sh --keep",
     "test:int:coverage:up": "bash scripts/run-integration-tests.sh --coverage --keep",
-    "test:int:down": "bash scripts/run-integration-tests.sh --down"
+    "test:int:down": "bash scripts/run-integration-tests.sh --down",
+    "test:e2e": "maestro test .maestro/flows",
+    "test:e2e:studio": "maestro studio",
+    "test:e2e:ci": "maestro test .maestro/flows"
   },
   "private": true
 }

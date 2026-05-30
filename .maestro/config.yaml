@@ -1,0 +1,18 @@
+# =============================================================================
+# Maestro E2E Test Configuration
+# =============================================================================
+#
+# Before running tests, set your appId below to match your app bundle.
+#   - Expo Go on Android: host.exp.exponent
+#   - Expo Go on iOS:      host.exp.Exponent
+#   - Development build:   com.yourcompany.toroloom
+#   - Production build:    com.yourcompany.toroloom
+#
+# Run tests:  npx maestro test .maestro/flows/
+# Open studio: npx maestro studio
+# =============================================================================
+
+appId: host.exp.exponent
+env:
+  TEST_EMAIL: test@toroloom.com
+  TEST_PASSWORD: password123

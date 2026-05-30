@@ -146,7 +146,77 @@ Every push to `master`/`main` triggers a GitHub Actions workflow (`.github/workf
 - **TypeScript** — Strict mode. No `any` casts unless unavoidable.
 - **React Native / Expo** — Functional components with hooks. Zustand for state management.
 - **Backend** — Express with Zod validation. Broker interface pattern for Zerodha/Angel One.
-- **Testing** — Vitest with `@testing-library/react-native` for frontend. Integration tests use real DB instances (no mocking the storage layer).
+- **Testing** — Vitest with `@testing-library/react-native` for frontend. Integration tests use real DB instances (no mocking the storage layer). End-to-end tests use Maestro (see below).
+
+---
+
+## End-to-End Testing (Maestro)
+
+Maestro provides declarative YAML-based E2E tests that run against a real Android emulator or device. All test flows are in `.maestro/flows/`.
+
+### Quick Start
+
+```bash
+# Install Maestro CLI (macOS/Linux)
+curl -Ls "https://get.maestro.mobile.dev" | bash
+
+# Run all E2E flows
+npx maestro test .maestro/flows
+
+# Open Maestro Studio (interactive recorder)
+npx maestro studio
+```
+
+### Test Flows
+
+| Flow File | What It Tests |
+|-----------|---------------|
+| `auth/login.yaml` | Login with test credentials, verify Home screen |
+| `auth/signup.yaml` | Navigate from Login → Signup, fill all fields, submit |
+| `navigation/tabNavigation.yaml` | Navigate through all 5 bottom tabs, verify each screen |
+| `smoke/smokeTest.yaml` | Full app smoke test: login → quick actions → markets → portfolio → logout |
+
+```bash
+# Run a single flow
+npx maestro test .maestro/flows/auth/login.yaml
+
+# Run tests against a specific app
+npx maestro test .maestro/flows --app-id com.yourcompany.toroloom
+```
+
+### Configuration
+
+The `.maestro/config.yaml` file sets:
+- `appId` — The app bundle to test against (defaults to `host.exp.exponent` for Expo Go)
+- `env` — Environment variables like `TEST_EMAIL` and `TEST_PASSWORD`
+
+For development builds, change the `appId` to your production bundle.
+
+### Writing Tests
+
+Use Maestro Studio to record interactions, or write YAML flows manually:
+
+```yaml
+appId: host.exp.exponent
+---
+- assertVisible: "Welcome Back! 👋"
+- tapOn: "Enter your email"
+- inputText: "test@example.com"
+- tapOn: "Log In"
+- waitForAnimationToEnd
+- assertVisible: "Good Morning,"
+```
+
+### Test IDs
+
+The `Input` component accepts a `testID` prop for more robust element targeting in Maestro flows. You can also target elements by their visible text, placeholder, or accessibility label.
+
+### Running on CI
+
+The E2E suite runs as the `E2E — Maestro (Android)` job in CI, which:
+1. Spins up an Android emulator (API 34) via `reactivecircus/android-emulator-runner`
+2. Starts the Expo dev server (`npx expo start --android`)
+3. Runs `maestro test .maestro/flows` against the emulator
 
 Before submitting a PR, make sure:
 

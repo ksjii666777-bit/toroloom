@@ -1,0 +1,67 @@
+# =============================================================================
+# Tab Navigation Flow
+# =============================================================================
+# Tests bottom tab navigation: logs in first, then navigates through all 5
+# tabs (Home, Markets, Watchlist, Portfolio, More) and verifies each screen's
+# title is visible.
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# ── Step 1: Login ──────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back! 👋"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ── Step 2: Home Tab ───────────────────────────────────────────────────────
+- assertVisible:
+    text: "Good Morning,"
+- assertVisible:
+    text: "Markets"
+
+# ── Step 3: Markets Tab ────────────────────────────────────────────────────
+- tapOn: "Markets"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Markets"
+- assertVisible:
+    text: "Real-time stock market data"
+
+# ── Step 4: Portfolio Tab ──────────────────────────────────────────────────
+- tapOn: "Portfolio"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Portfolio"
+- assertVisible:
+    text: "Track your investments"
+
+# ── Step 5: Watchlist Tab ──────────────────────────────────────────────────
+- tapOn: "Watchlist"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Watchlist"
+- assertVisible:
+    text: "Monitor your favorite stocks"
+
+# ── Step 6: More Tab ───────────────────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"
+- assertVisible:
+    text: "Mutual Funds"
+
+# ── Step 7: Back to Home ───────────────────────────────────────────────────
+- tapOn: "Home"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Good Morning,"
