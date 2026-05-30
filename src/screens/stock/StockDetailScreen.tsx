@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useMarketStore } from '../../store/marketStore';
-import { usePortfolioStore } from '../../store/portfolioStore';
 import { useWatchlistStore } from '../../store/watchlistStore';
 import { useAIStore } from '../../store/aiStore';
 import { useTheme } from '../../context/ThemeContext';
@@ -11,7 +10,6 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import { formatCurrency, formatCompactNumber, hexToRgba } from '../../utils/formatters';
 import CandlestickChart from '../../components/CandlestickChart';
 import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { useRealtimePrice } from '../../hooks/useRealtimePrice';
 
@@ -23,15 +21,11 @@ export default function StockDetailScreen({ route, navigation }: any) {
   const { stockId, symbol } = route.params;
   const { colors } = useTheme();
   const { stocks } = useMarketStore();
-  const { buyStock } = usePortfolioStore();
   const { insights } = useAIStore();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist, watchlists } = useWatchlistStore();
 
   const stock = stocks.find(s => s.id === stockId) || stocks[0];
   const [activeTimeframe, setActiveTimeframe] = useState('1M');
-  const [showTradeModal, setShowTradeModal] = useState(false);
-  const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
-  const [quantity, setQuantity] = useState('');
   const [showMA, setShowMA] = useState(false);
 
   // Real-time price updates via mock WebSocket
@@ -71,14 +65,9 @@ export default function StockDetailScreen({ route, navigation }: any) {
     }
   }, [watchlists, stockId, stock, isInWatchlist, addToWatchlist, removeFromWatchlist]);
 
-  const handleBuy = () => {
-    const qty = parseInt(quantity);
-    if (qty > 0) {
-      buyStock(stock, qty, displayPrice);
-      setShowTradeModal(false);
-      setQuantity('');
-    }
-  };
+  const handleOpenPlaceOrder = useCallback((type: 'buy' | 'sell') => {
+    navigation.navigate('PlaceOrder', { stockId: stock.id, symbol: stock.symbol, tradeType: type });
+  }, [navigation, stock]);
 
   // Compute day range from candle data
   const dayHigh = candleHistory.length > 0
@@ -404,115 +393,6 @@ export default function StockDetailScreen({ route, navigation }: any) {
         fontSize: FONTS.size.md,
         color: colors.white,
       },
-      modalOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        justifyContent: 'flex-end',
-      },
-      modal: {
-        backgroundColor: colors.bgSecondary,
-        borderTopLeftRadius: BORDER_RADIUS.xxl,
-        borderTopRightRadius: BORDER_RADIUS.xxl,
-        padding: SPACING.xxl,
-        paddingBottom: 50,
-      },
-      modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-      },
-      modalTitle: {
-        fontFamily: 'System',
-        fontWeight: '700',
-        fontSize: FONTS.size.xl,
-        color: colors.text,
-      },
-      modalPriceRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-        padding: SPACING.lg,
-        backgroundColor: colors.bgCard,
-        borderRadius: BORDER_RADIUS.md,
-      },
-      modalPriceLabel: {
-        fontFamily: 'System',
-        fontWeight: '400',
-        fontSize: FONTS.size.md,
-        color: colors.textSecondary,
-      },
-      modalPrice: {
-        fontFamily: 'System',
-        fontWeight: '700',
-        fontSize: FONTS.size.xl,
-        color: colors.text,
-      },
-      qtyContainer: {
-        marginBottom: SPACING.xl,
-      },
-      qtyLabel: {
-        fontFamily: 'System',
-        fontWeight: '500',
-        fontSize: FONTS.size.sm,
-        color: colors.textSecondary,
-        marginBottom: SPACING.sm,
-      },
-      qtyRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: SPACING.lg,
-      },
-      qtyBtn: {
-        width: 48,
-        height: 48,
-        borderRadius: 14,
-        backgroundColor: colors.bgCard,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-      },
-      qtyInput: {
-        width: 100,
-        height: 56,
-        backgroundColor: colors.bgInput,
-        borderRadius: BORDER_RADIUS.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        textAlign: 'center',
-        color: colors.text,
-        fontSize: FONTS.size.xxxl,
-        fontWeight: '700',
-        fontFamily: 'System',
-      },
-      totalRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-        padding: SPACING.lg,
-        backgroundColor: colors.bgCard,
-        borderRadius: BORDER_RADIUS.md,
-      },
-      totalLabel: {
-        fontFamily: 'System',
-        fontWeight: '400',
-        fontSize: FONTS.size.md,
-        color: colors.textSecondary,
-      },
-      totalValue: {
-        fontFamily: 'System',
-        fontWeight: '700',
-        fontSize: FONTS.size.xl,
-        color: colors.text,
-      },
     });
   }, [colors, isPositive, SPACING, FONTS, BORDER_RADIUS]);
 
@@ -691,13 +571,13 @@ export default function StockDetailScreen({ route, navigation }: any) {
           <View style={styles.bottomActions}>
             <TouchableOpacity
               style={[styles.tradeBtn, styles.sellBtn]}
-              onPress={() => { setTradeType('sell'); setShowTradeModal(true); }}
+              onPress={() => handleOpenPlaceOrder('sell')}
             >
               <Text style={styles.tradeBtnText}>Sell</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tradeBtn, styles.buyBtn]}
-              onPress={() => { setTradeType('buy'); setShowTradeModal(true); }}
+              onPress={() => handleOpenPlaceOrder('buy')}
             >
               <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.buyGradient}>
                 <Text style={styles.tradeBtnText}>Buy</Text>
@@ -707,63 +587,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         </View>
       </LinearGradient>
 
-      {/* Trade Modal */}
-      {showTradeModal && (
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTradeModal(false)}>
-          <TouchableOpacity style={styles.modal} activeOpacity={1} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{tradeType === 'buy' ? 'Buy' : 'Sell'} {stock.symbol}</Text>
-              <TouchableOpacity onPress={() => setShowTradeModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
 
-            <View style={styles.modalPriceRow}>
-              <Text style={styles.modalPriceLabel}>Market Price</Text>
-              <Text style={styles.modalPrice}>{formatCurrency(displayPrice)}</Text>
-            </View>
-
-            <View style={styles.qtyContainer}>
-              <Text style={styles.qtyLabel}>Quantity</Text>
-              <View style={styles.qtyRow}>
-                <TouchableOpacity
-                  style={styles.qtyBtn}
-                  onPress={() => setQuantity(Math.max(0, parseInt(quantity || '0') - 1).toString())}
-                >
-                  <Ionicons name="remove" size={20} color={colors.text} />
-                </TouchableOpacity>
-                <TextInput
-                  style={styles.qtyInput}
-                  value={quantity}
-                  onChangeText={setQuantity}
-                  keyboardType="numeric"
-                  placeholder="0"
-                  placeholderTextColor={colors.textMuted}
-                />
-                <TouchableOpacity
-                  style={styles.qtyBtn}
-                  onPress={() => setQuantity((parseInt(quantity || '0') + 1).toString())}
-                >
-                  <Ionicons name="add" size={20} color={colors.text} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Total Amount</Text>
-              <Text style={styles.totalValue}>{formatCurrency(displayPrice * (parseInt(quantity || '0')))}</Text>
-            </View>
-
-            <Button
-              title={tradeType === 'buy' ? `Buy ${quantity || '0'} Shares` : `Sell ${quantity || '0'} Shares`}
-              onPress={handleBuy}
-              variant={tradeType === 'buy' ? 'primary' : 'danger'}
-              disabled={!quantity || parseInt(quantity) <= 0}
-              size="large"
-            />
-          </TouchableOpacity>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }

@@ -15,6 +15,7 @@ interface ButtonProps {
   icon?: React.ReactNode;
   style?: ViewStyle;
   gradient?: readonly [string, string];
+  testID?: string;
 }
 
 export default function Button({
@@ -27,6 +28,7 @@ export default function Button({
   icon,
   style,
   gradient,
+  testID,
 }: ButtonProps) {
   const { colors } = useTheme();
   const isDisabled = disabled || loading;
@@ -85,6 +87,7 @@ export default function Button({
       <AnimatedPressable
         onPress={onPress}
         disabled={isDisabled}
+        testID={testID}
         scaleTo={0.97}
         haptic="light"
         highlight
@@ -108,6 +111,7 @@ export default function Button({
       <AnimatedPressable
         onPress={onPress}
         disabled={isDisabled}
+        testID={testID}
         scaleTo={0.97}
         haptic="light"
         style={[isDisabled && styles.disabled, style]}
@@ -132,6 +136,7 @@ export default function Button({
     <AnimatedPressable
       onPress={onPress}
       disabled={isDisabled}
+      testID={testID}
       scaleTo={0.97}
       haptic="light"
       highlight

@@ -11,6 +11,7 @@ interface AnimatedPressableProps {
   onPressIn?: () => void;
   onPressOut?: () => void;
   disabled?: boolean;
+  testID?: string;
   scaleTo?: number;
   haptic?: 'light' | 'medium' | 'heavy' | 'selection' | 'none' | 'success' | 'warning' | 'error';
   style?: StyleProp<ViewStyle>;
@@ -30,6 +31,7 @@ export default function AnimatedPressable({
   onPressIn,
   onPressOut,
   disabled = false,
+  testID,
   scaleTo = 0.96,
   haptic = 'light',
   style,
@@ -142,7 +144,7 @@ export default function AnimatedPressable({
       onLongPress={!disabled ? handleLongPress : undefined}
       disabled={disabled}
     >
-      <Animated.View style={[style, animatedStyle, containerStyle]}>
+      <Animated.View testID={testID} style={[style, animatedStyle, containerStyle]}>
         {highlight && (
           <Animated.View
             pointerEvents="none"

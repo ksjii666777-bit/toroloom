@@ -441,7 +441,7 @@ describe('StockDetailScreen — Negative Price', () => {
   });
 });
 
-describe('StockDetailScreen — Trade Modal', () => {
+describe('StockDetailScreen — Navigate to PlaceOrder', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockNavigate.mockClear();
@@ -453,7 +453,7 @@ describe('StockDetailScreen — Trade Modal', () => {
     vi.useRealTimers();
   });
 
-  it('shows Buy modal when Buy button is pressed', () => {
+  it('navigates to PlaceOrder with buy when Buy button is pressed', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
@@ -466,63 +466,44 @@ describe('StockDetailScreen — Trade Modal', () => {
     });
     advanceAndRender(100);
 
-    // Modal should now show with stock symbol and market price
-    expect(getByText('Buy RELIANCE')).toBeDefined();
-    expect(getByText('Market Price')).toBeDefined();
+    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      tradeType: 'buy',
+    });
   });
 
-  it('shows trade quantity controls in modal', () => {
+  it('navigates to PlaceOrder with sell when Sell button is pressed', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
 
-    // Open the Buy modal
+    // Press the Sell button
     act(() => {
-      fireEvent.press(getByText('Buy'));
+      fireEvent.press(getByText('Sell'));
     });
     advanceAndRender(100);
 
-    expect(getByText('Quantity')).toBeDefined();
-    expect(getByText('Total Amount')).toBeDefined();
+    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      tradeType: 'sell',
+    });
   });
 
-  it('shows disabled Buy button in modal when quantity is empty', () => {
+  it('does not show modal content on the StockDetail screen (now navigates instead)', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
+    const { queryByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
 
-    // Open the Buy modal
-    act(() => {
-      fireEvent.press(getByText('Buy'));
-    });
-    advanceAndRender(100);
-
-    // Button should show 0 Shares initially
-    expect(getByText('Buy 0 Shares')).toBeDefined();
-  });
-
-  it('closes modal when close button is pressed', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText, queryByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-
-    // Open the Buy modal
-    act(() => {
-      fireEvent.press(getByText('Buy'));
-    });
-    advanceAndRender(100);
-    expect(getByText('Buy RELIANCE')).toBeDefined();
-
-    // Close the modal by pressing the Sell button to trigger different state
-    // Or press the overlay by pressing Sell first then Buy
-    // Actually, let's just verify the modal content rendered
-    expect(queryByText('Buy RELIANCE')).not.toBeNull();
+    // Modal content should not exist on this screen after navigation refactor
+    expect(queryByText('Buy RELIANCE')).toBeNull();
+    expect(queryByText('Market Price')).toBeNull();
+    expect(queryByText('Buy 0 Shares')).toBeNull();
   });
 });
 

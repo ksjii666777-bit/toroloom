@@ -62,3 +62,6 @@ CLAUDE.md
 # ===================== Misc =====================
 *.pem
 *.envrc
+
+# CI artifacts
+gh_jobs*.json

@@ -34,6 +34,7 @@ import RiskSettingsScreen from '../screens/settings/RiskSettingsScreen';
 import CourseDetailScreen from '../screens/education/CourseDetailScreen';
 import LessonViewScreen from '../screens/education/LessonViewScreen';
 import TradeHistoryScreen from '../screens/trade/TradeHistoryScreen';
+import PlaceOrderScreen from '../screens/trade/PlaceOrderScreen';
 import ReportsScreen from '../screens/reports/ReportsScreen';
 import HelpScreen from '../screens/support/HelpScreen';
 import AchievementsScreen from '../screens/achievements/AchievementsScreen';
@@ -168,6 +169,7 @@ export default function AppNavigator() {
             <Stack.Screen name="MutualFunds" component={MutualFundsScreen} />
             <Stack.Screen name="SIPs" component={MutualFundsScreen} />
             <Stack.Screen name="TradeHistory" component={TradeHistoryScreen} />
+            <Stack.Screen name="PlaceOrder" component={PlaceOrderScreen} />
             <Stack.Screen name="Reports" component={ReportsScreen} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="Achievements" component={AchievementsScreen} />
