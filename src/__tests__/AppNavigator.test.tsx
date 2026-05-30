@@ -110,6 +110,9 @@ vi.mock('../screens/funds/UPIScreen', () => ({
 vi.mock('../screens/funds/FundsDashboardScreen', () => ({
   default: NullComponent,
 }));
+vi.mock('../screens/trade/PlaceOrderScreen', () => ({
+  default: NullComponent,
+}));
 
 /* ------------------------------------------------------------------ */
 /*  Mock navigation libraries                                          */
@@ -263,6 +266,7 @@ describe('AppNavigator — Auth Gating', () => {
     expect(str).toContain('Help');
     expect(str).toContain('AddFunds');
     expect(str).toContain('TransactionHistory');
+    expect(str).toContain('PlaceOrder');
   });
 });
 
