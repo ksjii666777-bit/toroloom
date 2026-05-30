@@ -199,7 +199,7 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd "echo 'db.adminCommand(\"ping\").ok' | mongosh --quiet -u toroloom -p toroloom_dev --authenticationDatabase admin || exit 1"
+          --health-cmd "mongosh --quiet -u toroloom -p toroloom_dev --authenticationDatabase admin --eval 'db.adminCommand(\"ping\")' || exit 1"
           --health-interval 10s
           --health-timeout 10s
           --health-retries 10
@@ -218,12 +218,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Run integration tests in a single fork so that all test files share
-      # the same process.  Without this, parallel workers cause race
-      # conditions: clearForTesting() in one file wipes data another file
-      # is actively using.
+      # Integration tests share databases (MongoDB/PostgreSQL) and
+      # singletons (riskEngine, auditTrail).  fileParallelism: false is
+      # already set in vitest.config.ts, so there's no need for a CLI flag.
       - name: Run integration tests (PostgreSQL + MongoDB)
-        run: npx vitest run --reporter=verbose --poolOptions.forks.singleFork src/__tests__/*.int.test.ts
+        run: npx vitest run --reporter=verbose src/__tests__/*.int.test.ts
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://toroloom:toroloom_dev@localhost:5432/toroloom
