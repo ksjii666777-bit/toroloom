@@ -21,6 +21,7 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
 import { getActiveWS } from '../services/wsRegistry';
+import { log } from '../utils/logger';
 
 // ==================== Types ====================
 
@@ -216,7 +217,7 @@ export const useRiskStore = create<RiskStoreState>((set, get) => ({
           settingsFrozen: false,
         });
 
-        console.log('[RiskStore] Lockdown LIFTED via WebSocket — P&L recovered above limit');
+        log.info('[RiskStore] Lockdown LIFTED via WebSocket — P&L recovered above limit');
       } else {
         // ── Lockdown triggered ────────────────────────────────
         if (current.lockdown.status !== 'none') return;
@@ -233,7 +234,7 @@ export const useRiskStore = create<RiskStoreState>((set, get) => ({
           wsLockdownCount: current.wsLockdownCount + 1,
         });
 
-        console.log(
+        log.info(
           '[RiskStore] Lockdown received via WebSocket — ' +
           `loss ₹${(lockdownData.triggerLoss ?? 0).toLocaleString()}, ` +
           `limit: ${lockdownData.breachedLimit}` +

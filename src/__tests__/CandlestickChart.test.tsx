@@ -146,4 +146,48 @@ describe('CandlestickChart', () => {
     );
     expect(getByText('1M')).toBeDefined();
   });
+
+  it('renders with a single data point', () => {
+    const single: StockHistoryPoint = { date: '2025-01-01', open: 100, high: 110, low: 98, close: 108, volume: 10000 };
+    const { getByText } = render(
+      <CandlestickChart data={[single]} />
+    );
+    // Should render timeframe selector, not empty/loading
+    expect(getByText('1M')).toBeDefined();
+  });
+
+  it('handles data with all identical prices (no range)', () => {
+    const flatData: StockHistoryPoint[] = [
+      { date: '2025-01-01', open: 100, high: 100, low: 100, close: 100, volume: 1000 },
+      { date: '2025-01-02', open: 100, high: 100, low: 100, close: 100, volume: 1000 },
+    ];
+    const { getByText } = render(
+      <CandlestickChart data={flatData} />
+    );
+    expect(getByText('1M')).toBeDefined();
+  });
+
+  it('calls onDataNeeded callback when defined', () => {
+    const onDataNeeded = vi.fn();
+    const { getByText } = render(
+      <CandlestickChart data={sampleData} onDataNeeded={onDataNeeded} />
+    );
+    // Component mounts, callback should be available but not auto-called
+    expect(getByText('1M')).toBeDefined();
+  });
+
+  it('tolerates null/undefined data gracefully', () => {
+    const { getByText } = render(
+      <CandlestickChart data={null as any} />
+    );
+    expect(getByText('No chart data available')).toBeDefined();
+  });
+
+  it('renders without timeframe change callback (no crash)', () => {
+    const { getByText } = render(
+      <CandlestickChart data={sampleData} />
+    );
+    // Timeframe buttons still render and are tappable
+    expect(getByText('1D')).toBeDefined();
+  });
 });

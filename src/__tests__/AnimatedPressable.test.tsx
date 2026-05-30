@@ -174,4 +174,46 @@ describe('AnimatedPressable', () => {
     expect(onPressIn).toHaveBeenCalledTimes(1);
     expect(onPressOut).toHaveBeenCalledTimes(1);
   });
+
+  it('triggers medium haptic when haptic="medium"', () => {
+    const { getByText } = render(
+      <AnimatedPressable onPress={() => {}} haptic="medium">
+        <>Press me</>
+      </AnimatedPressable>
+    );
+    fireEvent.press(getByText('Press me'));
+    expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Medium);
+  });
+
+  it('triggers heavy haptic when haptic="heavy"', () => {
+    const { getByText } = render(
+      <AnimatedPressable onPress={() => {}} haptic="heavy">
+        <>Press me</>
+      </AnimatedPressable>
+    );
+    fireEvent.press(getByText('Press me'));
+    expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Heavy);
+  });
+
+  it('long-press does not trigger haptic when disabled', () => {
+    const { getByText } = render(
+      <AnimatedPressable onPress={() => {}} onLongPress={() => {}} disabled={true}>
+        <>No haptic</>
+      </AnimatedPressable>
+    );
+    // The component blocks both the longPress callback and haptic when disabled.
+    // onLongPress callback is not callable because the prop is undefined;
+    // verify that pressing (which would also trigger disabled guard) does nothing
+    fireEvent.press(getByText('No haptic'));
+    expect(Haptics.impactAsync).not.toHaveBeenCalled();
+  });
+
+  it('renders with custom scaleTo and containerStyle', () => {
+    const { getByText } = render(
+      <AnimatedPressable onPress={() => {}} scaleTo={0.85} containerStyle={{ margin: 10 }}>
+        <>Scaled</>
+      </AnimatedPressable>
+    );
+    expect(getByText('Scaled')).toBeDefined();
+  });
 });

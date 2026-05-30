@@ -99,16 +99,17 @@ describe('WebSocket → RiskEngine P&L Bridge — PostgreSQL Integration', () =>
 
   afterAll(async () => {
     if (available && storage) {
-      await storage.deleteRiskProfile(TEST_USER.userId);
-      await storage.deleteRiskProfile(LOAD_TEST_USER.userId);
+      await storage.clearForTesting();
       await storage.disconnect();
     }
     wss?.close();
     server?.close();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     if (!available) return;
+    // Clear the database to prevent cross-test contamination
+    await storage.clearForTesting();
     riskEngine.setPortfolioValue(TEST_USER.userId, 1_000_000);
   });
 

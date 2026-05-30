@@ -10,6 +10,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useWatchlistStore } from '../store/watchlistStore';
 import { Stock } from '../types';
+import { watchlistApi } from '../services/api/watchlist';
 
 // Mock watchlistApi to trigger local fallback for all operations
 vi.mock('../services/api/watchlist', () => ({
@@ -59,7 +60,7 @@ const mockStock2: Stock = {
   dividend: 1.20,
 };
 
-describe('WatchlistStore — CRUD Operations', () => {
+describe('WatchlistStore — CRUD Operations (Local Fallback)', () => {
   beforeEach(() => {
     useWatchlistStore.setState({
       watchlists: [],
@@ -138,5 +139,137 @@ describe('WatchlistStore — CRUD Operations', () => {
     expect(useWatchlistStore.getState().isInWatchlist('RELIANCE')).toBe(false);
     await useWatchlistStore.getState().addToWatchlist(wlId, mockStock);
     expect(useWatchlistStore.getState().isInWatchlist('RELIANCE')).toBe(true);
+  });
+
+  it('checks across multiple watchlists for isInWatchlist', async () => {
+    await useWatchlistStore.getState().createWatchlist('Watchlist A');
+    await useWatchlistStore.getState().createWatchlist('Watchlist B');
+    const wlA = useWatchlistStore.getState().watchlists[0].id;
+
+    await useWatchlistStore.getState().addToWatchlist(wlA, mockStock);
+    expect(useWatchlistStore.getState().isInWatchlist('RELIANCE')).toBe(true);
+    expect(useWatchlistStore.getState().isInWatchlist('TCS')).toBe(false);
+  });
+
+  it('removeFromWatchlist does nothing when watchlistId does not match', async () => {
+    await useWatchlistStore.getState().createWatchlist('My Watchlist');
+    const wlId = useWatchlistStore.getState().watchlists[0].id;
+    await useWatchlistStore.getState().addToWatchlist(wlId, mockStock);
+
+    // Try removing from a non-existent watchlist — should be a no-op
+    await useWatchlistStore.getState().removeFromWatchlist('non_existent', 'RELIANCE', 'RELIANCE');
+    expect(useWatchlistStore.getState().watchlists[0].stocks).toHaveLength(1);
+  });
+});
+
+describe('WatchlistStore — API Success Paths', () => {
+  beforeEach(() => {
+    // Make API methods resolve successfully
+    vi.mocked(watchlistApi.getAll).mockResolvedValue([
+      { id: 'api_wl_1', name: 'Remote Watchlist', stocks: [mockStock], createdAt: '2025-01-01' },
+    ]);
+    vi.mocked(watchlistApi.addStock).mockResolvedValue({ id: 'api_wl_1', name: 'Remote Watchlist', stocks: [mockStock], createdAt: '2025-01-01' });
+    vi.mocked(watchlistApi.removeStock).mockResolvedValue(undefined as any);
+    vi.mocked(watchlistApi.create).mockResolvedValue({
+      id: 'api_wl_new', name: 'Remote Created', stocks: [], createdAt: '2025-06-01',
+    });
+    vi.mocked(watchlistApi.delete).mockResolvedValue(undefined as any);
+
+    useWatchlistStore.setState({ watchlists: [], isLoading: false });
+  });
+
+  it('fetchWatchlists loads data from API', async () => {
+    await useWatchlistStore.getState().fetchWatchlists();
+    const state = useWatchlistStore.getState();
+    expect(state.watchlists).toHaveLength(1);
+    expect(state.watchlists[0].name).toBe('Remote Watchlist');
+    expect(state.watchlists[0].stocks).toHaveLength(1);
+  });
+
+  it('fetchWatchlists sets loading state', async () => {
+    // Don't await — check loading is true during the pending promise
+    const promise = useWatchlistStore.getState().fetchWatchlists();
+    expect(useWatchlistStore.getState().isLoading).toBe(true);
+    await promise;
+    expect(useWatchlistStore.getState().isLoading).toBe(false);
+  });
+
+  it('addToWatchlist persists via API and updates state', async () => {
+    useWatchlistStore.setState({
+      watchlists: [{ id: 'wl1', name: 'My WL', stocks: [], createdAt: '2025-01-01' }],
+    });
+
+    await useWatchlistStore.getState().addToWatchlist('wl1', mockStock);
+    expect(watchlistApi.addStock).toHaveBeenCalledWith('wl1', 'RELIANCE');
+    expect(useWatchlistStore.getState().watchlists[0].stocks).toHaveLength(1);
+  });
+
+  it('removeFromWatchlist persists via API and updates state', async () => {
+    useWatchlistStore.setState({
+      watchlists: [{ id: 'wl1', name: 'My WL', stocks: [mockStock], createdAt: '2025-01-01' }],
+    });
+
+    await useWatchlistStore.getState().removeFromWatchlist('wl1', 'RELIANCE', 'RELIANCE');
+    expect(watchlistApi.removeStock).toHaveBeenCalledWith('wl1', 'RELIANCE');
+    expect(useWatchlistStore.getState().watchlists[0].stocks).toHaveLength(0);
+  });
+
+  it('createWatchlist persists via API and adds to state', async () => {
+    await useWatchlistStore.getState().createWatchlist('Remote Created');
+    expect(watchlistApi.create).toHaveBeenCalledWith('Remote Created');
+    expect(useWatchlistStore.getState().watchlists).toHaveLength(1);
+    expect(useWatchlistStore.getState().watchlists[0].id).toBe('api_wl_new');
+  });
+
+  it('deleteWatchlist persists via API and removes from state', async () => {
+    useWatchlistStore.setState({
+      watchlists: [{ id: 'wl1', name: 'To Delete', stocks: [], createdAt: '2025-01-01' }],
+    });
+
+    await useWatchlistStore.getState().deleteWatchlist('wl1');
+    expect(watchlistApi.delete).toHaveBeenCalledWith('wl1');
+    expect(useWatchlistStore.getState().watchlists).toHaveLength(0);
+  });
+});
+
+describe('WatchlistStore — API Failure (already covered in CRUD tests above)', () => {
+  beforeEach(() => {
+    useWatchlistStore.setState({ watchlists: [], isLoading: false });
+  });
+
+  it('fetchWatchlists keeps existing data on API failure', async () => {
+    vi.mocked(watchlistApi.getAll).mockRejectedValueOnce(new Error('Network error'));
+
+    useWatchlistStore.setState({ watchlists: [{ id: 'existing', name: 'Existing', stocks: [mockStock], createdAt: '2025-01-01' }] });
+    await useWatchlistStore.getState().fetchWatchlists();
+
+    const state = useWatchlistStore.getState();
+    expect(state.watchlists).toHaveLength(1);
+    expect(state.watchlists[0].name).toBe('Existing');
+    expect(state.isLoading).toBe(false);
+  });
+
+  it('addToWatchlist updates state even when API fails', async () => {
+    vi.mocked(watchlistApi.addStock).mockRejectedValueOnce(new Error('Network error'));
+
+    useWatchlistStore.setState({
+      watchlists: [{ id: 'wl1', name: 'My WL', stocks: [], createdAt: '2025-01-01' }],
+    });
+
+    await useWatchlistStore.getState().addToWatchlist('wl1', mockStock);
+    // State should still update even though API failed
+    expect(useWatchlistStore.getState().watchlists[0].stocks).toHaveLength(1);
+  });
+
+  it('createWatchlist creates locally when API fails', async () => {
+    vi.mocked(watchlistApi.create).mockRejectedValueOnce(new Error('Network error'));
+
+    await useWatchlistStore.getState().createWatchlist('Local WL');
+    const state = useWatchlistStore.getState();
+    expect(state.watchlists).toHaveLength(1);
+    // Local ID starts with w_local_
+    expect(state.watchlists[0].id).toMatch(/^w_local_/);
+    expect(state.watchlists[0].name).toBe('Local WL');
+    expect(state.watchlists[0].stocks).toEqual([]);
   });
 });

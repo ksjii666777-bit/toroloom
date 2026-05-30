@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { Platform } from 'react-native';
+import { log } from '../utils/logger';
 import { useNavigation } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
 import {
@@ -42,13 +43,13 @@ export function useNotificationSetup() {
     // Register for push notifications
     registerForPushNotifications().then(token => {
       if (token) {
-        console.log('[Notifications] Push token:', token);
+        log.info('[Notifications] Push token:', token);
       }
     });
 
     // Listen for notifications while app is foregrounded
     notificationListenerRef.current = Notifications.addNotificationReceivedListener(notification => {
-      console.log('[Notifications] Received:', notification.request.content.title);
+      log.info('[Notifications] Received:', notification.request.content.title);
     });
 
     // Listen for notification taps (user opens notification)

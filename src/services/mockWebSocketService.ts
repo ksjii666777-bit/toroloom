@@ -1,6 +1,7 @@
 import { mockStocks } from '../constants/mockData';
 import { useAuthStore } from '../store/authStore';
 import { usePortfolioStore } from '../store/portfolioStore';
+import { log } from '../utils/logger';
 import type { WebSocketService, PriceUpdateCallback, CandleUpdateCallback, ConnectionCallback, PnLUpdateCallback, LockdownCallback } from './wsService';
 import type { StockHistoryPoint } from '../types';
 
@@ -47,23 +48,23 @@ class MockWebSocketService implements WebSocketService {
     this._lockdownActive = false;
     this.isConnected = true;
     this.onConnectionChange?.(true);
-    console.log('[MockWS] Connected to market data feed');
+    log.info('[MockWS] Connected to market data feed');
 
     // Step 1: Authenticate via the same protocol the real WS handler expects.
     // Send { type: "auth", token } and wait for { type: "authenticated" }.
     const { token } = useAuthStore.getState();
     const authToken = token || 'mock-token';
 
-    console.log('[MockWS] Sending auth...');
+    log.info('[MockWS] Sending auth...');
 
     // Simulate the auth round-trip. In the real WebSocket this would be an
     // actual message exchange; here we decode the token-like value in-band.
     if (!authToken) {
-      console.warn('[MockWS] No auth token available — proceeding without authentication');
+      log.warn('[MockWS] No auth token available — proceeding without authentication');
       this.isAuthenticated = false;
     } else {
       this.isAuthenticated = true;
-      console.log('[MockWS] Auth verified — received authenticated response');
+      log.info('[MockWS] Auth verified — received authenticated response');
     }
 
     // Step 2: After successful auth, auto-subscribe to the user's portfolio
@@ -75,7 +76,7 @@ class MockWebSocketService implements WebSocketService {
       this.autoSubscribed.add(holding.stockId);
     }
 
-    console.log(
+    log.info(
       `[MockWS] Authenticated. Auto-subscribed to ${holdings.length} portfolio positions: ` +
       holdings.map(h => h.symbol).join(', '),
     );
@@ -95,7 +96,7 @@ class MockWebSocketService implements WebSocketService {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
-    console.log('[MockWS] Disconnected from market data feed');
+    log.info('[MockWS] Disconnected from market data feed');
   }
 
   onConnectionChangeCallback(cb: ConnectionCallback): void {
@@ -310,7 +311,7 @@ class MockWebSocketService implements WebSocketService {
         breachedLimit: 'daily_loss',
       });
 
-      console.log(
+      log.info(
         '[MockWS] Lockdown TRIGGERED — ' +
         `loss ₹${Math.abs(totalUnrealizedPnL).toLocaleString()} ≥ limit ₹${this.lossLimitOverride.toLocaleString()}`,
       );
@@ -326,9 +327,23 @@ class MockWebSocketService implements WebSocketService {
         breachedLimit: null,
       });
 
-      console.log('[MockWS] Lockdown LIFTED — P&L recovered above limit');
+      log.info('[MockWS] Lockdown LIFTED — P&L recovered above limit');
     }
     // else: no state change → deduplicate (don't re-emit)
+  }
+
+  // ── Test Support ───────────────────────────────────────────────────────────
+
+  /**
+   * Re-initialise internal price map from mock data and clear cached candles.
+   * Used in tests to reset singleton state between test suites.
+   */
+  reset(): void {
+    this.stockPrices.clear();
+    this.stockCandles.clear();
+    for (const stock of mockStocks) {
+      this.stockPrices.set(stock.id, stock.price);
+    }
   }
 
   // ── Public Data Access ────────────────────────────────────────────────────
@@ -353,7 +368,7 @@ class MockWebSocketService implements WebSocketService {
     this.isConnected = false;
     this.isAuthenticated = false;
     this.onConnectionChange?.(false);
-    console.log('[MockWS] Connection lost');
+    log.info('[MockWS] Connection lost');
 
     // Auto-reconnect after 3 seconds
     this.reconnectTimer = setTimeout(async () => {

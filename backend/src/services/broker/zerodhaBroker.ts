@@ -55,6 +55,22 @@ export class ZerodhaBroker implements IBroker {
   // Symbol → { tradingsymbol, exchange, instrument_token } mapping cache
   private instrumentCache: Map<string, { tradingsymbol: string; exchange: string; instrumentToken: number }> = new Map();
 
+  /**
+   * Optional SDK dependency override for testing.
+   * When provided, the broker uses these instead of calling require().
+   */
+  constructor(private sdk?: { KiteConnect?: any; KiteTicker?: any }) {}
+
+  private loadKiteConnect(): any {
+    if (this.sdk?.KiteConnect) return this.sdk.KiteConnect;
+    return require('kiteconnect').KiteConnect;
+  }
+
+  private loadKiteTicker(): any {
+    if (this.sdk?.KiteTicker) return this.sdk.KiteTicker;
+    return require('kiteconnect').KiteTicker;
+  }
+
   // ======================== Auth ========================
 
   async authenticate(config: BrokerConfig): Promise<boolean> {
@@ -67,8 +83,8 @@ export class ZerodhaBroker implements IBroker {
     if (!this.apiSecret) throw new Error('Zerodha API secret is required');
 
     try {
-      const { KiteConnect } = require('kiteconnect');
-      this.kite = new KiteConnect({ api_key: this.apiKey });
+      const KiteConnectClass = this.loadKiteConnect();
+      this.kite = new KiteConnectClass({ api_key: this.apiKey });
 
       if (this.accessToken) {
         // Use existing access token
@@ -530,9 +546,9 @@ export class ZerodhaBroker implements IBroker {
     this.requireAuth();
 
     try {
-      const { KiteTicker } = require('kiteconnect');
+      const KiteTickerClass = this.loadKiteTicker();
 
-      this.ticker = new KiteTicker({
+      this.ticker = new KiteTickerClass({
         api_key: this.apiKey,
         access_token: this.accessToken,
       });

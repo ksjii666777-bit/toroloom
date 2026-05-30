@@ -89,11 +89,10 @@ export default function CandlestickChart({
   }, [data, showMA]);
 
   // Mapping functions
-  const candleWidth = Math.max(
-    (chartWidth / data.length) * CANDLE_WIDTH,
-    CANDLE_MIN_WIDTH
-  );
-  const candleSpacing = chartWidth / data.length;
+  const candleWidth = data && data.length > 0
+    ? Math.max((chartWidth / data.length) * CANDLE_WIDTH, CANDLE_MIN_WIDTH)
+    : 0;
+  const candleSpacing = data && data.length > 0 ? chartWidth / data.length : 0;
   const halfSpacing = candleSpacing / 2;
 
   const getX = useCallback((index: number) => padding.left + index * candleSpacing, [padding.left, candleSpacing]);

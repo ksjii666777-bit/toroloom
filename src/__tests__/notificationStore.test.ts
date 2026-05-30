@@ -10,6 +10,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useNotificationStore, NotificationPreferences } from '../store/notificationStore';
 import { AppNotification } from '../types';
+import { notificationApi } from '../services/api/notifications';
 
 // Make sendLocalNotification synchronous so checkPriceAlerts' async
 // addNotification call completes immediately in the same tick
@@ -223,6 +224,111 @@ describe('NotificationStore — Price Alert Rules', () => {
     expect(useNotificationStore.getState().priceAlertRules[0].triggered).toBe(true);
     // No notification should be added because addNotification is async without await
     // But more importantly the rule state is correct
+    expect(useNotificationStore.getState().notifications).toHaveLength(0);
+  });
+
+  it('skips rule when stock price is not in the current prices object', () => {
+    useNotificationStore.getState().addPriceAlertRule('MISSING_SYMBOL', 'Missing Stock', 100, 'above');
+    useNotificationStore.getState().checkPriceAlerts({ RELIANCE: 2000 });
+    const rule = useNotificationStore.getState().priceAlertRules[0];
+    expect(rule.triggered).toBe(false);
+  });
+
+  it('triggers alert when price exactly equals target (above)', () => {
+    useNotificationStore.getState().addPriceAlertRule('EQUAL', 'Equal Test', 150, 'above');
+    useNotificationStore.getState().checkPriceAlerts({ EQUAL: 150 });
+    expect(useNotificationStore.getState().priceAlertRules[0].triggered).toBe(true);
+  });
+
+  it('triggers alert when price exactly equals target (below)', () => {
+    useNotificationStore.getState().addPriceAlertRule('EQUAL', 'Equal Test', 150, 'below');
+    useNotificationStore.getState().checkPriceAlerts({ EQUAL: 150 });
+    expect(useNotificationStore.getState().priceAlertRules[0].triggered).toBe(true);
+  });
+});
+
+describe('NotificationStore — Fetch Notifications Success', () => {
+  beforeEach(() => {
+    useNotificationStore.setState({
+      notifications: [],
+      preferences: defaultPrefs,
+      priceAlertRules: [],
+      scheduledIds: {},
+    });
+  });
+
+  it('loads notifications from the backend on success', async () => {
+    const apiNotifications = [
+      { id: 'api_1', type: 'price_alert', title: 'API Alert', message: 'Backend alert', read: false, timestamp: '2025-06-01T00:00:00' },
+      { id: 'api_2', type: 'trade', title: 'Trade Executed', message: 'Bought 10 RELIANCE', read: true, timestamp: '2025-06-01T01:00:00' },
+    ];
+    vi.mocked(notificationApi.getAll).mockResolvedValueOnce(apiNotifications as any);
+
+    await useNotificationStore.getState().fetchNotifications();
+
+    expect(useNotificationStore.getState().notifications).toEqual(apiNotifications);
+  });
+});
+
+describe('NotificationStore — Notification Type Filtering', () => {
+  beforeEach(() => {
+    useNotificationStore.setState({
+      notifications: [],
+      preferences: { ...defaultPrefs },
+      priceAlertRules: [],
+      scheduledIds: {},
+    });
+  });
+
+  it('adds a trade notification (coverage: trade case in getPreferenceKeyForType)', async () => {
+    const tradeNotif: AppNotification = {
+      id: 'trade_1', type: 'trade', title: 'Trade', message: 'Bought stock', read: false, timestamp: '2025-06-01T00:00:00',
+    };
+    await useNotificationStore.getState().addNotification(tradeNotif);
+    const state = useNotificationStore.getState();
+    expect(state.notifications).toHaveLength(1);
+    expect(state.notifications[0].type).toBe('trade');
+  });
+
+  it('adds a system notification (coverage: system case in getPreferenceKeyForType)', async () => {
+    const systemNotif: AppNotification = {
+      id: 'sys_1', type: 'system', title: 'System', message: 'App updated', read: false, timestamp: '2025-06-01T00:00:00',
+    };
+    await useNotificationStore.getState().addNotification(systemNotif);
+    const state = useNotificationStore.getState();
+    expect(state.notifications).toHaveLength(1);
+    expect(state.notifications[0].type).toBe('system');
+  });
+
+  it('adds a news notification (coverage: news case in getPreferenceKeyForType, same branch as system)', async () => {
+    const newsNotif: AppNotification = {
+      id: 'news_1', type: 'news', title: 'News', message: 'Market news', read: false, timestamp: '2025-06-01T00:00:00',
+    };
+    await useNotificationStore.getState().addNotification(newsNotif);
+    const state = useNotificationStore.getState();
+    expect(state.notifications).toHaveLength(1);
+    expect(state.notifications[0].type).toBe('news');
+  });
+
+  it('adds an unknown type notification (coverage: default case in getPreferenceKeyForType)', async () => {
+    const unknownNotif = {
+      id: 'unk_1', type: 'unknown_type', title: 'Unknown', message: 'Something', read: false, timestamp: '2025-06-01T00:00:00',
+    } as unknown as AppNotification;
+    await useNotificationStore.getState().addNotification(unknownNotif);
+    const state = useNotificationStore.getState();
+    expect(state.notifications).toHaveLength(1);
+    expect(state.notifications[0].type).toBe('unknown_type');
+  });
+
+  it('does not add notification when its preference type is disabled', async () => {
+    useNotificationStore.getState().updatePreference('priceAlerts', false);
+
+    const alertNotif: AppNotification = {
+      id: 'blocked_1', type: 'price_alert', title: 'Blocked', message: 'Should not appear', read: false, timestamp: '2025-06-01T00:00:00',
+    };
+    const result = await useNotificationStore.getState().addNotification(alertNotif);
+
+    expect(result).toBeUndefined();
     expect(useNotificationStore.getState().notifications).toHaveLength(0);
   });
 });

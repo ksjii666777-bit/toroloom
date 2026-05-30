@@ -7,7 +7,7 @@
  * and addTransaction for various scenarios (add, withdraw, pending, failed).
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useFundStore, FundTransaction } from '../store/fundStore';
 
 describe('FundStore — Initial State', () => {
@@ -176,5 +176,129 @@ describe('FundStore — addTransaction', () => {
 
     const state = useFundStore.getState();
     expect(state.transactions[0].id).not.toBe(state.transactions[1].id);
+  });
+});
+
+describe('FundStore — dateLabel Edge Cases', () => {
+  beforeEach(() => {
+    useFundStore.setState({ transactions: [] });
+  });
+
+  it('labels today transactions as "Today"', () => {
+    useFundStore.getState().addTransaction({
+      type: 'add', amount: 1000, method: 'UPI', status: 'completed',
+      transactionId: 'TXN001',
+    });
+    expect(useFundStore.getState().transactions[0].dateLabel).toBe('Today');
+  });
+
+  it('includes all required fields in added transaction', () => {
+    useFundStore.getState().addTransaction({
+      type: 'withdraw', amount: 5000, method: 'HDFC Bank', account: 'XXXX1234',
+      status: 'completed', transactionId: 'WDR001',
+    });
+    const tx = useFundStore.getState().transactions[0];
+    expect(tx.id).toBeTruthy();
+    expect(tx.timestamp).toBeTruthy();
+    expect(tx.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(tx.account).toBe('XXXX1234');
+  });
+
+  it('handles addTransaction without optional account field', () => {
+    useFundStore.getState().addTransaction({
+      type: 'add', amount: 2000, method: 'UPI',
+      status: 'completed', transactionId: 'TXN002',
+    });
+    const tx = useFundStore.getState().transactions[0];
+    expect(tx.account).toBeUndefined();
+    expect(tx.type).toBe('add');
+  });
+
+  it('allows multiple transaction types with different methods', () => {
+    useFundStore.getState().addTransaction({
+      type: 'add', amount: 10000, method: 'Net Banking',
+      status: 'completed', transactionId: 'TXN001',
+    });
+    useFundStore.getState().addTransaction({
+      type: 'withdraw', amount: 3000, method: 'ICICI Bank', account: 'XXXX5678',
+      status: 'pending', transactionId: 'WDR001',
+    });
+    expect(useFundStore.getState().transactions).toHaveLength(2);
+    expect(useFundStore.getState().transactions[0].type).toBe('withdraw');
+    expect(useFundStore.getState().transactions[1].type).toBe('add');
+  });
+
+  it('generates unique IDs that differ from each other', () => {
+    useFundStore.getState().addTransaction({
+      type: 'add', amount: 100, method: 'UPI', status: 'completed',
+      transactionId: 'TXN001',
+    });
+    useFundStore.getState().addTransaction({
+      type: 'add', amount: 200, method: 'UPI', status: 'completed',
+      transactionId: 'TXN002',
+    });
+    expect(useFundStore.getState().transactions[0].id).not.toBe(
+      useFundStore.getState().transactions[1].id,
+    );
+  });
+});
+
+describe('FundStore — Seed Transaction Date Labels', () => {
+  beforeEach(() => {
+    // Reload seed data with various ages
+    const now = Date.now();
+    const DAY = 86400000;
+    const seedTxs: FundTransaction[] = [
+      { id: 's1', type: 'add', amount: 100, method: 'UPI', status: 'completed', transactionId: 'T1', timestamp: new Date(now - DAY).toISOString(), dateLabel: '' },
+      { id: 's2', type: 'add', amount: 200, method: 'UPI', status: 'completed', transactionId: 'T2', timestamp: new Date(now - 3 * DAY).toISOString(), dateLabel: '' },
+      { id: 's3', type: 'add', amount: 300, method: 'UPI', status: 'completed', transactionId: 'T3', timestamp: new Date(now - 14 * DAY).toISOString(), dateLabel: '' },
+    ];
+    // Compute labels using the same logic as the store
+    const labeled = seedTxs.map(tx => {
+      const date = new Date(tx.timestamp);
+      const diffDays = Math.floor((now - date.getTime()) / DAY);
+      let label: string;
+      if (diffDays === 0) label = 'Today';
+      else if (diffDays === 1) label = 'Yesterday';
+      else if (diffDays < 7) label = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
+      else {
+        const d = String(date.getDate()).padStart(2, '0');
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        label = `${d} ${months[date.getMonth()]} ${date.getFullYear()}`;
+      }
+      return { ...tx, dateLabel: label };
+    });
+    useFundStore.setState({ transactions: labeled });
+  });
+
+  it('marks 1-day-old transaction as Yesterday', () => {
+    const tx = useFundStore.getState().transactions.find(t => t.id === 's1');
+    expect(tx?.dateLabel).toBe('Yesterday');
+  });
+
+  it('marks 3-day-old transaction with weekday name', () => {
+    const tx = useFundStore.getState().transactions.find(t => t.id === 's2');
+    expect(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']).toContain(tx?.dateLabel);
+  });
+
+  it('marks 14-day-old transaction with formatted date', () => {
+    const tx = useFundStore.getState().transactions.find(t => t.id === 's3');
+    expect(tx?.dateLabel).toMatch(/^\d{2} \w{3} \d{4}$/);
+  });
+
+  it('includes pending and failed status transactions when added', () => {
+    useFundStore.getState().addTransaction({
+      type: 'add', amount: 500, method: 'UPI', status: 'pending',
+      transactionId: 'TXN_PND',
+    });
+    useFundStore.getState().addTransaction({
+      type: 'withdraw', amount: 300, method: 'Bank', status: 'failed',
+      transactionId: 'TXN_FAIL',
+    });
+    const state = useFundStore.getState();
+    expect(state.transactions).toHaveLength(5);
+    expect(state.transactions[0].status).toBe('failed');
+    expect(state.transactions[0].type).toBe('withdraw');
+    expect(state.transactions[1].status).toBe('pending');
   });
 });

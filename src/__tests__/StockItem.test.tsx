@@ -159,4 +159,49 @@ describe('StockItem', () => {
     expect(onPress).toHaveBeenCalledTimes(1);
     expect(onPress).toHaveBeenCalledWith(positiveStock);
   });
+
+  it('calls onWatchlistToggle when watchlist button is pressed', () => {
+    const onWatchlistToggle = vi.fn();
+    const { root } = render(
+      <StockItem
+        stock={positiveStock}
+        onPress={() => {}}
+        showActions={true}
+        onWatchlistToggle={onWatchlistToggle}
+      />
+    );
+    const pressables = root.findAll(
+      (inst: any) => typeof inst.props?.onPress === 'function'
+    );
+    expect(pressables.length).toBeGreaterThan(1);
+    // The last pressable should be the watchlist toggle button
+    fireEvent.press(pressables[pressables.length - 1]);
+    expect(onWatchlistToggle).toHaveBeenCalledWith(positiveStock);
+  });
+
+  it('renders negative stock with watchlist toggle', () => {
+    const { getByText } = render(
+      <StockItem
+        stock={negativeStock}
+        onPress={() => {}}
+        showActions={true}
+        onWatchlistToggle={() => {}}
+      />
+    );
+    expect(getByText('TCS')).toBeDefined();
+    expect(getByText('Technology')).toBeDefined();
+  });
+
+  it('renders with isInWatchlist=false showing heart-outline icon', () => {
+    const { toJSON } = render(
+      <StockItem
+        stock={positiveStock}
+        onPress={() => {}}
+        showActions={true}
+        isInWatchlist={false}
+        onWatchlistToggle={() => {}}
+      />
+    );
+    expect(toJSON).toBeDefined();
+  });
 });

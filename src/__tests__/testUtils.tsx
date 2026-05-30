@@ -17,7 +17,7 @@ export interface RenderResult {
   /** The root TestRenderer instance */
   root: TestRenderer.ReactTestInstance;
   /** The JSON-serialised tree for snapshot-like assertions */
-  toJSON: ReturnType<TestRenderer.ReactTestRenderer['toJSON']>;
+  toJSON: () => ReturnType<TestRenderer.ReactTestRenderer['toJSON']>;
   /** Re-render with new element */
   update: (element: ReactElement) => void;
   /** Unmount the rendered tree */
@@ -32,6 +32,10 @@ export interface RenderResult {
   getByTestId: (id: string) => TestRenderer.ReactTestInstance;
   /** Find a single element by testID prop (returns null if not found) */
   queryByTestId: (id: string) => TestRenderer.ReactTestInstance | null;
+  /** Find a single element by placeholder prop */
+  getByPlaceholderText: (text: string) => TestRenderer.ReactTestInstance;
+  /** Find a single element by placeholder prop (returns null if not found) */
+  queryByPlaceholderText: (text: string) => TestRenderer.ReactTestInstance | null;
 }
 
 // ── Text extractor ───────────────────────────────────────────
@@ -161,11 +165,33 @@ export function render(component: ReactElement): RenderResult {
     ) as TestRenderer.ReactTestInstance | null;
   }
 
+  function getByPlaceholderText(
+    text: string
+  ): TestRenderer.ReactTestInstance {
+    const el = queryByPlaceholderText(text);
+    if (!el) {
+      throw new Error(`Unable to find an element with placeholder: ${text}`);
+    }
+    return el;
+  }
+
+  function queryByPlaceholderText(
+    text: string
+  ): TestRenderer.ReactTestInstance | null {
+    return findInTree(
+      (inst) => {
+        const props = inst.props as Record<string, any>;
+        return props.placeholder === text;
+      },
+      false
+    ) as TestRenderer.ReactTestInstance | null;
+  }
+
   return {
     get root() {
       return renderer.root;
     },
-    toJSON: renderer.toJSON(),
+    toJSON: () => renderer.toJSON(),
     update: (el) => renderer.update(el),
     unmount: () => renderer.unmount(),
     getByText,
@@ -173,6 +199,8 @@ export function render(component: ReactElement): RenderResult {
     getAllByText,
     getByTestId,
     queryByTestId,
+    getByPlaceholderText,
+    queryByPlaceholderText,
   };
 }
 
@@ -222,6 +250,40 @@ function findByProp(
 }
 
 export const fireEvent = {
+  /**
+   * Simulate a text change on an element by calling its `onChangeText` prop
+   * (or `onChange` prop as fallback).
+   */
+  changeText(element: TestRenderer.ReactTestInstance, text: string): void {
+    let handler = findPropOnAncestor(element, 'onChangeText');
+    if (typeof handler !== 'function') {
+      handler = findPropOnAncestor(element, 'onChange');
+    }
+    if (typeof handler !== 'function') {
+      let root = element;
+      while (root.parent) root = root.parent;
+      handler = findByProp(root, 'onChangeText')?.props?.onChangeText;
+    }
+    if (typeof handler === 'function') {
+      handler(text);
+    }
+  },
+
+  /**
+   * Simulate a scroll-to-end event.
+   */
+  scrollToEnd(element: TestRenderer.ReactTestInstance): void {
+    let handler = findPropOnAncestor(element, 'onEndReached');
+    if (typeof handler !== 'function') {
+      let root = element;
+      while (root.parent) root = root.parent;
+      handler = findByProp(root, 'onEndReached')?.props?.onEndReached;
+    }
+    if (typeof handler === 'function') {
+      handler();
+    }
+  },
+
   /**
    * Simulate a press on an element by calling its `onPress` prop.
    *

@@ -223,6 +223,7 @@ export default function UPIScreen({ navigation }: any) {
         <TouchableOpacity
           style={[styles.backBtn, { backgroundColor: colors.bgCard }]}
           onPress={() => setShowManageUPI(!showManageUPI)}
+          testID="manage-upi-toggle"
         >
           <Ionicons name="qr-code-outline" size={22} color={colors.primary} />
         </TouchableOpacity>

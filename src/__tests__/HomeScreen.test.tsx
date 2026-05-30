@@ -60,9 +60,12 @@ vi.mock('../store/marketStore', () => ({
   })),
 }));
 
+// Track current mock holdings so we can swap them per-test
+let currentHoldings: any[] = [];
+
 vi.mock('../store/portfolioStore', () => ({
   usePortfolioStore: vi.fn(() => ({
-    holdings: [],
+    holdings: currentHoldings,
   })),
 }));
 
@@ -132,8 +135,8 @@ describe('HomeScreen — Loaded Content', () => {
   it('renders the notification badge with unread count', () => {
     const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(700);
-    // mockNotifications has 3 unread items — badge shows the count
-    expect(getByText('3')).toBeDefined();
+    // mockNotifications has 2 unread items (n1, n2) — badge shows the count
+    expect(getByText(/^2$/)).toBeDefined();
   });
 
   it('renders the portfolio card with value label', () => {
@@ -256,5 +259,136 @@ describe('HomeScreen — Navigation Callbacks', () => {
     advanceAndRender(700);
     expect(toJSON).not.toBeNull();
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('HomeScreen — Negative P&L', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    // Holdings where currentValue < totalInvested → negative P&L
+    currentHoldings = [{
+      id: 'h1', stockId: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries',
+      quantity: 50, buyPrice: 3000, currentPrice: 2800, totalInvested: 150000, currentValue: 140000,
+      pnl: -10000, pnlPercent: -6.67, dayChange: -500, dayChangePercent: -0.5,
+    }];
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    currentHoldings = [];
+  });
+
+  it('renders negative change chip with down caret', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    expect(getByText(/Portfolio Value/)).toBeDefined();
+    // The formatted P&L should contain a negative percent
+    expect(getByText(/-6.67%/)).toBeDefined();
+  });
+});
+
+describe('HomeScreen — Quick Action Navigation', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('navigates to Markets when Buy quick action is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText('Buy')); });
+    expect(mockNavigate).toHaveBeenCalledWith('Markets');
+  });
+
+  it('navigates to Portfolio when Sell quick action is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText('Sell')); });
+    expect(mockNavigate).toHaveBeenCalledWith('Portfolio');
+  });
+
+  it('navigates to MutualFunds when SIP quick action is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText('SIP')); });
+    expect(mockNavigate).toHaveBeenCalledWith('MutualFunds');
+  });
+
+  it('navigates to Learn when Learn quick action is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText('Learn')); });
+    expect(mockNavigate).toHaveBeenCalledWith('Learn');
+  });
+
+  it('navigates to AddFunds when Add Funds button is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText('Add Funds')); });
+    expect(mockNavigate).toHaveBeenCalledWith('AddFunds');
+  });
+
+  it('navigates to Transfer when Transfer button is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText('Transfer')); });
+    expect(mockNavigate).toHaveBeenCalledWith('Transfer');
+  });
+
+  it('navigates to FundsDashboard when Balance button is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText('Balance')); });
+    expect(mockNavigate).toHaveBeenCalledWith('FundsDashboard');
+  });
+
+  it('navigates to Notifications when notification bell is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText(/^2$/)); });
+    expect(mockNavigate).toHaveBeenCalledWith('Notifications');
+  });
+
+  it('navigates to Profile when avatar is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText(/^R$/)); });
+    expect(mockNavigate).toHaveBeenCalledWith('Profile');
+  });
+});
+
+describe('HomeScreen — Stock Detail Navigation', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('navigates to StockDetail when a top gainer stock is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    act(() => { fireEvent.press(getByText('BHARTIARTL')); });
+    expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
+      stockId: 'BHARTIARTL',
+      symbol: 'BHARTIARTL',
+    });
+  });
+
+  it('navigates to StockDetail when a watchlist stock is pressed', () => {
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(700);
+    // RELIANCE and HDFCBANK appear in top stocks, which are also in watchlist preview
+    act(() => { fireEvent.press(getByText('RELIANCE')); });
+    expect(mockNavigate).toHaveBeenCalledWith('StockDetail', expect.objectContaining({
+      stockId: 'RELIANCE',
+    }));
   });
 });

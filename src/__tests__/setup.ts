@@ -7,6 +7,20 @@
  * modules that are not available in the Node.js test environment.
  */
 
+// ==================== Mock react-native-safe-area-context ====================
+// Fund screens (AddFundsScreen, TransactionHistoryScreen, TransferScreen,
+// UPIScreen, WithdrawScreen) all import useSafeAreaInsets.  This module
+// ships with ESM/Flow syntax that vitest cannot transform, so we must
+// mock it at the top level.
+vi.mock('react-native-safe-area-context', () => ({
+  SafeAreaProvider: ({ children }: any) => children,
+  SafeAreaView: ({ children }: any) => children,
+  SafeAreaConsumer: ({ children }: any) => children({ top: 0, bottom: 0, left: 0, right: 0 }),
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+  useSafeAreaFrame: () => ({ width: 390, height: 844 }),
+  initialWindowMetrics: { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, bottom: 0, left: 0, right: 0 } },
+}));
+
 // ==================== Mock AsyncStorage ====================
 const mockStorage: Record<string, string> = {};
 
@@ -73,8 +87,10 @@ vi.mock('expo-notifications', () => ({
     setNotificationChannelAsync: vi.fn(() => Promise.resolve()),
     addNotificationReceivedListener: vi.fn(() => ({ remove: vi.fn() })),
     addNotificationResponseReceivedListener: vi.fn(() => ({ remove: vi.fn() })),
+    getExpoPushTokenAsync: vi.fn(() => Promise.resolve({ data: 'mock-push-token' })),
   },
   setNotificationHandler: vi.fn(),
+  getExpoPushTokenAsync: vi.fn(() => Promise.resolve({ data: 'mock-push-token' })),
   scheduleNotificationAsync: vi.fn(() => Promise.resolve('scheduled-id')),
   cancelScheduledNotificationAsync: vi.fn(() => Promise.resolve()),
   cancelAllScheduledNotificationsAsync: vi.fn(() => Promise.resolve()),
@@ -83,6 +99,9 @@ vi.mock('expo-notifications', () => ({
   setNotificationChannelAsync: vi.fn(() => Promise.resolve()),
   addNotificationReceivedListener: vi.fn(() => ({ remove: vi.fn() })),
   addNotificationResponseReceivedListener: vi.fn(() => ({ remove: vi.fn() })),
+  AndroidImportance: { HIGH: 'high', DEFAULT: 'default', LOW: 'low', NONE: 'none' },
+  IosAuthorizationStatus: { GRANTED: 1, DENIED: 0 },
+  Importance: { NONE: 0, LOW: 1, UNSPECIFIED: 2, DEFAULT: 3, HIGH: 4 },
 }));
 
 // ==================== Mock expo-haptics ====================

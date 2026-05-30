@@ -9,7 +9,7 @@
 
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render } from './testUtils';
+import { render, fireEvent } from './testUtils';
 import { mockStocks, mockIndices } from '../constants/mockData';
 
 // ==================== Mocks (hoisted) ====================
@@ -44,12 +44,17 @@ vi.mock('../context/ThemeContext', () => ({
   }),
 }));
 
+// Track current market store state so we can swap per-test
+let currentSearchQuery = '';
+let currentSearchResults: any[] = [];
+let currentStocks: any[] = [];
+
 vi.mock('../store/marketStore', () => ({
   useMarketStore: vi.fn(() => ({
     indices: mockIndices,
-    stocks: mockStocks,
-    searchQuery: '',
-    searchResults: [],
+    stocks: currentStocks.length > 0 ? currentStocks : mockStocks,
+    searchQuery: currentSearchQuery,
+    searchResults: currentSearchResults,
     setSearchQuery: mockSetSearchQuery,
   })),
 }));
@@ -165,5 +170,123 @@ describe('MarketsScreen — Empty State', () => {
     const { toJSON } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
     expect(toJSON).not.toBeNull();
+  });
+});
+
+describe('MarketsScreen — Search Mode', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    mockSetSearchQuery.mockClear();
+    currentSearchQuery = 'TCS';
+    currentSearchResults = [mockStocks[1]];
+    currentStocks = [];
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    currentSearchQuery = '';
+    currentSearchResults = [];
+    currentStocks = [];
+  });
+
+  it('renders search results header with result count', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText(/Results \(1\)/)).toBeDefined();
+  });
+
+  it('renders matching search result', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText('TCS')).toBeDefined();
+  });
+
+  it('hides sector filter chips when searching', () => {
+    const { queryByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(queryByText('All')).toBeNull();
+  });
+
+  it('shows close button on search bar', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText('1 stocks')).toBeDefined();
+  });
+
+  it('renders search results in place of full stock list', () => {
+    const { getByText, queryByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    // Sector chips hidden during search
+    expect(queryByText('All')).toBeNull();
+    // Search results shown instead
+    expect(getByText(/Results \(1\)/)).toBeDefined();
+    expect(getByText('TCS')).toBeDefined();
+  });
+});
+
+describe('MarketsScreen — Sector Filtering', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    mockSetSearchQuery.mockClear();
+    currentSearchQuery = '';
+    currentSearchResults = [];
+    currentStocks = [];
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    currentStocks = [];
+  });
+
+  it('renders sector filter chips', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText('All')).toBeDefined();
+    expect(getByText('Technology')).toBeDefined();
+    expect(getByText('Finance')).toBeDefined();
+    expect(getByText('Energy')).toBeDefined();
+    expect(getByText('Automobile')).toBeDefined();
+    expect(getByText('Consumer')).toBeDefined();
+  });
+
+  it('renders All as the default selected sector', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText(/All Stocks/)).toBeDefined();
+  });
+});
+
+describe('MarketsScreen — Stock Navigation', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    mockSetSearchQuery.mockClear();
+    currentSearchQuery = '';
+    currentSearchResults = [];
+    currentStocks = [];
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    currentStocks = [];
+  });
+
+  it('navigates to StockDetail when a stock is pressed', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    act(() => { fireEvent.press(getByText('RELIANCE')); });
+    expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+    });
+  });
+
+  it('does not navigate without pressing a stock', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText('RELIANCE')).toBeDefined();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

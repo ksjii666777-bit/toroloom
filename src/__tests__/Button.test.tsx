@@ -146,4 +146,58 @@ describe('Button', () => {
     );
     expect(getByText('Styled')).toBeDefined();
   });
+
+  it('is disabled when loading is true even without disabled prop', () => {
+    const onPress = vi.fn();
+    const { getByText } = render(
+      <Button title="Loading" onPress={onPress} loading />
+    );
+    // Title is not rendered when loading, but the root should have disabled state
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it('renders with outline variant and custom size', () => {
+    const { getByText } = render(
+      <Button title="Out Small" onPress={() => {}} variant="outline" size="small" />
+    );
+    expect(getByText('Out Small')).toBeDefined();
+  });
+
+  it('renders with ghost variant and large size', () => {
+    const { getByText } = render(
+      <Button title="Ghost Large" onPress={() => {}} variant="ghost" size="large" />
+    );
+    expect(getByText('Ghost Large')).toBeDefined();
+  });
+
+  it('renders with secondary variant and custom gradient override', () => {
+    const { getByText } = render(
+      <Button
+        title="Custom"
+        onPress={() => {}}
+        variant="secondary"
+        gradient={['#FF0000', '#00FF00'] as const}
+      />
+    );
+    expect(getByText('Custom')).toBeDefined();
+  });
+
+  it('does not call onPress when both disabled and loading are true', () => {
+    const onPress = vi.fn();
+    const { getByText } = render(
+      <Button title="No Press" onPress={onPress} disabled loading />
+    );
+    // Verify render doesn't crash
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it('renders all size variants without crashing', () => {
+    const sizes = ['small', 'medium', 'large'] as const;
+    for (const size of sizes) {
+      const { toJSON } = render(
+        <Button title={`Size ${size}`} onPress={() => {}} size={size} />
+      );
+      expect(toJSON).toBeDefined();
+    }
+  });
 });

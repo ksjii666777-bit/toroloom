@@ -19,6 +19,7 @@
 import { getBaseUrl } from './api/client';
 import { useAuthStore } from '../store/authStore';
 import { usePortfolioStore } from '../store/portfolioStore';
+import { log } from '../utils/logger';
 import type {
   WebSocketService,
   PriceUpdateCallback,
@@ -86,7 +87,7 @@ export class RealWebSocketService implements WebSocketService {
     this.shouldReconnect = true;
 
     const url = getWSBaseUrl();
-    console.log(`[RealWS] Connecting to ${url}…`);
+    log.info(`[RealWS] Connecting to ${url}…`);
 
     return new Promise<void>((resolve, reject) => {
       const ws = new WebSocket(url);
@@ -100,7 +101,7 @@ export class RealWebSocketService implements WebSocketService {
         this.ws = ws;
         this.isConnected = true;
         this.onConnectionChange?.(true);
-        console.log('[RealWS] Connected');
+        log.info('[RealWS] Connected');
 
         // After the WebSocket opens, the server sends { type: "connected" }
         // immediately.  We wait for it, then send auth.
@@ -143,7 +144,7 @@ export class RealWebSocketService implements WebSocketService {
     this.subscribers.clear();
     this.autoSubscribed.clear();
     this.pendingSubscribes.clear();
-    console.log('[RealWS] Disconnected');
+    log.info('[RealWS] Disconnected');
   }
 
   // ── Message Routing ───────────────────────────────────────────────────────
@@ -153,14 +154,14 @@ export class RealWebSocketService implements WebSocketService {
     try {
       msg = JSON.parse(raw);
     } catch {
-      console.warn('[RealWS] Ignoring non-JSON message:', raw);
+      log.warn('[RealWS] Ignoring non-JSON message:', raw);
       return;
     }
 
     switch (msg.type) {
       // ── Welcome ────────────────────────────────────────────
       case 'connected': {
-        console.log('[RealWS] Server connected — sending auth');
+        log.info('[RealWS] Server connected — sending auth');
         this.sendAuth();
         break;
       }
@@ -174,7 +175,7 @@ export class RealWebSocketService implements WebSocketService {
       // ── Auth Response ──────────────────────────────────────
       case 'authenticated': {
         this.isAuthenticated = true;
-        console.log('[RealWS] Authenticated —', msg.userId);
+        log.info('[RealWS] Authenticated —', msg.userId);
 
         // ── 1. Flush any subscribes that were requested before auth ──
         this.flushPendingSubscribes();
@@ -186,7 +187,7 @@ export class RealWebSocketService implements WebSocketService {
 
       // ── Subscribe Confirmation ─────────────────────────────
       case 'subscribed': {
-        console.log(`[RealWS] Subscribed to ${msg.count} symbol(s): ${msg.symbols?.join(', ')}`);
+        log.info(`[RealWS] Subscribed to ${msg.count} symbol(s): ${msg.symbols?.join(', ')}`);
         break;
       }
 
@@ -204,7 +205,7 @@ export class RealWebSocketService implements WebSocketService {
 
       // ── Error ──────────────────────────────────────────────
       case 'error': {
-        console.warn('[RealWS] Server error:', msg.message);
+        log.warn('[RealWS] Server error:', msg.message);
         break;
       }
 
@@ -215,7 +216,7 @@ export class RealWebSocketService implements WebSocketService {
       }
 
       default: {
-        console.warn('[RealWS] Unknown message type:', msg.type);
+        log.warn('[RealWS] Unknown message type:', msg.type);
       }
     }
   }
@@ -225,7 +226,7 @@ export class RealWebSocketService implements WebSocketService {
   private sendAuth(): void {
     const { token } = useAuthStore.getState();
     if (!token) {
-      console.warn('[RealWS] No auth token available — cannot authenticate');
+      log.warn('[RealWS] No auth token available — cannot authenticate');
       return;
     }
     this.send({ type: 'auth', token });
@@ -286,6 +287,8 @@ export class RealWebSocketService implements WebSocketService {
 
   unsubscribe(stockId: string): void {
     this.subscribers.delete(stockId);
+    // Remove from pending queue if the subscribe hadn't been flushed yet
+    this.pendingSubscribes.delete(stockId);
 
     // Only unsubscribe from the backend if it's not an auto-subscribed
     // holding (which persists across component unmounts).
@@ -310,7 +313,7 @@ export class RealWebSocketService implements WebSocketService {
     }
 
     this.send({ type: 'subscribe', symbols });
-    console.log(
+    log.info(
       `[RealWS] Flushed ${symbols.length} queued subscribe(s): ${symbols.join(', ')}`,
     );
   }
@@ -331,7 +334,7 @@ export class RealWebSocketService implements WebSocketService {
       this.autoSubscribed.add(sym);
     }
 
-    console.log(
+    log.info(
       `[RealWS] Auto-subscribed to ${symbols.length} portfolio position(s): ${symbols.join(', ')}`,
     );
   }
@@ -377,7 +380,7 @@ export class RealWebSocketService implements WebSocketService {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));
     } else {
-      console.warn('[RealWS] Cannot send — WebSocket not open');
+      log.warn('[RealWS] Cannot send — WebSocket not open');
     }
   }
 }

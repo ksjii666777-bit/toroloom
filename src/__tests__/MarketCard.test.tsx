@@ -59,14 +59,14 @@ describe('MarketCard', () => {
 
   it('renders positive change value', () => {
     const { toJSON } = render(<MarketCard index={positiveIndex} />);
-    const json = JSON.stringify(toJSON);
+    const json = JSON.stringify(toJSON());
     expect(json).toContain('345');
   });
 
   it('renders negative change value', () => {
     const { toJSON, getByText } = render(<MarketCard index={negativeIndex} />);
     expect(getByText('SENSEX')).toBeDefined();
-    const json = JSON.stringify(toJSON);
+    const json = JSON.stringify(toJSON());
     expect(json).toContain('123');
   });
 

@@ -15,5 +15,24 @@ export default defineConfig({
         inline: ['date-fns'],
       },
     },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'text-summary', 'json-summary', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      exclude: [
+        'src/__tests__/**',
+        'src/types/**',
+        'src/constants/**',
+        'src/vitest.d.ts',
+        '**/*.d.ts',
+      ],
+      thresholds: {
+        statements: 55,
+        branches: 40,
+        functions: 50,
+        lines: 55,
+      },
+    },
   },
 });

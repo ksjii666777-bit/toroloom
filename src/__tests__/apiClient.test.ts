@@ -4,10 +4,11 @@
  * ============================================================================
  *
  * Tests the client.ts utility functions: configureApi, getBaseUrl,
- * ApiError class, isNetworkError, and withFallback.
+ * ApiError class, isNetworkError, withFallback, and HTTP method helpers
+ * with edge cases for skipAuth, 204 responses, and JSON parse failures.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 
 // Need to import after mocks are set up
 import { configureApi, getBaseUrl, api, ApiError } from '../services/api/client';
@@ -32,6 +33,12 @@ describe('ApiClient — configureApi / getBaseUrl', () => {
     configureApi({ getToken: () => token });
     // Token is used internally in requests
     configureApi({ getToken: () => token });
+  });
+
+  it('allows overriding only baseUrl without affecting token', () => {
+    configureApi({ getToken: () => 'existing-token' });
+    configureApi({ baseUrl: 'https://new-url.com/api' });
+    expect(getBaseUrl()).toBe('https://new-url.com/api');
   });
 });
 
@@ -65,6 +72,11 @@ describe('ApiClient — ApiError', () => {
     const err = new ApiError(400, 'test');
     expect(err).toBeInstanceOf(Error);
   });
+
+  it('prefers error field over message field in body', () => {
+    const err = new ApiError(400, { error: 'Auth failed', message: 'Bad request' });
+    expect(err.message).toBe('Auth failed');
+  });
 });
 
 describe('ApiClient — isNetworkError', () => {
@@ -86,6 +98,15 @@ describe('ApiClient — isNetworkError', () => {
   it('returns false for null/undefined', () => {
     expect(api.isNetworkError(null)).toBe(false);
     expect(api.isNetworkError(undefined)).toBe(false);
+  });
+
+  it('returns false for TypeError with non-network message', () => {
+    const err = new TypeError('Some other type error');
+    expect(api.isNetworkError(err)).toBe(false);
+  });
+
+  it('returns false for plain objects', () => {
+    expect(api.isNetworkError({ code: 'ECONNREFUSED' })).toBe(false);
   });
 });
 
@@ -113,13 +134,21 @@ describe('ApiClient — withFallback', () => {
     );
     expect(result).toBe('default');
   });
+
+  it('returns null fallback when call fails with null as fallback', async () => {
+    const result = await api.withFallback(
+      () => Promise.reject(new Error('fail')),
+      null,
+    );
+    expect(result).toBeNull();
+  });
 });
 
 describe('ApiClient — HTTP method helpers', () => {
   const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
-    configureApi({ baseUrl: 'http://localhost:3000/api' });
+    configureApi({ baseUrl: 'http://localhost:3000/api', getToken: () => null });
     // Mock fetch globally
     globalThis.fetch = vi.fn();
   });
@@ -184,12 +213,10 @@ describe('ApiClient — HTTP method helpers', () => {
 
   it('attaches auth token when available', async () => {
     let capturedHeaders: any = null;
-    let capturedUrl: string = '';
 
     configureApi({ getToken: () => 'bearer-token' });
 
     (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedUrl = url;
       capturedHeaders = opts.headers;
       return {
         ok: true,
@@ -200,5 +227,154 @@ describe('ApiClient — HTTP method helpers', () => {
 
     await api.get('/secure');
     expect(capturedHeaders['Authorization']).toBe('Bearer bearer-token');
+  });
+
+  it('does NOT attach auth token when skipAuth is true', async () => {
+    let capturedHeaders: any = null;
+
+    configureApi({ getToken: () => 'bearer-token' });
+
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedHeaders = opts.headers;
+      return {
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({}),
+      };
+    });
+
+    await api.get('/public', { skipAuth: true });
+    expect(capturedHeaders['Authorization']).toBeUndefined();
+  });
+
+  it('does not attach token when getToken returns null', async () => {
+    let capturedHeaders: any = null;
+
+    configureApi({ getToken: () => null });
+
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedHeaders = opts.headers;
+      return {
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({}),
+      };
+    });
+
+    await api.get('/no-auth');
+    expect(capturedHeaders['Authorization']).toBeUndefined();
+  });
+
+  it('returns undefined for 204 No Content response', async () => {
+    (globalThis.fetch as any).mockResolvedValue({
+      ok: true,
+      status: 204,
+      json: () => Promise.reject(new Error('No content')),
+    });
+
+    // 204 short-circuits json parsing
+    const result = await api.delete('/resource/1');
+    expect(result).toBeUndefined();
+  });
+
+  it('throws ApiError when JSON parse fails on error response', async () => {
+    (globalThis.fetch as any).mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: () => Promise.reject(new Error('Invalid JSON')),
+    });
+
+    await expect(api.get('/bad-gateway')).rejects.toThrow('HTTP 502');
+  });
+
+  it('uses correct HTTP method GET', async () => {
+    let capturedMethod = '';
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedMethod = opts.method;
+      return { ok: true, status: 200, json: () => Promise.resolve({}) };
+    });
+
+    await api.get('/items');
+    expect(capturedMethod).toBe('GET');
+  });
+
+  it('uses correct HTTP method POST', async () => {
+    let capturedMethod = '';
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedMethod = opts.method;
+      return { ok: true, status: 200, json: () => Promise.resolve({}) };
+    });
+
+    await api.post('/items', { x: 1 });
+    expect(capturedMethod).toBe('POST');
+  });
+
+  it('uses correct HTTP method PUT', async () => {
+    let capturedMethod = '';
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedMethod = opts.method;
+      return { ok: true, status: 200, json: () => Promise.resolve({}) };
+    });
+
+    await api.put('/items/1', { x: 2 });
+    expect(capturedMethod).toBe('PUT');
+  });
+
+  it('uses correct HTTP method DELETE', async () => {
+    let capturedMethod = '';
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedMethod = opts.method;
+      return { ok: true, status: 204, json: () => Promise.resolve(null) };
+    });
+
+    await api.delete('/items/1');
+    expect(capturedMethod).toBe('DELETE');
+  });
+
+  it('sends request body as JSON string for POST', async () => {
+    let capturedBody = '';
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedBody = opts.body;
+      return { ok: true, status: 200, json: () => Promise.resolve({}) };
+    });
+
+    await api.post('/items', { name: 'test', value: 42 });
+    expect(JSON.parse(capturedBody)).toEqual({ name: 'test', value: 42 });
+  });
+
+  it('sends no body for GET and DELETE', async () => {
+    let capturedBody: any = 'not_undefined';
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedBody = opts.body;
+      return { ok: true, status: 200, json: () => Promise.resolve({}) };
+    });
+
+    await api.get('/items');
+    expect(capturedBody).toBeUndefined();
+
+    await api.delete('/items/1');
+    expect(capturedBody).toBeUndefined();
+  });
+
+  it('constructs correct URL from baseUrl and path', async () => {
+    let capturedUrl = '';
+    (globalThis.fetch as any).mockImplementation(async (url: string) => {
+      capturedUrl = url;
+      return { ok: true, status: 200, json: () => Promise.resolve({}) };
+    });
+
+    await api.get('/test-path');
+    expect(capturedUrl).toBe('http://localhost:3000/api/test-path');
+  });
+
+  it('sets Content-Type to application/json', async () => {
+    let capturedHeaders: any = null;
+    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+      capturedHeaders = opts.headers;
+      return { ok: true, status: 200, json: () => Promise.resolve({}) };
+    });
+
+    await api.get('/items');
+    expect(capturedHeaders['Content-Type']).toBe('application/json');
   });
 });

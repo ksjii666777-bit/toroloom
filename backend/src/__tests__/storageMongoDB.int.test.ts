@@ -19,7 +19,7 @@
  * ============================================================================
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { MongoDBStorage } from '../services/storage/mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://toroloom:toroloom_dev@localhost:27017/toroloom?authSource=admin';
@@ -52,6 +52,12 @@ describe('MongoDBStorage Integration', () => {
     }
   });
 
+  // Start each test with a clean slate — prevents cross-test data contamination
+  beforeEach(async () => {
+    if (!available) return;
+    await storage.clearForTesting();
+  });
+
   // ──── Audit Trail ────
 
   it('should append and retrieve an audit event', async () => {
@@ -74,6 +80,17 @@ describe('MongoDBStorage Integration', () => {
   it('should get the latest event', async () => {
     if (!available) return;
 
+    // Create two events, then verify the latest is the second one
+    await storage.appendEvent({
+      id: 'mongo-test-001',
+      timestamp: new Date(Date.now() - 1000).toISOString(),
+      userId: 'mongo_int_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: { symbol: 'TCS', qty: 5 },
+      previousHash: 'GENESIS_BLOCK',
+      hash: 'mongo_abc_hash',
+    });
+
     await storage.appendEvent({
       id: 'mongo-test-002',
       timestamp: new Date().toISOString(),
@@ -92,22 +109,82 @@ describe('MongoDBStorage Integration', () => {
   it('should query events by userId', async () => {
     if (!available) return;
 
-    const events = await storage.queryEvents({ userId: 'mongo_int_user' });
+    // Create events of our own
+    await storage.appendEvent({
+      id: 'mongo-q-001',
+      timestamp: new Date().toISOString(),
+      userId: 'mongo_query_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: { seq: 1 },
+      previousHash: 'GENESIS_BLOCK',
+      hash: 'hash001',
+    });
+    await storage.appendEvent({
+      id: 'mongo-q-002',
+      timestamp: new Date(Date.now() + 1).toISOString(),
+      userId: 'mongo_query_user',
+      eventType: 'LOCKDOWN_TRIGGERED' as any,
+      data: { seq: 2 },
+      previousHash: 'hash001',
+      hash: 'hash002',
+    });
+
+    const events = await storage.queryEvents({ userId: 'mongo_query_user' });
     expect(events.length).toBeGreaterThanOrEqual(2);
-    events.forEach((e) => expect(e.userId).toBe('mongo_int_user'));
+    events.forEach((e) => expect(e.userId).toBe('mongo_query_user'));
   });
 
   it('should return event count', async () => {
     if (!available) return;
+
+    // Create some events to count
+    await storage.appendEvent({
+      id: 'mongo-count-001',
+      timestamp: new Date().toISOString(),
+      userId: 'mongo_count_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: {},
+      previousHash: 'GENESIS_BLOCK',
+      hash: 'hash001',
+    });
+    await storage.appendEvent({
+      id: 'mongo-count-002',
+      timestamp: new Date(Date.now() + 1).toISOString(),
+      userId: 'mongo_count_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: {},
+      previousHash: 'hash001',
+      hash: 'hash002',
+    });
+
     const count = await storage.getEventCount();
-    expect(count).toBeGreaterThanOrEqual(2);
+    expect(count).toBe(2);
   });
 
   it('should get event by id', async () => {
     if (!available) return;
-    const event = await storage.getEvent('mongo-test-001');
+
+    // Create an event to retrieve
+    await storage.appendEvent({
+      id: 'mongo-get-by-id-001',
+      timestamp: new Date().toISOString(),
+      userId: 'mongo_get_by_id_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: { symbol: 'INFY' },
+      previousHash: 'GENESIS_BLOCK',
+      hash: 'hash001',
+    });
+
+    const event = await storage.getEvent('mongo-get-by-id-001');
     expect(event).not.toBeNull();
-    expect(event!.id).toBe('mongo-test-001');
+    expect(event!.id).toBe('mongo-get-by-id-001');
+    expect(event!.data.symbol).toBe('INFY');
+  });
+
+  it('should return null for non-existent event', async () => {
+    if (!available) return;
+    const event = await storage.getEvent('non-existent-' + Date.now());
+    expect(event).toBeNull();
   });
 
   // ──── Risk Profiles ────
@@ -115,8 +192,9 @@ describe('MongoDBStorage Integration', () => {
   it('should save and load a risk profile', async () => {
     if (!available) return;
 
+    const userId = 'mongo_risk_user_' + Date.now();
     const profile = {
-      userId: 'mongo_risk_user',
+      userId,
       limits: { dailyLossLimit: 10000, dailyLossPercentLimit: 15, maxPositionSizePercent: 25 },
       lockdown: { status: 'NONE', triggeredAt: null, liftsAt: null, triggerLoss: null, breachedLimit: null },
       today: { date: '2026-05-26', realizedPnL: 0, unrealizedPnL: 0, peakValue: 200000, totalCharges: 0, tradeCount: 0 },
@@ -127,14 +205,14 @@ describe('MongoDBStorage Integration', () => {
     };
 
     await storage.saveRiskProfile(profile as any);
-    const loaded = await storage.loadRiskProfile('mongo_risk_user');
+    const loaded = await storage.loadRiskProfile(userId);
     expect(loaded).not.toBeNull();
-    expect(loaded!.userId).toBe('mongo_risk_user');
+    expect(loaded!.userId).toBe(userId);
     expect((loaded as any).limits.dailyLossLimit).toBe(10000);
 
     // Cleanup
-    await storage.deleteRiskProfile('mongo_risk_user');
-    const afterDelete = await storage.loadRiskProfile('mongo_risk_user');
+    await storage.deleteRiskProfile(userId);
+    const afterDelete = await storage.loadRiskProfile(userId);
     expect(afterDelete).toBeNull();
   });
 

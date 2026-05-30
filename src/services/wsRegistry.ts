@@ -11,7 +11,9 @@
  */
 
 import type { WebSocketService } from './wsService';
+import { log } from '../utils/logger';
 import { mockWebSocket } from './mockWebSocketService';
+import { RealWebSocketService } from './realWebSocketService';
 
 // ── Active Service ───────────────────────────────────────────────────────────
 
@@ -26,14 +28,11 @@ type WSMode = 'mock' | 'real';
  */
 let _mode: WSMode = 'mock';
 
-// Lazy-loaded instance so we don't pull in the real WS dependency unless needed.
+// Lazy-loaded instance so RealWebSocketService constructor isn't called on import.
 let _realInstance: WebSocketService | null = null;
 
 function getRealInstance(): WebSocketService {
   if (!_realInstance) {
-    // Dynamic import to avoid bundling the real WS logic when not in use.
-    // (TypeScript compiles the module either way, but tree-shaking can drop it.)
-    const { RealWebSocketService } = require('./realWebSocketService') as typeof import('./realWebSocketService');
     _realInstance = new RealWebSocketService();
   }
   return _realInstance;
@@ -52,7 +51,7 @@ export function getActiveWS(): WebSocketService {
 /** Switch the active service.  Returns the instance for chaining. */
 export function setWSMode(mode: WSMode): WebSocketService {
   _mode = mode;
-  console.log(`[WSRegistry] Switched to ${mode} WebSocket service`);
+  log.info(`[WSRegistry] Switched to ${mode} WebSocket service`);
   return getActiveWS();
 }
 

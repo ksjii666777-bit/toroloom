@@ -60,7 +60,7 @@ jobs:
         env:
           NODE_ENV: test
 
-  # ── Frontend: TypeScript compilation + vitest unit tests ──────────────────
+  # ── Frontend: TypeScript compilation + vitest unit tests + coverage ─────
   frontend:
     name: Frontend
     runs-on: ubuntu-latest
@@ -85,10 +85,25 @@ jobs:
       - name: TypeScript compilation check
         run: npx tsc --noEmit
 
-      - name: Run vitest tests
-        run: npx vitest run --reporter=verbose
+      - name: Run vitest tests with coverage
+        run: npx vitest run --reporter=verbose --coverage
         env:
           NODE_ENV: test
+
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: coverage/
+          retention-days: 14
+
+      # Post a coverage summary comment on pull requests
+      - name: PR coverage comment
+        uses: davelosert/vitest-coverage-report-action@v2
+        if: github.event_name == 'pull_request'
+        with:
+          working-directory: ./
 
   # ── Backend integration tests (PostgreSQL + MongoDB) ─────────────────────
   backend-integration:

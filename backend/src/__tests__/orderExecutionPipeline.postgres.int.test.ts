@@ -114,14 +114,15 @@ describe('OrderExecutionPipeline — PostgreSQL Integration', () => {
 
   afterAll(async () => {
     if (available && storage) {
-      await storage.deleteRiskProfile(TEST_USER);
-      await storage.deleteRiskProfile(LOAD_TEST_USER);
+      await storage.clearForTesting();
       await storage.disconnect();
     }
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     if (!available) return;
+    // Clear the database to prevent cross-test contamination
+    await storage.clearForTesting();
     pipeline = new OrderExecutionPipeline();
     riskEngine.configureStorage(storage);
     riskEngine.setPortfolioValue(TEST_USER, 1_000_000);

@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { AppNotification } from '../types';
+import { log } from '../utils/logger';
 
 // Configure notification handler — show foreground notifications as heads-up banners
 Notifications.setNotificationHandler({
@@ -69,7 +70,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
   }
 
   if (finalStatus !== 'granted') {
-    console.warn('[Notifications] Permission not granted');
+    log.warn('[Notifications] Permission not granted');
     return null;
   }
 
@@ -78,11 +79,11 @@ export async function registerForPushNotifications(): Promise<string | null> {
       const tokenData = await Notifications.getExpoPushTokenAsync();
       return tokenData.data;
     } catch (e) {
-      console.warn('[Notifications] Failed to get push token', e);
+      log.warn('[Notifications] Failed to get push token', e);
       return null;
     }
   } else {
-    console.warn('[Notifications] Must use physical device for push notifications');
+    log.warn('[Notifications] Must use physical device for push notifications');
     return 'simulator-device-token';
   }
 }

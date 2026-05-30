@@ -18,7 +18,7 @@
  * ============================================================================
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { PostgreSQLStorage } from '../services/storage/postgres';
 
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://toroloom:toroloom_dev@localhost:5432/toroloom';
@@ -50,6 +50,12 @@ describe('PostgreSQLStorage Integration', () => {
     }
   });
 
+  // Start each test with a clean slate — prevents cross-test data contamination
+  beforeEach(async () => {
+    if (!available) return;
+    await storage.clearForTesting();
+  });
+
   // ──── Audit Trail ────
 
   it('should append and retrieve an audit event', async () => {
@@ -72,6 +78,17 @@ describe('PostgreSQLStorage Integration', () => {
   it('should get the latest event', async () => {
     if (!available) return;
 
+    // Create two events, then verify the latest is the second one
+    await storage.appendEvent({
+      id: 'test-001',
+      timestamp: new Date(Date.now() - 1000).toISOString(),
+      userId: 'int_test_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: { symbol: 'RELIANCE', qty: 10 },
+      previousHash: 'GENESIS_BLOCK',
+      hash: 'abc123hash',
+    });
+
     await storage.appendEvent({
       id: 'test-002',
       timestamp: new Date().toISOString(),
@@ -90,27 +107,81 @@ describe('PostgreSQLStorage Integration', () => {
   it('should query events by userId', async () => {
     if (!available) return;
 
-    const events = await storage.queryEvents({ userId: 'int_test_user' });
+    // Create events of our own
+    await storage.appendEvent({
+      id: 'test-001',
+      timestamp: new Date().toISOString(),
+      userId: 'query_test_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: { seq: 1 },
+      previousHash: 'GENESIS_BLOCK',
+      hash: 'hash001',
+    });
+    await storage.appendEvent({
+      id: 'test-002',
+      timestamp: new Date(Date.now() + 1).toISOString(),
+      userId: 'query_test_user',
+      eventType: 'LOCKDOWN_TRIGGERED' as any,
+      data: { seq: 2 },
+      previousHash: 'hash001',
+      hash: 'hash002',
+    });
+
+    const events = await storage.queryEvents({ userId: 'query_test_user' });
     expect(events.length).toBeGreaterThanOrEqual(2);
-    events.forEach((e) => expect(e.userId).toBe('int_test_user'));
+    events.forEach((e) => expect(e.userId).toBe('query_test_user'));
   });
 
   it('should return event count', async () => {
     if (!available) return;
+
+    // Create some events to count
+    await storage.appendEvent({
+      id: 'count-001',
+      timestamp: new Date().toISOString(),
+      userId: 'count_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: {},
+      previousHash: 'GENESIS_BLOCK',
+      hash: 'hash001',
+    });
+    await storage.appendEvent({
+      id: 'count-002',
+      timestamp: new Date(Date.now() + 1).toISOString(),
+      userId: 'count_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: {},
+      previousHash: 'hash001',
+      hash: 'hash002',
+    });
+
     const count = await storage.getEventCount();
-    expect(count).toBeGreaterThanOrEqual(2);
+    expect(count).toBe(2);
   });
 
   it('should get event by id', async () => {
     if (!available) return;
-    const event = await storage.getEvent('test-001');
+
+    // Create an event to retrieve
+    await storage.appendEvent({
+      id: 'get-by-id-001',
+      timestamp: new Date().toISOString(),
+      userId: 'get_by_id_user',
+      eventType: 'ORDER_EXECUTION' as any,
+      data: { symbol: 'TCS' },
+      previousHash: 'GENESIS_BLOCK',
+      hash: 'hash001',
+    });
+
+    const event = await storage.getEvent('get-by-id-001');
     expect(event).not.toBeNull();
-    expect(event!.id).toBe('test-001');
+    expect(event!.id).toBe('get-by-id-001');
+    expect(event!.data.symbol).toBe('TCS');
   });
 
   it('should return null for non-existent event', async () => {
     if (!available) return;
-    const event = await storage.getEvent('non-existent');
+    const event = await storage.getEvent('non-existent-' + Date.now());
     expect(event).toBeNull();
   });
 
@@ -119,8 +190,9 @@ describe('PostgreSQLStorage Integration', () => {
   it('should save and load a risk profile', async () => {
     if (!available) return;
 
+    const userId = 'risk_test_user_' + Date.now();
     const profile = {
-      userId: 'risk_test_user',
+      userId,
       limits: { dailyLossLimit: 5000, dailyLossPercentLimit: 10, maxPositionSizePercent: 20 },
       lockdown: { status: 'NONE', triggeredAt: null, liftsAt: null, triggerLoss: null, breachedLimit: null },
       today: { date: '2026-05-26', realizedPnL: 0, unrealizedPnL: 0, peakValue: 100000, totalCharges: 0, tradeCount: 0 },
@@ -131,14 +203,14 @@ describe('PostgreSQLStorage Integration', () => {
     };
 
     await storage.saveRiskProfile(profile as any);
-    const loaded = await storage.loadRiskProfile('risk_test_user');
+    const loaded = await storage.loadRiskProfile(userId);
     expect(loaded).not.toBeNull();
-    expect(loaded!.userId).toBe('risk_test_user');
+    expect(loaded!.userId).toBe(userId);
     expect((loaded as any).limits.dailyLossLimit).toBe(5000);
 
     // Cleanup
-    await storage.deleteRiskProfile('risk_test_user');
-    const afterDelete = await storage.loadRiskProfile('risk_test_user');
+    await storage.deleteRiskProfile(userId);
+    const afterDelete = await storage.loadRiskProfile(userId);
     expect(afterDelete).toBeNull();
   });
 

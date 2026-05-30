@@ -11,5 +11,26 @@ export default defineConfig({
     reporters: ['verbose'],
     hookTimeout: 30000,
     teardownTimeout: 5000,
+    // Integration tests share databases (MongoDB/PostgreSQL) and singletons
+    // (riskEngine, auditTrail). File-level parallelism causes data races
+    // where one file's clearForTesting() wipes data another file just wrote.
+    fileParallelism: false,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'text-summary', 'json-summary', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.ts'],
+      exclude: [
+        'src/__tests__/**',
+        'src/types/**',
+        '**/*.d.ts',
+      ],
+      thresholds: {
+        statements: 23,
+        branches: 15,
+        functions: 22,
+        lines: 24,
+      },
+    },
   },
 });

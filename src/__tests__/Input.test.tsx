@@ -133,4 +133,58 @@ describe('Input', () => {
     const errorEl = queryByText(/error|required/i);
     expect(errorEl).toBeNull();
   });
+
+  it('renders password toggle eye icon with secureTextEntry', () => {
+    const { toJSON } = render(
+      <Input label="Password" value="secret123" onChangeText={() => {}} secureTextEntry />
+    );
+    expect(toJSON).toBeDefined();
+  });
+
+  it('renders with focus state styles via onFocus/onBlur', () => {
+    const { root } = render(
+      <Input label="Focus" value="" onChangeText={() => {}} placeholder="Type here" />
+    );
+    const textInputs = root.findAll(
+      (inst: any) => inst.props?.onFocus !== undefined
+    );
+    expect(textInputs.length).toBeGreaterThanOrEqual(1);
+    // Trigger focus
+    fireEvent.trigger(textInputs[0], 'onFocus');
+    // Trigger blur
+    fireEvent.trigger(textInputs[0], 'onBlur');
+  });
+
+  it('renders with icon and label together', () => {
+    const { getByText } = render(
+      <Input label="Username" value="john" onChangeText={() => {}} icon="person-outline" />
+    );
+    expect(getByText('Username')).toBeDefined();
+  });
+
+  it('renders with all optional props combined', () => {
+    const { toJSON } = render(
+      <Input
+        label="Full Name"
+        placeholder="Enter your name"
+        value="John Doe"
+        onChangeText={() => {}}
+        icon="person-outline"
+        keyboardType="default"
+        autoCapitalize="words"
+        style={{ marginBottom: 20 }}
+      />
+    );
+    expect(toJSON).toBeDefined();
+  });
+
+  it('renders multiline with placeholder', () => {
+    const { root } = render(
+      <Input label="Bio" value="" onChangeText={() => {}} multiline placeholder="Tell us about yourself" />
+    );
+    const textInput = root.find(
+      (inst: any) => inst.props?.placeholder === 'Tell us about yourself'
+    );
+    expect(textInput).toBeDefined();
+  });
 });

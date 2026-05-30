@@ -9,6 +9,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useMutualFundStore } from '../store/mutualFundStore';
+import { mutualFundApi } from '../services/api/mutualFunds';
 
 // Mock mutualFundApi to reject so local fallback is triggered
 vi.mock('../services/api/mutualFunds', () => ({
@@ -93,5 +94,62 @@ describe('MutualFundStore — Fetch Operations', () => {
     expect(() => {
       useMutualFundStore.getState().fetchSIPs();
     }).not.toThrow();
+  });
+});
+
+describe('MutualFundStore — Fetch Fund Success', () => {
+  beforeEach(() => {
+    useMutualFundStore.setState({
+      funds: [],
+      sipPlans: [],
+      isLoading: false,
+    });
+  });
+
+  it('loads funds from the backend on success', async () => {
+    const mockApiFunds = [
+      { id: 'api_fund_1', name: 'API Fund 1', category: 'Large Cap', nav: 100, dayChange: 0.5, dayChangePercent: 0.5, oneYearReturn: 15, threeYearReturn: 45, fiveYearReturn: 90, riskLevel: 'moderate', minInvestment: 500, fundSize: '₹10,000 Cr', rating: 4 },
+    ];
+    vi.mocked(mutualFundApi.getFunds).mockResolvedValueOnce(mockApiFunds as any);
+
+    await useMutualFundStore.getState().fetchFunds();
+
+    const state = useMutualFundStore.getState();
+    expect(state.funds).toEqual(mockApiFunds);
+    expect(state.isLoading).toBe(false);
+  });
+
+  it('loads SIPs from the backend on success', async () => {
+    const mockApiSIPs = [
+      { id: 'sip_api_1', fundId: 'fund_1', fundName: 'API SIP Fund', amount: 5000, frequency: 'monthly', nextDate: '2025-07-01', totalInvested: 15000, currentValue: 16200, returns: 8 },
+    ];
+    vi.mocked(mutualFundApi.getSIPs).mockResolvedValueOnce(mockApiSIPs as any);
+
+    await useMutualFundStore.getState().fetchSIPs();
+
+    expect(useMutualFundStore.getState().sipPlans).toEqual(mockApiSIPs);
+  });
+});
+
+describe('MutualFundStore — Start SIP Success', () => {
+  beforeEach(() => {
+    useMutualFundStore.setState({
+      funds: [
+        { id: 'mf1', name: 'Parag Parikh Flexi Cap Fund', category: 'Flexi Cap', nav: 67.45, dayChange: 0.89, dayChangePercent: 1.34, oneYearReturn: 28.5, threeYearReturn: 72.3, fiveYearReturn: 125.6, riskLevel: 'high', minInvestment: 1000, fundSize: '₹45,678 Cr', rating: 5 },
+      ],
+      sipPlans: [],
+      isLoading: false,
+    });
+  });
+
+  it('starts SIP via backend API when available', async () => {
+    const createdSIP = { id: 'sip_created', fundId: 'mf1', fundName: 'Parag Parikh Flexi Cap Fund', amount: 5000, frequency: 'monthly', nextDate: '2025-07-01', totalInvested: 5000, currentValue: 5000, returns: 0 };
+    vi.mocked(mutualFundApi.createSIP).mockResolvedValueOnce(createdSIP as any);
+
+    await useMutualFundStore.getState().startSIP('mf1', 5000, 'monthly');
+
+    const state = useMutualFundStore.getState();
+    expect(state.sipPlans).toHaveLength(1);
+    expect(state.sipPlans[0]).toEqual(createdSIP);
   });
 });

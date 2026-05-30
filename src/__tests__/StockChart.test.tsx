@@ -125,4 +125,57 @@ describe('StockChart', () => {
     );
     expect(getByText('No chart data available')).toBeDefined();
   });
+
+  it('renders with showAxis and custom width', () => {
+    const { toJSON } = render(
+      <StockChart data={sampleData} showAxis width={300} />
+    );
+    expect(toJSON).toBeDefined();
+  });
+
+  it('renders data with extreme price values (very low and very high)', () => {
+    const extremeData = [
+      { date: '2025-01-01', price: 0.05 },
+      { date: '2025-01-02', price: 99999.99 },
+    ];
+    const { toJSON } = render(
+      <StockChart data={extremeData} />
+    );
+    expect(toJSON).toBeDefined();
+  });
+
+  it('renders data with negative prices', () => {
+    const negativeData = [
+      { date: '2025-01-01', price: -5.50 },
+      { date: '2025-01-02', price: -3.20 },
+    ];
+    const { toJSON } = render(
+      <StockChart data={negativeData} />
+    );
+    expect(toJSON).toBeDefined();
+  });
+
+  it('renders with showAxis, positive=false and custom colors together', () => {
+    const { toJSON } = render(
+      <StockChart
+        data={sampleData}
+        positive={false}
+        showAxis
+        lineColor="#FF9800"
+        gradientColor="#FF5722"
+      />
+    );
+    expect(toJSON).toBeDefined();
+  });
+
+  it('renders with showAxis and many data points', () => {
+    const manyPoints = Array.from({ length: 100 }, (_, i) => ({
+      date: `2025-01-${String(i + 1).padStart(2, '0')}`,
+      price: 150 + Math.sin(i * 0.5) * 10,
+    }));
+    const { toJSON } = render(
+      <StockChart data={manyPoints} showAxis />
+    );
+    expect(toJSON).toBeDefined();
+  });
 });

@@ -4,6 +4,7 @@ import { mockHoldings, mockTrades } from '../constants/mockData';
 import { api, portfolioApi } from '../services/api';
 import { useAuthStore } from './authStore';
 import { sendTradeConfirmation } from '../services/notificationService';
+import { log } from '../utils/logger';
 
 interface PortfolioState {
   holdings: Holding[];
@@ -53,14 +54,14 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       // If risk engine rejected the order, warn but still update local state
       // so the demo portfolio remains functional
       if (result && !result.success) {
-        console.warn('[Portfolio] Risk engine blocked BUY:', result.message);
+        log.warn('[Portfolio] Risk engine blocked BUY:', result.message);
       }
     } catch (err: unknown) {
       if (api.isNetworkError(err)) {
         // Backend unavailable — execute locally
       } else {
         // Server responded but error occurred — still proceed locally for demo
-        console.warn('[Portfolio] Order execution API error:', err);
+        log.warn('[Portfolio] Order execution API error:', err);
       }
     }
 
@@ -160,13 +161,13 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
         },
       });
       if (result && !result.success) {
-        console.warn('[Portfolio] Risk engine blocked SELL:', result.message);
+        log.warn('[Portfolio] Risk engine blocked SELL:', result.message);
       }
     } catch (err: unknown) {
       if (api.isNetworkError(err)) {
         // Backend unavailable — execute locally
       } else {
-        console.warn('[Portfolio] Order execution API error:', err);
+        log.warn('[Portfolio] Order execution API error:', err);
       }
     }
 

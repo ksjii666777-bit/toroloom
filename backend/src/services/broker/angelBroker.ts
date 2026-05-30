@@ -82,6 +82,30 @@ export class AngelBroker implements IBroker {
   // WebSocketV2 instance
   private wsClient: any = null;
 
+  /**
+   * Optional SDK dependency override for testing.
+   * When provided, the broker uses these instead of calling require().
+   */
+  constructor(private sdk?: { SmartAPI?: any; WebSocketV2?: any }) {}
+
+  /**
+   * Load the SmartAPI SDK module. Uses the injected dependency if available,
+   * otherwise falls back to dynamic require().
+   */
+  private loadSmartAPI(): any {
+    if (this.sdk?.SmartAPI) return this.sdk.SmartAPI;
+    return require('smartapi-javascript').SmartAPI;
+  }
+
+  /**
+   * Load the WebSocketV2 SDK module. Uses the injected dependency if available,
+   * otherwise falls back to dynamic require().
+   */
+  private loadWebSocketV2(): any {
+    if (this.sdk?.WebSocketV2) return this.sdk.WebSocketV2;
+    return require('smartapi-javascript').WebSocketV2;
+  }
+
   // ======================== Auth ========================
 
   async authenticate(config: BrokerConfig): Promise<boolean> {
@@ -95,8 +119,8 @@ export class AngelBroker implements IBroker {
     if (!this.clientCode) throw new Error('Angel One client ID is required');
 
     try {
-      const { SmartAPI } = require('smartapi-javascript');
-      this.smartApi = new SmartAPI({ api_key: this.apiKey });
+      const SmartAPIClass = this.loadSmartAPI();
+      this.smartApi = new SmartAPIClass({ api_key: this.apiKey });
 
       if (this.accessToken) {
         // Use existing access token
@@ -565,9 +589,9 @@ export class AngelBroker implements IBroker {
     }
 
     try {
-      const { WebSocketV2 } = require('smartapi-javascript');
+      const WebSocketV2Class = this.loadWebSocketV2();
 
-      this.wsClient = new WebSocketV2({
+      this.wsClient = new WebSocketV2Class({
         jwttoken: this.accessToken,
         apikey: this.apiKey,
         clientcode: this.clientCode,

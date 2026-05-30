@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { MutualFund, SIPPlan } from '../types';
 import { mockMutualFunds, mockSIPs } from '../constants/mockData';
 import { mutualFundApi } from '../services/api';
+import { log } from '../utils/logger';
 
 interface MutualFundState {
   funds: MutualFund[];
@@ -39,7 +40,7 @@ export const useMutualFundStore = create<MutualFundState>((set) => ({
 
   investInFund: async (fundId, amount) => {
     // Backend doesn't have a lump-sum endpoint yet — just log locally
-    console.log(`Invested ₹${amount} in fund ${fundId}`);
+    log.info(`[MutualFunds] Invested ₹${amount} in fund ${fundId}`);
   },
 
   startSIP: async (fundId, amount, frequency) => {

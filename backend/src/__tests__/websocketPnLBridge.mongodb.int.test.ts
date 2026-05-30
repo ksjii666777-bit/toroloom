@@ -60,16 +60,6 @@ const LOAD_TEST_USER = { userId: 'ws_mongo_load_test', email: 'ws-mongo-load@tor
 
 // ──── Server & Client State ─────────────────────────────────────────────────
 
-/**
- * Yield the event loop so fire-and-forget I/O (persistProfile) can complete.
- * The risk engine's updateUnrealizedPnL() calls persistProfile() without
- * await, so direct risk engine calls followed by storage reads need this
- * flush to avoid a race condition.
- */
-async function flushIO(): Promise<void> {
-  await new Promise<void>((resolve) => setImmediate(resolve));
-}
-
 let server: http.Server;
 let wss: WebSocketServer;
 let port: number;
@@ -112,16 +102,17 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
 
   afterAll(async () => {
     if (available && storage) {
-      await storage.deleteRiskProfile(TEST_USER.userId);
-      await storage.deleteRiskProfile(LOAD_TEST_USER.userId);
+      await storage.clearForTesting();
       await storage.disconnect();
     }
     wss?.close();
     server?.close();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     if (!available) return;
+    // Clear the database to prevent cross-test contamination
+    await storage.clearForTesting();
     riskEngine.setPortfolioValue(TEST_USER.userId, 1_000_000);
   });
 
@@ -222,7 +213,7 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
 
     // Trigger lockdown deterministically via risk engine
     riskEngine.updateUnrealizedPnL(TEST_USER.userId, -99_999);
-    await flushIO();
+    await riskEngine.drain(TEST_USER.userId);
 
     // Verify in-memory state
     const memState = riskEngine.getState(TEST_USER.userId);
@@ -291,7 +282,7 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
     profile.limits.dailyLossLimit = 1;
     profile.today.realizedPnL = -(profile.today.unrealizedPnL - 1);
     riskEngine.updateUnrealizedPnL(TEST_USER.userId, -99_999);
-    await flushIO();
+    await riskEngine.drain(TEST_USER.userId);
 
     // Verify lockdown persisted
     let persisted = await storage.loadRiskProfile(TEST_USER.userId);
@@ -299,7 +290,7 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
 
     // Lift lockdown by recovering P&L
     riskEngine.updateUnrealizedPnL(TEST_USER.userId, 99_999);
-    await flushIO();
+    await riskEngine.drain(TEST_USER.userId);
 
     // Verify lockdown lifted in MongoDB
     persisted = await storage.loadRiskProfile(TEST_USER.userId);
