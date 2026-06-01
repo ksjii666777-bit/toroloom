@@ -159,7 +159,12 @@ export async function handleSubscribe(ws: WebSocket, message: any): Promise<void
     return;
   }
 
-  const symbols: string[] = message.symbols || [];
+  const symbols: string[] = Array.isArray(message.symbols) ? message.symbols : [];
+
+  if (symbols.length === 0) {
+    ws.send(JSON.stringify({ type: 'error', message: 'subscribe requires a non-empty symbols array' }));
+    return;
+  }
 
   // ── Guard stale callbacks immediately ────────────────────────────
   client.closed = true;
@@ -171,6 +176,12 @@ export async function handleSubscribe(ws: WebSocket, message: any): Promise<void
     await loadUserPositions(client.userId, broker);
     const unsubscribe = broker.subscribeTicks(symbols, (quote) => {
       if (client.closed || ws.readyState !== WebSocket.OPEN) return;
+
+      // ── Backpressure: skip tick if client is too far behind ────
+      // The ws library buffers data when the TCP socket is congested.
+      // If bufferedAmount exceeds 64 KB, drop the tick to prevent
+      // memory exhaustion on the server from a slow client.
+      if (ws.bufferedAmount > 65_536) return;
 
       ws.send(JSON.stringify({ type: 'tick', data: quote }));
       incrementTickCounter(client.userId);
