@@ -14,6 +14,11 @@
  * ============================================================================
  */
 
+vi.hoisted(() => {
+  process.env.BROKER = 'mock';
+  process.env.DATA_SOURCE = 'mock';
+});
+
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import express from 'express';
 import http from 'http';

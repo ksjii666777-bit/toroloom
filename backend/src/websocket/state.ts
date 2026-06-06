@@ -200,6 +200,25 @@ export function totalUnrealizedPnL(positions: Map<string, Position>): number {
   return sum;
 }
 
+// ──────────────────── State Cleanup (Testing) ───────────────────────────────
+
+/**
+ * Reset all module-level WebSocket state for cross-file isolation testing.
+ * Clears all maps and sets so File B can verify that File A's state did not
+ * leak across the test-file boundary.
+ *
+ * Only exported for testing — production code should rely on the normal
+ * connection lifecycle (close/error handlers) to clean up state.
+ */
+export function resetWebSocketState(): void {
+  clients.clear();
+  userPositions.clear();
+  userConnectionCount.clear();
+  rateLimitMap.clear();
+  connectionAlertedUsers.clear();
+  globalConnectionCounts.clear();
+}
+
 // ──────────────────── Rate Limiting ─────────────────────────────────────────
 
 /**
