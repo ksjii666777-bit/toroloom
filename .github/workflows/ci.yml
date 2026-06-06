@@ -492,7 +492,8 @@ jobs:
           target: google_apis
           arch: arm64-v8a
           avd-name: Pixel_6_Pro
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
+          emulator-boot-timeout: 1200
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot -accel hvf
           disable-animations: true
           script: |
             # Wait for device and disable animations
