@@ -176,13 +176,30 @@ vi.mock('@expo/vector-icons', () => ({
 
 import AppNavigator from '../navigation/AppNavigator';
 
-/** Helper: render AppNavigator and return a string-renderering for assertions */
-function renderToString() {
+/**
+ * Render AppNavigator and extract all text from the rendered tree.
+ * Uses root.root (ReactTestInstance) instead of root.toJSON() to avoid
+ * circular reference issues in React 19 when JSON.stringify is called
+ * on the serialized element tree (via _owner → FiberNode).
+ */
+function getRenderedText(): string {
   let root: TestRenderer.ReactTestRenderer;
   TestRenderer.act(() => {
     root = TestRenderer.create(<AppNavigator />);
   });
-  return root!.toJSON();
+
+  const texts: string[] = [];
+  function collect(node: TestRenderer.ReactTestInstance) {
+    node.children?.forEach(child => {
+      if (typeof child === 'string') {
+        texts.push(child);
+      } else if (child && typeof child !== 'string') {
+        collect(child as TestRenderer.ReactTestInstance);
+      }
+    });
+  }
+  collect(root!.root);
+  return texts.join(' ');
 }
 
 describe('AppNavigator — Auth Gating', () => {
@@ -208,12 +225,11 @@ describe('AppNavigator — Auth Gating', () => {
       return sel ? sel(state) : state;
     });
 
-    const json = renderToString();
-    const str = JSON.stringify(json);
+    const text = getRenderedText();
 
-    expect(str).toContain('Login');
-    expect(str).toContain('Signup');
-    expect(str).not.toContain('MainTabs');
+    expect(text).toContain('Login');
+    expect(text).toContain('Signup');
+    expect(text).not.toContain('MainTabs');
   });
 
   it('renders MainTabs when user is logged in', () => {
@@ -222,12 +238,11 @@ describe('AppNavigator — Auth Gating', () => {
       return sel ? sel(state) : state;
     });
 
-    const json = renderToString();
-    const str = JSON.stringify(json);
+    const text = getRenderedText();
 
-    expect(str).not.toContain('Login');
-    expect(str).not.toContain('Signup');
-    expect(str).toContain('MainTabs');
+    expect(text).not.toContain('Login');
+    expect(text).not.toContain('Signup');
+    expect(text).toContain('MainTabs');
   });
 
   it('registers all five tab screens', () => {
@@ -236,14 +251,13 @@ describe('AppNavigator — Auth Gating', () => {
       return sel ? sel(state) : state;
     });
 
-    const json = renderToString();
-    const str = JSON.stringify(json);
+    const text = getRenderedText();
 
-    expect(str).toContain('More');
-    expect(str).toContain('Home');
-    expect(str).toContain('Markets');
-    expect(str).toContain('Portfolio');
-    expect(str).toContain('Watchlist');
+    expect(text).toContain('More');
+    expect(text).toContain('Home');
+    expect(text).toContain('Markets');
+    expect(text).toContain('Portfolio');
+    expect(text).toContain('Watchlist');
   });
 
   it('registers all detail screens in the stack', () => {
@@ -252,21 +266,20 @@ describe('AppNavigator — Auth Gating', () => {
       return sel ? sel(state) : state;
     });
 
-    const json = renderToString();
-    const str = JSON.stringify(json);
+    const text = getRenderedText();
 
-    expect(str).toContain('StockDetail');
-    expect(str).toContain('Learn');
-    expect(str).toContain('Community');
-    expect(str).toContain('Notifications');
-    expect(str).toContain('Profile');
-    expect(str).toContain('MutualFunds');
-    expect(str).toContain('SIPs');
-    expect(str).toContain('Settings');
-    expect(str).toContain('Help');
-    expect(str).toContain('AddFunds');
-    expect(str).toContain('TransactionHistory');
-    expect(str).toContain('PlaceOrder');
+    expect(text).toContain('StockDetail');
+    expect(text).toContain('Learn');
+    expect(text).toContain('Community');
+    expect(text).toContain('Notifications');
+    expect(text).toContain('Profile');
+    expect(text).toContain('MutualFunds');
+    expect(text).toContain('SIPs');
+    expect(text).toContain('Settings');
+    expect(text).toContain('Help');
+    expect(text).toContain('AddFunds');
+    expect(text).toContain('TransactionHistory');
+    expect(text).toContain('PlaceOrder');
   });
 });
 
@@ -293,9 +306,8 @@ describe('AppNavigator — Risk / Lockdown Badge', () => {
       return sel ? sel(state) : state;
     });
 
-    const json = renderToString();
-    const str = JSON.stringify(json);
-    expect(str).toContain('MainTabs');
+    const text = getRenderedText();
+    expect(text).toContain('MainTabs');
   });
 
   it('renders without crash when wsLockdownCount is 0', () => {
@@ -304,9 +316,8 @@ describe('AppNavigator — Risk / Lockdown Badge', () => {
       return sel ? sel(state) : state;
     });
 
-    const json = renderToString();
-    const str = JSON.stringify(json);
-    expect(str).toContain('MainTabs');
+    const text = getRenderedText();
+    expect(text).toContain('MainTabs');
   });
 
   it('does not call clearLockdownAlert on mount', () => {

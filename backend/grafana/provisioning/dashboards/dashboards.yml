@@ -1,0 +1,26 @@
+# ============================================================================
+# Toroloom Grafana Dashboard Provisioning
+# ============================================================================
+#
+# Declares the dashboard provider that tells Grafana where to find
+# pre-built dashboard JSON files for auto-loading on startup.
+#
+# Place in: /etc/grafana/provisioning/dashboards/ (or mount as volume)
+#
+# The dashboard JSON files are mounted at /var/lib/grafana/dashboards/
+# via docker-compose.prod.yml:
+#   - ./backend/grafana/toroloom-ws-dashboard.json:/var/lib/grafana/dashboards/toroloom-ws.json
+# ============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: 'Toroloom'
+    orgId: 1
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

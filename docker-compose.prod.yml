@@ -9,13 +9,22 @@
 # Reset:   docker compose -f docker-compose.prod.yml down -v
 #
 # The backend listens on port 3000 (REST API + WebSocket).
-# A reverse proxy (nginx, Caddy, Traefik) should terminate TLS and forward
-# /api/* and /ws to this service.  See DEPLOY.md for production recipes.
+# Caddy reverse proxy (included below) terminates TLS and forwards
+# /api/* and /ws to this service.
 #
 # Databases are NOT exposed to the internet. They are only accessible
 # within the Docker internal network.  If you need to connect from the
 # host (e.g. for admin tools), use a Docker exec or bind to localhost.
+#
+# All services share the 'toroloom-net' network so they can communicate
+# by container name. Caddy is the only service exposed on ports 80/443.
+# The backend, databases, Redis, Prometheus, and Grafana are internal.
 # ============================================================================
+
+networks:
+  toroloom-net:
+    name: toroloom-net
+    driver: bridge
 
 services:
   # ──── Backend API + WebSocket Server ──────────────────────────────────────
@@ -26,13 +35,26 @@ services:
     container_name: toroloom-backend
     restart: unless-stopped
     ports:
-      - '3000:3000'
+      - '127.0.0.1:3000:3000'
+    networks:
+      - toroloom-net
     environment:
       # ── Core ─────────────────────────────────────────────────────
       NODE_ENV: production
       PORT: '3000'
       JWT_SECRET: '${JWT_SECRET:-change-me-in-production}'
       JWT_EXPIRES_IN: '${JWT_EXPIRES_IN:-7d}'
+
+      # ── Cluster mode (multi-core) ───────────────────────────────
+      # Set to '0' to disable clustering (single-process mode).
+      # Workers default to number of CPU cores.
+      CLUSTER_MODE: '1'
+      # CLUSTER_WORKERS: '4'  # uncomment to override CPU core count
+
+      # ── Redis pub/sub (cross-worker state sync) ──────────────────
+      # When set, workers use Redis instead of Node.js cluster IPC.
+      # Unset / empty = fall back to IPC (single-machine cluster).
+      REDIS_URL: 'redis://:${REDIS_PASSWORD:-toroloom_prod}@redis:6379'
 
       # ── Data source (mock for demos, live for real brokers) ─────
       DATA_SOURCE: '${DATA_SOURCE:-mock}'
@@ -69,6 +91,9 @@ services:
       mongodb:
         condition: service_healthy
         required: false
+      redis:
+        condition: service_healthy
+        required: false
     healthcheck:
       test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 15s
@@ -76,11 +101,53 @@ services:
       retries: 3
       start_period: 30s
     # ── Resource limits (adjust to your server) ────────────────────
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '1'
-    #       memory: 512M
+    deploy:
+      resources:
+        limits:
+          cpus: '${BACKEND_CPUS:-4}'
+          memory: ${BACKEND_MEM:-512M}
+
+  # ──── Caddy Reverse Proxy (auto TLS via Let's Encrypt) ────────────────────
+  #
+  # Terminates TLS for api.toroloom.dev and proxies to the backend.
+  # Configure your domain's DNS A record to point to this server's IP.
+  #
+  # Ports 80 (HTTP-01 challenge) and 443 (HTTPS) are exposed to the internet.
+  # ALL other services are bound to 127.0.0.1 and are NOT publicly accessible.
+  #
+  # Configuration lives in ./Caddyfile at the project root.
+  # SSL certificates are persisted in the caddy_data volume.
+  #
+  caddy:
+    image: caddy:2-alpine
+    container_name: toroloom-caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - toroloom-net
+    depends_on:
+      backend:
+        condition: service_started
+        required: false
+    # Note: HEALTHCHECK uses 'caddy version' instead of hitting localhost:80/health
+    # because the production Caddyfile only matches api.toroloom.dev, not localhost.
+    healthcheck:
+      test: ['CMD', 'caddy', 'version']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
 
   # ──── PostgreSQL (primary relational store) ───────────────────────────────
   #
@@ -99,6 +166,8 @@ services:
     #   docker exec -it toroloom-postgres psql -U toroloom toroloom
     ports:
       - '127.0.0.1:5432:5432'
+    networks:
+      - toroloom-net
     environment:
       POSTGRES_USER: toroloom
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD:-toroloom_prod}'
@@ -135,6 +204,8 @@ services:
     #   docker exec -it toroloom-mongodb mongosh -u toroloom -p $MONGO_PASSWORD
     ports:
       - '127.0.0.1:27017:27017'
+    networks:
+      - toroloom-net
     environment:
       MONGO_INITDB_ROOT_USERNAME: toroloom
       MONGO_INITDB_ROOT_PASSWORD: '${MONGO_PASSWORD:-toroloom_prod}'
@@ -153,6 +224,160 @@ services:
           cpus: '1'
           memory: 512M
 
+  # ──── Redis (pub/sub for cross-worker sync + optional caching) ──────────
+  #
+  # Required for production-grade cross-worker state synchronization.
+  # When REDIS_URL is not set, the backend falls back to Node.js cluster
+  # IPC (single-machine only).
+  #
+  # Password is set via REDIS_PASSWORD env var (default: toroloom_prod).
+  #
+  redis:
+    image: redis:7-alpine
+    container_name: toroloom-redis
+    restart: unless-stopped
+    # Not exposed to the internet.
+    ports:
+      - '127.0.0.1:6379:6379'
+    networks:
+      - toroloom-net
+    command: [
+      'redis-server',
+      '--requirepass', '${REDIS_PASSWORD:-toroloom_prod}',
+      '--appendonly', 'no',  # no persistence needed for pub/sub
+    ]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 128M
+
+  # ──── Prometheus (metrics collection & storage) ─────────────────────────
+  #
+  # Scrapes the backend's /metrics endpoint every 15s using Docker DNS
+  # service discovery (service name: backend). The web UI is available
+  # at http://localhost:9090 for ad-hoc querying.
+  #
+  # Grafana is configured to use this Prometheus as its data source.
+  # See: backend/grafana/provisioning/datasources/datasource.yml
+  #      backend/grafana/provisioning/prometheus/prometheus.yml
+  #
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: toroloom-prometheus
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:9090:9090'
+    networks:
+      - toroloom-net
+    volumes:
+      - ./backend/grafana/provisioning/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheusdata:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-30d}'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'  # Enable reload via SIGHUP or POST /-/reload
+    depends_on:
+      - backend
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:9090/-/ready']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+
+  # ──── Grafana (dashboards, alerting, visualization) ─────────────────────
+  #
+  # Pre-provisioned with:
+  #   - Prometheus datasource (uid: prometheus)
+  #   - Toroloom WebSocket dashboard
+  #   - Alert rules for connection thresholds, tick latency, and symbol drops
+  #   - Slack + PagerDuty contact points (requires env vars)
+  #
+  # Credentials (default: admin / admin — change on first login):
+  #   GRAFANA_ADMIN_USER / GRAFANA_ADMIN_PASSWORD
+  #
+  # See: backend/grafana/provisioning/
+  #
+  grafana:
+    image: grafana/grafana:11.5.0
+    container_name: toroloom-grafana
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:3001:3000'
+    networks:
+      - toroloom-net
+    volumes:
+      - ./backend/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./backend/grafana/provisioning/alerting:/etc/grafana/provisioning/alerting
+      - ./backend/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./backend/grafana/toroloom-ws-dashboard.json:/var/lib/grafana/dashboards/toroloom-ws.json
+      - ./backend/grafana/toroloom-broker-dashboard.json:/var/lib/grafana/dashboards/toroloom-broker.json
+      - grafanadata:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: '${GRAFANA_ADMIN_USER:-admin}'
+      GF_SECURITY_ADMIN_PASSWORD: '${GRAFANA_ADMIN_PASSWORD:-admin}'
+      GF_INSTALL_PLUGINS: ''
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/toroloom-ws.json
+      # ── Protocol ──────────────────────────────────────────────────
+      # 'http'  when behind Caddy :80 (no domain, HTTP only)
+      # 'https' when behind Caddy 443 (TLS via Let's Encrypt / domain)
+      # Setting this to 'https' makes Grafana set the Secure flag on
+      # cookies (login session, CSRF token, etc.) which is REQUIRED
+      # for HTTPS — otherwise browsers block them as insecure cookies.
+      GF_SERVER_PROTOCOL: '${GF_SERVER_PROTOCOL:-http}'
+
+      # ── Root URL ─────────────────────────────────────────────────
+      # 'http://localhost/grafana/'  when using :80 mode + subpath
+      # 'https://grafana.YOUR_DOMAIN' when using subdomain + HTTPS
+      # Grafana uses this to generate correct asset URLs and redirects.
+      GF_SERVER_ROOT_URL: '${GF_SERVER_ROOT_URL:-http://localhost/grafana/}'
+
+      # ── Serve from subpath ───────────────────────────────────────
+      # 'true'  when Grafana is behind Caddy's /grafana/ subpath
+      # 'false' when Grafana has its own subdomain (grafana.xyz.com)
+      GF_SERVER_SERVE_FROM_SUB_PATH: '${GF_SERVER_SERVE_FROM_SUB_PATH:-true}'
+
+      # Provisioning: auto-load dashboards from the JSON file
+      # Slack & PagerDuty (set these in .env for alert notifications)
+      SLACK_WEBHOOK_URL: '${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/placeholder}'
+      PAGERDUTY_INTEGRATION_KEY: '${PAGERDUTY_INTEGRATION_KEY:-placeholder}'
+    depends_on:
+      prometheus:
+        condition: service_started
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:3000/api/health']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+
 volumes:
   pgdata:
   mongodata:
+  redisdata:
+  prometheusdata:
+  grafanadata:
+  caddy_data:
+  caddy_config:

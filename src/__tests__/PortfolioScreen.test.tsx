@@ -44,12 +44,17 @@ vi.mock('../context/ThemeContext', () => ({
   }),
 }));
 
-vi.mock('../store/portfolioStore', () => ({
-  usePortfolioStore: vi.fn(() => ({
+vi.mock('../store/portfolioStore', () => {
+  const mockStoreState = () => ({
     holdings: mockHoldings,
     trades: mockTrades,
-  })),
-}));
+  });
+  const usePortfolioStore = Object.assign(
+    vi.fn(mockStoreState),
+    { getState: vi.fn(mockStoreState) },
+  );
+  return { usePortfolioStore };
+});
 
 // ==================== Imports ====================
 

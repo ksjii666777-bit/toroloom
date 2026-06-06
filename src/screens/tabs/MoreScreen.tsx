@@ -20,6 +20,7 @@ const menuItems = [
     { icon: 'pie-chart', label: 'Mutual Funds', color: '#6C63FF', screen: 'MutualFunds' },
     { icon: 'calendar', label: 'My SIPs', color: '#00D2FF', screen: 'SIPs' },
     { icon: 'document-text', label: 'Trade History', color: '#FFC107', screen: 'TradeHistory' },
+    { icon: 'clipboard', label: 'Open Orders', color: '#FF9800', screen: 'OpenOrders' },
     { icon: 'analytics', label: 'Reports', color: '#FF6B6B', screen: 'Reports' },
   ]},
   { section: 'Learn & Grow', items: [
@@ -31,7 +32,8 @@ const menuItems = [
   { section: 'Account', items: [
     { icon: 'person', label: 'Profile & KYC', color: '#00D2FF', screen: 'Profile' },
     { icon: 'notifications', label: 'Notifications', color: '#FF6B6B', screen: 'Notifications' },
-    { icon: 'settings', label: 'Settings', color: '#6E6E9A', screen: 'Settings' },
+    { icon: 'notifications', label: 'Portfolio Alerts', color: '#FFC107', screen: 'PortfolioAlerts' },
+    { icon: 'settings', label: 'Risk Settings', color: '#6E6E9A', screen: 'Settings' },
     { icon: 'help-circle', label: 'Help & Support', color: '#00C853', screen: 'Help' },
   ]},
 ];

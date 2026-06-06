@@ -101,10 +101,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    boxShadow: `0px 4px 8px ${colors.shadow}40`,
   },
   gradientContainer: {
     borderWidth: 0,

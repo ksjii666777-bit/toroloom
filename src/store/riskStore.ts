@@ -18,9 +18,11 @@
  *   const exitOnly = useRiskStore(s => s.exitOnly);
  */
 
+import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
 import { api } from '../services/api';
 import { getActiveWS } from '../services/wsRegistry';
+import { usePortfolioStore } from './portfolioStore';
 import { log } from '../utils/logger';
 
 // ==================== Types ====================
@@ -84,6 +86,9 @@ export interface RiskStoreState {
   };
   updateLimits: (newLimits: Partial<RiskLimits>) => Promise<{ success: boolean; message: string }>;
   resetDaily: () => void;
+
+  /** Local lockdown limit checker — runs on each P&L update */
+  _checkLocalLimits: (totalPnL: number) => void;
 }
 
 // ==================== Selectors ====================
@@ -173,6 +178,99 @@ export const useRiskStore = create<RiskStoreState>((set, get) => ({
   // When the backend triggers a lockdown (or the mock simulates one), the
   // WS handler pushes `pnl_update` / `lockdown` messages which flow through
   // mockWebSocket → these callbacks → Zustand re-render.
+  //
+  // On each P&L update, the riskStore also:
+  //   - Updates all dailyMTM fields (realizedPnL, unrealizedPnL, totalPnL)
+  //   - Tracks the portfolio value high watermark (peakValue)
+  //   - Sets portfolioValueAtOpen on the first update of the day
+  //   - Runs local lockdown detection against configured limits
+  //   - Counts today's trades from the portfolio store
+
+  /**
+   * Check if the current daily P&L breaches configured loss limits.
+   * If not already in lockdown and limits are breached, triggers lockdown.
+   * If in lockdown and P&L recovers, lifts lockdown.
+   */
+  _checkLocalLimits: (totalPnL: number) => {
+    const state = get();
+    if (totalPnL >= 0) {
+      // Positive P&L — never triggers lockdown
+      if (state.lockdown.status !== 'none') {
+        // LIFT lockdown if P&L recovered
+        set({
+          lockdown: {
+            status: 'none',
+            triggeredAt: null,
+            liftsAt: null,
+            triggerLoss: null,
+            breachedLimit: null,
+          },
+          settingsFrozen: false,
+        });
+        log.info('[RiskStore] Local lockdown LIFTED — P&L recovered');
+      }
+      return;
+    }
+
+    const loss = Math.abs(totalPnL);
+    let breached = false;
+    let breachedLimit: 'daily_loss' | 'daily_loss_percent' | null = null;
+
+    // Check absolute loss limit
+    if (loss >= state.limits.dailyLossLimit) {
+      breached = true;
+      breachedLimit = 'daily_loss';
+    }
+
+    // Check percentage loss limit
+    if (state.portfolioValueAtOpen > 0) {
+      const lossPercent = (loss / state.portfolioValueAtOpen) * 100;
+      if (lossPercent >= state.limits.dailyLossPercentLimit) {
+        breached = true;
+        breachedLimit = 'daily_loss_percent';
+      }
+    }
+
+    if (breached && state.lockdown.status === 'none') {
+      // ── Local lockdown trigger ────────────────────────────────
+      const now = new Date();
+      const liftsAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+      set({
+        lockdown: {
+          status: 'active',
+          triggeredAt: now.toISOString(),
+          liftsAt: liftsAt.toISOString(),
+          triggerLoss: loss,
+          breachedLimit,
+        },
+        settingsFrozen: true,
+        wsLockdownCount: get().wsLockdownCount + 1,
+      });
+
+      // Haptic feedback for lockdown alert
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+
+      log.info(
+        '[RiskStore] Local lockdown TRIGGERED — ' +
+        `loss ₹${loss.toLocaleString()}, limit: ${breachedLimit}` +
+        ` (count: ${get().wsLockdownCount + 1})`,
+      );
+    } else if (!breached && state.lockdown.status !== 'none') {
+      // ── Local lockdown lift (P&L recovered below both limits) ──
+      set({
+        lockdown: {
+          status: 'none',
+          triggeredAt: null,
+          liftsAt: null,
+          triggerLoss: null,
+          breachedLimit: null,
+        },
+        settingsFrozen: false,
+      });
+      log.info('[RiskStore] Local lockdown LIFTED — P&L recovered below limits');
+    }
+  },
 
   listenToWS: () => {
     const state = get();
@@ -182,17 +280,53 @@ export const useRiskStore = create<RiskStoreState>((set, get) => ({
     // lockdown detection (only relevant for mock — real WS delegates to backend).
     ws.setLossLimit(state.limits.dailyLossLimit);
 
+    // Track whether this is the first P&L update of the session to set
+    // portfolioValueAtOpen.
+    let _hasInitialised = false;
+
     // Listen for P&L updates pushed by the WS risk bridge on every tick.
     // This keeps the frontend's today.unrealizedPnL in sync with market
     // movement without polling /risk/state.
     ws.onPnLUpdateCallback((pnlData) => {
       const current = get();
+      const { holdings, trades } = usePortfolioStore.getState();
+
+      // Compute portfolio value from current holdings
+      const portfolioValue = holdings.reduce((s, h) => s + h.currentValue, 0);
+
+      // On first update, set portfolioValueAtOpen if not already set
+      let newPortfolioValueAtOpen = current.portfolioValueAtOpen;
+      if (!_hasInitialised && portfolioValue > 0) {
+        _hasInitialised = true;
+        if (newPortfolioValueAtOpen === 0) {
+          newPortfolioValueAtOpen = portfolioValue;
+        }
+      }
+
+      // Count today's trades from portfolio store
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayTrades = trades.filter(t =>
+        t.timestamp.startsWith(todayStr),
+      ).length;
+
+      // Track peak value (high watermark)
+      const newPeakValue = Math.max(current.today.peakValue, portfolioValue);
+
+      // Update daily MTM from P&L data
+      const totalPnL = pnlData.totalPnL;
       set({
         today: {
           ...current.today,
+          realizedPnL: pnlData.realizedPnL,
           unrealizedPnL: pnlData.unrealizedPnL,
+          peakValue: newPeakValue,
+          tradeCount: todayTrades,
         },
+        portfolioValueAtOpen: newPortfolioValueAtOpen,
       });
+
+      // Run local lockdown detection
+      get()._checkLocalLimits(totalPnL);
     });
 
     // Listen for lockdown events pushed by the server when the Financial
@@ -233,6 +367,9 @@ export const useRiskStore = create<RiskStoreState>((set, get) => ({
           settingsFrozen: true,
           wsLockdownCount: current.wsLockdownCount + 1,
         });
+
+          // Haptic feedback for lockdown alert
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
 
         log.info(
           '[RiskStore] Lockdown received via WebSocket — ' +

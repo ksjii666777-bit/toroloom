@@ -1,5 +1,5 @@
 import {
-  User, MarketIndex, Stock, Holding, Trade, Watchlist,
+  User, MarketIndex, Stock, Holding, Trade, OpenOrder, Watchlist,
   MutualFund, SIPPlan, Course, Lesson, CommunityPost,
   AIInsight, Badge, UserLevel, AppNotification
 } from '../types';
@@ -467,6 +467,71 @@ export const mockNotifications: AppNotification[] = [
   { id: 'n3', type: 'educational', title: 'New Lesson Available', message: 'Next lesson "Advanced Chart Patterns" is ready for you!', read: true, timestamp: '2025-05-23T12:00:00' },
   { id: 'n4', type: 'news', title: 'Market News: RBI Policy', message: 'RBI keeps repo rate unchanged at 6.50%. Markets react positively.', read: true, timestamp: '2025-05-23T10:00:00' },
   { id: 'n5', type: 'system', title: 'KYC Update', message: 'Your KYC documents have been verified successfully! ✅', read: true, timestamp: '2025-05-20T14:00:00' },
+];
+
+// ============ Open Orders (Mock) ============
+export const mockOpenOrders: OpenOrder[] = [
+  {
+    id: 'open_ord_1',
+    symbol: 'RELIANCE',
+    exchange: 'NSE',
+    transactionType: 'BUY',
+    quantity: 25,
+    filledQuantity: 0,
+    price: 2850.00,
+    productType: 'CNC',
+    orderType: 'LIMIT',
+    status: 'open',
+    placedBy: 'WEB',
+    timestamp: new Date(Date.now() - 3600000).toISOString(),
+    validity: 'DAY',
+  },
+  {
+    id: 'open_ord_2',
+    symbol: 'TCS',
+    exchange: 'NSE',
+    transactionType: 'SELL',
+    quantity: 10,
+    filledQuantity: 5,
+    price: 3950.00,
+    productType: 'CNC',
+    orderType: 'LIMIT',
+    status: 'partially_filled',
+    placedBy: 'WEB',
+    timestamp: new Date(Date.now() - 7200000).toISOString(),
+    validity: 'DAY',
+  },
+  {
+    id: 'open_ord_3',
+    symbol: 'INFY',
+    exchange: 'NSE',
+    transactionType: 'BUY',
+    quantity: 50,
+    filledQuantity: 0,
+    price: 1550.00,
+    triggerPrice: 1540.00,
+    productType: 'MIS',
+    orderType: 'SL',
+    status: 'trigger_pending',
+    placedBy: 'WEB',
+    timestamp: new Date(Date.now() - 86400000).toISOString(),
+    validity: 'DAY',
+  },
+  {
+    id: 'open_ord_4',
+    symbol: 'HDFCBANK',
+    exchange: 'NSE',
+    transactionType: 'BUY',
+    quantity: 30,
+    filledQuantity: 0,
+    price: 1660.00,
+    productType: 'CNC',
+    orderType: 'LIMIT',
+    status: 'pending',
+    placedBy: 'WEB',
+    timestamp: new Date(Date.now() - 1800000).toISOString(),
+    validity: 'DAY',
+  },
 ];
 
 // ============ Chart History (Mock) ============

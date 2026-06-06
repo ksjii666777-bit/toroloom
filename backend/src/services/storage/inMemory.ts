@@ -69,7 +69,7 @@ export class InMemoryStorage implements StorageEngine {
   }
 
   async getAllEvents(): Promise<AuditEvent[]> {
-    return [...this.events];
+    return [...this.events].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   }
 
   async clearForTesting(): Promise<void> {
@@ -89,6 +89,17 @@ export class InMemoryStorage implements StorageEngine {
 
   async deleteRiskProfile(userId: string): Promise<void> {
     this.riskProfiles.delete(userId);
+  }
+
+  // ──── Badge Counts ────
+  private badgeCounts = new Map<string, number>();
+
+  async loadBadgeCount(userId: string): Promise<number> {
+    return this.badgeCounts.get(userId) ?? 0;
+  }
+
+  async saveBadgeCount(userId: string, count: number): Promise<void> {
+    this.badgeCounts.set(userId, count);
   }
 
   // ──── Broker State ────
@@ -113,7 +124,14 @@ export class InMemoryStorage implements StorageEngine {
   async saveNotification(notification: NotificationData): Promise<void> {
     const idx = this.notifications.findIndex((n) => n.id === notification.id);
     if (idx >= 0) {
-      this.notifications[idx] = notification;
+      // Preserve userId on conflict — matches Postgres (user_id omitted from ON CONFLICT DO UPDATE SET)
+      this.notifications[idx].type = notification.type;
+      this.notifications[idx].title = notification.title;
+      this.notifications[idx].message = notification.message;
+      this.notifications[idx].read = notification.read;
+      this.notifications[idx].timestamp = notification.timestamp;
+      this.notifications[idx].data = notification.data;
+      this.notifications[idx].metadata = notification.metadata;
     } else {
       this.notifications.push(notification);
     }
@@ -146,7 +164,11 @@ export class InMemoryStorage implements StorageEngine {
   async saveCommunityPost(post: CommunityPostData): Promise<void> {
     const idx = this.communityPosts.findIndex((p) => p.id === post.id);
     if (idx >= 0) {
-      this.communityPosts[idx] = post;
+      // Preserve user_name, user_avatar, timestamp on conflict — matches Postgres ON CONFLICT DO UPDATE SET
+      this.communityPosts[idx].content = post.content;
+      this.communityPosts[idx].likes = post.likes;
+      this.communityPosts[idx].comments = post.comments;
+      this.communityPosts[idx].tags = post.tags;
     } else {
       this.communityPosts.push(post);
     }

@@ -286,6 +286,7 @@ export const fireEvent = {
 
   /**
    * Simulate a press on an element by calling its `onPress` prop.
+   * Wraps in act() so React processes state updates and re-renders.
    *
    * Strategy: first tries walking up the parent chain (standard React TestRenderer
    * behavior).  Falls back to a full tree DFS if the parent chain doesn't have
@@ -302,13 +303,16 @@ export const fireEvent = {
       handler = findByProp(root, 'onPress')?.props?.onPress;
     }
     if (typeof handler === 'function') {
-      handler();
+      act(() => {
+        handler();
+      });
     }
   },
 
   /**
    * Generic event dispatcher.  Calls `props[eventName]` using tree-search
    * fallback similar to press().
+   * Wraps in act() so React processes state updates and re-renders.
    */
   trigger(
     element: TestRenderer.ReactTestInstance,
@@ -322,7 +326,9 @@ export const fireEvent = {
       handler = findByProp(root, eventName)?.props?.[eventName];
     }
     if (typeof handler === 'function') {
-      handler(...args);
+      act(() => {
+        handler(...args);
+      });
     }
   },
 };

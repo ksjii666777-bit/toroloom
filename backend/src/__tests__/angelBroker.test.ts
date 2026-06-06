@@ -13,6 +13,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import speakeasy from 'speakeasy';
 import { AngelBroker } from '../services/broker/angelBroker';
 import type { BrokerConfig, OrderPayload } from '../services/broker/interface';
 
@@ -25,7 +26,24 @@ function createMockSmartApi() {
       data: { jwtToken: 'test-jwt', feedToken: 'test-feed-token' },
     }),
     setSessionExpiryHook: vi.fn(),
-    ltpData: vi.fn().mockResolvedValue({ data: { ltp: 2890, exch_tm: '2025-05-30T10:00:00' } }),
+    marketData: vi.fn().mockResolvedValue({
+      data: {
+        fetched: [{
+          ltp: 2890,
+          last_price: 2890,
+          exch_tm: '2025-05-30T10:00:00',
+          open: 2870,
+          high: 2900,
+          low: 2860,
+          close: 2880,
+          volume: 5000000,
+          net_change: 10,
+          percentage_change: 0.35,
+          bid_price: 2889,
+          ask_price: 2891,
+        }],
+      },
+    }),
     getCandleData: vi.fn().mockResolvedValue({
       data: [['2025-05-30T00:00', 2870, 2900, 2860, 2880, 5000000]],
     }),
@@ -121,6 +139,9 @@ describe('AngelBroker', () => {
     });
 
     it('should generate session with password and totp', async () => {
+      const expectedTotpCode = '559335';
+      const speakeasySpy = vi.spyOn(speakeasy, 'totp').mockReturnValue(expectedTotpCode);
+
       mockSmartApi.generateSession.mockResolvedValue({
         data: { jwtToken: 'new-jwt', feedToken: 'new-feed-token' },
       });
@@ -128,12 +149,18 @@ describe('AngelBroker', () => {
       await broker.authenticate(createConfig({
         accessToken: undefined,
         password: 'test-password',
-        totp: 'test-totp',
+        totp: 'JBSWY3DPEHPK3PXP',
       } as any));
 
+      expect(speakeasySpy).toHaveBeenCalledWith({
+        secret: 'JBSWY3DPEHPK3PXP',
+        encoding: 'base32',
+      });
       expect(mockSmartApi.generateSession).toHaveBeenCalledWith(
-        'test-client', 'test-password', 'test-totp',
+        'test-client', 'test-password', expectedTotpCode,
       );
+
+      speakeasySpy.mockRestore();
     });
 
     it('should reject when API key is missing', async () => {
@@ -208,11 +235,21 @@ describe('AngelBroker', () => {
     });
 
     it('should return index data for all default indices', async () => {
-      mockSmartApi.ltpData.mockResolvedValue({
-        data: { ltp: 23500, exch_tm: '2025-05-30T10:00:00' },
-      });
-      mockSmartApi.getCandleData.mockResolvedValue({
-        data: [['2025-05-30T00:00', 23400, 23600, 23300, 23500, 1000000]],
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{
+            ltp: 23500,
+            last_price: 23500,
+            exch_tm: '2025-05-30T10:00:00',
+            open: 23400,
+            high: 23600,
+            low: 23300,
+            close: 23500,
+            volume: 1000000,
+            net_change: 100,
+            percentage_change: 0.43,
+          }],
+        },
       });
 
       const indices = await broker.getIndices();
@@ -225,8 +262,12 @@ describe('AngelBroker', () => {
     });
 
     it('should handle partial index fetch failures gracefully', async () => {
-      mockSmartApi.ltpData
-        .mockResolvedValueOnce({ data: { ltp: 23500 } })
+      mockSmartApi.marketData
+        .mockResolvedValueOnce({
+          data: {
+            fetched: [{ ltp: 23500, last_price: 23500, net_change: 50, open: 23400, high: 23600, low: 23300, close: 23400 }],
+          },
+        })
         .mockRejectedValueOnce(new Error('API error'));
 
       const indices = await broker.getIndices();
@@ -234,9 +275,20 @@ describe('AngelBroker', () => {
     });
 
     it('should calculate change and changePercent correctly', async () => {
-      mockSmartApi.ltpData.mockResolvedValue({ data: { ltp: 24000 } });
-      mockSmartApi.getCandleData.mockResolvedValue({
-        data: [['2025-05-30T00:00', 23000, 24100, 22900, 24000, 1000000]],
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{
+            ltp: 24000,
+            last_price: 24000,
+            net_change: 200,
+            percentage_change: 0.84,
+            open: 23800,
+            high: 24100,
+            low: 23700,
+            close: 23800,
+            volume: 1000000,
+          }],
+        },
       });
 
       const indices = await broker.getIndices();
@@ -245,8 +297,8 @@ describe('AngelBroker', () => {
       expect(nifty!.isPositive).toBe(true);
     });
 
-    it('should handle when ltpData returns no data', async () => {
-      mockSmartApi.ltpData.mockResolvedValue({ data: null });
+    it('should handle when marketData returns no data', async () => {
+      mockSmartApi.marketData.mockResolvedValue({ data: null });
 
       const indices = await broker.getIndices();
       expect(Array.isArray(indices)).toBe(true);
@@ -265,11 +317,23 @@ describe('AngelBroker', () => {
       mockSmartApi.searchScrip.mockResolvedValue({
         data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
       });
-      mockSmartApi.ltpData.mockResolvedValue({
-        data: { ltp: 2890, exch_tm: '2025-05-30T10:00:00' },
-      });
-      mockSmartApi.getCandleData.mockResolvedValue({
-        data: [['2025-05-30T00:00', 2870, 2900, 2860, 2880, 5000000]],
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{
+            ltp: 2890,
+            last_price: 2890,
+            exch_tm: '2025-05-30T10:00:00',
+            open: 2870,
+            high: 2900,
+            low: 2860,
+            close: 2880,
+            volume: 5000000,
+            net_change: 10,
+            percentage_change: 0.35,
+            bid_price: 2889,
+            ask_price: 2891,
+          }],
+        },
       });
 
       const quote = await broker.getQuote('RELIANCE');
@@ -287,7 +351,11 @@ describe('AngelBroker', () => {
       mockSmartApi.searchScrip.mockResolvedValue({
         data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
       });
-      mockSmartApi.ltpData.mockResolvedValue({ data: { ltp: 2890 } });
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{ ltp: 2890, last_price: 2890, net_change: 10, open: 2880, high: 2900, low: 2870, close: 2880, volume: 5000000 }],
+        },
+      });
       mockSmartApi.getCandleData.mockResolvedValue({ data: [] });
 
       await broker.getQuote('RELIANCE');
@@ -308,8 +376,10 @@ describe('AngelBroker', () => {
       mockSmartApi.searchScrip.mockResolvedValue({
         data: [{ tradingsymbol: 'TCS', symboltoken: '67890' }],
       });
-      mockSmartApi.ltpData.mockResolvedValue({
-        data: { ltp: 3890, exch_tm: '2025-05-30T10:00:00' },
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{ ltp: 3890, last_price: 3890, net_change: 10, open: 3890, high: 3900, low: 3880, close: 3880, volume: 5000000 }],
+        },
       });
       mockSmartApi.getCandleData.mockRejectedValue(new Error('Candle fetch failed'));
 
@@ -331,9 +401,17 @@ describe('AngelBroker', () => {
       mockSmartApi.searchScrip
         .mockResolvedValueOnce({ data: [{ tradingsymbol: 'RELIANCE', symboltoken: '1' }] })
         .mockResolvedValueOnce({ data: [{ tradingsymbol: 'TCS', symboltoken: '2' }] });
-      mockSmartApi.ltpData
-        .mockResolvedValueOnce({ data: { ltp: 2890 } })
-        .mockResolvedValueOnce({ data: { ltp: 3890 } });
+      mockSmartApi.marketData
+        .mockResolvedValueOnce({
+          data: {
+            fetched: [{ ltp: 2890, last_price: 2890, net_change: 10, open: 2880, high: 2900, low: 2870, close: 2880, volume: 5000000 }],
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            fetched: [{ ltp: 3890, last_price: 3890, net_change: -10, open: 3880, high: 3900, low: 3870, close: 3890, volume: 3000000 }],
+          },
+        });
       mockSmartApi.getCandleData.mockResolvedValue({ data: [] });
 
       const map = await broker.getBulkQuotes(['RELIANCE', 'TCS']);
@@ -347,7 +425,11 @@ describe('AngelBroker', () => {
       mockSmartApi.searchScrip
         .mockResolvedValueOnce({ data: [{ tradingsymbol: 'RELIANCE', symboltoken: '1' }] })
         .mockRejectedValueOnce(new Error('Not found'));
-      mockSmartApi.ltpData.mockResolvedValue({ data: { ltp: 2890 } });
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{ ltp: 2890, last_price: 2890, net_change: 10, open: 2880, high: 2900, low: 2870, close: 2880, volume: 5000000 }],
+        },
+      });
       mockSmartApi.getCandleData.mockResolvedValue({ data: [] });
 
       const map = await broker.getBulkQuotes(['RELIANCE', 'UNKNOWN']);
@@ -420,8 +502,10 @@ describe('AngelBroker', () => {
       mockSmartApi.searchScrip.mockResolvedValue({
         data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
       });
-      mockSmartApi.ltpData.mockResolvedValue({
-        data: { ltp: 2890, exch_tm: '2025-05-30T10:00:00' },
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{ ltp: 2890, last_price: 2890, net_change: 10, open: 2880, high: 2900, low: 2870, close: 2880, volume: 5000000 }],
+        },
       });
       mockSmartApi.getCandleData.mockResolvedValue({ data: [] });
 
@@ -450,7 +534,11 @@ describe('AngelBroker', () => {
           { tradingsymbol: 'RELINFRA', symboltoken: '67890', name: 'Reliance Infra' },
         ],
       });
-      mockSmartApi.ltpData.mockResolvedValue({ data: { ltp: 2890 } });
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{ ltp: 2890, last_price: 2890, net_change: 10, open: 2880, high: 2900, low: 2870, close: 2880, volume: 5000000 }],
+        },
+      });
 
       const results = await broker.searchStocks('REL');
 
@@ -469,7 +557,7 @@ describe('AngelBroker', () => {
       mockSmartApi.searchScrip.mockResolvedValue({
         data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
       });
-      mockSmartApi.ltpData.mockRejectedValue(new Error('Price fetch failed'));
+      mockSmartApi.marketData.mockRejectedValue(new Error('Price fetch failed'));
 
       const results = await broker.searchStocks('REL');
       expect(results.length).toBe(1);
@@ -673,6 +761,323 @@ describe('AngelBroker', () => {
 
       const unsubscribe = brokenBroker.subscribeTicks(['RELIANCE'], vi.fn());
       expect(typeof unsubscribe).toBe('function');
+    });
+  });
+
+  // ──────────────── EDIS: verifyEDIS ────────────────
+
+  describe('verifyEDIS', () => {
+    beforeEach(async () => {
+      await broker.authenticate(createConfig());
+      vi.clearAllMocks();
+    });
+
+    it('should make POST request to EDIS verify endpoint and return response', async () => {
+      const mockResponse = {
+        ReqId: 'REQ_1717000000',
+        ReturnURL: 'https://cdslindia.com/verify',
+        DPId: '12345',
+        BOID: 'BO_INESP123',
+        TransDtls: 'TRAN_1717000000',
+      };
+
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+        text: async () => JSON.stringify(mockResponse),
+      } as any);
+
+      const result = await broker['verifyEDIS']({
+        isin: 'INESP123',
+        quantity: '10',
+      });
+
+      expect(result).toEqual(mockResponse);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://apiconnect.angelone.in/rest/secure/angelbroking/edis/v1/verifyDis',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Authorization': 'Bearer test-access-token',
+            'X-PrivateKey': 'test-api-key',
+          }),
+          body: JSON.stringify({ isin: 'INESP123', quantity: '10' }),
+        }),
+      );
+
+      fetchMock.mockRestore();
+    });
+
+    it('should throw when not authenticated', async () => {
+      const unauthenticatedBroker = new AngelBroker();
+      await expect(
+        unauthenticatedBroker['verifyEDIS']({ isin: 'INESP123', quantity: '10' }),
+      ).rejects.toThrow('Angel One broker not authenticated');
+    });
+
+    it('should include optional REST headers when configured', async () => {
+      const customConfig = createConfig({
+        clientLocalIP: '192.168.1.10',
+        clientPublicIP: '203.0.113.50',
+        macAddress: 'AA:BB:CC:DD:EE:FF',
+        appId: 'my-app',
+      } as any);
+      await broker.authenticate(customConfig);
+      vi.clearAllMocks();
+
+      const mockResponse = {
+        ReqId: 'REQ_001', ReturnURL: '', DPId: '', BOID: '', TransDtls: '',
+      };
+
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+        text: async () => JSON.stringify(mockResponse),
+      } as any);
+
+      await broker['verifyEDIS']({ isin: 'INE123', quantity: '5' });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'X-ClientLocalIP': '192.168.1.10',
+            'X-ClientPublicIP': '203.0.113.50',
+            'X-MACAddress': 'AA:BB:CC:DD:EE:FF',
+            'X-AppId': 'my-app',
+            'X-ClientCode': 'test-client',
+          }),
+        }),
+      );
+
+      fetchMock.mockRestore();
+    });
+
+    it('should throw on HTTP error response', async () => {
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        text: async () => 'Bad Request: invalid ISIN',
+      } as any);
+
+      await expect(
+        broker['verifyEDIS']({ isin: 'INVALID', quantity: '10' }),
+      ).rejects.toThrow('Angel One REST API error (400): Bad Request: invalid ISIN');
+
+      fetchMock.mockRestore();
+    });
+  });
+
+  // ──────────────── EDIS: generateTPIN ────────────────
+
+  describe('generateTPIN', () => {
+    beforeEach(async () => {
+      await broker.authenticate(createConfig());
+      vi.clearAllMocks();
+    });
+
+    it('should make POST request to generate TPIN', async () => {
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'TPIN generated successfully' }),
+        text: async () => JSON.stringify({ status: 'TPIN generated successfully' }),
+      } as any);
+
+      const result = await broker['generateTPIN']({
+        dpId: '12345',
+        ReqId: 'REQ_001',
+        boid: 'BO_INE123',
+        pan: 'ABCDE1234F',
+      });
+
+      expect(result.status).toBe('TPIN generated successfully');
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://apiconnect.angelone.in/rest/secure/angelbroking/edis/v1/generateTPIN',
+        expect.any(Object),
+      );
+
+      fetchMock.mockRestore();
+    });
+
+    it('should throw when not authenticated', async () => {
+      const unauthenticatedBroker = new AngelBroker();
+      await expect(
+        unauthenticatedBroker['generateTPIN']({
+          dpId: '', ReqId: '', boid: '', pan: '',
+        }),
+      ).rejects.toThrow('Angel One broker not authenticated');
+    });
+  });
+
+  // ──────────────── EDIS: getEDISTranStatus ────────────────
+
+  describe('getEDISTranStatus', () => {
+    beforeEach(async () => {
+      await broker.authenticate(createConfig());
+      vi.clearAllMocks();
+    });
+
+    it('should return status 1 when EDIS is authorised', async () => {
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ReqId: 'REQ_001', status: 1 }),
+        text: async () => JSON.stringify({ ReqId: 'REQ_001', status: 1 }),
+      } as any);
+
+      const result = await broker['getEDISTranStatus']({ ReqId: 'REQ_001' });
+
+      expect(result.status).toBe(1);
+      expect(result.ReqId).toBe('REQ_001');
+      fetchMock.mockRestore();
+    });
+
+    it('should return status 0 when EDIS is not yet authorised', async () => {
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ReqId: 'REQ_002', status: 0 }),
+        text: async () => JSON.stringify({ ReqId: 'REQ_002', status: 0 }),
+      } as any);
+
+      const result = await broker['getEDISTranStatus']({ ReqId: 'REQ_002' });
+
+      expect(result.status).toBe(0);
+      fetchMock.mockRestore();
+    });
+  });
+
+  // ──────────────── Brokerage Calculator: estimateBrokerage ────────────────
+
+  describe('estimateBrokerage', () => {
+    beforeEach(async () => {
+      await broker.authenticate(createConfig());
+      vi.clearAllMocks();
+    });
+
+    it('should return brokerage estimate for a single order', async () => {
+      const mockResponse = {
+        status: 'SUCCESS',
+        payload: {
+          brokerage: 15.0,
+          transaction_charges: 5.0,
+          gst: 3.6,
+          stt_ctt: 50.0,
+          stamp_duty: 1.5,
+          sebi_turnover_fees: 0.1,
+          total_charges: 75.2,
+        },
+      };
+
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+        text: async () => JSON.stringify(mockResponse),
+      } as any);
+
+      const result = await broker['estimateBrokerage']({
+        orders: [{
+          product_type: 'DELIVERY',
+          transaction_type: 'BUY',
+          exchange: 'NSE',
+          symbol: 'RELIANCE',
+          token: '12345',
+          qty: 10,
+          price: 2500,
+        }],
+      });
+
+      expect(result.status).toBe('SUCCESS');
+      expect(result.payload.brokerage).toBe(15.0);
+      expect(result.payload.total_charges).toBe(75.2);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://apiconnect.angelone.in/rest/secure/angelbroking/brokerage/v1/estimateCharges',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            orders: [{
+              product_type: 'DELIVERY',
+              transaction_type: 'BUY',
+              exchange: 'NSE',
+              symbol: 'RELIANCE',
+              token: '12345',
+              qty: 10,
+              price: 2500,
+            }],
+          }),
+        }),
+      );
+
+      fetchMock.mockRestore();
+    });
+
+    it('should handle multiple orders in a single request', async () => {
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          status: 'SUCCESS',
+          payload: {
+            brokerage: 30.0,
+            transaction_charges: 10.0,
+            gst: 7.2,
+            stt_ctt: 100.0,
+            stamp_duty: 3.0,
+            sebi_turnover_fees: 0.2,
+            total_charges: 150.4,
+          },
+        }),
+        text: async () => '',
+      } as any);
+
+      const result = await broker['estimateBrokerage']({
+        orders: [
+          {
+            product_type: 'DELIVERY',
+            transaction_type: 'BUY',
+            exchange: 'NSE',
+            symbol: 'RELIANCE',
+            token: '12345',
+            qty: 10,
+            price: 2500,
+          },
+          {
+            product_type: 'INTRADAY',
+            transaction_type: 'SELL',
+            exchange: 'NSE',
+            symbol: 'TCS',
+            token: '67890',
+            qty: 5,
+            price: 4000,
+          },
+        ],
+      });
+
+      expect(result.status).toBe('SUCCESS');
+      expect(result.payload.total_charges).toBe(150.4);
+      fetchMock.mockRestore();
+    });
+
+    it('should throw on API error', async () => {
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => 'Internal server error',
+      } as any);
+
+      await expect(
+        broker['estimateBrokerage']({
+          orders: [{
+            product_type: 'DELIVERY',
+            transaction_type: 'BUY',
+            exchange: 'NSE',
+            symbol: 'RELIANCE',
+            token: '12345',
+            qty: 10,
+            price: 2500,
+          }],
+        }),
+      ).rejects.toThrow('Angel One REST API error (500): Internal server error');
+
+      fetchMock.mockRestore();
     });
   });
 });

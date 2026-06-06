@@ -13,7 +13,7 @@
 import { WebSocket } from 'ws';
 import { riskEngine, LockdownStatus } from '../services/riskEngine';
 import { getBroker } from '../services/broker';
-import { incrementTickCounter } from '../services/metrics';
+import { incrementTickCounter, observeTickLatency, recalculateSymbolSubscriptions } from '../services/metrics';
 import {
   clients,
   decodeToken,
@@ -175,6 +175,8 @@ export async function handleSubscribe(ws: WebSocket, message: any): Promise<void
     const broker = await getBroker();
     await loadUserPositions(client.userId, broker);
     const unsubscribe = broker.subscribeTicks(symbols, (quote) => {
+      const tickStart = performance.now();
+
       if (client.closed || ws.readyState !== WebSocket.OPEN) return;
 
       // ── Backpressure: skip tick if client is too far behind ────
@@ -185,6 +187,7 @@ export async function handleSubscribe(ws: WebSocket, message: any): Promise<void
 
       ws.send(JSON.stringify({ type: 'tick', data: quote }));
       incrementTickCounter(client.userId);
+      observeTickLatency(client.userId, performance.now() - tickStart);
 
       const positions = userPositions.get(client.userId);
       if (positions) {
@@ -206,6 +209,10 @@ export async function handleSubscribe(ws: WebSocket, message: any): Promise<void
     client.symbols = symbols;
     client.unsubscribe = unsubscribe;
     client.closed = false;
+
+    // Update per-symbol subscription counts (must happen before emitting
+    // 'subscribed' so the gauge reflects the latest state for scrapes).
+    recalculateSymbolSubscriptions(clients);
 
     ws.send(JSON.stringify({
       type: 'subscribed',
@@ -232,6 +239,9 @@ export function handleUnsubscribe(ws: WebSocket): void {
     client.symbols = [];
     client.unsubscribe = () => {};
   }
+  // Update per-symbol subscription counts after clearing this client's symbols.
+  recalculateSymbolSubscriptions(clients);
+
   ws.send(JSON.stringify({ type: 'unsubscribed' }));
 }
 

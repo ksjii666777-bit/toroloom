@@ -1,13 +1,15 @@
-import React, { useMemo, useRef, useCallback } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import React, { useMemo, useRef, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { useRiskStore } from '../store/riskStore';
+import { useNotificationStore } from '../store/notificationStore';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS } from '../constants/theme';
+import { analytics } from '../services/analytics';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -35,10 +37,12 @@ import CourseDetailScreen from '../screens/education/CourseDetailScreen';
 import LessonViewScreen from '../screens/education/LessonViewScreen';
 import TradeHistoryScreen from '../screens/trade/TradeHistoryScreen';
 import PlaceOrderScreen from '../screens/trade/PlaceOrderScreen';
+import OpenOrdersScreen from '../screens/trade/OpenOrdersScreen';
 import ReportsScreen from '../screens/reports/ReportsScreen';
 import HelpScreen from '../screens/support/HelpScreen';
 import AchievementsScreen from '../screens/achievements/AchievementsScreen';
 import NotificationPreferencesScreen from '../screens/settings/NotificationPreferencesScreen';
+import PortfolioAlertsScreen from '../screens/settings/PortfolioAlertsScreen';
 import AddFundsScreen from '../screens/funds/AddFundsScreen';
 import WithdrawScreen from '../screens/funds/WithdrawScreen';
 import TransactionHistoryScreen from '../screens/funds/TransactionHistoryScreen';
@@ -49,8 +53,10 @@ import FundsDashboardScreen from '../screens/funds/FundsDashboardScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function TabIcon({ name, focused, color }: { name: string; focused: boolean; color: string }) {
+function TabIcon({ name, focused, color, badgeCount }: { name: string; focused: boolean; color: string; badgeCount?: number }) {
   const scaleAnim = useRef(new Animated.Value(focused ? 1 : 0.85)).current;
+  const badgeScale = useRef(new Animated.Value(1)).current;
+  const prevBadgeCount = useRef(badgeCount);
 
   React.useEffect(() => {
     Animated.spring(scaleAnim, {
@@ -61,9 +67,30 @@ function TabIcon({ name, focused, color }: { name: string; focused: boolean; col
     }).start();
   }, [focused, scaleAnim]);
 
+  // Pulse badge when count increases
+  React.useEffect(() => {
+    if (badgeCount !== undefined && prevBadgeCount.current !== undefined && badgeCount > prevBadgeCount.current) {
+      badgeScale.setValue(1.5);
+      Animated.spring(badgeScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        speed: 8,
+        bounciness: 14,
+      }).start();
+    }
+    prevBadgeCount.current = badgeCount;
+  }, [badgeCount, badgeScale]);
+
   return (
     <Animated.View style={[tabStyles.iconContainer, { transform: [{ scale: scaleAnim }] }]}>
       <Ionicons name={name as any} size={24} color={color} />
+      {badgeCount !== undefined && badgeCount > 0 && (
+        <Animated.View style={[tabStyles.badgeOverlay, { transform: [{ scale: badgeScale }] }]}>
+          <Text style={tabStyles.badgeText}>
+            {badgeCount > 9 ? '9+' : badgeCount}
+          </Text>
+        </Animated.View>
+      )}
     </Animated.View>
   );
 }
@@ -75,12 +102,35 @@ const tabStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  badgeOverlay: {
+    position: 'absolute',
+    top: -6,
+    right: -8,
+    backgroundColor: '#FF3B30',
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+    borderWidth: 1.5,
+    borderColor: '#fff',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
 });
 
 function MainTabs() {
   const { colors } = useTheme();
   const wsLockdownCount = useRiskStore(s => s.wsLockdownCount);
   const clearLockdownAlert = useRiskStore(s => s.clearLockdownAlert);
+  const portfolioAlertBadgeCount = useNotificationStore(s => s.portfolioAlertBadgeCount);
+  const clearPortfolioAlertBadge = useNotificationStore(s => s.clearPortfolioAlertBadge);
+  const totalBadgeCount = wsLockdownCount + portfolioAlertBadgeCount;
 
   return (
     <Tab.Navigator
@@ -96,7 +146,14 @@ function MainTabs() {
             case 'More': iconName = focused ? 'grid' : 'grid-outline'; break;
             default: iconName = 'ellipse';
           }
-          return <TabIcon name={iconName} focused={focused} color={color} />;
+          return (
+            <TabIcon
+              name={iconName}
+              focused={focused}
+              color={color}
+              badgeCount={route.name === 'More' ? totalBadgeCount : undefined}
+            />
+          );
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
@@ -113,10 +170,7 @@ function MainTabs() {
           fontWeight: '500',
           fontFamily: 'System',
         },
-        tabBarBadge: route.name === 'More' && wsLockdownCount > 0 ? wsLockdownCount : undefined,
-        tabBarBadgeStyle: route.name === 'More' && wsLockdownCount > 0
-          ? { backgroundColor: '#FF3B30', fontSize: 11, minWidth: 18, height: 18, borderRadius: 9 }
-          : undefined,
+
       })}
     >
       <Tab.Screen
@@ -124,9 +178,8 @@ function MainTabs() {
         component={MoreScreen}
         listeners={{
           tabPress: () => {
-            if (wsLockdownCount > 0) {
-              clearLockdownAlert();
-            }
+            if (wsLockdownCount > 0) clearLockdownAlert();
+            if (portfolioAlertBadgeCount > 0) clearPortfolioAlertBadge();
           },
         }}
       />
@@ -139,11 +192,45 @@ function MainTabs() {
 }
 
 export default function AppNavigator() {
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, user } = useAuthStore();
   const { colors } = useTheme();
+  const routeNameRef = useRef<string | null>(null);
+
+  // Set Firebase user ID and properties when auth state changes
+  useEffect(() => {
+    if (user) {
+      analytics.setUserId(user.id);
+      analytics.setUserProperty('kyc_status', user.kycStatus);
+    }
+  }, [user?.id, user?.kycStatus]);
+
+  // Recursively resolve the active route name from nested navigators
+  // (tabs inside stacks, stacks inside drawers, etc.)
+  const getActiveRouteName = useCallback((state: any): string | null => {
+    if (!state) return null;
+    const route = state.routes?.[state.index];
+    if (!route) return null;
+    // Drill into nested navigator state (tabs within stacks, etc.)
+    if (route.state) {
+      return getActiveRouteName(route.state);
+    }
+    return route.name;
+  }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      onReady={() => {
+        // Track the initial screen on first render
+        routeNameRef.current = isLoggedIn ? 'Home' : 'Login';
+      }}
+      onStateChange={async (state) => {
+        const screenName = getActiveRouteName(state);
+        if (screenName && screenName !== routeNameRef.current) {
+          routeNameRef.current = screenName;
+          await analytics.logScreenView(screenName);
+        }
+      }}
+    >
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -170,6 +257,7 @@ export default function AppNavigator() {
             <Stack.Screen name="SIPs" component={MutualFundsScreen} />
             <Stack.Screen name="TradeHistory" component={TradeHistoryScreen} />
             <Stack.Screen name="PlaceOrder" component={PlaceOrderScreen} />
+            <Stack.Screen name="OpenOrders" component={OpenOrdersScreen} />
             <Stack.Screen name="Reports" component={ReportsScreen} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="Achievements" component={AchievementsScreen} />
@@ -178,6 +266,7 @@ export default function AppNavigator() {
             <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
             <Stack.Screen name="LessonView" component={LessonViewScreen} />
             <Stack.Screen name="NotificationPreferences" component={NotificationPreferencesScreen} />
+            <Stack.Screen name="PortfolioAlerts" component={PortfolioAlertsScreen} />
             <Stack.Screen name="AddFunds" component={AddFundsScreen} />
             <Stack.Screen name="Withdraw" component={WithdrawScreen} />
             <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />

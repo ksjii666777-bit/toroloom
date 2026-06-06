@@ -22,7 +22,18 @@ import { WebSocket } from 'ws';
 import metricsRoutes from '../routes/metrics';
 import * as state from '../websocket/state';
 import { AuthenticatedClient } from '../websocket/state';
-import { updateMetrics, incrementTickCounter, getMetricsRegistry } from '../services/metrics';
+import {
+  updateMetrics,
+  incrementTickCounter,
+  getMetricsRegistry,
+  setBrokerConnected,
+  incrementBrokerAuthError,
+  incrementBrokerReconnects,
+  incrementRateLimited,
+  setActiveRateLimiters,
+  recalculateSymbolSubscriptions,
+  observeTickLatency,
+} from '../services/metrics';
 
 // ──── Helpers ───────────────────────────────────────────────────────────────
 
@@ -104,34 +115,34 @@ let baseUrl: string;
 
 // ──── Suite ─────────────────────────────────────────────────────────────────
 
-describe('GET /metrics', () => {
-  beforeAll(async () => {
-    const app = express();
-    // Mount at /metrics to match the production setup in index.ts
-    app.use('/metrics', metricsRoutes);
+beforeAll(async () => {
+  const app = express();
+  // Mount at /metrics to match the production setup in index.ts
+  app.use('/metrics', metricsRoutes);
 
-    server = http.createServer(app);
-    await new Promise<void>((resolve) => {
-      server.listen(0, () => {
-        const port = (server.address() as any).port;
-        baseUrl = `http://localhost:${port}`;
-        resolve();
-      });
+  server = http.createServer(app);
+  await new Promise<void>((resolve) => {
+    server.listen(0, () => {
+      const port = (server.address() as any).port;
+      baseUrl = `http://localhost:${port}`;
+      resolve();
     });
   });
+});
 
-  afterAll(() => {
-    server?.close();
-  });
+afterAll(() => {
+  server?.close();
+});
 
-  // Reset module-level state and Prometheus registry
-  beforeEach(() => {
-    state.clients.clear();
-    state.userConnectionCount.clear();
-    state.connectionAlertedUsers.clear();
-    getMetricsRegistry().resetMetrics();
-  });
+// Reset module-level state and Prometheus registry before each test
+beforeEach(() => {
+  state.clients.clear();
+  state.userConnectionCount.clear();
+  state.connectionAlertedUsers.clear();
+  getMetricsRegistry().resetMetrics();
+});
 
+describe('GET /metrics', () => {
   // ──────────────── Response shape ────────────────────────────
 
   it('should return 200 with the correct Content-Type', async () => {
@@ -356,5 +367,465 @@ describe('GET /metrics', () => {
     if (tickLabels instanceof Map) {
       expect(tickLabels.size).toBe(0);
     }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Broker Health Metrics
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Broker Health Metrics', () => {
+  beforeEach(() => {
+    getMetricsRegistry().resetMetrics();
+  });
+
+  // ──────────── Broker Connected ────────────────────────────────
+
+  it('should reflect broker connected status as 1', async () => {
+    setBrokerConnected('zerodha', true);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const brokerLabels = parsed.get('toroloom_broker_connected') as Map<string, string>;
+    expect(brokerLabels).toBeInstanceOf(Map);
+    expect(brokerLabels.get('broker="zerodha"')).toBe('1');
+  });
+
+  it('should reflect broker disconnected status as 0', async () => {
+    setBrokerConnected('angel', false);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const brokerLabels = parsed.get('toroloom_broker_connected') as Map<string, string>;
+    expect(brokerLabels.get('broker="angel"')).toBe('0');
+  });
+
+  it('should report multiple broker statuses independently', async () => {
+    setBrokerConnected('zerodha', true);
+    setBrokerConnected('angel', true);
+    setBrokerConnected('mock', false);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const brokerLabels = parsed.get('toroloom_broker_connected') as Map<string, string>;
+    expect(brokerLabels.get('broker="zerodha"')).toBe('1');
+    expect(brokerLabels.get('broker="angel"')).toBe('1');
+    expect(brokerLabels.get('broker="mock"')).toBe('0');
+  });
+
+  it('should reset broker connected gauge to zero when registry is cleared', async () => {
+    setBrokerConnected('zerodha', true);
+    getMetricsRegistry().resetMetrics();
+    setBrokerConnected('zerodha', false);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+    const brokerLabels = parsed.get('toroloom_broker_connected') as Map<string, string>;
+    expect(brokerLabels.get('broker="zerodha"')).toBe('0');
+  });
+
+  // ──────────── Auth Errors ─────────────────────────────────────
+
+  it('should increment broker auth error counter', async () => {
+    incrementBrokerAuthError('zerodha');
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const authLabels = parsed.get('toroloom_broker_auth_errors_total') as Map<string, string>;
+    expect(authLabels.get('broker="zerodha"')).toBe('1');
+  });
+
+  it('should accumulate broker auth errors across multiple calls', async () => {
+    incrementBrokerAuthError('zerodha');
+    incrementBrokerAuthError('zerodha');
+    incrementBrokerAuthError('angel');
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const authLabels = parsed.get('toroloom_broker_auth_errors_total') as Map<string, string>;
+    expect(authLabels.get('broker="zerodha"')).toBe('2');
+    expect(authLabels.get('broker="angel"')).toBe('1');
+  });
+
+  it('should start broker auth error counter at zero after reset', async () => {
+    incrementBrokerAuthError('zerodha');
+    getMetricsRegistry().resetMetrics();
+
+    // After reset, the counter is registered but has value 0
+    // Verify by incrementing and checking it starts at 1
+    incrementBrokerAuthError('zerodha');
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+    const authLabels = parsed.get('toroloom_broker_auth_errors_total') as Map<string, string>;
+    expect(authLabels.get('broker="zerodha"')).toBe('1');
+  });
+
+  it('should handle auth errors for unknown broker types', async () => {
+    incrementBrokerAuthError('unknown-broker');
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const authLabels = parsed.get('toroloom_broker_auth_errors_total') as Map<string, string>;
+    expect(authLabels.get('broker="unknown-broker"')).toBe('1');
+  });
+
+  // ──────────── Reconnects ──────────────────────────────────────
+
+  it('should increment broker reconnect counter', async () => {
+    incrementBrokerReconnects('angel');
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const reconnectLabels = parsed.get('toroloom_broker_reconnects_total') as Map<string, string>;
+    expect(reconnectLabels.get('broker="angel"')).toBe('1');
+  });
+
+  it('should accumulate broker reconnects across multiple calls', async () => {
+    incrementBrokerReconnects('zerodha');
+    incrementBrokerReconnects('zerodha');
+    incrementBrokerReconnects('zerodha');
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const reconnectLabels = parsed.get('toroloom_broker_reconnects_total') as Map<string, string>;
+    expect(reconnectLabels.get('broker="zerodha"')).toBe('3');
+  });
+
+  it('should track reconnects independently per broker', async () => {
+    incrementBrokerReconnects('zerodha');
+    incrementBrokerReconnects('angel');
+    incrementBrokerReconnects('zerodha');
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const reconnectLabels = parsed.get('toroloom_broker_reconnects_total') as Map<string, string>;
+    expect(reconnectLabels.get('broker="zerodha"')).toBe('2');
+    expect(reconnectLabels.get('broker="angel"')).toBe('1');
+  });
+
+  // ──────────── HELP / TYPE lines ───────────────────────────────
+
+  it('should include HELP and TYPE lines for all broker metrics', async () => {
+    const { body } = await fetchMetrics(baseUrl);
+
+    const expected: { name: string; type: string }[] = [
+      { name: 'toroloom_broker_connected', type: 'gauge' },
+      { name: 'toroloom_broker_auth_errors_total', type: 'counter' },
+      { name: 'toroloom_broker_reconnects_total', type: 'counter' },
+    ];
+
+    for (const { name, type } of expected) {
+      expect(body).toContain(`# HELP ${name}`);
+      expect(body).toContain(`# TYPE ${name} ${type}`);
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Rate Limit Metrics
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Rate Limit Metrics', () => {
+  beforeEach(() => {
+    getMetricsRegistry().resetMetrics();
+  });
+
+  it('should increment rate-limited counter', async () => {
+    incrementRateLimited();
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    expect(parsed.get('toroloom_ws_rate_limited_total')).toBe('1');
+  });
+
+  it('should accumulate rate-limited counts', async () => {
+    incrementRateLimited();
+    incrementRateLimited();
+    incrementRateLimited();
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    expect(parsed.get('toroloom_ws_rate_limited_total')).toBe('3');
+  });
+
+  it('should start at zero after reset', async () => {
+    incrementRateLimited();
+    getMetricsRegistry().resetMetrics();
+
+    // After reset, counter is registered but has value 0.
+    // Verify by incrementing and checking it starts at 1.
+    incrementRateLimited();
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+    expect(parsed.get('toroloom_ws_rate_limited_total')).toBe('1');
+  });
+
+  it('should set active rate limiters count', async () => {
+    setActiveRateLimiters(5);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    expect(parsed.get('toroloom_ws_active_rate_limiters')).toBe('5');
+  });
+
+  it('should update active rate limiters to zero', async () => {
+    setActiveRateLimiters(5);
+    setActiveRateLimiters(0);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    expect(parsed.get('toroloom_ws_active_rate_limiters')).toBe('0');
+  });
+
+  it('should include HELP and TYPE lines for rate limit metrics', async () => {
+    const { body } = await fetchMetrics(baseUrl);
+
+    expect(body).toContain('# HELP toroloom_ws_rate_limited_total');
+    expect(body).toContain('# TYPE toroloom_ws_rate_limited_total counter');
+    expect(body).toContain('# HELP toroloom_ws_active_rate_limiters');
+    expect(body).toContain('# TYPE toroloom_ws_active_rate_limiters gauge');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Symbol Subscription Metrics
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Symbol Subscription Metrics', () => {
+  beforeEach(() => {
+    getMetricsRegistry().resetMetrics();
+  });
+
+  it('should report per-symbol subscription counts', async () => {
+    const clientMap = new Map<any, AuthenticatedClient>([
+      ['ws1', makeAuthenticatedClient('user-a', ['RELIANCE', 'TCS'])],
+      ['ws2', makeAuthenticatedClient('user-b', ['RELIANCE'])],
+    ]);
+
+    recalculateSymbolSubscriptions(clientMap);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const symbolLabels = parsed.get('toroloom_ws_symbol_subscriptions') as Map<string, string>;
+    expect(symbolLabels.get('symbol="RELIANCE"')).toBe('2');
+    expect(symbolLabels.get('symbol="TCS"')).toBe('1');
+  });
+
+  it('should update symbol counts when clients change', async () => {
+    const clientMap = new Map<any, AuthenticatedClient>([
+      ['ws1', makeAuthenticatedClient('user-a', ['RELIANCE', 'TCS', 'HDFCBANK'])],
+    ]);
+
+    recalculateSymbolSubscriptions(clientMap);
+
+    const { body: firstBody } = await fetchMetrics(baseUrl);
+    const firstParsed = parseMetrics(firstBody);
+
+    const firstLabels = firstParsed.get('toroloom_ws_symbol_subscriptions') as Map<string, string>;
+    expect(firstLabels.get('symbol="RELIANCE"')).toBe('1');
+    expect(firstLabels.get('symbol="TCS"')).toBe('1');
+    expect(firstLabels.get('symbol="HDFCBANK"')).toBe('1');
+
+    // Remove TCS by replacing the client's symbols
+    clientMap.set('ws1', makeAuthenticatedClient('user-a', ['RELIANCE', 'HDFCBANK']));
+    recalculateSymbolSubscriptions(clientMap);
+
+    const { body: secondBody } = await fetchMetrics(baseUrl);
+    const secondParsed = parseMetrics(secondBody);
+
+    const secondLabels = secondParsed.get('toroloom_ws_symbol_subscriptions') as Map<string, string>;
+    expect(secondLabels.get('symbol="RELIANCE"') ?? '0').toBe('1');
+    expect(secondLabels.get('symbol="HDFCBANK"') ?? '0').toBe('1');
+    // TCS should be purged (no longer in the map)
+    expect(secondLabels.has('symbol="TCS"')).toBe(false);
+  });
+
+  it('should clear all symbol subscriptions for empty client map', async () => {
+    const clientMap = new Map<any, AuthenticatedClient>([
+      ['ws1', makeAuthenticatedClient('user-a', ['RELIANCE'])],
+    ]);
+
+    recalculateSymbolSubscriptions(clientMap);
+    recalculateSymbolSubscriptions(new Map()); // empty
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const symbolLabels = parsed.get('toroloom_ws_symbol_subscriptions');
+    // Should be absent entirely (gauge was reset, no labels set)
+    expect(symbolLabels).toBeUndefined();
+  });
+
+  it('should handle multiple clients sharing the same symbol', async () => {
+    const clientMap = new Map<any, AuthenticatedClient>([
+      ['ws1', makeAuthenticatedClient('user-a', ['RELIANCE'])],
+      ['ws2', makeAuthenticatedClient('user-b', ['RELIANCE'])],
+      ['ws3', makeAuthenticatedClient('user-c', ['RELIANCE'])],
+      ['ws4', makeAuthenticatedClient('user-d', ['TCS'])],
+    ]);
+
+    recalculateSymbolSubscriptions(clientMap);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const symbolLabels = parsed.get('toroloom_ws_symbol_subscriptions') as Map<string, string>;
+    expect(symbolLabels.get('symbol="RELIANCE"')).toBe('3');
+    expect(symbolLabels.get('symbol="TCS"')).toBe('1');
+  });
+
+  it('should include HELP and TYPE for symbol subscriptions', async () => {
+    recalculateSymbolSubscriptions(new Map([
+      ['ws1', makeAuthenticatedClient('user-a', ['RELIANCE'])],
+    ]));
+
+    const { body } = await fetchMetrics(baseUrl);
+    expect(body).toContain('# HELP toroloom_ws_symbol_subscriptions');
+    expect(body).toContain('# TYPE toroloom_ws_symbol_subscriptions gauge');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Tick Latency Histogram Metrics
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Tick Latency Metrics', () => {
+  beforeEach(() => {
+    getMetricsRegistry().resetMetrics();
+  });
+
+  it('should record tick dispatch latency observations', async () => {
+    observeTickLatency('user-a', 5); // 5ms → 0.005s
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const histLabels = parsed.get('toroloom_broker_tick_dispatch_seconds_count') as Map<string, string>;
+    expect(histLabels.get('user_id="user-a"')).toBe('1');
+  });
+
+  it('should accumulate multiple latency observations per user', async () => {
+    observeTickLatency('user-a', 5);
+    observeTickLatency('user-a', 10);
+    observeTickLatency('user-b', 2);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const histCount = parsed.get('toroloom_broker_tick_dispatch_seconds_count') as Map<string, string>;
+    expect(histCount.get('user_id="user-a"')).toBe('2');
+    expect(histCount.get('user_id="user-b"')).toBe('1');
+  });
+
+  it('should distribute observations into histogram buckets', async () => {
+    // 5ms → falls into the 0.01 bucket (0.01s = 10ms)
+    observeTickLatency('user-a', 5);
+    // 200ms → falls into the 0.1 bucket (0.1s = 100ms) or the +Inf bucket
+    observeTickLatency('user-b', 200);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const histBucket = parsed.get('toroloom_broker_tick_dispatch_seconds_bucket') as Map<string, string>;
+    // Check that the 0.01 bucket (10ms) has user-a's 5ms observation
+    const userA005 = [...histBucket.entries()].find(
+      ([k]) => k.includes('user_id="user-a"') && k.includes('0.01'),
+    );
+    expect(userA005).toBeDefined();
+    expect(userA005![1]).toBe('1');
+
+    // +Inf bucket should have both observations
+    const userInf = [...histBucket.entries()].find(
+      ([k]) => k.includes('user_id="user-b"') && k.includes('+Inf'),
+    );
+    expect(userInf).toBeDefined();
+    expect(userInf![1]).toBe('1');
+  });
+
+  it('should include HELP and TYPE for tick latency metrics', async () => {
+    observeTickLatency('user-a', 1);
+
+    const { body } = await fetchMetrics(baseUrl);
+    expect(body).toContain('# HELP toroloom_broker_tick_dispatch_seconds');
+    expect(body).toContain('# TYPE toroloom_broker_tick_dispatch_seconds histogram');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Integrated State — Broker + Rate Limit + Subscriptions
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Integrated Metrics State', () => {
+  beforeEach(() => {
+    getMetricsRegistry().resetMetrics();
+    state.clients.clear();
+    state.userConnectionCount.clear();
+    state.connectionAlertedUsers.clear();
+  });
+
+  it('should report all metric families simultaneously', async () => {
+    // Set up WebSocket state
+    const ws1 = makeMockWs('c1');
+    state.clients.set(ws1, makeAuthenticatedClient('user-a', ['RELIANCE', 'TCS']));
+    state.userConnectionCount.set('user-a', 1);
+
+    // Set up broker state
+    setBrokerConnected('zerodha', true);
+    setBrokerConnected('angel', false);
+    incrementBrokerAuthError('angel');
+    incrementBrokerReconnects('angel');
+
+    // Set up rate limit state
+    incrementRateLimited();
+    incrementRateLimited();
+    setActiveRateLimiters(1);
+
+    // Push WS state
+    updateMetrics(state.userConnectionCount, state.clients, state.connectionAlertedUsers);
+
+    const { body } = await fetchMetrics(baseUrl);
+
+    // All metric names should appear
+    expect(body).toContain('toroloom_ws_total_connections');
+    expect(body).toContain('toroloom_broker_connected');
+    expect(body).toContain('toroloom_broker_auth_errors_total');
+    expect(body).toContain('toroloom_broker_reconnects_total');
+    expect(body).toContain('toroloom_ws_rate_limited_total');
+    expect(body).toContain('toroloom_ws_active_rate_limiters');
+    expect(body).toContain('toroloom_ws_symbol_subscriptions');
+
+    const parsed = parseMetrics(body);
+
+    // WebSocket gauges
+    expect(parsed.get('toroloom_ws_total_connections')).toBe('1');
+    expect(parsed.get('toroloom_ws_authenticated_users')).toBe('1');
+
+    // Broker gauges
+    const brokerLabels = parsed.get('toroloom_broker_connected') as Map<string, string>;
+    expect(brokerLabels.get('broker="zerodha"')).toBe('1');
+    expect(brokerLabels.get('broker="angel"')).toBe('0');
+
+    // Rate limit gauges
+    expect(parsed.get('toroloom_ws_rate_limited_total')).toBe('2');
+    expect(parsed.get('toroloom_ws_active_rate_limiters')).toBe('1');
+
+    // Symbol subscriptions
+    const symbolLabels = parsed.get('toroloom_ws_symbol_subscriptions') as Map<string, string>;
+    expect(symbolLabels.get('symbol="RELIANCE"')).toBe('1');
+    expect(symbolLabels.get('symbol="TCS"')).toBe('1');
   });
 });

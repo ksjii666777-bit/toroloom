@@ -14,6 +14,12 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+// __DEV__ must be set at the hoisted level because vi.mock is hoisted above all code.
+// expo-task-manager depends on expo-modules-core which references __DEV__ at module level.
+vi.hoisted(() => {
+  (globalThis as any).__DEV__ = true;
+});
+
 // Use the real notification service instead of the setup.ts mock
 vi.mock('../services/notificationService', async () => {
   const actual = await vi.importActual<typeof import('../services/notificationService')>('../services/notificationService');
@@ -69,11 +75,11 @@ describe('Notification Service — setupChannels', () => {
     expect(Notifications.setNotificationChannelAsync).not.toHaveBeenCalled();
   });
 
-  it('creates all 4 Android channels on Android', async () => {
+  it('creates all 5 Android channels on Android', async () => {
     vi.spyOn(Platform, 'OS', 'get').mockReturnValue('android');
     await setupChannels();
 
-    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledTimes(4);
+    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledTimes(5);
     expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledWith(
       'price_alerts',
       expect.objectContaining({ id: 'price_alerts' }),
@@ -90,6 +96,10 @@ describe('Notification Service — setupChannels', () => {
       'system_notifications',
       expect.objectContaining({ id: 'system_notifications' }),
     );
+    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledWith(
+      'portfolio_alerts',
+      expect.objectContaining({ id: 'portfolio_alerts' }),
+    );
   });
 
   it('CHANNELS constant has the expected structure', () => {
@@ -97,6 +107,8 @@ describe('Notification Service — setupChannels', () => {
     expect(CHANNELS.TRADE_CONFIRMATIONS.id).toBe('trade_confirmations');
     expect(CHANNELS.EDUCATIONAL.id).toBe('educational_reminders');
     expect(CHANNELS.SYSTEM.id).toBe('system_notifications');
+    expect(CHANNELS.PORTFOLIO_ALERTS.id).toBe('portfolio_alerts');
+    expect(CHANNELS.PORTFOLIO_ALERTS.importance).toBe('high');
   });
 });
 

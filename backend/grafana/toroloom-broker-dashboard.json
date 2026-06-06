@@ -1,0 +1,1739 @@
+{
+
+  "title": "Toroloom — Broker Performance & Auth",
+  "description": "Dedicated monitoring for broker connection health, authentication failures, failover events, rate limiting activity, and tick dispatch latency across all broker backends (Zerodha, Angel, Mock).",
+  "tags": ["toroloom", "broker", "auth", "performance", "zerodha", "angel", "rate-limiting"],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "15s",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "collapsed": false,
+      "title": "Broker Status",
+      "description": "Real-time broker connection health, authentication error rates, and failover activity across all configured broker backends.",
+      "panels": [
+        {
+          "id": 101,
+          "type": "stat",
+          "title": "Overall Broker Health",
+          "description": "Aggregate broker connection status. 1 = at least one broker is connected, 0 = all brokers are disconnected (critical).",
+          "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [
+                { "type": "value", "value": "0", "text": "Disconnected" },
+                { "type": "value", "value": "1", "text": "Connected" }
+              ],
+              "min": 0,
+              "max": 1,
+              "noValue": "No Data"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "max(toroloom_broker_connected)",
+              "legendFormat": "Overall",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 102,
+          "type": "stat",
+          "title": "Connected Brokers",
+          "description": "Count of brokers currently reporting connected (1) status. The chain has 3 backends: zerodha, angel, mock.",
+          "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "green", "value": 3 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [],
+              "min": 0,
+              "max": 3,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "count(toroloom_broker_connected == 1)",
+              "legendFormat": "Connected",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 103,
+          "type": "stat",
+          "title": "Auth Errors / min",
+          "description": "Running rate of broker authentication failures across all backends. Sustained values above 1/min indicate credential issues or API outages.",
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 5 }
+                ]
+              },
+              "unit": "cpm",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 /min"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_broker_auth_errors_total[1m]))",
+              "legendFormat": "Errors/min",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 104,
+          "type": "stat",
+          "title": "Reconnects / min",
+          "description": "Running rate of broker reconnection or failover events. Any sustained value above 0 indicates network instability or broker API downtime.",
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 3 }
+                ]
+              },
+              "unit": "cpm",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 /min"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_broker_reconnects_total[1m]))",
+              "legendFormat": "Reconnects/min",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Broker Connection Details",
+      "description": "Per-broker connection state, authentication failure distribution, and failover events broken down by backend.",
+      "panels": [
+        {
+          "id": 105,
+          "type": "timeseries",
+          "title": "Broker Connection State",
+          "description": "Connection status per broker over time. A drop to 0 triggers automatic failover down the chain (Zerodha → Angel → Mock). Bars indicate state changes clearly.",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 2,
+                "pointSize": 4,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              },
+              "unit": "short",
+              "min": 0,
+              "max": 1
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "zerodha" },
+                "properties": [
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "angel" },
+                "properties": [
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "mock" },
+                "properties": [
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "toroloom_broker_connected{broker=\"zerodha\"}",
+              "legendFormat": "zerodha",
+              "refId": "A"
+            },
+            {
+              "expr": "toroloom_broker_connected{broker=\"angel\"}",
+              "legendFormat": "angel",
+              "refId": "B"
+            },
+            {
+              "expr": "toroloom_broker_connected{broker=\"mock\"}",
+              "legendFormat": "mock",
+              "refId": "C"
+            }
+          ]
+        },
+        {
+          "id": 106,
+          "type": "timeseries",
+          "title": "Auth Errors by Broker",
+          "description": "Authentication error rate per broker over time. Spikes in zerodha or angel indicate upstream API token expiry or credential issues. Mock broker should never have auth errors.",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "errors / min",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 3,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 5 }
+                ]
+              },
+              "unit": "cpm"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*1\\/min.*/i" },
+                "properties": [
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*5\\/min.*/i" },
+                "properties": [
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "rate(toroloom_broker_auth_errors_total{broker=\"zerodha\"}[5m])",
+              "legendFormat": "zerodha",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(toroloom_broker_auth_errors_total{broker=\"angel\"}[5m])",
+              "legendFormat": "angel",
+              "refId": "B"
+            },
+            {
+              "expr": "rate(toroloom_broker_auth_errors_total{broker=\"mock\"}[5m])",
+              "legendFormat": "mock",
+              "refId": "C"
+            },
+            {
+              "expr": "1",
+              "legendFormat": "⚠ Warning (1/min)",
+              "refId": "D"
+            },
+            {
+              "expr": "5",
+              "legendFormat": "🔴 Critical (5/min)",
+              "refId": "E"
+            }
+          ]
+        },
+        {
+          "id": 107,
+          "type": "timeseries",
+          "title": "Reconnects by Broker",
+          "description": "Reconnection / failover rate per broker. Zerodha reconnects indicate upstream API issues. Mock reconnects indicate internal fallback activation.",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "reconnects / min",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 3,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 3 }
+                ]
+              },
+              "unit": "cpm"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "rate(toroloom_broker_reconnects_total{broker=\"zerodha\"}[5m])",
+              "legendFormat": "zerodha",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(toroloom_broker_reconnects_total{broker=\"angel\"}[5m])",
+              "legendFormat": "angel",
+              "refId": "B"
+            },
+            {
+              "expr": "rate(toroloom_broker_reconnects_total{broker=\"mock\"}[5m])",
+              "legendFormat": "mock",
+              "refId": "C"
+            },
+            {
+              "expr": "1",
+              "legendFormat": "⚠ Warning (1/min)",
+              "refId": "D"
+            }
+          ]
+        },
+        {
+          "id": 108,
+          "type": "timeseries",
+          "title": "Active Broker Count Over Time",
+          "description": "Number of brokers actively connected. Drops below 3 indicate failover activity. A drop to 0 is a critical outage.",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "brokers",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 30,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 3,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "green", "value": 3 }
+                ]
+              },
+              "unit": "short",
+              "min": 0,
+              "max": 3
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "count(toroloom_broker_connected == 1)",
+              "legendFormat": "Active Brokers",
+              "refId": "A"
+            },
+            {
+              "expr": "3",
+              "legendFormat": "Expected (3)",
+              "refId": "B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Auth & Rate Limiting",
+      "description": "Authentication health metrics and WebSocket rate limiter activity. Sustained rate limiting indicates aggressive clients or potential DoS.",
+      "panels": [
+        {
+          "id": 109,
+          "type": "timeseries",
+          "title": "Authentication Error Rate",
+          "description": "Total auth error rate across all brokers with trend analysis. The 5-minute and 15-minute moving averages help distinguish transient spikes from sustained issues.",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 28 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "errors / min",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 15,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 2,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 5 }
+                ]
+              },
+              "unit": "cpm"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*15min.*/i" },
+                "properties": [
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "custom.fillOpacity", "value": 0 }
+                ]
+              },
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*Warning.*/i" },
+                "properties": [
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*Critical.*/i" },
+                "properties": [
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_broker_auth_errors_total[5m]))",
+              "legendFormat": "Auth Errors (5m avg)",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(toroloom_broker_auth_errors_total[15m]))",
+              "legendFormat": "Trend (15m avg)",
+              "refId": "B"
+            },
+            {
+              "expr": "1",
+              "legendFormat": "⚠ Warning (1/min)",
+              "refId": "C"
+            },
+            {
+              "expr": "5",
+              "legendFormat": "🔴 Critical (5/min)",
+              "refId": "D"
+            }
+          ]
+        },
+        {
+          "id": 110,
+          "type": "timeseries",
+          "title": "Rate Limiter Activity",
+          "description": "WebSocket rate-limited messages per minute (red) vs active rate limiter connections (blue). Sustained rate limiting above 0 indicates aggressive clients; growing active limiters suggest a DoS pattern.",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 28 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 3,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "red", "value": 50 }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*10\\/min.*/i" },
+                "properties": [
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*50\\/min.*/i" },
+                "properties": [
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_ws_rate_limited_total[1m]))",
+              "legendFormat": "Rate Limited / min",
+              "refId": "A"
+            },
+            {
+              "expr": "toroloom_ws_active_rate_limiters",
+              "legendFormat": "Active Rate Limiters",
+              "refId": "B"
+            },
+            {
+              "expr": "10",
+              "legendFormat": "⚠ Warning (10/min)",
+              "refId": "C"
+            },
+            {
+              "expr": "50",
+              "legendFormat": "🔴 Critical (50/min)",
+              "refId": "D"
+            }
+          ]
+        },
+        {
+          "id": 111,
+          "type": "stat",
+          "title": "Peak Auth Error Rate (1h)",
+          "description": "Highest auth error rate observed in the last hour. Helps identify worst-case auth failure intensity.",
+          "gridPos": { "h": 8, "w": 6, "x": 0, "y": 38 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 5 }
+                ]
+              },
+              "unit": "cpm",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 /min"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["max"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_broker_auth_errors_total[5m]))",
+              "legendFormat": "Peak Errors/min",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 112,
+          "type": "stat",
+          "title": "Peak Reconnect Rate (1h)",
+          "description": "Highest reconnect rate observed in the last hour. Helps identify worst-case failover storm intensity.",
+          "gridPos": { "h": 8, "w": 6, "x": 6, "y": 38 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 3 }
+                ]
+              },
+              "unit": "cpm",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 /min"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["max"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_broker_reconnects_total[5m]))",
+              "legendFormat": "Peak Reconnects/min",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 113,
+          "type": "stat",
+          "title": "Max Active Rate Limiters (1h)",
+          "description": "Highest number of connections simultaneously in rate-limited state over the last hour. Values above 0 indicate the rate limiter is actively throttling clients.",
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 38 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 5 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [
+                { "type": "value", "value": "0", "text": "0 — No clients throttled" }
+              ],
+              "min": 0,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["max"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_ws_active_rate_limiters",
+              "legendFormat": "Max Active",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 114,
+          "type": "stat",
+          "title": "Total Rate Limited Today",
+          "description": "Cumulative count of all rate-limited WebSocket messages since midnight. Helps track daily rate limiting volume.",
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 38 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1000 },
+                  { "color": "red", "value": 10000 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "increase(toroloom_ws_rate_limited_total[24h])",
+              "legendFormat": "Today Total",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Broker Performance (Tick Dispatch)",
+      "description": "Tick dispatch latency by broker and user, showing how quickly price ticks are marshalled and sent to connected clients.",
+      "panels": [
+        {
+          "id": 115,
+          "type": "timeseries",
+          "title": "Tick Dispatch Latency (p50 / p95 / p99)",
+          "description": "Percentile breakdown of tick dispatch latency. The p50-p95 gap reveals outlier ticks causing latency spikes. If p99 is 10x p95, individual large payloads (many symbols) are the bottleneck. Values above 1ms warrant investigation.",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 46 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 15,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 3,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 0.001 },
+                  { "color": "red", "value": 0.01 }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*p99.*/i" },
+                "properties": [
+                  { "id": "custom.lineWidth", "value": 3 },
+                  { "id": "custom.fillOpacity", "value": 20 }
+                ]
+              },
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*Warning.*/i" },
+                "properties": [
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*Critical.*/i" },
+                "properties": [
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p50 Latency",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p95 Latency",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p99 Latency",
+              "refId": "C"
+            },
+            {
+              "expr": "0.001",
+              "legendFormat": "⚠ Warning (1ms)",
+              "refId": "D"
+            },
+            {
+              "expr": "0.01",
+              "legendFormat": "🔴 Critical (10ms)",
+              "refId": "E"
+            }
+          ]
+        },
+        {
+          "id": 116,
+          "type": "stat",
+          "title": "Current p99 Latency",
+          "description": "Current 99th percentile tick dispatch latency. Values above 1ms indicate backpressure or serialization bottlenecks.",
+          "gridPos": { "h": 10, "w": 6, "x": 12, "y": 46 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 0.001 },
+                  { "color": "red", "value": 0.01 }
+                ]
+              },
+              "unit": "s",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 s"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p99",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 117,
+          "type": "gauge",
+          "title": "Broker Performance Score",
+          "description": "Composite health score (0–100) based on broker connected status, auth error rate, reconnect rate, and tick dispatch p99 latency. 100 = all brokers healthy and performing well.",
+          "gridPos": { "h": 10, "w": 6, "x": 18, "y": 46 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 50 },
+                  { "color": "green", "value": 80 }
+                ]
+              },
+              "mappings": [],
+              "min": 0,
+              "max": 100,
+              "unit": "percent",
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": true,
+            "showThresholdMarkers": true,
+            "orientation": "auto"
+          },
+          "targets": [
+            {
+              "expr": "(\n  max(toroloom_broker_connected) * 40\n  +\n  clamp_max((1 - sum(rate(toroloom_broker_auth_errors_total[5m])) / 5), 1) * 25\n  +\n  clamp_max((1 - sum(rate(toroloom_broker_reconnects_total[5m])) / 3), 1) * 15\n  +\n  clamp_max((1 - histogram_quantile(0.99, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le)) / 0.01), 1) * 20\n)",
+              "legendFormat": "Score",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Broker Health Tables",
+      "description": "Detailed breakdowns of authentication errors, reconnection events, and tick dispatch latency by broker and user.",
+      "panels": [
+        {
+          "id": 118,
+          "type": "table",
+          "title": "Auth Errors by Broker (Total)",
+          "description": "Cumulative authentication errors per broker. A growing count for zerodha or angel indicates credential issues. Mock broker errors indicate internal fallback chain problems.",
+          "gridPos": { "h": 10, "w": 8, "x": 0, "y": 56 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "minWidth": 120
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "red", "value": 50 }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Auth Errors" },
+                "properties": [
+                  { "id": "custom.width", "value": 150 },
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": false
+            },
+            "sortBy": [{ "displayName": "Auth Errors", "desc": true }],
+            "showTypeIcons": false
+          },
+          "targets": [
+            {
+              "expr": "topk(5, toroloom_broker_auth_errors_total)",
+              "legendFormat": "{{broker}}",
+              "refId": "A",
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true
+                },
+                "indexByName": { "broker": 0, "Value": 1 },
+                "renameByName": { "broker": "Broker", "Value": "Auth Errors" }
+              }
+            }
+          ]
+        },
+        {
+          "id": 119,
+          "type": "table",
+          "title": "Reconnects by Broker (Total)",
+          "description": "Cumulative reconnection/failover events per broker. Higher counts for zerodha indicate upstream API instability. Mock reconnects indicate the fallback was activated.",
+          "gridPos": { "h": 10, "w": 8, "x": 8, "y": 56 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "minWidth": 120
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 5 },
+                  { "color": "red", "value": 20 }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Reconnects" },
+                "properties": [
+                  { "id": "custom.width", "value": 150 },
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": false
+            },
+            "sortBy": [{ "displayName": "Reconnects", "desc": true }],
+            "showTypeIcons": false
+          },
+          "targets": [
+            {
+              "expr": "topk(5, toroloom_broker_reconnects_total)",
+              "legendFormat": "{{broker}}",
+              "refId": "A",
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true
+                },
+                "indexByName": { "broker": 0, "Value": 1 },
+                "renameByName": { "broker": "Broker", "Value": "Reconnects" }
+              }
+            }
+          ]
+        },
+        {
+          "id": 120,
+          "type": "table",
+          "title": "Broker Snapshot",
+          "description": "Live snapshot of all broker metrics — connection status, auth errors, and reconnects for each backend at a glance.",
+          "gridPos": { "h": 10, "w": 8, "x": 16, "y": 56 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "minWidth": 100
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Connected" },
+                "properties": [
+                  { "id": "custom.displayMode", "value": "color-background-solid" },
+                  { "id": "thresholds", "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "red", "value": null },
+                      { "color": "green", "value": 1 }
+                    ]
+                  }},
+                  { "id": "mappings", "value": [
+                    { "type": "value", "value": "0", "text": "Disconnected" },
+                    { "type": "value", "value": "1", "text": "Connected" }
+                  ]}
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Auth Errors" },
+                "properties": [
+                  { "id": "thresholds", "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": null },
+                      { "color": "orange", "value": 10 },
+                      { "color": "red", "value": 50 }
+                    ]
+                  }},
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Reconnects" },
+                "properties": [
+                  { "id": "thresholds", "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "color": "green", "value": null },
+                      { "color": "orange", "value": 5 },
+                      { "color": "red", "value": 20 }
+                    ]
+                  }},
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": false
+            },
+            "sortBy": [],
+            "showTypeIcons": false
+          },
+          "targets": [
+            {
+              "expr": "toroloom_broker_connected",
+              "legendFormat": "Connected  {{broker}}",
+              "refId": "connected",
+              "format": "table"
+            },
+            {
+              "expr": "toroloom_broker_auth_errors_total",
+              "legendFormat": "Auth Errors  {{broker}}",
+              "refId": "auth",
+              "format": "table"
+            },
+            {
+              "expr": "toroloom_broker_reconnects_total",
+              "legendFormat": "Reconnects  {{broker}}",
+              "refId": "reconnects",
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true
+                },
+                "indexByName": {
+                  "broker": 0,
+                  "Value #connected": 1,
+                  "Value #auth": 2,
+                  "Value #reconnects": 3
+                },
+                "renameByName": {
+                  "broker": "Broker",
+                  "Value #connected": "Connected",
+                  "Value #auth": "Auth Errors",
+                  "Value #reconnects": "Reconnects"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Top Users by Tick Activity",
+      "description": "Users receiving the most price ticks and those with the highest tick dispatch latency — useful for identifying high-traffic clients and potential serialization bottlenecks.",
+      "panels": [
+        {
+          "id": 121,
+          "type": "table",
+          "title": "Top Users by Tick Rate",
+          "description": "Users with the highest tick delivery rate. Users receiving the most ticks per second are the heaviest consumers of broker data.",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 66 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "minWidth": 120
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 50 },
+                  { "color": "red", "value": 200 }
+                ]
+              },
+              "unit": "cps"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Ticks/s" },
+                "properties": [
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": true
+            },
+            "sortBy": [{ "displayName": "Ticks/s", "desc": true }],
+            "showTypeIcons": false
+          },
+          "targets": [
+            {
+              "expr": "topk(10, sum(rate(toroloom_ws_ticks_total[1m])) by (user_id))",
+              "legendFormat": "{{user_id}}",
+              "refId": "A",
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true
+                },
+                "indexByName": { "user_id": 0, "Value": 1 },
+                "renameByName": { "user_id": "User ID", "Value": "Ticks/s" }
+              }
+            }
+          ]
+        },
+        {
+          "id": 122,
+          "type": "table",
+          "title": "Top Users by Latency",
+          "description": "Users with the highest current p99 tick dispatch latency. High latency for specific users may indicate slow network connections or large symbol watchlists.",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 66 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "minWidth": 120
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 0.001 },
+                  { "color": "red", "value": 0.01 }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "p99 Latency" },
+                "properties": [
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": true
+            },
+            "sortBy": [{ "displayName": "p99 Latency", "desc": true }],
+            "showTypeIcons": false
+          },
+          "targets": [
+            {
+              "expr": "topk(10,\n  histogram_quantile(0.99,\n    sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le, user_id)\n  )\n)",
+              "legendFormat": "{{user_id}}",
+              "refId": "A",
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true,
+                  "le": true
+                },
+                "indexByName": { "user_id": 0, "Value": 1 },
+                "renameByName": { "user_id": "User ID", "Value": "p99 Latency" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Raw Metrics",
+      "description": "Raw Prometheus values for debugging broker and auth metrics.",
+      "panels": [
+        {
+          "id": 123,
+          "type": "table",
+          "title": "Raw Broker Metrics Sampler",
+          "description": "Raw Prometheus values for all toroloom_broker_* and toroloom_ws_rate_* metrics. Useful for ad-hoc debugging.",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 76 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": { "align": "auto", "displayMode": "auto" },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": false
+            },
+            "sortBy": [{ "displayName": "Metric", "desc": false }],
+            "showTypeIcons": false
+          },
+          "targets": [
+            {
+              "expr": "toroloom_broker_connected",
+              "legendFormat": "broker_connected  {{broker}}",
+              "refId": "connected"
+            },
+            {
+              "expr": "toroloom_broker_auth_errors_total",
+              "legendFormat": "broker_auth_errors  {{broker}}",
+              "refId": "auth_errors"
+            },
+            {
+              "expr": "toroloom_broker_reconnects_total",
+              "legendFormat": "broker_reconnects  {{broker}}",
+              "refId": "reconnects"
+            },
+            {
+              "expr": "sum(rate(toroloom_ws_rate_limited_total[$__rate_interval]))",
+              "legendFormat": "rate_limited (rate)",
+              "refId": "rate_limited"
+            },
+            {
+              "expr": "toroloom_ws_active_rate_limiters",
+              "legendFormat": "active_rate_limiters",
+              "refId": "active_limiters"
+            },
+            {
+              "expr": "sum(rate(toroloom_ws_ticks_total[$__rate_interval]))",
+              "legendFormat": "ticks_total (rate)",
+              "refId": "ticks"
+            },
+            {
+              "expr": "count(toroloom_ws_symbol_subscriptions)",
+              "legendFormat": "unique_symbols",
+              "refId": "symbols"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "instance": true,
+                  "job": true,
+                  "__name__": true,
+                  "le": true
+                },
+                "indexByName": {},
+                "renameByName": {
+                  "Metric": "Metric",
+                  "Value": "Current Value"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(toroloom_broker_connected, broker)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Broker",
+        "multi": true,
+        "name": "broker",
+        "options": [],
+        "query": {
+          "query": "label_values(toroloom_broker_connected, broker)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(toroloom_ws_user_connections, user_id)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "User ID",
+        "multi": true,
+        "name": "user_id",
+        "options": [],
+        "query": {
+          "query": "label_values(toroloom_ws_user_connections, user_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "WebSocket Dashboard",
+      "type": "link",
+      "url": "/d/toroloom-ws/toroloom-websocket-connections",
+      "targetBlank": false
+    },
+    {
+      "title": "Prometheus Targets",
+      "type": "link",
+      "url": "/targets",
+      "targetBlank": true
+    }
+  ]
+}

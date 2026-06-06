@@ -10,4 +10,5 @@ export { useCommunityStore } from './communityStore';
 export { useAIStore } from './aiStore';
 export { useGamificationStore } from './gamificationStore';
 export { useNotificationStore } from './notificationStore';
+export { usePortfolioAnalyticsStore } from './portfolioAnalyticsStore';
 export { useThemeStore } from './themeStore';

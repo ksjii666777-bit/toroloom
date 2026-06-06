@@ -181,31 +181,19 @@ export const FONTS = {
 
 export const SHADOWS = {
   small: {
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.25)',
     elevation: 3,
   },
   medium: {
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(0,0,0,0.30)',
     elevation: 5,
   },
   large: {
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
+    boxShadow: '0px 8px 16px rgba(0,0,0,0.35)',
     elevation: 8,
   },
   glow: (color: string) => ({
-    shadowColor: color,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
+    boxShadow: `0px 0px 20px ${color}80`,
     elevation: 6,
   }),
 };

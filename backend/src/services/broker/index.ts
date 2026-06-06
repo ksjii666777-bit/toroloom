@@ -3,12 +3,14 @@ import { IBroker, BrokerConfig } from './interface';
 import { MockBroker } from './mockBroker';
 import { ZerodhaBroker } from './zerodhaBroker';
 import { AngelBroker } from './angelBroker';
+import { GrowwBroker } from './growwBroker';
 import { getCircuitBreaker, CircuitOpenError } from '../circuitBreaker';
 import { auditTrail } from '../auditTrail';
 import type { StorageEngine } from '../storage/types';
+import { setBrokerConnected, incrementBrokerAuthError, incrementBrokerReconnects } from '../metrics';
 
 let brokerInstance: IBroker | null = null;
-let currentBrokerType: 'zerodha' | 'angel' | 'mock' | null = null;
+let currentBrokerType: 'zerodha' | 'angel' | 'groww' | 'mock' | null = null;
 
 /**
  * Optional StorageEngine for persisting broker state across restarts.
@@ -23,12 +25,12 @@ let brokerStorage: StorageEngine | null = null;
  * every time getBroker() is called while a circuit is OPEN.
  */
 const brokerStateCache = new Map<
-  'zerodha' | 'angel' | 'mock',
+  'zerodha' | 'angel' | 'groww' | 'mock',
   { lastEvent: 'BROKER_CONNECTED' | 'BROKER_DISCONNECTED'; timestamp: number }
 >();
 
 interface BrokerFactoryEntry {
-  type: 'zerodha' | 'angel' | 'mock';
+  type: 'zerodha' | 'angel' | 'groww' | 'mock';
   factory: () => IBroker;
   config: BrokerConfig;
 }
@@ -77,7 +79,7 @@ async function persistBrokerState(): Promise<void> {
  * already known to be disconnected, preventing audit trail flooding.
  */
 async function tryLogDisconnection(
-  type: 'zerodha' | 'angel' | 'mock',
+  type: 'zerodha' | 'angel' | 'groww' | 'mock',
   reason: string,
   metadata?: Record<string, unknown>,
 ): Promise<void> {
@@ -132,6 +134,14 @@ async function createBrokerWithFallback(): Promise<IBroker> {
       },
     },
     {
+      type: 'groww',
+      factory: () => new GrowwBroker(),
+      config: {
+        apiKey: env.groww?.apiKey || '',
+        accessToken: env.groww?.accessToken || '',
+      },
+    },
+    {
       type: 'mock',
       factory: () => new MockBroker(),
       config: { apiKey: 'mock' },
@@ -139,7 +149,7 @@ async function createBrokerWithFallback(): Promise<IBroker> {
   ];
 
   // Determine starting index based on configured broker preference
-  const startIndex = env.broker === 'zerodha' ? 0 : env.broker === 'angel' ? 1 : 2;
+  const startIndex = env.broker === 'zerodha' ? 0 : env.broker === 'angel' ? 1 : env.broker === 'groww' ? 2 : 3;
 
   let lastError: Error | null = null;
 
@@ -162,11 +172,16 @@ async function createBrokerWithFallback(): Promise<IBroker> {
     try {
       const broker = await cb.call(async () => {
         const instance = factory();
-        await instance.authenticate(config);
+        const authResult = await instance.authenticate(config);
+        if (!authResult) {
+          incrementBrokerAuthError(type);
+          throw new Error(`Authentication failed for broker: ${type}`);
+        }
         return instance;
       });
 
       // Connection successful — record it
+      setBrokerConnected(type, true);
       currentBrokerType = type;
       brokerStateCache.set(type, {
         lastEvent: 'BROKER_CONNECTED',
@@ -186,6 +201,9 @@ async function createBrokerWithFallback(): Promise<IBroker> {
       if (error instanceof CircuitOpenError) {
         await tryLogDisconnection(type, error.message);
       } else {
+        // Track the auth failure and reconnection attempt
+        incrementBrokerAuthError(type);
+        if (i > 0) incrementBrokerReconnects(type); // failover
         await auditTrail.append({
           userId: 'system',
           eventType: 'BROKER_FAILOVER',
@@ -242,7 +260,7 @@ export function resetBroker(): void {
 /**
  * Reset the deduplication state for a specific broker type.
  */
-export function resetBrokerDeduplication(type: 'zerodha' | 'angel' | 'mock'): void {
+export function resetBrokerDeduplication(type: 'zerodha' | 'angel' | 'groww' | 'mock'): void {
   brokerStateCache.delete(type);
 }
 
@@ -250,7 +268,7 @@ export function resetBrokerDeduplication(type: 'zerodha' | 'angel' | 'mock'): vo
  * Get the current deduplication state (for testing/observability).
  */
 export function getBrokerDeduplicationState(): Map<
-  'zerodha' | 'angel' | 'mock',
+  'zerodha' | 'angel' | 'groww' | 'mock',
   { lastEvent: string; timestamp: number }
 > {
   return new Map(brokerStateCache);

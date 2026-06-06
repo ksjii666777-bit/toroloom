@@ -439,10 +439,7 @@ const createStyles = (colors: any) =>
       borderWidth: 1,
       borderColor: colors.border,
       minWidth: 120,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
+      boxShadow: `0px 2px 4px ${colors.shadow}40`,
       elevation: 5,
     },
     crosshairPrice: {

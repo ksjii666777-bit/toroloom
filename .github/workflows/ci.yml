@@ -56,7 +56,11 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run unit tests with coverage (excluding integration tests)
-        run: npx vitest run --reporter=verbose --coverage --exclude='**/*.int.test.ts'
+        # Also exclude cross-file isolation tests — they run in a dedicated
+        # job (cross-file-isolation) with singleFork=true so the singleton
+        # is shared across files. Running them here (separate forks) would
+        # produce a false pass trivially.
+        run: npx vitest run --reporter=verbose --coverage --exclude='**/*.int.test.ts' --exclude='**/*CrossFile*.test.ts'
         env:
           NODE_ENV: test
 
@@ -306,6 +310,43 @@ jobs:
           name: frontend-coverage-badge
           path: badge-artifact/
           retention-days: 7
+
+  # ── Backend cross-file isolation test ─────────────────────────────────────
+  # Runs all 8 cross-file test files (riskEngine, auditTrail, brokerState,
+  # circuitBreaker — each as File A + File B pairs) in the SAME vitest fork
+  # to verify that afterAll cleanup properly isolates each singleton across
+  # test file boundaries. This would be a false pass if run with the default
+  # pool (separate forks = natural isolation).
+  cross-file-isolation:
+    name: Backend — Cross-File Isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: backend
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run cross-file isolation test (singleFork = same process)
+        # All 8 cross-file test files (4 singleton pairs) run in the same
+        # fork to verify that afterAll cleanup prevents state leakage
+        # between test files.
+        run: npx vitest run --config vitest.cross-file.config.ts --reporter=verbose src/__tests__/riskCrossFileA.test.ts src/__tests__/riskCrossFileB.test.ts src/__tests__/auditCrossFileA.test.ts src/__tests__/auditCrossFileB.test.ts src/__tests__/brokerCrossFileA.test.ts src/__tests__/brokerCrossFileB.test.ts src/__tests__/circuitCrossFileA.test.ts src/__tests__/circuitCrossFileB.test.ts
+        env:
+          NODE_ENV: test
 
   # ── Backend integration tests (PostgreSQL + MongoDB) ─────────────────────
   backend-integration:

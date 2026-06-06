@@ -7,6 +7,13 @@
  * modules that are not available in the Node.js test environment.
  */
 
+// ==================== Global environment polyfills ===========================
+// __DEV__ is a React Native / Metro bundler global that vitest's Node
+// environment doesn't define by default. expo-modules-core's setUpJsLogger
+// references it at import time, causing a ReferenceError in tests that
+// transitively load expo modules.
+globalThis.__DEV__ = true;
+
 // ==================== Mock react-native-safe-area-context ====================
 // Fund screens (AddFundsScreen, TransactionHistoryScreen, TransferScreen,
 // UPIScreen, WithdrawScreen) all import useSafeAreaInsets.  This module
@@ -106,9 +113,9 @@ vi.mock('expo-notifications', () => ({
 
 // ==================== Mock expo-haptics ====================
 vi.mock('expo-haptics', () => ({
-  impactAsync: vi.fn(),
-  selectionAsync: vi.fn(),
-  notificationAsync: vi.fn(),
+  impactAsync: vi.fn(() => Promise.resolve()),
+  selectionAsync: vi.fn(() => Promise.resolve()),
+  notificationAsync: vi.fn(() => Promise.resolve()),
   ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
   NotificationFeedbackType: { Success: 'success', Error: 'error', Warning: 'warning' },
 }));
@@ -163,6 +170,28 @@ vi.mock('react-native-svg', () => {
   };
 });
 
+// ==================== Mock expo-task-manager ====================
+vi.mock('expo-task-manager', () => ({
+  defineTask: vi.fn(),
+  isTaskRegisteredAsync: vi.fn(() => Promise.resolve(false)),
+  registerTaskAsync: vi.fn(() => Promise.resolve()),
+  unregisterTaskAsync: vi.fn(() => Promise.resolve()),
+  getRegisteredTasksAsync: vi.fn(() => Promise.resolve([])),
+  TaskManager: {
+    defineTask: vi.fn(),
+    isTaskRegisteredAsync: vi.fn(() => Promise.resolve(false)),
+  },
+}));
+
+// ==================== Mock expo-background-fetch ====================
+vi.mock('expo-background-fetch', () => ({
+  registerTaskAsync: vi.fn(() => Promise.resolve()),
+  unregisterTaskAsync: vi.fn(() => Promise.resolve()),
+  getStatusAsync: vi.fn(() => Promise.resolve(3)),
+  BackgroundFetchStatus: { Denied: 0, Restricted: 1, Available: 3 },
+  BackgroundFetchResult: { NoData: 1, NewData: 2, Failed: 3 },
+}));
+
 // ==================== Mock expo-device ====================
 vi.mock('expo-device', () => ({
   deviceName: 'Test Device',
@@ -198,9 +227,12 @@ vi.mock('../services/wsRegistry', () => ({
     onMessage: vi.fn(),
     send: vi.fn(),
     isConnected: vi.fn(() => false),
-    onPnLUpdateCallback: vi.fn((cb) => {}),
-    onLockdownCallback: vi.fn((cb) => {}),
+    onPnLUpdateCallback: vi.fn((_cb: any) => {}),
+    onLockdownCallback: vi.fn((_cb: any) => {}),
     setLossLimit: vi.fn(),
+    getCurrentPrice: vi.fn((_stockId: string) => 2890.50),
+    getCachedCandles: vi.fn(() => []),
+    getIsAuthenticated: vi.fn(() => true),
   })),
 }));
 
@@ -209,10 +241,12 @@ vi.mock('../services/notificationService', () => ({
   sendPriceAlert: vi.fn(),
   sendTradeConfirmation: vi.fn(),
   sendEducationalReminder: vi.fn(),
+  sendPortfolioAlert: vi.fn(),
   sendLocalNotification: vi.fn(() => Promise.resolve('mock-scheduled-id')),
   cancelNotification: vi.fn(),
   cancelAllNotifications: vi.fn(),
   setupChannels: vi.fn(),
+  updateAppIconBadge: vi.fn(() => Promise.resolve()),
   useNotificationStore: { getState: vi.fn() },
 }));
 
@@ -255,6 +289,9 @@ vi.mock('../services/api/notifications', () => ({
     getAll: vi.fn(),
     markRead: vi.fn(),
     markAllRead: vi.fn(),
+    getBadgeCount: vi.fn(() => Promise.resolve({ badgeCount: 0 })),
+    evaluatePortfolioAlerts: vi.fn(() => Promise.resolve({ evaluated: true, rulesFired: 0, badgeCount: 0, fired: [] })),
+    syncPortfolioAlertRules: vi.fn(() => Promise.resolve({ success: true, count: 0 })),
   },
 }));
 
@@ -296,3 +333,56 @@ vi.mock('../services/api/support', () => ({
     getFAQs: vi.fn(() => Promise.resolve([])),
   },
 }));
+
+// ==================== Mock expo-print ====================
+vi.mock('expo-print', () => ({
+  Print: {
+    printToFileAsync: vi.fn(() => Promise.resolve({ uri: 'file:///tmp/test_report.pdf' })),
+  },
+  default: {
+    printToFileAsync: vi.fn(() => Promise.resolve({ uri: 'file:///tmp/test_report.pdf' })),
+  },
+  printToFileAsync: vi.fn(() => Promise.resolve({ uri: 'file:///tmp/test_report.pdf' })),
+}));
+
+// ==================== Mock expo-sharing ====================
+vi.mock('expo-sharing', () => ({
+  default: {
+    isAvailableAsync: vi.fn(() => Promise.resolve(true)),
+    shareAsync: vi.fn(() => Promise.resolve()),
+  },
+  isAvailableAsync: vi.fn(() => Promise.resolve(true)),
+  shareAsync: vi.fn(() => Promise.resolve()),
+}));
+
+// ==================== Mock expo-file-system ====================
+vi.mock('expo-file-system', () => ({
+  default: {
+    cacheDirectory: '/tmp/',
+    moveAsync: vi.fn(() => Promise.resolve()),
+    writeAsStringAsync: vi.fn(() => Promise.resolve()),
+    documentDirectory: '/docs/',
+    EncodingType: { UTF8: 'utf8' },
+  },
+  cacheDirectory: '/tmp/',
+  documentDirectory: '/docs/',
+  moveAsync: vi.fn(() => Promise.resolve()),
+  writeAsStringAsync: vi.fn(() => Promise.resolve()),
+  EncodingType: { UTF8: 'utf8' },
+}));
+
+// ==================== Mock expo-file-system/legacy ====================
+// reportExport.ts imports from 'expo-file-system/legacy'. vitest's mock of the
+// root module does NOT cover subpath imports. Without this mock, the real module
+// loads and triggers expo-modules-core → react-native subpath imports that our
+// root react-native mock doesn't intercept (e.g. react-native/Libraries/...),
+// causing EventEmitter errors. The test file also has its own mock with local
+// vi.fn() refs, but other test files (e.g. ReportsScreen) need this too since
+// they import the same reportExport module at render time.
+vi.mock('expo-file-system/legacy', () => ({
+  cacheDirectory: '/tmp/',
+  moveAsync: vi.fn(() => Promise.resolve()),
+  writeAsStringAsync: vi.fn(() => Promise.resolve()),
+  EncodingType: { UTF8: 'utf8' },
+}));
+

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { Platform } from 'react-native';
+import { Platform, AppState } from 'react-native';
 import { log } from '../utils/logger';
 import { useNavigation } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
@@ -7,7 +7,11 @@ import {
   registerForPushNotifications,
   setupNotificationResponseListener,
   getScreenForType,
+  registerPortfolioAlertBackgroundTask,
+  evaluatePortfolioAlertsInBackground,
 } from '../services/notificationService';
+import { notificationApi } from '../services/api/notifications';
+import { useNotificationStore } from '../store/notificationStore';
 
 export function useNotificationSetup() {
   const navigation = useNavigation<any>();
@@ -30,6 +34,7 @@ export function useNotificationSetup() {
           navigation.navigate('More');
           break;
         case 'Notifications':
+        case 'PortfolioAlerts':
           navigation.navigate('Notifications');
           break;
         default:
@@ -40,12 +45,28 @@ export function useNotificationSetup() {
   );
 
   useEffect(() => {
+    // Skip notification setup on web — push notifications require native APIs
+    if (Platform.OS === 'web') return;
+
     // Register for push notifications
     registerForPushNotifications().then(token => {
       if (token) {
         log.info('[Notifications] Push token:', token);
+        // Send the push token to the backend for server-side push notifications
+        notificationApi.registerPushToken(token).catch(() => {
+          // Backend may be unavailable — silently ignore
+        });
       }
     });
+
+    // Sync the app icon badge with the backend badge count
+    // This ensures the badge persists across app restarts — the backend tracks
+    // the count server-side and returns it here so the local store and app
+    // icon badge are accurate even after the app was killed.
+    useNotificationStore.getState().syncBadgeCountFromBackend();
+
+    // Register background fetch task for periodic portfolio alert evaluation
+    registerPortfolioAlertBackgroundTask();
 
     // Listen for notifications while app is foregrounded
     notificationListenerRef.current = Notifications.addNotificationReceivedListener(notification => {
@@ -55,9 +76,21 @@ export function useNotificationSetup() {
     // Listen for notification taps (user opens notification)
     responseListenerRef.current = setupNotificationResponseListener(onNavigate);
 
+    // ── AppState listener — re-evaluate portfolio alerts on foreground ──
+    // Captures alerts that would have fired while the app was backgrounded
+    const appStateSubscription = AppState.addEventListener('change', nextState => {
+      if (nextState === 'active') {
+        // Small delay to ensure stores have rehydrated from persistence
+        setTimeout(() => {
+          evaluatePortfolioAlertsInBackground();
+        }, 500);
+      }
+    });
+
     return () => {
       notificationListenerRef.current?.remove();
       responseListenerRef.current?.remove();
+      appStateSubscription.remove();
     };
   }, [onNavigate]);
 }

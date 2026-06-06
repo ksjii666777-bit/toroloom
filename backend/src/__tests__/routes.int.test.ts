@@ -30,12 +30,14 @@ import educationRoutes from '../routes/education';
 import communityRoutes from '../routes/community';
 import aiInsightsRoutes from '../routes/aiInsights';
 import notificationsRoutes from '../routes/notifications';
+import pushNotificationsRoutes from '../routes/pushNotifications';
 import riskRoutes from '../routes/risk';
 import supportRoutes from '../routes/support';
 import fundsRoutes from '../routes/funds';
 import ordersRoutes from '../routes/orders';
 import systemRoutes from '../routes/system';
 import wsStatusRoutes from '../routes/wsStatus';
+import brokerRoutes from '../routes/broker';
 
 // ──── Circuit breaker + state for system/wsStatus routes ─────────────────
 
@@ -127,12 +129,14 @@ beforeAll(async () => {
   app.use('/api/community', communityRoutes);
   app.use('/api/ai', aiInsightsRoutes);
   app.use('/api/notifications', notificationsRoutes);
+  app.use('/api/notifications', pushNotificationsRoutes);
   app.use('/api/risk', riskRoutes);
   app.use('/api/support', supportRoutes);
   app.use('/api/funds', fundsRoutes);
   app.use('/api/orders', ordersRoutes);
   app.use('/api/system', systemRoutes);
   app.use('/api/system', wsStatusRoutes);
+  app.use('/api/broker', brokerRoutes);
 
   server = http.createServer(app);
   await new Promise<void>((resolve) => {
@@ -870,7 +874,461 @@ describe('PUT /api/notifications/read-all', () => {
 });
 
 // ============================================================================
-// 10. RISK ROUTES
+// 10. PORTFOLIO ALERT EVALUATE ENDPOINT
+// ============================================================================
+
+describe('POST /api/notifications/portfolio-alert/evaluate', () => {
+  beforeEach(async () => {
+    // Reset badge count and rules before each test
+    await post('/api/notifications/portfolio-alert/reset-triggers', {}, AUTH_HEADER);
+  });
+
+  it('should reject without auth', async () => {
+    const { status } = await post('/api/notifications/portfolio-alert/evaluate', {});
+    expect(status).toBe(401);
+  });
+
+  it('should return evaluated = false and rulesFired = 0 when no rules exist', async () => {
+    // Sync empty rules
+    await post('/api/notifications/portfolio-rules/sync', { rules: [] }, AUTH_HEADER);
+
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.evaluated).toBe(true);
+    expect(body.rulesFired).toBe(0);
+    expect(Array.isArray(body.fired)).toBe(true);
+    expect(body.fired).toHaveLength(0);
+    expect(typeof body.badgeCount).toBe('number');
+  });
+
+  it('should detect breached P&L threshold and return fired rule details', async () => {
+    const rule = {
+      id: 'eval-test-rule-1',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'Eval Test P&L',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.evaluated).toBe(true);
+    expect(body.rulesFired).toBe(1);
+    expect(body.badgeCount).toBeGreaterThanOrEqual(1);
+
+    // Verify the fired entry shape
+    expect(body.fired).toHaveLength(1);
+    const firedEntry = body.fired[0];
+    expect(firedEntry.ruleId).toBe('eval-test-rule-1');
+    expect(firedEntry.ruleLabel).toBe('Eval Test P&L');
+    expect(firedEntry.kind).toBe('portfolio_pnl_pct');
+    expect(firedEntry.title).toContain('P&L Threshold Breached');
+    expect(typeof firedEntry.message).toBe('string');
+    expect(firedEntry.value).toBe(-10);
+  });
+
+  it('should return rulesFired = 0 when no threshold is breached', async () => {
+    const rule = {
+      id: 'eval-test-rule-2',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'No Breach Test',
+      threshold: -10,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -5, // Not below -10 threshold
+        totalReturn: -25000,
+        totalInvested: 500000,
+        currentValue: 475000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.evaluated).toBe(true);
+    expect(body.rulesFired).toBe(0);
+    expect(body.fired).toHaveLength(0);
+  });
+
+  it('should detect breached drawdown threshold', async () => {
+    const rule = {
+      id: 'eval-test-rule-3',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_peak_drawdown',
+      label: 'Drawdown Test',
+      threshold: 3,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: 0,
+        totalReturn: 0,
+        totalInvested: 500000,
+        currentValue: 450000, // 100k drop from peak
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.rulesFired).toBe(1);
+    const firedEntry = body.fired[0];
+    expect(firedEntry.kind).toBe('portfolio_peak_drawdown');
+    // Drawdown = (550000 - 450000) / 550000 * 100 = ~18.18%
+    expect(firedEntry.value).toBeGreaterThan(3);
+  });
+
+  it('should return rulesFired = 2 when two rules breach simultaneously', async () => {
+    const rules = [
+      {
+        id: 'eval-test-rule-4a',
+        userId: TEST_USER_ID,
+        kind: 'portfolio_pnl_pct',
+        label: 'P&L Breach',
+        threshold: -5,
+        direction: 'below',
+        triggered: false,
+        createdAt: new Date().toISOString(),
+        enabled: true,
+      },
+      {
+        id: 'eval-test-rule-4b',
+        userId: TEST_USER_ID,
+        kind: 'portfolio_peak_drawdown',
+        label: 'Drawdown Breach',
+        threshold: 3,
+        direction: 'below',
+        triggered: false,
+        createdAt: new Date().toISOString(),
+        enabled: true,
+      },
+    ];
+    await post('/api/notifications/portfolio-rules/sync', { rules }, AUTH_HEADER);
+
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.rulesFired).toBe(2);
+    expect(body.fired).toHaveLength(2);
+    expect(body.badgeCount).toBeGreaterThanOrEqual(2);
+
+    const kinds = body.fired.map((f: any) => f.kind).sort();
+    // Alphabetical order: 'portfolio_peak_drawdown' < 'portfolio_pnl_pct'
+    expect(kinds).toEqual(['portfolio_peak_drawdown', 'portfolio_pnl_pct']);
+  });
+
+  it('should sync client badgeCount and then increment on rule fire', async () => {
+    const rule = {
+      id: 'eval-test-rule-5',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'Badge Sync Test',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+
+    // Provide badgeCount: 1 from client — server syncs to 1 then increments to 2
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+      badgeCount: 1,
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.rulesFired).toBe(1);
+    expect(body.badgeCount).toBe(2);
+  });
+
+  it('should skip disabled rules', async () => {
+    const rule = {
+      id: 'eval-test-rule-6',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'Disabled Rule',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: false, // <-- disabled
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.rulesFired).toBe(0);
+    expect(body.fired).toHaveLength(0);
+  });
+
+  it('should not re-fire an already-triggered rule', async () => {
+    const rule = {
+      id: 'eval-test-rule-7',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'Already Triggered',
+      threshold: -5,
+      direction: 'below',
+      triggered: true, // <-- already triggered
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.rulesFired).toBe(0);
+    expect(body.fired).toHaveLength(0);
+  });
+});
+
+// ============================================================================
+// 11. BADGE-COUNT ENDPOINT (Push Notifications route)
+// ============================================================================
+
+describe('GET /api/notifications/badge-count', () => {
+  beforeEach(async () => {
+    // Reset badge count to 0 before each test to prevent state leakage
+    await post('/api/notifications/portfolio-alert/reset-triggers', {}, AUTH_HEADER);
+  });
+
+  it('should reject without auth', async () => {
+    const { status } = await get('/api/notifications/badge-count');
+    expect(status).toBe(401);
+  });
+
+  it('should return 0 for a new user', async () => {
+    const { status, body } = await get('/api/notifications/badge-count', AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body).toHaveProperty('badgeCount');
+    expect(typeof body.badgeCount).toBe('number');
+    expect(body.badgeCount).toBe(0);
+  });
+
+  it('should return the badge count in expected shape', async () => {
+    const { status, body } = await get('/api/notifications/badge-count', AUTH_HEADER);
+
+    expect(status).toBe(200);
+    // Only badgeCount — no extra fields
+    expect(Object.keys(body)).toEqual(['badgeCount']);
+  });
+
+  it('should reject with invalid token', async () => {
+    const { status } = await get('/api/notifications/badge-count', {
+      Authorization: 'Bearer invalid-token',
+    });
+
+    expect(status).toBe(401);
+  });
+
+  it('should return > 0 after triggering a portfolio alert via evaluate', async () => {
+    // Step 1: Sync a portfolio alert rule that will trigger
+    const rule = {
+      id: 'int-test-rule-1',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'Integration Test P&L',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+
+    const syncRes = await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+    expect(syncRes.status).toBe(200);
+
+    // Step 2: Evaluate with portfolio data that breaches the threshold
+    const evaluateRes = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(evaluateRes.status).toBe(200);
+    expect(evaluateRes.body.rulesFired).toBe(1);
+    expect(evaluateRes.body.badgeCount).toBeGreaterThanOrEqual(1);
+
+    // Step 3: Check badge-count endpoint returns the incremented count
+    const badgeRes = await get('/api/notifications/badge-count', AUTH_HEADER);
+    expect(badgeRes.status).toBe(200);
+    expect(badgeRes.body.badgeCount).toBeGreaterThan(0);
+    // Should be at least the count returned by evaluate
+    expect(badgeRes.body.badgeCount).toBeGreaterThanOrEqual(evaluateRes.body.badgeCount);
+  });
+
+  it('should return incremented badge count after two rules fire', async () => {
+    // Step 1: Sync two rules that will both trigger
+    const rules = [
+      {
+        id: 'int-test-rule-2a',
+        userId: TEST_USER_ID,
+        kind: 'portfolio_pnl_pct',
+        label: 'P&L Test',
+        threshold: -5,
+        direction: 'below',
+        triggered: false,
+        createdAt: new Date().toISOString(),
+        enabled: true,
+      },
+      {
+        id: 'int-test-rule-2b',
+        userId: TEST_USER_ID,
+        kind: 'portfolio_peak_drawdown',
+        label: 'Drawdown Test',
+        threshold: 3,
+        direction: 'below',
+        triggered: false,
+        createdAt: new Date().toISOString(),
+        enabled: true,
+      },
+    ];
+
+    const syncRes = await post('/api/notifications/portfolio-rules/sync', { rules }, AUTH_HEADER);
+    expect(syncRes.status).toBe(200);
+
+    // Step 2: Evaluate with data that triggers both rules
+    const evaluateRes = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+    }, AUTH_HEADER);
+
+    expect(evaluateRes.status).toBe(200);
+    expect(evaluateRes.body.rulesFired).toBe(2);
+    expect(evaluateRes.body.badgeCount).toBeGreaterThanOrEqual(2);
+
+    // Step 3: Badge-count reflects both increments
+    const badgeRes = await get('/api/notifications/badge-count', AUTH_HEADER);
+    expect(badgeRes.status).toBe(200);
+    expect(badgeRes.body.badgeCount).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should return badge count of 1 when client passes badgeCount to evaluate endpoint', async () => {
+    // Step 1: Sync a rule
+    const rule = {
+      id: 'int-test-rule-3',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'Badge Sync Test',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+
+    const syncRes = await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+    expect(syncRes.status).toBe(200);
+
+    // Step 2: Evaluate with a badgeCount hint from the client (simulating frontend sync)
+    const evaluateRes = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: -10,
+        totalReturn: -50000,
+        totalInvested: 500000,
+        currentValue: 450000,
+        peakValue: 550000,
+        consecutiveLossDays: 0,
+      },
+      badgeCount: 1,
+    }, AUTH_HEADER);
+
+    expect(evaluateRes.status).toBe(200);
+    expect(evaluateRes.body.rulesFired).toBe(1);
+    // With badgeCount: 1 provided, the server syncs to 1 then increments to 2
+    expect(evaluateRes.body.badgeCount).toBe(2);
+  });
+});
+
+// ============================================================================
+// 12. RISK ROUTES
 // ============================================================================
 
 describe('GET /api/risk', () => {
@@ -936,7 +1394,7 @@ describe('POST /api/risk/reset', () => {
 });
 
 // ============================================================================
-// 11. SUPPORT ROUTES
+// 13. SUPPORT ROUTES
 // ============================================================================
 
 describe('GET /api/support', () => {
@@ -984,7 +1442,7 @@ describe('GET /api/support', () => {
 });
 
 // ============================================================================
-// 12. FUNDS ROUTES
+// 14. FUNDS ROUTES
 // ============================================================================
 
 describe('GET /api/funds', () => {
@@ -1163,7 +1621,7 @@ describe('POST /api/funds', () => {
 });
 
 // ============================================================================
-// 13. ORDERS ROUTES
+// 15. ORDERS ROUTES
 // ============================================================================
 
 describe('POST /api/orders', () => {
@@ -1276,7 +1734,173 @@ describe('POST /api/orders', () => {
 });
 
 // ============================================================================
-// 14. SYSTEM ROUTES
+// 16. BROKER ROUTES (EDIS + Brokerage Calculator) — Mock broker
+// ============================================================================
+
+describe('POST /api/broker', () => {
+  it('should reject all EDIS endpoints without auth', async () => {
+    const endpoints = [
+      { path: '/api/broker/edis/verify', body: { isin: 'INE545U01014', quantity: '10' } },
+      { path: '/api/broker/edis/generate-tpin', body: { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: 'ABCDE1234F' } },
+      { path: '/api/broker/edis/tran-status', body: { ReqId: 'REQ_001' } },
+      { path: '/api/broker/brokerage/estimate', body: { orders: [{ product_type: 'DELIVERY', transaction_type: 'BUY', exchange: 'NSE', symbol: 'RELIANCE', token: '123', qty: 10, price: 2500 }] } },
+    ];
+
+    for (const ep of endpoints) {
+      const { status } = await post(ep.path, ep.body);
+      expect(status).toBe(401);
+    }
+  });
+
+  describe('edis/verify', () => {
+    it('should reject without isin', async () => {
+      const { status, body } = await post('/api/broker/edis/verify', { quantity: '10' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('isin');
+    });
+
+    it('should reject without quantity', async () => {
+      const { status, body } = await post('/api/broker/edis/verify', { isin: 'INE545U01014' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('quantity');
+    });
+
+    it('should return 400 when broker is not Angel One (mock)', async () => {
+      const { status, body } = await post('/api/broker/edis/verify', { isin: 'INE545U01014', quantity: '10' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('only available with the Angel One broker');
+    });
+  });
+
+  describe('edis/generate-tpin', () => {
+    it('should reject without all required fields', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('dpId, ReqId, boid, and pan');
+    });
+
+    it('should reject numeric dpId (must be a string)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: 123, ReqId: 'R1', boid: 'BO1', pan: 'ABCDE1234F' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('must be strings');
+    });
+
+    it('should reject numeric ReqId (must be a string)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 456, boid: 'BO1', pan: 'ABCDE1234F' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('must be strings');
+    });
+
+    it('should reject numeric boid (must be a string)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 789, pan: 'ABCDE1234F' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('must be strings');
+    });
+
+    it('should reject invalid PAN format (too few letters)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: 'ABC1234D' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('Invalid PAN format');
+    });
+
+    it('should reject invalid PAN format (last character is digit)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: 'ABCDE12345' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('Invalid PAN format');
+    });
+
+    it('should reject invalid PAN format (too short)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: 'ABCDE1234' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('Invalid PAN format');
+    });
+
+    it('should reject invalid PAN format (too long)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: 'ABCDE1234FA' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('Invalid PAN format');
+    });
+
+    it('should reject invalid PAN format (special character)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: 'ABCDE1234@' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('Invalid PAN format');
+    });
+
+    it('should accept lowercase PAN after normalization (then broker mismatch)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: 'abcde1234f' }, AUTH_HEADER);
+      // PAN is normalized to uppercase and passes validation, then hits broker mismatch
+      expect(status).toBe(400);
+      expect(body.error).toContain('only available with the Angel One broker');
+    });
+
+    it('should accept PAN with whitespace after normalization (then broker mismatch)', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: '  ABCDE1234F  ' }, AUTH_HEADER);
+      // PAN is trimmed and passes validation, then hits broker mismatch
+      expect(status).toBe(400);
+      expect(body.error).toContain('only available with the Angel One broker');
+    });
+
+    it('should return 400 when broker is not Angel One (mock) with valid PAN', async () => {
+      const { status, body } = await post('/api/broker/edis/generate-tpin', { dpId: '123', ReqId: 'R1', boid: 'BO1', pan: 'ABCDE1234F' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('only available with the Angel One broker');
+    });
+  });
+
+  describe('edis/tran-status', () => {
+    it('should reject without ReqId', async () => {
+      const { status, body } = await post('/api/broker/edis/tran-status', {}, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('ReqId');
+    });
+
+    it('should reject with non-string ReqId', async () => {
+      const { status, body } = await post('/api/broker/edis/tran-status', { ReqId: 123 }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('ReqId');
+    });
+
+    it('should return 400 when broker is not Angel One (mock)', async () => {
+      const { status, body } = await post('/api/broker/edis/tran-status', { ReqId: 'REQ_001' }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('only available with the Angel One broker');
+    });
+  });
+
+  describe('brokerage/estimate', () => {
+    it('should reject without orders', async () => {
+      const { status, body } = await post('/api/broker/brokerage/estimate', {}, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('orders');
+    });
+
+    it('should reject with empty orders array', async () => {
+      const { status, body } = await post('/api/broker/brokerage/estimate', { orders: [] }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('orders');
+    });
+
+    it('should reject orders with missing required fields', async () => {
+      const { status, body } = await post('/api/broker/brokerage/estimate', { orders: [{ symbol: 'RELIANCE' }] }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('missing required fields');
+      expect(body.error).toContain('product_type');
+      expect(body.error).toContain('transaction_type');
+    });
+
+    it('should return 400 when broker is not Angel One (mock)', async () => {
+      const { status, body } = await post('/api/broker/brokerage/estimate', {
+        orders: [{ product_type: 'DELIVERY', transaction_type: 'BUY', exchange: 'NSE', symbol: 'RELIANCE', token: '123', qty: 10, price: 2500 }],
+      }, AUTH_HEADER);
+      expect(status).toBe(400);
+      expect(body.error).toContain('only available with the Angel One broker');
+    });
+  });
+});
+
+// ============================================================================
+// 17. SYSTEM ROUTES
 // ============================================================================
 
 describe('GET /api/system', () => {

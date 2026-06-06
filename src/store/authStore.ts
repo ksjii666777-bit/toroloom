@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
 import { mockUser } from '../constants/mockData';
 import { authApi } from '../services/api';
+import { analytics } from '../services/analytics';
 
 interface AuthState {
   user: User | null;
@@ -48,11 +49,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       await AsyncStorage.setItem('toroloom_token', res.token);
       await AsyncStorage.setItem('toroloom_user', JSON.stringify(res.user));
       set({ user: res.user, token: res.token, isLoggedIn: true, isLoading: false });
+      analytics.logEvent('login', { method: 'email' });
+      analytics.setUserId(res.user.id);
       return true;
     } catch {
       // Backend unavailable — fall back to mock login
       if (email && password) {
         set({ user: mockUser, token: 'mock-token', isLoggedIn: true, isLoading: false });
+        analytics.logEvent('login', { method: 'email' });
         return true;
       }
       set({ isLoading: false });
@@ -67,11 +71,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       await AsyncStorage.setItem('toroloom_token', res.token);
       await AsyncStorage.setItem('toroloom_user', JSON.stringify(res.user));
       set({ user: res.user, token: res.token, isLoggedIn: true, isLoading: false });
+      analytics.logEvent('signup', { method: 'email' });
+      analytics.setUserId(res.user.id);
       return true;
     } catch {
       // Backend unavailable — fall back to mock
       const mockUserData = { ...mockUser, name, email, phone };
       set({ user: mockUserData, token: 'mock-token', isLoggedIn: true, isLoading: false });
+      analytics.logEvent('signup', { method: 'email' });
       return true;
     }
   },
@@ -79,6 +86,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     await AsyncStorage.multiRemove(['toroloom_token', 'toroloom_user']);
     set({ user: null, token: null, isLoggedIn: false });
+    analytics.logEvent('logout', {});
+    analytics.reset();
   },
 
   updateBalance: (amount) => set((state) => ({

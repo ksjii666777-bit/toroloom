@@ -146,6 +146,9 @@ export class MongoDBStorage implements StorageEngine {
     await notif.createIndex({ userId: 1 });
     await notif.createIndex({ timestamp: -1 });
 
+    const badge = this.db.collection('badge_counts');
+    await badge.createIndex({ userId: 1 }, { unique: true });
+
     const posts = this.db.collection('community_posts');
     await posts.createIndex({ timestamp: -1 });
   }
@@ -195,8 +198,10 @@ export class MongoDBStorage implements StorageEngine {
 
   async getLatestEvent(): Promise<AuditEvent | null> {
     const col = this.getAuditCollection();
-    const result = await col.findOne({}, { sort: { timestamp: -1 } });
-    return result;
+    const doc = await col.findOne({}, { sort: { timestamp: -1 } });
+    if (!doc) return null;
+    const { _id, ...event } = doc;
+    return event as unknown as AuditEvent;
   }
 
   async getEventCount(): Promise<number> {
@@ -225,17 +230,22 @@ export class MongoDBStorage implements StorageEngine {
     if (filter.offset) cursor = cursor.skip(filter.offset);
     if (filter.limit) cursor = cursor.limit(filter.limit);
 
-    return cursor.toArray();
+    const docs = await cursor.toArray();
+    return docs.map(({ _id, ...event }) => event as unknown as AuditEvent);
   }
 
   async getEvent(id: string): Promise<AuditEvent | null> {
     const col = this.getAuditCollection();
-    return col.findOne(this.byId<AuditEvent>(id));
+    const doc = await col.findOne(this.byId<AuditEvent>(id));
+    if (!doc) return null;
+    const { _id, ...event } = doc;
+    return event as unknown as AuditEvent;
   }
 
   async getAllEvents(): Promise<AuditEvent[]> {
     const col = this.getAuditCollection();
-    return col.find({}).sort({ timestamp: 1 }).toArray();
+    const docs = await col.find({}).sort({ timestamp: 1 }).toArray();
+    return docs.map(({ _id, ...event }) => event as unknown as AuditEvent);
   }
 
   async clearForTesting(): Promise<void> {
@@ -244,6 +254,7 @@ export class MongoDBStorage implements StorageEngine {
     await this.db.collection('risk_profiles').deleteMany({});
     await this.db.collection('broker_state').deleteMany({});
     await this.db.collection('notifications').deleteMany({});
+    await this.db.collection('badge_counts').deleteMany({});
     await this.db.collection('community_posts').deleteMany({});
   }
 
@@ -294,19 +305,35 @@ export class MongoDBStorage implements StorageEngine {
 
   async saveNotification(notification: NotificationData): Promise<void> {
     const col = this.getNotificationCollection();
-    await col.replaceOne(
+    await col.updateOne(
       { id: notification.id } as unknown as Filter<NotificationData & { _id?: string }>,
-      notification as unknown as NotificationData & { _id?: string },
+      {
+        // Updated on conflict — matches Postgres ON CONFLICT DO UPDATE SET
+        $set: {
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          read: notification.read,
+          timestamp: notification.timestamp,
+          data: notification.data,
+          metadata: notification.metadata,
+        },
+        // Only set on insert — preserves userId on conflict
+        $setOnInsert: {
+          userId: notification.userId,
+        },
+      },
       { upsert: true },
     );
   }
 
   async loadNotifications(userId: string): Promise<NotificationData[]> {
     const col = this.getNotificationCollection();
-    return col
+    const docs = await col
       .find({ userId } as unknown as Filter<NotificationData & { _id?: string }>)
       .sort({ timestamp: -1 })
-      .toArray() as unknown as Promise<NotificationData[]>;
+      .toArray();
+    return docs.map(({ _id, ...data }) => data as unknown as NotificationData);
   }
 
   async markNotificationRead(notificationId: string): Promise<void> {
@@ -330,29 +357,66 @@ export class MongoDBStorage implements StorageEngine {
     await col.deleteOne({ id: notificationId } as unknown as Filter<NotificationData & { _id?: string }>);
   }
 
+  // ──── Badge Counts ────
+
+  async loadBadgeCount(userId: string): Promise<number> {
+    if (!this.db) return 0;
+    const col = this.db.collection('badge_counts');
+    const doc = await col.findOne({ userId });
+    return (doc?.count as number) ?? 0;
+  }
+
+  async saveBadgeCount(userId: string, count: number): Promise<void> {
+    if (!this.db) return;
+    const col = this.db.collection('badge_counts');
+    await col.updateOne(
+      { userId },
+      { $set: { userId, count } },
+      { upsert: true },
+    );
+  }
+
   // ──── Community ────
 
   async saveCommunityPost(post: CommunityPostData): Promise<void> {
     const col = this.getCommunityCollection();
-    await col.replaceOne(
+    await col.updateOne(
       { id: post.id } as unknown as Filter<CommunityPostData & { _id?: string }>,
-      post as unknown as CommunityPostData & { _id?: string },
+      {
+        // Updated on conflict — matches Postgres ON CONFLICT DO UPDATE SET
+        $set: {
+          content: post.content,
+          likes: post.likes,
+          comments: post.comments,
+          tags: post.tags,
+        },
+        // Only set on insert — preserves user_name, user_avatar, timestamp on conflict
+        $setOnInsert: {
+          userId: post.userId,
+          userName: post.userName,
+          userAvatar: post.userAvatar,
+          timestamp: post.timestamp,
+        },
+      },
       { upsert: true },
     );
   }
 
   async loadCommunityPosts(): Promise<CommunityPostData[]> {
     const col = this.getCommunityCollection();
-    return col
+    const docs = await col
       .find({})
       .sort({ timestamp: -1 })
-      .toArray() as unknown as Promise<CommunityPostData[]>;
+      .toArray();
+    return docs.map(({ _id, ...data }) => data as unknown as CommunityPostData);
   }
 
   async loadCommunityPost(id: string): Promise<CommunityPostData | null> {
     const col = this.getCommunityCollection();
     const doc = await col.findOne({ id } as unknown as Filter<CommunityPostData & { _id?: string }>);
-    return doc as unknown as CommunityPostData | null;
+    if (!doc) return null;
+    const { _id, ...post } = doc;
+    return post as unknown as CommunityPostData;
   }
 
   async likeCommunityPost(postId: string): Promise<void> {

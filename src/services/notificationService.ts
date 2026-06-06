@@ -4,19 +4,24 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import * as TaskManager from 'expo-task-manager';
+import * as BackgroundFetch from 'expo-background-fetch';
 import { AppNotification } from '../types';
 import { log } from '../utils/logger';
 
 // Configure notification handler — show foreground notifications as heads-up banners
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Skip on web — expo-notifications uses native APIs not available in browser
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 // ============ Notification Channels (Android) ============
 
@@ -45,6 +50,12 @@ const CHANNELS = {
     description: 'KYC status, app updates, and account notifications',
     importance: Notifications.AndroidImportance.DEFAULT,
   },
+  PORTFOLIO_ALERTS: {
+    id: 'portfolio_alerts',
+    name: 'Portfolio Alerts',
+    description: 'Real-time portfolio P&L, holding movement, and drawdown alerts',
+    importance: Notifications.AndroidImportance.HIGH,
+  },
 };
 
 async function setupChannels(): Promise<void> {
@@ -53,6 +64,7 @@ async function setupChannels(): Promise<void> {
     await Notifications.setNotificationChannelAsync(CHANNELS.TRADE_CONFIRMATIONS.id, CHANNELS.TRADE_CONFIRMATIONS);
     await Notifications.setNotificationChannelAsync(CHANNELS.EDUCATIONAL.id, CHANNELS.EDUCATIONAL);
     await Notifications.setNotificationChannelAsync(CHANNELS.SYSTEM.id, CHANNELS.SYSTEM);
+    await Notifications.setNotificationChannelAsync(CHANNELS.PORTFOLIO_ALERTS.id, CHANNELS.PORTFOLIO_ALERTS);
   }
 }
 
@@ -140,6 +152,7 @@ function getChannelForType(type: AppNotification['type']): string | undefined {
     case 'price_alert': return CHANNELS.PRICE_ALERTS.id;
     case 'trade': return CHANNELS.TRADE_CONFIRMATIONS.id;
     case 'educational': return CHANNELS.EDUCATIONAL.id;
+    case 'portfolio_alert': return CHANNELS.PORTFOLIO_ALERTS.id;
     case 'system':
     case 'news':
       return CHANNELS.SYSTEM.id;
@@ -269,6 +282,22 @@ export async function sendEducationalReminder(
   });
 }
 
+export async function sendPortfolioAlert(
+  title: string,
+  message: string,
+  data?: any,
+): Promise<string | undefined> {
+  return sendLocalNotification({
+    id: `pal_${Date.now()}`,
+    type: 'portfolio_alert',
+    title,
+    message,
+    read: false,
+    timestamp: new Date().toISOString(),
+    data,
+  });
+}
+
 export async function sendSystemNotification(
   title: string,
   message: string,
@@ -283,5 +312,100 @@ export async function sendSystemNotification(
   });
 }
 
-export { CHANNELS, setupChannels };
+// ============ Background Fetch — Portfolio Alerts ============
+
+const BACKGROUND_FETCH_TASK = 'portfolio-alert-evaluation';
+
+/**
+ * Define the background fetch task for portfolio alert evaluation.
+ * This runs whenever iOS/Android triggers the background fetch.
+ */
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  try {
+    await evaluatePortfolioAlertsInBackground();
+    return BackgroundFetch.BackgroundFetchResult.NewData;
+  } catch (err) {
+    log.warn('[BackgroundFetch] Task failed', err);
+    return BackgroundFetch.BackgroundFetchResult.Failed;
+  }
+});
+
+/**
+ * Register a periodic background fetch task that re-evaluates
+ * portfolio alert rules against the latest portfolio state.
+ * This allows alerts to fire even when the app is in the background.
+ */
+export function registerPortfolioAlertBackgroundTask(): void {
+  if (Platform.OS === 'web') return;
+
+  BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+    minimumInterval: 15 * 60, // 15 minutes (iOS minimum)
+    stopOnTerminate: false,
+    startOnBoot: true,
+  }).catch(err => {
+    log.warn('[BackgroundFetch] Task registration failed', err);
+  });
+}
+
+/**
+ * Unregister the background fetch task.
+ */
+export async function unregisterPortfolioAlertBackgroundTask(): Promise<void> {
+  if (Platform.OS === 'web') return;
+  try {
+    await BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+  } catch {
+    // Ignore if not registered
+  }
+}
+
+/**
+ * Evaluate portfolio alerts from the background fetch task.
+ * Reads the latest state from the notification store and re-evaluates
+ * rules by creating a fresh PortfolioAlertData snapshot.
+ */
+export async function evaluatePortfolioAlertsInBackground(): Promise<void> {
+  const { useNotificationStore, usePortfolioStore, usePortfolioAnalyticsStore } = await import('../store');
+
+  const { holdings } = usePortfolioStore.getState();
+  const analytics = usePortfolioAnalyticsStore.getState().getAnalytics();
+  const m = analytics.metrics;
+
+  const portfolioValue = holdings.reduce((s: number, h: any) => s + h.currentValue, 0);
+
+  useNotificationStore.getState().evaluatePortfolioAlerts({
+    totalReturnPercent: m.totalReturnPercent,
+    totalReturn: m.totalReturn,
+    totalInvested: holdings.reduce((s: number, h: any) => s + h.totalInvested, 0),
+    currentValue: portfolioValue,
+    peakValue: Math.max(portfolioValue, m.totalReturn > 0 ? portfolioValue - m.totalReturn : portfolioValue),
+    holdings,
+    consecutiveLossDays: m.consecutiveLosses || 0,
+  });
+}
+
+// ============ App Icon Badge ============
+
+/**
+ * Update the iOS/Android app icon badge count.
+ * Setting to 0 removes the badge entirely.
+ * Uses expo-notifications setBadgeCountAsync under the hood.
+ */
+export async function updateAppIconBadge(count: number): Promise<void> {
+  if (Platform.OS === 'web') return;
+  try {
+    await Notifications.setBadgeCountAsync(count);
+  } catch {
+    // Silently ignore — badge setting is a best-effort UX enhancement
+  }
+}
+
+/**
+ * Clear the app icon badge (set to 0).
+ */
+export async function clearAppIconBadge(): Promise<void> {
+  await updateAppIconBadge(0);
+}
+
+export { CHANNELS, setupChannels, BACKGROUND_FETCH_TASK };
 export type NotificationChannel = keyof typeof CHANNELS;

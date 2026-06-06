@@ -1,23 +1,31 @@
 import { create } from 'zustand';
-import { Stock, Holding, Trade } from '../types';
-import { mockHoldings, mockTrades } from '../constants/mockData';
+import { Stock, Holding, Trade, OpenOrder } from '../types';
+import { mockHoldings, mockTrades, mockOpenOrders } from '../constants/mockData';
 import { api, portfolioApi } from '../services/api';
 import { useAuthStore } from './authStore';
 import { sendTradeConfirmation } from '../services/notificationService';
 import { log } from '../utils/logger';
+import { analytics } from '../services/analytics';
 
 interface PortfolioState {
   holdings: Holding[];
   trades: Trade[];
+  openOrders: OpenOrder[];
+  ordersLoading: boolean;
   isLoading: boolean;
   buyStock: (stock: Stock, quantity: number, price: number) => Promise<void>;
   sellStock: (holdingId: string, quantity: number, price: number) => Promise<void>;
   refreshPortfolio: () => Promise<void>;
+  fetchOpenOrders: () => Promise<void>;
+  modifyOrder: (orderId: string, updates: Partial<OpenOrder>) => Promise<boolean>;
+  cancelOrder: (orderId: string) => Promise<boolean>;
 }
 
 export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   holdings: mockHoldings,
   trades: mockTrades,
+  openOrders: mockOpenOrders as OpenOrder[],
+  ordersLoading: false,
   isLoading: false,
 
   refreshPortfolio: async () => {
@@ -31,6 +39,69 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     } catch {
       // Backend unavailable — keep existing mock data
       set({ isLoading: false });
+    }
+  },
+
+  fetchOpenOrders: async () => {
+    set({ ordersLoading: true });
+    try {
+      const openOrders = await portfolioApi.getOpenOrders();
+      set({ openOrders, ordersLoading: false });
+    } catch {
+      // Backend unavailable — keep existing mock data
+      set({ ordersLoading: false });
+    }
+  },
+
+  modifyOrder: async (orderId, updates) => {
+    try {
+      const result = await portfolioApi.modifyOrder({
+        orderId,
+        ...(updates.price !== undefined && { price: updates.price }),
+        ...(updates.quantity !== undefined && { quantity: updates.quantity }),
+        ...(updates.orderType !== undefined && { orderType: updates.orderType }),
+        ...(updates.productType !== undefined && { productType: updates.productType }),
+        ...(updates.triggerPrice !== undefined && { triggerPrice: updates.triggerPrice }),
+      });
+
+      if (result.status === 'confirmed' || result.status === 'cancelled') {
+        // Update local state
+        set(state => ({
+          openOrders: state.openOrders.map(o =>
+            o.id === orderId ? { ...o, ...updates } : o
+          ),
+        }));
+        return true;
+      }
+      return false;
+    } catch {
+      // Fallback: update local mock state
+      set(state => ({
+        openOrders: state.openOrders.map(o =>
+          o.id === orderId ? { ...o, ...updates } : o
+        ),
+      }));
+      return true;
+    }
+  },
+
+  cancelOrder: async (orderId) => {
+    try {
+      const result = await portfolioApi.cancelOrder({ orderId });
+
+      if (result.status === 'cancelled') {
+        set(state => ({
+          openOrders: state.openOrders.filter(o => o.id !== orderId),
+        }));
+        return true;
+      }
+      return false;
+    } catch {
+      // Fallback: remove from local state
+      set(state => ({
+        openOrders: state.openOrders.filter(o => o.id !== orderId),
+      }));
+      return true;
     }
   },
 
@@ -132,6 +203,12 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       });
     }
 
+    analytics.logEvent('order_placed', {
+      symbol: stock.symbol,
+      type: 'buy',
+      quantity,
+      value: totalCost,
+    });
     sendTradeConfirmation('buy', stock.symbol, quantity, price, totalCost);
   },
 
@@ -218,6 +295,12 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       });
     }
 
+    analytics.logEvent('order_placed', {
+      symbol: holding.symbol,
+      type: 'sell',
+      quantity,
+      value: totalReceived,
+    });
     sendTradeConfirmation('sell', holding.symbol, quantity, price, totalReceived);
   },
 }));

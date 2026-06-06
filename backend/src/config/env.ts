@@ -9,7 +9,7 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   dataSource: (process.env.DATA_SOURCE || 'mock') as 'mock' | 'live',
-  broker: (process.env.BROKER || 'mock') as 'mock' | 'zerodha' | 'angel',
+  broker: (process.env.BROKER || 'mock') as 'mock' | 'zerodha' | 'angel' | 'groww',
 
   // ──── Storage Backend ────
   // 'memory'   → InMemoryStorage (default, no deps)
@@ -41,6 +41,25 @@ export const env = {
     password: process.env.ANGEL_PASSWORD || '',
     totp: process.env.ANGEL_TOTP || '',
   },
+
+  // ──── Groww Trade API ────
+  // To get credentials: visit https://groww.in/trade-api
+  // Required: GROWW_API_KEY and GROWW_ACCESS_TOKEN
+  groww: {
+    apiKey: process.env.GROWW_API_KEY || '',
+    accessToken: process.env.GROWW_ACCESS_TOKEN || '',
+  },
+
+  // ──── Sentry (error tracking) ──────────────────────────────
+  // DSN for Sentry crash/error reporting.
+  // If not set, Sentry is disabled (no events sent).
+  sentryDsn: process.env.SENTRY_DSN || '',
+
+  // ──── Redis (pub/sub for cross-worker sync) ────────────────
+  // If not provided, falls back to Node.js cluster IPC (single-machine)
+  // or local-only mode (single process).
+  // Format: redis://[:password@]host[:port][/db]
+  redisUrl: process.env.REDIS_URL || '',
 
   get isDev() {
     return this.nodeEnv === 'development';

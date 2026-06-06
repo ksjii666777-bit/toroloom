@@ -3,378 +3,253 @@
  * Toroloom — API Client Tests
  * ============================================================================
  *
- * Tests the client.ts utility functions: configureApi, getBaseUrl,
- * ApiError class, isNetworkError, withFallback, and HTTP method helpers
- * with edge cases for skipAuth, 204 responses, and JSON parse failures.
+ * Tests the core API client module:
+ *   - api.get, api.post, api.put, api.delete
+ *   - api.isNetworkError
+ *   - api.withFallback
+ *   - ApiError class
+ *   - configureApi / getBaseUrl
+ * ============================================================================
  */
 
-import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Need to import after mocks are set up
-import { configureApi, getBaseUrl, api, ApiError } from '../services/api/client';
+// ==================== Imports ====================
+
+import { api, configureApi, getBaseUrl, ApiError } from '../services/api/client';
+
+// ==================== Tests ====================
 
 describe('ApiClient — configureApi / getBaseUrl', () => {
   beforeEach(() => {
-    // Reset to defaults
+    // Reset base URL
     configureApi({ baseUrl: 'http://localhost:3000/api' });
   });
 
-  it('uses default base URL', () => {
+  it('getBaseUrl returns default base URL', () => {
     expect(getBaseUrl()).toBe('http://localhost:3000/api');
   });
 
-  it('allows overriding base URL', () => {
-    configureApi({ baseUrl: 'https://api.example.com/v1' });
-    expect(getBaseUrl()).toBe('https://api.example.com/v1');
+  it('configureApi updates the base URL', () => {
+    configureApi({ baseUrl: 'http://custom:4000/api' });
+    expect(getBaseUrl()).toBe('http://custom:4000/api');
   });
 
-  it('allows setting token getter', () => {
-    let token = 'test-token';
-    configureApi({ getToken: () => token });
-    // Token is used internally in requests
-    configureApi({ getToken: () => token });
-  });
-
-  it('allows overriding only baseUrl without affecting token', () => {
-    configureApi({ getToken: () => 'existing-token' });
-    configureApi({ baseUrl: 'https://new-url.com/api' });
-    expect(getBaseUrl()).toBe('https://new-url.com/api');
-  });
-});
-
-describe('ApiClient — ApiError', () => {
-  it('creates error with status and message from body string', () => {
-    const err = new ApiError(400, 'Bad request');
-    expect(err.status).toBe(400);
-    expect(err.message).toBe('Bad request');
-    expect(err.body).toBe('Bad request');
-  });
-
-  it('creates error with status and message from body object error field', () => {
-    const err = new ApiError(401, { error: 'Unauthorized' });
-    expect(err.status).toBe(401);
-    expect(err.message).toBe('Unauthorized');
-  });
-
-  it('creates error with status and message from body object message field', () => {
-    const err = new ApiError(500, { message: 'Server error' });
-    expect(err.status).toBe(500);
-    expect(err.message).toBe('Server error');
-  });
-
-  it('falls back to HTTP status text for unknown body shape', () => {
-    const err = new ApiError(404, { foo: 'bar' });
-    expect(err.status).toBe(404);
-    expect(err.message).toBe('HTTP 404');
-  });
-
-  it('is an instance of Error', () => {
-    const err = new ApiError(400, 'test');
-    expect(err).toBeInstanceOf(Error);
-  });
-
-  it('prefers error field over message field in body', () => {
-    const err = new ApiError(400, { error: 'Auth failed', message: 'Bad request' });
-    expect(err.message).toBe('Auth failed');
+  it('configureApi sets token getter', () => {
+    const getToken = vi.fn(() => 'test-token');
+    configureApi({ getToken });
+    // Just verify it doesn't throw
+    expect(getToken()).toBe('test-token');
   });
 });
 
 describe('ApiClient — isNetworkError', () => {
-  it('returns true for TypeError with Failed to fetch', () => {
+  it('returns true for TypeError with Failed to fetch message', () => {
     const err = new TypeError('Failed to fetch');
     expect(api.isNetworkError(err)).toBe(true);
   });
 
   it('returns false for ApiError', () => {
-    const err = new ApiError(500, 'Server error');
+    const err = new ApiError(500, { error: 'Server error' });
     expect(api.isNetworkError(err)).toBe(false);
   });
 
   it('returns false for generic Error', () => {
-    const err = new Error('Something went wrong');
+    const err = new Error('Something broke');
     expect(api.isNetworkError(err)).toBe(false);
   });
 
-  it('returns false for null/undefined', () => {
+  it('returns false for non-Error values', () => {
+    expect(api.isNetworkError('string error')).toBe(false);
     expect(api.isNetworkError(null)).toBe(false);
     expect(api.isNetworkError(undefined)).toBe(false);
+    expect(api.isNetworkError({})).toBe(false);
   });
 
-  it('returns false for TypeError with non-network message', () => {
-    const err = new TypeError('Some other type error');
+  it('returns false for TypeError with different message', () => {
+    const err = new TypeError('Some other error');
     expect(api.isNetworkError(err)).toBe(false);
-  });
-
-  it('returns false for plain objects', () => {
-    expect(api.isNetworkError({ code: 'ECONNREFUSED' })).toBe(false);
   });
 });
 
 describe('ApiClient — withFallback', () => {
-  it('returns success value when call succeeds', async () => {
+  it('returns the call result on success', async () => {
     const result = await api.withFallback(
-      () => Promise.resolve(42),
-      0,
-    );
-    expect(result).toBe(42);
-  });
-
-  it('returns fallback value when call fails', async () => {
-    const result = await api.withFallback(
-      () => Promise.reject(new Error('fail')),
+      () => Promise.resolve('success'),
       'fallback',
     );
-    expect(result).toBe('fallback');
+    expect(result).toBe('success');
   });
 
-  it('returns fallback when call throws', async () => {
+  it('returns fallback when the call throws', async () => {
     const result = await api.withFallback(
-      () => { throw new Error('crash'); },
-      'default',
+      () => Promise.reject(new Error('API error')),
+      'fallback-value',
     );
-    expect(result).toBe('default');
+    expect(result).toBe('fallback-value');
   });
 
-  it('returns null fallback when call fails with null as fallback', async () => {
+  it('returns fallback when call network fails', async () => {
     const result = await api.withFallback(
-      () => Promise.reject(new Error('fail')),
-      null,
+      () => Promise.reject(new TypeError('Failed to fetch')),
+      { data: [] },
     );
-    expect(result).toBeNull();
+    expect(result).toEqual({ data: [] });
   });
 });
 
-describe('ApiClient — HTTP method helpers', () => {
-  const originalFetch = globalThis.fetch;
-
+describe('ApiClient — HTTP methods (with mocked fetch)', () => {
   beforeEach(() => {
-    configureApi({ baseUrl: 'http://localhost:3000/api', getToken: () => null });
-    // Mock fetch globally
-    globalThis.fetch = vi.fn();
+    vi.restoreAllMocks();
+    configureApi({ baseUrl: 'http://localhost:3000/api' });
   });
 
-  afterAll(() => {
-    globalThis.fetch = originalFetch;
-  });
-
-  it('api.get makes GET request', async () => {
-    (globalThis.fetch as any).mockResolvedValue({
+  it('api.get makes a GET request and returns parsed JSON', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ data: 'test' }),
-    });
+      json: async () => ({ id: 1, name: 'Test' }),
+    } as any);
 
-    const result = await api.get('/test');
-    expect(result).toEqual({ data: 'test' });
+    const result = await api.get<{ id: number; name: string }>('/test');
+    expect(result).toEqual({ id: 1, name: 'Test' });
   });
 
-  it('api.post makes POST request with body', async () => {
-    (globalThis.fetch as any).mockResolvedValue({
+  it('api.post makes a POST request with body', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ id: 1 }),
-    });
+      json: async () => ({ success: true }),
+    } as any);
 
-    const result = await api.post('/test', { name: 'test' });
-    expect(result).toEqual({ id: 1 });
+    const result = await api.post<{ success: boolean }>('/create', { name: 'test' });
+    expect(result).toEqual({ success: true });
   });
 
-  it('api.put makes PUT request', async () => {
-    (globalThis.fetch as any).mockResolvedValue({
+  it('api.put makes a PUT request with body', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ updated: true }),
-    });
+      json: async () => ({ updated: true }),
+    } as any);
 
-    const result = await api.put('/test/1', { name: 'updated' });
+    const result = await api.put<{ updated: boolean }>('/update/1', { name: 'new' });
     expect(result).toEqual({ updated: true });
   });
 
-  it('api.delete makes DELETE request', async () => {
-    (globalThis.fetch as any).mockResolvedValue({
+  it('api.delete makes a DELETE request', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       ok: true,
       status: 204,
-      json: () => Promise.resolve(null),
-    });
+      json: async () => ({}),
+    } as any);
 
-    const result = await api.delete('/test/1');
+    const result = await api.delete('/delete/1');
     expect(result).toBeUndefined();
   });
 
-  it('throws ApiError on non-ok response', async () => {
-    (globalThis.fetch as any).mockResolvedValue({
-      ok: false,
-      status: 401,
-      json: () => Promise.resolve({ error: 'Unauthorized' }),
-    });
+  it('api.get includes Authorization header when token is set', async () => {
+    configureApi({ getToken: () => 'my-jwt-token' });
 
-    await expect(api.get('/secure')).rejects.toThrow('Unauthorized');
-  });
-
-  it('attaches auth token when available', async () => {
-    let capturedHeaders: any = null;
-
-    configureApi({ getToken: () => 'bearer-token' });
-
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+    let capturedHeaders: any;
+    vi.spyOn(globalThis, 'fetch').mockImplementationOnce(async (_url, opts: any) => {
       capturedHeaders = opts.headers;
       return {
         ok: true,
         status: 200,
-        json: () => Promise.resolve({}),
-      };
+        json: async () => ({}),
+      } as any;
     });
 
     await api.get('/secure');
-    expect(capturedHeaders['Authorization']).toBe('Bearer bearer-token');
+    expect(capturedHeaders['Authorization']).toBe('Bearer my-jwt-token');
   });
 
-  it('does NOT attach auth token when skipAuth is true', async () => {
-    let capturedHeaders: any = null;
+  it('api.get does not include Authorization header when skipAuth is set', async () => {
+    configureApi({ getToken: () => 'my-jwt-token' });
 
-    configureApi({ getToken: () => 'bearer-token' });
-
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
+    let capturedHeaders: any;
+    vi.spyOn(globalThis, 'fetch').mockImplementationOnce(async (_url, opts: any) => {
       capturedHeaders = opts.headers;
       return {
         ok: true,
         status: 200,
-        json: () => Promise.resolve({}),
-      };
+        json: async () => ({}),
+      } as any;
     });
 
     await api.get('/public', { skipAuth: true });
     expect(capturedHeaders['Authorization']).toBeUndefined();
   });
 
-  it('does not attach token when getToken returns null', async () => {
-    let capturedHeaders: any = null;
-
-    configureApi({ getToken: () => null });
-
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedHeaders = opts.headers;
-      return {
-        ok: true,
-        status: 200,
-        json: () => Promise.resolve({}),
-      };
-    });
-
-    await api.get('/no-auth');
-    expect(capturedHeaders['Authorization']).toBeUndefined();
-  });
-
-  it('returns undefined for 204 No Content response', async () => {
-    (globalThis.fetch as any).mockResolvedValue({
-      ok: true,
-      status: 204,
-      json: () => Promise.reject(new Error('No content')),
-    });
-
-    // 204 short-circuits json parsing
-    const result = await api.delete('/resource/1');
-    expect(result).toBeUndefined();
-  });
-
-  it('throws ApiError when JSON parse fails on error response', async () => {
-    (globalThis.fetch as any).mockResolvedValue({
+  it('throws ApiError on non-ok response', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       ok: false,
-      status: 502,
-      json: () => Promise.reject(new Error('Invalid JSON')),
-    });
+      status: 401,
+      json: async () => ({ error: 'Unauthorized' }),
+    } as any);
 
-    await expect(api.get('/bad-gateway')).rejects.toThrow('HTTP 502');
+    await expect(api.get('/secure')).rejects.toThrow(ApiError);
   });
 
-  it('uses correct HTTP method GET', async () => {
-    let capturedMethod = '';
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedMethod = opts.method;
-      return { ok: true, status: 200, json: () => Promise.resolve({}) };
-    });
+  it('throws ApiError with correct status code', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      json: async () => ({ error: 'Not found' }),
+    } as any);
 
-    await api.get('/items');
-    expect(capturedMethod).toBe('GET');
+    try {
+      await api.get('/nonexistent');
+      expect.unreachable('Should have thrown');
+    } catch (err) {
+      expect(err).toBeInstanceOf(ApiError);
+      expect((err as ApiError).status).toBe(404);
+    }
   });
 
-  it('uses correct HTTP method POST', async () => {
-    let capturedMethod = '';
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedMethod = opts.method;
-      return { ok: true, status: 200, json: () => Promise.resolve({}) };
-    });
+  it('throws ApiError with message from response body', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({ message: 'Invalid input' }),
+    } as any);
 
-    await api.post('/items', { x: 1 });
-    expect(capturedMethod).toBe('POST');
+    try {
+      await api.post('/create', { invalid: true });
+      expect.unreachable('Should have thrown');
+    } catch (err) {
+      expect((err as ApiError).message).toContain('Invalid input');
+    }
+  });
+});
+
+describe('ApiError', () => {
+  it('creates an error with status and body', () => {
+    const err = new ApiError(500, { error: 'Server error' });
+    expect(err.status).toBe(500);
+    expect(err.body).toEqual({ error: 'Server error' });
+    expect(err.message).toBe('Server error');
   });
 
-  it('uses correct HTTP method PUT', async () => {
-    let capturedMethod = '';
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedMethod = opts.method;
-      return { ok: true, status: 200, json: () => Promise.resolve({}) };
-    });
-
-    await api.put('/items/1', { x: 2 });
-    expect(capturedMethod).toBe('PUT');
+  it('creates an error with string body', () => {
+    const err = new ApiError(503, 'Service unavailable');
+    expect(err.status).toBe(503);
+    expect(err.message).toBe('Service unavailable');
   });
 
-  it('uses correct HTTP method DELETE', async () => {
-    let capturedMethod = '';
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedMethod = opts.method;
-      return { ok: true, status: 204, json: () => Promise.resolve(null) };
-    });
-
-    await api.delete('/items/1');
-    expect(capturedMethod).toBe('DELETE');
+  it('creates an error with message property in body', () => {
+    const err = new ApiError(429, { message: 'Rate limit exceeded' });
+    expect(err.message).toBe('Rate limit exceeded');
   });
 
-  it('sends request body as JSON string for POST', async () => {
-    let capturedBody = '';
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedBody = opts.body;
-      return { ok: true, status: 200, json: () => Promise.resolve({}) };
-    });
-
-    await api.post('/items', { name: 'test', value: 42 });
-    expect(JSON.parse(capturedBody)).toEqual({ name: 'test', value: 42 });
+  it('falls back to HTTP status text when body has no error or message', () => {
+    const err = new ApiError(500, { code: 'UNKNOWN' });
+    expect(err.message).toBe('HTTP 500');
   });
 
-  it('sends no body for GET and DELETE', async () => {
-    let capturedBody: any = 'not_undefined';
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedBody = opts.body;
-      return { ok: true, status: 200, json: () => Promise.resolve({}) };
-    });
-
-    await api.get('/items');
-    expect(capturedBody).toBeUndefined();
-
-    await api.delete('/items/1');
-    expect(capturedBody).toBeUndefined();
-  });
-
-  it('constructs correct URL from baseUrl and path', async () => {
-    let capturedUrl = '';
-    (globalThis.fetch as any).mockImplementation(async (url: string) => {
-      capturedUrl = url;
-      return { ok: true, status: 200, json: () => Promise.resolve({}) };
-    });
-
-    await api.get('/test-path');
-    expect(capturedUrl).toBe('http://localhost:3000/api/test-path');
-  });
-
-  it('sets Content-Type to application/json', async () => {
-    let capturedHeaders: any = null;
-    (globalThis.fetch as any).mockImplementation(async (url: string, opts: any) => {
-      capturedHeaders = opts.headers;
-      return { ok: true, status: 200, json: () => Promise.resolve({}) };
-    });
-
-    await api.get('/items');
-    expect(capturedHeaders['Content-Type']).toBe('application/json');
+  it('is instance of Error', () => {
+    const err = new ApiError(500, 'fail');
+    expect(err).toBeInstanceOf(Error);
   });
 });

@@ -38,6 +38,11 @@
  * ============================================================================
  */
 
+vi.hoisted(() => {
+  process.env.BROKER = 'mock';
+  process.env.DATA_SOURCE = 'mock';
+});
+
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import http from 'http';
 import { WebSocketServer } from 'ws';
@@ -233,7 +238,8 @@ describe('WebSocket → RiskEngine P&L Bridge — Stress Test', () => {
     await client.nextMessage(); // authenticated
   });
 
-  afterAll(() => {
+  afterAll(async () => {
+    await riskEngine.resetForTesting();
     client?.close();
     wss?.close();
     server?.close();

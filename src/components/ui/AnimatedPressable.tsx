@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useCallback } from 'react';
-import { TouchableWithoutFeedback, View, Animated, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { Pressable, View, Animated, StyleSheet, ViewStyle, StyleProp, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { BORDER_RADIUS } from '../../constants/theme';
@@ -47,6 +47,7 @@ export default function AnimatedPressable({
   const highlightAnim = useRef(new Animated.Value(0)).current;
 
   const triggerHaptic = useCallback(() => {
+    if (Platform.OS === 'web') return;
     switch (haptic) {
       case 'light': Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); break;
       case 'medium': Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); break;
@@ -121,7 +122,9 @@ export default function AnimatedPressable({
 
   const handleLongPress = useCallback(() => {
     if (disabled) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }
     onLongPress?.();
   }, [disabled, onLongPress]);
 
@@ -137,7 +140,7 @@ export default function AnimatedPressable({
   });
 
   return (
-    <TouchableWithoutFeedback
+    <Pressable
       onPressIn={!disabled ? handlePressIn : undefined}
       onPressOut={!disabled ? handlePressOut : undefined}
       onPress={handlePress}
@@ -147,19 +150,19 @@ export default function AnimatedPressable({
       <Animated.View testID={testID} style={[style, animatedStyle, containerStyle]}>
         {highlight && (
           <Animated.View
-            pointerEvents="none"
             style={[
               StyleSheet.absoluteFill,
               {
                 borderRadius,
                 backgroundColor: hColor,
                 opacity: hOpacity,
+                pointerEvents: 'none',
               },
             ]}
           />
         )}
         {children}
       </Animated.View>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 }

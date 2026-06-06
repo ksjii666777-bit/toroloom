@@ -21,6 +21,11 @@
  * ============================================================================
  */
 
+vi.hoisted(() => {
+  process.env.BROKER = 'mock';
+  process.env.DATA_SOURCE = 'mock';
+});
+
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import http from 'http';
 import { WebSocketServer } from 'ws';
@@ -54,7 +59,8 @@ describe('WebSocket → RiskEngine P&L Bridge', () => {
     });
   });
 
-  afterAll(() => {
+  afterAll(async () => {
+    await riskEngine.resetForTesting();
     wss?.close();
     server?.close();
   });

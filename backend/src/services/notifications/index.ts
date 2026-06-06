@@ -17,7 +17,7 @@ import type { StorageEngine, NotificationData } from '../storage/types';
 
 // ==================== Types ====================
 
-export type NotificationType = 'price_alert' | 'trade' | 'news' | 'system' | 'educational';
+export type NotificationType = 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert';
 
 // ==================== Internal State ====================
 

@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { getBroker } from '../services/broker';
+import { marketCache, CACHE_TTL } from '../services/cache';
 
 const router = Router();
 
@@ -7,7 +8,11 @@ const router = Router();
 router.get('/indices', async (_req: Request, res: Response) => {
   try {
     const broker = await getBroker();
-    const indices = await broker.getIndices();
+    const indices = await marketCache.getOrSet(
+      'indices',
+      () => broker.getIndices(),
+      CACHE_TTL.INDICES,
+    );
     res.json(indices);
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Failed to fetch indices' });
@@ -18,7 +23,11 @@ router.get('/indices', async (_req: Request, res: Response) => {
 router.get('/stocks', async (_req: Request, res: Response) => {
   try {
     const broker = await getBroker();
-    const stocks = await broker.getStocks();
+    const stocks = await marketCache.getOrSet(
+      'stocks',
+      () => broker.getStocks(),
+      CACHE_TTL.STOCKS,
+    );
     res.json(stocks);
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Failed to fetch stocks' });
@@ -30,7 +39,11 @@ router.get('/quote/:symbol', async (req: Request, res: Response) => {
   try {
     const broker = await getBroker();
     const symbol = req.params.symbol as string;
-    const quote = await broker.getQuote(symbol);
+    const quote = await marketCache.getOrSet(
+      `quote:${symbol}`,
+      () => broker.getQuote(symbol),
+      CACHE_TTL.QUOTE,
+    );
     res.json(quote);
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Failed to fetch quote' });
@@ -46,10 +59,30 @@ router.get('/quotes', async (req: Request, res: Response) => {
       res.status(400).json({ error: 'symbols query parameter is required (comma-separated)' });
       return;
     }
-    const broker = await getBroker();
-    const quotes = await broker.getBulkQuotes(symbols);
-    const result = Array.from(quotes.entries()).map(([, quote]) => quote);
-    res.json(result);
+
+    // Check cache for each symbol; collect misses
+    const cached: any[] = [];
+    const misses: string[] = [];
+    for (const symbol of symbols) {
+      const cachedQuote = marketCache.get<any>(`quote:${symbol}`);
+      if (cachedQuote !== undefined) {
+        cached.push(cachedQuote);
+      } else {
+        misses.push(symbol);
+      }
+    }
+
+    // Fetch only the symbols not in cache
+    if (misses.length > 0) {
+      const broker = await getBroker();
+      const freshQuotes = await broker.getBulkQuotes(misses);
+      for (const [symbol, quote] of freshQuotes) {
+        marketCache.set(`quote:${symbol}`, quote, CACHE_TTL.BULK_QUOTES);
+        cached.push(quote);
+      }
+    }
+
+    res.json(cached);
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Failed to fetch quotes' });
   }
@@ -61,9 +94,13 @@ router.get('/ohlc/:symbol', async (req: Request, res: Response) => {
     const interval = (req.query.interval as string) || 'day';
     const daysParam = req.query.days as string;
     const days = parseInt(daysParam || '30') || 30;
-    const broker = await getBroker();
     const symbol = req.params.symbol as string;
-    const ohlc = await broker.getOHLC(symbol, interval, days);
+    const broker = await getBroker();
+    const ohlc = await marketCache.getOrSet(
+      `ohlc:${symbol}:${interval}:${days}`,
+      () => broker.getOHLC(symbol, interval, days),
+      CACHE_TTL.OHLC,
+    );
     res.json(ohlc);
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Failed to fetch OHLC data' });
@@ -79,7 +116,11 @@ router.get('/search', async (req: Request, res: Response) => {
       return;
     }
     const broker = await getBroker();
-    const results = await broker.searchStocks(query);
+    const results = await marketCache.getOrSet(
+      `search:${query.toLowerCase().trim()}`,
+      () => broker.searchStocks(query),
+      CACHE_TTL.SEARCH,
+    );
     res.json(results);
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Search failed' });

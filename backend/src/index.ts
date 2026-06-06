@@ -1,168 +1,145 @@
-import express from 'express';
-import cors from 'cors';
-import http from 'http';
+/**
+ * Toroloom Backend — Cluster Entry Point
+ *
+ * Behaviour controlled by env vars:
+ *   CLUSTER_MODE  = "1" (default in production) — enables multi-core forking
+ *   CLUSTER_WORKERS = <number> — worker count (default: CPU cores)
+ *
+ * In development (CLUSTER_MODE=0 or NODE_ENV !== production),
+ * the server runs in single-process mode (no clustering).
+ */
+
+import cluster from 'cluster';
+import os from 'os';
 import { env } from './config/env';
-import { errorHandler } from './middleware/errorHandler';
-import { apiLimiter, authLimiter } from './middleware/rateLimiter';
-import { setupWebSocket } from './websocket/handler';
-import { getStorage, getStorageIfInitialized } from './services/storage';
-import { auditTrail } from './services/auditTrail';
-import { riskEngine } from './services/riskEngine';
-import { configureBrokerPersistence, loadBrokerStateFromStorage } from './services/broker';
-import { configureNotificationPersistence } from './services/notifications';
-import { configureCommunityPersistence } from './services/community';
+import { getStorageIfInitialized } from './services/storage';
+import { startPrimaryIPC, startWorkerIPC } from './services/clusterIPC';
 
-// Routes
-import authRoutes from './routes/auth';
-import marketRoutes from './routes/market';
-import portfolioRoutes from './routes/portfolio';
-import watchlistRoutes from './routes/watchlist';
-import mutualFundsRoutes from './routes/mutualFunds';
-import educationRoutes from './routes/education';
-import communityRoutes from './routes/community';
-import aiInsightsRoutes from './routes/aiInsights';
-import notificationsRoutes from './routes/notifications';
-import riskRoutes from './routes/risk';
-import supportRoutes from './routes/support';
-import fundsRoutes from './routes/funds';
-import ordersRoutes from './routes/orders';
-import systemRoutes from './routes/system';
-import wsStatusRoutes from './routes/wsStatus';
-import metricsRoutes from './routes/metrics';
+const isProduction = process.env.NODE_ENV === 'production' || env.dataSource !== 'mock';
+// Cluster enabled when:
+// - CLUSTER_MODE=1 explicitly (for local testing), OR
+// - Not explicitly disabled (CLUSTER_MODE !== '0') AND is production
+const clusterEnabled = process.env.CLUSTER_MODE === '1' ||
+  (process.env.CLUSTER_MODE !== '0' && isProduction);
+const workerCount = Math.min(
+  parseInt(process.env.CLUSTER_WORKERS || '', 10) || os.cpus().length,
+  16, // hard cap to avoid resource exhaustion
+);
 
-const app = express();
-const server = http.createServer(app);
+if (cluster.isPrimary && clusterEnabled) {
+  // ──── Primary Process — Fork Workers ──────────────────────────────────
+  console.log(`\n🚀 Toroloom Backend Cluster — Primary [PID ${process.pid}]`);
+  console.log(`   Workers:    ${workerCount} (of ${os.cpus().length} CPU cores)`);
+  console.log(`   Mode:       ${env.broker.toUpperCase()} (${env.dataSource})`);
+  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}\n`);
 
-// ============ Middleware ============
+  const workers = new Set<cluster.Worker>();
+  let workerSlotCounter = 0;
+  // Track restarts per slot (not per PID — PID changes on restart)
+  const workerRestarts = new Map<number, number>();
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-app.use(express.json({ limit: '1mb' }));
-app.use('/api', apiLimiter);
-
-// ============ Prometheus Metrics ============
-
-app.use('/metrics', metricsRoutes);
-
-// ============ Health Check ============
-
-app.get('/health', async (_req, res) => {
-  const storage = getStorageIfInitialized();
-  let storageHealthy = false;
-  if (storage) {
-    try { storageHealthy = await storage.isHealthy(); } catch { /* not healthy */ }
+  function forkWorker(): cluster.Worker {
+    const slot = workerSlotCounter++;
+    const w = cluster.fork();
+    (w as any).__slot = slot;
+    workerRestarts.set(slot, 0);
+    workers.add(w);
+    console.log(`   [+] Worker ${w.process.pid} started (slot ${slot}, ${workers.size}/${workerCount})`);
+    return w;
   }
 
-  res.json({
-    status: storageHealthy ? 'ok' : 'degraded',
-    broker: env.broker,
-    dataSource: env.dataSource,
-    storageBackend: env.storageBackend,
-    storageHealthy,
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// ============ API Routes ============
-
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/market', marketRoutes);
-app.use('/api/portfolio', portfolioRoutes);
-app.use('/api/watchlist', watchlistRoutes);
-app.use('/api/mutual-funds', mutualFundsRoutes);
-app.use('/api/education', educationRoutes);
-app.use('/api/community', communityRoutes);
-app.use('/api/ai', aiInsightsRoutes);
-app.use('/api/notifications', notificationsRoutes);
-app.use('/api/risk', riskRoutes);
-app.use('/api/support', supportRoutes);
-app.use('/api/funds', fundsRoutes);
-app.use('/api/orders', ordersRoutes);
-app.use('/api/system', systemRoutes);
-app.use('/api/system', wsStatusRoutes);
-
-// ============ Error Handler ============
-
-app.use(errorHandler);
-
-// ============ WebSocket ============
-
-const wss = setupWebSocket(server);
-
-// ============ Storage Initialization ============
-
-async function initializeStorage(): Promise<void> {
-  try {
-    const storage = await getStorage();
-    console.log(`   Storage:    ${env.storageBackend.toUpperCase()}`);
-
-    // Wire storage into the AuditTrail singleton
-    // (auditTrail defaults to InMemoryStorage — swap to the configured backend)
-    // configureStorage migrates any buffered events to the new backend.
-    await auditTrail.configureStorage(storage);
-
-    // Wire storage into the RiskEngine for profile persistence
-    riskEngine.configureStorage(storage);
-
-    // Wire storage into the Broker factory for state persistence
-    configureBrokerPersistence(storage);
-
-    // Wire storage into the Notification service for persistence
-    await configureNotificationPersistence(storage);
-
-    // Wire storage into the Community service for persistence
-    await configureCommunityPersistence(storage);
-
-    // Load persisted broker state (type + dedup cache)
-    await loadBrokerStateFromStorage();
-
-    console.log(`   Profile persistence: enabled`);
-  } catch (error) {
-    console.error('   ⚠ Storage initialization failed — falling back to in-memory:', error);
+  // Fork initial workers
+  for (let i = 0; i < workerCount; i++) {
+    forkWorker();
   }
-}
 
-// ============ Start Server ============
+  // Start the IPC bridge to aggregate cross-worker state
+  startPrimaryIPC().catch(err => {
+    console.error('   [IPC] Failed to start primary IPC bridge:', err);
+  });
 
-async function start(): Promise<void> {
-  await initializeStorage();
+  // Graceful shutdown on primary signals
+  function shutdownPrimary() {
+    console.log('\n   ⏳ Shutting down cluster gracefully...');
+    for (const w of workers) {
+      w.kill('SIGTERM');
+    }
+    setTimeout(() => process.exit(0), 5000);
+  }
 
-  server.listen(env.port, () => {
-    console.log(`\n🚀 Toroloom Backend Server`);
-    console.log(`   Mode:       ${env.broker.toUpperCase()} (${env.dataSource})`);
-    console.log(`   REST API:   http://localhost:${env.port}/api`);
-    console.log(`   WebSocket:  ws://localhost:${env.port}/ws`);
-    console.log(`   Health:     http://localhost:${env.port}/health\n`);
+  process.on('SIGTERM', shutdownPrimary);
+  process.on('SIGINT', shutdownPrimary);
+
+  // Auto-restart workers on crash (up to 3 restarts per slot)
+  cluster.on('exit', (worker, code, signal) => {
+    workers.delete(worker);
+    const slot = (worker as any).__slot ?? 0;
+    const restarts = workerRestarts.get(slot) ?? 0;
+    const pid = worker.process.pid!;
+
+    if (signal !== 'SIGTERM' && signal !== 'SIGINT') {
+      if (restarts < 3) {
+        console.log(`   [!] Worker ${pid} (slot ${slot}) exited (code: ${code}). Restarting... (attempt ${restarts + 1}/3)`);
+        workerRestarts.set(slot, restarts + 1);
+        forkWorker();
+      } else {
+        console.error(`   [X] Worker ${pid} (slot ${slot}) exited ${restarts} times. No more restarts.`);
+      }
+    } else {
+      console.log(`   [-] Worker ${pid} (slot ${slot}) stopped gracefully.`);
+    }
+  });
+
+  cluster.on('online', (worker) => {
+    console.log(`   [✓] Worker ${worker.process.pid} is online`);
+  });
+} else {
+  // ──── Worker Process — Run Server ────────────────────────────────────
+  // (also runs when cluster is disabled — single-process mode)
+
+  if (cluster.isWorker) {
+    console.log(`   ▶ Worker [PID ${process.pid}] initializing...`);
+    // Start IPC listener for cross-worker state sync
+    startWorkerIPC().catch(err => {
+      console.error('   [IPC] Failed to start worker IPC:', err);
+    });
+  }
+
+  // Dynamic require — safe because tsconfig compiles to CommonJS
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { start, server, wss } = require('./server');
+
+  async function gracefulShutdown(signal: string): Promise<void> {
+    console.log(`\n   ⏳ ${signal} received. Shutting down gracefully...`);
+
+    // Close WebSocket connections first
+    wss.close();
+
+    // Close HTTP server (stops accepting new connections)
+    server.close(async () => {
+      // Disconnect storage (flush pending writes to PostgreSQL/MongoDB)
+      try {
+        const storage = getStorageIfInitialized();
+        if (storage) {
+          await storage.disconnect();
+        }
+      } catch (err) {
+        console.error('   ⚠ Storage disconnect error:', err);
+      }
+      process.exit(0);
+    });
+
+    // Force exit after 5s if graceful shutdown hangs
+    setTimeout(() => process.exit(1), 5000);
+  }
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  if (!cluster.isWorker) {
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  }
+
+  start().catch((err: Error) => {
+    console.error('Fatal startup error:', err);
+    process.exit(1);
   });
 }
-
-start().catch((err) => {
-  console.error('Fatal startup error:', err);
-  process.exit(1);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
-  wss.close();
-  const { getStorageIfInitialized } = await import('./services/storage');
-  const storage = getStorageIfInitialized();
-  if (storage) await storage.disconnect();
-  server.close(() => process.exit(0));
-});
-
-process.on('SIGINT', async () => {
-  console.log('SIGINT received. Shutting down gracefully...');
-  wss.close();
-  const { getStorageIfInitialized } = await import('./services/storage');
-  const storage = getStorageIfInitialized();
-  if (storage) await storage.disconnect();
-  server.close(() => process.exit(0));
-});
-
-export { app, server };

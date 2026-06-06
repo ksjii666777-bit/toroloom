@@ -31,6 +31,13 @@
  * ============================================================================
  */
 
+// Force mock broker to prevent the Angel One smartapi-javascript WebSocket
+// client from attempting real connections (backend/.env has BROKER=angel).
+vi.hoisted(() => {
+  process.env.BROKER = 'mock';
+  process.env.DATA_SOURCE = 'mock';
+});
+
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import http from 'http';
 import { WebSocketServer } from 'ws';
@@ -103,6 +110,11 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
   afterAll(async () => {
     if (available && storage) {
       await storage.clearForTesting();
+    }
+    // Drain pending persists and reset singleton BEFORE disconnecting
+    // storage, so any in-flight writes complete against connected DB
+    await riskEngine.resetForTesting();
+    if (available && storage) {
       await storage.disconnect();
     }
     wss?.close();

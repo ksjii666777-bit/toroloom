@@ -1,6 +1,11 @@
 import {
   IBroker, BrokerConfig, MarketQuote, OHLCData, IndexData,
-  StockInfo, OrderPayload, OrderResult, Position, TradeHistory
+  StockInfo, OrderPayload, OrderResult, ModifyOrderPayload,
+  CancelOrderPayload, OpenOrder, Position, TradeHistory,
+  EDISVerifyRequest, EDISVerifyResponse,
+  EDISGenerateTPINRequest,
+  EDISTranStatusRequest, EDISTranStatusResponse,
+  BrokerageEstimateRequest, BrokerageEstimateResponse,
 } from './interface';
 
 // ============ In-Memory Mock Data ============
@@ -81,6 +86,56 @@ function generateQuote(stock: StockInfo): MarketQuote {
 }
 
 // ============ Mock Positions / Orders State ============
+
+// ============ Mock Open Orders ============
+let mockOpenOrders: OpenOrder[] = [
+  {
+    id: 'open_ord_1',
+    symbol: 'RELIANCE',
+    exchange: 'NSE',
+    transactionType: 'BUY',
+    quantity: 25,
+    filledQuantity: 0,
+    price: 2850.00,
+    productType: 'CNC',
+    orderType: 'LIMIT',
+    status: 'open',
+    placedBy: 'WEB',
+    timestamp: new Date(Date.now() - 3600000).toISOString(),
+    validity: 'DAY',
+  },
+  {
+    id: 'open_ord_2',
+    symbol: 'TCS',
+    exchange: 'NSE',
+    transactionType: 'SELL',
+    quantity: 10,
+    filledQuantity: 5,
+    price: 3950.00,
+    productType: 'CNC',
+    orderType: 'LIMIT',
+    status: 'partially_filled',
+    placedBy: 'WEB',
+    timestamp: new Date(Date.now() - 7200000).toISOString(),
+    validity: 'DAY',
+  },
+  {
+    id: 'open_ord_3',
+    symbol: 'INFY',
+    exchange: 'NSE',
+    transactionType: 'BUY',
+    quantity: 50,
+    filledQuantity: 0,
+    price: 1550.00,
+    triggerPrice: 1540.00,
+    productType: 'MIS',
+    orderType: 'SL',
+    status: 'trigger_pending',
+    placedBy: 'WEB',
+    timestamp: new Date(Date.now() - 86400000).toISOString(),
+    validity: 'DAY',
+  },
+];
 
 let mockOrders: OrderResult[] = [];
 let mockPositions: Position[] = [
@@ -167,6 +222,76 @@ export class MockBroker implements IBroker {
     return mockStocks.filter(
       s => s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
     );
+  }
+
+  // ======================== Order Modification & Cancellation ========================
+
+  async getOpenOrders(): Promise<OpenOrder[]> {
+    await this.delay(200);
+    return [...mockOpenOrders];
+  }
+
+  async modifyOrder(order: ModifyOrderPayload): Promise<OrderResult> {
+    await this.delay(400);
+    const existing = mockOpenOrders.find(o => o.id === order.orderId);
+    if (!existing) {
+      return {
+        id: order.orderId,
+        status: 'rejected',
+        message: `Order ${order.orderId} not found or already completed`,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // Update fields
+    if (order.price !== undefined) existing.price = order.price;
+    if (order.quantity !== undefined) existing.quantity = order.quantity;
+    if (order.orderType !== undefined) existing.orderType = order.orderType;
+    if (order.productType !== undefined) existing.productType = order.productType;
+    if (order.triggerPrice !== undefined) existing.triggerPrice = order.triggerPrice;
+
+    mockOpenOrders = mockOpenOrders.map(o =>
+      o.id === order.orderId ? existing : o
+    );
+
+    return {
+      id: order.orderId,
+      status: 'confirmed',
+      message: `Order ${order.orderId} modified successfully`,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async cancelOrder(order: CancelOrderPayload): Promise<OrderResult> {
+    await this.delay(300);
+    const existing = mockOpenOrders.find(o => o.id === order.orderId);
+    if (!existing) {
+      return {
+        id: order.orderId,
+        status: 'rejected',
+        message: `Order ${order.orderId} not found or already completed`,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // Remove from open orders & add to trade history
+    mockOpenOrders = mockOpenOrders.filter(o => o.id !== order.orderId);
+    mockTradeHistory.unshift({
+      id: `t_cancel_${Date.now()}`,
+      symbol: existing.symbol,
+      type: existing.transactionType === 'BUY' ? 'buy' : 'sell',
+      quantity: existing.quantity - existing.filledQuantity,
+      price: existing.price,
+      total: existing.price * (existing.quantity - existing.filledQuantity),
+      timestamp: new Date().toISOString(),
+    });
+
+    return {
+      id: order.orderId,
+      status: 'cancelled',
+      message: `Order ${order.orderId} cancelled successfully`,
+      timestamp: new Date().toISOString(),
+    };
   }
 
   async placeOrder(order: OrderPayload): Promise<OrderResult> {
@@ -278,6 +403,61 @@ export class MockBroker implements IBroker {
     return () => {
       clearInterval(interval);
       symbols.forEach(s => this.tickSubscriptions.delete(s));
+    };
+  }
+
+  // ======================== EDIS (Mock) ========================
+
+  async verifyEDIS(request: EDISVerifyRequest): Promise<EDISVerifyResponse> {
+    await this.delay(400);
+    return {
+      ReqId: `REQ_${Date.now()}`,
+      ReturnURL: 'https://cdslindia.com/verify',
+      DPId: '12345',
+      BOID: `BO_${request.isin}`,
+      TransDtls: `TRAN_${Date.now()}`,
+    };
+  }
+
+  async generateTPIN(_request: EDISGenerateTPINRequest): Promise<{ status: string }> {
+    await this.delay(300);
+    return { status: 'TPIN generated successfully' };
+  }
+
+  async getEDISTranStatus(request: EDISTranStatusRequest): Promise<EDISTranStatusResponse> {
+    await this.delay(200);
+    return { ReqId: request.ReqId, status: 1 };
+  }
+
+  // ======================== Brokerage Calculator (Mock) ========================
+
+  async estimateBrokerage(request: BrokerageEstimateRequest): Promise<BrokerageEstimateResponse> {
+    await this.delay(300);
+    const totalOrderValue = request.orders.reduce(
+      (sum, o) => sum + o.price * o.qty,
+      0,
+    );
+    const brokerage = Math.round(totalOrderValue * 0.0003 * 100) / 100; // ~0.03%
+    const sttCtt = Math.round(totalOrderValue * 0.001 * 100) / 100;    // ~0.1%
+    const transactionCharges = Math.round(totalOrderValue * 0.0001 * 100) / 100;
+    const gst = Math.round((brokerage + transactionCharges) * 0.18 * 100) / 100;
+    const stampDuty = Math.round(totalOrderValue * 0.00003 * 100) / 100;
+    const sebiFees = Math.round(totalOrderValue * 0.000002 * 100) / 100;
+    const total = Math.round(
+      (brokerage + transactionCharges + gst + sttCtt + stampDuty + sebiFees) * 100,
+    ) / 100;
+
+    return {
+      status: 'SUCCESS',
+      payload: {
+        brokerage,
+        transaction_charges: transactionCharges,
+        gst,
+        stt_ctt: sttCtt,
+        stamp_duty: stampDuty,
+        sebi_turnover_fees: sebiFees,
+        total_charges: total,
+      },
     };
   }
 

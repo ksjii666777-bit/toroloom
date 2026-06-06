@@ -7,6 +7,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { setupChannels } from './src/services/notificationService';
 import { configureApi } from './src/services/api';
 import { useAuthStore, useRiskStore } from './src/store';
+import Sentry from './src/services/sentry';
 
 // Initialize notification channels on app launch
 setupChannels();
@@ -47,7 +48,7 @@ function AppContent() {
   );
 }
 
-export default function App() {
+function AppRoot() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -58,3 +59,5 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(AppRoot);

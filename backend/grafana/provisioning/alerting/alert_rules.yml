@@ -1,0 +1,407 @@
+# ============================================================================
+# Toroloom Grafana Alert Rules — Unified Alerting (Grafana 9+)
+# ============================================================================
+#
+# Provisioning file loaded by Grafana from /etc/grafana/provisioning/alerting/
+# or mounted as a volume in docker-compose.
+#
+# Eight alert rules:
+#   1. WebSocket Connection Warning    (>= 500 for 5 minutes)
+#   2. WebSocket Connection Critical   (>= 900 for 2 minutes)
+#   3. Tick Dispatch Latency Warning   (p99 > 1ms for 5 minutes)
+#   4. Tick Dispatch Latency Critical  (p99 > 10ms for 2 minutes)
+#   5. Symbol Subscriptions Dropped    (zero symbols + active users)
+#   6. Broker Disconnected             (all brokers down)
+#   7. Broker Auth Errors Spiking      (> 1/min for 5 minutes)
+#   8. High Rate Limiting              (> 10/min for 5 minutes)
+#
+# All rules route to the "Slack + PagerDuty" notification policy.
+#
+# IMPORTANT: The datasourceUid below must match the UID of your Prometheus
+# datasource. A matching provisioning file is provided at:
+#   ../datasources/datasource.yml
+# which guarantees uid: prometheus. If your datasource uses a different
+# UID, update the datasourceUid fields below.
+# ============================================================================
+
+apiVersion: 1
+
+groups:
+  - name: toroloom-websocket
+    folder: Toroloom Alerts
+    interval: 30s
+    rules:
+      # ──── Rule 1: Warning ──────────────────────────────────────────────
+      - uid: toroloom_ws_warning
+        title: "WebSocket Connection Warning (>= 500)"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: toroloom_ws_total_connections
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: math
+              expression: $A > 500
+              refId: B
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: >-
+            WebSocket connections exceeded 500
+            (current: {{ $values.A.Value }})
+          description: >-
+            Total WebSocket connections have been above 500 for 5 minutes.
+            Current value: {{ $values.A.Value }}. This may indicate increased
+            user activity or a connection leak.
+          runbook_url: >-
+            https://github.com/ksjii666777-bit/toroloom/wiki/WebSocket-Alerts
+        labels:
+          severity: warning
+          team: platform
+          service: toroloom-websocket
+
+      # ──── Rule 2: Critical ─────────────────────────────────────────────
+      - uid: toroloom_ws_critical
+        title: "WebSocket Connection Critical (>= 900)"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: toroloom_ws_total_connections
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: math
+              expression: $A > 900
+              refId: B
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: >-
+            🔴 WebSocket connections CRITICAL at {{ $values.A.Value }}
+            (threshold: 900)
+          description: >-
+            Total WebSocket connections exceeded 900 for 2 minutes.
+            Current value: {{ $values.A.Value }}. The global cap is 1000 —
+            new connections will be rejected with close code 1013.
+            Immediate investigation required.
+          runbook_url: >-
+            https://github.com/ksjii666777-bit/toroloom/wiki/WebSocket-Alerts
+        labels:
+          severity: critical
+          team: platform
+          service: toroloom-websocket
+
+      # ──── Rule 3: Tick Latency Warning ────────────────────────────────────
+      - uid: toroloom_tick_latency_warning
+        title: "Tick Dispatch Latency Warning (p99 > 1ms)"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: >-
+                histogram_quantile(0.99,
+                  sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m]))
+                  by (le)
+                )
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: math
+              expression: $A > 0.001
+              refId: B
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: >-
+            Tick dispatch p99 latency exceeded 1ms
+            (current: {{ $values.A.Value }})
+          description: >-
+            The 99th percentile tick dispatch latency has been above 1ms
+            for 5 minutes. Current value: {{ $values.A.Value }}s.
+            This may indicate serialization overhead, backpressure from slow
+            clients, or CPU starvation on the event loop.
+          runbook_url: >-
+            https://github.com/ksjii666777-bit/toroloom/wiki/WebSocket-Alerts
+        labels:
+          severity: warning
+          team: platform
+          service: toroloom-websocket
+
+      # ──── Rule 4: Tick Latency Critical ───────────────────────────────────
+      - uid: toroloom_tick_latency_critical
+        title: "Tick Dispatch Latency Critical (p99 > 10ms)"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: >-
+                histogram_quantile(0.99,
+                  sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[2m]))
+                  by (le)
+                )
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: math
+              expression: $A > 0.01
+              refId: B
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: >-
+            🔴 Tick dispatch p99 latency CRITICAL at {{ $values.A.Value }}s
+            (threshold: 10ms)
+          description: >-
+            The 99th percentile tick dispatch latency exceeded 10ms for
+            2 minutes. Current value: {{ $values.A.Value }}s. Ticks are
+            taking too long to dispatch — clients may be seeing stale prices.
+            Immediate investigation required.
+          runbook_url: >-
+            https://github.com/ksjii666777-bit/toroloom/wiki/WebSocket-Alerts
+        labels:
+          severity: critical
+          team: platform
+          service: toroloom-websocket
+
+      # ──── Rule 5: Symbol Subscription Anomaly ─────────────────────────────
+      # Fires when the count of tracked symbols drops to zero while there are
+      # still authenticated users. This indicates a broker connection failure,
+      # subscription pipeline error, or WebSocket state corruption.
+      - uid: toroloom_symbol_subscriptions_dropped
+        title: "Symbol Subscriptions Dropped to Zero"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 60
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: count(toroloom_ws_symbol_subscriptions)
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 60
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: count(toroloom_ws_authenticated_users)
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: math
+              expression: $A == 0 && $B > 0
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: >-
+            Symbol subscriptions dropped to 0 while {{ $values.B.Value }}
+            users are still connected
+          description: >-
+            The number of tracked symbols dropped to zero, but there are
+            still {{ $values.B.Value }} authenticated users connected.
+            This likely indicates a broker connection failure or a
+            subscription pipeline error. Check broker health and
+            WebSocket handler logs.
+          runbook_url: >-
+            https://github.com/ksjii666777-bit/toroloom/wiki/WebSocket-Alerts
+        labels:
+          severity: critical
+          team: platform
+          service: toroloom-websocket
+
+      # ──── Rule 6: Broker Disconnected ─────────────────────────────────
+      # Fires when ALL brokers are disconnected (max() returns 0).
+      # The backend has a fallback chain (Zerodha → Angel → Mock), so
+      # this fires only when the circuit is fully open or all brokers
+      # fail to authenticate.
+      - uid: toroloom_broker_disconnected
+        title: "Broker Disconnected — All Brokers Unavailable"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 60
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: max(toroloom_broker_connected)
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: math
+              expression: $A == 0
+              refId: B
+        noDataState: NoData
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: >-
+            All brokers disconnected — no market data available
+          description: >-
+            The broker connection gauge reports 0 for all configured
+            brokers (Zerodha, Angel, Mock). The fallback chain has been
+            exhausted — no market data, orders, or positions are
+            available. Check broker API credentials, network
+            connectivity, and circuit breaker status.
+          runbook_url: >-
+            https://github.com/ksjii666777-bit/toroloom/wiki/WebSocket-Alerts
+        labels:
+          severity: critical
+          team: platform
+          service: toroloom-websocket
+
+      # ──── Rule 7: Broker Auth Errors Spiking ──────────────────────────
+      # Sustained auth error rate indicates token expiry, invalid
+      # credentials, or broker API endpoint unavailability.
+      - uid: toroloom_broker_auth_errors_spiking
+        title: "Broker Auth Errors Spiking (> 1/min)"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(rate(toroloom_broker_auth_errors_total[5m]))
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: math
+              expression: $A > 1
+              refId: B
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: >-
+            Broker auth errors exceeded 1/min
+            (current: {{ $values.A.Value }} /min)
+          description: >-
+            Broker authentication errors have been above 1 per minute
+            for 5 minutes. Current rate: {{ $values.A.Value }}/min.
+            This may indicate expired tokens, invalid API credentials,
+            or broker API endpoint issues. Auth failures trigger
+            circuit breakers and broker failovers.
+          runbook_url: >-
+            https://github.com/ksjii666777-bit/toroloom/wiki/WebSocket-Alerts
+        labels:
+          severity: warning
+          team: platform
+          service: toroloom-websocket
+
+      # ──── Rule 8: High Rate Limiting ──────────────────────────────────
+      # Sustained rate-limiting indicates aggressive clients, a
+      # misconfigured client polling too fast, or a potential DoS.
+      - uid: toroloom_ws_rate_limiting_high
+        title: "High Rate Limiting (> 10/min)"
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: sum(rate(toroloom_ws_rate_limited_total[5m]))
+              intervalMs: 10000
+              maxDataPoints: 100
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: math
+              expression: $A > 10
+              refId: B
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: >-
+            WebSocket rate limiting exceeded 10/min
+            (current: {{ $values.A.Value }} /min)
+          description: >-
+            The rate-limited message count has been above 10 per minute
+            for 5 minutes. Current rate: {{ $values.A.Value }}/min.
+            This indicates aggressive clients or a potential DoS.
+            Check client connection patterns and the per-connection
+            rate limit configuration (default: 10 msg/s).
+          runbook_url: >-
+            https://github.com/ksjii666777-bit/toroloom/wiki/WebSocket-Alerts
+        labels:
+          severity: warning
+          team: platform
+          service: toroloom-websocket

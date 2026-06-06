@@ -165,22 +165,42 @@ export class RiskEngine {
    * Errors are logged but not thrown — the in-memory state is always
    * authoritative. The async callers (recordTradeAsync) explicitly await
    * this to guarantee durability; sync callers fire-and-forget.
+   *
+   * Chain: If a persist is already in-flight for this user, chain the new
+   * persist after it to prevent stale overwrites (the MongoDB driver
+   * serializes the profile document synchronously at call time, so the
+   * in-flight persist captured an older state). By chaining, we guarantee
+   * the next persist runs after the previous one completes, capturing
+   * the latest in-memory state.
+   *
+   * Critical: Update `pendingPersists` with the chained promise BEFORE
+   * awaiting. This ensures `drain()` sees the most recent promise and
+   * waits for it to complete before reading from the database.
    */
   private async persistProfile(userId: string): Promise<void> {
     if (!this.storage) return;
-    try {
-      const profile = this.profiles.get(userId);
-      if (profile) {
-        const promise = this.storage.saveRiskProfile(profile).then(
-          () => { this.pendingPersists.delete(userId); },
-          () => { this.pendingPersists.delete(userId); },
-        );
-        this.pendingPersists.set(userId, promise);
-        await promise;
-      }
-    } catch (error) {
-      console.error(`[RiskEngine] Failed to persist profile for ${userId}:`, error);
-    }
+
+    const profile = this.profiles.get(userId);
+    if (!profile) return;
+
+    // Chain after any in-flight persist. The .then() callback captures
+    // `profile` by closure reference — since the in-memory object is
+    // mutated in-place by all synchronous callers before they call
+    // persistProfile(), the callback will serialize the LATEST state.
+    const inFlight = this.pendingPersists.get(userId);
+    const promise = (inFlight || Promise.resolve())
+      .then(() => this.storage!.saveRiskProfile(profile))
+      .then(
+        () => { this.pendingPersists.delete(userId); },
+        (error) => {
+          console.error(`[RiskEngine] Failed to persist profile for ${userId}:`, error);
+          this.pendingPersists.delete(userId);
+        },
+      );
+
+    // Must set BEFORE awaiting so drain() sees the latest promise
+    this.pendingPersists.set(userId, promise);
+    await promise;
   }
 
   /**
@@ -520,6 +540,24 @@ export class RiskEngine {
    */
   getState(userId: string): RiskProfile {
     return this.reconcileLockdownState(this.getProfile(userId));
+  }
+
+  /**
+   * Reset all internal state for testing.
+   * Drains all pending persists, then clears the in-memory profile cache,
+   * user locks, pending persists map, and storage reference.
+   * Call in afterAll() of each test file that uses the singleton to
+   * prevent cross-file state contamination.
+   */
+  async resetForTesting(): Promise<void> {
+    // Drain all pending persists first so any in-flight writes complete
+    // before we clear state. This prevents orphaned promise chains from
+    // writing stale data when the next test file configures new storage.
+    await this.drain();
+    this.profiles.clear();
+    this.userLocks.clear();
+    this.pendingPersists.clear();
+    this.storage = null;
   }
 
   // ──────────────────── Private Helpers ────────────────────

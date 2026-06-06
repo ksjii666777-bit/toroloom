@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioStore } from '../../store/portfolioStore';
+import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import PortfolioHolding from '../../components/PortfolioHolding';
@@ -32,6 +33,8 @@ export default function PortfolioScreen({ navigation }: any) {
     setTimeout(() => setRefreshing(false), 1500);
   }, []);
 
+  const analytics = usePortfolioAnalyticsStore(s => s.getAnalytics());
+  const a = analytics.metrics;
   const portfolioValue = holdings.reduce((sum, h) => sum + h.currentValue, 0) || 1250000;
   const invested = holdings.reduce((sum, h) => sum + h.totalInvested, 0) || 1100000;
   const pnl = portfolioValue - invested;
@@ -200,6 +203,12 @@ export default function PortfolioScreen({ navigation }: any) {
                 <Text style={styles.statValue}>{winningCount}/{holdingsCount}</Text>
                 <Text style={styles.statLabel}>Winning</Text>
               </View>
+              {a.sharpeRatio !== 0 && (
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{a.sharpeRatio.toFixed(1)}</Text>
+                  <Text style={styles.statLabel}>Sharpe</Text>
+                </View>
+              )}
             </View>
           </LinearGradient>
         </View>
@@ -285,6 +294,25 @@ export default function PortfolioScreen({ navigation }: any) {
             ))
           )}
         </View>
+
+        {/* Analytics CTA */}
+        <AnimatedPressable onPress={() => navigation.navigate('Reports')} scaleTo={0.97}>
+          <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+            style={styles.analyticsCta}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.md }}>
+              <View style={styles.analyticsCtaIcon}>
+                <Ionicons name="stats-chart" size={24} color={colors.white} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.analyticsCtaTitle}>Advanced Analytics</Text>
+                <Text style={styles.analyticsCtaSub}>
+                  P&L charts · Sharpe: {a.sharpeRatio.toFixed(1)} · Win rate: {a.winRate.toFixed(0)}% · Tax reports
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
+            </View>
+          </LinearGradient>
+        </AnimatedPressable>
 
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -469,6 +497,33 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.full,
   },
+  // ── Analytics CTA ──
+  analyticsCta: {
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    marginHorizontal: SPACING.xl,
+    marginTop: SPACING.lg,
+  },
+  analyticsCtaIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  analyticsCtaTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    color: colors.white,
+  },
+  analyticsCtaSub: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 2,
+  },
+
   exploreBtnText: {
     ...FONTS.semiBold,
     fontSize: FONTS.size.md,

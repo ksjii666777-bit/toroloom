@@ -58,6 +58,13 @@ export default function TradeHistoryScreen({ navigation }: any) {
           <Text style={styles.title}>Trade History</Text>
           <Text style={styles.subtitle}>{totalTrades} total trades</Text>
         </View>
+        <TouchableOpacity
+          style={styles.openOrdersBtn}
+          onPress={() => navigation.navigate('OpenOrders')}
+        >
+          <Ionicons name="clipboard-outline" size={18} color={colors.primary} />
+          <Text style={styles.openOrdersBtnText}>Open</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Stats Cards */}
@@ -200,6 +207,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
+  },
+  openOrdersBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.full,
+    backgroundColor: colors.primary + '15',
+    borderWidth: 1,
+    borderColor: colors.primary + '30',
+  },
+  openOrdersBtnText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.primary,
   },
   headerContent: {
     flex: 1,

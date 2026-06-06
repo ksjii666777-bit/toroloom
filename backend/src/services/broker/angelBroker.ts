@@ -11,7 +11,7 @@
  *   ANGEL_CLIENT_ID=your_client_id
  *   ANGEL_API_KEY=your_api_key
  *   ANGEL_PASSWORD=your_password
- *   ANGEL_TOTP=your_totp  (optional, for 2FA)
+ *   ANGEL_TOTP=your_base32_totp_secret  (required for 2FA — Base32 secret key, not the 6-digit code)
  *
  * If you already have an access token:
  *   ANGEL_CLIENT_ID=your_client_id
@@ -21,9 +21,16 @@
  * API Docs: https://github.com/angel-one/smartapi-javascript
  */
 
+import speakeasy from 'speakeasy';
+
 import {
   IBroker, BrokerConfig, MarketQuote, OHLCData, IndexData,
-  StockInfo, OrderPayload, OrderResult, Position, TradeHistory
+  StockInfo, OrderPayload, OrderResult, ModifyOrderPayload,
+  CancelOrderPayload, OpenOrder, Position, TradeHistory,
+  EDISVerifyRequest, EDISVerifyResponse,
+  EDISGenerateTPINRequest,
+  EDISTranStatusRequest, EDISTranStatusResponse,
+  BrokerageEstimateRequest, BrokerageEstimateResponse,
 } from './interface';
 
 // Known index tokens for Angel One SmartAPI
@@ -82,6 +89,12 @@ export class AngelBroker implements IBroker {
   // WebSocketV2 instance
   private wsClient: any = null;
 
+  // Additional headers for raw REST calls (EDIS, Brokerage, etc.)
+  private clientLocalIP = '127.0.0.1';
+  private clientPublicIP = '127.0.0.1';
+  private macAddress = '00:00:00:00:00:00';
+  private appId = '';
+
   /**
    * Optional SDK dependency override for testing.
    * When provided, the broker uses these instead of calling require().
@@ -128,19 +141,43 @@ export class AngelBroker implements IBroker {
       } else {
         // Generate new session
         if (!this.password) throw new Error('Angel One password is required to generate session');
+
+        // Generate the 6-digit TOTP code from the Base32 secret key.
+        // The smartapi-javascript SDK expects a current 6-digit code,
+        // NOT the Base32 secret itself. We use speakeasy to compute it:
+        let totpCode: string | undefined;
+        if (this.totp) {
+          try {
+            totpCode = speakeasy.totp({
+              secret: this.totp,
+              encoding: 'base32',
+            });
+          } catch (err) {
+            console.warn('[AngelBroker] Could not generate TOTP code from secret:', (err as Error).message);
+          }
+        }
+
         const session = await this.smartApi.generateSession(
           this.clientCode,
           this.password,
-          this.totp || undefined,
+          totpCode,
         );
         this.accessToken = session.data.jwtToken;
         this.feedToken = session.data.feedToken || '';
         this.smartApi.setAccessToken(this.accessToken);
       }
 
+      // Store optional REST headers
+      this.clientLocalIP = (config as any).clientLocalIP || '127.0.0.1';
+      this.clientPublicIP = (config as any).clientPublicIP || '127.0.0.1';
+      this.macAddress = (config as any).macAddress || '00:00:00:00:00:00';
+      this.appId = (config as any).appId || '';
+
       // Set up session expiry hook for auto-reconnect
+      // When the JWT token expires, this hook fires. We set connected=false
+      // and requireAuth() will trigger re-authentication on the next API call.
       this.smartApi.setSessionExpiryHook(() => {
-        console.warn('[AngelBroker] Session expired — will re-authenticate on next call');
+        console.warn('[AngelBroker] Session token expired — will re-authenticate on next API call');
         this.connected = false;
       });
 
@@ -169,15 +206,19 @@ export class AngelBroker implements IBroker {
     if (cached) return cached;
 
     try {
-      const results = await this.smartApi.searchScrip({
+      const rawResult = await this.smartApi.searchScrip({
         exchange,
         searchscrip: symbol,
       });
 
-      if (results?.data && Array.isArray(results.data) && results.data.length > 0) {
-        const match = results.data.find(
+      // SDK's searchScrip returns the data array directly on success,
+      // so check both `rawResult` (array) and `rawResult?.data` (fallback).
+      const list: any[] = Array.isArray(rawResult) ? rawResult : (rawResult?.data || []);
+
+      if (list.length > 0) {
+        const match = list.find(
           (s: any) => s.tradingsymbol?.toUpperCase() === symbol.toUpperCase() || s.symbol?.toUpperCase() === symbol.toUpperCase(),
-        ) || results.data[0];
+        ) || list[0];
 
         const token = match.symboltoken || match.token;
         if (token) {
@@ -195,7 +236,7 @@ export class AngelBroker implements IBroker {
   // ======================== Market Data ========================
 
   async getIndices(): Promise<IndexData[]> {
-    this.requireAuth();
+    await this.requireAuth();
     const results: IndexData[] = [];
 
     for (const indexName of DEFAULT_INDICES) {
@@ -203,37 +244,23 @@ export class AngelBroker implements IBroker {
       if (!info) continue;
 
       try {
-        const ltpResult = await this.smartApi.ltpData({
-          exchange: 'NSE',
-          tradingsymbol: info.shortName,
-          symboltoken: info.token,
+        // Use marketData (the correct SDK method name) instead of the non-existent ltpData
+        const quoteResult = await this.smartApi.marketData({
+          mode: 'FULL',
+          exchangeTokens: { 'NSE': [info.token] },
         });
 
-        if (ltpResult?.data) {
-          const ltp = ltpResult.data.ltp || 0;
+        const fetched = quoteResult?.data?.fetched || [];
+        const q = fetched[0];
 
-          // ltpData doesn't return OHLC — fetch latest candle for open/change
-          let open = ltp;
-          try {
-            const now = new Date();
-            const todayStart = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} 00:00`;
-            const candleData = await this.smartApi.getCandleData({
-              exchange: 'NSE',
-              symboltoken: info.token,
-              interval: 'ONE_DAY',
-              fromdate: todayStart,
-              todate: now.toISOString().slice(0, 16).replace('T', ' '),
-            });
-            if (candleData?.data && Array.isArray(candleData.data) && candleData.data.length > 0) {
-              const latest = candleData.data[candleData.data.length - 1];
-              open = latest[1] || ltp;
-            }
-          } catch {
-            // Candle fetch is best-effort
-          }
+        if (q) {
+          const ltp = q.ltp || q.last_price || 0;
 
-          const change = ltp - open;
-          const changePercent = open > 0 ? (change / open) * 100 : 0;
+          // marketData returns OHLC values — no need for separate candle fetch
+          const open = q.open || ltp;
+          const close = q.close || ltp;
+          const change = q.net_change || q.change || (ltp - close);
+          const changePercent = q.percentage_change || (close > 0 ? (change / close) * 100 : 0);
 
           results.push({
             id: info.shortName,
@@ -254,7 +281,7 @@ export class AngelBroker implements IBroker {
   }
 
   async getStocks(): Promise<StockInfo[]> {
-    this.requireAuth();
+    await this.requireAuth();
     // Angel One doesn't have a direct "get all stocks" method.
     // In production, you'd download & parse the master contract CSV.
     // For now, return a subset via searchScrip with common stocks.
@@ -286,53 +313,27 @@ export class AngelBroker implements IBroker {
   }
 
   async getQuote(symbol: string): Promise<MarketQuote> {
-    this.requireAuth();
+    await this.requireAuth();
     const token = await this.resolveToken(symbol);
 
-    // Step 1: Get LTP via ltpData
-    const ltpResult = await this.smartApi.ltpData({
-      exchange: 'NSE',
-      tradingsymbol: symbol,
-      symboltoken: token,
+    // Use marketData (the correct SDK method) instead of the non-existent ltpData
+    const quoteResult = await this.smartApi.marketData({
+      mode: 'FULL',
+      exchangeTokens: { 'NSE': [token] },
     });
 
-    if (!ltpResult?.data) throw new Error(`No quote data for ${symbol}`);
+    const fetched = quoteResult?.data?.fetched || [];
+    const q = fetched[0];
+    if (!q) throw new Error(`No quote data for ${symbol}`);
 
-    const d = ltpResult.data;
-    const ltp = d.ltp || 0;
-
-    // Step 2: Get OHLC data from latest candle (Angel ltpData doesn't return OHLC)
-    let open = ltp, high = ltp, low = ltp, close = ltp, volume = 0;
-    try {
-      const now = new Date();
-      const todayStr =
-        `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} 00:00`;
-      const endStr =
-        `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-      const candleData = await this.smartApi.getCandleData({
-        exchange: 'NSE',
-        symboltoken: token,
-        interval: 'ONE_DAY',
-        fromdate: todayStr,
-        todate: endStr,
-      });
-
-      if (candleData?.data && Array.isArray(candleData.data) && candleData.data.length > 0) {
-        const latest = candleData.data[candleData.data.length - 1];
-        // Angel returns: [timestamp, open, high, low, close, volume]
-        open = latest[1] || ltp;
-        high = latest[2] || ltp;
-        low = latest[3] || ltp;
-        close = latest[4] || ltp;
-        volume = latest[5] || 0;
-      }
-    } catch {
-      // Candle data is a best-effort enhancement; fall back to LTP-only values
-    }
-
-    const change = ltp - close;
-    const changePercent = close > 0 ? (change / close) * 100 : 0;
+    const ltp = q.ltp || q.last_price || 0;
+    const open = q.open || ltp;
+    const high = q.high || ltp;
+    const low = q.low || ltp;
+    const close = q.close || ltp;
+    const volume = q.volume || q.volume_traded || 0;
+    const change = q.net_change || q.change || (ltp - close);
+    const changePercent = q.percentage_change || (close > 0 ? (change / close) * 100 : 0);
 
     return {
       symbol,
@@ -344,14 +345,14 @@ export class AngelBroker implements IBroker {
       low,
       close,
       volume,
-      bid: ltp,  // ltpData doesn't provide bid/ask depth
-      ask: ltp,
-      timestamp: d.exch_tm || d.exch_time || new Date().toISOString(),
+      bid: q.bid_price || q.bid || ltp,
+      ask: q.ask_price || q.ask || ltp,
+      timestamp: q.exch_tm || q.exch_time || new Date().toISOString(),
     };
   }
 
   async getBulkQuotes(symbols: string[]): Promise<Map<string, MarketQuote>> {
-    this.requireAuth();
+    await this.requireAuth();
     const map = new Map<string, MarketQuote>();
     const results = await Promise.allSettled(symbols.map(s => this.getQuote(s)));
     for (let i = 0; i < symbols.length; i++) {
@@ -364,7 +365,7 @@ export class AngelBroker implements IBroker {
   }
 
   async getOHLC(symbol: string, interval: string, days: number): Promise<OHLCData[]> {
-    this.requireAuth();
+    await this.requireAuth();
     const token = await this.resolveToken(symbol);
 
     // Map our interval strings to Angel One intervals
@@ -413,35 +414,37 @@ export class AngelBroker implements IBroker {
   }
 
   async searchStocks(query: string): Promise<StockInfo[]> {
-    this.requireAuth();
+    await this.requireAuth();
 
-    const results = await this.smartApi.searchScrip({
+    const rawResult = await this.smartApi.searchScrip({
       exchange: 'NSE',
       searchscrip: query,
     });
 
-    if (!results?.data || !Array.isArray(results.data)) return [];
+    // SDK's searchScrip returns the data array directly on success
+    const list: any[] = Array.isArray(rawResult) ? rawResult : (rawResult?.data || []);
+    if (list.length === 0) return [];
 
-    // searchScrip returns basic instrument info without price data.
-    // Fetch LTP for each result in parallel to populate prices.
+    // Fetch price data for each result using marketData
     const stocks: StockInfo[] = [];
     const priceResults = await Promise.allSettled(
-      results.data.map(async (s: any) => {
+      list.map(async (s: any) => {
         const symbol = s.tradingsymbol || s.symbol || '';
         const token = s.symboltoken || s.token || '';
         if (!symbol || !token) return null;
 
         let price = 0, change = 0, changePercent = 0;
         try {
-          const ltpData = await this.smartApi.ltpData({
-            exchange: 'NSE',
-            tradingsymbol: symbol,
-            symboltoken: token,
+          const quoteResult = await this.smartApi.marketData({
+            mode: 'LTP',
+            exchangeTokens: { 'NSE': [token] },
           });
-          if (ltpData?.data) {
-            price = ltpData.data.ltp || 0;
-            change = 0; // ltpData doesn't give change; computed as 0 for search results
-            changePercent = 0;
+          const fetched = quoteResult?.data?.fetched || [];
+          const q = fetched[0];
+          if (q) {
+            price = q.ltp || q.last_price || 0;
+            change = q.net_change || q.change || 0;
+            changePercent = q.percentage_change || 0;
           }
         } catch {
           // Price fetch best-effort
@@ -455,7 +458,7 @@ export class AngelBroker implements IBroker {
           price,
           change,
           changePercent,
-          isPositive: price >= 0,
+          isPositive: change >= 0,
           marketCap: '',
           volume: String(s.volume || s.vol_traded || 0),
           high52: 0,
@@ -477,8 +480,95 @@ export class AngelBroker implements IBroker {
 
   // ======================== Trading ========================
 
+  async getOpenOrders(): Promise<OpenOrder[]> {
+    await this.requireAuth();
+    const result = await this.smartApi.getOrderBook();
+
+    if (!result?.data || !Array.isArray(result.data)) return [];
+
+    return result.data
+      .filter((o: any) => {
+        const status = (o.order_status || o.status || '').toUpperCase();
+        return status === 'OPEN' || status === 'PENDING' || status === 'TRIGGER_PENDING' || status === 'PARTIALLY_FILLED';
+      })
+      .map((o: any) => ({
+        id: String(o.orderid || o.order_id || `ang_${Date.now()}`),
+        symbol: o.tradingsymbol || o.symbol || '',
+        exchange: o.exchange || 'NSE',
+        transactionType: (o.transactiontype || o.transaction_type || 'BUY').toUpperCase() as 'BUY' | 'SELL',
+        quantity: parseInt(o.quantity || o.qty || 0),
+        filledQuantity: parseInt(o.filledqty || o.filled_quantity || 0),
+        price: parseFloat(o.price || 0),
+        triggerPrice: o.trigger_price ? parseFloat(o.trigger_price) : undefined,
+        productType: o.producttype || o.product_type || 'CNC',
+        orderType: o.ordertype || o.order_type || 'MARKET',
+        status: this.mapAngelOrderStatus(o),
+        placedBy: o.placedby || 'WEB',
+        timestamp: o.exch_tm || o.exchange_time || o.order_timestamp || new Date().toISOString(),
+        validity: o.validity || 'DAY',
+      }));
+  }
+
+  private mapAngelOrderStatus(o: any): 'open' | 'pending' | 'partially_filled' | 'trigger_pending' {
+    const status = (o.order_status || o.status || '').toUpperCase();
+    if (status === 'OPEN') return 'open';
+    if (status === 'TRIGGER_PENDING') return 'trigger_pending';
+    if (status === 'PARTIALLY_FILLED' || status === 'PARTFILLED') return 'partially_filled';
+    return 'pending';
+  }
+
+  async modifyOrder(order: ModifyOrderPayload): Promise<OrderResult> {
+    await this.requireAuth();
+    const token = order.symbol ? await this.resolveToken(order.symbol, order.exchange || 'NSE') : '';
+
+    const result = await this.smartApi.modifyOrder({
+      orderid: order.orderId,
+      variety: 'NORMAL',
+      tradingsymbol: order.symbol || '',
+      symboltoken: token,
+      exchange: order.exchange || 'NSE',
+      ordertype: order.orderType === 'MARKET' ? 'MARKET' : order.orderType === 'LIMIT' ? 'LIMIT' : 'MARKET',
+      producttype: order.productType ? ({
+        'CNC': 'DELIVERY',
+        'MIS': 'INTRADAY',
+        'NRML': 'NORMAL',
+      }[order.productType] || 'DELIVERY') : undefined,
+      price: order.price !== undefined ? String(order.price) : undefined,
+      quantity: order.quantity !== undefined ? String(order.quantity) : undefined,
+      triggerprice: order.triggerPrice !== undefined ? String(order.triggerPrice) : undefined,
+      duration: 'DAY',
+    });
+
+    if (!result) throw new Error('Angel One modifyOrder returned no result');
+
+    return {
+      id: order.orderId,
+      status: result.status === 'success' ? 'confirmed' : 'rejected',
+      message: result.message || result.data?.message || `Order ${order.orderId} modified`,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async cancelOrder(order: CancelOrderPayload): Promise<OrderResult> {
+    await this.requireAuth();
+
+    const result = await this.smartApi.cancelOrder({
+      variety: 'NORMAL',
+      orderid: order.orderId,
+    });
+
+    if (!result) throw new Error('Angel One cancelOrder returned no result');
+
+    return {
+      id: order.orderId,
+      status: 'cancelled',
+      message: result.message || `Order ${order.orderId} cancelled`,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   async placeOrder(order: OrderPayload): Promise<OrderResult> {
-    this.requireAuth();
+    await this.requireAuth();
     const token = await this.resolveToken(order.symbol, order.exchange);
 
     const exchangeMap: Record<string, string> = {
@@ -523,7 +613,7 @@ export class AngelBroker implements IBroker {
   }
 
   async getPositions(): Promise<Position[]> {
-    this.requireAuth();
+    await this.requireAuth();
     const result = await this.smartApi.getPosition();
 
     if (!result?.data || !Array.isArray(result.data)) return [];
@@ -541,7 +631,7 @@ export class AngelBroker implements IBroker {
   }
 
   async getTradeHistory(): Promise<TradeHistory[]> {
-    this.requireAuth();
+    await this.requireAuth();
     const result = await this.smartApi.getTradeBook();
 
     if (!result?.data || !Array.isArray(result.data)) return [];
@@ -558,7 +648,7 @@ export class AngelBroker implements IBroker {
   }
 
   async getHoldings(): Promise<Position[]> {
-    this.requireAuth();
+    await this.requireAuth();
     const result = await this.smartApi.getHolding();
 
     if (!result?.data || !Array.isArray(result.data)) return [];
@@ -581,7 +671,10 @@ export class AngelBroker implements IBroker {
   // ======================== Real-time (WebSocket V2) ========================
 
   subscribeTicks(symbols: string[], onTick: (quote: MarketQuote) => void): () => void {
-    this.requireAuth();
+    if (!this.connected || !this.smartApi) {
+      console.warn('[AngelBroker] Cannot subscribe to ticks — broker not authenticated');
+      return () => {};
+    }
 
     if (!this.feedToken && !this.accessToken) {
       console.warn('[AngelBroker] No feed token available — cannot subscribe to WebSocket ticks');
@@ -682,11 +775,171 @@ export class AngelBroker implements IBroker {
     }
   }
 
+  // ======================== EDIS (Electronic Delivery Instruction Slip) ========================
+
+  /**
+   * Initiate CDSL/NSDL authorisation for a specific holding (ISIN).
+   * After calling this, you must redirect the user to the ReturnURL
+   * (CDSL verification page) to complete the TPIN authorisation.
+   */
+  async verifyEDIS(request: EDISVerifyRequest): Promise<EDISVerifyResponse> {
+    await this.requireAuth();
+    const response = await this.restPost<EDISVerifyResponse>(
+      'https://apiconnect.angelone.in/rest/secure/angelbroking/edis/v1/verifyDis',
+      request,
+    );
+    console.log(`[AngelBroker] EDIS verify initiated for ISIN ${request.isin}`, response);
+    return response;
+  }
+
+  /**
+   * Generate TPIN for EDIS authorisation.
+   * Call this after the user has provided their TPIN via the CDSL portal flow.
+   */
+  async generateTPIN(request: EDISGenerateTPINRequest): Promise<{ status: string }> {
+    await this.requireAuth();
+    const response = await this.restPost<{ status: string }>(
+      'https://apiconnect.angelone.in/rest/secure/angelbroking/edis/v1/generateTPIN',
+      request,
+    );
+    console.log(`[AngelBroker] TPIN generated for ReqId ${request.ReqId}`);
+    return response;
+  }
+
+  /**
+   * Check the status of an EDIS transaction.
+   * Status 0 = not yet authorised (cannot sell).
+   * Status 1 = authorised (can sell).
+   */
+  async getEDISTranStatus(request: EDISTranStatusRequest): Promise<EDISTranStatusResponse> {
+    await this.requireAuth();
+    const response = await this.restPost<EDISTranStatusResponse>(
+      'https://apiconnect.angelone.in/rest/secure/angelbroking/edis/v1/getTranStatus',
+      request,
+    );
+    return response;
+  }
+
+  // ======================== Brokerage Calculator ========================
+
+  /**
+   * Estimate brokerage charges for one or more orders.
+   * Returns a breakdown of brokerage, transaction charges, GST, STT/CTT,
+   * stamp duty, SEBI fees, and the total.
+   */
+  async estimateBrokerage(request: BrokerageEstimateRequest): Promise<BrokerageEstimateResponse> {
+    await this.requireAuth();
+    const response = await this.restPost<BrokerageEstimateResponse>(
+      'https://apiconnect.angelone.in/rest/secure/angelbroking/brokerage/v1/estimateCharges',
+      request,
+    );
+    return response;
+  }
+
+  // ======================== Raw REST Helper ========================
+
+  /**
+   * Make a raw POST request to an Angel One REST API endpoint.
+   * Builds the required headers from the current session state.
+   */
+  private async restPost<T>(url: string, body: unknown): Promise<T> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.accessToken}`,
+      'X-PrivateKey': this.apiKey,
+      'X-ClientLocalIP': this.clientLocalIP,
+      'X-ClientPublicIP': this.clientPublicIP,
+      'X-MACAddress': this.macAddress,
+      'Accept': 'application/json',
+    };
+
+    if (this.appId) {
+      headers['X-AppId'] = this.appId;
+    }
+    if (this.clientCode) {
+      headers['X-ClientCode'] = this.clientCode;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => 'Unknown error');
+      throw new Error(
+        `Angel One REST API error (${response.status}): ${errorBody}`,
+      );
+    }
+
+    return response.json() as Promise<T>;
+  }
+
   // ======================== Helpers ========================
 
-  private requireAuth(): void {
-    if (!this.connected || !this.smartApi) {
-      throw new Error('Angel One broker not authenticated. Call authenticate() first.');
+  /**
+   * Re-authenticate using stored credentials (password + TOTP).
+   * Called automatically when the session token expires.
+   */
+  private async reAuthenticate(): Promise<boolean> {
+    if (!this.clientCode || !this.apiKey || !this.password) {
+      console.warn('[AngelBroker] Cannot re-authenticate — missing credentials (clientCode/apiKey/password)');
+      return false;
     }
+
+    try {
+      // Ensure SmartAPI instance exists
+      if (!this.smartApi) {
+        const SmartAPIClass = this.loadSmartAPI();
+        this.smartApi = new SmartAPIClass({ api_key: this.apiKey });
+      }
+
+      // Generate fresh 6-digit TOTP code from the stored Base32 secret
+      const totpCode = this.totp
+        ? speakeasy.totp({ secret: this.totp, encoding: 'base32' })
+        : undefined;
+
+      const session = await this.smartApi.generateSession(
+        this.clientCode,
+        this.password,
+        totpCode,
+      );
+
+      this.accessToken = session.data.jwtToken;
+      this.feedToken = session.data.feedToken || '';
+      this.smartApi.setAccessToken(this.accessToken);
+
+      // Re-attach session expiry hook for the new token
+      this.smartApi.setSessionExpiryHook(() => {
+        console.warn('[AngelBroker] Session token expired — will re-authenticate on next API call');
+        this.connected = false;
+      });
+
+      this.connected = true;
+      console.log(`[AngelBroker] Re-authenticated successfully (client: ${this.clientCode})`);
+      return true;
+    } catch (err: any) {
+      console.error('[AngelBroker] Re-authentication failed:', err.message);
+      this.connected = false;
+      return false;
+    }
+  }
+
+  /**
+   * Ensure the broker is authenticated before making API calls.
+   * If the session has expired, attempts to re-authenticate automatically
+   * using the stored password and TOTP secret.
+   */
+  private async requireAuth(): Promise<void> {
+    if (this.connected && this.smartApi) return;
+
+    // Session expired — try to refresh automatically
+    if (this.clientCode && this.apiKey && this.password) {
+      const success = await this.reAuthenticate();
+      if (success) return;
+    }
+
+    throw new Error('Angel One broker not authenticated. Call authenticate() first.');
   }
 }

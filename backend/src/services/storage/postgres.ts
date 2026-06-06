@@ -36,7 +36,7 @@
  * ============================================================================
  */
 
-import type { Pool, PoolClient, PoolConfig } from 'pg';
+import type { Pool, PoolConfig } from 'pg';
 import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
@@ -63,6 +63,20 @@ const DEFAULT_POOL_CONFIG: Partial<PoolConfig> = {
  * Wait for `ms` – used in exponential backoff.
  */
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Safely parse a JSONB column value returned by the `pg` driver.
+ *
+ * In older `pg` versions (<8) JSONB columns are returned as strings;
+ * in v8+ they're automatically parsed as objects/arrays. This helper
+ * handles both variants transparently.
+ *
+ * - string → JSON.parse
+ * - object/array/null/undefined → returned as-is
+ */
+function parseJSON<T = any>(value: unknown): T {
+  return (typeof value === 'string' ? JSON.parse(value) : value) as T;
+}
 
 export class PostgreSQLStorage implements StorageEngine {
   private pool: Pool | null = null;
@@ -179,6 +193,13 @@ export class PostgreSQLStorage implements StorageEngine {
     `);
 
     await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS badge_counts (
+        user_id TEXT PRIMARY KEY,
+        count INTEGER NOT NULL DEFAULT 0
+      );
+    `);
+
+    await this.pool.query(`
       CREATE TABLE IF NOT EXISTS notifications (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
@@ -208,11 +229,6 @@ export class PostgreSQLStorage implements StorageEngine {
       );
       CREATE INDEX IF NOT EXISTS idx_community_timestamp ON community_posts (timestamp DESC);
     `);
-  }
-
-  private async getClient(): Promise<PoolClient> {
-    if (!this.pool) throw new Error('PostgreSQL not connected');
-    return this.pool.connect();
   }
 
   // ──── Audit Trail ────
@@ -304,6 +320,7 @@ export class PostgreSQLStorage implements StorageEngine {
     await this.pool.query('DELETE FROM risk_profiles');
     await this.pool.query('DELETE FROM broker_state');
     await this.pool.query('DELETE FROM notifications');
+    await this.pool.query('DELETE FROM badge_counts');
     await this.pool.query('DELETE FROM community_posts');
   }
 
@@ -313,10 +330,8 @@ export class PostgreSQLStorage implements StorageEngine {
       timestamp: row.timestamp,
       userId: row.user_id,
       eventType: row.event_type,
-      data: typeof row.data === 'string' ? JSON.parse(row.data) : row.data,
-      metadata: row.metadata
-        ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata)
-        : undefined,
+      data: parseJSON(row.data),
+      metadata: row.metadata ? parseJSON(row.metadata) : undefined,
       previousHash: row.previous_hash,
       hash: row.hash,
     };
@@ -331,8 +346,7 @@ export class PostgreSQLStorage implements StorageEngine {
       [userId],
     );
     if (result.rows.length === 0) return null;
-    const profile = result.rows[0].profile;
-    return typeof profile === 'string' ? JSON.parse(profile) : profile;
+    return parseJSON<RiskProfile>(result.rows[0].profile);
   }
 
   async saveRiskProfile(profile: RiskProfile): Promise<void> {
@@ -364,8 +378,7 @@ export class PostgreSQLStorage implements StorageEngine {
       "SELECT value FROM broker_state WHERE key = 'broker_state'",
     );
     if (result.rows.length === 0) return defaultState;
-    const value = result.rows[0].value;
-    return typeof value === 'string' ? JSON.parse(value) : value;
+    return parseJSON<BrokerStateData>(result.rows[0].value);
   }
 
   async saveBrokerState(state: BrokerStateData): Promise<void> {
@@ -374,6 +387,27 @@ export class PostgreSQLStorage implements StorageEngine {
       `INSERT INTO broker_state (key, value) VALUES ('broker_state', $1)
        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
       [JSON.stringify(state)],
+    );
+  }
+
+  // ──── Badge Counts ────
+
+  async loadBadgeCount(userId: string): Promise<number> {
+    if (!this.pool) return 0;
+    const result = await this.pool.query(
+      'SELECT count FROM badge_counts WHERE user_id = $1',
+      [userId],
+    );
+    if (result.rows.length === 0) return 0;
+    return parseInt(result.rows[0].count, 10);
+  }
+
+  async saveBadgeCount(userId: string, count: number): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO badge_counts (user_id, count) VALUES ($1, $2)
+       ON CONFLICT (user_id) DO UPDATE SET count = EXCLUDED.count`,
+      [userId, count],
     );
   }
 
@@ -445,10 +479,8 @@ export class PostgreSQLStorage implements StorageEngine {
       message: row.message,
       read: row.read,
       timestamp: row.timestamp,
-      data: row.data ? (typeof row.data === 'string' ? JSON.parse(row.data) : row.data) : undefined,
-      metadata: row.metadata
-        ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata)
-        : undefined,
+      data: row.data ? parseJSON(row.data) : undefined,
+      metadata: row.metadata ? parseJSON(row.metadata) : undefined,
     };
   }
 
@@ -519,7 +551,7 @@ export class PostgreSQLStorage implements StorageEngine {
       likes: row.likes,
       comments: row.comments,
       timestamp: row.timestamp,
-      tags: row.tags ? (typeof row.tags === 'string' ? JSON.parse(row.tags) : row.tags) : [],
+      tags: row.tags ? parseJSON<string[]>(row.tags) : [],
     };
   }
 }

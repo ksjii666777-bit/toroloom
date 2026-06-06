@@ -1,0 +1,54 @@
+# ============================================================================
+# Toroloom Grafana Contact Points — Slack & PagerDuty
+# ============================================================================
+#
+# These contact points are referenced by the notification policy and
+# by the dashboard's legacy embedded alerts.
+#
+# Secrets (webhook URLs, integration keys) are loaded from environment
+# variables defined in the Grafana container or .env file.
+#
+# Required env vars:
+#   SLACK_WEBHOOK_URL        — Slack Incoming Webhook URL
+#   PAGERDUTY_INTEGRATION_KEY— PagerDuty Events API v2 integration key
+# ============================================================================
+
+apiVersion: 1
+
+contactPoints:
+  # ──── Slack ────────────────────────────────────────────────────────────
+  - orgId: 1
+    name: Slack WebSocket Alerts
+    receivers:
+      - uid: slack-websocket
+        type: slack
+        settings:
+          url: ${SLACK_WEBHOOK_URL}
+          title: |
+            Toroloom WebSocket Alert — {{ .CommonLabels.severity | toUpper }}
+          text: |
+            {{ range .Alerts }}
+            • {{ .Annotations.summary }}
+              {{ .Annotations.description }}
+            {{ end }}
+          footer: Toroloom Grafana
+          username: Toroloom Bot
+          icon_emoji: ":warning:"
+        disableResolveMessage: false
+
+  # ──── PagerDuty ───────────────────────────────────────────────────────
+  - orgId: 1
+    name: PagerDuty WebSocket Alerts
+    receivers:
+      - uid: pagerduty-websocket
+        type: pagerduty
+        settings:
+          integrationKey: ${PAGERDUTY_INTEGRATION_KEY}
+          severity: |
+            {{ if eq .CommonLabels.severity "critical" }}critical{{ else }}warning{{ end }}
+          class: websocket
+          group: toroloom-websocket
+          component: toroloom-backend
+          summary: |
+            {{ .CommonLabels.alertname }} — {{ .CommonLabels.severity }}
+        disableResolveMessage: false

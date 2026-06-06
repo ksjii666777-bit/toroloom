@@ -232,6 +232,38 @@ export const InteractionManager = {
   clearInteractionHandle: () => {},
 };
 
+// ── EventEmitter ——————————————————————————————————————————
+// expo-modules-core imports EventEmitter from react-native at module level.
+class MockEventEmitter {
+  _listeners: Record<string, Array<(...args: any[]) => void>> = {};
+
+  addListener(eventType: string, listener: (...args: any[]) => void) {
+    if (!this._listeners[eventType]) this._listeners[eventType] = [];
+    this._listeners[eventType].push(listener);
+    return { remove: () => this.removeListener(eventType, listener) };
+  }
+
+  removeListener(eventType: string, listener: (...args: any[]) => void) {
+    const arr = this._listeners[eventType];
+    if (arr) this._listeners[eventType] = arr.filter(l => l !== listener);
+  }
+
+  removeAllListeners(eventType?: string) {
+    if (eventType) delete this._listeners[eventType];
+    else this._listeners = {};
+  }
+
+  emit(eventType: string, ...args: any[]) {
+    (this._listeners[eventType] || []).forEach(l => l(...args));
+  }
+
+  listenerCount(eventType: string) {
+    return (this._listeners[eventType] || []).length;
+  }
+}
+
+export const EventEmitter = MockEventEmitter;
+
 // ── TurboModuleRegistry ——————————————————————————————————————
 export const TurboModuleRegistry = {
   get: (_name: string) => null,
@@ -275,6 +307,7 @@ const ReactNative = {
   NativeModules,
   I18nManager,
   InteractionManager,
+  EventEmitter,
   TurboModuleRegistry,
 };
 

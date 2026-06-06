@@ -239,7 +239,7 @@ export class OrderExecutionPipeline {
       });
 
       if (brokerResult.status === 'rejected') {
-        auditTrail.append({
+        await auditTrail.append({
           userId,
           eventType: 'ORDER_REJECTED',
           data: {

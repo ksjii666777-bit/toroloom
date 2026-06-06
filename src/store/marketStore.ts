@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Stock, MarketIndex } from '../types';
 import { mockIndices, mockStocks } from '../constants/mockData';
 import { marketApi } from '../services/api';
+import { analytics } from '../services/analytics';
 import { sendPriceAlert } from '../services/notificationService';
 
 interface MarketState {
@@ -50,7 +51,14 @@ export const useMarketStore = create<MarketState>((set, get) => ({
     }
   },
 
-  selectStock: (stock) => set({ selectedStock: stock }),
+  selectStock: (stock) => {
+    set({ selectedStock: stock });
+    analytics.logEvent('stock_view', {
+      symbol: stock.symbol,
+      name: stock.name,
+      sector: stock.sector,
+    });
+  },
 
   simulatePriceAlert: (symbol) => {
     const { stocks } = get();

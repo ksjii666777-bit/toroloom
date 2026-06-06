@@ -13,11 +13,17 @@
 
 import { WebSocket } from 'ws';
 import jwt from 'jsonwebtoken';
+import cluster from 'cluster';
 import { getBroker } from '../services/broker';
 import { env } from '../config/env';
 import { AuthPayload } from '../middleware/auth';
 import { IBroker, Position } from '../services/broker/interface';
-import { updateMetrics } from '../services/metrics';
+import { updateMetrics, incrementRateLimited, setActiveRateLimiters } from '../services/metrics';
+import {
+  ipcEvents,
+  sendConnectionIncrement,
+  sendConnectionDecrement,
+} from '../services/clusterIPC';
 
 // ──────────────────── Types ─────────────────────────────────────────────────
 
@@ -100,20 +106,48 @@ export async function loadUserPositions(userId: string, broker?: IBroker): Promi
 }
 
 /**
+ * Tracks the global connection count per userId (populated via IPC from primary).
+ * This is a worker-local mirror of the primary's aggregated state.
+ */
+const globalConnectionCounts = new Map<string, number>();
+
+/**
+ * Listen for IPC connection_sync events to update the global count mirror.
+ * This runs once when the module is first loaded in a worker.
+ */
+if (cluster.isWorker) {
+  ipcEvents.on('connection_sync', (counts: Record<string, number>) => {
+    globalConnectionCounts.clear();
+    for (const [userId, count] of Object.entries(counts)) {
+      globalConnectionCounts.set(userId, count);
+    }
+  });
+}
+
+/**
  * Increment the reference count for a userId.
  * Called when a new WebSocket connection authenticates.
  * Logs a warning if the user exceeds MAX_CONNECTIONS_PER_USER.
  * The alert fires only once per user (reset when count drops below
  * the threshold again via decrementConnectionCount).
+ *
+ * In cluster mode, sends an IPC message to the primary so the global
+ * count is updated across all workers.
  */
 export function incrementConnectionCount(userId: string): void {
-  const newCount = (userConnectionCount.get(userId) ?? 0) + 1;
-  userConnectionCount.set(userId, newCount);
+  const localCount = (userConnectionCount.get(userId) ?? 0) + 1;
+  userConnectionCount.set(userId, localCount);
 
-  if (newCount > MAX_CONNECTIONS_PER_USER && !connectionAlertedUsers.has(userId)) {
+  // Notify primary for global aggregation
+  sendConnectionIncrement(userId);
+
+  // Use the reported global count for threshold checks
+  const globalCount = globalConnectionCounts.get(userId) ?? localCount;
+
+  if (globalCount > MAX_CONNECTIONS_PER_USER && !connectionAlertedUsers.has(userId)) {
     connectionAlertedUsers.add(userId);
     console.warn(
-      `[WS] ⚠ User ${userId} has ${newCount} concurrent WebSocket connections ` +
+      `[WS] ⚠ User ${userId} has ${globalCount} concurrent WebSocket connections across all workers ` +
       `(limit: ${MAX_CONNECTIONS_PER_USER}). This may indicate multiple tabs ` +
       `or a potential issue.`,
     );
@@ -136,6 +170,9 @@ export function resetConnectionAlert(userId: string): void {
  * Only deletes the cached positions when the LAST connection closes,
  * preventing multi-tab position cache corruption.
  * Resets the connection alert when the count drops below the threshold.
+ *
+ * In cluster mode, sends an IPC message to the primary so the global
+ * count is decremented across all workers.
  */
 export function decrementConnectionCount(userId: string): void {
   const count = userConnectionCount.get(userId) ?? 1;
@@ -150,6 +187,9 @@ export function decrementConnectionCount(userId: string): void {
       connectionAlertedUsers.delete(userId);
     }
   }
+
+  // Notify primary for global aggregation
+  sendConnectionDecrement(userId);
 
   updateMetrics(userConnectionCount, clients, connectionAlertedUsers);
 }
@@ -174,9 +214,16 @@ export function checkRateLimit(ws: WebSocket): boolean {
   if (!state || now >= state.windowStart + RATE_LIMIT_WINDOW_MS) {
     // First message or window expired — start a fresh window
     rateLimitMap.set(ws, { windowStart: now, count: 1 });
+    setActiveRateLimiters(rateLimitMap.size);
     return true;
   }
 
   state.count++;
-  return state.count <= RATE_LIMIT_MAX_MESSAGES;
+  const allowed = state.count <= RATE_LIMIT_MAX_MESSAGES;
+
+  if (!allowed) {
+    incrementRateLimited();
+  }
+
+  return allowed;
 }

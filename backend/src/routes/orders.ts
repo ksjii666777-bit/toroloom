@@ -45,6 +45,7 @@ import {
   ExecuteOrderParams,
 } from '../services/orderExecution';
 import { OrderActionType, riskEngine } from '../services/riskEngine';
+import { auditTrail } from '../services/auditTrail';
 
 const router = Router();
 router.use(authMiddleware);
@@ -266,6 +267,158 @@ router.post('/validate', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: `Validation error: ${error.message}`,
+    });
+  }
+});
+
+
+// ==================== Order Management: Modify & Cancel ====================
+
+/**
+ * GET /api/orders/open
+ *
+ * Fetch all open/pending orders for the authenticated user.
+ * Returns an array of OpenOrder objects from the active broker.
+ */
+router.get('/open', async (_req: Request, res: Response) => {
+  try {
+    const broker = await getBroker();
+    const openOrders = await broker.getOpenOrders();
+    res.json(openOrders);
+  } catch (error: any) {
+    console.error('[Orders] Failed to fetch open orders:', error);
+    res.status(500).json({ error: error.message || 'Failed to fetch open orders' });
+  }
+});
+
+/**
+ * POST /api/orders/modify
+ *
+ * Modify an existing open/pending order.
+ *
+ * Body schema:
+ *   orderId     — ID of the order to modify (required)
+ *   price       — New limit price (optional)
+ *   quantity    — New quantity (optional)
+ *   orderType   — New order type: LIMIT | MARKET | SL | SLM (optional)
+ *   productType — New product type: CNC | MIS | NRML (optional)
+ *   triggerPrice — New trigger price for SL/SL-M orders (optional)
+ *   symbol      — Trading symbol (optional, for token resolution)
+ *   exchange    — Exchange: NSE | BSE (optional, default: NSE)
+ */
+router.post('/modify', async (req: Request, res: Response) => {
+  try {
+    const { orderId, symbol, exchange, quantity, price, productType, orderType, triggerPrice } = req.body;
+
+    if (!orderId || typeof orderId !== 'string') {
+      res.status(400).json({ error: 'orderId is required' });
+      return;
+    }
+
+    // Validate optional enum fields if provided
+    const VALID_ORDER_TYPES = ['LIMIT', 'MARKET', 'SL', 'SLM'] as const;
+    const VALID_PRODUCT_TYPES = ['CNC', 'MIS', 'NRML'] as const;
+
+    if (orderType && !VALID_ORDER_TYPES.includes(orderType as any)) {
+      res.status(400).json({ error: `Invalid orderType. Must be one of: ${VALID_ORDER_TYPES.join(', ')}` });
+      return;
+    }
+    if (productType && !VALID_PRODUCT_TYPES.includes(productType as any)) {
+      res.status(400).json({ error: `Invalid productType. Must be one of: ${VALID_PRODUCT_TYPES.join(', ')}` });
+      return;
+    }
+    if (quantity !== undefined && (typeof quantity !== 'number' || quantity <= 0 || !Number.isInteger(quantity))) {
+      res.status(400).json({ error: 'quantity must be a positive integer' });
+      return;
+    }
+    if (price !== undefined && (typeof price !== 'number' || price <= 0)) {
+      res.status(400).json({ error: 'price must be a positive number' });
+      return;
+    }
+
+    const broker = await getBroker();
+    const result = await broker.modifyOrder({
+      orderId,
+      symbol,
+      exchange: exchange || 'NSE',
+      quantity,
+      price,
+      productType: productType as any,
+      orderType: orderType as any,
+      triggerPrice,
+    });
+
+    // Audit trail
+    await auditTrail.append({
+      userId: req.user!.userId,
+      eventType: 'ORDER_EXECUTION',
+      data: {
+        action: 'MODIFY',
+        orderId,
+        symbol,
+        quantity,
+        price,
+        orderType,
+        productType,
+        status: result.status,
+      },
+    });
+
+    res.status(200).json(result);
+  } catch (error: any) {
+    console.error('[Orders] Modify order error:', error);
+    res.status(500).json({
+      id: req.body?.orderId || 'unknown',
+      status: 'rejected',
+      message: error.message || 'Failed to modify order',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+/**
+ * POST /api/orders/cancel
+ *
+ * Cancel an existing open/pending order.
+ *
+ * Body schema:
+ *   orderId  — ID of the order to cancel (required)
+ *   symbol   — Trading symbol (optional)
+ *   exchange — Exchange (optional)
+ */
+router.post('/cancel', async (req: Request, res: Response) => {
+  try {
+    const { orderId, symbol, exchange } = req.body;
+
+    if (!orderId || typeof orderId !== 'string') {
+      res.status(400).json({ error: 'orderId is required' });
+      return;
+    }
+
+    const broker = await getBroker();
+    const result = await broker.cancelOrder({ orderId, symbol, exchange });
+
+    // Audit trail
+    await auditTrail.append({
+      userId: req.user!.userId,
+      eventType: 'ORDER_EXECUTION',
+      data: {
+        action: 'CANCEL',
+        orderId,
+        symbol,
+        exchange,
+        status: result.status,
+      },
+    });
+
+    res.status(200).json(result);
+  } catch (error: any) {
+    console.error('[Orders] Cancel order error:', error);
+    res.status(500).json({
+      id: req.body?.orderId || 'unknown',
+      status: 'rejected',
+      message: error.message || 'Failed to cancel order',
+      timestamp: new Date().toISOString(),
     });
   }
 });

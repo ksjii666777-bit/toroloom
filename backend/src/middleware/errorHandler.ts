@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { Request, Response, NextFunction } from 'express';
 import { env } from '../config/env';
 
@@ -25,6 +26,10 @@ export function errorHandler(
     });
     return;
   }
+
+  // Capture unhandled errors with Sentry (redundant if the Sentry middleware
+  // already caught it, but ensures capture if the error handler is used directly).
+  Sentry.captureException(err);
 
   console.error('Unhandled error:', err);
   res.status(500).json({

@@ -225,10 +225,90 @@ export interface UserLevel {
   totalXp: number;
 }
 
+// ============ Portfolio Analytics ============
+export interface PerformanceMetrics {
+  totalReturn: number;
+  totalReturnPercent: number;
+  realizedPnl: number;
+  unrealizedPnl: number;
+  dayChange: number;
+  dayChangePercent: number;
+  winRate: number;
+  totalTrades: number;
+  winningTrades: number;
+  losingTrades: number;
+  avgWin: number;
+  avgLoss: number;
+  profitFactor: number;
+  maxDrawdown: number;
+  maxDrawdownPercent: number;
+  sharpeRatio: number;
+  avgHoldingDays: number;
+  bestTrade: number;
+  worstTrade: number;
+  consecutiveWins: number;
+  consecutiveLosses: number;
+}
+
+export interface CapitalGains {
+  shortTerm: {
+    gains: number;
+    count: number;
+    taxRate: number;
+    estimatedTax: number;
+  };
+  longTerm: {
+    gains: number;
+    count: number;
+    taxRate: number;
+    exemptLimit: number;
+    taxableGains: number;
+    estimatedTax: number;
+  };
+  totalEstimatedTax: number;
+  sttPaid: number;
+  totalBrokerage: number;
+}
+
+export interface MonthOverMonthReturn {
+  month: string;
+  startValue: number;
+  endValue: number;
+  return: number;
+  returnPercent: number;
+  contributions: number;
+}
+
+export interface PortfolioAnalytics {
+  metrics: PerformanceMetrics;
+  capitalGains: CapitalGains;
+  monthlyReturns: MonthOverMonthReturn[];
+  sectorAllocation: { sector: string; value: number; percent: number; count: number }[];
+  pnlHistory: { date: string; value: number; cumulativePnl: number }[];
+}
+
+// ============ Open Orders ============
+export interface OpenOrder {
+  id: string;
+  symbol: string;
+  exchange: string;
+  transactionType: 'BUY' | 'SELL';
+  quantity: number;
+  filledQuantity: number;
+  price: number;
+  triggerPrice?: number;
+  productType: string;
+  orderType: string;
+  status: 'open' | 'pending' | 'partially_filled' | 'trigger_pending';
+  placedBy: string;
+  timestamp: string;
+  validity?: string;
+}
+
 // ============ Notifications ============
 export interface AppNotification {
   id: string;
-  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational';
+  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert';
   title: string;
   message: string;
   read: boolean;

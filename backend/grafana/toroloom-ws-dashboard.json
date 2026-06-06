@@ -1,54 +1,6 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "Prometheus data source for Toroloom WebSocket metrics",
-      "type": "datasource",
-      "pluginId": "prometheus"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "9.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "stat",
-      "name": "Stat",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "timeseries",
-      "name": "Time series",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "gauge",
-      "name": "Gauge",
-      "version": ""
-    }
-  ],
-  "title": "Toroloom — WebSocket Connections",
-  "description": "Real-time WebSocket connection monitoring for the Toroloom trading platform. Tracks active connections, per-user distribution, subscription health, and tick throughput.",
-  "tags": ["toroloom", "websocket", "connections", "trading"],
+  "title": "Toroloom — WebSocket Connections",      "description": "Real-time WebSocket connection monitoring for the Toroloom trading platform. Tracks active connections, per-user distribution, subscription health, tick throughput, Node.js runtime metrics, broker dispatch latency, and per-symbol subscription distribution.",
+  "tags": ["toroloom", "websocket", "connections", "trading", "nodejs", "broker", "latency"],
   "timezone": "browser",
   "editable": true,
   "graphTooltip": 0,
@@ -58,7 +10,7 @@
   },
   "refresh": "15s",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 4,
   "panels": [
     {
       "collapsed": false,
@@ -70,7 +22,7 @@
           "title": "Total Connections",
           "description": "Total active authenticated WebSocket connections across all users.",
           "gridPos": { "h": 8, "w": 4, "x": 0, "y": 0 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },
@@ -78,8 +30,8 @@
                 "mode": "absolute",
                 "steps": [
                   { "color": "green", "value": null },
-                  { "color": "orange", "value": 200 },
-                  { "color": "red", "value": 500 }
+                  { "color": "orange", "value": 500 },
+                  { "color": "red", "value": 900 }
                 ]
               },
               "unit": "short",
@@ -116,7 +68,7 @@
           "title": "Authenticated Users",
           "description": "Number of distinct authenticated users with at least one active WebSocket connection.",
           "gridPos": { "h": 8, "w": 4, "x": 4, "y": 0 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },
@@ -161,7 +113,7 @@
           "title": "Alerted Users",
           "description": "Users who have exceeded the max concurrent connection threshold (default: 5).",
           "gridPos": { "h": 8, "w": 4, "x": 8, "y": 0 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },
@@ -175,16 +127,8 @@
               },
               "unit": "short",
               "mappings": [
-                {
-                  "type": "value",
-                  "value": "0",
-                  "text": "0 — All Clear"
-                },
-                {
-                  "type": "value",
-                  "value": "1",
-                  "text": "⚠ 1 User Alerted"
-                }
+                { "type": "value", "value": "0", "text": "0 — All Clear" },
+                { "type": "value", "value": "1", "text": "⚠ 1 User Alerted" }
               ],
               "min": 0,
               "noValue": "0"
@@ -217,7 +161,7 @@
           "title": "Ticks / sec",
           "description": "Running rate of price ticks delivered to clients over the last 5 minutes.",
           "gridPos": { "h": 8, "w": 4, "x": 12, "y": 0 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "palette-classic" },
@@ -268,7 +212,7 @@
           "title": "Connections & Users Over Time",
           "description": "Total active connections vs distinct authenticated users. A widening gap indicates multi-tab usage.",
           "gridPos": { "h": 10, "w": 12, "x": 0, "y": 8 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "palette-classic" },
@@ -289,24 +233,19 @@
                 "lineInterpolation": "smooth",
                 "lineWidth": 2,
                 "pointSize": 4,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
+                "scaleDistribution": { "type": "linear" },
                 "showPoints": "never",
                 "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
               },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  { "color": "green", "value": null }
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 500 },
+                  { "color": "red", "value": 900 }
                 ]
               },
               "unit": "short"
@@ -320,10 +259,7 @@
               "placement": "bottom",
               "showLegend": true
             },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
+            "tooltip": { "mode": "multi", "sort": "desc" }
           },
           "targets": [
             {
@@ -335,6 +271,16 @@
               "expr": "toroloom_ws_authenticated_users",
               "legendFormat": "Authenticated Users",
               "refId": "B"
+            },
+            {
+              "expr": "500",
+              "legendFormat": "⚠ Warning (500)",
+              "refId": "C"
+            },
+            {
+              "expr": "900",
+              "legendFormat": "🔴 Critical (900)",
+              "refId": "D"
             }
           ]
         },
@@ -344,7 +290,7 @@
           "title": "Ticks Per Second",
           "description": "Aggregate tick delivery rate across all users. Drops to zero indicate a ticker stall.",
           "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "palette-classic" },
@@ -365,18 +311,11 @@
                 "lineInterpolation": "smooth",
                 "lineWidth": 2,
                 "pointSize": 4,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
+                "scaleDistribution": { "type": "linear" },
                 "showPoints": "never",
                 "spanNulls": true,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "line"
-                }
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "line" }
               },
               "mappings": [],
               "thresholds": {
@@ -390,25 +329,13 @@
             },
             "overrides": [
               {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "/.*stall.*/i"
-                },
+                "matcher": { "id": "byRegexp", "options": "/.*stall.*/i" },
                 "properties": [
-                  {
-                    "id": "custom.fillOpacity",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 1
-                  },
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 },
                   {
                     "id": "color",
-                    "value": {
-                      "mode": "fixed",
-                      "fixedColor": "dark-red"
-                    }
+                    "value": { "mode": "fixed", "fixedColor": "dark-red" }
                   }
                 ]
               }
@@ -421,10 +348,7 @@
               "placement": "bottom",
               "showLegend": true
             },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
+            "tooltip": { "mode": "multi", "sort": "desc" }
           },
           "targets": [
             {
@@ -443,6 +367,1082 @@
     },
     {
       "collapsed": false,
+      "title": "Node.js Runtime",
+      "description": "Node.js process health metrics — event loop lag, memory usage, handles. These help detect CPU starvation, memory leaks, and socket leaks.",
+      "panels": [
+        {
+          "id": 13,
+          "type": "stat",
+          "title": "Event Loop Lag",
+          "description": "Node.js event loop lag in milliseconds. Values above 100ms indicate blocking operations or CPU starvation.",
+          "gridPos": { "h": 8, "w": 6, "x": 0, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 100 },
+                  { "color": "red", "value": 500 }
+                ]
+              },
+              "unit": "ms",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 ms"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "nodejs_eventloop_lag_seconds{component=\"nodejs\"} * 1000",
+              "legendFormat": "Event Loop Lag",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "type": "stat",
+          "title": "Heap Used",
+          "description": "V8 heap memory currently in use by the Node.js process. A gradual upward trend with no GC drop may indicate a memory leak.",
+          "gridPos": { "h": 8, "w": 6, "x": 6, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 209715200 },
+                  { "color": "red", "value": 419430400 }
+                ]
+              },
+              "unit": "bytes",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 B"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "nodejs_heap_size_used_bytes{component=\"nodejs\"}",
+              "legendFormat": "Heap Used",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "type": "stat",
+          "title": "RSS",
+          "description": "Resident Set Size — total physical memory allocated to the Node.js process. High values relative to heap indicate native bindings or external allocations.",
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 314572800 },
+                  { "color": "red", "value": 524288000 }
+                ]
+              },
+              "unit": "bytes",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 B"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "process_resident_memory_bytes{component=\"nodejs\"}",
+              "legendFormat": "RSS",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "type": "stat",
+          "title": "Active Handles",
+          "description": "Number of active libuv handles (timers, sockets, files). A smooth upward trend may indicate a handle leak (e.g. unclosed WebSocket or timer).",
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 500 },
+                  { "color": "red", "value": 1000 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "nodejs_active_handles_total{component=\"nodejs\"}",
+              "legendFormat": "Active Handles",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "type": "timeseries",
+          "title": "Event Loop Lag Over Time",
+          "description": "Event loop lag in milliseconds. Spikes above 100ms indicate blocking event-loop operations. Sustained values above 500ms suggest severe CPU starvation or synchronous I/O in the hot path.",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 26 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "ms",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 2,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 100 },
+                  { "color": "red", "value": 500 }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*100ms.*/i" },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": { "mode": "fixed", "fixedColor": "orange" }
+                  },
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 }
+                ]
+              },
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*500ms.*/i" },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": { "mode": "fixed", "fixedColor": "red" }
+                  },
+                  { "id": "custom.fillOpacity", "value": 0 },
+                  { "id": "custom.lineWidth", "value": 1 }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "nodejs_eventloop_lag_seconds{component=\"nodejs\"} * 1000",
+              "legendFormat": "Event Loop Lag (ms)",
+              "refId": "A"
+            },
+            {
+              "expr": "100",
+              "legendFormat": "⚠ Warning (100ms)",
+              "refId": "B"
+            },
+            {
+              "expr": "500",
+              "legendFormat": "🔴 Critical (500ms)",
+              "refId": "C"
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "type": "timeseries",
+          "title": "Memory Usage",
+          "description": "V8 heap (used vs total), RSS, and external memory. A used/total gap approaching zero indicates GC pressure. RSS exceeding total by a large margin points to non-heap allocations (buffers, native addons).",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 26 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "bytes",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 3,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "area" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 314572800 },
+                  { "color": "red", "value": 524288000 }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Heap Total" },
+                "properties": [
+                  { "id": "custom.lineStyle", "value": { "fill": "dash" } },
+                  { "id": "custom.lineWidth", "value": 1 },
+                  { "id": "custom.fillOpacity", "value": 0 }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "process_resident_memory_bytes{component=\"nodejs\"}",
+              "legendFormat": "RSS",
+              "refId": "A"
+            },
+            {
+              "expr": "nodejs_heap_size_used_bytes{component=\"nodejs\"}",
+              "legendFormat": "Heap Used",
+              "refId": "B"
+            },
+            {
+              "expr": "nodejs_heap_size_total_bytes{component=\"nodejs\"}",
+              "legendFormat": "Heap Total",
+              "refId": "C"
+            },
+            {
+              "expr": "nodejs_external_memory_bytes{component=\"nodejs\"}",
+              "legendFormat": "External Memory",
+              "refId": "D"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Broker & Symbols",
+      "description": "Broker tick dispatch latency and per-symbol subscription distribution. High latency spikes indicate serialization overhead; symbols with the most subscribers are the most actively traded.",
+      "panels": [
+        {
+          "id": 19,
+          "type": "stat",
+          "title": "Tick Dispatch Latency (p99)",
+          "description": "99th percentile of broker tick dispatch latency over the last 5 minutes. Values above 1ms indicate serialization or backpressure bottlenecks.",
+          "gridPos": { "h": 8, "w": 6, "x": 0, "y": 36 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 0.001 },
+                  { "color": "red", "value": 0.01 }
+                ]
+              },
+              "unit": "s",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 s"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p99 Latency",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "type": "stat",
+          "title": "Tick Dispatch Rate",
+          "description": "Aggregate tick dispatch rate across all users. The same as 'Ticks / sec' in Overview but here for side-by-side comparison with latency.",
+          "gridPos": { "h": 8, "w": 6, "x": 6, "y": 36 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "dark-red", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "green", "value": 50 }
+                ]
+              },
+              "unit": "cps",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 cps"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_ws_ticks_total[$__rate_interval]))",
+              "legendFormat": "Ticks/s",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "type": "stat",
+          "title": "Unique Symbols",
+          "description": "Number of unique symbols currently subscribed to by at least one client.",
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 36 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 50 },
+                  { "color": "red", "value": 100 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "count(toroloom_ws_symbol_subscriptions)",
+              "legendFormat": "Unique Symbols",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "type": "stat",
+          "title": "Avg Subs / Symbol",
+          "description": "Average number of subscribers per symbol. High values indicate concentrated interest; low values indicate broad, diversified tracking.",
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 36 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 3 },
+                  { "color": "red", "value": 10 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [
+                { "type": "value", "value": "null", "text": "N/A" }
+              ],
+              "min": 0,
+              "noValue": "N/A"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(toroloom_ws_symbol_subscriptions) / count(toroloom_ws_symbol_subscriptions)",
+              "legendFormat": "Avg Subs/Symbol",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "type": "timeseries",
+          "title": "Tick Dispatch Latency (p50 / p95 / p99)",
+          "description": "Multidimensional tick dispatch latency. Use the p50-p95 gap to detect outlier ticks causing latency spikes. If p99 is 10x p95, individual large ticks (e.g. serializing many symbols) are the bottleneck.",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 44 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 15,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 3,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 0.001 },
+                  { "color": "red", "value": 0.01 }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*p99.*/i" },
+                "properties": [
+                  { "id": "custom.lineWidth", "value": 3 },
+                  { "id": "custom.fillOpacity", "value": 20 }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p50 Latency",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p95 Latency",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(toroloom_broker_tick_dispatch_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p99 Latency",
+              "refId": "C"
+            },
+            {
+              "expr": "0.001",
+              "legendFormat": "⚠ Warning (1ms)",
+              "refId": "D"
+            },
+            {
+              "expr": "0.01",
+              "legendFormat": "🔴 Critical (10ms)",
+              "refId": "E"
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "type": "table",
+          "title": "Top Subscribed Symbols",
+          "description": "Symbols with the most active WebSocket subscribers. Sorted by subscriber count descending. Helps identify the most watched tickers and potential fan-out load per symbol.",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 44 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "minWidth": 120
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 3 },
+                  { "color": "red", "value": 10 }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Symbol" },
+                "properties": [{ "id": "custom.width", "value": 200 }]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Subscribers" },
+                "properties": [
+                  { "id": "custom.width", "value": 150 },
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": true
+            },
+            "sortBy": [{ "displayName": "Subscribers", "desc": true }],
+            "showTypeIcons": false
+          },
+          "targets": [
+            {
+              "expr": "topk(20, toroloom_ws_symbol_subscriptions)",
+              "legendFormat": "{{symbol}}",
+              "refId": "A",
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true
+                },
+                "indexByName": { "symbol": 0, "Value": 1 },
+                "renameByName": { "symbol": "Symbol", "Value": "Subscribers" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Infrastructure",
+      "description": "Broker connection health, authentication status, failover events, and WebSocket rate limiter activity.",
+      "panels": [
+        {
+          "id": 25,
+          "type": "stat",
+          "title": "Broker Connected",
+          "description": "Current broker connection status. 1 = connected, 0 = disconnected. A drop to 0 indicates an outage or authentication failure.",
+          "gridPos": { "h": 8, "w": 6, "x": 0, "y": 54 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [
+                { "type": "value", "value": "0", "text": "Disconnected" },
+                { "type": "value", "value": "1", "text": "Connected" }
+              ],
+              "min": 0,
+              "max": 1,
+              "noValue": "No Data"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "max(toroloom_broker_connected)",
+              "legendFormat": "Broker",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 26,
+          "type": "stat",
+          "title": "Auth Errors / min",
+          "description": "Rate of broker authentication failures. Spikes indicate token expiry, invalid credentials, or network issues reaching broker APIs.",
+          "gridPos": { "h": 8, "w": 6, "x": 6, "y": 54 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 5 }
+                ]
+              },
+              "unit": "cpm",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 /min"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_broker_auth_errors_total[1m]))",
+              "legendFormat": "Auth Errors/min",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 27,
+          "type": "stat",
+          "title": "Reconnects / min",
+          "description": "Rate of broker reconnection or failover events. Values > 0 indicate network instability or broker API downtime.",
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 54 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 3 }
+                ]
+              },
+              "unit": "cpm",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 /min"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_broker_reconnects_total[1m]))",
+              "legendFormat": "Reconnects/min",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 28,
+          "type": "stat",
+          "title": "Rate Limited / min",
+          "description": "Rate of WebSocket messages rejected by the per-connection rate limiter. Sustained activity above 0 indicates aggressive clients or potential DoS.",
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 54 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "red", "value": 50 }
+                ]
+              },
+              "unit": "cpm",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 /min"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_ws_rate_limited_total[1m]))",
+              "legendFormat": "Rate Limited/min",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 29,
+          "type": "timeseries",
+          "title": "Broker Connection State",
+          "description": "Broker connection status over time. A drop to 0 triggers a failover to the next available broker in the chain (Zerodha → Angel → Mock).",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 62 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 2,
+                "pointSize": 4,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              },
+              "unit": "short",
+              "min": 0,
+              "max": 1
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Connected (zerodha)" },
+                "properties": [
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Connected (angel)" },
+                "properties": [
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Connected (mock)" },
+                "properties": [
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "toroloom_broker_connected{broker=\"zerodha\"}",
+              "legendFormat": "Connected (zerodha)",
+              "refId": "A"
+            },
+            {
+              "expr": "toroloom_broker_connected{broker=\"angel\"}",
+              "legendFormat": "Connected (angel)",
+              "refId": "B"
+            },
+            {
+              "expr": "toroloom_broker_connected{broker=\"mock\"}",
+              "legendFormat": "Connected (mock)",
+              "refId": "C"
+            }
+          ]
+        },
+        {
+          "id": 30,
+          "type": "timeseries",
+          "title": "Rate Limiter Activity",
+          "description": "Rate-limited messages and active rate limiter connections. Spikes in red indicate aggressive clients or potential DoS. Active limiters show how many connections are currently constrained.",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 62 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 3,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 10 },
+                  { "color": "red", "value": 50 }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(toroloom_ws_rate_limited_total[1m]))",
+              "legendFormat": "Rate Limited/min",
+              "refId": "A"
+            },
+            {
+              "expr": "toroloom_ws_active_rate_limiters",
+              "legendFormat": "Active Rate Limiters",
+              "refId": "B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
       "title": "Per-User Details",
       "panels": [
         {
@@ -450,8 +1450,8 @@
           "type": "table",
           "title": "Connection Count by User",
           "description": "Current WebSocket connections per user. Sorted by connection count descending. Values exceeding 5 trigger alerts.",
-          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 18 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 72 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },
@@ -474,24 +1474,13 @@
             "overrides": [
               {
                 "matcher": { "id": "byName", "options": "User ID" },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 300
-                  }
-                ]
+                "properties": [{ "id": "custom.width", "value": 300 }]
               },
               {
                 "matcher": { "id": "byName", "options": "Connections" },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 150
-                  },
-                  {
-                    "id": "custom.displayMode",
-                    "value": "color-background-solid"
-                  }
+                  { "id": "custom.width", "value": 150 },
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
                 ]
               }
             ]
@@ -504,12 +1493,7 @@
               "reducer": ["sum"],
               "show": true
             },
-            "sortBy": [
-              {
-                "displayName": "Connections",
-                "desc": true
-              }
-            ],
+            "sortBy": [{ "displayName": "Connections", "desc": true }],
             "showTypeIcons": false
           },
           "targets": [
@@ -530,14 +1514,8 @@
                   "instance": true,
                   "job": true
                 },
-                "indexByName": {
-                  "user_id": 0,
-                  "Value": 1
-                },
-                "renameByName": {
-                  "user_id": "User ID",
-                  "Value": "Connections"
-                }
+                "indexByName": { "user_id": 0, "Value": 1 },
+                "renameByName": { "user_id": "User ID", "Value": "Connections" }
               }
             }
           ]
@@ -547,8 +1525,8 @@
           "type": "table",
           "title": "Active Subscriptions by User",
           "description": "Number of symbols each user is currently subscribed to (aggregated across all their tabs).",
-          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 18 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 72 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },
@@ -572,10 +1550,7 @@
               {
                 "matcher": { "id": "byName", "options": "Symbols" },
                 "properties": [
-                  {
-                    "id": "custom.displayMode",
-                    "value": "color-background-solid"
-                  }
+                  { "id": "custom.displayMode", "value": "color-background-solid" }
                 ]
               }
             ]
@@ -588,12 +1563,7 @@
               "reducer": ["sum"],
               "show": true
             },
-            "sortBy": [
-              {
-                "displayName": "Subscriptions",
-                "desc": true
-              }
-            ],
+            "sortBy": [{ "displayName": "Subscriptions", "desc": true }],
             "showTypeIcons": false
           },
           "targets": [
@@ -614,10 +1584,7 @@
                   "instance": true,
                   "job": true
                 },
-                "indexByName": {
-                  "user_id": 0,
-                  "Value": 1
-                },
+                "indexByName": { "user_id": 0, "Value": 1 },
                 "renameByName": {
                   "user_id": "User ID",
                   "Value": "Subscriptions"
@@ -637,8 +1604,8 @@
           "type": "timeseries",
           "title": "Per-User Connection Distribution",
           "description": "Breakdown of the top 10 users by connection count. Spikes above the threshold line indicate multi-tab abuse.",
-          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 28 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 82 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "palette-classic" },
@@ -659,18 +1626,11 @@
                 "lineInterpolation": "stepAfter",
                 "lineWidth": 1,
                 "pointSize": 2,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
+                "scaleDistribution": { "type": "linear" },
                 "showPoints": "never",
                 "spanNulls": true,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "dashed"
-                }
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
               },
               "mappings": [],
               "thresholds": {
@@ -691,10 +1651,7 @@
               "placement": "bottom",
               "showLegend": true
             },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
+            "tooltip": { "mode": "multi", "sort": "desc" }
           },
           "targets": [
             {
@@ -709,8 +1666,8 @@
           "type": "gauge",
           "title": "Alerted Users Gauge",
           "description": "Current number of users in alert state. An alert fires when a user exceeds 5 concurrent connections.",
-          "gridPos": { "h": 10, "w": 6, "x": 12, "y": 28 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "gridPos": { "h": 10, "w": 6, "x": 12, "y": 82 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },
@@ -753,8 +1710,8 @@
           "type": "stat",
           "title": "Connection Health Status",
           "description": "Overall health score based on the ratio of users to connections. A high ratio means heavy multi-tab usage.",
-          "gridPos": { "h": 10, "w": 6, "x": 18, "y": 28 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "gridPos": { "h": 10, "w": 6, "x": 18, "y": 82 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },
@@ -810,21 +1767,16 @@
           "type": "table",
           "title": "Raw Metrics Sampler",
           "description": "Raw Prometheus values for debugging. Shows the last scraped sample for each toroloom_ws metric.",
-          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 38 },
-          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 92 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
           "fieldConfig": {
             "defaults": {
               "color": { "mode": "thresholds" },
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto"
-              },
+              "custom": { "align": "auto", "displayMode": "auto" },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
-                "steps": [
-                  { "color": "green", "value": null }
-                ]
+                "steps": [{ "color": "green", "value": null }]
               }
             },
             "overrides": []
@@ -837,12 +1789,7 @@
               "reducer": ["sum"],
               "show": false
             },
-            "sortBy": [
-              {
-                "displayName": "Metric",
-                "desc": false
-              }
-            ],
+            "sortBy": [{ "displayName": "Metric", "desc": false }],
             "showTypeIcons": false
           },
           "targets": [
@@ -902,20 +1849,9 @@
   "templating": {
     "list": [
       {
-        "current": { "selected": true, "text": "All", "value": "$__all" },
-        "hide": 2,
-        "label": "Data Source",
-        "name": "DS_PROMETHEUS",
-        "options": [],
-        "query": "prometheus",
-        "refresh": 1,
-        "regex": "",
-        "type": "datasource"
-      },
-      {
         "allValue": ".*",
         "current": { "selected": true, "text": "All", "value": "$__all" },
-        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
         "definition": "label_values(toroloom_ws_user_connections, user_id)",
         "hide": 0,
         "includeAll": true,

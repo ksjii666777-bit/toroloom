@@ -19,7 +19,22 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "backgroundColor": "#0D1117",
+      "description": "Toroloom — AI-powered trading & investment platform",
+      "name": "Toroloom",
+      "lang": "en-IN",
+      "scope": "/",
+      "shortName": "Toroloom",
+      "display": "standalone",
+      "orientation": "any",
+      "themeColor": "#0D1117"
+    },
+    "plugins": [
+      "expo-sharing",
+      "@react-native-firebase/app",
+      "@react-native-firebase/analytics"
+    ]
   }
 }

@@ -117,6 +117,11 @@ describe('OrderExecutionPipeline — MongoDB Integration', () => {
   afterAll(async () => {
     if (available && storage) {
       await storage.clearForTesting();
+    }
+    // Drain pending persists and reset singleton BEFORE disconnecting
+    // storage, so any in-flight writes complete against connected DB
+    await riskEngine.resetForTesting();
+    if (available && storage) {
       await storage.disconnect();
     }
   });
@@ -206,6 +211,12 @@ describe('OrderExecutionPipeline — MongoDB Integration', () => {
     await pipeline.execute(buyParams({ quantity: 5 }));
     await pipeline.execute(buyParams({ quantity: 3, symbol: 'TCS', price: 3890 }));
 
+    // Drain pending persists before reading from storage. Without this, the
+    // second trade's persist may still be in-flight (chained after the first
+    // by persistProfile's eager chaining) and the storage read would see only
+    // the first trade's data.
+    await riskEngine.drain(TEST_USER);
+
     const persisted = await storage.loadRiskProfile(TEST_USER);
     expect(persisted).not.toBeNull();
     expect(persisted!.today.tradeCount).toBe(2);
@@ -219,16 +230,28 @@ describe('OrderExecutionPipeline — MongoDB Integration', () => {
     riskEngine.resetDaily(TEST_USER);
     riskEngine.setPortfolioValue(TEST_USER, 1_000_000);
 
-    // Set a razor-thin loss limit
-    riskEngine.updateLimits(TEST_USER, { dailyLossLimit: 1 });
+    // Set a razor-thin loss limit — the BUY order's P&L impact will exceed it
+    riskEngine.updateLimits(TEST_USER, { dailyLossLimit: 1 }); // ₹1 absurdly tight
 
     const profile = riskEngine.getProfile(TEST_USER);
+    // Seed a realized loss so total P&L plus BUY impact triggers lockdown
     profile.today.realizedPnL = -1;
 
+    // Drain any pending fire-and-forget persists from setup (resetDaily,
+    // setPortfolioValue, updateLimits) so the evaluate() call below is
+    // guaranteed to be the last write to the database, preventing race
+    // conditions where a stale profile (lockdown=NONE) overwrites the
+    // lockdown=ACTIVE state.
+    await riskEngine.drain(TEST_USER);
+
+    // Execute a large BUY — estimatedPnl = -2890 * 10 = -28900 → total loss = -28901 >> ₹1
     const result = await pipeline.execute(buyParams({ quantity: 10 }));
     expect(result.success).toBe(false);
     // Evaluate returns BLOCKED_LOSS_LIMIT (which triggers the lockdown as a side effect)
     expect(result.riskEvaluation.decision).toBe(RiskDecision.BLOCKED_LOSS_LIMIT);
+
+    // Ensure pending persists complete before checking the DB
+    await riskEngine.drain(TEST_USER);
 
     // Verify lockdown state in MongoDB
     const persisted = await storage.loadRiskProfile(TEST_USER);

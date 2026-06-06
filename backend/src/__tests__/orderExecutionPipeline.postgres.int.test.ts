@@ -115,6 +115,11 @@ describe('OrderExecutionPipeline — PostgreSQL Integration', () => {
   afterAll(async () => {
     if (available && storage) {
       await storage.clearForTesting();
+    }
+    // Drain pending persists and reset singleton BEFORE disconnecting
+    // storage, so any in-flight writes complete against connected DB
+    await riskEngine.resetForTesting();
+    if (available && storage) {
       await storage.disconnect();
     }
   });
@@ -204,6 +209,12 @@ describe('OrderExecutionPipeline — PostgreSQL Integration', () => {
 
     await pipeline.execute(buyParams({ quantity: 5 }));
     await pipeline.execute(buyParams({ quantity: 3, symbol: 'TCS', price: 3890 }));
+
+    // Drain pending persists before reading from storage. Without this, the
+    // second trade's persist may still be in-flight (chained after the first
+    // by persistProfile's eager chaining) and the storage read would see only
+    // the first trade's data.
+    await riskEngine.drain(TEST_USER);
 
     const persisted = await storage.loadRiskProfile(TEST_USER);
     expect(persisted).not.toBeNull();

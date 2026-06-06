@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { Holding, Trade } from '../../types';
+import type { Holding, Trade, OpenOrder } from '../../types';
 
 export interface PlaceOrderRequest {
   symbol: string;
@@ -20,6 +20,23 @@ export interface OrderResult {
   error?: string;
 }
 
+export interface ModifyOrderRequest {
+  orderId: string;
+  price?: number;
+  quantity?: number;
+  orderType?: string;
+  productType?: string;
+  triggerPrice?: number;
+  symbol?: string;
+  exchange?: string;
+}
+
+export interface CancelOrderRequest {
+  orderId: string;
+  symbol?: string;
+  exchange?: string;
+}
+
 export const portfolioApi = {
   getHoldings: () => api.get<Holding[]>('/portfolio/holdings'),
 
@@ -29,4 +46,15 @@ export const portfolioApi = {
 
   placeOrder: (order: PlaceOrderRequest) =>
     api.post<OrderResult>('/portfolio/orders', order),
+
+  /** Fetch all open/pending orders */
+  getOpenOrders: () => api.get<OpenOrder[]>('/orders/open'),
+
+  /** Modify an existing open order */
+  modifyOrder: (order: ModifyOrderRequest) =>
+    api.post<{ id: string; status: string; message: string; timestamp: string }>('/orders/modify', order),
+
+  /** Cancel an existing open order */
+  cancelOrder: (order: CancelOrderRequest) =>
+    api.post<{ id: string; status: string; message: string; timestamp: string }>('/orders/cancel', order),
 };

@@ -59,11 +59,22 @@ vi.mock('expo-notifications', () => ({
   scheduleNotificationAsync: vi.fn(() => Promise.resolve('id')),
 }));
 
+// Mock the notifications API so registerPushToken and getBadgeCount don't error
+vi.mock('../services/api/notifications', () => ({
+  notificationApi: {
+    registerPushToken: vi.fn(() => Promise.resolve({ success: true })),
+    getBadgeCount: vi.fn(() => Promise.resolve({ badgeCount: 0 })),
+  },
+}));
+
 // Override notificationService mock — use mock implementations for the functions
 // the hook calls so we can verify they're invoked correctly.
 vi.mock('../services/notificationService', () => ({
   registerForPushNotifications: mockRegisterForPush,
   setupNotificationResponseListener: mockSetupResponseListener,
+  registerPortfolioAlertBackgroundTask: vi.fn(),
+  evaluatePortfolioAlertsInBackground: vi.fn(),
+  updateAppIconBadge: vi.fn(() => Promise.resolve()),
   setupChannels: vi.fn(),
   sendLocalNotification: vi.fn(),
   cancelNotification: vi.fn(),
@@ -77,6 +88,8 @@ vi.mock('../services/notificationService', () => ({
 // ==================== Imports ====================
 
 import { useNotificationSetup } from '../hooks/useNotificationSetup';
+import { notificationApi } from '../services/api/notifications';
+import * as notificationService from '../services/notificationService';
 
 // ==================== Test Component ====================
 
@@ -147,6 +160,29 @@ describe('useNotificationSetup — Mount Lifecycle', () => {
 
     expect(removeReceived).toHaveBeenCalled();
     expect(removeResponse).toHaveBeenCalled();
+  });
+
+  it('calls syncBadgeCountFromBackend on mount (via getBadgeCount API)', () => {
+    act(() => {
+      TestRenderer.create(<TestComponent />);
+    });
+
+    // syncBadgeCountFromBackend internally calls notificationApi.getBadgeCount()
+    expect(notificationApi.getBadgeCount).toHaveBeenCalled();
+  });
+
+  it('calls updateAppIconBadge when syncBadgeCountFromBackend returns a non-zero badge count', async () => {
+    // Override getBadgeCount to return a non-zero count
+    vi.mocked(notificationApi.getBadgeCount).mockResolvedValueOnce({ badgeCount: 5 });
+
+    act(() => {
+      TestRenderer.create(<TestComponent />);
+    });
+
+    // Flush pending microtasks so the async syncBadgeCountFromBackend completes
+    await act(async () => {});
+
+    expect(notificationService.updateAppIconBadge).toHaveBeenCalledWith(5);
   });
 });
 

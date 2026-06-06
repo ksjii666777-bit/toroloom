@@ -37,6 +37,7 @@ vi.mock('../config/env', () => ({
     isMock: true,
     zerodha: { apiKey: '', apiSecret: '', accessToken: '' },
     angel: { apiKey: '', clientId: '', accessToken: '' },
+    groww: { apiKey: '', accessToken: '' },
   },
 }));
 

@@ -105,6 +105,11 @@ describe('OrderExecutionPipeline — Full 5-Stage Pipeline', () => {
     });
   });
 
+  afterAll(async () => {
+    // Reset the singleton to prevent cross-file state contamination
+    await riskEngine.resetForTesting();
+  });
+
   afterEach(() => {
     riskEngine.resetDaily(testUserId);
     // Hard-reset all lock state so subsequent tests start clean
@@ -337,6 +342,11 @@ describe('RiskEngine — Full Lifecycle Simulation', () => {
 
   beforeEach(() => {
     riskEngine.setPortfolioValue(lifecycleUser, 1000000);
+  });
+
+  afterAll(async () => {
+    // Reset the singleton to prevent cross-file state contamination
+    await riskEngine.resetForTesting();
   });
 
   afterEach(() => {

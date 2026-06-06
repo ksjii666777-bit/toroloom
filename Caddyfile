@@ -1,0 +1,174 @@
+# ============================================================================
+# Toroloom — Caddy Reverse Proxy Configuration
+# ============================================================================
+#
+# ── Current Mode: Direct Server IP (HTTP, no TLS) ──
+#   Use this when you don't have a domain yet. Caddy serves on port 80.
+#   API at http://YOUR_SERVER_IP/health
+#   Grafana at http://YOUR_SERVER_IP/grafana/
+#
+# ── When you get a domain: ──
+#   1. Point DNS A records to your server IP:
+#      api.YOUR_DOMAIN     → YOUR_SERVER_IP
+#      grafana.YOUR_DOMAIN → YOUR_SERVER_IP
+#   2. Comment out the :80 block below
+#   3. Uncomment the DOMAIN MODE section
+#   4. Run: docker exec toroloom-caddy caddy reload --config /etc/caddy/Caddyfile
+#   Caddy will auto-provision Let's Encrypt TLS certificates.
+#
+# ── Cloudflare Tunnel (alternative, no open ports): ──
+#   See the CLOUDFLARE TUNNEL TEMPLATE at the bottom.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+# Reload without downtime:
+#   docker exec toroloom-caddy caddy reload --config /etc/caddy/Caddyfile
+# ============================================================================
+
+# ──── CURRENT: Server IP Mode (HTTP only, no TLS) ────────────────────────────
+#
+# Path-based routing:
+#   /api/*, /health, /ws  → backend:3000
+#   /grafana/*            → grafana:3000
+#
+:80 {
+    # ── API Backend ──
+    handle /api/* {
+        reverse_proxy backend:3000
+    }
+    handle /ws {
+        reverse_proxy backend:3000
+    }
+    handle /health {
+        reverse_proxy backend:3000
+    }
+
+    # ── Grafana Dashboard ──
+    handle_path /grafana/* {
+        reverse_proxy toroloom-grafana:3000
+    }
+    # Redirect /grafana → /grafana/ so Grafana's relative paths work
+    # Using 302 (temporary) in case you later move Grafana to a subdomain
+    redir /grafana /grafana/ 302
+
+    # ── Default: API backend ──
+    handle {
+        reverse_proxy backend:3000
+    }
+
+    # ── Headers ──
+    header {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+        Access-Control-Max-Age "86400"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Cache-Control "no-store"
+    }
+
+    @options {
+        method OPTIONS
+    }
+    handle @options {
+        respond "" 204
+    }
+
+    log {
+        output file /data/access.log {
+            roll_size 100mb
+            roll_keep 7
+        }
+        format json
+    }
+}
+
+# ──── DOMAIN MODE (use when you have a domain) ───────────────────────────────
+#
+# ⚠️ ACTIVATION:
+#   1. Add DNS A records:
+#      api.YOUR_DOMAIN     → YOUR_SERVER_IP
+#      grafana.YOUR_DOMAIN → YOUR_SERVER_IP
+#   2. Comment out the :80 block above
+#   3. Replace YOUR_DOMAIN throughout this section with your actual domain
+#   4. Uncomment this entire section
+#   5. Run: docker exec toroloom-caddy caddy reload --config /etc/caddy/Caddyfile
+#
+# Caddy will auto-provision Let's Encrypt TLS on first HTTPS request.
+#
+# api.YOUR_DOMAIN {
+#     reverse_proxy backend:3000 {
+#         health_uri /health
+#         health_interval 30s
+#         health_timeout 5s
+#     }
+#
+#     header {
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#         X-Content-Type-Options "nosniff"
+#         X-Frame-Options "DENY"
+#         X-XSS-Protection "1; mode=block"
+#         Referrer-Policy "strict-origin-when-cross-origin"
+#         Cache-Control "no-store"
+#         Access-Control-Allow-Origin "*"
+#         Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+#         Access-Control-Allow-Headers "Content-Type, Authorization"
+#         Access-Control-Max-Age "86400"
+#     }
+#
+#     @options {
+#         method OPTIONS
+#     }
+#     handle @options {
+#         respond "" 204
+#     }
+#
+#     log {
+#         output file /data/access.log {
+#             roll_size 100mb
+#             roll_keep 7
+#         }
+#         format json
+#     }
+# }
+#
+# # ── Grafana subdomain ──
+# grafana.YOUR_DOMAIN {
+#     reverse_proxy toroloom-grafana:3000
+#
+#     header {
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#     }
+#
+#     log {
+#         output file /data/access.log {
+#             roll_size 100mb
+#             roll_keep 7
+#         }
+#         format json
+#     }
+# }
+
+# ──── CLOUDFLARE TUNNEL TEMPLATE (alternative to Caddy) ──────────────────────
+#
+# Instead of Caddy/Certbot, you can use Cloudflare Tunnel for FREE TLS
+# and DDoS protection. No open ports needed (not even port 80/443).
+#
+# Steps:
+#   1. Install:  curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb && dpkg -i cloudflared.deb
+#   2. Login:    cloudflared tunnel login
+#   3. Create:   cloudflared tunnel create toroloom
+#   4. Config (~/.cloudflared/config.yml):
+#        tunnel: YOUR_TUNNEL_ID
+#        credentials-file: /root/.cloudflared/YOUR_TUNNEL_ID.json
+#        ingress:
+#          - hostname: api.yourdomain.com
+#            service: http://localhost:3000
+#          - hostname: grafana.yourdomain.com
+#            service: http://localhost:3001
+#          - service: http_status:404
+#   5. Route:    cloudflared tunnel route dns TUNNEL_ID api.yourdomain.com
+#                cloudflared tunnel route dns TUNNEL_ID grafana.yourdomain.com
+#   6. Start:    cloudflared service install && systemctl start cloudflared
+#   7. Buy domain (~$6-12/yr) from Porkbun, Namecheap, or Cloudflare
+#   8. Add domain to Cloudflare (free plan), update nameservers

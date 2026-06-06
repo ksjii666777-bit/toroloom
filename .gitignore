@@ -5,6 +5,13 @@ node_modules/
 .env
 .env.local
 .env.*.local
+backend/.env
+backend/.env.local
+backend/.env.*.local
+
+# ===================== Firebase =====================
+google-services.json
+GoogleService-Info.plist
 
 # ===================== Expo / React Native =====================
 .expo/
@@ -43,6 +50,9 @@ yarn-error.*
 # ===================== OS Files =====================
 .DS_Store
 Thumbs.db
+# Windows reserved device names
+nul
+backend/nul
 
 # ===================== IDEs & Editors =====================
 .vscode/

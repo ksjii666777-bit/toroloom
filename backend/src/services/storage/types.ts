@@ -53,7 +53,7 @@ export interface BrokerStateData {
 export interface NotificationData {
   id: string;
   userId: string;
-  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational';
+  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert';
   title: string;
   message: string;
   read: boolean;
@@ -161,6 +161,14 @@ export interface StorageEngine {
 
   /** Delete a community post by ID. */
   deleteCommunityPost(postId: string): Promise<void>;
+
+  // ──── Badge Counts ────
+
+  /** Load the current badge count for a user. Returns 0 if not set. */
+  loadBadgeCount(userId: string): Promise<number>;
+
+  /** Save (overwrite) the badge count for a user. */
+  saveBadgeCount(userId: string, count: number): Promise<void>;
 
   // ──── Lifecycle ────
 

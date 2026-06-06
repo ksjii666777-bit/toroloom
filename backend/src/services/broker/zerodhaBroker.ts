@@ -23,7 +23,8 @@
 
 import {
   IBroker, BrokerConfig, MarketQuote, OHLCData, IndexData,
-  StockInfo, OrderPayload, OrderResult, Position, TradeHistory
+  StockInfo, OrderPayload, OrderResult, ModifyOrderPayload,
+  CancelOrderPayload, OpenOrder, Position, TradeHistory
 } from './interface';
 
 // Standard index tokens used by Zerodha Kite
@@ -400,6 +401,79 @@ export class ZerodhaBroker implements IBroker {
   }
 
   // ======================== Trading ========================
+
+  async getOpenOrders(): Promise<OpenOrder[]> {
+    this.requireAuth();
+    const orders = await this.kite.getOrders();
+
+    if (!Array.isArray(orders)) return [];
+
+    return orders
+      .filter((o: any) => {
+        const status = (o.status || '').toUpperCase();
+        return status === 'OPEN' || status === 'PENDING' || status === 'TRIGGER_PENDING' || status === 'PARTIALLY_FILLED';
+      })
+      .map((o: any) => ({
+        id: String(o.order_id || o.id || `zer_${Date.now()}`),
+        symbol: o.tradingsymbol || o.symbol || '',
+        exchange: o.exchange || 'NSE',
+        transactionType: (o.transaction_type || 'BUY').toUpperCase() as 'BUY' | 'SELL',
+        quantity: parseInt(o.quantity || 0),
+        filledQuantity: parseInt(o.filled_quantity || o.pending_quantity || 0),
+        price: parseFloat(o.price || 0),
+        triggerPrice: o.trigger_price ? parseFloat(o.trigger_price) : undefined,
+        productType: o.product || 'CNC',
+        orderType: o.order_type || 'MARKET',
+        status: this.mapZerodhaOrderStatus(o),
+        placedBy: o.placed_by || 'WEB',
+        timestamp: o.order_timestamp || o.exchange_timestamp || new Date().toISOString(),
+        validity: o.validity || 'DAY',
+      }));
+  }
+
+  private mapZerodhaOrderStatus(o: any): 'open' | 'pending' | 'partially_filled' | 'trigger_pending' {
+    const status = (o.status || '').toUpperCase();
+    if (status === 'OPEN') return 'open';
+    if (status === 'TRIGGER PENDING') return 'trigger_pending';
+    if (status === 'PARTIALLY FILLED') return 'partially_filled';
+    return 'pending';
+  }
+
+  async modifyOrder(order: ModifyOrderPayload): Promise<OrderResult> {
+    this.requireAuth();
+
+    const result = await this.kite.modifyOrder(order.orderId, {
+      order_type: order.orderType || undefined,
+      quantity: order.quantity || undefined,
+      price: order.price || undefined,
+      trigger_price: order.triggerPrice || undefined,
+    });
+
+    if (!result) throw new Error('Zerodha modifyOrder returned no result');
+
+    const orderId = typeof result === 'string' ? result : result.order_id || order.orderId;
+    return {
+      id: orderId,
+      status: 'confirmed',
+      message: `Order modified: ${orderId}`,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async cancelOrder(order: CancelOrderPayload): Promise<OrderResult> {
+    this.requireAuth();
+
+    const result = await this.kite.cancelOrder(order.orderId);
+
+    if (!result) throw new Error('Zerodha cancelOrder returned no result');
+
+    return {
+      id: order.orderId,
+      status: 'cancelled',
+      message: `Order cancelled: ${order.orderId}`,
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   async placeOrder(order: OrderPayload): Promise<OrderResult> {
     this.requireAuth();
