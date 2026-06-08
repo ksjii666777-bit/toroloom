@@ -392,10 +392,83 @@ spec:
 
 | Platform | Guide |
 |----------|-------|
-| Railway | Deploy `backend/` as a service. Set `PORT`, `JWT_SECRET`, `DATABASE_URL` in dashboard |
+| Railway | See detailed guide below |
 | Render | Create a "Web Service" pointing to `backend/`. Build command: `npm ci && npm run build`. Start command: `node dist/index.js` |
 | Fly.io | `fly launch` from `backend/`. Auto-detects Node. Set secrets with `fly secrets set JWT_SECRET=...` |
 | AWS ECS | Push image to ECR. Create task definition with env vars. Use ALB for TLS termination |
+
+---
+
+## Railway Deployment
+
+Railway is the recommended PaaS for Toroloom. It supports Dockerfile-based deployments, WebSockets, and provides a managed PostgreSQL service.
+
+> **Prerequisites:** A [Railway account](https://railway.app/) connected to your GitHub account.
+
+### Step 1: Create Railway Project
+
+1. Go to [Railway Dashboard](https://railway.app/dashboard) → **+ New Project**
+2. Select **Deploy from GitHub repo** → Choose `ksjii666777-bit/toroloom`
+3. Railway will auto-detect the repo and attempt to build from the root — the first build will fail (expected, since the Dockerfile is in `backend/`)
+
+### Step 2: Configure Root Directory
+
+1. Click the newly created service → **Settings** tab
+2. Find **Root Directory** → Change from `/` to `/backend`
+3. Railway will **automatically trigger a new deployment**
+4. The build uses the Dockerfile at `backend/Dockerfile` (also configured in `railway.json`)
+
+### Step 3: Set Environment Variables
+
+Go to the service's **Variables** tab and add:
+
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `JWT_SECRET` | (generate: `openssl rand -hex 32`) | **Required** — sign auth tokens |
+| `NODE_ENV` | `production` | Production mode |
+| `BROKER` | `mock` | Change to `angel` when ready |
+| `DATA_SOURCE` | `mock` | Change to `live` for real data |
+| `STORAGE_BACKEND` | `memory` | `memory` works without any database |
+| `CLUSTER_MODE` | `0` | Single-process (Railway handles scaling) |
+
+> Railway provides the `PORT` variable automatically — the backend reads it via `process.env.PORT`.
+
+### Step 4: Verify Deployment
+
+1. Wait for the build to complete (green checkmark)
+2. Railway assigns a `.railway.app` domain automatically
+3. Test the health endpoint:
+   ```bash
+   curl https://your-service.up.railway.app/health
+   ```
+   Expected:
+   ```json
+   {"status":"ok","broker":"mock","storageBackend":"memory","storageHealthy":true,"uptime":...}
+   ```
+
+### Step 5 (Optional): Add PostgreSQL
+
+1. Click **+ New** in your Railway project → **Database** → **PostgreSQL**
+2. Railway creates a PostgreSQL service and auto-injects `DATABASE_URL`, `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` into your backend service
+3. Update your backend's `STORAGE_BACKEND` variable to `postgres`
+4. Railway will redeploy automatically — tables are created on first startup via auto-migration
+
+### Auto-Deploy from Git
+
+Railway connects to your GitHub repo and auto-deploys on every push to `master`:
+1. Push code → Railway detects the push → builds Docker image → deploys
+2. Check deployment status in Railway dashboard (live logs available)
+3. No CI pipeline needed — Railway handles build + deploy
+
+### Troubleshooting Railway
+
+| Symptom | Likely Cause | Fix |
+|---------|-------------|-----|
+| `ERR_CONNECTION_REFUSED` | App not listening on Railway's PORT | Verify `PORT` env var is read in `env.ts` (it is: `process.env.PORT || '3000'`) |
+| Build fails: `Dockerfile not found` | Root Directory not set | Update service Settings → Root Directory to `/backend` |
+| WebSocket disconnects | Railway idle timeout | Railway's free tier has a timeout. Upgrade or use a keepalive. |
+| App crashes with exit code 137 | Out of memory | Upgrade to a paid plan or add swap ([docs](https://docs.railway.com/deployments/swap)) |
+| `401` on API calls | JWT_SECRET mismatch | Verify the Railway `JWT_SECRET` matches the frontend's config
 
 ---
 
