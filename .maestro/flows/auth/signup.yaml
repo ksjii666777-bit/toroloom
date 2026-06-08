@@ -5,7 +5,7 @@
 # fields, taps "Create Account", and verifies login screen is shown after.
 # =============================================================================
 
-appId: host.exp.exponent
+appId: com.anonymous.Toroloom
 ---
 # Start from the Login screen and navigate to Signup
 - tapOn:

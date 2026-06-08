@@ -5,11 +5,11 @@
 # verifies the user lands on the Home screen.
 # =============================================================================
 
-appId: host.exp.exponent
+appId: com.anonymous.Toroloom
 ---
 # Wait for the login screen to load
 - assertVisible:
-    text: "Welcome Back! 👋"
+    text: "Welcome Back!"
 
 # Fill in email field (targeted by placeholder text)
 - tapOn:
@@ -20,6 +20,9 @@ appId: host.exp.exponent
 - tapOn:
     text: "Enter your password"
 - inputText: ${TEST_PASSWORD}
+
+# Dismiss the keyboard so the Log In button is visible
+- hideKeyboard
 
 # Tap the "Log In" button
 - tapOn:

@@ -12,7 +12,9 @@
 # Open studio: npx maestro studio
 # =============================================================================
 
-appId: host.exp.exponent
+appId: com.anonymous.Toroloom
+flows:
+  - "flows/**/*.yaml"
 env:
   TEST_EMAIL: test@toroloom.com
   TEST_PASSWORD: password123

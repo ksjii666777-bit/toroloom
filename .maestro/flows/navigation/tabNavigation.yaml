@@ -6,17 +6,21 @@
 # title is visible.
 # =============================================================================
 
-appId: host.exp.exponent
+appId: com.anonymous.Toroloom
 ---
 # ── Step 1: Login ──────────────────────────────────────────────────────────
 - assertVisible:
-    text: "Welcome Back! 👋"
+    text: "Welcome Back!"
 - tapOn:
     text: "Enter your email"
 - inputText: ${TEST_EMAIL}
 - tapOn:
     text: "Enter your password"
 - inputText: ${TEST_PASSWORD}
+
+# Dismiss keyboard before tapping Log In
+- hideKeyboard
+
 - tapOn:
     text: "Log In"
 - waitForAnimationToEnd:

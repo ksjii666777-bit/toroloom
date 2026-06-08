@@ -16,7 +16,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.Toroloom"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -32,9 +33,7 @@
       "themeColor": "#0D1117"
     },
     "plugins": [
-      "expo-sharing",
-      "@react-native-firebase/app",
-      "@react-native-firebase/analytics"
+      "expo-sharing"
     ]
   }
 }

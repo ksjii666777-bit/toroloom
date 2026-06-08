@@ -6,11 +6,11 @@
 #   2. Invalid credentials → "Invalid credentials. Try again."
 # =============================================================================
 
-appId: host.exp.exponent
+appId: com.anonymous.Toroloom
 ---
 # ── 1. Empty fields validation ────────────────────────────────────────────
 - assertVisible:
-    text: "Welcome Back! 👋"
+    text: "Welcome Back!"
 
 # Tap Log In without entering any credentials
 - tapOn:
@@ -30,6 +30,9 @@ appId: host.exp.exponent
 - tapOn:
     text: "Enter your password"
 - inputText: "wrongpassword123"
+
+# Dismiss keyboard before tapping Log In
+- hideKeyboard
 
 - tapOn:
     text: "Log In"
@@ -54,6 +57,9 @@ appId: host.exp.exponent
 # Error should still be visible until we tap Log In (it gets cleared on submit)
 - assertVisible:
     text: "Invalid credentials. Try again."
+
+# Dismiss keyboard before tapping Log In
+- hideKeyboard
 
 # Tap Log In with valid credentials
 - tapOn:
