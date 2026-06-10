@@ -460,7 +460,16 @@ jobs:
   # For testing against dev builds locally, use:
   #   npx expo run:android && maestro test .maestro/flows
   #
+  # ── DISABLED: E2E — Maestro (Android) ──────────────────────────────────
+  # GitHub Actions free runners lack nested virtualization (KVM/haxm),
+  # causing the Android emulator to time out during boot (44+ min on a
+  # 30-min timeout). Run these flows locally on a real device or local
+  # emulator.
+  #
+  # Re-enable by removing the `if: false` line below.
+  # ───────────────────────────────────────────────────────────────────────
   e2e:
+    if: false
     name: E2E — Maestro (Android)
     runs-on: macos-14
     timeout-minutes: 45
