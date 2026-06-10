@@ -23,6 +23,7 @@
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { PostgreSQLStorage } from '../services/storage/postgres';
+import { CONNECT_TIMEOUT } from './testUtils';
 import {
   configureNotificationPersistence,
   getNotifications,
@@ -46,7 +47,7 @@ describe('Notification Persistence — PostgreSQL', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (5s)')), 5_000),
+          setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
     } catch (err: any) {

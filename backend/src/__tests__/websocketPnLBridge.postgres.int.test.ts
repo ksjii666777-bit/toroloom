@@ -43,7 +43,7 @@ import { setupWebSocket } from '../websocket/handler';
 import { riskEngine, LockdownStatus, DEFAULT_RISK_LIMITS } from '../services/riskEngine';
 import { PostgreSQLStorage } from '../services/storage/postgres';
 import { generateToken } from '../middleware/auth';
-import { createBufferedClient } from './testUtils';
+import { CONNECT_TIMEOUT, createBufferedClient } from './testUtils';
 
 // ──── Configuration ─────────────────────────────────────────────────────────
 
@@ -92,7 +92,7 @@ describe('WebSocket → RiskEngine P&L Bridge — PostgreSQL Integration', () =>
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (5s)')), 5_000),
+          setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
       riskEngine.configureStorage(storage);

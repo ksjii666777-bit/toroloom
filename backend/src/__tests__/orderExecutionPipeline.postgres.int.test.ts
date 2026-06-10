@@ -44,6 +44,7 @@ import {
   DEFAULT_RISK_LIMITS,
 } from '../services/riskEngine';
 import { PostgreSQLStorage } from '../services/storage/postgres';
+import { CONNECT_TIMEOUT } from './testUtils';
 
 // IMPORTANT: This test file must NOT run in parallel with other *.int.test.ts
 // files that configure riskEngine (e.g. websocketPnLBridge.mongodb.int.test.ts)
@@ -101,7 +102,7 @@ describe('OrderExecutionPipeline — PostgreSQL Integration', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (5s)')), 5_000),
+          setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
     } catch (err: any) {

@@ -1,15 +1,39 @@
 /**
  * ============================================================================
- * Toroloom WebSocket Test Utilities
+ * Toroloom Test Utilities
  * ============================================================================
  *
- * Shared helpers used across WebSocket test suites to avoid duplicating
- * the buffered-client and event-waiting machinery.
+ * Shared helpers used across test suites to avoid duplicating common
+ * machinery:
+ *   - WebSocket buffered client for WS integration tests
+ *   - Configurable connect timeout for DB/WS connection attempts
  *
  * ============================================================================
  */
 
 import WebSocket from 'ws';
+
+// ──── Configurable Connect Timeout ───────────────────────────────────────────
+
+/**
+ * Connect timeout (in ms) used when racing DB or WebSocket connections.
+ *
+ * Can be overridden via the `CONNECT_TIMEOUT_MS` environment variable.
+ * Default: 15_000 (15s) — conservative enough for GitHub Actions runners
+ * while still failing fast when services are genuinely unreachable.
+ *
+ * Usage in integration tests:
+ *
+ *   import { CONNECT_TIMEOUT } from './testUtils';
+ *   // ...
+ *   await Promise.race([
+ *     storage.connect(),
+ *     new Promise<void>((_, reject) =>
+ *       setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
+ *     ),
+ *   ]);
+ */
+export const CONNECT_TIMEOUT = Number(process.env.CONNECT_TIMEOUT_MS) || 15_000;
 
 // ──── Helpers ───────────────────────────────────────────────────────────────
 
@@ -79,8 +103,8 @@ export interface BufferedClient {
 export function createBufferedClient(port: number): Promise<BufferedClient> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
-      reject(new Error('WebSocket connection timed out after 5s'));
-    }, 5000);
+      reject(new Error(`WebSocket connection timed out after ${CONNECT_TIMEOUT}ms`));
+    }, CONNECT_TIMEOUT);
 
     const ws = new WebSocket(`ws://localhost:${port}/ws`);
 

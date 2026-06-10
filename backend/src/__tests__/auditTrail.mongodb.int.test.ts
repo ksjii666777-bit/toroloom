@@ -27,6 +27,7 @@ import { createHash } from 'crypto';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { AuditTrail } from '../services/auditTrail';
 import { MongoDBStorage } from '../services/storage/mongodb';
+import { CONNECT_TIMEOUT } from './testUtils';
 
 const MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://toroloom:toroloom_dev@localhost:27017/toroloom?authSource=admin';
@@ -43,7 +44,7 @@ describe('AuditTrail — MongoDB Integration', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (3s)')), 3_000),
+          setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
       audit = new AuditTrail(storage, 1000);

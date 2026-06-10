@@ -45,6 +45,7 @@ import {
   DEFAULT_RISK_LIMITS,
 } from '../services/riskEngine';
 import { MongoDBStorage } from '../services/storage/mongodb';
+import { CONNECT_TIMEOUT } from './testUtils';
 
 // IMPORTANT: This test file must NOT run in parallel with other *.int.test.ts
 // files that configure riskEngine (e.g. orderExecutionPipeline.postgres.int.test.ts)
@@ -103,7 +104,7 @@ describe('OrderExecutionPipeline — MongoDB Integration', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (3s)')), 3_000),
+          setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
     } catch (err: any) {

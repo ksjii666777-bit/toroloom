@@ -413,6 +413,8 @@ jobs:
           DATABASE_URL: postgresql://toroloom:toroloom_dev@localhost:5432/toroloom
           MONGODB_URI: mongodb://toroloom:toroloom_dev@localhost:27017/toroloom?authSource=admin
           MONGODB_DB_NAME: toroloom_test
+          # Conservative connect timeout for slow GitHub Actions runners
+          CONNECT_TIMEOUT_MS: 25000
 
   # ── Backend stress test (long-running, independent job) ───────────────────
   # Runs in parallel with backend + frontend + integration. No `needs`

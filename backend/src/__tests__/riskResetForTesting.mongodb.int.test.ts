@@ -29,6 +29,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { riskEngine } from '../services/riskEngine';
 import { MongoDBStorage } from '../services/storage/mongodb';
+import { CONNECT_TIMEOUT } from './testUtils';
 
 const MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://toroloom:toroloom_dev@localhost:27017';
@@ -49,7 +50,7 @@ describe('riskEngine.resetForTesting() — MongoDB Cross-File Isolation', () => 
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (3s)')), 3_000),
+          setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
     } catch (err: any) {

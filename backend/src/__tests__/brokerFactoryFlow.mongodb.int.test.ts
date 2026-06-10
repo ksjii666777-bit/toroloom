@@ -43,6 +43,7 @@ vi.mock('../config/env', () => ({
 }));
 
 import { MongoDBStorage } from '../services/storage/mongodb';
+import { CONNECT_TIMEOUT } from './testUtils';
 import {
   configureBrokerPersistence,
   loadBrokerStateFromStorage,
@@ -68,7 +69,7 @@ describe('Broker Factory Flow — MongoDB', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (3s)')), 3_000),
+          setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
     } catch (err: any) {
