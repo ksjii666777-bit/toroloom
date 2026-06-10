@@ -509,29 +509,57 @@ jobs:
             # requires. google_atd images are lighter but may lack Play
             # Services compatibility — stick with google_apis for safety.
             target: google_apis
-            # arm64-v8a runs natively on Apple Silicon (macos-14). No
-            # x86 emulation needed — ~3x faster than x86_64 images.
-            arch: arm64-v8a
+            # x86_64 with google_apis is the most reliably compatible
+            # combination across all macOS runner variants (Intel + Apple
+            # Silicon). arm64-v8a can cause "adb: device not found" errors
+            # on some runner instances due to AVD corruption across retries.
+            arch: x86_64
             avd-name: Pixel_6_Pro
-            emulator-boot-timeout: 1200
-            # No -accel flag needed — reactivecircus action auto-detects
-            # the native hypervisor on Apple Silicon (Hypervisor.framework).
-            # Passing -accel hvf with arm64-v8a can cause boot failure.
-            emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
+            emulator-boot-timeout: 1800
+            # Allocate enough memory/cores so the emulator doesn't OOM on
+            # resource-constrained cloud runners (macos-14 has ~14 GB RAM).
+            # The -no-snapshot flag forces a cold boot every time, which
+            # is slower but avoids stale snapshot corruption across retries.
+            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -memory 2048 -cores 4
             disable-animations: true
             script: |
-              # ── 1. Wait for device to finish booting ──
+              # ── 1. Wait for device to appear ──
+              echo "Waiting for emulator device to appear..."
               adb wait-for-device
+              echo "Emulator device detected."
+
+              # ── 2. Wait for full boot completion ──
+              # sys.boot_completed=1 means the Android system is fully
+              # booted and the home screen is reachable. Without this
+              # check, adb may find the device while it's still in the
+              # boot animation, causing "adb: device not found" errors
+              # in subsequent steps.
+              echo "Waiting for sys.boot_completed..."
+              for i in $(seq 1 120); do
+                BOOT_COMPLETED=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
+                if [ "$BOOT_COMPLETED" = "1" ]; then
+                  echo "Boot completed!"
+                  break
+                fi
+                if [ $i -eq 120 ]; then
+                  echo "Timed out waiting for boot completion."
+                  exit 1
+                fi
+                sleep 5
+              done
+
+              # ── 3. Disable animations for reliable Maestro taps ──
               adb shell settings put global window_animation_scale 0.0
               adb shell settings put global transition_animation_scale 0.0
               adb shell settings put global animator_duration_scale 0.0
+              echo "Animations disabled."
 
-              # ── 2. Start Expo dev server in background ──
+              # ── 4. Start Expo dev server in background ──
               echo "Starting Expo dev server..."
               npx expo start --android 2>&1 | tee /tmp/expo.log &
               EXPO_PID=$!
 
-              # ── 3. Wait for Metro bundler to be ready ──
+              # ── 5. Wait for Metro bundler to be ready ──
               echo "Waiting for Metro bundler..."
               timeout 180 bash -c '
                 until grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; do
@@ -544,7 +572,7 @@ jobs:
               # Give Expo a moment to push the app to the emulator
               sleep 15
 
-              # ── 4. Run Maestro tests ──
+              # ── 6. Run Maestro tests ──
               # Override appId from config.yaml (com.anonymous.Toroloom) to
               # host.exp.exponent because CI uses Expo Go, not a dev build.
               echo "Running Maestro E2E flows..."
