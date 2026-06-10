@@ -59,7 +59,7 @@ describe('riskEngine.resetForTesting() — MongoDB Cross-File Isolation', () => 
       );
       available = false;
     }
-  }, 10_000);
+  }, 30_000);
 
   afterAll(async () => {
     if (available && storage) {

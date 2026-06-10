@@ -44,7 +44,7 @@ describe('MongoDBStorage Integration', () => {
       console.warn(`⚠ MongoDB not available (${err.message}) — skipping integration tests`);
       available = false;
     }
-  }, 10_000);
+  }, 30_000);
 
   afterAll(async () => {
     if (available && storage) {

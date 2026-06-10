@@ -55,7 +55,7 @@ describe('Broker State Persistence — PostgreSQL', () => {
       );
       available = false;
     }
-  }, 10_000);
+  }, 30_000);
 
   afterAll(async () => {
     if (available && storage) {

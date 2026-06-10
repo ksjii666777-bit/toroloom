@@ -105,7 +105,7 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
       );
       available = false;
     }
-  }, 10_000);
+  }, 30_000);
 
   afterAll(async () => {
     if (available && storage) {

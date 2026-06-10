@@ -57,7 +57,7 @@ describe('Broker State Persistence — MongoDB', () => {
       );
       available = false;
     }
-  }, 10_000);
+  }, 30_000);
 
   afterAll(async () => {
     if (available && storage) {
