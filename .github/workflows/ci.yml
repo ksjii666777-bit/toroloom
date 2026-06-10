@@ -543,6 +543,8 @@ jobs:
                 fi
                 if [ $i -eq 120 ]; then
                   echo "Timed out waiting for boot completion."
+                  adb devices -l
+                  adb shell getprop 2>/dev/null | head -20 || true
                   exit 1
                 fi
                 sleep 5
