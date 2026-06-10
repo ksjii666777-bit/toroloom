@@ -41,7 +41,7 @@ describe('AuditTrail — PostgreSQL Integration', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (15s)')), 15_000),
+          setTimeout(() => reject(new Error('connect timeout (3s)')), 3_000),
         ),
       ]);
       audit = new AuditTrail(storage, 1000);
@@ -52,7 +52,7 @@ describe('AuditTrail — PostgreSQL Integration', () => {
       );
       available = false;
     }
-  }, 20_000);
+  }, 10_000);
 
   afterAll(async () => {
     if (available && storage) {

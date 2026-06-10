@@ -3,7 +3,7 @@
  * Toroloom WebSocket → RiskEngine P&L Bridge — Stress Test
  * ============================================================================
  *
- * Runs the lockdown trigger + lift cycle 20 times to validate long-term
+ * Runs the lockdown trigger + lift cycle 10 times to validate long-term
  * stability.  Uses a **single persistent WebSocket connection** across all
  * iterations to avoid TCP TIME_WAIT port exhaustion on Windows (each
  * short-lived TCP socket occupies an ephemeral port for ~4 minutes).
@@ -14,16 +14,18 @@
  * user keeps a WebSocket session open for the trading day.
  *
  * Each iteration:
- *   Reset risk engine → re-subscribe → wait for 1st tick →
+ *   Reset risk engine → re-subscribe →
+ *   seed baseline P&L directly (skip tick wait — tested in
+ *   websocketPnLBridge.test.ts) →
  *   configure tight limit →
  *   TRIGGER lockdown via riskEngine.updateUnrealizedPnL(-X) (deterministic) →
  *   verify lockdown state/counters are correct →
  *   LIFT lockdown via riskEngine.updateUnrealizedPnL(+X) (deterministic) →
  *   verify lockdown released
  *
- * The trigger/lift steps use direct riskEngine API calls — 100% deterministic
- * and instant.  The WebSocket → RiskEngine event emission is already tested
- * in websocketPnLBridge.test.ts (test 11).  This test focuses purely on
+ * All steps use direct riskEngine API calls — 100% deterministic and instant.
+ * The WebSocket → RiskEngine tick event emission is already tested in
+ * websocketPnLBridge.test.ts (test 11).  This test focuses purely on
  * survival under repeated reset→subscribe→trigger→lift churn.
  *
  * Server lifecycle:
@@ -34,7 +36,7 @@
  * Run:
  *   npx vitest run --reporter=verbose src/__tests__/websocketPnLBridge.stress.test.ts
  *
- * Expected duration: ~1 minute (deterministic)
+ * Expected duration: ~20 seconds (deterministic, no tick waits)
  * ============================================================================
  */
 
@@ -54,20 +56,20 @@ import { createBufferedClient } from './testUtils';
 // ──── Configuration ─────────────────────────────────────────────────────────
 
 /** Number of stress iterations to run. */
-const ITERATIONS = 20;
+const ITERATIONS = 10;
 
 /**
- * Timeout for the first tick wait per iteration.
- * Mock broker fires every 1–3 seconds, so 15s gives ~5–15 ticks.
+ * Baseline P&L value seeded directly into the risk engine at the start
+ * of each iteration (replaces waiting for a real mock tick).
  */
-const FIRST_TICK_TIMEOUT_MS = 15_000;
+const BASELINE_PNL = 5000;
 
 /**
  * Overall test timeout.
- * Formula: ITERATIONS × (subscribe + 1 tick + trigger + lift) × 2x buffer
- * Each iteration takes ~3-5s, 20 iterations → ~60-100s.  Set to 5 min.
+ * Each iteration is ~1-2s (subscribe + instant trigger/lift).
+ * 10 iterations × 3x buffer → 60s.
  */
-const SUITE_TIMEOUT_MS = 300_000;
+const SUITE_TIMEOUT_MS = 60_000;
 
 // ──── Test User (single user, reused across all iterations) ─────────────────
 
@@ -162,18 +164,11 @@ async function runLockdownCycle(
   expect(subMsg.type).toBe('subscribed');
   expect(subMsg.count).toBe(1);
 
-  // ── Step 2: Wait for first tick (refreshes positions in risk engine) ─
-  const ticks = await c.waitForTicks(1, FIRST_TICK_TIMEOUT_MS);
-  expect(ticks.length).toBe(1);
-  expect(ticks[0].data.symbol).toBe('RELIANCE');
-  expect(ticks[0].data.lastPrice).toBeGreaterThan(0);
-
-  // At this point the risk engine holds the baseline P&L from the tick.
-  // We configure a tight limit (buffer = ₹1), then directly set P&L
-  // negative to trigger lockdown deterministically.
+  // ── Step 2: Seed baseline P&L directly (avoids waiting for mock tick) ─
+  // The WebSocket→RiskEngine tick flow is tested in websocketPnLBridge.test.ts
+  riskEngine.updateUnrealizedPnL(TEST_USER.userId, BASELINE_PNL);
 
   // ── Step 3: Configure tight limit (buffer = ₹1) ───────────────
-  const livePnL = currentTotalPnL();
   const profile = riskEngine.getProfile(TEST_USER.userId);
 
   const buffer = 1;

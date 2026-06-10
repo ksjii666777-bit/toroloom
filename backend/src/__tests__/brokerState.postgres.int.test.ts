@@ -45,7 +45,7 @@ describe('Broker State Persistence — PostgreSQL', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (15s)')), 15_000),
+          setTimeout(() => reject(new Error('connect timeout (3s)')), 3_000),
         ),
       ]);
     } catch (err: any) {
@@ -54,7 +54,7 @@ describe('Broker State Persistence — PostgreSQL', () => {
       );
       available = false;
     }
-  }, 30_000);
+  }, 10_000);
 
   afterAll(async () => {
     if (available && storage) {

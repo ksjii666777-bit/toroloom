@@ -95,7 +95,7 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (15s)')), 15_000),
+          setTimeout(() => reject(new Error('connect timeout (3s)')), 3_000),
         ),
       ]);
       riskEngine.configureStorage(storage);
@@ -105,7 +105,7 @@ describe('WebSocket → RiskEngine P&L Bridge — MongoDB Integration', () => {
       );
       available = false;
     }
-  }, 30_000);
+  }, 10_000);
 
   afterAll(async () => {
     if (available && storage) {

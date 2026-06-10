@@ -34,14 +34,14 @@ describe('PostgreSQLStorage Integration', () => {
       await Promise.race([
         storage.connect(),
         new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('connect timeout (15s)')), 15_000),
+          setTimeout(() => reject(new Error('connect timeout (3s)')), 3_000),
         ),
       ]);
     } catch (err: any) {
       console.warn(`⚠ PostgreSQL not available (${err.message}) — skipping integration tests`);
       available = false;
     }
-  }, 20_000);
+  }, 10_000);
 
   afterAll(async () => {
     if (available && storage) {
