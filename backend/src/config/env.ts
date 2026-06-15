@@ -50,6 +50,12 @@ export const env = {
     accessToken: process.env.GROWW_ACCESS_TOKEN || '',
   },
 
+  // ──── OpenRouter AI ────────────────────────────────────────
+  // API key for real AI-powered market insights.
+  // Get one: https://openrouter.ai/keys
+  openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
+  openRouterModel: process.env.OPENROUTER_MODEL || 'google/gemini-3.5-flash',
+
   // ──── Sentry (error tracking) ──────────────────────────────
   // DSN for Sentry crash/error reporting.
   // If not set, Sentry is disabled (no events sent).
