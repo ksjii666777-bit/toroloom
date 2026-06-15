@@ -24,6 +24,8 @@ export interface AIInsight {
   analysis: string;
   targets: { target: number; probability: number }[];
   timestamp: string;
+  /** Diagnostic field showing which AI provider generated this insight. */
+  _provider?: string;
 }
 
 interface OpenRouterResponse {
@@ -157,8 +159,9 @@ async function callGoogleGemini(systemPrompt: string, userPrompt: string): Promi
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [
-        { role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
+        { role: 'user', parts: [{ text: userPrompt }] },
       ],
       generationConfig: {
         temperature: 0.2,
@@ -274,24 +277,6 @@ export async function generateBatchInsight(symbols: string[]): Promise<AIInsight
   const userPrompt = `Analyze the following Indian stocks listed on NSE: ${symbols.join(', ')}.
 For each stock, provide: type (bullish/bearish/neutral), confidence score, one-line summary, detailed 2-3 sentence analysis, and 3 price targets.
 Return VALID JSON ARRAY ONLY following the schema.`;
-
-  const batchSystemPrompt = `You are Toroloom AI, an expert Indian stock market analyst assistant.
-You provide concise stock analysis for NSE/BSE-listed companies.
-
-For the requested stocks, respond with a JSON array ONLY (no markdown, no code fences).
-Each element must follow this exact schema:
-{
-  "symbol": string (the stock symbol),
-  "type": "bullish" | "bearish" | "neutral",
-  "confidence": number (60-95),
-  "summary": string (one line),
-  "analysis": string (2-3 sentences),
-  "targets": [
-    { "target": number, "probability": number }
-  ]
-}
-
-Return them in a JSON array format: [{...}, {...}, ...]`;
 
   try {
     let content: string;

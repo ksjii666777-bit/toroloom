@@ -87,7 +87,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
     // getOrRefresh handles: cache hit → return, stale → return + bg refresh, miss → fetch
     const insight = await insightCache.getOrRefresh(symbol, () => generateInsight(symbol));
     // Attach provider info for diagnostics
-    (insight as any)._provider = getActiveProviderName();
+    insight._provider = getActiveProviderName();
     res.json(insight);
   } catch (error: any) {
     console.error('[AI Route] Analysis failed:', error.message);
