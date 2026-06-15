@@ -50,11 +50,26 @@ export const env = {
     accessToken: process.env.GROWW_ACCESS_TOKEN || '',
   },
 
-  // ──── OpenRouter AI ────────────────────────────────────────
-  // API key for real AI-powered market insights.
-  // Get one: https://openrouter.ai/keys
+  // ──── AI Configuration ────────────────────────────────────────
+  // Two providers supported:
+  //   1. OpenRouter (https://openrouter.ai/keys) — unified API for many models
+  //   2. Google Gemini (https://aistudio.google.com/apikey) — direct Gemini API
+  //
+  // AI_PROVIDER controls which one is used:
+  //   'openrouter' → uses OPENROUTER_API_KEY (default)
+  //   'google'     → uses GOOGLE_GEMINI_API_KEY
+  //
+  // If the primary provider's key is missing, falls back to the other.
+  // If neither key is set, isAIConfigured() returns false (mock data).
+  aiProvider: (process.env.AI_PROVIDER || 'openrouter') as 'openrouter' | 'google',
+
+  // OpenRouter config
   openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
   openRouterModel: process.env.OPENROUTER_MODEL || 'google/gemini-3.5-flash',
+
+  // Google Gemini config (direct API, no OpenRouter needed)
+  googleGeminiApiKey: process.env.GOOGLE_GEMINI_API_KEY || '',
+  googleGeminiModel: process.env.GOOGLE_GEMINI_MODEL || 'gemini-3.5-flash',
 
   // ──── Sentry (error tracking) ──────────────────────────────
   // DSN for Sentry crash/error reporting.

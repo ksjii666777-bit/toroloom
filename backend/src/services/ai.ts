@@ -41,9 +41,19 @@ interface OpenRouterResponse {
   };
 }
 
+interface GeminiResponse {
+  candidates: {
+    content: {
+      parts: { text: string }[];
+    };
+    finishReason: string;
+  }[];
+}
+
 // ──── Constants ────────────────────────────────────────────────────────────
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GOOGLE_GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 const SYSTEM_PROMPT = `You are Toroloom AI, an expert Indian stock market analyst assistant.
 You provide concise, data-driven stock analysis for NSE/BSE-listed companies.
@@ -68,10 +78,32 @@ If no real data is available, note that the analysis is based on general market 
 // ──── AI Service ───────────────────────────────────────────────────────────
 
 /**
- * Check if the AI service is configured (API key is set).
+ * Determine which AI provider to use based on env config and available keys.
+ */
+function getActiveProvider(): 'openrouter' | 'google' | null {
+  if (env.aiProvider === 'google' && env.googleGeminiApiKey) return 'google';
+  if (env.aiProvider === 'openrouter' && env.openRouterApiKey) return 'openrouter';
+  // Fallback: use whichever key is available
+  if (env.openRouterApiKey) return 'openrouter';
+  if (env.googleGeminiApiKey) return 'google';
+  return null;
+}
+
+/**
+ * Check if any AI provider is configured with a valid API key.
  */
 export function isAIConfigured(): boolean {
-  return !!env.openRouterApiKey;
+  return getActiveProvider() !== null;
+}
+
+/**
+ * Get the human-readable name of the active provider.
+ */
+export function getActiveProviderName(): string {
+  const provider = getActiveProvider();
+  if (provider === 'google') return 'Google Gemini';
+  if (provider === 'openrouter') return 'OpenRouter';
+  return 'none';
 }
 
 /**
@@ -116,46 +148,89 @@ function parseAIResponse(content: string): any {
 }
 
 /**
+ * Call Google Gemini API directly.
+ */
+async function callGoogleGemini(systemPrompt: string, userPrompt: string): Promise<string> {
+  const url = `${GOOGLE_GEMINI_API_URL}/${env.googleGeminiModel}:generateContent?key=${env.googleGeminiApiKey}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [
+        { role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 4096,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => 'Unknown error');
+    throw new Error(`Google Gemini API error (${response.status}): ${errorText}`);
+  }
+
+  const data = (await response.json()) as GeminiResponse;
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!content) {
+    throw new Error('Google Gemini returned empty response');
+  }
+
+  return content;
+}
+
+/**
  * Generate an AI insight for a given stock symbol.
- * Falls back gracefully if the API key is missing or the API call fails.
+ * Uses the active AI provider (OpenRouter or Google Gemini).
  */
 export async function generateInsight(symbol: string): Promise<AIInsight> {
-  if (!isAIConfigured()) {
-    throw new Error('OpenRouter API key not configured. Set OPENROUTER_API_KEY in .env');
+  const provider = getActiveProvider();
+  if (!provider) {
+    throw new Error('No AI provider configured. Set OPENROUTER_API_KEY or GOOGLE_GEMINI_API_KEY.');
   }
 
   const userPrompt = `Analyze the Indian stock ${symbol} listed on NSE. Provide a detailed analysis with technical and fundamental factors. Include specific support and resistance levels, RSI, and trend analysis where applicable. Return VALID JSON ONLY following the schema.`;
 
   try {
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${env.openRouterApiKey}`,
-        'HTTP-Referer': 'https://toroloom.app',
-        'X-Title': 'Toroloom',
-      },
-      body: JSON.stringify({
-        model: env.openRouterModel,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.2,
-        max_tokens: 4096,
-      }),
-    });
+    let content: string;
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error');
-      throw new Error(`OpenRouter API error (${response.status}): ${errorText}`);
-    }
+    if (provider === 'google') {
+      content = await callGoogleGemini(SYSTEM_PROMPT, userPrompt);
+    } else {
+      // OpenRouter
+      const response = await fetch(OPENROUTER_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${env.openRouterApiKey}`,
+          'HTTP-Referer': 'https://toroloom.app',
+          'X-Title': 'Toroloom',
+        },
+        body: JSON.stringify({
+          model: env.openRouterModel,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: 0.2,
+          max_tokens: 4096,
+        }),
+      });
 
-    const data = (await response.json()) as OpenRouterResponse;
-    const content = data.choices?.[0]?.message?.content;
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`OpenRouter API error (${response.status}): ${errorText}`);
+      }
 
-    if (!content) {
-      throw new Error('OpenRouter returned empty response');
+      const data = (await response.json()) as OpenRouterResponse;
+      content = data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        throw new Error('OpenRouter returned empty response');
+      }
     }
 
     const parsed = parseAIResponse(content);
@@ -165,7 +240,7 @@ export async function generateInsight(symbol: string): Promise<AIInsight> {
     }
     return insight;
   } catch (error: any) {
-    console.error('[AI Service] Failed to generate insight:', error.message);
+    console.error(`[AI Service] Failed to generate insight (${provider}):`, error.message);
     throw error;
   }
 }
@@ -186,10 +261,21 @@ export async function generateInsights(symbols: string[]): Promise<AIInsight[]> 
 }
 
 /**
- * Batch system prompt — asks the AI to analyze multiple stocks in a single response.
- * Uses less tokens than parallel calls but takes longer per request.
+ * Generate insights for multiple symbols in a SINGLE API call.
+ * More token-efficient but the AI needs to handle all symbols at once.
+ * Supports both OpenRouter and Google Gemini providers.
  */
-const BATCH_SYSTEM_PROMPT = `You are Toroloom AI, an expert Indian stock market analyst assistant.
+export async function generateBatchInsight(symbols: string[]): Promise<AIInsight[]> {
+  const provider = getActiveProvider();
+  if (!provider) {
+    throw new Error('No AI provider configured. Set OPENROUTER_API_KEY or GOOGLE_GEMINI_API_KEY.');
+  }
+
+  const userPrompt = `Analyze the following Indian stocks listed on NSE: ${symbols.join(', ')}.
+For each stock, provide: type (bullish/bearish/neutral), confidence score, one-line summary, detailed 2-3 sentence analysis, and 3 price targets.
+Return VALID JSON ARRAY ONLY following the schema.`;
+
+  const batchSystemPrompt = `You are Toroloom AI, an expert Indian stock market analyst assistant.
 You provide concise stock analysis for NSE/BSE-listed companies.
 
 For the requested stocks, respond with a JSON array ONLY (no markdown, no code fences).
@@ -207,49 +293,42 @@ Each element must follow this exact schema:
 
 Return them in a JSON array format: [{...}, {...}, ...]`;
 
-/**
- * Generate insights for multiple symbols in a SINGLE API call.
- * More token-efficient but the AI needs to handle all symbols at once.
- */
-export async function generateBatchInsight(symbols: string[]): Promise<AIInsight[]> {
-  if (!isAIConfigured()) {
-    throw new Error('OpenRouter API key not configured. Set OPENROUTER_API_KEY in .env');
-  }
-
-  const userPrompt = `Analyze the following Indian stocks listed on NSE: ${symbols.join(', ')}.
-For each stock, provide: type (bullish/bearish/neutral), confidence score, one-line summary, detailed 2-3 sentence analysis, and 3 price targets.
-Return VALID JSON ARRAY ONLY following the schema.`;
-
   try {
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${env.openRouterApiKey}`,
-        'HTTP-Referer': 'https://toroloom.app',
-        'X-Title': 'Toroloom',
-      },
-      body: JSON.stringify({
-        model: env.openRouterModel,
-        messages: [
-          { role: 'system', content: BATCH_SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.2,
-        max_tokens: 8192,
-      }),
-    });
+    let content: string;
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error');
-      throw new Error(`OpenRouter batch API error (${response.status}): ${errorText}`);
-    }
+    if (provider === 'google') {
+      content = await callGoogleGemini(batchSystemPrompt, userPrompt);
+    } else {
+      const response = await fetch(OPENROUTER_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${env.openRouterApiKey}`,
+          'HTTP-Referer': 'https://toroloom.app',
+          'X-Title': 'Toroloom',
+        },
+        body: JSON.stringify({
+          model: env.openRouterModel,
+          messages: [
+            { role: 'system', content: batchSystemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: 0.2,
+          max_tokens: 8192,
+        }),
+      });
 
-    const data = (await response.json()) as OpenRouterResponse;
-    const content = data.choices?.[0]?.message?.content;
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`OpenRouter batch API error (${response.status}): ${errorText}`);
+      }
 
-    if (!content) {
-      throw new Error('OpenRouter returned empty batch response');
+      const data = (await response.json()) as OpenRouterResponse;
+      content = data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        throw new Error('OpenRouter returned empty batch response');
+      }
     }
 
     const parsedArray = parseAIResponse(content);
@@ -262,7 +341,7 @@ Return VALID JSON ARRAY ONLY following the schema.`;
       .map((item: any) => toAIInsight(item, item?.symbol || 'unknown'))
       .filter((insight): insight is AIInsight => insight !== null);
   } catch (error: any) {
-    console.error('[AI Service] Batch analysis failed:', error.message);
+    console.error(`[AI Service] Batch analysis failed (${provider}):`, error.message);
     throw error;
   }
 }
