@@ -11,6 +11,7 @@ backend/.env.*.local
 
 # ===================== Firebase =====================
 google-services.json
+!google-services.json
 GoogleService-Info.plist
 
 # ===================== Expo / React Native =====================
