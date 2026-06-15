@@ -77,6 +77,24 @@ Confidence must reflect how certain the model is about the prediction.
 Analysis should reference real technical indicators (RSI, MACD, moving averages, support/resistance levels).
 If no real data is available, note that the analysis is based on general market knowledge.`;
 
+const BATCH_SYSTEM_PROMPT = `You are Toroloom AI, an expert Indian stock market analyst assistant.
+You provide concise stock analysis for NSE/BSE-listed companies.
+
+For the requested stocks, respond with a JSON array ONLY (no markdown, no code fences).
+Each element must follow this exact schema:
+{
+  "symbol": string (the stock symbol),
+  "type": "bullish" | "bearish" | "neutral",
+  "confidence": number (60-95),
+  "summary": string (one line),
+  "analysis": string (2-3 sentences),
+  "targets": [
+    { "target": number, "probability": number }
+  ]
+}
+
+Return them in a JSON array format: [{...}, {...}, ...]`;
+
 // ──── AI Service ───────────────────────────────────────────────────────────
 
 /**
@@ -282,7 +300,7 @@ Return VALID JSON ARRAY ONLY following the schema.`;
     let content: string;
 
     if (provider === 'google') {
-      content = await callGoogleGemini(batchSystemPrompt, userPrompt);
+      content = await callGoogleGemini(BATCH_SYSTEM_PROMPT, userPrompt);
     } else {
       const response = await fetch(OPENROUTER_API_URL, {
         method: 'POST',
@@ -295,7 +313,7 @@ Return VALID JSON ARRAY ONLY following the schema.`;
         body: JSON.stringify({
           model: env.openRouterModel,
           messages: [
-            { role: 'system', content: batchSystemPrompt },
+            { role: 'system', content: BATCH_SYSTEM_PROMPT },
             { role: 'user', content: userPrompt },
           ],
           temperature: 0.2,
