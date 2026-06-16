@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.anonymous.Toroloom",
+    "sha256_cert_fingerprints":[
+  "08:AE:13:3A:B6:42:7F:F0:67:B1:EE:A4:98:F1:28:2E:6B:52:26:8E:1B:EC:3F:29:58:29:0E:38:75:F3:CE:E2"
+]
+  }
+}]
