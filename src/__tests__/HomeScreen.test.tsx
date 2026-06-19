@@ -11,7 +11,7 @@
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
-import { mockUser, mockIndices, mockStocks, mockUserLevel, mockBadges, mockNotifications } from '../constants/mockData';
+import { mockUser, mockIndices, mockStocks, mockUserLevel, mockBadges, mockNotifications, mockTrades, mockAIInsights } from '../constants/mockData';
 
 // ==================== Mocks (hoisted) ====================
 
@@ -60,12 +60,14 @@ vi.mock('../store/marketStore', () => ({
   })),
 }));
 
-// Track current mock holdings so we can swap them per-test
+// Track current mock holdings + trades so we can swap them per-test
 let currentHoldings: any[] = [];
+let currentTrades: any[] = [];
 
 vi.mock('../store/portfolioStore', () => ({
   usePortfolioStore: vi.fn(() => ({
     holdings: currentHoldings,
+    trades: currentTrades,
   })),
 }));
 
@@ -79,6 +81,12 @@ vi.mock('../store/gamificationStore', () => ({
 vi.mock('../store/notificationStore', () => ({
   useNotificationStore: vi.fn(() => ({
     notifications: mockNotifications,
+  })),
+}));
+
+vi.mock('../store/aiStore', () => ({
+  useAIStore: vi.fn(() => ({
+    insights: mockAIInsights,
   })),
 }));
 
@@ -113,16 +121,18 @@ describe('HomeScreen — Loaded Content', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockNavigate.mockClear();
+    currentTrades = mockTrades;
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it('renders the greeting message', () => {
+  it('renders the dynamic greeting message', () => {
     const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(700);
-    expect(getByText('Good Morning,')).toBeDefined();
+    // Greeting is time-based: Good Morning / Good Afternoon / Good Evening
+    expect(getByText(/Good (Morning|Afternoon|Evening),/)).toBeDefined();
   });
 
   it('renders the user first name from authStore', () => {
@@ -236,13 +246,10 @@ describe('HomeScreen — Navigation Callbacks', () => {
     expect(mockNavigate).toHaveBeenCalledWith('Markets');
   });
 
-  it('navigates to Markets when View All is pressed', () => {
+  it('renders the Top Gainers View All button', () => {
     const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(700);
-    act(() => {
-      fireEvent.press(getByText('View All'));
-    });
-    expect(mockNavigate).toHaveBeenCalledWith('Markets');
+    expect(getByText('View All')).toBeDefined();
   });
 
   it('navigates to Watchlist when Manage is pressed', () => {

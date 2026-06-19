@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  Dimensions, Alert, ActivityIndicator,
+  Dimensions, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
+import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -138,6 +139,7 @@ export default function AddFundsScreen({ navigation }: any) {
   }
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
@@ -170,21 +172,24 @@ export default function AddFundsScreen({ navigation }: any) {
           <Text style={styles.sectionTitle}>Select Amount</Text>
           <View style={styles.presetsRow}>
             {AMOUNT_PRESETS.map(amount => (
-              <TouchableOpacity
+              <AnimatedPressable
                 key={amount}
-                style={[
-                  styles.presetBtn,
-                  selectedAmount === amount && styles.presetBtnActive,
-                ]}
+                haptic="light"
+                scaleTo={0.95}
                 onPress={() => handlePresetPress(amount)}
               >
-                <Text style={[
-                  styles.presetText,
-                  selectedAmount === amount && styles.presetTextActive,
+                <View style={[
+                  styles.presetBtn,
+                  selectedAmount === amount && styles.presetBtnActive,
                 ]}>
-                  {formatCurrency(amount, true)}
-                </Text>
-              </TouchableOpacity>
+                  <Text style={[
+                    styles.presetText,
+                    selectedAmount === amount && styles.presetTextActive,
+                  ]}>
+                    {formatCurrency(amount, true)}
+                  </Text>
+                </View>
+              </AnimatedPressable>
             ))}
           </View>
 
@@ -293,6 +298,7 @@ export default function AddFundsScreen({ navigation }: any) {
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 

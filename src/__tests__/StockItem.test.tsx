@@ -7,7 +7,7 @@
  * change display, watchlist toggle actions, and press callbacks.
  */
 
-import React from 'react';
+import React, { act } from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import StockItem from '../components/StockItem';
 import { render, fireEvent } from './testUtils';
@@ -203,5 +203,39 @@ describe('StockItem', () => {
       />
     );
     expect(toJSON).toBeDefined();
+  });
+
+  describe('onLongPress', () => {
+    it('calls onLongPress with the stock when long-pressed', () => {
+      const onLongPress = vi.fn();
+      const { root } = render(
+        <StockItem stock={positiveStock} onPress={() => {}} onLongPress={onLongPress} />
+      );
+      // findAll finds 3 elements with onLongPress: StockItem, AnimatedPressable, and
+      // the Pressable host component. We need the innermost (Pressable host), whose
+      // onLongPress chains through AnimatedPressable → StockItem.handleLongPress → mock.
+      const pressables = root.findAll(
+        (inst: any) => typeof inst.props?.onLongPress === 'function'
+      );
+      expect(pressables.length).toBeGreaterThanOrEqual(3);
+      // Use the last one (Pressable host) so the full callback chain executes
+      const lastIdx = pressables.length - 1;
+      act(() => {
+        pressables[lastIdx].props.onLongPress();
+      });
+      expect(onLongPress).toHaveBeenCalledTimes(1);
+      expect(onLongPress).toHaveBeenCalledWith(positiveStock);
+    });
+
+    it('still fires onPress on tap when onLongPress is provided', () => {
+      const onPress = vi.fn();
+      const onLongPress = vi.fn();
+      const { getByText } = render(
+        <StockItem stock={positiveStock} onPress={onPress} onLongPress={onLongPress} />
+      );
+      fireEvent.press(getByText('RELIANCE'));
+      expect(onPress).toHaveBeenCalledTimes(1);
+      expect(onLongPress).not.toHaveBeenCalled();
+    });
   });
 });

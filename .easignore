@@ -1,0 +1,132 @@
+# =============================================================================
+# .easignore — Files to exclude from EAS Build uploads
+#
+# This file overrides .gitignore. EAS uses this instead of .gitignore when
+# deciding which files to upload to the build server.
+#
+# By excluding dev/test/documentation artifacts and the backend server (which
+# is not needed for the mobile app build), the archive size drops from ~300 MB
+# to under 50 MB, making uploads 4-6x faster.
+# =============================================================================
+
+# ===================== Dependencies =====================
+# Installed by EAS from package-lock.json — no need to upload
+node_modules/
+
+# ===================== Environment =====================
+.env
+.env.local
+.env.*.local
+backend/.env
+backend/.env.local
+backend/.env.*.local
+
+# ===================== Firebase (keep google-services.json!) =====================
+google-services.json
+!google-services.json
+GoogleService-Info.plist
+
+# ===================== Expo / React Native =====================
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native build artifacts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro bundler
+.metro-health-check*
+
+# Generated native folders — EAS runs prebuild on the server
+/android
+/ios
+
+# ===================== Build Output =====================
+backend/dist/
+
+# ===================== Test & Coverage =====================
+# Test files are not needed for production builds — exclude them
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__mocks__/
+coverage/
+
+# ===================== Logs & Debug =====================
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# ===================== OS Files =====================
+.DS_Store
+Thumbs.db
+# Windows reserved device names
+nul
+backend/nul
+
+# ===================== IDEs & Editors =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===================== TypeScript =====================
+*.tsbuildinfo
+
+# ===================== AI / Codebuff =====================
+.claude/
+AGENTS.md
+CLAUDE.md
+
+# ===================== Project Documentation =====================
+# Docs and guides — not needed for the build
+docs/
+*.md
+!README.md   # Keep README for context if needed
+
+# ===================== Backend Server =====================
+# The backend is a separate Node.js service — not needed for mobile app builds
+backend/
+
+# ===================== CI / Dev Tools =====================
+.github/
+.maestro/
+scripts/
+
+# ===================== Git =====================
+# Git history is large and not needed by the build server
+.git/
+.gitattributes
+.gitmodules
+
+# ===================== Misc =====================
+*.pem
+*.envrc
+local.properties
+set_env.bat
+set_env_e_drive.bat
+*.zip
+*.rar
+
+# CI artifacts
+gh_jobs*.json
+
+# Caddy config (production reverse proxy — server-only)
+Caddyfile
+docker-compose*.yml
+Dockerfile*
+*.dockerignore
+
+# EAS credentials backup
+credentials.json

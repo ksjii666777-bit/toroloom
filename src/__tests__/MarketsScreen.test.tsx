@@ -147,6 +147,45 @@ describe('MarketsScreen — Loaded Content', () => {
     expect(getByText('TCS')).toBeDefined();
   });
 
+  it('renders the Gainers / Losers section', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText('Top Gainers')).toBeDefined();
+    expect(getByText('Top Losers')).toBeDefined();
+  });
+
+  it('renders top gainer stocks with positive change badges', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    // BHARTIARTL has the highest changePercent (2.63%)
+    expect(getByText('BHARTIARTL')).toBeDefined();
+    // Should show the change percent (2.63%)
+    expect(getByText('2.63%')).toBeDefined();
+  });
+
+  it('renders top loser stocks with negative change badges', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    // ITC has the most negative changePercent (-1.16%)
+    expect(getByText('ITC')).toBeDefined();
+  });
+
+  it('renders the Sector Performance heatmap', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText('Sector Performance')).toBeDefined();
+  });
+
+  it('renders sector names with stock count in heatmap', () => {
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    // textTransform: uppercase in styles doesn't affect test renderer — match actual values
+    expect(getByText('Energy')).toBeDefined();
+    expect(getByText('Finance')).toBeDefined();
+    expect(getByText('Technology')).toBeDefined();
+    expect(getByText('1 stocks')).toBeDefined();  // Energy has 1 stock
+  });
+
   it('navigate callback is not called on initial render', () => {
     const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);

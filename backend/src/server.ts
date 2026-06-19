@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/node';
+import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
@@ -29,9 +30,12 @@ import supportRoutes from './routes/support';
 import fundsRoutes from './routes/funds';
 import ordersRoutes from './routes/orders';
 import brokerRoutes from './routes/broker';
+import brokerLinkRoutes from './routes/brokerLink';
 import systemRoutes from './routes/system';
 import wsStatusRoutes from './routes/wsStatus';
+import ironLockRoutes from './routes/ironLock';
 import metricsRoutes from './routes/metrics';
+import paymentsRoutes from './routes/payments';
 import pushNotificationsRoutes from './routes/pushNotifications';
 
 // ============ Sentry Initialization ============
@@ -58,6 +62,15 @@ app.use(cors({
 
 app.use(express.json({ limit: '1mb' }));
 app.use('/api', apiLimiter);
+
+// Serve .well-known files for Universal Links / Android App Links verification
+app.use('/.well-known', express.static(path.join(__dirname, '../public/.well-known'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('apple-app-site-association')) {
+      res.setHeader('Content-Type', 'application/json');
+    }
+  },
+}));
 
 // ============ Prometheus Metrics ============
 
@@ -100,8 +113,11 @@ app.use('/api/support', supportRoutes);
 app.use('/api/funds', fundsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/broker', brokerRoutes);
+app.use('/api/broker-link', brokerLinkRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/system', wsStatusRoutes);
+app.use('/api/iron-lock', ironLockRoutes);
+app.use('/api/payments', paymentsRoutes);
 
 // ============ Sentry Error Handler (must be before custom error handler) ============
 

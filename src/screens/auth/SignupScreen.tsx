@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -10,9 +10,10 @@ import { useAuthStore } from '../../store/authStore';
 
 interface SignupScreenProps {
   navigation: any;
+  route?: any;
 }
 
-export default function SignupScreen({ navigation }: SignupScreenProps) {
+export default function SignupScreen({ navigation, route }: SignupScreenProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [name, setName] = useState('');
@@ -22,6 +23,9 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const { signup, isLoading } = useAuthStore();
+
+  // Detect referral source from navigation route params (e.g., from deep link)
+  const referralSource = route?.params?.ref;
 
   const handleSignup = async () => {
     if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
@@ -37,10 +41,11 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
       return;
     }
     setError('');
-    await signup(name, email, phone, password);
+    await signup(name, email, phone, password, referralSource);
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -48,6 +53,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Back Button */}
         <TouchableOpacity
@@ -62,6 +68,16 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Start your investment journey today</Text>
         </View>
+
+        {/* Referral badge — shown when arriving via deep link with ?ref= */}
+        {referralSource && (
+          <View style={styles.referralBanner}>
+            <Ionicons name="gift" size={16} color={colors.primary} />
+            <Text style={styles.referralText}>
+              🎉 Referred by <Text style={styles.referralSource}>{referralSource}</Text>
+            </Text>
+          </View>
+        )}
 
         {/* Form */}
         <View style={styles.form}>
@@ -145,6 +161,7 @@ export default function SignupScreen({ navigation }: SignupScreenProps) {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -180,6 +197,29 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.regular,
     fontSize: FONTS.size.md,
     color: colors.textSecondary,
+  },
+  referralBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: SPACING.xxl,
+    marginBottom: SPACING.lg,
+    backgroundColor: '#6C63FF15',
+    paddingVertical: SPACING.sm + 2,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: '#6C63FF30',
+    gap: SPACING.sm,
+  },
+  referralText: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.textSecondary,
+    flex: 1,
+  },
+  referralSource: {
+    ...FONTS.semiBold,
+    color: colors.primary,
   },
   form: {
     paddingHorizontal: SPACING.xxl,

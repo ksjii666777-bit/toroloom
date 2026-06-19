@@ -11,12 +11,13 @@ import AnimatedPressable from './ui/AnimatedPressable';
 interface StockItemProps {
   stock: Stock;
   onPress: (stock: Stock) => void;
+  onLongPress?: (stock: Stock) => void;
   showActions?: boolean;
   isInWatchlist?: boolean;
   onWatchlistToggle?: (stock: Stock) => void;
 }
 
-export default function StockItem({ stock, onPress, showActions, isInWatchlist, onWatchlistToggle }: StockItemProps) {
+export default function StockItem({ stock, onPress, onLongPress, showActions, isInWatchlist, onWatchlistToggle }: StockItemProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -28,8 +29,12 @@ export default function StockItem({ stock, onPress, showActions, isInWatchlist, 
     onWatchlistToggle?.(stock);
   }, [onWatchlistToggle, stock]);
 
+  const handleLongPress = useCallback(() => {
+    onLongPress?.(stock);
+  }, [onLongPress, stock]);
+
   return (
-    <AnimatedPressable onPress={() => onPress(stock)} haptic="selection" scaleTo={0.98}>
+    <AnimatedPressable onPress={() => onPress(stock)} onLongPress={onLongPress ? handleLongPress : undefined} haptic="selection" scaleTo={0.98}>
       <View style={styles.container}>
         <View style={styles.mainRow}>
           <View style={styles.iconContainer}>

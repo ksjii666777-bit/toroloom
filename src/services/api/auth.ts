@@ -17,4 +17,8 @@ export const authApi = {
 
   updateProfile: (data: { name?: string; phone?: string }) =>
     api.put<User>('/auth/profile', data),
+
+  /** Record a referral source for the currently authenticated user */
+  recordReferral: (source: string) =>
+    api.post<{ success: boolean; message: string }>('/auth/referral', { source }),
 };

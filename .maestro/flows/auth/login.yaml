@@ -5,11 +5,11 @@
 # verifies the user lands on the Home screen.
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: host.exp.exponent
 ---
 # Wait for the login screen to load
 - assertVisible:
-    text: "Welcome Back!"
+    text: "Welcome Back! 👋"
 
 # Fill in email field (targeted by placeholder text)
 - tapOn:
@@ -28,7 +28,15 @@ appId: com.anonymous.Toroloom
 - tapOn:
     text: "Log In"
 
-# Wait for navigation to complete — verify we're on the Home screen
+# Wait for navigation + home screen loading skeleton (600ms) + render
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# Navigate to the Home tab (More tab is the first/default tab after login)
+- tapOn:
+    text: "Home"
+
+# Wait for Home screen to render
 - waitForAnimationToEnd:
     timeout: 5000
 

@@ -316,6 +316,229 @@ export interface AppNotification {
   data?: any;
 }
 
+// ============ Subscription & Payments ============
+export type SubscriptionTier = 'free' | 'pro' | 'elite';
+
+// ──── Granular Feature Paywall Matrix ─────────────────────────
+// Every feature in Toroloom maps to a minimum required tier.
+// Tenants can override individual features in their config.
+
+export type SubscriptionFeature =
+  | 'basic_portfolio'
+  | 'unlimited_watchlist'
+  | 'advanced_analytics'
+  | 'ai_insights'
+  | 'ai_companion'
+  | 'iron_lock'
+  | 'real_time_data'
+  | 'social_trading'
+  | 'full_education'
+  | 'tax_reports'
+  | 'api_access'
+  | 'ad_free'
+  | 'priority_support'
+  | 'dedicated_manager'
+  | 'behavioural_journal';
+
+// Default tier requirements for each feature
+export const DEFAULT_FEATURE_MATRIX: Record<SubscriptionFeature, {
+  minTier: SubscriptionTier;
+  label: string;
+  description: string;
+  icon: string;
+  category: 'analytics' | 'trading' | 'ai' | 'education' | 'support';
+}> = {
+  basic_portfolio:     { minTier: 'free', label: 'Portfolio Tracking',       description: 'Track your holdings and P&L',           icon: 'pie-chart',      category: 'analytics' },
+  unlimited_watchlist: { minTier: 'pro',  label: 'Unlimited Watchlists',     description: 'Create unlimited watchlists',          icon: 'heart',          category: 'trading' },
+  advanced_analytics:  { minTier: 'pro',  label: 'Advanced Analytics',       description: 'Performance metrics & P&L breakdown',  icon: 'analytics',      category: 'analytics' },
+  ai_insights:         { minTier: 'pro',  label: 'AI Insights',              description: 'AI-powered market analysis',          icon: 'bulb',           category: 'ai' },
+  ai_companion:        { minTier: 'pro',  label: 'AI Voice Companion',       description: 'Live avatar with voice alerts',       icon: 'happy',          category: 'ai' },
+  iron_lock:           { minTier: 'elite',label: 'Iron Lock Engine',         description: 'Server-side loss limit enforcement',  icon: 'shield',         category: 'trading' },
+  real_time_data:      { minTier: 'elite',label: 'Real-Time Data',           description: 'Live streaming market data',          icon: 'pulse',          category: 'trading' },
+  social_trading:      { minTier: 'elite',label: 'Social & Copy Trading',    description: 'Follow & copy top traders',           icon: 'people',         category: 'trading' },
+  full_education:      { minTier: 'pro',  label: 'Full Education Library',   description: 'All courses & lessons',               icon: 'school',         category: 'education' },
+  tax_reports:         { minTier: 'elite',label: 'Tax Reports & Export',     description: 'Capital gains & tax reports',         icon: 'document-text',  category: 'analytics' },
+  api_access:          { minTier: 'elite',label: 'API Access',               description: 'Automate trading via API',            icon: 'code-slash',     category: 'trading' },
+  ad_free:             { minTier: 'pro',  label: 'Ad-Free Experience',       description: 'No advertisements',                   icon: 'eye-off',        category: 'support' },
+  priority_support:    { minTier: 'pro',  label: 'Priority Support',         description: 'Fast-track support tickets',          icon: 'chatbubbles',    category: 'support' },
+  dedicated_manager:   { minTier: 'elite',label: 'Dedicated Manager',        description: 'Personal account manager',            icon: 'person',         category: 'support' },
+  behavioural_journal: { minTier: 'elite',label: 'Behavioural Journal',      description: 'Emotional trading diagnostics',       icon: 'journal',        category: 'ai' },
+};
+
+// ──── Tenant-Specific Override ───────────────────────────────
+// A tenant can override the tier requirement for any feature.
+// e.g. { 'ai_insights': 'free' } makes AI free for that tenant.
+
+export type PaywallOverride = Partial<Record<SubscriptionFeature, SubscriptionTier>>;
+
+// ──── Per-Tenant Razorpay Config ─────────────────────────────
+// Each tenant (platform buyer) can configure their own Razorpay
+// keys so subscription revenue routes to their account.
+
+export interface TenantRazorpayConfig {
+  keyId: string;
+  keySecret: string;
+  // Optional custom pricing overrides per plan
+  pricing?: Partial<Record<string, { monthly: number; yearly: number }>>;
+}
+
+// ──── Multi-Tenant Configuration ─────────────────────────────
+export interface TenantConfig {
+  id: string;
+  name: string;
+  domain: string;
+  logo?: string;
+  primaryColor?: string;
+  // Feature paywall overrides — allows tenant to make
+  // premium features free for their users
+  featureOverrides?: PaywallOverride;
+  // Custom Razorpay keys for this tenant
+  razorpay?: TenantRazorpayConfig;
+  // Custom plan display
+  planCustomization?: {
+    planNames?: Partial<Record<string, string>>;
+    planPricing?: Partial<Record<string, { monthly: number; yearly: number }>>;
+  };
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  tier: SubscriptionTier;
+  name: string;
+  tagline: string;
+  price: number;             // INR per month
+  priceYearly: number;       // INR per year (discounted)
+  icon: string;
+  gradient: [string, string];
+  features: string[];
+  highlightedFeature?: string;
+  badge?: string;
+  popular?: boolean;
+  // Which features in the matrix are included in this plan
+  includedFeatures?: SubscriptionFeature[];
+}
+
+export interface UserSubscription {
+  tier: SubscriptionTier;
+  planId: string;
+  status: 'active' | 'expired' | 'cancelled' | 'trial';
+  startDate: string;
+  endDate: string;
+  autoRenew: boolean;
+  paymentMethod?: string;
+  razorpayOrderId?: string;
+  lastPaymentDate?: string;
+  // Tenant attribution
+  tenantId?: string;
+}
+
+// ============ Market News ============
+export interface MarketNewsItem {
+  id: string;
+  title: string;
+  summary: string;
+  content: string;
+  source: string;
+  category: 'markets' | 'economy' | 'corporate' | 'ipo' | 'global' | 'policy';
+  symbol?: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  imageUrl?: string;
+  publishedAt: string;
+  read: boolean;
+  bookmarked: boolean;
+}
+
+// ============ Behavioral Journal ============
+export type EmotionalState = 'calm' | 'anxious' | 'excited' | 'fearful' | 'frustrated' | 'overconfident' | 'neutral';
+
+export type TradingMistake =
+  | 'no_stop_loss'
+  | 'fomo_entry'
+  | 'revenge_trade'
+  | 'over_leveraged'
+  | 'deviated_from_plan'
+  | 'held_too_long'
+  | 'cut_winner_early'
+  | 'chased_price'
+  | 'averaged_down'
+  | 'impulsive_entry';
+
+export interface JournalEntry {
+  id: string;
+  date: string;
+  symbol: string;
+  direction: 'long' | 'short';
+  entryPrice: number;
+  exitPrice: number;
+  quantity: number;
+  pnl: number;
+  pnlPercent: number;
+  holdingPeriod: string;           // e.g., '2h', '3d', '1w'
+  emotionalState: EmotionalState;
+  mistakes: TradingMistake[];
+  planCompliance: number;          // 0-100%
+  notes: string;
+  setupType: string;               // e.g., 'breakout', 'pullback', 'trend_follow'
+  exitReason: string;              // e.g., 'stop_loss', 'target', 'manual'
+  tags: string[];
+}
+
+export interface BehaviorMetrics {
+  totalTrades: number;
+  winningTrades: number;
+  losingTrades: number;
+  winRate: number;
+  avgPnl: number;
+  avgWin: number;
+  avgLoss: number;
+  profitFactor: number;
+  maxConsecutiveWins: number;
+  maxConsecutiveLosses: number;
+  maxDrawdown: number;
+  planComplianceRate: number;
+  mistakeFrequency: Record<TradingMistake, number>;
+  emotionalBreakdown: Record<EmotionalState, number>;
+  bestDay: string | null;
+  worstDay: string | null;
+}
+
+export interface WeeklyReport {
+  weekStart: string;
+  weekEnd: string;
+  metrics: BehaviorMetrics;
+  topMistake: string;
+  dominantEmotion: string;
+  improvementTip: string;
+  journalEntries: string[];        // entry IDs
+}
+
+// ============ Chat ============
+export interface ChatMessage {
+  id: string;
+  roomId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  content: string;
+  timestamp: string;
+  type: 'text' | 'trade' | 'alert' | 'system';
+  read: boolean;
+}
+
+export interface ChatRoom {
+  id: string;
+  name: string;
+  avatar?: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  lastMessageSender?: string;
+  unreadCount: number;
+  participants: { userId: string; userName: string; isOnline: boolean }[];
+  type: 'group' | 'direct';
+  topic?: string;
+  stockSymbol?: string;
+}
+
 // ============ Navigation Types ============
 export type RootStackParamList = {
   Auth: undefined;
@@ -330,6 +553,6 @@ export type RootStackParamList = {
 
 export type AuthStackParamList = {
   Login: undefined;
-  Signup: undefined;
+  Signup: { ref?: string } | undefined;
   ForgotPassword: undefined;
 };

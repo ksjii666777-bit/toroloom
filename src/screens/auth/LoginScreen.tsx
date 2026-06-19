@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import ToroloomLogo from '../../components/ui/ToroloomLogo';
 import { SPACING, FONTS, BORDER_RADIUS, SCREEN } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 
@@ -33,6 +34,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -40,6 +42,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Header Section */}
         <View style={styles.headerSection}>
@@ -49,10 +52,10 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             end={{ x: 1, y: 1 }}
             style={styles.logoContainer}
           >
-            <Ionicons name="trending-up" size={40} color={colors.white} />
+            <ToroloomLogo size={44} />
           </LinearGradient>
-          <Text style={styles.appName}>WealthWise</Text>
-          <Text style={styles.tagline}>Invest Smarter, Grow Faster</Text>
+          <Text style={styles.appName}>Toroloom</Text>
+          <Text style={styles.tagline}>Intelligence Meets Execution</Text>
         </View>
 
         {/* Login Form */}
@@ -126,6 +129,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 

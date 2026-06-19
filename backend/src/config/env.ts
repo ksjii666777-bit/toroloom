@@ -71,6 +71,11 @@ export const env = {
   googleGeminiApiKey: process.env.GOOGLE_GEMINI_API_KEY || '',
   googleGeminiModel: process.env.GOOGLE_GEMINI_MODEL || 'gemini-3.5-flash',
 
+  // ──── Razorpay (payment gateway) ───────────────────────────
+  // Get keys from https://dashboard.razorpay.com/app/keys
+  razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
+  razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
+
   // ──── Sentry (error tracking) ──────────────────────────────
   // DSN for Sentry crash/error reporting.
   // If not set, Sentry is disabled (no events sent).

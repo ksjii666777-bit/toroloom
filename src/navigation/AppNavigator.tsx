@@ -1,15 +1,14 @@
 import React, { useMemo, useRef, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Alert, Linking } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuthStore } from '../store/authStore';
-import { useRiskStore } from '../store/riskStore';
-import { useNotificationStore } from '../store/notificationStore';
+import { useAuthStore, useOnboardingStore, useRiskStore, useNotificationStore } from '../store';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS } from '../constants/theme';
 import { analytics } from '../services/analytics';
+import { authApi } from '../services/api';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -43,12 +42,24 @@ import HelpScreen from '../screens/support/HelpScreen';
 import AchievementsScreen from '../screens/achievements/AchievementsScreen';
 import NotificationPreferencesScreen from '../screens/settings/NotificationPreferencesScreen';
 import PortfolioAlertsScreen from '../screens/settings/PortfolioAlertsScreen';
+import SubscriptionScreen from '../screens/settings/SubscriptionScreen';
 import AddFundsScreen from '../screens/funds/AddFundsScreen';
 import WithdrawScreen from '../screens/funds/WithdrawScreen';
 import TransactionHistoryScreen from '../screens/funds/TransactionHistoryScreen';
 import TransferScreen from '../screens/funds/TransferScreen';
 import UPIScreen from '../screens/funds/UPIScreen';
 import FundsDashboardScreen from '../screens/funds/FundsDashboardScreen';
+import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
+import BrokerConnectScreen from '../screens/broker/BrokerConnectScreen';
+import TenantConfigScreen from '../screens/settings/TenantConfigScreen';
+import VoiceSettingsScreen from '../screens/settings/VoiceSettingsScreen';
+import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
+import NewsFeedScreen from '../screens/news/NewsFeedScreen';
+import ChatRoomListScreen from '../screens/chat/ChatRoomListScreen';
+import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
+import BehavioralJournalScreen from '../screens/journal/BehavioralJournalScreen';
+import AvatarWidget from '../components/AvatarWidget';
+import IronLockOverlay from '../components/IronLockOverlay';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -133,7 +144,8 @@ function MainTabs() {
   const totalBadgeCount = wsLockdownCount + portfolioAlertBadgeCount;
 
   return (
-    <Tab.Navigator
+    <>
+      <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ focused, color }) => {
@@ -188,11 +200,16 @@ function MainTabs() {
       <Tab.Screen name="Portfolio" component={PortfolioScreen} />
       <Tab.Screen name="Watchlist" component={WatchlistScreen} />
     </Tab.Navigator>
+      <AvatarWidget />
+      <IronLockOverlay />
+    </>
   );
 }
 
 export default function AppNavigator() {
   const { isLoggedIn, user } = useAuthStore();
+  const hasCompletedOnboarding = useOnboardingStore(s => s.hasCompletedOnboarding);
+  const onboardingInitialized = useOnboardingStore(s => s.initialized);
   const { colors } = useTheme();
   const routeNameRef = useRef<string | null>(null);
 
@@ -203,6 +220,59 @@ export default function AppNavigator() {
       analytics.setUserProperty('kyc_status', user.kycStatus);
     }
   }, [user?.id, user?.kycStatus]);
+
+  // Handle deep links for logged-in users (Signup screen isn't rendered)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    function handleDeepLink(url: string | null) {
+      if (!url) return;
+
+      // Parse referral ref from toroloom://signup?ref=XXX or https://toroloom.com/signup?ref=XXX
+      // For custom scheme URLs (toroloom://signup), 'signup' is the hostname.
+      // For HTTPS universal links (https://toroloom.com/signup), 'signup' is the pathname.
+      try {
+        const parsed = new URL(url);
+        const ref = parsed.searchParams.get('ref');
+        const path = parsed.pathname.replace(/^\/+/, '') || parsed.hostname;
+        if (ref && path === 'signup') {
+          // Record the referral on the user's account
+          authApi.recordReferral(ref).then(() => {
+            Alert.alert(
+              '🎉 Referral Applied',
+              `You were referred by ${ref}! Your account has been updated.`,
+              [{ text: 'Awesome!' }]
+            );
+          }).catch(() => {
+            // Backend unavailable — store locally as fallback
+            useOnboardingStore.getState().setReferralSource(ref);
+          });
+        }
+      } catch {
+        // Invalid URL — ignore
+      }
+    }
+
+    // Check if the app was opened via a deep link (cold start)
+    Linking.getInitialURL().then(handleDeepLink);
+
+    // Listen for deep links while the app is running (warm start)
+    const subscription = Linking.addEventListener('url', (event) => {
+      handleDeepLink(event.url);
+    });
+
+    return () => subscription.remove();
+  }, [isLoggedIn]);
+
+  // Deep linking configuration for handling external URLs
+  const linking = {
+    prefixes: ['toroloom://', 'https://toroloom.com'],
+    config: {
+      screens: {
+        Signup: 'signup',
+      },
+    },
+  };
 
   // Recursively resolve the active route name from nested navigators
   // (tabs inside stacks, stacks inside drawers, etc.)
@@ -219,9 +289,13 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer
+      linking={linking}
       onReady={() => {
         // Track the initial screen on first render
-        routeNameRef.current = isLoggedIn ? 'Home' : 'Login';
+        if (!isLoggedIn) routeNameRef.current = 'Login';
+        else if (!onboardingInitialized) routeNameRef.current = 'Loading';
+        else if (!hasCompletedOnboarding) routeNameRef.current = 'Onboarding';
+        else routeNameRef.current = 'Home';
       }}
       onStateChange={async (state) => {
         const screenName = getActiveRouteName(state);
@@ -244,11 +318,24 @@ export default function AppNavigator() {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
           </>
+        ) : !onboardingInitialized ? (
+          // Loading — wait for onboarding state to hydrate from AsyncStorage
+          <Stack.Screen name="Loading" component={() => null} />
+        ) : !hasCompletedOnboarding ? (
+          // Onboarding (first-time users only)
+          <>
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          </>
         ) : (
           // Main App Screens
           <>
             <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen name="StockDetail" component={StockDetailScreen} />
+            <Stack.Screen name="StockScreener" component={StockScreenerScreen} />
+            <Stack.Screen name="NewsFeed" component={NewsFeedScreen} />
+            <Stack.Screen name="ChatList" component={ChatRoomListScreen} />
+            <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
+            <Stack.Screen name="BehavioralJournal" component={BehavioralJournalScreen} />
             <Stack.Screen name="Learn" component={LearnScreen} />
             <Stack.Screen name="Community" component={CommunityScreen} />
             <Stack.Screen name="AIInsights" component={AIInsightsScreen} />
@@ -267,12 +354,16 @@ export default function AppNavigator() {
             <Stack.Screen name="LessonView" component={LessonViewScreen} />
             <Stack.Screen name="NotificationPreferences" component={NotificationPreferencesScreen} />
             <Stack.Screen name="PortfolioAlerts" component={PortfolioAlertsScreen} />
+            <Stack.Screen name="Subscription" component={SubscriptionScreen} />
             <Stack.Screen name="AddFunds" component={AddFundsScreen} />
             <Stack.Screen name="Withdraw" component={WithdrawScreen} />
             <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
             <Stack.Screen name="Transfer" component={TransferScreen} />
             <Stack.Screen name="UPI" component={UPIScreen} />
             <Stack.Screen name="FundsDashboard" component={FundsDashboardScreen} />
+            <Stack.Screen name="BrokerConnect" component={BrokerConnectScreen} />
+            <Stack.Screen name="TenantConfig" component={TenantConfigScreen} />
+            <Stack.Screen name="VoiceSettings" component={VoiceSettingsScreen} />
           </>
         )}
       </Stack.Navigator>

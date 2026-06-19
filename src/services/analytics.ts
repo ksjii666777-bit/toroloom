@@ -3,7 +3,8 @@
  * Toroloom — Firebase Analytics Service
  * ============================================================================
  *
- * Type-safe wrapper around @react-native-firebase/analytics.
+ * Type-safe wrapper around @react-native-firebase/analytics using the
+ * modular (v22+) API to avoid deprecated namespaced-API warnings.
  *
  * Usage:
  *   import { analytics } from '../services/analytics';
@@ -17,16 +18,21 @@
 import { Platform } from 'react-native';
 import { log } from '../utils/logger';
 
-// Dynamic import so the module doesn't crash on web or in test environments
-// where the native Firebase module is not available.
-let FirebaseAnalytics: any = null;
+// Store the analytics instance and the module reference separately so we
+// can call standalone modular functions (logEvent, setUserProperty, etc.)
+// without the deprecated namespaced-API warning.
+let analyticsInstance: any = null;
+let analyticsModule: any = null;
 
 async function getAnalytics() {
-  if (FirebaseAnalytics) return FirebaseAnalytics;
+  if (analyticsInstance) return { instance: analyticsInstance, mod: analyticsModule };
   try {
     const mod = await import('@react-native-firebase/analytics');
-    FirebaseAnalytics = mod.default();
-    return FirebaseAnalytics;
+    analyticsModule = mod;
+    // Use the modular API getAnalytics() instead of the namespaced default()
+    // to suppress the "getApp() is deprecated" warning.
+    analyticsInstance = mod.getAnalytics();
+    return { instance: analyticsInstance, mod: analyticsModule };
   } catch {
     // Firebase not available (web, test, or missing native module)
     return null;
@@ -51,6 +57,8 @@ export interface AnalyticsEvents {
   community_post_created: {};
   community_post_liked: {};
   notification_opened: { type: string };
+  onboarding_completed: { completed: boolean; skipped?: boolean; replay?: boolean };
+  onboarding_started: { source: string; variant: 'default' | 'referral' };
   funds_added: { amount: number; method: string };
   funds_withdrawn: { amount: number };
   error_occurred: { code: string; message: string; screen?: string };
@@ -70,9 +78,9 @@ export const analytics = {
     params: AnalyticsEvents[T],
   ): Promise<void> {
     try {
-      const instance = await getAnalytics();
-      if (instance) {
-        await instance.logEvent(name, params as Record<string, any>);
+      const fa = await getAnalytics();
+      if (fa) {
+        await fa.mod.logEvent(fa.instance, name, params as Record<string, any>);
       }
     } catch (err) {
       log.debug('[Analytics] Failed to log event:', name, err);
@@ -82,15 +90,17 @@ export const analytics = {
   /**
    * Log a screen view (automatically called by the navigation listener).
    * No-ops if Firebase is not available.
+   *
+   * Uses logEvent('screen_view', ...) instead of the deprecated logScreenView().
    */
   async logScreenView(
     screenName: string,
     screenClass?: string,
   ): Promise<void> {
     try {
-      const instance = await getAnalytics();
-      if (instance) {
-        await instance.logScreenView({
+      const fa = await getAnalytics();
+      if (fa) {
+        await fa.mod.logEvent(fa.instance, 'screen_view', {
           screen_name: screenName,
           screen_class: screenClass || screenName,
         });
@@ -109,9 +119,9 @@ export const analytics = {
     value: string | null,
   ): Promise<void> {
     try {
-      const instance = await getAnalytics();
-      if (instance) {
-        await instance.setUserProperty(name, value);
+      const fa = await getAnalytics();
+      if (fa) {
+        await fa.mod.setUserProperty(fa.instance, name, value);
       }
     } catch (err) {
       log.debug('[Analytics] Failed to set user property:', name, err);
@@ -124,9 +134,9 @@ export const analytics = {
    */
   async setUserId(userId: string | null): Promise<void> {
     try {
-      const instance = await getAnalytics();
-      if (instance) {
-        await instance.setUserId(userId);
+      const fa = await getAnalytics();
+      if (fa) {
+        await fa.mod.setUserId(fa.instance, userId);
       }
     } catch (err) {
       log.debug('[Analytics] Failed to set user ID:', err);
@@ -138,9 +148,9 @@ export const analytics = {
    */
   async reset(): Promise<void> {
     try {
-      const instance = await getAnalytics();
-      if (instance) {
-        await instance.resetAnalyticsData();
+      const fa = await getAnalytics();
+      if (fa) {
+        await fa.mod.resetAnalyticsData(fa.instance);
       }
     } catch (err) {
       log.debug('[Analytics] Failed to reset:', err);

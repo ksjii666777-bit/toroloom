@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  Dimensions, Alert, ActivityIndicator,
+  Dimensions, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
+import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -164,6 +165,7 @@ export default function WithdrawScreen({ navigation }: any) {
   }
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
@@ -196,33 +198,39 @@ export default function WithdrawScreen({ navigation }: any) {
           <Text style={styles.sectionTitle}>Withdrawal Amount</Text>
           <View style={styles.presetsRow}>
             {WITHDRAW_PRESETS.map(amount => (
-              <TouchableOpacity
+              <AnimatedPressable
                 key={amount}
-                style={[
-                  styles.presetBtn,
-                  selectedAmount === amount && styles.presetBtnActive,
-                ]}
+                haptic="light"
+                scaleTo={0.95}
                 onPress={() => handlePresetPress(amount)}
               >
-                <Text style={[
-                  styles.presetText,
-                  selectedAmount === amount && styles.presetTextActive,
+                <View style={[
+                  styles.presetBtn,
+                  selectedAmount === amount && styles.presetBtnActive,
                 ]}>
-                  {formatCurrency(amount, true)}
-                </Text>
-              </TouchableOpacity>
+                  <Text style={[
+                    styles.presetText,
+                    selectedAmount === amount && styles.presetTextActive,
+                  ]}>
+                    {formatCurrency(amount, true)}
+                  </Text>
+                </View>
+              </AnimatedPressable>
             ))}
-            <TouchableOpacity
-              style={[styles.presetBtn, selectedAmount === currentBalance && styles.presetBtnActive]}
+            <AnimatedPressable
+              haptic="light"
+              scaleTo={0.95}
               onPress={handleMaxPress}
             >
-              <Text style={[
-                styles.presetText,
-                selectedAmount === currentBalance && styles.presetTextActive,
-              ]}>
-                MAX
-              </Text>
-            </TouchableOpacity>
+              <View style={[styles.presetBtn, selectedAmount === currentBalance && styles.presetBtnActive]}>
+                <Text style={[
+                  styles.presetText,
+                  selectedAmount === currentBalance && styles.presetTextActive,
+                ]}>
+                  MAX
+                </Text>
+              </View>
+            </AnimatedPressable>
           </View>
 
           {/* Custom Amount */}
@@ -365,6 +373,7 @@ export default function WithdrawScreen({ navigation }: any) {
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 

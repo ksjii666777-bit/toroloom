@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Refre
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import PortfolioHolding from '../../components/PortfolioHolding';
+import PnLChart from '../../components/PnLChart';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
@@ -35,11 +37,14 @@ export default function PortfolioScreen({ navigation }: any) {
 
   const analytics = usePortfolioAnalyticsStore(s => s.getAnalytics());
   const a = analytics.metrics;
+  const { pnlHistory } = analytics;
+  const { stocks } = useMarketStore();
   const portfolioValue = holdings.reduce((sum, h) => sum + h.currentValue, 0) || 1250000;
   const invested = holdings.reduce((sum, h) => sum + h.totalInvested, 0) || 1100000;
   const pnl = portfolioValue - invested;
   const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
 
+  const [chartTimeframe, setChartTimeframe] = useState('1Y');
   const holdingsCount = holdings.length;
   const winningCount = holdings.filter(h => h.pnl > 0).length;
   const { getAnimatedStyle: getHoldingsStyle } = useStaggeredAnimation(holdingsCount, {
@@ -52,21 +57,6 @@ export default function PortfolioScreen({ navigation }: any) {
     staggerDelay: 50,
     duration: 350,
   });
-
-  // Animated mini chart bars with spring stagger
-  const barAnims = useRef([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => new Animated.Value(0))).current;
-
-  useEffect(() => {
-    Animated.stagger(40, barAnims.map((anim, i) =>
-      Animated.spring(anim, {
-        toValue: 1,
-        useNativeDriver: true,
-        delay: i * 30,
-        speed: 10,
-        bounciness: 8,
-      })
-    )).start();
-  }, [barAnims]);
 
   // Animated count-up effect for numbers
   const countUpAnim = useRef(new Animated.Value(0)).current;
@@ -89,9 +79,6 @@ export default function PortfolioScreen({ navigation }: any) {
   const displayPortfolio = invested + (portfolioValue - invested) * displayProgress;
   const displayPnl = displayPortfolio - invested;
   const displayPnlPercent = invested > 0 ? (displayPnl / invested) * 100 : 0;
-
-  const barHeights = [22, 35, 18, 42, 28, 48, 52, 38, 30, 45];
-  const barColors = [false, false, false, true, true, true, true, false, true, true]; // which bars are 'up'
 
   if (isLoading) {
     return (
@@ -164,30 +151,15 @@ export default function PortfolioScreen({ navigation }: any) {
               </View>
             </View>
 
-            {/* Animated Mini Chart */}
-            <View style={styles.miniChartRow}>
-              {barHeights.map((height, i) => {
-                const scaleY = barAnims[i]?.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 1],
-                }) || new Animated.Value(1);
-                const isUp = barColors[i];
-                return (
-                  <View key={i} style={styles.barContainer}>
-                    <Animated.View
-                      style={[
-                        styles.bar,
-                        {
-                          height: height,
-                          backgroundColor: isUp ? colors.marketUp : colors.border,
-                          transform: [{ scaleY }],
-                          opacity: scaleY,
-                        },
-                      ]}
-                    />
-                  </View>
-                );
-              })}
+            {/* Interactive P&L Chart */}
+            <View style={styles.chartContainer}>
+              <PnLChart
+                data={pnlHistory}
+                height={160}
+                width={width - SPACING.xl * 4}
+                timeframe={chartTimeframe}
+                onTimeframeChange={setChartTimeframe}
+              />
             </View>
 
             <View style={styles.statsRow}>
@@ -294,6 +266,88 @@ export default function PortfolioScreen({ navigation }: any) {
             ))
           )}
         </View>
+
+        {/* Dividend Calendar */}
+        {holdings.length > 0 && (() => {
+          // Estimate dividend events from holdings stock data
+          const dividendEvents = holdings.map(h => {
+            const stock = stocks.find(s => s.id === h.stockId);
+            if (!stock || stock.dividend <= 0) return null;
+            const annualDividendPerShare = (stock.dividend / 100) * stock.price;
+            const estimatedQuarterly = annualDividendPerShare / 4;
+            const estimatedAnnual = estimatedQuarterly * h.quantity;
+            // Create upcoming dates for next 4 quarters
+            const now = new Date();
+            const currentQuarter = Math.floor(now.getMonth() / 3);
+            const upcoming: { month: string; amount: number }[] = [];
+            for (let q = 0; q < 4; q++) {
+              const quarterMonth = (currentQuarter + q) % 4 * 3;
+              const year = now.getFullYear() + Math.floor((currentQuarter + q) / 4);
+              const monthStr = new Date(year, quarterMonth, 15).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+              upcoming.push({ month: monthStr, amount: estimatedQuarterly * h.quantity });
+            }
+            return { symbol: h.symbol, name: h.name, yield: stock.dividend, annualAmount: estimatedAnnual, upcoming, quantity: h.quantity };
+          }).filter(Boolean) as { symbol: string; name: string; yield: number; annualAmount: number; upcoming: { month: string; amount: number }[]; quantity: number }[];
+
+          const totalAnnualDividend = dividendEvents.reduce((s, d) => s + d.annualAmount, 0);
+
+          return (
+            <View style={styles.dividendSection}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionHeaderLeft}>
+                  <Ionicons name="calendar" size={18} color={colors.primary} />
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>Dividend Calendar</Text>
+                </View>
+                <View style={[styles.annualChip, { backgroundColor: colors.primary + '20' }]}>
+                  <Text style={[styles.annualChipText, { color: colors.primary }]}>₹{totalAnnualDividend.toFixed(0)}/yr</Text>
+                </View>
+              </View>
+
+              <View style={styles.dividendTimeline}>
+                <Text style={[styles.timelineLabel, { color: colors.textMuted }]}>Upcoming Estimates</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dividendScroll}>
+                  {dividendEvents[0]?.upcoming.map((event, ei) => {
+                    const totalForMonth = dividendEvents.reduce((s, d) => s + (d.upcoming[ei]?.amount || 0), 0);
+                    return (
+                      <View key={ei} style={[styles.dividendChip, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                        <Text style={[styles.dividendMonth, { color: colors.textSecondary }]}>{event.month}</Text>
+                        <Text style={[styles.dividendAmount, { color: colors.marketUp }]}>+₹{totalForMonth.toFixed(0)}</Text>
+                        <View style={styles.dividendStocks}>
+                          {dividendEvents.map((d, di) => {
+                            const amt = d.upcoming[ei]?.amount || 0;
+                            if (amt <= 0) return null;
+                            return (
+                              <View key={di} style={styles.dividendStockRow}>
+                                <Text style={[styles.dividendStockSymbol, { color: colors.textMuted }]}>{d.symbol}</Text>
+                                <Text style={[styles.dividendStockAmt, { color: colors.textMuted }]}>₹{amt.toFixed(0)}</Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              {/* Holdings dividend summary */}
+              <View style={[styles.dividendSummary, { borderColor: colors.border }]}>
+                {dividendEvents.map(d => (
+                  <View key={d.symbol} style={styles.dividendSummaryRow}>
+                    <View style={styles.dividendSummaryLeft}>
+                      <Text style={[styles.dividendSummarySymbol, { color: colors.text }]}>{d.symbol}</Text>
+                      <Text style={[styles.dividendSummaryYield, { color: colors.textMuted }]}>{d.yield}% yield</Text>
+                    </View>
+                    <View style={styles.dividendSummaryRight}>
+                      <Text style={[styles.dividendSummaryQty, { color: colors.textSecondary }]}>{d.quantity} shares</Text>
+                      <Text style={[styles.dividendSummaryAmount, { color: colors.marketUp }]}>+₹{d.annualAmount.toFixed(0)}/yr</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          );
+        })()}
 
         {/* Analytics CTA */}
         <AnimatedPressable onPress={() => navigation.navigate('Reports')} scaleTo={0.97}>
@@ -411,22 +465,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.semiBold,
     fontSize: FONTS.size.sm,
   },
-  miniChartRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    height: 56,
-    gap: 4,
+  chartContainer: {
     marginTop: SPACING.lg,
-  },
-  barContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  bar: {
-    width: '100%',
-    borderRadius: 2,
-    minHeight: 2,
   },
   statsRow: {
     flexDirection: 'row',
@@ -522,6 +562,129 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.xs,
     color: 'rgba(255,255,255,0.7)',
     marginTop: 2,
+  },
+
+  // ── Dividend Calendar ──
+  dividendSection: {
+    marginHorizontal: SPACING.xl,
+    marginTop: SPACING.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  sectionTitle: {
+    fontFamily: 'System',
+    fontWeight: '700',
+    fontSize: FONTS.size.lg,
+  },
+  annualChip: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  annualChipText: {
+    fontFamily: 'System',
+    fontWeight: '700',
+    fontSize: FONTS.size.xs,
+  },
+  dividendTimeline: {
+    marginBottom: SPACING.md,
+  },
+  timelineLabel: {
+    fontFamily: 'System',
+    fontWeight: '500',
+    fontSize: FONTS.size.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: SPACING.sm,
+  },
+  dividendScroll: {
+    marginHorizontal: -SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+  },
+  dividendChip: {
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginRight: SPACING.sm,
+    minWidth: 140,
+  },
+  dividendMonth: {
+    fontFamily: 'System',
+    fontWeight: '500',
+    fontSize: FONTS.size.xs,
+  },
+  dividendAmount: {
+    fontFamily: 'System',
+    fontWeight: '700',
+    fontSize: FONTS.size.md,
+    marginTop: 4,
+  },
+  dividendStocks: {
+    marginTop: SPACING.sm,
+    gap: 3,
+  },
+  dividendStockRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dividendStockSymbol: {
+    fontFamily: 'System',
+    fontWeight: '500',
+    fontSize: 10,
+  },
+  dividendStockAmt: {
+    fontFamily: 'System',
+    fontWeight: '600',
+    fontSize: 10,
+  },
+  dividendSummary: {
+    borderTopWidth: 1,
+    paddingTop: SPACING.md,
+  },
+  dividendSummaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  dividendSummaryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  dividendSummarySymbol: {
+    fontFamily: 'System',
+    fontWeight: '600',
+    fontSize: FONTS.size.sm,
+  },
+  dividendSummaryYield: {
+    fontFamily: 'System',
+    fontWeight: '400',
+    fontSize: 10,
+  },
+  dividendSummaryRight: {
+    alignItems: 'flex-end',
+  },
+  dividendSummaryQty: {
+    fontFamily: 'System',
+    fontWeight: '400',
+    fontSize: 10,
+  },
+  dividendSummaryAmount: {
+    fontFamily: 'System',
+    fontWeight: '700',
+    fontSize: FONTS.size.sm,
+    marginTop: 1,
   },
 
   exploreBtnText: {

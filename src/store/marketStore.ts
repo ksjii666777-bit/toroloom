@@ -5,6 +5,57 @@ import { marketApi } from '../services/api';
 import { analytics } from '../services/analytics';
 import { sendPriceAlert } from '../services/notificationService';
 
+// ── Stock Screener Filter Types ───────────────────────────────
+export interface ScreenerFilters {
+  priceMin: number;
+  priceMax: number;
+  peMin: number;
+  peMax: number;
+  marketCapCategory: 'all' | 'large' | 'mid' | 'small';
+  dividendMin: number;
+  sector: string;
+  dayChangeMin: number;
+  dayChangeMax: number;
+}
+
+export const DEFAULT_SCREENER_FILTERS: ScreenerFilters = {
+  priceMin: 0,
+  priceMax: 100000,
+  peMin: 0,
+  peMax: 1000,
+  marketCapCategory: 'all',
+  dividendMin: 0,
+  sector: 'All',
+  dayChangeMin: -100,
+  dayChangeMax: 100,
+};
+
+// Helper to determine market cap category from marketCap string
+export function getMarketCapCategory(marketCap: string): 'large' | 'mid' | 'small' {
+  const numStr = marketCap.replace(/[₹,LBCr\s]/g, '');
+  const num = parseFloat(numStr);
+  if (marketCap.includes('Cr')) {
+    if (num >= 100000) return 'large';
+    if (num >= 10000) return 'mid';
+    return 'small';
+  }
+  if (marketCap.includes('L')) {
+    if (num >= 10000) return 'large';
+    return 'mid';
+  }
+  return 'small';
+}
+
+// Parse market cap string to numeric value for filtering
+export function parseMarketCap(marketCap: string): number {
+  const numStr = marketCap.replace(/[₹,\s]/g, '');
+  if (numStr.includes('Cr')) return parseFloat(numStr) * 10000000;
+  if (numStr.includes('L')) return parseFloat(numStr) * 100000;
+  if (numStr.includes('K')) return parseFloat(numStr) * 1000;
+  return parseFloat(numStr) || 0;
+}
+
+// ── State Interface ───────────────────────────────────────────
 interface MarketState {
   indices: MarketIndex[];
   stocks: Stock[];
@@ -12,10 +63,22 @@ interface MarketState {
   isLoading: boolean;
   searchQuery: string;
   searchResults: Stock[];
+
+  // Screener state
+  screenerFilters: ScreenerFilters;
+  screenerResults: Stock[];
+  isScreenerVisible: boolean;
+
   setSearchQuery: (query: string) => void;
   selectStock: (stock: Stock) => void;
   refreshMarket: () => Promise<void>;
   simulatePriceAlert: (symbol?: string) => void;
+
+  // Screener actions
+  setScreenerFilters: (filters: Partial<ScreenerFilters>) => void;
+  applyScreener: () => void;
+  resetScreenerFilters: () => void;
+  toggleScreener: () => void;
 }
 
 export const useMarketStore = create<MarketState>((set, get) => ({
@@ -25,6 +88,9 @@ export const useMarketStore = create<MarketState>((set, get) => ({
   isLoading: false,
   searchQuery: '',
   searchResults: [],
+  screenerFilters: { ...DEFAULT_SCREENER_FILTERS },
+  screenerResults: [],
+  isScreenerVisible: false,
 
   setSearchQuery: (query) => {
     set({ searchQuery: query });
@@ -94,5 +160,43 @@ export const useMarketStore = create<MarketState>((set, get) => ({
       }));
       set({ indices: updatedIndices, stocks: updatedStocks, isLoading: false });
     }
+  },
+
+  // ── Screener Actions ──
+  setScreenerFilters: (filters) => {
+    set(state => ({
+      screenerFilters: { ...state.screenerFilters, ...filters },
+    }));
+  },
+
+  applyScreener: () => {
+    const { stocks, screenerFilters: f } = get();
+    const results = stocks.filter(s => {
+      // Price range
+      if (s.price < f.priceMin || s.price > f.priceMax) return false;
+      // P/E ratio range
+      if (s.pe < f.peMin || s.pe > f.peMax) return false;
+      // Dividend yield
+      if (s.dividend < f.dividendMin) return false;
+      // Day change range
+      if (s.changePercent < f.dayChangeMin || s.changePercent > f.dayChangeMax) return false;
+      // Sector filter
+      if (f.sector !== 'All' && s.sector !== f.sector) return false;
+      // Market cap category
+      if (f.marketCapCategory !== 'all') {
+        const cat = getMarketCapCategory(s.marketCap);
+        if (cat !== f.marketCapCategory) return false;
+      }
+      return true;
+    });
+    set({ screenerResults: results, isScreenerVisible: false });
+  },
+
+  resetScreenerFilters: () => {
+    set({ screenerFilters: { ...DEFAULT_SCREENER_FILTERS }, screenerResults: [] });
+  },
+
+  toggleScreener: () => {
+    set(state => ({ isScreenerVisible: !state.isScreenerVisible }));
   },
 }));

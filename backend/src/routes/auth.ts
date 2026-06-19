@@ -53,4 +53,23 @@ router.put('/profile', authMiddleware, (req: Request, res: Response) => {
   });
 });
 
+// POST /api/auth/referral
+router.post('/referral', authMiddleware, (req: Request, res: Response) => {
+  const { source } = req.body;
+
+  if (!source || typeof source !== 'string') {
+    res.status(400).json({ error: 'Referral source is required' });
+    return;
+  }
+
+  // In production, store the referral in the user's profile / referrals table.
+  // For now, acknowledge and log it.
+  console.log(`[Referral] User ${req.user!.userId} recorded referral from: ${source}`);
+
+  res.json({
+    success: true,
+    message: `Referral source '${source}' recorded for your account. Thanks!`,
+  });
+});
+
 export default router;

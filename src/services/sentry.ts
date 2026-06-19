@@ -38,4 +38,7 @@ if (SENTRY_DSN) {
   });
 }
 
+/** True when a Sentry DSN is configured — used by App.tsx to conditionally wrap with Sentry.wrap */
+export const isSentryEnabled = !!SENTRY_DSN;
+
 export default Sentry;

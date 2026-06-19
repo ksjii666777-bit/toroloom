@@ -2,9 +2,11 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
 import { useGamificationStore } from '../../store/gamificationStore';
+import { useOnboardingStore } from '../../store/onboardingStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -13,6 +15,7 @@ import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton, SkeletonCard } from '../../components/ui/SkeletonLoader';
 
 const { width } = Dimensions.get('window');
+const BADGE_DISPLAY_COUNT = 8;
 
 const menuItems = [
   { section: 'Investments', items: [
@@ -26,15 +29,23 @@ const menuItems = [
   { section: 'Learn & Grow', items: [
     { icon: 'school', label: 'Courses', color: '#00C853', screen: 'Learn' },
     { icon: 'chatbubbles', label: 'Community', color: '#6C63FF', screen: 'Community' },
+    { icon: 'chatbox-ellipses', label: 'Messages', color: '#10B981', screen: 'ChatList' },
     { icon: 'bulb', label: 'AI Insights', color: '#FFC107', screen: 'AIInsights' },
+    { icon: 'newspaper', label: 'Market News', color: '#00D2FF', screen: 'NewsFeed' },
+    { icon: 'journal', label: 'Trading Journal', color: '#8B5CF6', screen: 'BehavioralJournal' },
     { icon: 'trophy', label: 'Achievements', color: '#FF6B6B', screen: 'Achievements' },
   ]},
   { section: 'Account', items: [
     { icon: 'person', label: 'Profile & KYC', color: '#00D2FF', screen: 'Profile' },
+    { icon: 'diamond', label: 'Go Premium', color: '#10B981', screen: 'Subscription' },
     { icon: 'notifications', label: 'Notifications', color: '#FF6B6B', screen: 'Notifications' },
     { icon: 'notifications', label: 'Portfolio Alerts', color: '#FFC107', screen: 'PortfolioAlerts' },
     { icon: 'settings', label: 'Risk Settings', color: '#6E6E9A', screen: 'Settings' },
+    { icon: 'link', label: 'Connect Broker', color: '#FF6B00', screen: 'BrokerConnect' },
+    { icon: 'compass', label: 'Replay Tour', color: '#8B5CF6', screen: '__onboarding' },
+    { icon: 'volume-high', label: 'Voice Settings', color: '#00D2FF', screen: 'VoiceSettings' },
     { icon: 'help-circle', label: 'Help & Support', color: '#00C853', screen: 'Help' },
+    { icon: 'settings', label: 'Tenant Config', color: '#8B5CF6', screen: 'TenantConfig' },
   ]},
 ];
 
@@ -50,6 +61,7 @@ export default function MoreScreen({ navigation }: any) {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user, logout } = useAuthStore();
   const { userLevel, badges } = useGamificationStore();
+  const resetOnboarding = useOnboardingStore(s => s.resetOnboarding);
   const unlockedCount = badges.filter(b => b.unlocked).length;
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -76,7 +88,10 @@ export default function MoreScreen({ navigation }: any) {
     duration: 450,
   });
 
-  const { getAnimatedStyle: getBadgeStyle } = useStaggeredAnimation(badges.slice(0, 8).length, {
+  // Use a fixed count to avoid violating React's Rules of Hooks —
+  // useStaggeredAnimation creates useSharedValue hooks per count, and
+  // if badges.length changes between renders, the hook count changes.
+  const { getAnimatedStyle: getBadgeStyle } = useStaggeredAnimation(BADGE_DISPLAY_COUNT, {
     initialDelay: 200,
     staggerDelay: 40,
     duration: 300,
@@ -92,16 +107,15 @@ export default function MoreScreen({ navigation }: any) {
         break;
       case 'Transfer':
         navigation.navigate('Transfer');
-        break;
-      case 'UPI':
-        navigation.navigate('UPI');
-        break;
-      default:
-        Alert.alert(
-          label,
-          `${label} feature is coming soon. We'll notify you when it's ready!`,
-          [{ text: 'OK' }]
-        );
+        break;        case 'UPI':
+          navigation.navigate('UPI');
+          break;
+        default:
+          Alert.alert(
+            label,
+            `${label} feature is coming soon. We'll notify you when it's ready!`,
+            [{ text: 'OK' }]
+          );
     }
   };
 
@@ -224,7 +238,26 @@ export default function MoreScreen({ navigation }: any) {
               {section.items.map((item, i) => (
                 <AnimatedPressable
                   key={i}
-                  onPress={() => navigation.navigate(item.screen)}
+                  onPress={() => {
+                    if (item.screen === '__onboarding') {
+                      Alert.alert(
+                        'Replay Tour',
+                        'This will restart the onboarding walkthrough. You can skip through it anytime.',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          {
+                            text: 'Start Tour',
+                            onPress: () => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                              resetOnboarding();
+                            },
+                          },
+                        ]
+                      );
+                    } else {
+                      navigation.navigate(item.screen);
+                    }
+                  }}
                   haptic="selection"
                   scaleTo={0.93}
                 >
@@ -244,7 +277,7 @@ export default function MoreScreen({ navigation }: any) {
         <AnimatedPressable onPress={() => navigation.navigate('Achievements')} haptic="light" scaleTo={0.98}>
           <Card title="Achievements" subtitle={`${unlockedCount}/${badges.length} unlocked`}>
             <View style={styles.badgesGrid}>
-              {badges.slice(0, 8).map((badge, i) => (
+              {badges.slice(0, BADGE_DISPLAY_COUNT).map((badge, i) => (
                 <Animated.View key={badge.id} style={getBadgeStyle(i)}>
                   <View style={[styles.badgeItem, !badge.unlocked && styles.badgeLocked]}>
                     <Text style={styles.badgeIcon}>{badge.icon}</Text>

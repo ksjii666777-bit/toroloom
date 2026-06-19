@@ -8,6 +8,7 @@ import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useNotificationStore } from '../../store/notificationStore';
+import { useAIStore } from '../../store/aiStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import MarketCard from '../../components/MarketCard';
@@ -25,15 +26,40 @@ export default function HomeScreen({ navigation }: any) {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user } = useAuthStore();
   const { indices, stocks } = useMarketStore();
-  const { holdings } = usePortfolioStore();
+  const { holdings, trades } = usePortfolioStore();
   const { userLevel, badges } = useGamificationStore();
   const { notifications } = useNotificationStore();
+  const { insights } = useAIStore();
 
   const totalInvested = holdings.reduce((sum, h) => sum + h.totalInvested, 0);
   const currentValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
   const totalPnl = currentValue - totalInvested;
   const totalPnlPercent = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  // ── Dynamic greeting ────────────────────────────────────────
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
+
+  // ── Market status (weekdays 9:15 AM - 3:30 PM) ──
+  const day = new Date().getDay();
+  const isMarketOpen = day >= 1 && day <= 5 && ((hour > 9 || (hour === 9 && new Date().getMinutes() >= 15)) && (hour < 15 || (hour === 15 && new Date().getMinutes() <= 30)));
+
+  // ── Market Breadth ───────────────────────────────────────────
+  const advancing = stocks.filter(s => s.changePercent > 0).length;
+  const declining = stocks.filter(s => s.changePercent < 0).length;
+  const unchanged = stocks.length - advancing - declining;
+
+  // ── Recent Trades ───────────────────────────────────────────
+  const recentTrades = [...trades].slice(0, 3);
+
+  // ── Top Holdings ────────────────────────────────────────────
+  const topHoldings = [...holdings]
+    .sort((a, b) => b.currentValue - a.currentValue)
+    .slice(0, 3);
+
+  // ── AI Insight ──────────────────────────────────────────────
+  const topInsight = insights.length > 0 ? insights[0] : null;
 
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +100,7 @@ export default function HomeScreen({ navigation }: any) {
   const topGainers = [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 3);
   const topLosers = [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 3);
 
-  const sectionCount = 6;
+  const sectionCount = 9;
   const { getAnimatedStyle: getSectionStyle } = useStaggeredAnimation(sectionCount, {
     initialDelay: 200,
     staggerDelay: 120,
@@ -97,8 +123,8 @@ export default function HomeScreen({ navigation }: any) {
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(portfolioGlow, { toValue: 1, duration: 2500, useNativeDriver: false }),
-        Animated.timing(portfolioGlow, { toValue: 0, duration: 2500, useNativeDriver: false }),
+        Animated.timing(portfolioGlow, { toValue: 1, duration: 2500, useNativeDriver: true }),
+        Animated.timing(portfolioGlow, { toValue: 0, duration: 2500, useNativeDriver: true }),
       ])
     ).start();
   }, [portfolioGlow]);
@@ -152,8 +178,16 @@ export default function HomeScreen({ navigation }: any) {
         <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.greeting}>Good Morning,</Text>
-              <Text style={styles.userName}>{user?.name?.split(' ')[0] || 'Investor'} 👋</Text>
+              <Text style={styles.greeting}>{greeting},</Text>
+              <View style={styles.greetingRow}>
+                <Text style={styles.userName}>{user?.name?.split(' ')[0] || 'Investor'} 👋</Text>
+                <View style={[styles.marketStatusBadge, { backgroundColor: isMarketOpen ? '#00C85320' : '#FF174420' }]}>
+                  <View style={[styles.marketStatusDot, { backgroundColor: isMarketOpen ? '#00C853' : '#FF1744' }]} />
+                  <Text style={[styles.marketStatusText, { color: isMarketOpen ? '#00C853' : '#FF1744' }]}>
+                    {isMarketOpen ? 'Open' : 'Closed'}
+                  </Text>
+                </View>
+              </View>
             </View>
             <View style={styles.headerRight}>
               <AnimatedPressable onPress={() => navigation.navigate('Notifications')} haptic="light" scaleTo={0.92}>
@@ -234,6 +268,34 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         </LinearGradient>
 
+        {/* Market Breadth */}
+        <Animated.View style={[styles.section, getSectionStyle(0)]}>
+          <View style={styles.marketBreadthRow}>
+            <View style={[styles.breadthCard, { borderColor: colors.border }]}>
+              <Ionicons name="arrow-up-circle" size={18} color="#00C853" />
+              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>Adv</Text>
+              <Text style={[styles.breadthValue, { color: '#00C853' }]}>{advancing}</Text>
+            </View>
+            <View style={[styles.breadthCard, { borderColor: colors.border }]}>
+              <Ionicons name="remove-circle" size={18} color={colors.textMuted} />
+              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>Flat</Text>
+              <Text style={[styles.breadthValue, { color: colors.textMuted }]}>{unchanged}</Text>
+            </View>
+            <View style={[styles.breadthCard, { borderColor: colors.border }]}>
+              <Ionicons name="arrow-down-circle" size={18} color="#FF1744" />
+              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>Dec</Text>
+              <Text style={[styles.breadthValue, { color: '#FF1744' }]}>{declining}</Text>
+            </View>
+            <View style={[styles.breadthCard, { borderColor: colors.border }]}>
+              <Ionicons name="stats-chart" size={18} color={advancing > declining ? '#00C853' : '#FF1744'} />
+              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>Ratio</Text>
+              <Text style={[styles.breadthValue, { color: advancing > declining ? '#00C853' : '#FF1744' }]}>
+                {declining > 0 ? (advancing / declining).toFixed(1) : '∞'}
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
+
         {/* Market Indices */}
         <Animated.View style={[styles.section, getSectionStyle(0)]}>
           <View style={styles.sectionHeader}>
@@ -249,8 +311,48 @@ export default function HomeScreen({ navigation }: any) {
           </ScrollView>
         </Animated.View>
 
+        {/* AI Market Insight */}
+        {topInsight && (
+          <Animated.View style={[styles.section, getSectionStyle(1)]}>
+            <Card animated animationDelay={500}>
+              <View style={styles.aiInsightHeader}>
+                <View style={styles.aiInsightLeft}>
+                  <View style={[styles.aiBadge, { backgroundColor: colors.primaryLight + '20' }]}>
+                    <Ionicons name="bulb" size={16} color={colors.primary} />
+                  </View>
+                  <View>
+                    <Text style={[styles.aiLabel, { color: colors.textSecondary }]}>AI Market Insight</Text>
+                    <Text style={[styles.aiSymbol, { color: colors.text }]}>{topInsight.symbol}</Text>
+                  </View>
+                </View>
+                <View style={[styles.confidenceChip, {
+                  backgroundColor: topInsight.type === 'bullish' ? '#00C85320' : topInsight.type === 'bearish' ? '#FF174420' : colors.bgCardLight,
+                }]}>
+                  <Ionicons name={
+                    topInsight.type === 'bullish' ? 'trending-up' :
+                    topInsight.type === 'bearish' ? 'trending-down' : 'remove'
+                  } size={14} color={
+                    topInsight.type === 'bullish' ? '#00C853' :
+                    topInsight.type === 'bearish' ? '#FF1744' : colors.textMuted
+                  } />
+                  <Text style={[styles.confidenceText, {
+                    color: topInsight.type === 'bullish' ? '#00C853' :
+                    topInsight.type === 'bearish' ? '#FF1744' : colors.textMuted,
+                  }]}>{topInsight.confidence}%</Text>
+                </View>
+              </View>
+              <Text style={[styles.aiSummary, { color: colors.textSecondary }]} numberOfLines={2}>
+                {topInsight.summary}
+              </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('AIInsights')} style={styles.aiCta}>
+                <Text style={[styles.aiCtaText, { color: colors.primary }]}>View Full Analysis →</Text>
+              </TouchableOpacity>
+            </Card>
+          </Animated.View>
+        )}
+
         {/* Level & XP */}
-        <Animated.View style={[styles.section, getSectionStyle(1)]}>
+        <Animated.View style={[styles.section, getSectionStyle(2)]}>
           <Card animated animationDelay={400}>
             <View style={styles.levelRow}>
               <View style={styles.levelInfo}>
@@ -276,8 +378,51 @@ export default function HomeScreen({ navigation }: any) {
           </Card>
         </Animated.View>
 
+        {/* Top Holdings */}
+        {topHoldings.length > 0 && (
+          <Animated.View style={[styles.section, getSectionStyle(3)]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Top Holdings 📊</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Portfolio')}>
+                <Text style={styles.seeAll}>All Holdings</Text>
+              </TouchableOpacity>
+            </View>
+            {topHoldings.map(holding => {
+              const isPositive = holding.pnl >= 0;
+              return (
+                <TouchableOpacity
+                  key={holding.id}
+                  style={[styles.holdingCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                  onPress={() => navigation.navigate('StockDetail', { stockId: holding.stockId, symbol: holding.symbol })}
+                >
+                  <View style={styles.holdingLeft}>
+                    <View style={[styles.holdingAvatar, { backgroundColor: isPositive ? '#00C85320' : '#FF174420' }]}>
+                      <Ionicons name={isPositive ? 'trending-up' : 'trending-down'} size={16} color={isPositive ? '#00C853' : '#FF1744'} />
+                    </View>
+                    <View>
+                      <Text style={[styles.holdingSymbol, { color: colors.text }]}>{holding.symbol}</Text>
+                      <Text style={[styles.holdingQty, { color: colors.textMuted }]}>{holding.quantity} shares</Text>
+                    </View>
+                  </View>
+                  <View style={styles.holdingRight}>
+                    <Text style={[styles.holdingValue, { color: colors.text }]}>
+                      {formatLargeCurrency(holding.currentValue)}
+                    </Text>
+                    <View style={[styles.holdingPnlChip, { backgroundColor: isPositive ? '#00C85320' : '#FF174420' }]}>
+                      <Ionicons name={isPositive ? 'caret-up' : 'caret-down'} size={12} color={isPositive ? '#00C853' : '#FF1744'} />
+                      <Text style={[styles.holdingPnlText, { color: isPositive ? '#00C853' : '#FF1744' }]}>
+                        {formatPercent(holding.pnlPercent)}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </Animated.View>
+        )}
+
         {/* Top Gainers */}
-        <Animated.View style={[styles.section, getSectionStyle(2)]}>
+        <Animated.View style={[styles.section, getSectionStyle(4)]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Gainers 🔥</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -294,11 +439,11 @@ export default function HomeScreen({ navigation }: any) {
         </Animated.View>
 
         {/* Top Losers */}
-        <Animated.View style={[styles.section, getSectionStyle(3)]}>
+        <Animated.View style={[styles.section, getSectionStyle(5)]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Losers 📉</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
-              <Text style={styles.seeAll}>View All</Text>
+              <Text style={styles.seeAll}>View Losers</Text>
             </TouchableOpacity>
           </View>
           {topLosers.map(stock => (
@@ -310,8 +455,42 @@ export default function HomeScreen({ navigation }: any) {
           ))}
         </Animated.View>
 
+        {/* Recent Trades */}
+        {recentTrades.length > 0 && (
+          <Animated.View style={[styles.section, getSectionStyle(6)]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent Activity 📋</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('TradeHistory')}>
+                <Text style={styles.seeAll}>All Trades</Text>
+              </TouchableOpacity>
+            </View>
+            {recentTrades.map(trade => (
+              <View key={trade.id} style={[styles.tradeItem, { borderColor: colors.border }]}>
+                <View style={styles.tradeLeft}>
+                  <View style={[styles.tradeTypeBadge, {
+                    backgroundColor: trade.type === 'buy' ? '#00C85320' : '#FF174420',
+                  }]}>
+                    <Ionicons name={trade.type === 'buy' ? 'cart' : 'arrow-up'} size={14} color={trade.type === 'buy' ? '#00C853' : '#FF1744'} />
+                  </View>
+                  <View>
+                    <Text style={[styles.tradeSymbol, { color: colors.text }]}>{trade.symbol}</Text>
+                    <Text style={[styles.tradeMeta, { color: colors.textMuted }]}>
+                      {trade.type === 'buy' ? 'Bought' : 'Sold'} {trade.quantity} @ ₹{trade.price.toFixed(2)}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={[styles.tradeAmount, {
+                  color: trade.type === 'buy' ? colors.text : colors.marketUp,
+                }]}>
+                  {trade.type === 'buy' ? '-' : '+'}₹{trade.total.toLocaleString()}
+                </Text>
+              </View>
+            ))}
+          </Animated.View>
+        )}
+
         {/* Watchlist Preview */}
-        <Animated.View style={[styles.section, getSectionStyle(4)]}>
+        <Animated.View style={[styles.section, getSectionStyle(7)]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Watchlist ⭐</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Watchlist')}>
@@ -359,11 +538,33 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.md,
     color: colors.textSecondary,
   },
+  greetingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginTop: 2,
+  },
   userName: {
     ...FONTS.bold,
     fontSize: FONTS.size.xxl,
     color: colors.text,
-    marginTop: 2,
+  },
+  marketStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  marketStatusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  marketStatusText: {
+    ...FONTS.semiBold,
+    fontSize: 11,
   },
   headerRight: {
     flexDirection: 'row',
@@ -581,5 +782,169 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.xs,
     color: colors.textMuted,
     marginLeft: SPACING.xs,
+  },
+
+  // ── Market Breadth ──
+  marketBreadthRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  breadthCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+  },
+  breadthLabel: {
+    ...FONTS.regular,
+    fontSize: 10,
+  },
+  breadthValue: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    marginLeft: 'auto',
+  },
+
+  // ── AI Insight ──
+  aiInsightHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  aiInsightLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  aiBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  aiLabel: {
+    ...FONTS.regular,
+    fontSize: 10,
+  },
+  aiSymbol: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+    marginTop: 1,
+  },
+  confidenceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  confidenceText: {
+    ...FONTS.semiBold,
+    fontSize: 11,
+  },
+  aiSummary: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    lineHeight: 20,
+  },
+  aiCta: {
+    marginTop: SPACING.sm,
+  },
+  aiCtaText: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+
+  // ── Top Holdings ──
+  holdingCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginBottom: SPACING.sm,
+  },
+  holdingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  holdingAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  holdingSymbol: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  holdingQty: {
+    ...FONTS.regular,
+    fontSize: 11,
+    marginTop: 1,
+  },
+  holdingRight: {
+    alignItems: 'flex-end',
+  },
+  holdingValue: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  holdingPnlChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.full,
+    marginTop: 3,
+  },
+  holdingPnlText: {
+    ...FONTS.semiBold,
+    fontSize: 10,
+  },
+
+  // ── Recent Trades ──
+  tradeItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+  },
+  tradeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  tradeTypeBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tradeSymbol: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  tradeMeta: {
+    ...FONTS.regular,
+    fontSize: 10,
+    marginTop: 1,
+  },
+  tradeAmount: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
   },
 });

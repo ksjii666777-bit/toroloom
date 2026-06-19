@@ -46,9 +46,25 @@ import {
   sendSystemNotification,
   setupChannels,
   CHANNELS,
+  __resetTestState,
 } from '../services/notificationService';
 
 import type { AppNotification } from '../types';
+
+// ==================== Global mock injection ====================
+// Before each test, inject the actual vitest mock objects into globalThis so
+// the lazy getter in notificationService returns the SAME objects that
+// vi.spyOn operates on. This makes spies reachable from the service code.
+beforeEach(() => {
+  (globalThis as any).__TOROLOOM_LAZY_MODULES__ = {
+    'expo-notifications': Notifications,
+    'expo-device': Device,
+    // TaskManager & BackgroundFetch are only accessed during module-level code
+    // (which runs during vi.importActual, before beforeEach), so they don't
+    // need injection. The Proxy fallback handles that case gracefully.
+  };
+  __resetTestState();
+});
 
 // ==================== Sample Data ====================
 
@@ -67,6 +83,7 @@ const sampleNotification: AppNotification = {
 describe('Notification Service — setupChannels', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
   });
 
   it('does NOT create Android channels on non-Android platform', async () => {
@@ -115,6 +132,7 @@ describe('Notification Service — setupChannels', () => {
 describe('Notification Service — registerForPushNotifications', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
     vi.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
   });
 
@@ -177,6 +195,7 @@ describe('Notification Service — registerForPushNotifications', () => {
 describe('Notification Service — sendLocalNotification', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
   });
 
   it('schedules an immediate notification and returns an identifier', async () => {
@@ -278,6 +297,7 @@ describe('Notification Service — sendLocalNotification', () => {
 describe('Notification Service — scheduleNotification', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
   });
 
   it('schedules a notification with a time interval trigger', async () => {
@@ -317,6 +337,7 @@ describe('Notification Service — scheduleNotification', () => {
 describe('Notification Service — cancelNotification / cancelAllNotifications', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
   });
 
   it('cancels a single notification by identifier', async () => {
@@ -359,6 +380,7 @@ describe('Notification Service — getScreenForType', () => {
 describe('Notification Service — setupNotificationResponseListener', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
   });
 
   it('subscribes to notification response events', () => {
@@ -454,6 +476,7 @@ describe('Notification Service — setupNotificationResponseListener', () => {
 describe('Notification Service — sendPriceAlert', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
     vi.spyOn(Notifications, 'scheduleNotificationAsync').mockResolvedValue('pa-1');
   });
 
@@ -504,6 +527,7 @@ describe('Notification Service — sendPriceAlert', () => {
 describe('Notification Service — sendTradeConfirmation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
     vi.spyOn(Notifications, 'scheduleNotificationAsync').mockResolvedValue('tr-1');
   });
 
@@ -551,6 +575,7 @@ describe('Notification Service — sendTradeConfirmation', () => {
 describe('Notification Service — sendEducationalReminder', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
     vi.spyOn(Notifications, 'scheduleNotificationAsync').mockResolvedValue('ed-1');
   });
 
@@ -603,6 +628,7 @@ describe('Notification Service — sendEducationalReminder', () => {
 describe('Notification Service — sendSystemNotification', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetTestState();
     vi.spyOn(Notifications, 'scheduleNotificationAsync').mockResolvedValue('sys-1');
   });
 

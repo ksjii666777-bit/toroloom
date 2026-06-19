@@ -9,6 +9,8 @@ import {
   Dimensions,
   Animated,
   Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -219,7 +221,8 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
   );
 
   return (
-    <View style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.container}>
       {/* Header */}
       <LinearGradient
         colors={tradeType === 'buy' ? GRADIENTS.primary : GRADIENTS.secondary}
@@ -259,8 +262,8 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
                 {stock.isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
               </Text>
             </View>
-          </View>
-        </View>
+      </View>
+    </View>
       </LinearGradient>
 
       <ScrollView
@@ -401,8 +404,8 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
                 </TouchableOpacity>
               );
             })}
-          </View>
-        </View>
+      </View>
+    </View>
 
         {/* Price Input (for Limit / SL / SL-M) */}
         {(orderType === 'LIMIT' || orderType === 'SL' || orderType === 'SL-M') && (
@@ -546,6 +549,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         </View>
       )}
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 

@@ -12,7 +12,7 @@ export default defineConfig({
     server: {
       deps: {
         // Inline date-fns so vitest can resolve it
-        inline: ['date-fns'],
+        inline: ['date-fns', 'react-native-webview'],
       },
     },
     coverage: {

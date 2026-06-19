@@ -99,13 +99,13 @@ describe('LoginScreen — Loaded Content', () => {
   it('renders the app name', () => {
     const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
-    expect(getByText('WealthWise')).toBeDefined();
+    expect(getByText('Toroloom')).toBeDefined();
   });
 
   it('renders the tagline', () => {
     const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
-    expect(getByText('Invest Smarter, Grow Faster')).toBeDefined();
+    expect(getByText('Intelligence Meets Execution')).toBeDefined();
   });
 
   it('renders the welcome back header', () => {
@@ -266,7 +266,7 @@ describe('LoginScreen — Navigation', () => {
   it('does not navigate on initial render', () => {
     const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
-    expect(getByText('WealthWise')).toBeDefined();
+    expect(getByText('Toroloom')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

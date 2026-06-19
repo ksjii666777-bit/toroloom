@@ -25,6 +25,7 @@ RUN npm ci
 # Copy source
 COPY tsconfig.json ./
 COPY src/ ./src/
+COPY public/ ./public/
 
 # Compile TypeScript → dist/
 RUN npm run build
@@ -42,6 +43,7 @@ WORKDIR /app
 
 # Copy production artifacts from builder
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 

@@ -10,11 +10,11 @@
 # 6. Logout
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: host.exp.exponent
 ---
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
-    text: "Welcome Back!"
+    text: "Welcome Back! 👋"
 - tapOn:
     text: "Enter your email"
 - inputText: ${TEST_EMAIL}
@@ -27,6 +27,12 @@ appId: com.anonymous.Toroloom
 
 - tapOn:
     text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# Navigate to Home tab (More tab is first/default after login)
+- tapOn:
+    text: "Home"
 - waitForAnimationToEnd:
     timeout: 5000
 
@@ -44,7 +50,7 @@ appId: com.anonymous.Toroloom
 - tapOn: "Learn"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Learn"
+    text: "Learning Hub"
 
 # Go back to Home via tab
 - tapOn: "Home"
@@ -111,6 +117,6 @@ appId: com.anonymous.Toroloom
 
 # Verify we're back on the login screen
 - assertVisible:
-    text: "Welcome Back!"
+    text: "Welcome Back! 👋"
 - assertVisible:
     text: "Don't have an account?"

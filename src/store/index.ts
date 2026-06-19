@@ -12,3 +12,5 @@ export { useGamificationStore } from './gamificationStore';
 export { useNotificationStore } from './notificationStore';
 export { usePortfolioAnalyticsStore } from './portfolioAnalyticsStore';
 export { useThemeStore } from './themeStore';
+export { useSubscriptionStore } from './subscriptionStore';
+export { useOnboardingStore } from './onboardingStore';

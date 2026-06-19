@@ -3,21 +3,41 @@
     "name": "Toroloom",
     "slug": "Toroloom",
     "version": "1.0.0",
+    "scheme": "toroloom",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "associatedDomains": [
+        "applinks:toroloom.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0D1117",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Toroloom"
+      "package": "com.anonymous.Toroloom",
+      "backgroundColor": "#0D1117",
+      "softwareKeyboardLayoutMode": "resize",
+      "googleServicesFile": "./google-services.json",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "toroloom.com",
+              "pathPrefix": "/signup"
+            }
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -33,7 +53,20 @@
       "themeColor": "#0D1117"
     },
     "plugins": [
-      "expo-sharing"
-    ]
+      "expo-sharing",
+      "@react-native-firebase/app",
+      "@react-native-firebase/analytics",
+      "expo-font"
+    ],
+    "updates": {
+      "enabled": false,
+      "fallbackToCacheTimeout": 0
+    },
+    "extra": {
+      "eas": {
+        "projectId": "516f5031-c683-43e5-a463-f714660154b0"
+      }
+    },
+    "owner": "hgdghdghh"
   }
 }

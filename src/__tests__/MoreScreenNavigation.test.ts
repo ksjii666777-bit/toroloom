@@ -46,7 +46,9 @@ const MORE_SCREEN_ROUTES = [
   'Achievements',
   'Profile',
   'Notifications',
+  'PortfolioAlerts',
   'Settings',
+  'Subscription',
   'Help',
   // Quick actions & balance card buttons
   'AddFunds',
@@ -76,7 +78,9 @@ const REGISTERED_ROUTES: Record<MoreScreenRoute, string> = {
   Achievements: 'Achievements',
   Profile: 'Profile',
   Notifications: 'Notifications',
+  PortfolioAlerts: 'PortfolioAlerts',
   Settings: 'Settings',
+  Subscription: 'Subscription',
   Help: 'Help',
   AddFunds: 'AddFunds',
   Withdraw: 'Withdraw',
@@ -106,7 +110,9 @@ const MENU_ITEM_ROUTES: MenuItemRoute[] = [
   { section: 'Learn & Grow', label: 'Achievements', route: 'Achievements' },
   // Account
   { section: 'Account', label: 'Profile & KYC', route: 'Profile' },
+  { section: 'Account', label: 'Go Premium', route: 'Subscription' },
   { section: 'Account', label: 'Notifications', route: 'Notifications' },
+  { section: 'Account', label: 'PortfolioAlerts', route: 'PortfolioAlerts' },
   { section: 'Account', label: 'Settings', route: 'Settings' },
   { section: 'Account', label: 'Help & Support', route: 'Help' },
 ];

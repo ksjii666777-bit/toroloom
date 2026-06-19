@@ -1,0 +1,89 @@
+# =============================================================================
+# Universal Link → Signup Flow
+# =============================================================================
+# Opens https://toroloom.com/signup?ref=test123 via a universal link, verifies
+# the Signup screen loads correctly, fills in all registration fields, submits
+# the form, and confirms the user lands on the Home screen.
+#
+# This validates:
+#   1. HTTPS universal link handling (https://toroloom.com/signup)
+#   2. React Navigation linking config with https:// prefix
+#   3. route.params.ref is received and passed to signup()
+#   4. apple-app-site-association / assetlinks.json verification (indirect)
+#   5. Full registration flow works from a universal-link origin
+#
+# Prerequisites:
+#   - iOS: apple-app-site-association must be deployed to toroloom.com/.well-known/
+#   - Android: assetlinks.json must be deployed to toroloom.com/.well-known/
+#   - The app must be rebuilt with associatedDomains (iOS) / intentFilters (Android)
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Open the universal link ────────────────────────────────────────────
+# This triggers https://toroloom.com/signup?ref=test123 which the OS intercepts
+# (if the association files are correctly deployed) and forwards to the app.
+# React Navigation then resolves to the Signup screen with route.params.ref.
+- openLink: https://toroloom.com/signup?ref=test123
+
+# ── 2. Wait for the Signup screen to load (allow for cold start) ───────────
+- waitForAnimationToEnd:
+    timeout: 25000
+
+# Verify the Signup screen rendered (not stuck on Login)
+- assertVisible:
+    text: "Create Account"
+- assertVisible:
+    text: "Start your investment journey today"
+
+# Verify we did NOT land on the Login screen (universal link worked correctly)
+- assertNotVisible:
+    text: "Welcome Back!"
+
+# ── 3. Verify the referral badge is visible ────────────────────────────────
+# The badge reads "🎉 Referred by test123" — confirms route.params.ref was
+# received from the universal link and passed to the Signup screen.
+- assertVisible:
+    text: "🎉 Referred by test123"
+
+# ── 4. Fill in Full Name ──────────────────────────────────────────────────
+- tapOn:
+    text: "Enter your full name"
+- inputText: "Priya Patel"
+
+# ── 5. Fill in Email ──────────────────────────────────────────────────────
+- tapOn:
+    text: "Enter your email"
+- inputText: "priya+universal@toroloom.com"
+
+# ── 6. Fill in Phone ──────────────────────────────────────────────────────
+- tapOn:
+    text: "Enter your phone number"
+- inputText: "8765432109"
+
+# ── 7. Fill in Password ───────────────────────────────────────────────────
+- tapOn:
+    text: "Create a strong password"
+- inputText: "UnivLink@456"
+
+# ── 8. Fill in Confirm Password ───────────────────────────────────────────
+- tapOn:
+    text: "Re-enter your password"
+- inputText: "UnivLink@456"
+
+# ── 9. Dismiss the keyboard ───────────────────────────────────────────────
+- hideKeyboard
+
+# ── 10. Submit the form ────────────────────────────────────────────────────
+- tapOn:
+    text: "Create Account"
+
+# ── 11. Wait for signup to complete ────────────────────────────────────────
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# ── 12. Verify navigation to Home screen ───────────────────────────────────
+- assertVisible:
+    text: "Good Morning,"
+- assertVisible:
+    text: "Portfolio"

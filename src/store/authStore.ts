@@ -4,6 +4,7 @@ import { User } from '../types';
 import { mockUser } from '../constants/mockData';
 import { authApi } from '../services/api';
 import { analytics } from '../services/analytics';
+import { useOnboardingStore } from './onboardingStore';
 
 interface AuthState {
   user: User | null;
@@ -11,7 +12,7 @@ interface AuthState {
   isLoggedIn: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (name: string, email: string, phone: string, password: string) => Promise<boolean>;
+  signup: (name: string, email: string, phone: string, password: string, referralSource?: string) => Promise<boolean>;
   logout: () => void;
   updateBalance: (amount: number) => void;
   loadStoredAuth: () => Promise<void>;
@@ -64,7 +65,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  signup: async (name, email, phone, password) => {
+  signup: async (name, email, phone, password, referralSource?) => {
     set({ isLoading: true });
     try {
       const res = await authApi.signup(name, email, phone, password);
@@ -73,12 +74,24 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: res.user, token: res.token, isLoggedIn: true, isLoading: false });
       analytics.logEvent('signup', { method: 'email' });
       analytics.setUserId(res.user.id);
+
+      // Wire referral source for onboarding variant
+      if (referralSource) {
+        useOnboardingStore.getState().setReferralSource(referralSource);
+      }
+
       return true;
     } catch {
       // Backend unavailable — fall back to mock
       const mockUserData = { ...mockUser, name, email, phone };
       set({ user: mockUserData, token: 'mock-token', isLoggedIn: true, isLoading: false });
       analytics.logEvent('signup', { method: 'email' });
+
+      // Wire referral source for onboarding variant
+      if (referralSource) {
+        useOnboardingStore.getState().setReferralSource(referralSource);
+      }
+
       return true;
     }
   },

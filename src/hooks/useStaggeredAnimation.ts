@@ -1,5 +1,6 @@
-import { useRef, useEffect, useCallback } from 'react';
-import { Animated } from 'react-native';
+import { useEffect, useCallback } from 'react';
+import type { ViewStyle } from 'react-native';
+import { useSharedValue, withTiming, withDelay, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
 
 interface StaggeredAnimationConfig {
   initialDelay?: number;
@@ -18,49 +19,34 @@ export function useStaggeredAnimation(count: number, config: StaggeredAnimationC
     fromTranslateY = 20,
   } = config;
 
-  const animations = useRef<Animated.Value[]>([]);
-
-  // Initialize or update animation values
-  useEffect(() => {
-    while (animations.current.length < count) {
-      animations.current.push(new Animated.Value(0));
-    }
-    if (animations.current.length > count) {
-      animations.current = animations.current.slice(0, count);
-    }
-  }, [count]);
+  // Create shared values for each item
+  const progressValues = Array.from({ length: count }, () => useSharedValue(0));
 
   const startAnimation = useCallback(() => {
-    const anims = animations.current.slice(0, count).map((anim, index) =>
-      Animated.timing(anim, {
-        toValue: 1,
-        duration,
-        delay: initialDelay + index * staggerDelay,
-        useNativeDriver: true,
-      })
-    );
-    Animated.stagger(staggerDelay, anims).start();
+    progressValues.forEach((anim, index) => {
+      const delay = initialDelay + index * staggerDelay;
+      anim.value = withDelay(delay, withTiming(1, { duration }));
+    });
   }, [count, initialDelay, staggerDelay, duration]);
 
   useEffect(() => {
     startAnimation();
   }, [startAnimation]);
 
-  const getAnimatedStyle = useCallback((index: number) => ({
-    opacity: animations.current[index]?.interpolate({
-      inputRange: [0, 1],
-      outputRange: [fromOpacity, 1],
-    }) || 0,
-    transform: [{
-      translateY: animations.current[index]?.interpolate({
-        inputRange: [0, 1],
-        outputRange: [fromTranslateY, 0],
-      }) || fromTranslateY,
-    }],
-  }), [fromOpacity, fromTranslateY]);
+  const getAnimatedStyle = useCallback(
+    (index: number): ViewStyle =>
+      useAnimatedStyle(() => {
+        const progress = progressValues[index]?.value ?? 0;
+        return {
+          opacity: fromOpacity + (1 - fromOpacity) * progress,
+          transform: [{ translateY: fromTranslateY * (1 - progress) }],
+        };
+      }) as unknown as ViewStyle,
+    [fromOpacity, fromTranslateY]
+  );
 
   const reset = useCallback(() => {
-    animations.current.forEach(anim => anim.setValue(0));
+    progressValues.forEach(anim => { anim.value = 0; });
     startAnimation();
   }, [startAnimation]);
 

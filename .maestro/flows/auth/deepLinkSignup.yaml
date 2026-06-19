@@ -1,0 +1,82 @@
+# =============================================================================
+# Deep Link → Signup Flow
+# =============================================================================
+# Opens toroloom://signup?ref=test123 via a deep link, verifies the Signup
+# screen loads correctly, fills in all registration fields, submits the
+# form, and confirms the user lands on the Home screen.
+#
+# This validates:
+#   1. Custom scheme deep link handling (toroloom://)
+#   2. React Navigation linking config resolves 'signup' path to SignupScreen
+#   3. route.params.ref is received and passed to signup()
+#   4. Full registration flow works from a deep-link origin
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Open the deep link ──────────────────────────────────────────────────
+# This triggers toroloom://signup?ref=test123 which React Navigation resolves
+# to the Signup screen with route.params.ref = 'test123'
+- openLink: toroloom://signup?ref=test123
+
+# ── 2. Wait for the Signup screen to load (allow for cold start) ───────────
+- waitForAnimationToEnd:
+    timeout: 25000
+
+# Verify the Signup screen rendered (not stuck on Login)
+- assertVisible:
+    text: "Create Account"
+- assertVisible:
+    text: "Start your investment journey today"
+
+# Verify we did NOT land on the Login screen (deep link worked correctly)
+- assertNotVisible:
+    text: "Welcome Back!"
+
+# ── 3. Verify the referral badge is visible ────────────────────────────────
+# The badge reads "🎉 Referred by test123" — confirms route.params.ref was
+# received from the deep link and passed to the Signup screen.
+- assertVisible:
+    text: "🎉 Referred by test123"
+
+# ── 3. Fill in Full Name ──────────────────────────────────────────────────
+- tapOn:
+    text: "Enter your full name"
+- inputText: "Rahul Sharma"
+
+# ── 4. Fill in Email ──────────────────────────────────────────────────────
+- tapOn:
+    text: "Enter your email"
+- inputText: "rahul+deeplink@toroloom.com"
+
+# ── 5. Fill in Phone ──────────────────────────────────────────────────────
+- tapOn:
+    text: "Enter your phone number"
+- inputText: "9876543210"
+
+# ── 6. Fill in Password ───────────────────────────────────────────────────
+- tapOn:
+    text: "Create a strong password"
+- inputText: "Secure@123"
+
+# ── 7. Fill in Confirm Password ───────────────────────────────────────────
+- tapOn:
+    text: "Re-enter your password"
+- inputText: "Secure@123"
+
+# ── 8. Dismiss the keyboard ───────────────────────────────────────────────
+- hideKeyboard
+
+# ── 9. Submit the form ─────────────────────────────────────────────────────
+- tapOn:
+    text: "Create Account"
+
+# ── 10. Wait for signup to complete ────────────────────────────────────────
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# ── 11. Verify navigation to Home screen ───────────────────────────────────
+- assertVisible:
+    text: "Good Morning,"
+- assertVisible:
+    text: "Portfolio"

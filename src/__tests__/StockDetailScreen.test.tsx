@@ -272,26 +272,27 @@ describe('StockDetailScreen — Loaded Content', () => {
     expect(getByText('About Company')).toBeDefined();
   });
 
-  it('renders the AI Insight card with confidence badge', () => {
+  it('renders the AI Analysis card with confidence', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-    expect(getByText('AI Insight')).toBeDefined();
-    expect(getByText('85% confidence')).toBeDefined();
+    expect(getByText('AI Analysis')).toBeDefined();
+    expect(getByText('85%')).toBeDefined();
   });
 
-  it('renders AI insight type (Bullish)', () => {
+  it('renders AI analysis sentiment (Bullish)', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-    expect(getByText(/Bullish/)).toBeDefined();
+    expect(getByText('Bullish')).toBeDefined();
+    expect(getByText('Confidence')).toBeDefined();
   });
 
-  it('renders AI insight summary and analysis', () => {
+  it('renders AI analysis summary', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
@@ -300,7 +301,7 @@ describe('StockDetailScreen — Loaded Content', () => {
     expect(getByText('Strong breakout above resistance with high volume')).toBeDefined();
   });
 
-  it('renders AI target prices', () => {
+  it('renders AI target prices with probability bars', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
@@ -309,6 +310,7 @@ describe('StockDetailScreen — Loaded Content', () => {
     expect(getByText('₹2,950.00')).toBeDefined();
     expect(getByText('₹3,020.00')).toBeDefined();
     expect(getByText('₹3,100.00')).toBeDefined();
+    expect(getByText('Target Levels')).toBeDefined();
   });
 
   it('renders LTP in the bottom action bar', () => {

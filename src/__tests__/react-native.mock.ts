@@ -59,6 +59,20 @@ export const TextInput = dummyComponent('TextInput');
 export const RefreshControl = dummyComponent('RefreshControl');
 export const Keyboard = dummyComponent('Keyboard');
 
+// ── Linking —————————————————————————————————————————————————
+export const Alert = {
+  alert: () => {},
+};
+
+export const Linking = {
+  getInitialURL: () => Promise.resolve(null),
+  addEventListener: (_eventType: string, _handler: any) => ({ remove: () => {} }),
+  openURL: () => Promise.resolve(),
+  canOpenURL: () => Promise.resolve(true),
+  openSettings: () => Promise.resolve(),
+  sendIntent: (_action: string, _extras?: any) => Promise.resolve(),
+};
+
 // ── StyleSheet ————————————————————————————————————————————————
 export const StyleSheet = {
   create: <T extends Record<string, any>>(styles: T): T => styles,
@@ -291,6 +305,8 @@ const ReactNative = {
   TextInput,
   RefreshControl,
   Keyboard,
+  Alert,
+  Linking,
   StyleSheet,
   Dimensions,
   Platform,

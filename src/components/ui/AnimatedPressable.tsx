@@ -75,13 +75,14 @@ export default function AnimatedPressable({
         useNativeDriver: true,
       }),
     ];
+    // opacity IS supported by native driver, so highlightAnim can use useNativeDriver: true too
     if (highlight) {
       anims.push(
         Animated.timing(highlightAnim, {
           toValue: 1,
           duration: 100,
-          useNativeDriver: false,
-        })
+          useNativeDriver: true,
+        }),
       );
     }
     Animated.parallel(anims).start();
@@ -107,8 +108,8 @@ export default function AnimatedPressable({
         Animated.timing(highlightAnim, {
           toValue: 0,
           duration: 200,
-          useNativeDriver: false,
-        })
+          useNativeDriver: true,
+        }),
       );
     }
     Animated.parallel(anims).start();

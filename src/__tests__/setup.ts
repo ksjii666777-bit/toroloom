@@ -62,6 +62,7 @@ vi.mock('react-native-reanimated', () => ({
     callback?.(true);
     return toValue;
   },
+  withDelay: (_delay: number, value: any) => value,
   withSpring: (toValue: any) => toValue,
   runOnJS: (fn: any) => fn,
   Easing: { in: (e: any) => e, out: (e: any) => e, ease: undefined },
@@ -384,5 +385,13 @@ vi.mock('expo-file-system/legacy', () => ({
   moveAsync: vi.fn(() => Promise.resolve()),
   writeAsStringAsync: vi.fn(() => Promise.resolve()),
   EncodingType: { UTF8: 'utf8' },
+}));
+
+// ==================== Mock react-native-webview ====================
+// AppNavigator → store → subscriptionStore → razorpay → react-native-webview
+// Avoid SyntaxError transforming the package
+vi.mock('react-native-webview', () => ({
+  WebView: 'WebView',
+  default: 'WebView',
 }));
 

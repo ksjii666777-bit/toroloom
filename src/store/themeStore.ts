@@ -18,7 +18,7 @@ export const useThemeStore = create<ThemeState>()(
       setTheme: (mode) => set({ mode }),
     }),
     {
-      name: 'wealthwise-theme',
+      name: 'toroloom-theme',
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

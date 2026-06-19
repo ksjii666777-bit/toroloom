@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "123456789012",
-    "project_id": "toroloom-dummy-project",
-    "storage_bucket": "toroloom-dummy-project.appspot.com"
+    "project_number": "998795844306",
+    "project_id": "toroloom",
+    "storage_bucket": "toroloom.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789012:android:abc123xyz456789",
+        "mobilesdk_app_id": "1:998795844306:android:7852f5c47bcdb3bba22b0b",
         "android_client_info": {
           "package_name": "com.anonymous.Toroloom"
         }
@@ -15,12 +15,12 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDummyKey-FakeFirebaseTokenForTesting"
+          "current_key": "AIzaSyA761K-7KrKH8S0Amw4EhNKdWCILoXUnfY"
         }
       ],
       "services": {
         "appinvite_service": {
-          "status": 1
+          "other_platform_oauth_client": []
         }
       }
     }

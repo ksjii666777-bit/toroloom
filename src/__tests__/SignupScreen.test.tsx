@@ -213,3 +213,118 @@ describe('SignupScreen — Navigation', () => {
     expect(mockGoBack).not.toHaveBeenCalled();
   });
 });
+
+describe('SignupScreen — Referral from Deep Link', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    mockGoBack.mockClear();
+    mockSignup.mockClear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('passes route.params.ref to signup when provided via deep link', () => {
+    const { getByText, getByPlaceholderText } = render(
+      <SignupScreen
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+        route={{ params: { ref: 'friend123' } }}
+      />
+    );
+    advanceAndRender(500);
+
+    // Fill in all form fields to bypass validation
+    act(() => { fireEvent.changeText(getByPlaceholderText('Enter your full name'), 'John Doe'); });
+    act(() => { fireEvent.changeText(getByPlaceholderText('Enter your email'), 'john@example.com'); });
+    act(() => { fireEvent.changeText(getByPlaceholderText('Enter your phone number'), '1234567890'); });
+    act(() => { fireEvent.changeText(getByPlaceholderText('Create a strong password'), 'password123'); });
+    act(() => { fireEvent.changeText(getByPlaceholderText('Re-enter your password'), 'password123'); });
+
+    // Submit the form
+    act(() => { fireEvent.press(getByText('Create Account')); });
+
+    // Referral source is passed as the 5th argument to signup
+    expect(mockSignup).toHaveBeenCalledWith(
+      'John Doe', 'john@example.com', '1234567890', 'password123', 'friend123'
+    );
+  });
+
+  it('passes undefined referralSource when route.params.ref is not provided', () => {
+    const { getByText, getByPlaceholderText } = render(
+      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+    );
+    advanceAndRender(500);
+
+    act(() => { fireEvent.changeText(getByPlaceholderText('Enter your full name'), 'Jane Doe'); });
+    act(() => { fireEvent.changeText(getByPlaceholderText('Enter your email'), 'jane@example.com'); });
+    act(() => { fireEvent.changeText(getByPlaceholderText('Enter your phone number'), '9876543210'); });
+    act(() => { fireEvent.changeText(getByPlaceholderText('Create a strong password'), 'secure123'); });
+    act(() => { fireEvent.changeText(getByPlaceholderText('Re-enter your password'), 'secure123'); });
+
+    act(() => { fireEvent.press(getByText('Create Account')); });
+
+    expect(mockSignup).toHaveBeenCalledWith(
+      'Jane Doe', 'jane@example.com', '9876543210', 'secure123', undefined
+    );
+  });
+
+  it('does not call signup when fields are empty even with a ref param', () => {
+    const { getByText } = render(
+      <SignupScreen
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+        route={{ params: { ref: 'testRef' } }}
+      />
+    );
+    advanceAndRender(500);
+
+    act(() => { fireEvent.press(getByText('Create Account')); });
+
+    expect(mockSignup).not.toHaveBeenCalled();
+  });
+
+  it('renders the referral badge with the ref value when route.params.ref is provided', () => {
+    const { getByText } = render(
+      <SignupScreen
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+        route={{ params: { ref: 'friend123' } }}
+      />
+    );
+    advanceAndRender(500);
+
+    // The badge renders "🎉 Referred by friend123" (React Native flattens nested Text)
+    expect(getByText('🎉 Referred by friend123')).toBeDefined();
+  });
+
+  it('renders the referral badge with different ref values', () => {
+    const { getByText } = render(
+      <SignupScreen
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+        route={{ params: { ref: 'partner42' } }}
+      />
+    );
+    advanceAndRender(500);
+
+    expect(getByText('🎉 Referred by partner42')).toBeDefined();
+  });
+
+  it('does not render the referral badge when route.params.ref is not provided', () => {
+    const { queryByText } = render(
+      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+    );
+    advanceAndRender(500);
+
+    // queryByText returns null when element is not found
+    expect(queryByText(/🎉 Referred by/)).toBeNull();
+  });
+
+  it('does not render the referral badge when route.params is undefined', () => {
+    const { queryByText } = render(
+      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} route={{}} />
+    );
+    advanceAndRender(500);
+
+    expect(queryByText(/🎉 Referred by/)).toBeNull();
+  });
+});

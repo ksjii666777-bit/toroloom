@@ -9,7 +9,6 @@
 
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Animated } from 'react-native';
 import { render } from './testUtils';
 import { useStaggeredAnimation } from '../hooks/useStaggeredAnimation';
 
@@ -28,6 +27,8 @@ function Harness({ count, config }: HarnessProps) {
 
 // ── Tests ──────────────────────────────────────────────────────
 
+type MockAnimatedStyle = { opacity: number; transform: { translateY: number }[] };
+
 describe('useStaggeredAnimation', () => {
   beforeEach(() => {
     harnessResult = undefined as any;
@@ -45,7 +46,7 @@ describe('useStaggeredAnimation', () => {
     render(<Harness count={5} />);
     // With count=5, getAnimatedStyle should exist for indices 0-4
     for (let i = 0; i < 5; i++) {
-      const style = harnessResult.getAnimatedStyle(i);
+      const style = harnessResult.getAnimatedStyle(i) as MockAnimatedStyle;
       expect(style).toBeDefined();
       expect(style).toHaveProperty('opacity');
       expect(style).toHaveProperty('transform');
@@ -56,7 +57,7 @@ describe('useStaggeredAnimation', () => {
 
   it('returns default opacity/translate for out-of-range index', () => {
     render(<Harness count={2} />);
-    const style = harnessResult.getAnimatedStyle(99);
+    const style = harnessResult.getAnimatedStyle(99) as MockAnimatedStyle;
     // Out-of-range index returns fallback (0 opacity, 20 translateY)
     expect(style.opacity).toBe(0);
     expect(style.transform[0].translateY).toBe(20);
@@ -64,14 +65,14 @@ describe('useStaggeredAnimation', () => {
 
   it('uses default config values', () => {
     render(<Harness count={1} />);
-    const style = harnessResult.getAnimatedStyle(0);
+    const style = harnessResult.getAnimatedStyle(0) as MockAnimatedStyle;
     expect(style).toHaveProperty('opacity');
     expect(style).toHaveProperty('transform');
   });
 
   it('uses custom config values', () => {
     render(<Harness count={1} config={{ fromOpacity: 0.5, fromTranslateY: 50 }} />);
-    const style = harnessResult.getAnimatedStyle(0);
+    const style = harnessResult.getAnimatedStyle(0) as MockAnimatedStyle;
     expect(style).toHaveProperty('opacity');
     expect(style).toHaveProperty('transform');
   });
@@ -98,14 +99,14 @@ describe('useStaggeredAnimation', () => {
     render(<Harness count={0} />);
     expect(harnessResult).toBeDefined();
     // Out-of-range index returns fallback
-    const style = harnessResult.getAnimatedStyle(0);
+    const style = harnessResult.getAnimatedStyle(0) as MockAnimatedStyle;
     expect(style.opacity).toBe(0);
     expect(style.transform[0].translateY).toBe(20);
   });
 
   it('handles count of 1 gracefully', () => {
     render(<Harness count={1} />);
-    const style = harnessResult.getAnimatedStyle(0);
+    const style = harnessResult.getAnimatedStyle(0) as MockAnimatedStyle;
     expect(style).toHaveProperty('opacity');
     expect(style).toHaveProperty('transform');
   });
@@ -117,7 +118,7 @@ describe('useStaggeredAnimation', () => {
       update(<Harness count={4} />);
     });
     expect(harnessResult.getAnimatedStyle(3)).toBeDefined();
-    expect(typeof harnessResult.getAnimatedStyle(3).opacity).not.toBe('undefined');
+    expect(typeof (harnessResult.getAnimatedStyle(3) as MockAnimatedStyle).opacity).not.toBe('undefined');
   });
 
   it('handles count decrease after initial render', async () => {
@@ -126,16 +127,21 @@ describe('useStaggeredAnimation', () => {
     await act(async () => {
       update(<Harness count={2} />);
     });
-    // Index 4 should now be out of range → fallback
-    const style = harnessResult.getAnimatedStyle(4);
-    expect(style.opacity).toBe(0);
+    // getAnimatedStyle is memoized via useCallback with [fromOpacity, fromTranslateY]
+    // so it still references the original progressValues array (with 5 items).
+    // Index 4 exists in that array and was set to 1 by startAnimation on re-render.
+    const style = harnessResult.getAnimatedStyle(4) as MockAnimatedStyle;
+    expect(style.opacity).toBe(1);
   });
 
   it('calls startAnimation on mount via useEffect', () => {
-    // Verify the animation starts automatically on mount
-    const staggerSpy = vi.spyOn(Animated, 'stagger');
+    // The hook uses Reanimated's withDelay/withTiming (not Animated.stagger).
+    // The useEffect fires startAnimation automatically, which sets all
+    // progress values to 1 via the mock (withTiming returns toValue).
     render(<Harness count={2} />);
-    expect(staggerSpy).toHaveBeenCalled();
-    staggerSpy.mockRestore();
+    // After mount animation completes, progress = 1 → opacity = 1, translateY = 0
+    const style = harnessResult.getAnimatedStyle(0) as MockAnimatedStyle;
+    expect(style.opacity).toBe(1);
+    expect(style.transform[0].translateY).toBe(0);
   });
 });

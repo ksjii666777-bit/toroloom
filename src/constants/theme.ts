@@ -1,148 +1,147 @@
-import { Dimensions } from 'react-native';
+import { Dimensions, Platform } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-export const COLORS = { // dark theme
-  // Primary
-  primary: '#6C63FF',
-  primaryLight: '#8B83FF',
-  primaryDark: '#4A42CC',
-  primaryGradient: ['#6C63FF', '#4834D4'] as const,
+// ─────────────────────────────────────────────────────────────────────────────
+// TOROLOOM — Institutional-Grade Luxury Design System
+// Deep Sapphire Black · Emerald Green · Electric Blue · Crimson Red
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const COLORS = {
+  // Background
+  bg: '#0B0F19',
+  bgSecondary: '#0E121D',
+  bgCard: '#111827',
+  bgCardLight: '#1A2235',
+  bgInput: '#0F131E',
+  bgDark: '#070A11',
+  bgOverlay: 'rgba(7, 10, 17, 0.85)',
+
+  // Brand — Sovereign Premium
+  primary: '#3B82F6',
+  primaryLight: '#60A5FA',
+  primaryDark: '#2563EB',
+  primaryGradient: ['#3B82F6', '#1D4ED8'] as const,
 
   // Secondary
-  secondary: '#FF6B6B',
-  secondaryLight: '#FF8E8E',
-  secondaryGradient: ['#FF6B6B', '#EE5A24'] as const,
+  secondary: '#EF4444',
+  secondaryLight: '#F87171',
+  secondaryGradient: ['#EF4444', '#DC2626'] as const,
 
-  // Accent
-  accent: '#00D2FF',
-  accentLight: '#33DDFF',
-  accentGradient: ['#00D2FF', '#3A7BD5'] as const,
+  // Accent — Emerald for growth
+  accent: '#10B981',
+  accentLight: '#34D399',
+  accentGradient: ['#10B981', '#059669'] as const,
 
   // Success / Risk
-  success: '#00C853',
-  successLight: '#69F0AE',
-  danger: '#FF1744',
-  dangerLight: '#FF5252',
-  warning: '#FFC107',
-  warningLight: '#FFD54F',
+  success: '#10B981',
+  successLight: '#6EE7B7',
+  danger: '#EF4444',
+  dangerLight: '#FCA5A5',
+  warning: '#F59E0B',
+  warningLight: '#FCD34D',
 
   // Market
-  marketUp: '#00C853',
-  marketDown: '#FF1744',
-  marketNeutral: '#FFC107',
-
-  // Background
-  bg: '#0D0D2B',
-  bgSecondary: '#1A1A3E',
-  bgCard: '#222255',
-  bgCardLight: '#2A2A5E',
-  bgInput: '#1E1E4A',
-  bgDark: '#070720',
-  bgOverlay: 'rgba(0,0,0,0.5)',
+  marketUp: '#10B981',
+  marketDown: '#EF4444',
+  marketNeutral: '#F59E0B',
 
   // Text
   text: '#FFFFFF',
-  textSecondary: '#B0B0D0',
-  textMuted: '#6E6E9A',
-  textDark: '#1A1A2E',
+  textSecondary: '#9CA3AF',
+  textMuted: '#6B7280',
+  textDark: '#111827',
   textOnPrimary: '#FFFFFF',
 
-  // UI
-  border: '#2A2A5E',
-  borderLight: '#3A3A7E',
-  divider: '#1E1E4A',
+  // UI — Crisp 1px borders
+  border: '#1F2937',
+  borderLight: '#374151',
+  divider: '#1E293B',
   shadow: '#000000',
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
 
   // Categories
-  tech: '#00D2FF',
-  finance: '#6C63FF',
-  healthcare: '#FF6B6B',
-  energy: '#FFC107',
-  consumer: '#FF9800',
-  industrial: '#4CAF50',
+  tech: '#3B82F6',
+  finance: '#10B981',
+  healthcare: '#EF4444',
+  energy: '#F59E0B',
+  consumer: '#8B5CF6',
+  industrial: '#06B6D4',
 };
 
 export const LIGHT_COLORS = {
-  // Primary - same brand colors
-  primary: '#6C63FF',
-  primaryLight: '#8B83FF',
-  primaryDark: '#4A42CC',
-  primaryGradient: ['#6C63FF', '#4834D4'] as const,
+  primary: '#3B82F6',
+  primaryLight: '#60A5FA',
+  primaryDark: '#2563EB',
+  primaryGradient: ['#3B82F6', '#1D4ED8'] as const,
 
-  // Secondary
-  secondary: '#FF6B6B',
-  secondaryLight: '#FF8E8E',
-  secondaryGradient: ['#FF6B6B', '#EE5A24'] as const,
+  secondary: '#EF4444',
+  secondaryLight: '#F87171',
+  secondaryGradient: ['#EF4444', '#DC2626'] as const,
 
-  // Accent
-  accent: '#00D2FF',
-  accentLight: '#33DDFF',
-  accentGradient: ['#00D2FF', '#3A7BD5'] as const,
+  accent: '#10B981',
+  accentLight: '#34D399',
+  accentGradient: ['#10B981', '#059669'] as const,
 
-  // Success / Risk
-  success: '#00C853',
-  successLight: '#69F0AE',
-  danger: '#FF1744',
-  dangerLight: '#FF5252',
-  warning: '#FFC107',
-  warningLight: '#FFD54F',
+  success: '#10B981',
+  successLight: '#6EE7B7',
+  danger: '#EF4444',
+  dangerLight: '#FCA5A5',
+  warning: '#F59E0B',
+  warningLight: '#FCD34D',
 
-  // Market
-  marketUp: '#00C853',
-  marketDown: '#FF1744',
-  marketNeutral: '#FFC107',
+  marketUp: '#10B981',
+  marketDown: '#EF4444',
+  marketNeutral: '#F59E0B',
 
-  // Background - Light mode
-  bg: '#F4F5FA',
+  // Background — Light mode
+  bg: '#F8FAFC',
   bgSecondary: '#FFFFFF',
   bgCard: '#FFFFFF',
-  bgCardLight: '#F0F2F8',
-  bgInput: '#F0F2F8',
-  bgDark: '#E8EAF0',
-  bgOverlay: 'rgba(0,0,0,0.3)',
+  bgCardLight: '#F1F5F9',
+  bgInput: '#F1F5F9',
+  bgDark: '#E2E8F0',
+  bgOverlay: 'rgba(15, 23, 42, 0.3)',
 
-  // Text - Dark on light bg
-  text: '#1A1A2E',
-  textSecondary: '#5A5A7A',
-  textMuted: '#9A9AB0',
-  textDark: '#1A1A2E',
+  text: '#0F172A',
+  textSecondary: '#475569',
+  textMuted: '#94A3B8',
+  textDark: '#0F172A',
   textOnPrimary: '#FFFFFF',
 
-  // UI
-  border: '#E0E0F0',
-  borderLight: '#D0D0E8',
-  divider: '#E8E8F0',
-  shadow: '#1A1A2E',
+  border: '#E2E8F0',
+  borderLight: '#CBD5E1',
+  divider: '#E2E8F0',
+  shadow: '#0F172A',
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
 
-  // Categories
-  tech: '#00D2FF',
-  finance: '#6C63FF',
-  healthcare: '#FF6B6B',
-  energy: '#FFC107',
-  consumer: '#FF9800',
-  industrial: '#4CAF50',
+  tech: '#3B82F6',
+  finance: '#10B981',
+  healthcare: '#EF4444',
+  energy: '#F59E0B',
+  consumer: '#8B5CF6',
+  industrial: '#06B6D4',
 };
 
 export type ThemeColors = typeof COLORS;
 
 export const GRADIENTS = {
-  primary: ['#6C63FF', '#4834D4'] as const,
-  secondary: ['#FF6B6B', '#EE5A24'] as const,
-  accent: ['#00D2FF', '#3A7BD5'] as const,
-  success: ['#00C853', '#009624'] as const,
-  danger: ['#FF1744', '#D50000'] as const,
-  warning: ['#FFC107', '#FF8F00'] as const,
-  card: ['#222255', '#1A1A3E'] as const,
-  gold: ['#FFD700', '#FFA000'] as const,
-  midnight: ['#0D0D2B', '#1A1A3E'] as const,
-  purple: ['#6C63FF', '#9C27B0'] as const,
+  primary: ['#3B82F6', '#1D4ED8'] as const,
+  secondary: ['#EF4444', '#DC2626'] as const,
+  accent: ['#10B981', '#059669'] as const,
+  success: ['#10B981', '#047857'] as const,
+  danger: ['#EF4444', '#B91C1C'] as const,
+  warning: ['#F59E0B', '#D97706'] as const,
+  card: ['#111827', '#0E121D'] as const,
+  gold: ['#F59E0B', '#D97706'] as const,
+  midnight: ['#0B0F19', '#111827'] as const,
+  purple: ['#8B5CF6', '#6D28D9'] as const,
+  emerald: ['#10B981', '#047857'] as const,
+  electric: ['#3B82F6', '#6366F1'] as const,
 };
 
 export const SPACING = {
@@ -156,15 +155,18 @@ export const SPACING = {
   huge: 48,
 };
 
+// Unified geometric typography with Inter font family + explicit tracking and line-height
+// Fonts are loaded asynchronously via @expo-google-fonts/inter in App.tsx (useLoadFonts hook).
 export const FONTS = {
-  thin: { fontFamily: 'System', fontWeight: '100' as const },
-  light: { fontFamily: 'System', fontWeight: '300' as const },
-  regular: { fontFamily: 'System', fontWeight: '400' as const },
-  medium: { fontFamily: 'System', fontWeight: '500' as const },
-  semiBold: { fontFamily: 'System', fontWeight: '600' as const },
-  bold: { fontFamily: 'System', fontWeight: '700' as const },
-  extraBold: { fontFamily: 'System', fontWeight: '800' as const },
-  black: { fontFamily: 'System', fontWeight: '900' as const },
+  thin: { fontFamily: 'Inter-Thin', fontWeight: '100' as const, letterSpacing: 0.5 },
+  light: { fontFamily: 'Inter-Light', fontWeight: '300' as const, letterSpacing: 0.3 },
+  regular: { fontFamily: 'Inter-Regular', fontWeight: '400' as const, letterSpacing: 0.2 },
+  medium: { fontFamily: 'Inter-Medium', fontWeight: '500' as const, letterSpacing: 0.15 },
+  semiBold: { fontFamily: 'Inter-SemiBold', fontWeight: '600' as const, letterSpacing: 0.1 },
+  bold: { fontFamily: 'Inter-Bold', fontWeight: '700' as const, letterSpacing: 0.05 },
+  extraBold: { fontFamily: 'Inter-ExtraBold', fontWeight: '800' as const, letterSpacing: 0 },
+  black: { fontFamily: 'Inter-Black', fontWeight: '900' as const, letterSpacing: -0.5 },
+  mono: { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', fontWeight: '400' as const, letterSpacing: 0 },
   size: {
     xs: 10,
     sm: 12,
@@ -179,23 +181,33 @@ export const FONTS = {
   },
 };
 
+export const LINE_HEIGHTS = {
+  tight: 1.15,
+  normal: 1.4,
+  relaxed: 1.6,
+};
+
 export const SHADOWS = {
   small: {
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.25)',
-    elevation: 3,
+    boxShadow: '0px 1px 2px rgba(0,0,0,0.3)',
+    elevation: 2,
   },
   medium: {
-    boxShadow: '0px 4px 8px rgba(0,0,0,0.30)',
+    boxShadow: '0px 4px 8px rgba(0,0,0,0.4)',
     elevation: 5,
   },
   large: {
-    boxShadow: '0px 8px 16px rgba(0,0,0,0.35)',
+    boxShadow: '0px 8px 24px rgba(0,0,0,0.5)',
     elevation: 8,
   },
   glow: (color: string) => ({
-    boxShadow: `0px 0px 20px ${color}80`,
+    boxShadow: `0px 0px 20px ${color}40`,
     elevation: 6,
   }),
+  inner: {
+    boxShadow: 'inset 0px 2px 4px rgba(0,0,0,0.2)',
+    elevation: 0,
+  },
 };
 
 export const BORDER_RADIUS = {
