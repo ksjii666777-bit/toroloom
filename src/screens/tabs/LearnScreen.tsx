@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, RefreshControl, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, RefreshControl } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -31,13 +32,13 @@ export default function LearnScreen({ navigation }: any) {
   }, []);
 
   const continueCourses = courses.filter(c => c.progress > 0 && c.progress < 100);
-  const { getAnimatedStyle: getContinueStyle } = useStaggeredAnimation(continueCourses.length, {
+  const { animatedStyles: continueStyles } = useStaggeredAnimation(continueCourses.length, {
     initialDelay: 150,
     staggerDelay: 100,
     duration: 400,
   });
 
-  const { getAnimatedStyle: getCourseStyle } = useStaggeredAnimation(courses.length, {
+  const { animatedStyles: courseStyles } = useStaggeredAnimation(courses.length, {
     initialDelay: 200,
     staggerDelay: 80,
     duration: 450,
@@ -107,7 +108,7 @@ export default function LearnScreen({ navigation }: any) {
             <Text style={styles.sectionTitle}>Continue Learning</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {continueCourses.map((course, i) => (
-                <Animated.View key={course.id} style={getContinueStyle(i)}>
+                <Animated.View key={course.id} style={continueStyles[i]}>
                   <AnimatedPressable
                     onPress={() => navigation.navigate('CourseDetail', { courseId: course.id, course })}
                     haptic="light"
@@ -133,7 +134,7 @@ export default function LearnScreen({ navigation }: any) {
           <Text style={styles.sectionTitle}>All Courses</Text>
           <View style={styles.coursesGrid}>
             {courses.map((course, i) => (
-              <Animated.View key={course.id} style={getCourseStyle(i)}>
+              <Animated.View key={course.id} style={courseStyles[i]}>
                 <AnimatedPressable
                   onPress={() => navigation.navigate('CourseDetail', { courseId: course.id, course })}
                   haptic="selection"

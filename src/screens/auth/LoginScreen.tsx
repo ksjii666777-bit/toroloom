@@ -59,7 +59,10 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         </View>
 
         {/* Login Form */}
-        <View style={styles.formSection}>
+        <View
+          accessibilityRole={'form' as any}
+          style={styles.formSection}
+        >
           <Text style={styles.welcomeBack}>Welcome Back! 👋</Text>
           <Text style={styles.subtitle}>Log in to your account</Text>
 
@@ -78,6 +81,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             icon="mail-outline"
             keyboardType="email-address"
             autoCapitalize="none"
+            id="login-email"
+            name="email"
           />
 
           <Input
@@ -87,6 +92,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             onChangeText={setPassword}
             secureTextEntry
             icon="lock-closed-outline"
+            id="login-password"
+            name="password"
+            onSubmitEditing={handleLogin}
           />
 
           <TouchableOpacity style={styles.forgotPassword}>

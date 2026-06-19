@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
-  Animated,
   Alert,
   Keyboard,
   TouchableWithoutFeedback,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -152,7 +152,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
   }, [tradeType]);
 
   // Staggered animation for order detail cards
-  const { getAnimatedStyle: getDetailStyle } = useStaggeredAnimation(1, {
+  const { animatedStyles: detailStyles } = useStaggeredAnimation(1, {
     initialDelay: 100,
     staggerDelay: 60,
     duration: 350,
@@ -439,7 +439,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
 
         {/* Order Summary Card */}
         {qtyNum > 0 && (
-          <Animated.View style={[getDetailStyle(0), styles.summaryCard]}>
+          <Animated.View style={[detailStyles[0], styles.summaryCard]}>
             <Text style={styles.summaryCardTitle}>Order Summary</Text>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Order Type</Text>

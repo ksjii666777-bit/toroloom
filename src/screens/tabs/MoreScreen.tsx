@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -76,22 +77,19 @@ export default function MoreScreen({ navigation }: any) {
     setTimeout(() => setRefreshing(false), 1500);
   }, []);
 
-  const { getAnimatedStyle: getQaStyle } = useStaggeredAnimation(quickActions.length, {
+  const { animatedStyles: qaStyles } = useStaggeredAnimation(quickActions.length, {
     initialDelay: 100,
     staggerDelay: 80,
     duration: 400,
   });
 
-  const { getAnimatedStyle: getMenuSectionStyle } = useStaggeredAnimation(menuItems.length, {
+  const { animatedStyles: menuSectionStyles } = useStaggeredAnimation(menuItems.length, {
     initialDelay: 150,
     staggerDelay: 120,
     duration: 450,
   });
 
-  // Use a fixed count to avoid violating React's Rules of Hooks —
-  // useStaggeredAnimation creates useSharedValue hooks per count, and
-  // if badges.length changes between renders, the hook count changes.
-  const { getAnimatedStyle: getBadgeStyle } = useStaggeredAnimation(BADGE_DISPLAY_COUNT, {
+  const { animatedStyles: badgeStyles } = useStaggeredAnimation(BADGE_DISPLAY_COUNT, {
     initialDelay: 200,
     staggerDelay: 40,
     duration: 300,
@@ -195,7 +193,8 @@ export default function MoreScreen({ navigation }: any) {
         {/* Quick Actions */}
         <View style={styles.quickActionsRow}>
           {quickActions.map((action, i) => (
-            <Animated.View key={i} style={getQaStyle(i)}>
+            <Animated.View key={i} style={qaStyles[i]}>
+
               <AnimatedPressable onPress={() => handleQuickAction(action.label)} haptic="light" scaleTo={0.92}>
                 <View style={styles.quickActionWrapper}>
                   <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
@@ -232,7 +231,8 @@ export default function MoreScreen({ navigation }: any) {
 
         {/* Menu Sections */}
         {menuItems.map((section, idx) => (
-          <Animated.View key={idx} style={[styles.menuSection, getMenuSectionStyle(idx)]}>
+          <Animated.View key={idx} style={[styles.menuSection, menuSectionStyles[idx]]}>
+
             <Text style={styles.menuSectionTitle}>{section.section}</Text>
             <View style={styles.menuGrid}>
               {section.items.map((item, i) => (
@@ -278,7 +278,8 @@ export default function MoreScreen({ navigation }: any) {
           <Card title="Achievements" subtitle={`${unlockedCount}/${badges.length} unlocked`}>
             <View style={styles.badgesGrid}>
               {badges.slice(0, BADGE_DISPLAY_COUNT).map((badge, i) => (
-                <Animated.View key={badge.id} style={getBadgeStyle(i)}>
+                <Animated.View key={badge.id} style={badgeStyles[i]}>
+
                   <View style={[styles.badgeItem, !badge.unlocked && styles.badgeLocked]}>
                     <Text style={styles.badgeIcon}>{badge.icon}</Text>
                     {!badge.unlocked && (

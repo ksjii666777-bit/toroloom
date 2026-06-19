@@ -17,6 +17,21 @@ interface InputProps {
   style?: ViewStyle;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   testID?: string;
+  /**
+   * HTML `id` attribute — React Native Web passes this to the underlying DOM input.
+   * Fixes browser a11y warning: "A form field element should have an id or name attribute"
+   */
+  id?: string;
+  /**
+   * HTML `name` attribute — React Native Web passes this to the underlying DOM input.
+   * Fixes browser a11y warning: "A form field element should have an id or name attribute"
+   */
+  name?: string;
+  /**
+   * Called when the user presses the submit/return key (web & iOS).
+   * Use on the last field of a form to trigger submission on Enter.
+   */
+  onSubmitEditing?: () => void;
 }
 
 export default function Input({
@@ -32,6 +47,9 @@ export default function Input({
   style,
   autoCapitalize = 'none',
   testID,
+  id,
+  name,
+  onSubmitEditing,
 }: InputProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -92,6 +110,9 @@ export default function Input({
           testID={testID}
           selectionColor={colors.primary}
           cursorColor={colors.primary}
+          onSubmitEditing={onSubmitEditing}
+          returnKeyType={onSubmitEditing ? 'go' : 'default'}
+          {...({ id, name } as any)}
         />
         {secureTextEntry && (
           <Ionicons

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Dimensions, RefreshControl, Animated, Keyboard, Platform } from 'react-native';
+import ReanimatedAnimated from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useMarketStore } from '../../store/marketStore';
@@ -61,7 +62,7 @@ export default function MarketsScreen({ navigation }: any) {
     }));
   }, [stocks]);
 
-  const { getAnimatedStyle: getStockStyle } = useStaggeredAnimation(filteredStocks.length, {
+  const { animatedStyles: stockStyles } = useStaggeredAnimation(filteredStocks.length, {
     initialDelay: 150,
     staggerDelay: 50,
     duration: 350,
@@ -122,7 +123,7 @@ export default function MarketsScreen({ navigation }: any) {
   }, [setSearchQuery]);
 
   // Sector chip entrance stagger
-  const { getAnimatedStyle: getSectorStyle } = useStaggeredAnimation(SECTORS.length, {
+  const { animatedStyles: sectorStyles } = useStaggeredAnimation(SECTORS.length, {
     initialDelay: 100,
     staggerDelay: 30,
     duration: 300,
@@ -344,7 +345,7 @@ export default function MarketsScreen({ navigation }: any) {
             contentContainerStyle={styles.sectorContent}
           >
             {SECTORS.map((sector, i) => (
-              <Animated.View key={sector} style={getSectorStyle(i)}>
+              <ReanimatedAnimated.View key={sector} style={sectorStyles[i]}>
                 <AnimatedPressable
                   onPress={() => setSelectedSector(sector)}
                   haptic="selection"
@@ -359,7 +360,7 @@ export default function MarketsScreen({ navigation }: any) {
                     </Text>
                   </View>
                 </AnimatedPressable>
-              </Animated.View>
+              </ReanimatedAnimated.View>
             ))}
           </ScrollView>
         )}
@@ -373,14 +374,14 @@ export default function MarketsScreen({ navigation }: any) {
             <Text style={styles.listCount}>{filteredStocks.length} stocks</Text>
           </View>
           {filteredStocks.map((stock, i) => (
-            <Animated.View key={stock.id} style={getStockStyle(i)}>
+            <ReanimatedAnimated.View key={stock.id} style={stockStyles[i]}>
               <StockItem
                 stock={stock}
                 onPress={(s) => navigation.navigate('StockDetail', { stockId: s.id, symbol: s.symbol })}
                 showActions
                 isInWatchlist={false}
               />
-            </Animated.View>
+            </ReanimatedAnimated.View>
           ))}
         </View>
 

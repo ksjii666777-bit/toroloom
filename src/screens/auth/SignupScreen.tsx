@@ -80,7 +80,10 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
         )}
 
         {/* Form */}
-        <View style={styles.form}>
+        <View
+          accessibilityRole={'form' as any}
+          style={styles.form}
+        >
           {error && (
             <View style={styles.errorBox}>
               <Ionicons name="alert-circle" size={16} color={colors.danger} />
@@ -95,6 +98,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             onChangeText={setName}
             icon="person-outline"
             autoCapitalize="words"
+            id="signup-name"
+            name="name"
           />
 
           <Input
@@ -105,6 +110,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             icon="mail-outline"
             keyboardType="email-address"
             autoCapitalize="none"
+            id="signup-email"
+            name="email"
           />
 
           <Input
@@ -114,6 +121,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             onChangeText={setPhone}
             icon="call-outline"
             keyboardType="phone-pad"
+            id="signup-phone"
+            name="phone"
           />
 
           <Input
@@ -123,6 +132,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             onChangeText={setPassword}
             secureTextEntry
             icon="lock-closed-outline"
+            id="signup-password"
+            name="password"
           />
 
           <Input
@@ -132,6 +143,9 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             onChangeText={setConfirmPassword}
             secureTextEntry
             icon="lock-closed-outline"
+            id="signup-confirm-password"
+            name="confirmPassword"
+            onSubmitEditing={handleSignup}
           />
 
           {/* Terms */}

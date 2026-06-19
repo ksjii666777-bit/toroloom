@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TextInput, RefreshControl,
-  Animated, TouchableOpacity, Modal, Dimensions, Alert,
+  TouchableOpacity, Modal, Dimensions, Alert,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -258,13 +259,13 @@ export default function WatchlistScreen({ navigation }: any) {
 
   const availableStocks = stocks.filter(s => !isStockInWatchlist(s.id));
 
-  const { getAnimatedStyle: getWatchlistStyle } = useStaggeredAnimation(sortedStocks.length, {
+  const { animatedStyles: watchlistStyles } = useStaggeredAnimation(sortedStocks.length, {
     initialDelay: 150,
     staggerDelay: 70,
     duration: 400,
   });
 
-  const { getAnimatedStyle: getSuggestedStyle } = useStaggeredAnimation(Math.min(availableStocks.length, 5), {
+  const { animatedStyles: suggestedStyles } = useStaggeredAnimation(Math.min(availableStocks.length, 5), {
     initialDelay: 300,
     staggerDelay: 60,
     duration: 350,
@@ -735,7 +736,7 @@ export default function WatchlistScreen({ navigation }: any) {
                   ? combinedStocks.find(e => e.stock.id === stock.id)?.sources || []
                   : [];
                 return (
-                  <Animated.View key={stock.id} style={getWatchlistStyle(i)}>
+                  <Animated.View key={stock.id} style={watchlistStyles[i]}>
                     <StockItem
                       stock={stock}
                       onPress={(s) => navigation.navigate('StockDetail', { stockId: s.id, symbol: s.symbol })}
@@ -832,7 +833,7 @@ export default function WatchlistScreen({ navigation }: any) {
                   <Text style={styles.suggestedSub}>Tap + to add to watchlist</Text>
                 </View>
                 {availableStocks.slice(0, 5).map((stock, i) => (
-                  <Animated.View key={stock.id} style={getSuggestedStyle(i)}>
+                  <Animated.View key={stock.id} style={suggestedStyles[i]}>
                     <View style={styles.suggestedItem}>
                       <View style={{ flex: 1 }}>
                         <StockItem

@@ -26,11 +26,11 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
-  Animated,
   Alert,
   Modal,
   Share,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ExpoSharing from 'expo-sharing';
 import { writeAsStringAsync, cacheDirectory, EncodingType } from 'expo-file-system/legacy';
@@ -46,6 +46,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 
 const { width } = Dimensions.get('window');
+
 
 const SECTORS = ['All', 'Technology', 'Finance', 'Energy', 'Consumer', 'Automobile', 'Telecom'];
 const MARKET_CAP_OPTIONS = [
@@ -664,7 +665,7 @@ export default function StockScreenerScreen({ navigation }: any) {
     });
   }, [stocks, priceMinStr, priceMaxStr, peMinStr, peMaxStr, dividendStr, dayChangeMinStr, dayChangeMaxStr, screenerFilters.sector, screenerFilters.marketCapCategory]);
 
-  const { getAnimatedStyle: getResultStyle } = useStaggeredAnimation(screenerResults.length, {
+  const { animatedStyles: resultStyles } = useStaggeredAnimation(screenerResults.length, {
     initialDelay: 100,
     staggerDelay: 50,
     duration: 350,
@@ -1061,7 +1062,7 @@ export default function StockScreenerScreen({ navigation }: any) {
               </View>
             </View>
             {sortedResults.map((stock, i) => (
-              <Animated.View key={stock.id} style={getResultStyle(i)}>
+              <Animated.View key={stock.id} style={resultStyles[i]}>
                 <StockItem
                   stock={stock}
                   onPress={(s) => navigation.navigate('StockDetail', { stockId: s.id, symbol: s.symbol })}
@@ -1168,30 +1169,30 @@ export default function StockScreenerScreen({ navigation }: any) {
                     <Text style={[sExport.optionTitle, { color: colors.text }]}>Export as CSV</Text>
                     <Text style={[sExport.optionDesc, { color: colors.textMuted }]}>Download a .csv file with all stock data</Text>
                   </View>
-                  {isExporting === 'csv' ? (
-                    <Animated.Text style={{ color: colors.primary, fontSize: 12 }}>Exporting…</Animated.Text>
-                  ) : (
-                    <Ionicons name="download-outline" size={20} color={colors.textMuted} />
-                  )}
-                </TouchableOpacity>
+          {isExporting === 'csv' ? (
+            <Animated.Text style={{ color: colors.primary, fontSize: 12 }}>Exporting…</Animated.Text>
+          ) : (
+            <Ionicons name="download-outline" size={20} color={colors.textMuted} />
+          )}
+        </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[sExport.option, { borderColor: colors.border }]}
-                  onPress={handleExportText}
-                  disabled={isExporting !== null}
-                >
-                  <View style={[sExport.optionIconWrap, { backgroundColor: colors.accent + '15' }]}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.accent} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[sExport.optionTitle, { color: colors.text }]}>Share as Text</Text>
-                    <Text style={[sExport.optionDesc, { color: colors.textMuted }]}>Send formatted results via messaging apps</Text>
-                  </View>
-                  {isExporting === 'text' ? (
-                    <Animated.Text style={{ color: colors.accent, fontSize: 12 }}>Sharing…</Animated.Text>
-                  ) : (
-                    <Ionicons name="share-social-outline" size={20} color={colors.textMuted} />
-                  )}
+        <TouchableOpacity
+          style={[sExport.option, { borderColor: colors.border }]}
+          onPress={handleExportText}
+          disabled={isExporting !== null}
+        >
+          <View style={[sExport.optionIconWrap, { backgroundColor: colors.accent + '15' }]}>
+            <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.accent} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[sExport.optionTitle, { color: colors.text }]}>Share as Text</Text>
+            <Text style={[sExport.optionDesc, { color: colors.textMuted }]}>Send formatted results via messaging apps</Text>
+          </View>
+          {isExporting === 'text' ? (
+            <Animated.Text style={{ color: colors.accent, fontSize: 12 }}>Sharing…</Animated.Text>
+          ) : (
+            <Ionicons name="share-social-outline" size={20} color={colors.textMuted} />
+          )}
                 </TouchableOpacity>
 
                 <TouchableOpacity

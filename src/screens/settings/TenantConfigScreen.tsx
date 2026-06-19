@@ -212,6 +212,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
+            {...({ id: 'tenant-id', name: 'tenantId' } as any)}
           />
 
           <Text style={styles.fieldLabel}>Tenant Name</Text>
@@ -221,6 +222,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             onChangeText={setName}
             placeholder="e.g. BrokerX"
             placeholderTextColor={colors.textMuted}
+            {...({ id: 'tenant-name', name: 'tenantName' } as any)}
           />
 
           <Text style={styles.fieldLabel}>Domain</Text>
@@ -232,6 +234,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
+            {...({ id: 'tenant-domain', name: 'domain' } as any)}
           />
 
           <Text style={styles.fieldLabel}>Primary Color (hex)</Text>
@@ -242,6 +245,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             placeholder="e.g. #FF6600"
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
+            {...({ id: 'tenant-primary-color', name: 'primaryColor' } as any)}
           />
         </Card>
 
@@ -348,6 +352,7 @@ export default function TenantConfigScreen({ navigation }: any) {
                       placeholder={String(plan.price)}
                       placeholderTextColor={colors.textMuted}
                       keyboardType="numeric"
+                      {...({ id: `pricing-${plan.id}-monthly`, name: `${plan.id}_monthly` } as any)}
                     />
                   </View>
                   <View style={styles.pricingField}>
@@ -364,6 +369,7 @@ export default function TenantConfigScreen({ navigation }: any) {
                       placeholder={String(plan.priceYearly)}
                       placeholderTextColor={colors.textMuted}
                       keyboardType="numeric"
+                      {...({ id: `pricing-${plan.id}-yearly`, name: `${plan.id}_yearly` } as any)}
                     />
                   </View>
                 </View>
@@ -388,6 +394,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
+            {...({ id: 'tenant-razorpay-key-id', name: 'razorpayKeyId' } as any)}
           />
 
           <Text style={styles.fieldLabel}>Key Secret</Text>
@@ -400,6 +407,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             autoCapitalize="none"
             autoCorrect={false}
             secureTextEntry
+            {...({ id: 'tenant-razorpay-key-secret', name: 'razorpayKeySecret' } as any)}
           />
         </Card>
 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Animated } from 'react-native';
+import ReanimatedAnimated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -47,12 +48,12 @@ export default function PortfolioScreen({ navigation }: any) {
   const [chartTimeframe, setChartTimeframe] = useState('1Y');
   const holdingsCount = holdings.length;
   const winningCount = holdings.filter(h => h.pnl > 0).length;
-  const { getAnimatedStyle: getHoldingsStyle } = useStaggeredAnimation(holdingsCount, {
+  const { animatedStyles: holdingsStyles } = useStaggeredAnimation(holdingsCount, {
     initialDelay: 200,
     staggerDelay: 70,
     duration: 400,
   });
-  const { getAnimatedStyle: getTradesStyle } = useStaggeredAnimation(trades.length, {
+  const { animatedStyles: tradesStyles } = useStaggeredAnimation(trades.length, {
     initialDelay: 200,
     staggerDelay: 50,
     duration: 350,
@@ -212,12 +213,12 @@ export default function PortfolioScreen({ navigation }: any) {
           {view === 'holdings' ? (
             holdings.length > 0 ? (
               holdings.map((holding, i) => (
-                <Animated.View key={holding.id} style={getHoldingsStyle(i)}>
+                <ReanimatedAnimated.View key={holding.id} style={holdingsStyles[i]}>
                   <PortfolioHolding
                     holding={holding}
                     onPress={(h) => navigation.navigate('StockDetail', { stockId: h.stockId, symbol: h.symbol })}
                   />
-                </Animated.View>
+                </ReanimatedAnimated.View>
               ))
             ) : (
               <Card>
@@ -238,7 +239,7 @@ export default function PortfolioScreen({ navigation }: any) {
             )
           ) : (
             trades.map((trade, i) => (
-              <Animated.View key={trade.id} style={getTradesStyle(i)}>
+              <ReanimatedAnimated.View key={trade.id} style={tradesStyles[i]}>
                 <AnimatedPressable
                   onPress={() => navigation.navigate('StockDetail', { stockId: trade.stockId, symbol: trade.symbol })}
                   haptic="selection"
@@ -262,7 +263,7 @@ export default function PortfolioScreen({ navigation }: any) {
                     </View>
                   </View>
                 </AnimatedPressable>
-              </Animated.View>
+              </ReanimatedAnimated.View>
             ))
           )}
         </View>

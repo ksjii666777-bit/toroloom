@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Animated } from 'react-native';
+import ReanimatedAnimated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -101,7 +102,7 @@ export default function HomeScreen({ navigation }: any) {
   const topLosers = [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 3);
 
   const sectionCount = 9;
-  const { getAnimatedStyle: getSectionStyle } = useStaggeredAnimation(sectionCount, {
+  const { animatedStyles: sectionStyles } = useStaggeredAnimation(sectionCount, {
     initialDelay: 200,
     staggerDelay: 120,
     duration: 500,
@@ -269,7 +270,7 @@ export default function HomeScreen({ navigation }: any) {
         </LinearGradient>
 
         {/* Market Breadth */}
-        <Animated.View style={[styles.section, getSectionStyle(0)]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[0]]}>
           <View style={styles.marketBreadthRow}>
             <View style={[styles.breadthCard, { borderColor: colors.border }]}>
               <Ionicons name="arrow-up-circle" size={18} color="#00C853" />
@@ -294,10 +295,10 @@ export default function HomeScreen({ navigation }: any) {
               </Text>
             </View>
           </View>
-        </Animated.View>
+        </ReanimatedAnimated.View>
 
         {/* Market Indices */}
-        <Animated.View style={[styles.section, getSectionStyle(0)]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[0]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Market Indices</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -309,11 +310,11 @@ export default function HomeScreen({ navigation }: any) {
               <MarketCard key={index.id} index={index} />
             ))}
           </ScrollView>
-        </Animated.View>
+        </ReanimatedAnimated.View>
 
         {/* AI Market Insight */}
         {topInsight && (
-          <Animated.View style={[styles.section, getSectionStyle(1)]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[1]]}>
             <Card animated animationDelay={500}>
               <View style={styles.aiInsightHeader}>
                 <View style={styles.aiInsightLeft}>
@@ -348,11 +349,11 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={[styles.aiCtaText, { color: colors.primary }]}>View Full Analysis →</Text>
               </TouchableOpacity>
             </Card>
-          </Animated.View>
+          </ReanimatedAnimated.View>
         )}
 
         {/* Level & XP */}
-        <Animated.View style={[styles.section, getSectionStyle(2)]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[2]]}>
           <Card animated animationDelay={400}>
             <View style={styles.levelRow}>
               <View style={styles.levelInfo}>
@@ -376,11 +377,11 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.moreBadges}>+{badges.filter(b => !b.unlocked).length} more</Text>
             </View>
           </Card>
-        </Animated.View>
+        </ReanimatedAnimated.View>
 
         {/* Top Holdings */}
         {topHoldings.length > 0 && (
-          <Animated.View style={[styles.section, getSectionStyle(3)]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[3]]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Top Holdings 📊</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Portfolio')}>
@@ -418,11 +419,11 @@ export default function HomeScreen({ navigation }: any) {
                 </TouchableOpacity>
               );
             })}
-          </Animated.View>
+          </ReanimatedAnimated.View>
         )}
 
         {/* Top Gainers */}
-        <Animated.View style={[styles.section, getSectionStyle(4)]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[4]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Gainers 🔥</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -436,10 +437,10 @@ export default function HomeScreen({ navigation }: any) {
               onPress={(s) => navigation.navigate('StockDetail', { stockId: s.id, symbol: s.symbol })}
             />
           ))}
-        </Animated.View>
+        </ReanimatedAnimated.View>
 
         {/* Top Losers */}
-        <Animated.View style={[styles.section, getSectionStyle(5)]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[5]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Losers 📉</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -453,11 +454,11 @@ export default function HomeScreen({ navigation }: any) {
               onPress={(s) => navigation.navigate('StockDetail', { stockId: s.id, symbol: s.symbol })}
             />
           ))}
-        </Animated.View>
+        </ReanimatedAnimated.View>
 
         {/* Recent Trades */}
         {recentTrades.length > 0 && (
-          <Animated.View style={[styles.section, getSectionStyle(6)]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[6]]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Recent Activity 📋</Text>
               <TouchableOpacity onPress={() => navigation.navigate('TradeHistory')}>
@@ -486,11 +487,11 @@ export default function HomeScreen({ navigation }: any) {
                 </Text>
               </View>
             ))}
-          </Animated.View>
+          </ReanimatedAnimated.View>
         )}
 
         {/* Watchlist Preview */}
-        <Animated.View style={[styles.section, getSectionStyle(7)]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[7]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Watchlist ⭐</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Watchlist')}>
@@ -506,7 +507,7 @@ export default function HomeScreen({ navigation }: any) {
               isInWatchlist
             />
           ))}
-        </Animated.View>
+        </ReanimatedAnimated.View>
 
         <View style={{ height: 100 }} />
       </ScrollView>

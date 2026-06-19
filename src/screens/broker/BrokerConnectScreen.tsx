@@ -585,6 +585,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                     autoCapitalize="none"
                     autoCorrect={false}
                     secureTextEntry
+                    {...({ id: 'broker-api-secret', name: 'apiSecret' } as any)}
                   />
                 </View>
               )}
@@ -615,6 +616,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                       autoCapitalize="none"
                       autoCorrect={false}
                       secureTextEntry
+                      {...({ id: 'broker-password', name: 'password' } as any)}
                     />
                   </View>
                   <View style={styles.inputGroup}>
@@ -645,6 +647,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                     autoCapitalize="none"
                     autoCorrect={false}
                     secureTextEntry
+                    {...({ id: 'broker-access-token', name: 'accessToken' } as any)}
                   />
                 </View>
               )}

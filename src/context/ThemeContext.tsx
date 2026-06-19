@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useRef, useCallback, useState } from 'react';
+import React, { createContext, useContext, useMemo, useCallback, useState } from 'react';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, Easing } from 'react-native-reanimated';
 import { useThemeStore } from '../store/themeStore';
 import { COLORS, LIGHT_COLORS, GRADIENTS, SHADOWS as BASE_SHADOWS, ThemeColors } from '../constants/theme';
@@ -22,16 +22,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Reanimated shared value for overlay opacity — drives the animation on the UI thread
   const overlayOpacity = useSharedValue(0);
+  // Shared value for the OUTGOING background color (UI-thread safe)
+  const oldBgSV = useSharedValue(colors.bg);
   // JS state controls pointerEvents prop to prevent touch blocking when overlay is invisible
   const [overlayBlocking, setOverlayBlocking] = useState(false);
-  // Ref captures the background color BEFORE the theme toggles, so the overlay
-  // always fades using the outgoing theme's bg color throughout the transition
-  const oldBgRef = useRef(colors.bg);
 
   const toggleTheme = useCallback(() => {
     // 1. Block touches and capture current background before any state change
     setOverlayBlocking(true);
-    oldBgRef.current = colors.bg;
+    oldBgSV.value = colors.bg;
 
     // 2. Two-phase transition on the UI thread:
     //    Phase 1 — fade overlay IN to mask the abrupt color switch
@@ -61,7 +60,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: oldBgRef.current,
+    backgroundColor: oldBgSV.value,
     opacity: overlayOpacity.value,
   }));
 

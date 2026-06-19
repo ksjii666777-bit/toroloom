@@ -56,7 +56,8 @@
       "expo-sharing",
       "@react-native-firebase/app",
       "@react-native-firebase/analytics",
-      "expo-font"
+      "expo-font",
+      "@sentry/react-native"
     ],
     "updates": {
       "enabled": false,

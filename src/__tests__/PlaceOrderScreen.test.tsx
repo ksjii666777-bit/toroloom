@@ -86,7 +86,7 @@ vi.mock('../store/authStore', () => ({
 
 vi.mock('../hooks/useStaggeredAnimation', () => ({
   useStaggeredAnimation: vi.fn(() => ({
-    getAnimatedStyle: vi.fn(() => ({ opacity: 1, transform: [{ translateY: 0 }] })),
+    animatedStyles: [{ opacity: 1, transform: [{ translateY: 0 }] }],
     reset: vi.fn(),
     startAnimation: vi.fn(),
   })),
