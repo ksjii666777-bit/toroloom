@@ -193,7 +193,7 @@ const mockOnboardingStore = vi.hoisted(() => {
   // Share the same vi.fn reference between the property and the named export
   // so tests can set it up via mockOnboardingStore.getState.mockReturnValue(...)
   const getState = vi.fn();
-  useOnboardingStore.getState = getState;
+  (useOnboardingStore as any).getState = getState;
   return { useOnboardingStore, getState };
 });
 
@@ -509,7 +509,7 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
     vi.spyOn(Linking, 'addEventListener').mockImplementation((_event, handler) => {
       warmStartHandler = handler as (event: { url: string }) => void;
       removeSubscription = vi.fn();
-      return { remove: removeSubscription };
+      return { remove: removeSubscription } as any;
     });
 
     // Add recordReferral to the mocked authApi
@@ -565,7 +565,7 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
   it('falls back to setReferralSource when the API call fails', async () => {
     (authApi as any).recordReferral = vi.fn().mockRejectedValue(new Error('Network error'));
     const mockSetReferralSource = vi.fn();
-    mockOnboardingStore.getState.mockReturnValue({ setReferralSource: mockSetReferralSource });
+    (mockOnboardingStore.getState as any).mockReturnValue({ setReferralSource: mockSetReferralSource });
 
     TestRenderer.act(() => {
       TestRenderer.create(<AppNavigator />);
@@ -596,9 +596,9 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
 
   it('cleans up the addEventListener subscription on unmount', async () => {
     const removeMock = vi.fn();
-    vi.spyOn(Linking, 'addEventListener').mockImplementation((_event, _handler) => {
-      warmStartHandler = vi.fn() as any;
-      return { remove: removeMock };
+    vi.spyOn(Linking, 'addEventListener').mockImplementation((_event: string, _handler: (event: { url: string }) => void) => {
+      warmStartHandler = _handler;
+      return { remove: removeMock } as any;
     });
 
     let root: TestRenderer.ReactTestRenderer;

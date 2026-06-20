@@ -14,7 +14,7 @@ const { mockUseRiskStore, mockUseVoiceStore, mockSafeAreaInsets } = vi.hoisted((
 // Override icon mock locally so icon names render as text children
 vi.mock('@expo/vector-icons', () => {
   const React = require('react');
-  const IconComponent = function(props) {
+  const IconComponent = function(props: any) {
     return React.createElement('Text', null, props.name || '');
   };
   return {

@@ -30,8 +30,8 @@ const mockApiPost = vi.fn();
 
 vi.mock('../services/api', () => ({
   api: {
-    get: (...args) => mockApiGet(...args),
-    post: (...args) => mockApiPost(...args),
+    get: (...args: any[]) => mockApiGet(...args),
+    post: (...args: any[]) => mockApiPost(...args),
   },
 }));
 

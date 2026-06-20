@@ -55,7 +55,7 @@ const mockGoBack = vi.fn();
 beforeEach(() => {
   vi.clearAllMocks();
   // Clear AsyncStorage mock
-  AsyncStorage.getItem.mockResolvedValue(null);
+  (AsyncStorage.getItem as any).mockResolvedValue(null);
   // Reset store to defaults
   useMarketStore.setState({
     stocks: mockStocks,

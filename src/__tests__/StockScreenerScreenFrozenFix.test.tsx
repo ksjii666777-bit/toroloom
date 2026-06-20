@@ -103,7 +103,7 @@ function createFrozenNavigation() {
 describe('StockScreenerScreen — Frozen Navigation Object', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    AsyncStorage.getItem.mockResolvedValue(null);
+    (AsyncStorage.getItem as any).mockResolvedValue(null);
   });
 
   // ── Render resilience ───────────────────────────────────

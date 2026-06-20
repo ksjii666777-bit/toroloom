@@ -43,7 +43,7 @@ vi.mock('../components/ui/AnimatedPressable', () => ({
 // No TS annotations inside the factory — vitest hoists the raw source.
 vi.mock('@expo/vector-icons', () => {
   const React = require('react');
-  const IconComponent = function(props) {
+  const IconComponent = function(props: any) {
     return React.createElement('Text', null, props.name || '');
   };
   return {

@@ -1127,11 +1127,11 @@ describe('TenantConfigScreen — Form Interactions', () => {
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
 
     const callArg = configureTenantSpy.mock.calls[0][0];
-    expect(callArg.razorpay.pricing).toEqual({
+    expect(callArg.razorpay!.pricing).toEqual({
       plan_pro: { monthly: 299, yearly: 2999 },
     });
     // Elite plan should NOT appear in pricing
-    expect(callArg.razorpay.pricing.plan_elite).toBeUndefined();
+    expect(callArg.razorpay!.pricing!.plan_elite).toBeUndefined();
 
     configureTenantSpy.mockRestore();
   });
@@ -1159,10 +1159,10 @@ describe('TenantConfigScreen — Form Interactions', () => {
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
 
     const callArg = configureTenantSpy.mock.calls[0][0];
-    expect(callArg.razorpay.keyId).toBe('rzp_test_noprice');
-    expect(callArg.razorpay.keySecret).toBe('sk_secret');
+    expect(callArg.razorpay!.keyId).toBe('rzp_test_noprice');
+    expect(callArg.razorpay!.keySecret).toBe('sk_secret');
     // pricing should be undefined since both fields were left blank
-    expect(callArg.razorpay.pricing).toBeUndefined();
+    expect(callArg.razorpay!.pricing).toBeUndefined();
 
     configureTenantSpy.mockRestore();
   });
@@ -1193,7 +1193,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
 
     // Verify razorpay is not in the config
     const callArg = configureTenantSpy.mock.calls[0][0];
-    expect(callArg.razorpay).toBeUndefined();
+    expect((callArg as any).razorpay).toBeUndefined();
 
     configureTenantSpy.mockRestore();
   });
@@ -1224,7 +1224,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
 
     const callArg = configureTenantSpy.mock.calls[0][0];
     // razorpay should be undefined — keyId is required, even if pricing is set
-    expect(callArg.razorpay).toBeUndefined();
+    expect((callArg as any).razorpay).toBeUndefined();
     // Pricing data should still be present in the state, but not included
     // in the config because it's nested inside the razorpay object
     expect(callArg.id).toBe('pricing_only');
@@ -1333,7 +1333,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
 
     // Invoke the captured callback
     if (capturedOnPress) {
-      act(() => { capturedOnPress(); });
+      act(() => { (capturedOnPress as () => void)(); });
     }
 
     // Flush microtasks to let async configureTenant resolve
