@@ -422,7 +422,7 @@ describe('MockWebSocketService', () => {
       mockWebSocket.subscribe('RELIANCE', vi.fn(), vi.fn());
       vi.advanceTimersByTime(4000);
 
-      const changedPrice = mockWebSocket.getCurrentPrice('RELIANCE');
+      mockWebSocket.getCurrentPrice('RELIANCE');
 
       mockWebSocket.reset();
       const resetPrice = mockWebSocket.getCurrentPrice('RELIANCE');

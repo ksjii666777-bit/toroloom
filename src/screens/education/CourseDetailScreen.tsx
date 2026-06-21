@@ -49,7 +49,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
     navigation.navigate('LessonView', { lessonId, courseId: course.id });
   };
 
-  const handleMarkComplete = async (lessonId: string) => {
+  const _handleMarkComplete = async (lessonId: string) => {
     await markLessonComplete(lessonId);
     addXp(50); // Reward XP for completing a lesson
   };

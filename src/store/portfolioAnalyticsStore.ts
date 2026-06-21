@@ -133,10 +133,10 @@ export const usePortfolioAnalyticsStore = create<AnalyticsState>((set, get) => (
     const unrealizedPnl = totalReturn - realizedPnl;
 
     // ── 3. Win/Loss Analysis from Holdings ──────────────────────
-    const winningHoldings = holdings.filter(h => h.pnl > 0);
-    const losingHoldings = holdings.filter(h => h.pnl < 0);
+    const _winningHoldings = holdings.filter(h => h.pnl > 0);
+    const _losingHoldings = holdings.filter(h => h.pnl < 0);
     const totalTrades = trades.length;
-    const buyTrades = trades.filter(t => t.type === 'buy').length;
+    const _buyTrades = trades.filter(t => t.type === 'buy').length;
     const sellTrades = trades.filter(t => t.type === 'sell');
     const winningSells = sellTrades.filter(t => t.total > 0);
     const losingSells = sellTrades.filter(t => t.total <= 0);

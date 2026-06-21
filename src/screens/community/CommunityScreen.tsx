@@ -4,7 +4,6 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimens
 import { Ionicons } from '@expo/vector-icons';
 import { useCommunityStore } from '../../store/communityStore';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
-import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { formatTimeAgo } from '../../utils/formatters';

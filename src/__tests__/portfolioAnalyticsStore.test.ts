@@ -776,9 +776,6 @@ describe('PortfolioAnalyticsStore — Live Subscription', () => {
     const store = usePortfolioAnalyticsStore;
     store.getState().subscribeToLiveUpdates();
 
-    // Read current WS price for RELIANCE
-    const livePrice = ws.getCurrentPrice('RELIANCE');
-
     // Trigger portfolioStore update with the same price (should NOT cause changes
     // since price hasn't changed from WS perspective)
     const holdings = usePortfolioStore.getState().holdings;

@@ -596,8 +596,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
     it('shows Exporting... while CSV is being exported', async () => {
       // Don't override mock here — let beforeEach handle it.
       // Use a deferred promise so we can control when it resolves.
-      let resolveExport!: (v: any) => void;
-      mockExportSingle.mockImplementationOnce(() => new Promise(r => { resolveExport = r; }));
+      mockExportSingle.mockImplementationOnce(() => new Promise(() => {}));
 
       const { getByText } = render(
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,

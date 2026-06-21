@@ -44,7 +44,7 @@ export default function ReportsScreen({ navigation }: any) {
   } = useNotificationStore();
   const [activeTab, setActiveTab] = useState<ReportTab>('pnl');
   const [chartTimeframe, setChartTimeframe] = useState('All');
-  const [showAllMetrics, setShowAllMetrics] = useState(false);
+  const [_showAllMetrics, _setShowAllMetrics] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [histPeriod, setHistPeriod] = useState('6M');
@@ -65,7 +65,7 @@ export default function ReportsScreen({ navigation }: any) {
   }, [subscribe, unsubscribe]);
 
   // ── Helper to format value with color ─────────────────────────
-  const coloredValue = (val: number, suffix = '', isPercent = false) => {
+  const _coloredValue = (val: number, suffix = '', isPercent = false) => {
     const color = val >= 0 ? colors.marketUp : colors.marketDown;
     const formatted = isPercent ? formatPercent(val) : formatCurrency(val, true);
     return <Text style={[styles.highlightValue, { color }]}>{formatted}{suffix}</Text>;
@@ -174,7 +174,7 @@ export default function ReportsScreen({ navigation }: any) {
           [{ text: 'OK' }],
         );
       }
-    } catch (err) {
+    } catch (_err) {
       Alert.alert('Export Error', 'An unexpected error occurred during export.');
     } finally {
       setExporting(false);

@@ -43,7 +43,7 @@ export default function PortfolioScreen({ navigation }: any) {
   const portfolioValue = holdings.reduce((sum, h) => sum + h.currentValue, 0) || 1250000;
   const invested = holdings.reduce((sum, h) => sum + h.totalInvested, 0) || 1100000;
   const pnl = portfolioValue - invested;
-  const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
+  const _pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
 
   const [chartTimeframe, setChartTimeframe] = useState('1Y');
   const holdingsCount = holdings.length;

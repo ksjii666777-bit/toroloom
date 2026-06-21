@@ -214,7 +214,7 @@ export default function WatchlistScreen({ navigation }: any) {
   }, []);
 
   // ── Price Alert helpers ────────────────────────────────────
-  const activeAlertSymbols = useMemo(() => {
+  const _activeAlertSymbols = useMemo(() => {
     const set = new Set<string>();
     priceAlertRules
       .filter(r => !r.triggered)

@@ -321,7 +321,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
     const config = ALERT_KINDS.find(c => c.kind === rule.kind);
     if (!config) return null;
     const isHoldingKind = HOLDING_KINDS.includes(rule.kind);
-    const holdingInfos = isHoldingKind && rule.symbols?.length
+    const _holdingInfos = isHoldingKind && rule.symbols?.length
       ? holdings.filter(h => rule.symbols!.includes(h.symbol))
       : [];
 
@@ -364,7 +364,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                     {rule.symbols?.length ? (
                       rule.symbols.length <= 3
                         ? rule.symbols.map(sym => {
-                            const hi = holdings.find(h => h.symbol === sym);
+                            const _hi = holdings.find(h => h.symbol === sym);
                             return (
                               <View key={sym} style={[styles.stockBadge, { backgroundColor: config.color + '20' }]}>
                                 <Text style={[styles.stockBadgeText, { color: config.color }]}>{sym}</Text>

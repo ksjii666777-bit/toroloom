@@ -8,7 +8,7 @@
  * with vitest due to react-native's Flow-typed source files.
  */
 
-import React, { act } from 'react';
+import { act } from 'react';
 import TestRenderer from 'react-test-renderer';
 import type { ReactElement } from 'react';
 

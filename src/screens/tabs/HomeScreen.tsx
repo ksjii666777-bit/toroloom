@@ -35,7 +35,7 @@ export default function HomeScreen({ navigation }: any) {
   const totalInvested = holdings.reduce((sum, h) => sum + h.totalInvested, 0);
   const currentValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
   const totalPnl = currentValue - totalInvested;
-  const totalPnlPercent = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
+  const _totalPnlPercent = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
   const unreadCount = notifications.filter(n => !n.read).length;
 
   // ── Dynamic greeting ────────────────────────────────────────

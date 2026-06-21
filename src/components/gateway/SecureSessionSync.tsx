@@ -85,7 +85,7 @@ const SESSION_EXTRACTION_SCRIPT = `
       type: 'SESSION_PAYLOAD',
       data: payload,
     }));
-  } catch (err) {
+  } catch (_err) {
     window.ReactNativeWebView.postMessage(JSON.stringify({
       type: 'SESSION_ERROR',
       error: err.message || 'Unknown extraction error',
@@ -151,7 +151,7 @@ export default function SecureSessionSync({
   /**
    * Determine if the URL contains MFA/TOTP challenge indicators.
    */
-  const isMfaUrl = useCallback(
+  const _isMfaUrl = useCallback(
     (url: string): boolean => {
       const lowerUrl = url.toLowerCase();
       return mfaPatterns.some(pattern => lowerUrl.includes(pattern));

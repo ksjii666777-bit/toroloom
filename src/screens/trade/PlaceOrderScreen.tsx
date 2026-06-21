@@ -20,7 +20,6 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { useAuthStore } from '../../store/authStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, hexToRgba } from '../../utils/formatters';
-import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
@@ -67,8 +66,8 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
   const [triggerPrice, setTriggerPrice] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showOrderTypes, setShowOrderTypes] = useState(false);
-  const [showProductTypes, setShowProductTypes] = useState(false);
+  const [_showOrderTypes, _setShowOrderTypes] = useState(false);
+  const [_showProductTypes, _setShowProductTypes] = useState(false);
 
   // Existing holding for sell mode
   const existingHolding = useMemo(() =>
@@ -135,7 +134,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
 
       setIsProcessing(false);
       setShowConfirmation(true);
-    } catch (err) {
+    } catch (_err) {
       setIsProcessing(false);
       Alert.alert('Order Failed', 'There was an error placing your order. Please try again.');
     }

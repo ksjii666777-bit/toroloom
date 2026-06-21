@@ -39,7 +39,7 @@ import type { ParsedTrade } from '../../types';
 // ============================================================================
 
 // ─── Core patterns (broker-agnostic) ────────────────────────
-const PATTERNS = {
+const _PATTERNS = {
   /** Standard exchange timestamp: DD-MM-YYYY HH:MM:SS */
   timestamp: /(\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2})/g,
 

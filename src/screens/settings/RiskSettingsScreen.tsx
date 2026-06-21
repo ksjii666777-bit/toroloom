@@ -30,8 +30,8 @@ export default function RiskSettingsScreen({ navigation }: any) {
   } = store;
 
   const isLockdown = selectIsLockdownActive(store);
-  const canTrade = selectCanTrade(store);
-  const exitOnly = selectExitOnlyMode(store);
+  const _canTrade = selectCanTrade(store);
+  const _exitOnly = selectExitOnlyMode(store);
   const dailyPnL = selectDailyPnL(store);
   const dailyLossPct = selectDailyLossPercent(store);
 

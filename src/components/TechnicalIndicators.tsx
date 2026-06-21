@@ -294,7 +294,7 @@ const MACDPanel = React.memo(({
   // Get last values
   const lastMACD = macd.filter((v): v is number => v !== null).pop() || 0;
   const lastSignal = signal.filter((v): v is number => v !== null).pop() || 0;
-  const lastHistogram = histogram.filter((v): v is number => v !== null).pop() || 0;
+  const _lastHistogram = histogram.filter((v): v is number => v !== null).pop() || 0;
 
   return (
     <View style={[indicatorStyles.panel, { height: panelHeight, width }]}>
@@ -404,7 +404,7 @@ const BollingerPanel = React.memo(({
   const lowerPath = buildPath(lower);
 
   // Build fill path (upper + reverse lower)
-  const lastIdx = upper.length - 1;
+  const _lastIdx = upper.length - 1;
   let firstUpperIdx = -1, lastUpperIdx = -1;
   for (let i = 0; i < upper.length; i++) {
     if (upper[i] !== null) {
@@ -426,7 +426,7 @@ const BollingerPanel = React.memo(({
     fillPath = `${fillPath}${revPath} Z`;
   }
 
-  const lastMiddle = middle.filter((v): v is number => v !== null).pop() || 0;
+  const _lastMiddle = middle.filter((v): v is number => v !== null).pop() || 0;
   const lastUpperVal = upper.filter((v): v is number => v !== null).pop() || 0;
   const lastLowerVal = lower.filter((v): v is number => v !== null).pop() || 0;
 

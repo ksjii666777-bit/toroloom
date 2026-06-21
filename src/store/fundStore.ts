@@ -29,7 +29,7 @@ function generateId(): string {
 function makeDateLabel(): string {
   const now = new Date();
   const today = format(now, 'yyyy-MM-dd');
-  const yesterday = format(new Date(now.getTime() - 86400000), 'yyyy-MM-dd');
+  const _yesterday = format(new Date(now.getTime() - 86400000), 'yyyy-MM-dd');
   // Compare against stored dates to determine label
   return today;
 }
