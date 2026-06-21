@@ -1,0 +1,196 @@
+# =============================================================================
+# Broker Connected State — E2E Test
+# =============================================================================
+# Tests the connected-state UI of ConnectBrokerView by pre-seeding the
+# keychain with a mock Zerodha session via the E2E deep link.
+#
+# Prerequisites:
+#   - Dev build installed on emulator (appId: com.anonymous.Toroloom)
+#   - __DEV__ mode enabled (E2E deep link handler is dev-only)
+#
+# Flow:
+#   1. Login with test credentials
+#   2. Trigger toroloom://e2e/seed-broker deep link to seed mock session
+#   3. Navigate to Connect Broker
+#   4. Verify connected-state UI: banner, Test API button, Disconnect,
+#      "Connected" badge on broker card, "Session Active" indicator
+#   5. Tap "Test API" button and verify proxy result alert
+#   6. Dismiss the alert
+#   7. Verify "Disconnect" prompt by tapping Disconnect
+#   8. Dismiss the disconnect confirmation (tap Cancel)
+#   9. Close the deep link-triggered connection by tapping Disconnect → confirm
+#  10. Verify UI returns to disconnected state
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ═══════════════════════════════════════════════════════════════════════════
+# 1. Login
+# ═══════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: "Welcome Back! 👋"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 2. Seed Mock Broker Session via Deep Link
+# ═══════════════════════════════════════════════════════════════════════════
+# Opens the E2E deep link which triggers the seed handler in App.tsx.
+# This stores a mock Zerodha session with 24h expiry in the keychain.
+- openLink: toroloom://e2e/seed-broker
+
+# Wait for the seed to complete (async keychain write)
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 3. Navigate: More → Connect Broker
+# ═══════════════════════════════════════════════════════════════════════════
+# First tap Home to ensure we're on a known tab, then navigate
+- tapOn: "Home"
+- waitForAnimationToEnd
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Connect Broker"
+    direction: DOWN
+- tapOn:
+    text: "Connect Broker"
+- waitForAnimationToEnd:
+    timeout: 10000  # Allow for session check + animation
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 4. Verify Connected-State UI
+# ═══════════════════════════════════════════════════════════════════════════
+# The ConnectBrokerView loads and checks hasValidSession. Since we seeded
+# a mock Zerodha session with 24h expiry, it should detect it and render
+# the connected banner.
+
+# Connected banner
+- assertVisible:
+    text: "Connected"
+- assertVisible:
+    text: "Zerodha"
+- assertVisible:
+    text: "Secure Session Active"
+
+# Test API button (neon cyan, only visible when connected)
+- assertVisible:
+    text: "Test API"
+
+# Disconnect button (only visible when connected)
+- assertVisible:
+    text: "Disconnect"
+
+# Broker card shows "Connected" badge instead of "Sync Now"
+- assertVisible:
+    text: "Connected"
+
+# Session Active indicator on the Zerodha card
+- assertVisible:
+    text: "Session Active"
+
+# Section subtitle changes when connected
+- assertVisible:
+    text: "Switch to a different broker below"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 5. Tap Test API Button — Verify Proxy Alert
+# ═══════════════════════════════════════════════════════════════════════════
+# The proxy request will fail (no real network), but the Alert should show
+# the error response with HTTP status code and error message.
+- tapOn:
+    text: "Test API"
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# The alert title should show either success or failure
+- assertVisible:
+    text: "Proxy"
+- assertVisible:
+    text: "HTTP"
+
+# Dismiss the alert by tapping OK
+- tapOn:
+    text: "OK"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 6. Verify Disconnect Prompt
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    text: "Disconnect"
+- waitForAnimationToEnd
+
+# Verify the disconnect confirmation alert appears
+- assertVisible:
+    text: "Disconnect Broker"
+- assertVisible:
+    text: "Are you sure you want to disconnect?"
+
+# Cancel the disconnect to keep the session active for next test steps
+- tapOn:
+    text: "Cancel"
+- waitForAnimationToEnd
+
+# Verify we're still connected
+- assertVisible:
+    text: "Connected"
+- assertVisible:
+    text: "Test API"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 7. Disconnect — Confirm and Verify Disconnected State
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    text: "Disconnect"
+- waitForAnimationToEnd
+
+# Confirm disconnect
+- tapOn:
+    text: "Disconnect"
+- waitForAnimationToEnd
+    timeout: 5000
+
+# Verify connected banner is gone
+- assertNotVisible:
+    text: "Connected"
+- assertNotVisible:
+    text: "Test API"
+- assertNotVisible:
+    text: "Disconnect"
+
+# Verify broker cards return to default state
+- assertVisible:
+    text: "Sync Now"
+- assertVisible:
+    text: "Zero-API Sync"
+
+# Verify section subtitle returns to disconnected state
+- assertVisible:
+    text: "Select a broker"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 8. Navigate Back to More
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"

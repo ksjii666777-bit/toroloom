@@ -220,6 +220,44 @@ export default function ReportsScreen({ navigation }: any) {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
+        {/* ── Tools: Contract Note Parser ─────────────────────── */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('ContractNoteParser')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,242,254,0.06)',
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: 'rgba(0,242,254,0.12)',
+          }}
+        >
+          <View style={{
+            width: 44, height: 44, borderRadius: 12,
+            backgroundColor: 'rgba(0,242,254,0.1)',
+            justifyContent: 'center', alignItems: 'center',
+          }}>
+            <Ionicons name="document-attach" size={22} color="#00F2FE" />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={{
+              ...FONTS.semiBold, fontSize: FONTS.size.md, color: '#FFFFFF',
+            }}>
+              Contract Note Parser
+            </Text>
+            <Text style={{
+              ...FONTS.regular, fontSize: FONTS.size.xs,
+              color: 'rgba(255,255,255,0.5)', marginTop: 2,
+            }}>
+              Upload broker PDFs to extract trades
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+
         {/* ── Portfolio Snapshot ─────────────────────────────── */}
         <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.snapshotCard}>
           <View style={styles.snapshotTop}>

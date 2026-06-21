@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
@@ -171,8 +170,10 @@ export default function MoreScreen({ navigation }: any) {
         </View>
 
         {/* Profile Card */}
+        {/* Glassmorphic Profile Card */}
         <AnimatedPressable onPress={() => navigation.navigate('Profile')} haptic="medium" scaleTo={0.97}>
-          <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.profileGradient}>
+          <View style={styles.glassProfileCard}>
+            <View style={styles.glassBg} />
             <View style={styles.profileRow}>
               <View style={styles.profileAvatar}>
                 <Text style={styles.avatarText}>{user?.name?.[0] || 'R'}</Text>
@@ -182,24 +183,24 @@ export default function MoreScreen({ navigation }: any) {
                 <Text style={styles.profileEmail}>{user?.email || 'rahul@email.com'}</Text>
                 <View style={styles.profileBadges}>
                   <Badge label={`Level ${userLevel.level}`} variant="primary" />
-                  <Badge label="KYC Verified" variant="success" />
+                  <View style={styles.kycVerifiedBadge}>
+                    <Ionicons name="shield-checkmark" size={12} color="#00D2FF" />
+                    <Text style={styles.kycVerifiedText}>KYC Verified</Text>
+                  </View>
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
             </View>
-          </LinearGradient>
+          </View>
         </AnimatedPressable>
 
-        {/* Quick Actions */}
+        {/* Quick Actions — Glass Pillars */}
         <View style={styles.quickActionsRow}>
           {quickActions.map((action, i) => (
             <Animated.View key={i} style={qaStyles[i]}>
-
               <AnimatedPressable onPress={() => handleQuickAction(action.label)} haptic="light" scaleTo={0.92}>
-                <View style={styles.quickActionWrapper}>
-                  <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
-                    <Ionicons name={action.icon as any} size={22} color={colors.white} />
-                  </LinearGradient>
+                <View style={styles.qaCard}>
+                  <Ionicons name={action.icon as any} size={20} color={action.gradient[0]} />
                   <Text style={styles.qaLabel}>{action.label}</Text>
                 </View>
               </AnimatedPressable>
@@ -231,44 +232,45 @@ export default function MoreScreen({ navigation }: any) {
 
         {/* Menu Sections */}
         {menuItems.map((section, idx) => (
-          <Animated.View key={idx} style={[styles.menuSection, menuSectionStyles[idx]]}>
-
-            <Text style={styles.menuSectionTitle}>{section.section}</Text>
-            <View style={styles.menuGrid}>
-              {section.items.map((item, i) => (
-                <AnimatedPressable
-                  key={i}
-                  onPress={() => {
-                    if (item.screen === '__onboarding') {
-                      Alert.alert(
-                        'Replay Tour',
-                        'This will restart the onboarding walkthrough. You can skip through it anytime.',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          {
-                            text: 'Start Tour',
-                            onPress: () => {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                              resetOnboarding();
+          <Animated.View key={idx} style={[styles.menuCardSection, menuSectionStyles[idx]]}>
+            <View style={styles.menuCard}>
+              <Text style={styles.menuSectionTitle}>{section.section}</Text>
+              <View style={styles.menuGrid}>
+                {section.items.map((item, i) => (
+                  <AnimatedPressable
+                    key={i}
+                    onPress={() => {
+                      if (item.screen === '__onboarding') {
+                        Alert.alert(
+                          'Replay Tour',
+                          'This will restart the onboarding walkthrough. You can skip through it anytime.',
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                              text: 'Start Tour',
+                              onPress: () => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                resetOnboarding();
+                              },
                             },
-                          },
-                        ]
-                      );
-                    } else {
-                      navigation.navigate(item.screen);
-                    }
-                  }}
-                  haptic="selection"
-                  scaleTo={0.93}
-                >
-                  <View style={styles.menuItem}>
-                    <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
-                      <Ionicons name={item.icon as any} size={22} color={item.color} />
+                          ]
+                        );
+                      } else {
+                        navigation.navigate(item.screen);
+                      }
+                    }}
+                    haptic="selection"
+                    scaleTo={0.93}
+                  >
+                    <View style={styles.menuItem}>
+                      <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
+                        <Ionicons name={item.icon as any} size={22} color={item.color} />
+                      </View>
+                      <Text style={styles.menuLabel}>{item.label}</Text>
                     </View>
-                    <Text style={styles.menuLabel}>{item.label}</Text>
-                  </View>
-                </AnimatedPressable>
-              ))}
+                  </AnimatedPressable>
+                ))}
+              </View>
             </View>
           </Animated.View>
         ))}
@@ -326,10 +328,36 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.title,
     color: colors.text,
   },
-  profileGradient: {
+  glassProfileCard: {
     padding: SPACING.xl,
     borderRadius: BORDER_RADIUS.xl,
     marginBottom: SPACING.lg,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  glassBg: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    borderRadius: BORDER_RADIUS.xl,
+  },
+  kycVerifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,210,255,0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(0,210,255,0.25)',
+  },
+  kycVerifiedText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.xs,
+    color: '#00D2FF',
   },
   profileRow: {
     flexDirection: 'row',
@@ -373,21 +401,20 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: SPACING.lg,
   },
-  quickActionWrapper: {
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  qaIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+  qaCard: {
+    width: 72,
+    height: 72,
+    backgroundColor: '#161922',
+    borderRadius: BORDER_RADIUS.lg,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: SPACING.xs,
   },
   qaLabel: {
     ...FONTS.regular,
     fontSize: FONTS.size.xs,
     color: colors.text,
+    textAlign: 'center',
   },
   balanceCard: {
     marginBottom: SPACING.xxl,
@@ -433,8 +460,13 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.sm,
     color: colors.primary,
   },
-  menuSection: {
-    marginBottom: SPACING.xxl,
+  menuCardSection: {
+    marginBottom: SPACING.lg,
+  },
+  menuCard: {
+    backgroundColor: '#0D0F14',
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.lg,
   },
   menuSectionTitle: {
     ...FONTS.semiBold,

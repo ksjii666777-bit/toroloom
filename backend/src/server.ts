@@ -37,6 +37,7 @@ import ironLockRoutes from './routes/ironLock';
 import metricsRoutes from './routes/metrics';
 import paymentsRoutes from './routes/payments';
 import pushNotificationsRoutes from './routes/pushNotifications';
+import contractNoteRoutes from './routes/contractNote';
 
 // ============ Sentry Initialization ============
 
@@ -118,6 +119,7 @@ app.use('/api/system', systemRoutes);
 app.use('/api/system', wsStatusRoutes);
 app.use('/api/iron-lock', ironLockRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/contract-note', contractNoteRoutes);
 
 // ============ Sentry Error Handler (must be before custom error handler) ============
 

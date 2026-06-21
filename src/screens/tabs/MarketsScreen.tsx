@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Dimensions, RefreshControl, Animated, Keyboard, Platform } from 'react-native';
-import ReanimatedAnimated from 'react-native-reanimated';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Dimensions, RefreshControl, Keyboard, Platform } from 'react-native';
+import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, interpolate, interpolateColor } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useMarketStore } from '../../store/marketStore';
@@ -26,8 +26,8 @@ export default function MarketsScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const searchAnim = useRef(new Animated.Value(0)).current;
-  const overlayAnim = useRef(new Animated.Value(0)).current;
+  const searchProgress = useSharedValue(0);
+  const overlayProgress = useSharedValue(0);
   const searchInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -71,46 +71,26 @@ export default function MarketsScreen({ navigation }: any) {
   // Advanced search overlay animation
   const handleSearchFocus = useCallback(() => {
     setIsSearchFocused(true);
-    Animated.spring(searchAnim, {
-      toValue: 1,
-      useNativeDriver: false,
-      speed: 14,
-      bounciness: 4,
-    }).start();
-    Animated.timing(overlayAnim, {
-      toValue: 1,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-  }, [searchAnim, overlayAnim]);
+    searchProgress.value = withSpring(1, { stiffness: 120, damping: 12 });
+    overlayProgress.value = withTiming(1, { duration: 250 });
+  }, [searchProgress, overlayProgress]);
 
   const handleSearchBlur = useCallback(() => {
     if (!searchQuery) {
       setIsSearchFocused(false);
-      Animated.spring(searchAnim, {
-        toValue: 0,
-        useNativeDriver: false,
-        speed: 14,
-        bounciness: 4,
-      }).start();
-      Animated.timing(overlayAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
+      searchProgress.value = withSpring(0, { stiffness: 120, damping: 12 });
+      overlayProgress.value = withTiming(0, { duration: 200 });
     }
-  }, [searchAnim, overlayAnim, searchQuery]);
+  }, [searchProgress, overlayProgress, searchQuery]);
 
-  const searchBorderColor = searchAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [colors.border, colors.primary],
-  });
+  const searchBorderStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(searchProgress.value, [0, 1], [colors.border, colors.primary]),
+  }));
 
   // Overlay opacity for backdrop blur effect
-  const overlayOpacity = overlayAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
-  });
+  const overlayStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(overlayProgress.value, [0, 1], [0, 1]),
+  }));
 
   const handleSuggestionTap = useCallback((symbol: string) => {
     setSearchQuery(symbol);
@@ -185,9 +165,9 @@ export default function MarketsScreen({ navigation }: any) {
         </View>
 
         {/* Search Bar — elevated when focused */}
-        <Animated.View style={[
+        <ReanimatedAnimated.View style={[
           styles.searchContainer,
-          { borderColor: searchBorderColor },
+          searchBorderStyle,
           isSearchFocused && styles.searchContainerFocused,
         ]}>
           <Ionicons name="search" size={20} color={searchQuery ? colors.primary : colors.textMuted} style={styles.searchIcon} />
@@ -206,11 +186,11 @@ export default function MarketsScreen({ navigation }: any) {
               <Ionicons name="close-circle" size={20} color={colors.textMuted} />
             </AnimatedPressable>
           ) : null}
-        </Animated.View>
+        </ReanimatedAnimated.View>
 
         {/* Search Suggestion Dashboard — slides down when search is focused */}
         {isSearchFocused && !searchQuery && (
-          <Animated.View style={[styles.suggestionDashboard, { opacity: overlayAnim }]}>
+          <ReanimatedAnimated.View style={[styles.suggestionDashboard, overlayStyle]}>
             <Text style={styles.suggestionTitle}>Popular Stocks</Text>
             <View style={styles.suggestionChips}>
               {SUGGESTED_SEARCHES.map(symbol => (
@@ -230,7 +210,7 @@ export default function MarketsScreen({ navigation }: any) {
               ))}
             </View>
             <View style={styles.suggestionDivider} />
-          </Animated.View>
+          </ReanimatedAnimated.View>
         )}
 
         {/* Market Indices */}
@@ -390,8 +370,8 @@ export default function MarketsScreen({ navigation }: any) {
 
       {/* Backdrop overlay when search is focused */}
       {isSearchFocused && searchQuery.length === 0 && (
-        <Animated.View
-          style={[styles.backdropOverlay, { opacity: overlayAnim }]}
+        <ReanimatedAnimated.View
+          style={[styles.backdropOverlay, overlayStyle]}
           pointerEvents={isSearchFocused ? 'auto' : 'none'}
         >
           <TouchableOpacity
@@ -400,14 +380,10 @@ export default function MarketsScreen({ navigation }: any) {
             onPress={() => {
               Keyboard.dismiss();
               setIsSearchFocused(false);
-              Animated.timing(overlayAnim, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: true,
-              }).start();
+              overlayProgress.value = withTiming(0, { duration: 200 });
             }}
           />
-        </Animated.View>
+        </ReanimatedAnimated.View>
       )}
     </View>
   );

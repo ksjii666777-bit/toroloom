@@ -1,8 +1,9 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Dimensions,
-  Animated, TouchableOpacity, Platform,
+  TouchableOpacity, Platform,
 } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, useAnimatedScrollHandler, withTiming, withSpring, withDelay, interpolate, Extrapolation } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import * as Haptics from 'expo-haptics';
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width - SPACING.xl * 2;
 const CARD_GAP = SPACING.md;
+const MAX_CARDS = 5; // ONBOARDING_STEPS max length
 
 export default function OnboardingScreen({ navigation }: any) {
   const { colors } = useTheme();
@@ -29,7 +31,7 @@ export default function OnboardingScreen({ navigation }: any) {
   const totalSteps = visibleSteps.length;
 
   const scrollRef = useRef<ScrollView>(null);
-  const scrollX = useRef(new Animated.Value(startStep * CARD_WIDTH)).current;
+  const scrollX = useSharedValue(startStep * CARD_WIDTH);
   const [isLastStep, setIsLastStep] = useState(startStep === totalSteps - 1);
   const hasScrolledToStart = useRef(false);
 
@@ -45,20 +47,72 @@ export default function OnboardingScreen({ navigation }: any) {
     }
   }, [referralSource]);
 
-  // Staggered entrance animation
-  const heroAnim = useRef(new Animated.Value(0)).current;
-  const contentAnim = useRef(new Animated.Value(0)).current;
-  const bottomAnim = useRef(new Animated.Value(0)).current;
+  // ── Staggered entrance animation ──
+  const heroProgress = useSharedValue(0);
+  const contentProgress = useSharedValue(0);
+  const bottomProgress = useSharedValue(0);
 
   useEffect(() => {
-    Animated.sequence([
-      Animated.timing(heroAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.timing(contentAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.timing(bottomAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
-    ]).start();
+    heroProgress.value = withTiming(1, { duration: 500 });
+    contentProgress.value = withDelay(500, withTiming(1, { duration: 400 }));
+    bottomProgress.value = withDelay(900, withTiming(1, { duration: 300 }));
   }, []);
 
-  // Scroll to the referral start step once the ScrollView has been laid out
+  const heroStyle = useAnimatedStyle(() => ({ opacity: heroProgress.value }));
+  const contentStyle = useAnimatedStyle(() => ({ opacity: contentProgress.value }));
+  const bottomStyle = useAnimatedStyle(() => ({ opacity: bottomProgress.value }));
+
+  // ── Card entrance animations ──
+  // Create up to MAX_CARDS shared values for scale and opacity
+  const cardScale0 = useSharedValue(0.9); const cardOpacity0 = useSharedValue(0);
+  const cardScale1 = useSharedValue(0.9); const cardOpacity1 = useSharedValue(0);
+  const cardScale2 = useSharedValue(0.9); const cardOpacity2 = useSharedValue(0);
+  const cardScale3 = useSharedValue(0.9); const cardOpacity3 = useSharedValue(0);
+  const cardScale4 = useSharedValue(0.9); const cardOpacity4 = useSharedValue(0);
+
+  const cardScales = [cardScale0, cardScale1, cardScale2, cardScale3, cardScale4];
+  const cardOpacities = [cardOpacity0, cardOpacity1, cardOpacity2, cardOpacity3, cardOpacity4];
+
+  const cardStyle0 = useAnimatedStyle(() => ({ transform: [{ scale: cardScale0.value }], opacity: cardOpacity0.value }));
+  const cardStyle1 = useAnimatedStyle(() => ({ transform: [{ scale: cardScale1.value }], opacity: cardOpacity1.value }));
+  const cardStyle2 = useAnimatedStyle(() => ({ transform: [{ scale: cardScale2.value }], opacity: cardOpacity2.value }));
+  const cardStyle3 = useAnimatedStyle(() => ({ transform: [{ scale: cardScale3.value }], opacity: cardOpacity3.value }));
+  const cardStyle4 = useAnimatedStyle(() => ({ transform: [{ scale: cardScale4.value }], opacity: cardOpacity4.value }));
+
+  const cardStyles = [cardStyle0, cardStyle1, cardStyle2, cardStyle3, cardStyle4];
+
+  useEffect(() => {
+    // Animate cards in sequence
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    visibleSteps.forEach((_, i) => {
+      const delay = i * 150;
+      const id = setTimeout(() => {
+        cardScales[i].value = withSpring(1, { stiffness: 100, damping: 12 });
+        cardOpacities[i].value = withTiming(1, { duration: 300 });
+      }, delay);
+      timeouts.push(id);
+    });
+    return () => timeouts.forEach(clearTimeout);
+  }, []);
+
+  // ── Scroll-driven progress bar ──
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
+
+  const progressStyle = useAnimatedStyle(() => {
+    const w = interpolate(
+      scrollX.value,
+      [0, (totalSteps - 1) * CARD_WIDTH],
+      [0, CARD_WIDTH],
+      Extrapolation.CLAMP,
+    );
+    return { width: w };
+  });
+
+  // ── Scroll to the referral start step once the ScrollView has been laid out ──
   const handleScrollLayout = useCallback(() => {
     if (referralSource && !hasScrolledToStart.current) {
       hasScrolledToStart.current = true;
@@ -115,43 +169,10 @@ export default function OnboardingScreen({ navigation }: any) {
     await useOnboardingStore.getState().completeOnboarding();
   }, []);
 
-  // Progress bar width
-  const progressWidth = scrollX.interpolate({
-    inputRange: [0, (totalSteps - 1) * CARD_WIDTH],
-    outputRange: [0, CARD_WIDTH],
-    extrapolate: 'clamp',
-  });
-
-  // Step card animations
-  const cardScale = useRef(visibleSteps.map(() => new Animated.Value(0.9))).current;
-  const cardOpacity = useRef(visibleSteps.map(() => new Animated.Value(0))).current;
-
-  useEffect(() => {
-    // Animate cards in sequence
-    visibleSteps.forEach((_, i) => {
-      Animated.sequence([
-        Animated.delay(i * 150),
-        Animated.parallel([
-          Animated.spring(cardScale[i], {
-            toValue: 1,
-            useNativeDriver: true,
-            speed: 10,
-            bounciness: 6,
-          }),
-          Animated.timing(cardOpacity[i], {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start();
-    });
-  }, []);
-
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Top Bar — Skip + Page Indicator */}
-      <Animated.View style={[styles.topBar, { opacity: contentAnim }]}>
+      <Animated.View style={[styles.topBar, contentStyle]}>
         <TouchableOpacity onPress={handleSkip} style={styles.skipBtn}>
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
@@ -178,7 +199,7 @@ export default function OnboardingScreen({ navigation }: any) {
       </Animated.View>
 
       {/* Scrollable Cards */}
-      <Animated.View style={[styles.cardsContainer, { opacity: heroAnim }]}>
+      <Animated.View style={[styles.cardsContainer, heroStyle]}>
         <ScrollView
           ref={scrollRef}
           horizontal
@@ -188,22 +209,17 @@ export default function OnboardingScreen({ navigation }: any) {
           decelerationRate="fast"
           onMomentumScrollEnd={handleScrollEnd}
           onLayout={handleScrollLayout}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: false }
-          )}
+          onScroll={scrollHandler}
           scrollEventThrottle={16}
           contentContainerStyle={styles.cardsContent}
-        >              {visibleSteps.map((step, i) => (
+        >
+          {visibleSteps.map((step, i) => (
             <Animated.View
               key={step.id}
               style={[
                 styles.card,
-                {
-                  width: CARD_WIDTH,
-                  transform: [{ scale: cardScale[i] }],
-                  opacity: cardOpacity[i],
-                },
+                { width: CARD_WIDTH },
+                cardStyles[i],
               ]}
             >
               {/* Card Gradient Background */}
@@ -251,10 +267,10 @@ export default function OnboardingScreen({ navigation }: any) {
       </Animated.View>
 
       {/* Bottom Section — Navigation Buttons + Progress Bar */}
-      <Animated.View style={[styles.bottomSection, { opacity: bottomAnim, paddingBottom: insets.bottom + SPACING.xl }]}>
+      <Animated.View style={[styles.bottomSection, bottomStyle, { paddingBottom: insets.bottom + SPACING.xl }]}>
         {/* Progress bar */}
         <View style={styles.progressBarBg}>
-          <Animated.View style={[styles.progressBarFill, { width: progressWidth }]} />
+          <Animated.View style={[styles.progressBarFill, progressStyle]} />
         </View>
 
         {/* Buttons */}

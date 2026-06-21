@@ -18,9 +18,10 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, Animated, TouchableOpacity,
+  View, Text, StyleSheet, TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, withRepeat, withSequence, interpolate, runOnJS } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
@@ -54,31 +55,33 @@ export default function AvatarWidget() {
   const [expanded, setExpanded] = useState(false);
 
   // Animations
-  const pulseAnim = useRef(new Animated.Value(0)).current;
-  const slideUp = useRef(new Animated.Value(80)).current;
-  const messageOpacity = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useSharedValue(0);
+  const slideUp = useSharedValue(80);
+  const messageOpacity = useSharedValue(0);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const voiceSpeak = useVoiceStore(s => s.speak);
+
+  // Animated styles
+  const slideUpStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: slideUp.value }],
+  }));
+
+  const messageStyle = useAnimatedStyle(() => ({
+    opacity: messageOpacity.value,
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pulseAnim.value, [0, 1], [0.2, 0.7]),
+  }));
 
   // ── Banner animation ──────────────────────────────────────
   const triggerBanner = useCallback(() => {
     setExpanded(true);
-    slideUp.setValue(80);
-    messageOpacity.setValue(0);
+    slideUp.value = 80;
+    messageOpacity.value = 0;
 
-    Animated.parallel([
-      Animated.spring(slideUp, {
-        toValue: 0,
-        useNativeDriver: true,
-        speed: 12,
-        bounciness: 6,
-      }),
-      Animated.timing(messageOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    slideUp.value = withSpring(0, { stiffness: 120, damping: 12 });
+    messageOpacity.value = withTiming(1, { duration: 300 });
 
     // Clear any previous dismiss timer
     if (dismissTimerRef.current) {
@@ -87,23 +90,15 @@ export default function AvatarWidget() {
 
     // Auto-dismiss after BANNER_AUTO_DISMISS_MS
     dismissTimerRef.current = setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(slideUp, {
-          toValue: 80,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(messageOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setExpanded(false);
-        setMessage(null);
-        setAvatarState('idle');
-        dismissTimerRef.current = null;
+      slideUp.value = withTiming(80, { duration: 300 });
+      messageOpacity.value = withTiming(0, { duration: 200 }, (finished) => {
+        if (finished) {
+          runOnJS(setExpanded)(false);
+          runOnJS(setMessage)(null);
+          runOnJS(setAvatarState)('idle');
+        }
       });
+      dismissTimerRef.current = null;
     }, BANNER_AUTO_DISMISS_MS);
   }, []);
 
@@ -176,16 +171,16 @@ export default function AvatarWidget() {
   // ── Neon Pulse Loop (idle state) ──────────────────────────
   useEffect(() => {
     if (avatarState === 'idle') {
-      const loop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 0, duration: 2000, useNativeDriver: true }),
-        ]),
+      pulseAnim.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 2000 }),
+          withTiming(0, { duration: 2000 }),
+        ),
+        -1,
       );
-      loop.start();
-      return () => loop.stop();
+      return () => { pulseAnim.value = 0; };
     } else {
-      pulseAnim.setValue(1);
+      pulseAnim.value = 1;
     }
   }, [avatarState]);
 
@@ -202,19 +197,14 @@ export default function AvatarWidget() {
     avatarState === 'celebration' ? `${PREMIUM_GOLD}20` :
     `${CYBER_CYAN}15`;
 
-  const glowOpacity = pulseAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.2, 0.7],
-  });
-
   return (
     <Animated.View
       style={[
         styles.container,
         {
           bottom: 80 + insets.bottom,
-          transform: [{ translateY: slideUp }],
         },
+        slideUpStyle,
       ]}
       pointerEvents="box-none"
     >
@@ -226,8 +216,8 @@ export default function AvatarWidget() {
             {
               backgroundColor: bgColor,
               borderColor: avatarColor,
-              opacity: messageOpacity,
             },
+            messageStyle,
           ]}
         >
           <Ionicons name={avatarIcon as any} size={20} color={avatarColor} />
@@ -249,8 +239,8 @@ export default function AvatarWidget() {
               styles.avatarGlow,
               {
                 backgroundColor: avatarColor,
-                opacity: glowOpacity,
               },
+              glowStyle,
             ]}
           />
           <Ionicons name={avatarIcon as any} size={24} color={avatarColor} />

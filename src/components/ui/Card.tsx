@@ -1,5 +1,6 @@
-import React, { useMemo, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
+import React, { useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, interpolate } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
@@ -33,38 +34,26 @@ export default function Card({
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // Entry animation
-  const entryAnim = useRef(new Animated.Value(0)).current;
+  const entryProgress = useSharedValue(0);
+  const entryStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(entryProgress.value, [0, 1], [0, 1]),
+    transform: [{
+      translateY: interpolate(entryProgress.value, [0, 1], [20, 0]),
+    }],
+  }));
+
   useEffect(() => {
     if (animated) {
-      Animated.spring(entryAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        delay: animationDelay,
-        speed: 12,
-        bounciness: 6,
-      }).start();
+      entryProgress.value = withDelay(animationDelay, withSpring(1, { stiffness: 120, damping: 12 }));
     }
-  }, [animated, animationDelay, entryAnim]);
-
-  const animatedEntryStyle = animated ? {
-    opacity: entryAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 1],
-    }),
-    transform: [{
-      translateY: entryAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [20, 0],
-      }),
-    }],
-  } : {};
+  }, [animated, animationDelay]);
 
   return (
     <Animated.View
       style={[
         styles.container,
         gradient && styles.gradientContainer,
-        animatedEntryStyle,
+        animated ? entryStyle : {},
         style,
       ]}
     >

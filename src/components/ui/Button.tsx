@@ -1,5 +1,5 @@
-import React, { useMemo, useCallback, useRef } from 'react';
-import { Text, StyleSheet, ActivityIndicator, View, ViewStyle, Animated } from 'react-native';
+import React, { useMemo, useCallback } from 'react';
+import { Text, StyleSheet, ActivityIndicator, View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';

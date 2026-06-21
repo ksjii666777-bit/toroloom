@@ -130,6 +130,9 @@ export default function BrokerConnectScreen({ navigation }: any) {
     apiKey: '', apiSecret: '', accessToken: '', clientId: '', password: '', totp: '',
   });
 
+  // Focus state for TextInputs
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
   // Animations (top level — NEVER inside loops/conditions per Rules of Hooks)
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -539,7 +542,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.modalOverlay}
         >
-          <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
+          <View style={[styles.modalContent, { backgroundColor: '#07080B' }]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <View style={[styles.modalIconCircle, { backgroundColor: selectedBroker?.color + '20' }]}>
@@ -560,16 +563,24 @@ export default function BrokerConnectScreen({ navigation }: any) {
             <ScrollView style={styles.modalForm} showsVerticalScrollIndicator={false}>
               {/* API Key (all brokers) */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>API Key</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
-                  placeholder="Enter your API key"
-                  placeholderTextColor={colors.textMuted}
-                  value={credentials.apiKey}
-                  onChangeText={t => setCredentials(p => ({ ...p, apiKey: t }))}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
+                <Text style={styles.inputLabel}>API Key</Text>                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: colors.bgInput,
+                        color: colors.text,
+                        borderColor: focusedField === 'apiKey' ? '#00D2FF' : colors.border,
+                      },
+                    ]}
+                    placeholder="Enter your API key"
+                    placeholderTextColor={colors.textMuted}
+                    value={credentials.apiKey}
+                    onChangeText={t => setCredentials(p => ({ ...p, apiKey: t }))}
+                    onFocus={() => setFocusedField('apiKey')}
+                    onBlur={() => setFocusedField(null)}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
               </View>
 
               {/* API Secret (Zerodha only) */}
@@ -577,11 +588,20 @@ export default function BrokerConnectScreen({ navigation }: any) {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>API Secret</Text>
                   <TextInput
-                    style={[styles.input, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: colors.bgInput,
+                        color: colors.text,
+                        borderColor: focusedField === 'apiSecret' ? '#00D2FF' : colors.border,
+                      },
+                    ]}
                     placeholder="Enter your API secret"
                     placeholderTextColor={colors.textMuted}
                     value={credentials.apiSecret}
                     onChangeText={t => setCredentials(p => ({ ...p, apiSecret: t }))}
+                    onFocus={() => setFocusedField('apiSecret')}
+                    onBlur={() => setFocusedField(null)}
                     autoCapitalize="none"
                     autoCorrect={false}
                     secureTextEntry
@@ -596,11 +616,20 @@ export default function BrokerConnectScreen({ navigation }: any) {
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Client ID</Text>
                     <TextInput
-                      style={[styles.input, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
+                      style={[
+                        styles.input,
+                        {
+                          backgroundColor: colors.bgInput,
+                          color: colors.text,
+                          borderColor: focusedField === 'clientId' ? '#00D2FF' : colors.border,
+                        },
+                      ]}
                       placeholder="Enter your Angel One Client ID"
                       placeholderTextColor={colors.textMuted}
                       value={credentials.clientId}
                       onChangeText={t => setCredentials(p => ({ ...p, clientId: t }))}
+                      onFocus={() => setFocusedField('clientId')}
+                      onBlur={() => setFocusedField(null)}
                       autoCapitalize="none"
                       autoCorrect={false}
                     />
@@ -608,11 +637,20 @@ export default function BrokerConnectScreen({ navigation }: any) {
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Password</Text>
                     <TextInput
-                      style={[styles.input, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
+                      style={[
+                        styles.input,
+                        {
+                          backgroundColor: colors.bgInput,
+                          color: colors.text,
+                          borderColor: focusedField === 'password' ? '#00D2FF' : colors.border,
+                        },
+                      ]}
                       placeholder="Trading password"
                       placeholderTextColor={colors.textMuted}
                       value={credentials.password}
                       onChangeText={t => setCredentials(p => ({ ...p, password: t }))}
+                      onFocus={() => setFocusedField('password')}
+                      onBlur={() => setFocusedField(null)}
                       autoCapitalize="none"
                       autoCorrect={false}
                       secureTextEntry
@@ -622,11 +660,20 @@ export default function BrokerConnectScreen({ navigation }: any) {
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>TOTP Secret (optional)</Text>
                     <TextInput
-                      style={[styles.input, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
+                      style={[
+                        styles.input,
+                        {
+                          backgroundColor: colors.bgInput,
+                          color: colors.text,
+                          borderColor: focusedField === 'totp' ? '#00D2FF' : colors.border,
+                        },
+                      ]}
                       placeholder="2FA TOTP secret for auto-login"
                       placeholderTextColor={colors.textMuted}
                       value={credentials.totp}
                       onChangeText={t => setCredentials(p => ({ ...p, totp: t }))}
+                      onFocus={() => setFocusedField('totp')}
+                      onBlur={() => setFocusedField(null)}
                       autoCapitalize="none"
                       autoCorrect={false}
                     />
@@ -639,11 +686,20 @@ export default function BrokerConnectScreen({ navigation }: any) {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Access Token</Text>
                   <TextInput
-                    style={[styles.input, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: colors.bgInput,
+                        color: colors.text,
+                        borderColor: focusedField === 'accessToken' ? '#00D2FF' : colors.border,
+                      },
+                    ]}
                     placeholder="Enter your Groww access token"
                     placeholderTextColor={colors.textMuted}
                     value={credentials.accessToken}
                     onChangeText={t => setCredentials(p => ({ ...p, accessToken: t }))}
+                    onFocus={() => setFocusedField('accessToken')}
+                    onBlur={() => setFocusedField(null)}
                     autoCapitalize="none"
                     autoCorrect={false}
                     secureTextEntry
@@ -654,13 +710,19 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
               {/* Connect Button */}
               <TouchableOpacity
-                style={[styles.connectButton, { backgroundColor: selectedBroker?.color || colors.primary }]}
                 onPress={handleConnect}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
-                <Text style={styles.connectButtonText}>
-                  Connect to {selectedBroker?.label}
-                </Text>
+                <LinearGradient
+                  colors={['#F59E0B', '#3B82F6']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.connectButton}
+                >
+                  <Text style={styles.connectButtonText}>
+                    Connect to {selectedBroker?.label}
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -953,7 +1015,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   // ── Credentials Modal ─────────────────────────────────────────
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.75)',
     justifyContent: 'flex-end',
   },
   modalContent: {
@@ -961,6 +1023,16 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderTopRightRadius: BORDER_RADIUS.xxl,
     padding: SPACING.xl,
     maxHeight: '85%',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  connectButton: {
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xl,
+    overflow: 'hidden',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1012,13 +1084,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
-  },
-  connectButton: {
-    paddingVertical: SPACING.lg,
-    borderRadius: BORDER_RADIUS.md,
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.xl,
   },
   connectButtonText: {
     ...FONTS.semiBold,

@@ -1,0 +1,211 @@
+# =============================================================================
+# Broker Connection Flow — Zero-API Hybrid Gateway
+# =============================================================================
+# Tests the broker connection experience via development build:
+#   1. Login with test credentials
+#   2. Navigate to Connect Broker (from More screen)
+#   3. Verify ConnectBrokerView renders correctly:
+#      - Status pills: ZERO-API SYNC, 100% FREE, ENCRYPTED
+#      - Broker grid with 3 cards (Angel One, Zerodha, Groww)
+#      - Glassmorphic info card
+#   4. Open WebView session sync for each broker (tap → WebView opens)
+#   5. Close WebView via Cancel button (text-based selector)
+#   6. Re-open WebView for next broker
+#   7. Verify no connected-state elements are visible
+#   8. Navigate back to More screen
+#
+# NOTE: All three brokers open the WebView session sync (not a credentials
+# modal) because all have login URLs mapped. The credentials modal is only
+# accessible as a fallback for brokers without a login URL.
+#
+# Broker login URLs (for reference):
+#   - Zerodha: https://kite.zerodha.com/
+#   - Angel:   https://smartapi.angelbroking.com/
+#   - Groww:   https://groww.in/login
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ═══════════════════════════════════════════════════════════════════════════
+# 1. Login
+# ═══════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: "Welcome Back! 👋"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# Navigate to Home tab (More is default after login)
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 2. Navigate: More → Connect Broker
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Connect Broker"
+    direction: DOWN
+- tapOn:
+    text: "Connect Broker"
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 3. Verify ConnectBrokerView Renders Correctly
+# ═══════════════════════════════════════════════════════════════════════════
+# Header
+- assertVisible:
+    text: "Connect Broker"
+- assertVisible:
+    text: "Zero-API gateway"
+
+# Status pills
+- assertVisible:
+    text: "ZERO-API SYNC"
+- assertVisible:
+    text: "100% FREE"
+- assertVisible:
+    text: "ENCRYPTED"
+
+# Section + broker grid
+- assertVisible:
+    text: "Choose Your Broker"
+- assertVisible:
+    text: "Angel One"
+- assertVisible:
+    text: "Zerodha"
+- assertVisible:
+    text: "Groww"
+
+# Verify broker taglines
+- assertVisible:
+    text: "India's largest retail broking house"
+- assertVisible:
+    text: "India's biggest stock broker"
+- assertVisible:
+    text: "Simple, modern investing platform"
+
+# Verify each card has "Sync Now" badge
+- assertVisible:
+    text: "Sync Now"
+
+# Glassmorphic info card (scroll down if needed)
+- scrollUntilVisible:
+    element:
+      text: "Zero-API Hybrid Gateway"
+    direction: DOWN
+- assertVisible:
+    text: "Zero-API Hybrid Gateway"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 4. Open WebView — Zerodha (hasOAuth: true)
+# ═══════════════════════════════════════════════════════════════════════════
+- scrollUntilVisible:
+    element:
+      text: "Zerodha"
+    direction: UP
+- tapOn:
+    text: "Zerodha"
+- waitForAnimationToEnd
+
+# Verify the WebView modal rendered with header + Cancel
+- assertVisible:
+    text: "Connect Zerodha"
+- assertVisible:
+    text: "Cancel"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 5. Close WebView — Zerodha
+# ═══════════════════════════════════════════════════════════════════════════
+# Use the Cancel button text instead of point coordinates (more robust)
+- tapOn:
+    text: "Cancel"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify back on main Connect Broker screen
+- assertVisible:
+    text: "Choose Your Broker"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 6. Open & Close WebView — Angel One
+# ═══════════════════════════════════════════════════════════════════════════
+# All brokers open WebView because all have login URLs mapped.
+# The hasOAuth flag is cosmetic and not used for routing.
+- tapOn:
+    text: "Angel One"
+- waitForAnimationToEnd
+
+# Verify Angel One WebView header
+- assertVisible:
+    text: "Connect Angel One"
+- assertVisible:
+    text: "Cancel"
+
+# Close via Cancel
+- tapOn:
+    text: "Cancel"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- assertVisible:
+    text: "Choose Your Broker"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 7. Open & Close WebView — Groww
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    text: "Groww"
+- waitForAnimationToEnd
+
+# Verify Groww WebView header
+- assertVisible:
+    text: "Connect Groww"
+- assertVisible:
+    text: "Cancel"
+
+# Close via Cancel
+- tapOn:
+    text: "Cancel"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- assertVisible:
+    text: "Choose Your Broker"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 8. Verify No Connected State
+# ═══════════════════════════════════════════════════════════════════════════
+# Since we never completed a real broker authentication, no session should
+# be stored and no connection banner should appear.
+- assertNotVisible:
+    text: "Disconnect"
+- assertNotVisible:
+    text: "Test API"
+- assertNotVisible:
+    text: "Session Active"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 9. Navigate Back to More Screen
+# ═══════════════════════════════════════════════════════════════════════════
+# Tap the back arrow (Ionicons arrow-back in header)
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+# Confirm we're back on the More screen
+- assertVisible:
+    text: "More"

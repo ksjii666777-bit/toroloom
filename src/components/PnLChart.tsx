@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Animated } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Line, Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -37,19 +38,18 @@ export default function PnLChart({
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; point: PnLPoint } | null>(null);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useSharedValue(1);
+  const fadeStyle = useAnimatedStyle(() => ({
+    opacity: fadeAnim.value,
+  }));
   const [prevDataLength, setPrevDataLength] = useState(0);
 
   // Animate fade-in when new data arrives (streaming)
   useEffect(() => {
     const totalLen = data.length + streamData.length;
     if (autoRefresh && totalLen > prevDataLength && prevDataLength > 0) {
-      fadeAnim.setValue(0.6);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }).start();
+      fadeAnim.value = 0.6;
+      fadeAnim.value = withTiming(1, { duration: 400 });
     }
     setPrevDataLength(totalLen);
   }, [data.length, streamData.length, autoRefresh]);
@@ -162,7 +162,7 @@ export default function PnLChart({
   };
 
   return (
-    <Animated.View style={[styles.container, { height }, autoRefresh ? { opacity: fadeAnim } : {}]}>
+    <Animated.View style={[styles.container, { height }, fadeStyle]}>
       {tooltip && (
         <View style={[styles.tooltip, { left: Math.min(Math.max(tooltip.x - 60, 8), width - 130) }]}>
           <Text style={[styles.tooltipValue, { color: tooltip.point.cumulativePnl >= 0 ? colors.marketUp : colors.marketDown }]}>

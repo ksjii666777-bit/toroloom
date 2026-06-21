@@ -492,7 +492,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
           value: alertData.value ?? 0,
           threshold: rule.threshold,
           timestamp: new Date().toISOString(),
-          summary: alertTitle.replace(/[🔴📉📈💰⚠️🛡️🎯]/g, '').trim().split('.')[0],
+          summary: alertTitle.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').trim().split('.')[0],
         };
 
         // Only increment badge count if the rule hasn't opted out

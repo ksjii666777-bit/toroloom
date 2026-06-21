@@ -54,6 +54,7 @@ vi.mock('../context/ThemeContext', () => ({
 // ==================== Imports ====================
 
 import { render, fireEvent } from './testUtils';
+import type { RenderResult } from './testUtils';
 import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../store/subscriptionStore';
 import { DEFAULT_FEATURE_MATRIX } from '../types';
 import type { TenantConfig, SubscriptionFeature } from '../types';
@@ -67,7 +68,8 @@ function advanceAnimations() {
 }
 
 /**
- * Reset the subscription store to a clean default state.
+ * Reset the subscription store to a clean default state,
+ * optionally with the given tenant config.
  */
 function resetStore(config?: TenantConfig | null) {
   useSubscriptionStore.setState({
@@ -85,18 +87,103 @@ function resetStore(config?: TenantConfig | null) {
   });
 }
 
+/** Spy on configureTenant with a no-op async implementation. */
+function spyOnConfigureTenant() {
+  const spy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
+  spy.mockImplementation(async () => {});
+  return spy;
+}
+
+/**
+ * Spy on configureTenant with an implementation that actually updates the
+ * store's tenantConfig — used by Active Config display tests that need the
+ * component to reflect saved state on re-render.
+ */
+function spyOnConfigureTenantWithStoreUpdate() {
+  const spy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
+  spy.mockImplementation(async (config: TenantConfig) => {
+    useSubscriptionStore.setState({ tenantConfig: config });
+  });
+  return spy;
+}
+
+/**
+ * Capture the destructive "Reset" button callback from an Alert.alert
+ * confirmation dialog. Returns a getter for the captured callback and a
+ * restore function. Uses a getter because the callback is captured asynchronously
+ * inside the Alert.alert override — destructuring a value directly would copy
+ * `null` before the callback is invoked.
+ */
+function captureResetAlert() {
+  let capturedOnPress: (() => void) | null = null;
+  const originalAlert = Alert.alert;
+  Alert.alert = ((_title: string, _message: string, buttons?: any[]) => {
+    const resetBtn = buttons?.find((b: any) => b.style === 'destructive');
+    if (resetBtn?.onPress) capturedOnPress = resetBtn.onPress;
+  }) as any;
+  return {
+    getCapturedOnPress: () => capturedOnPress,
+    restore: () => { Alert.alert = originalAlert; },
+  };
+}
+
+/**
+ * Press the "Free" tier chip on the last feature row (behavioural_journal,
+ * default: elite). Uses getAllByText('Free') and targets the last (deepest)
+ * match, which is the last row's Free chip in DFS order.
+ */
+function pressLastFreeChip(result: RenderResult) {
+  const freeChips = result.getAllByText('Free');
+  act(() => { fireEvent.press(freeChips[freeChips.length - 1]); });
+}
+
+/** Fill Razorpay key fields. */
+function fillRazorpayKeys(result: RenderResult, keyId: string, keySecret: string) {
+  act(() => { fireEvent.changeText(result.getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), keyId); });
+  act(() => { fireEvent.changeText(result.getByPlaceholderText('Enter key secret'), keySecret); });
+}
+
+/** Fill Pro pricing fields. */
+function fillProPricing(result: RenderResult, monthly: string, yearly: string) {
+  const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
+  act(() => { fireEvent.changeText(result.getByPlaceholderText(String(proPlan.price)), monthly); });
+  act(() => { fireEvent.changeText(result.getByPlaceholderText(String(proPlan.priceYearly)), yearly); });
+}
+
+/** Fill Elite pricing fields. */
+function fillElitePricing(result: RenderResult, monthly: string, yearly: string) {
+  const elitePlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'elite')!;
+  act(() => { fireEvent.changeText(result.getByPlaceholderText(String(elitePlan.price)), monthly); });
+  act(() => { fireEvent.changeText(result.getByPlaceholderText(String(elitePlan.priceYearly)), yearly); });
+}
+
+/**
+ * Save the form via the "Save Tenant Config" button. With the reactive
+ * subscription to s.tenantConfig, the component automatically re-renders
+ * when the store updates — no forced re-render needed.
+ */
+function save(result: RenderResult) {
+  act(() => { fireEvent.press(result.getByText('Save Tenant Config')); });
+  act(() => { vi.advanceTimersByTime(0); });
+}
+
+// ==================== File-level Setup ====================
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  mockNavigate.mockClear();
+  mockGoBack.mockClear();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 // ==================== Empty Form Rendering ====================
 
 describe('TenantConfigScreen — Empty Form', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders the header with title and back button', () => {
@@ -206,19 +293,10 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
   };
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore(existingConfig);
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it('shows pre-filled config values rendered in Active Config preview', () => {
-    // Pre-fill is verified via Active Config preview — see tests above.
-    // This test confirms the preview renders with the existing config data.
     const { getByText } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
@@ -253,8 +331,6 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
-    // The Active Config section renders: "Razorpay:  Configured (key_id...)"
-    // Look for the Razorpay label and Configured text
     expect(getByText(/Razorpay/)).toBeDefined();
     expect(getByText(/Configured/)).toBeDefined();
   });
@@ -289,14 +365,7 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
 
 describe('TenantConfigScreen — Form Interactions', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('does not throw when pressing the back button area', () => {
@@ -304,28 +373,23 @@ describe('TenantConfigScreen — Form Interactions', () => {
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
-    // Pressing "Tenant Config" title acts as a proxy — pressing any visible
-    // element verifies that the component handles press events without crashing.
     expect(() => {
       act(() => { fireEvent.press(getByText('Tenant Config')); });
     }).not.toThrow();
   });
 
   it('saves with valid inputs and calls configureTenant', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText, getByPlaceholderText } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Fill in tenant identity fields
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'my_broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'My Broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'mybroker.app'); });
 
-    // Press Save
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
 
     expect(configureTenantSpy).toHaveBeenCalledTimes(1);
@@ -341,22 +405,18 @@ describe('TenantConfigScreen — Form Interactions', () => {
   });
 
   it('saves with primaryColor set and verifies it is included in the config', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText, getByPlaceholderText } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Tenant identity
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'color_broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Color Broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'color.app'); });
-    // Set primary color
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. #FF6600'), '#00FF00'); });
 
-    // Press Save
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
 
     expect(configureTenantSpy).toHaveBeenCalledWith(
@@ -370,20 +430,17 @@ describe('TenantConfigScreen — Form Interactions', () => {
   });
 
   it('saves without primaryColor when field is left empty', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText, getByPlaceholderText } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Tenant identity — leave primaryColor empty
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'nocolor_broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'No Color Broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'nocolor.app'); });
 
-    // Press Save
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
 
     expect(configureTenantSpy).toHaveBeenCalledWith(
@@ -401,15 +458,11 @@ describe('TenantConfigScreen — Form Interactions', () => {
     );
     advanceAnimations();
 
-    // Fill name and domain but leave ID empty
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'My Broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'mybroker.app'); });
 
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-
-    // Press Save
+    const configureTenantSpy = spyOnConfigureTenant();
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-
     expect(configureTenantSpy).not.toHaveBeenCalled();
     configureTenantSpy.mockRestore();
   });
@@ -420,11 +473,10 @@ describe('TenantConfigScreen — Form Interactions', () => {
     );
     advanceAnimations();
 
-    // Fill ID and domain but leave name empty
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'my_broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'mybroker.app'); });
 
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
+    const configureTenantSpy = spyOnConfigureTenant();
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
     expect(configureTenantSpy).not.toHaveBeenCalled();
     configureTenantSpy.mockRestore();
@@ -436,40 +488,35 @@ describe('TenantConfigScreen — Form Interactions', () => {
     );
     advanceAnimations();
 
-    // Fill ID and name but leave domain empty
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'my_broker'); });
     act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'My Broker'); });
 
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
+    const configureTenantSpy = spyOnConfigureTenant();
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
     expect(configureTenantSpy).not.toHaveBeenCalled();
     configureTenantSpy.mockRestore();
   });
 
   it('saves with Razorpay keys and pricing overrides', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
-    const { getByText, getByPlaceholderText } = render(
+    const r = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
     // Tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'pay_broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Pay Broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'paybroker.app'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'pay_broker'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Pay Broker'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'paybroker.app'); });
 
     // Razorpay keys
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_live_test123'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_test_secret_xyz'); });
+    fillRazorpayKeys(r, 'rzp_live_test123', 'sk_test_secret_xyz');
 
     // Pro pricing
-    const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.price)), '249'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.priceYearly)), '2499'); });
+    fillProPricing(r, '249', '2499');
 
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
+    act(() => { fireEvent.press(r.getByText('Save Tenant Config')); });
 
     expect(configureTenantSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -488,8 +535,6 @@ describe('TenantConfigScreen — Form Interactions', () => {
   });
 
   it('saves with feature overrides from pre-populated tenant config', () => {
-    // Pre-populate the store with feature overrides so the component initializes
-    // its featureOverrides state from existingConfig.
     const preconfiguredTenant: TenantConfig = {
       id: 'custom_broker',
       name: 'Custom Broker',
@@ -501,16 +546,13 @@ describe('TenantConfigScreen — Form Interactions', () => {
     };
     resetStore(preconfiguredTenant);
 
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Press Save — the featureOverrides state has already been initialized
-    // from existingConfig.featureOverrides
     act(() => { fireEvent.press(getByText('Save Tenant Config')); });
     advanceAnimations();
 
@@ -530,7 +572,6 @@ describe('TenantConfigScreen — Form Interactions', () => {
   });
 
   it('renders override default text showing active override direction', () => {
-    // Set up a tenant with an override so we can see the "→ free" text rendered
     const tenantWithOverride: TenantConfig = {
       id: 'override_test',
       name: 'Override Test',
@@ -546,36 +587,30 @@ describe('TenantConfigScreen — Form Interactions', () => {
     );
     advanceAnimations();
 
-    // The overrideDefault text for iron_lock should now show "Default: elite → free"
     expect(getByText(/Default: elite/)).toBeDefined();
     expect(getByText(/→ free/)).toBeDefined();
   });
 
-  it('toggles a chip via the UI and verifies the override appears in saved config', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async () => {});
+  it('toggles a feature chip via the UI and verifies the override appears in saved config', () => {
+    const configureTenantSpy = spyOnConfigureTenant();
 
-    const { getByText, getByPlaceholderText } = render(
+    const r = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'chip_test'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Chip Test'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'chip.test'); });
+    // Fill tenant identity
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'chip_test'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Chip Test'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'chip.test'); });
 
-    // getByText('Free') returns the deepest leaf "Free" element in DFS order,
-    // which is the LAST feature row's Free chip (behavioural_journal, default: elite).
-    // Press this chip to toggle an override.
-    act(() => { fireEvent.press(getByText('Free')); });
+    // Toggle the last feature row's Free chip (behavioural_journal, default: elite → free)
+    pressLastFreeChip(r);
     advanceAnimations();
 
-    // Press Save
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
+    act(() => { fireEvent.press(r.getByText('Save Tenant Config')); });
     advanceAnimations();
 
-    // Verify at least one feature override was saved (we pressed some chip)
     expect(configureTenantSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'chip_test',
@@ -586,503 +621,317 @@ describe('TenantConfigScreen — Form Interactions', () => {
     configureTenantSpy.mockRestore();
   });
 
-  it('shows saved tenant details in Active Config section after save', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
+  // ── Active Config Display Tests (parameterized) ──
+
+  describe('Active Config after save', () => {
+    it('shows saved tenant details in Active Config section after save', () => {
+      const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
+
+      const r = render(
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      );
+      advanceAnimations();
+
+      expect(r.queryByText('Active Config')).toBeNull();
+
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'saved_broker'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Saved Broker'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'saved.app'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. #FF6600'), '#00FF00'); });
+      fillRazorpayKeys(r, 'rzp_saved_test', 'sk_saved');
+      fillProPricing(r, '499', '4999');
+
+      save(r);
+
+      expect(r.getByText('Active Config')).toBeDefined();
+      expect(r.getByText('saved_broker')).toBeDefined();
+      expect(r.getByText('Saved Broker')).toBeDefined();
+      expect(r.getByText('saved.app')).toBeDefined();
+      expect(r.getByText(/#00FF00/)).toBeDefined();
+      expect(r.getByText(/rzp_saved/)).toBeDefined();
+      expect(r.getByText('1 plan(s)')).toBeDefined();
+
+      configureTenantSpy.mockRestore();
     });
 
-    const { getByText, getByPlaceholderText, queryByText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
+    it('shows feature overrides in Active Config section after save with non-default overrides', () => {
+      const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
-    // Start with empty form — Active Config should not be visible
-    expect(queryByText('Active Config')).toBeNull();
+      const r = render(
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      );
+      advanceAnimations();
 
-    // Fill in all fields
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'saved_broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Saved Broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'saved.app'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. #FF6600'), '#00FF00'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_saved_test'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_saved'); });
+      expect(r.queryByText('Active Config')).toBeNull();
 
-    // Pro pricing
-    const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.price)), '499'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.priceYearly)), '4999'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'override_broker'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Override Broker'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'override.app'); });
 
-    // Press Save — spy updates store's tenantConfig
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
+      pressLastFreeChip(r);
+      advanceAnimations();
 
-    // Force re-render so component re-reads getTenantConfig()
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+      save(r);
+
+      expect(r.getByText('Active Config')).toBeDefined();
+      expect(r.getByText('override_broker')).toBeDefined();
+      expect(r.getByText('Override Broker')).toBeDefined();
+      expect(r.getByText('override.app')).toBeDefined();
+      expect(r.getByText('1 feature(s)')).toBeDefined();
+
+      configureTenantSpy.mockRestore();
     });
 
-    // Active Config section should now appear with saved details
-    expect(getByText('Active Config')).toBeDefined();
-    expect(getByText('saved_broker')).toBeDefined();
-    expect(getByText('Saved Broker')).toBeDefined();
-    expect(getByText('saved.app')).toBeDefined();
-    expect(getByText(/#00FF00/)).toBeDefined();
-
-    // Razorpay and pricing should be mentioned
-    expect(getByText(/rzp_saved/)).toBeDefined();
-    expect(getByText('1 plan(s)')).toBeDefined();
-
-    configureTenantSpy.mockRestore();
-  });
-
-  it('shows feature overrides in Active Config section after save with non-default overrides', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
-
-    const { getByText, getByPlaceholderText, queryByText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
-
-    // Start with empty form — Active Config should not be visible
-    expect(queryByText('Active Config')).toBeNull();
-
-    // Fill tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'override_broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Override Broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'override.app'); });
-
-    // Toggle the last feature row's Free chip (behavioural_journal, default: elite → free).
-    // getByText('Free') returns the deepest leaf "Free" element in DFS order,
-    // which is the LAST feature row's Free chip.
-    act(() => { fireEvent.press(getByText('Free')); });
-    advanceAnimations();
-
-    // Press Save — spy updates store's tenantConfig with the overrides
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
-
-    // Force re-render so component re-reads getTenantConfig()
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
-
-    // Active Config section should appear with tenant details
-    expect(getByText('Active Config')).toBeDefined();
-    expect(getByText('override_broker')).toBeDefined();
-    expect(getByText('Override Broker')).toBeDefined();
-    expect(getByText('override.app')).toBeDefined();
-
-    // Should show 1 feature override (behavioural_journal → free)
-    expect(getByText('1 feature(s)')).toBeDefined();
-
-    configureTenantSpy.mockRestore();
-  });
-
-  it('shows Razorpay keys in Active Config after save with only keys (no pricing)', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
-
-    const { getByText, getByPlaceholderText, queryByText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
-
-    // Start with empty form — Active Config should not be visible
-    expect(queryByText('Active Config')).toBeNull();
-
-    // Fill tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'razor_keys'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Razor Keys'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'razorkeys.app'); });
-
-    // Fill Razorpay keys only (no pricing)
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_live_abcdefghijkl'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_live_secret_key'); });
-
-    // Press Save — spy updates store's tenantConfig
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
-
-    // Force re-render so component re-reads getTenantConfig()
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
-
-    // Active Config section should appear
-    expect(getByText('Active Config')).toBeDefined();
-    expect(getByText('razor_keys')).toBeDefined();
-
-    // Razorpay section should show configured status with keyId prefix (first 12 chars)
-    expect(getByText(/Razorpay/)).toBeDefined();
-    expect(getByText(/Configured/)).toBeDefined();
-    // The keyId prefix slice(0, 12) = 'rzp_live_abc' (12 chars), rendered with ellipsis
-    expect(getByText(/rzp_live_abc/)).toBeDefined();
-
-    // Pricing overrides should NOT appear (no pricing was set)
-    // "Pricing Overrides:" is the label in Active Config's pricing count line
-    // and only renders when razorpay.pricing is defined
-    expect(queryByText(/Pricing Overrides:/)).toBeNull();
-
-    configureTenantSpy.mockRestore();
-  });
-
-  it('shows pricing overrides in Active Config after save with keys and Pro pricing', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
-
-    const { getByText, getByPlaceholderText, queryByText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
-
-    // Start with empty form — Active Config should not be visible
-    expect(queryByText('Active Config')).toBeNull();
-
-    // Fill tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'price_override'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Price Override'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'priceoverride.app'); });
-
-    // Fill Razorpay keys (required for pricing section)
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_live_price_test'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_price_secret'); });
-
-    // Fill Pro pricing only (one plan with overrides)
-    const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.price)), '499'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.priceYearly)), '4999'); });
-
-    // Press Save — spy updates store's tenantConfig
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
-
-    // Force re-render so component re-reads getTenantConfig()
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
-
-    // Active Config section should appear
-    expect(getByText('Active Config')).toBeDefined();
-    expect(getByText('price_override')).toBeDefined();
-    expect(getByText('Price Override')).toBeDefined();
-
-    // Pricing overrides should show Pro plan count
-    expect(getByText(/Pricing Overrides:/)).toBeDefined();
-    expect(getByText('1 plan(s)')).toBeDefined();
-
-    // Razorpay should also be configured
-    expect(getByText(/Configured/)).toBeDefined();
-
-    // Feature overrides should NOT appear (none were set)
-    expect(queryByText(/Feature Overrides:/)).toBeNull();
-
-    configureTenantSpy.mockRestore();
-  });
-
-  it('shows both Pro and Elite pricing in Active Config after save (2 plan(s))', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
-
-    const { getByText, getByPlaceholderText, queryByText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
-
-    // Start with empty form — Active Config should not be visible
-    expect(queryByText('Active Config')).toBeNull();
-
-    // Fill tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'dual_price'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Dual Price'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'dual.app'); });
-
-    // Fill Razorpay keys (required for pricing section)
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_dual_price'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_dual_secret'); });
-
-    // Fill Pro pricing
-    const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.price)), '399'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.priceYearly)), '3999'); });
-
-    // Fill Elite pricing too
-    const elitePlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'elite')!;
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(elitePlan.price)), '899'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(elitePlan.priceYearly)), '8999'); });
-
-    // Press Save — spy updates store's tenantConfig
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
-
-    // Force re-render so component re-reads getTenantConfig()
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
-
-    // Active Config section should appear with both pricing plans
-    expect(getByText('Active Config')).toBeDefined();
-    expect(getByText('dual_price')).toBeDefined();
-
-    // Pricing overrides should show 2 plan(s) — both Pro and Elite
-    expect(getByText(/Pricing Overrides:/)).toBeDefined();
-    expect(getByText('2 plan(s)')).toBeDefined();
-
-    configureTenantSpy.mockRestore();
-  });
-
-  it('updates Active Config tenant name after re-saving with a different name', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
-
-    const { getByText, getByPlaceholderText, queryByText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
-
-    // Start with empty form — Active Config should not be visible
-    expect(queryByText('Active Config')).toBeNull();
-
-    // ── First save ─────────────────────────────────────────
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 're_save'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Original Name'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'resave.app'); });
-
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
-
-    // Force re-render — Active Config should now appear with original name
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
-
-    expect(getByText('Active Config')).toBeDefined();
-    expect(getByText('Original Name')).toBeDefined();
-    expect(queryByText('Updated Name')).toBeNull();
-
-    // ── Second save with updated name ──────────────────────
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Updated Name'); });
-
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
-
-    // Force re-render — Active Config should now show the updated name
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
-
-    // Old name should be gone, new name should appear
-    expect(queryByText('Original Name')).toBeNull();
-    expect(getByText('Updated Name')).toBeDefined();
-
-    configureTenantSpy.mockRestore();
-  });
-
-  it('renders full Active Config section with all fields populated after save', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
-
-    const { getByText, getByPlaceholderText, queryByText, root, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
-
-    // Start with empty form — Active Config should not be visible
-    expect(queryByText('Active Config')).toBeNull();
-
-    // ── 1. Fill identity fields ──────────────────────────────
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'full_broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Full Broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'full.app'); });
-
-    // ── 2. Fill primary color ────────────────────────────────
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. #FF6600'), '#AA00FF'); });
-
-    // ── 3. Toggle a feature override chip ────────────────────
-    // getByText('Free') targets the last feature's Free chip (behavioural_journal, elite → free)
-    act(() => { fireEvent.press(getByText('Free')); });
-    advanceAnimations();
-
-    // ── 4. Fill Razorpay keys ────────────────────────────────
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_live_full_config'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_full_secret'); });
-
-    // ── 5. Fill Pro pricing ──────────────────────────────────
-    const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.price)), '599'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.priceYearly)), '5999'); });
-
-    // ── 6. Save — spy updates store with full config ────────
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
-
-    // Force re-render so component re-reads getTenantConfig()
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
-
-    // ── 7. Assert ALL Active Config sections are present ────
-    expect(getByText('Active Config')).toBeDefined();
-
-    // Identity
-    expect(getByText('full_broker')).toBeDefined();
-    expect(getByText('Full Broker')).toBeDefined();
-    expect(getByText('full.app')).toBeDefined();
-
-    // Primary color label, hex text, and swatch View with matching backgroundColor
-    expect(getByText('Primary Color:')).toBeDefined();
-    expect(getByText(/#AA00FF/)).toBeDefined();
-    const allViews = root.findAllByType(View);
-    const swatch = allViews.find((v) => {
-      const style = v.props.style;
-      return Array.isArray(style) && style[style.length - 1]?.backgroundColor === '#AA00FF';
-    });
-    expect(swatch).toBeDefined();
-
-    // Feature overrides
-    expect(getByText(/Feature Overrides:/)).toBeDefined();
-    expect(getByText('1 feature(s)')).toBeDefined();
-
-    // Razorpay
-    expect(getByText(/Configured/)).toBeDefined();
-    expect(getByText(/rzp_live_ful/)).toBeDefined();
-
-    // Pricing overrides
-    expect(getByText(/Pricing Overrides:/)).toBeDefined();
-    expect(getByText('1 plan(s)')).toBeDefined();
-
-    configureTenantSpy.mockRestore();
-  });
-
-  it('shows multiple feature overrides in Active Config after toggling additional chips', () => {
-    // Pre-populate store with 2 feature overrides so the form state initializes with them
-    const preconfiguredTenant: TenantConfig = {
-      id: 'multi_override',
-      name: 'Multi Override',
-      domain: 'multi.app',
-      featureOverrides: {
-        iron_lock: 'free',   // default: elite → override
-        ad_free: 'elite',    // default: pro → override
+    // Parameterized pricing variations
+    const pricingVariants = [
+      {
+        name: 'Razorpay keys only (no pricing)',
+        fillPricing: (r: RenderResult) => {},
+        expectedPlans: null,
+        expectPricingSection: false,
+        expectConfigured: true,
       },
-    };
-    resetStore(preconfiguredTenant);
+      {
+        name: 'keys + Pro pricing (1 plan)',
+        fillPricing: (r: RenderResult) => fillProPricing(r, '499', '4999'),
+        expectedPlans: 1,
+        expectPricingSection: true,
+        expectConfigured: true,
+      },
+      {
+        name: 'keys + Pro + Elite pricing (2 plans)',
+        fillPricing: (r: RenderResult) => {
+          fillProPricing(r, '399', '3999');
+          fillElitePricing(r, '899', '8999');
+        },
+        expectedPlans: 2,
+        expectPricingSection: true,
+        expectConfigured: true,
+      },
+    ] as const;
 
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
+    it.each(pricingVariants)('$name', ({ fillPricing, expectedPlans, expectPricingSection, expectConfigured }) => {
+      const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
-    const { getByText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
+      const r = render(
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      );
+      advanceAnimations();
 
-    // Toggle one more chip via UI — getByText('Free') targets the last feature's Free chip
-    // (behavioural_journal, default: elite → free), adding a 3rd override
-    act(() => { fireEvent.press(getByText('Free')); });
-    advanceAnimations();
+      expect(r.queryByText('Active Config')).toBeNull();
 
-    // Press Save — spy updates store's tenantConfig with all 3 feature overrides
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
+      // Tenant identity
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'pricing_test'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Pricing Test'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'pricing.test'); });
 
-    // Force re-render so component re-reads getTenantConfig()
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
+      // Razorpay keys
+      fillRazorpayKeys(r, 'rzp_live_' + 'pricing_test', 'sk_pricing_secret');
 
-    // Active Config should show the correct count of feature overrides
-    expect(getByText('Active Config')).toBeDefined();
-    expect(getByText('Multi Override')).toBeDefined();
-    expect(getByText('3 feature(s)')).toBeDefined();
+      // Plan-specific pricing
+      fillPricing(r);
 
-    configureTenantSpy.mockRestore();
-  });
+      save(r);
 
-  it('shows the correct primaryColor swatch color in Active Config section after save', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
+      expect(r.getByText('Active Config')).toBeDefined();
+      expect(r.getByText('pricing_test')).toBeDefined();
+      expect(r.getByText('Pricing Test')).toBeDefined();
 
-    const { getByText, getByPlaceholderText, queryByText, root, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    advanceAnimations();
-
-    // Start with empty form — Active Config should not be visible
-    expect(queryByText('Active Config')).toBeNull();
-
-    // Fill tenant identity + primaryColor
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'swatch_test'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Swatch Test'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'swatch.app'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. #FF6600'), '#FF00FF'); });
-
-    // Press Save — spy updates store's tenantConfig
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
-    act(() => { vi.advanceTimersByTime(0); });
-
-    // Force re-render so component re-reads getTenantConfig()
-    act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
-    });
-
-    // Active Config section should appear
-    expect(getByText('Active Config')).toBeDefined();
-
-    // Verify primaryColor label and hex text are rendered
-    expect(getByText('Primary Color:')).toBeDefined();
-    expect(getByText(/#FF00FF/)).toBeDefined();
-
-    // Verify the color swatch View has the correct backgroundColor matching the saved color.
-    // The swatch uses an array style: [styles.colorSwatch, { backgroundColor: '...' }]
-    const allViews = root.findAllByType(View);
-    const swatch = allViews.find((v) => {
-      const style = v.props.style;
-      if (Array.isArray(style) && style.length > 0) {
-        // Last element is the inline override: { backgroundColor: '#FF00FF' }
-        return style[style.length - 1]?.backgroundColor === '#FF00FF';
+      if (expectConfigured) {
+        expect(r.getByText(/Configured/)).toBeDefined();
       }
-      return false;
-    });
-    expect(swatch).toBeDefined();
 
-    configureTenantSpy.mockRestore();
+      if (expectPricingSection && expectedPlans !== null) {
+        expect(r.getByText(/Pricing Overrides:/)).toBeDefined();
+        expect(r.getByText(`${expectedPlans} plan(s)`)).toBeDefined();
+      } else {
+        expect(r.queryByText(/Pricing Overrides:/)).toBeNull();
+      }
+
+      if (!expectPricingSection && expectedPlans === null && expectConfigured) {
+        // Razorpay-only case — key prefix should be visible
+        expect(r.getByText(/rzp_live_p/)).toBeDefined();
+      }
+
+      configureTenantSpy.mockRestore();
+    });
+
+    it('updates Active Config tenant name after re-saving with a different name', () => {
+      const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
+
+      const r = render(
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      );
+      advanceAnimations();
+
+      expect(r.queryByText('Active Config')).toBeNull();
+
+      // First save
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 're_save'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Original Name'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'resave.app'); });
+
+      save(r);
+
+      expect(r.getByText('Active Config')).toBeDefined();
+      expect(r.getByText('Original Name')).toBeDefined();
+      expect(r.queryByText('Updated Name')).toBeNull();
+
+      // Second save with updated name
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Updated Name'); });
+
+      save(r);
+
+      expect(r.queryByText('Original Name')).toBeNull();
+      expect(r.getByText('Updated Name')).toBeDefined();
+
+      configureTenantSpy.mockRestore();
+    });
+
+    it('renders full Active Config section with all fields populated after save', () => {
+      const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
+
+      const r = render(
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      );
+      advanceAnimations();
+
+      expect(r.queryByText('Active Config')).toBeNull();
+
+      // 1. Fill identity fields
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'full_broker'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Full Broker'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'full.app'); });
+
+      // 2. Fill primary color
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. #FF6600'), '#AA00FF'); });
+
+      // 3. Toggle a feature override chip
+      pressLastFreeChip(r);
+      advanceAnimations();
+
+      // 4. Fill Razorpay keys
+      fillRazorpayKeys(r, 'rzp_live_full_config', 'sk_full_secret');
+
+      // 5. Fill Pro pricing
+      fillProPricing(r, '599', '5999');
+
+      // 6. Save
+      save(r);
+
+      // 7. Assert ALL Active Config sections
+      expect(r.getByText('Active Config')).toBeDefined();
+
+      // Identity
+      expect(r.getByText('full_broker')).toBeDefined();
+      expect(r.getByText('Full Broker')).toBeDefined();
+      expect(r.getByText('full.app')).toBeDefined();
+
+      // Primary color
+      expect(r.getByText('Primary Color:')).toBeDefined();
+      expect(r.getByText(/#AA00FF/)).toBeDefined();
+      const allViews = r.root.findAllByType(View);
+      const swatch = allViews.find((v) => {
+        const style = v.props.style;
+        return Array.isArray(style) && style[style.length - 1]?.backgroundColor === '#AA00FF';
+      });
+      expect(swatch).toBeDefined();
+
+      // Feature overrides
+      expect(r.getByText(/Feature Overrides:/)).toBeDefined();
+      expect(r.getByText('1 feature(s)')).toBeDefined();
+
+      // Razorpay
+      expect(r.getByText(/Configured/)).toBeDefined();
+      expect(r.getByText(/rzp_live_ful/)).toBeDefined();
+
+      // Pricing overrides
+      expect(r.getByText(/Pricing Overrides:/)).toBeDefined();
+      expect(r.getByText('1 plan(s)')).toBeDefined();
+
+      configureTenantSpy.mockRestore();
+    });
+
+    it('shows multiple feature overrides in Active Config after toggling additional chips', () => {
+      const preconfiguredTenant: TenantConfig = {
+        id: 'multi_override',
+        name: 'Multi Override',
+        domain: 'multi.app',
+        featureOverrides: {
+          iron_lock: 'free',
+          ad_free: 'elite',
+        },
+      };
+      resetStore(preconfiguredTenant);
+
+      const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
+
+      const r = render(
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      );
+      advanceAnimations();
+
+      pressLastFreeChip(r);
+      advanceAnimations();
+
+      save(r);
+
+      expect(r.getByText('Active Config')).toBeDefined();
+      expect(r.getByText('Multi Override')).toBeDefined();
+      expect(r.getByText('3 feature(s)')).toBeDefined();
+
+      configureTenantSpy.mockRestore();
+    });
+
+    it('shows the correct primaryColor swatch color in Active Config section after save', () => {
+      const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
+
+      const r = render(
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      );
+      advanceAnimations();
+
+      expect(r.queryByText('Active Config')).toBeNull();
+
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'swatch_test'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Swatch Test'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'swatch.app'); });
+      act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. #FF6600'), '#FF00FF'); });
+
+      save(r);
+
+      expect(r.getByText('Active Config')).toBeDefined();
+      expect(r.getByText('Primary Color:')).toBeDefined();
+      expect(r.getByText(/#FF00FF/)).toBeDefined();
+
+      const allViews = r.root.findAllByType(View);
+      const swatch = allViews.find((v) => {
+        const style = v.props.style;
+        return Array.isArray(style) && style.length > 0 &&
+          style[style.length - 1]?.backgroundColor === '#FF00FF';
+      });
+      expect(swatch).toBeDefined();
+
+      configureTenantSpy.mockRestore();
+    });
   });
+
+  // ── Direct save tests (no Active Config display) ──
 
   it('saves with only Razorpay keys and no pricing overrides', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
-    const { getByText, getByPlaceholderText } = render(
+    const r = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'razoronly'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Razor Only'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'razoronly.app'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'razoronly'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Razor Only'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'razoronly.app'); });
+    fillRazorpayKeys(r, 'rzp_live_razoronly', 'sk_razoronly');
 
-    // Fill Razorpay keys — leave pricing inputs blank
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_live_razoronly'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_razoronly'); });
-
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
+    act(() => { fireEvent.press(r.getByText('Save Tenant Config')); });
 
     expect(configureTenantSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1099,99 +948,70 @@ describe('TenantConfigScreen — Form Interactions', () => {
   });
 
   it('saves with pricing on only one plan (Pro) and leaves the other (Elite) blank', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
-    const { getByText, getByPlaceholderText } = render(
+    const r = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'partial_price'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Partial Price'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'partial.app'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'partial_price'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Partial Price'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'partial.app'); });
+    fillRazorpayKeys(r, 'rzp_partial', 'sk_partial');
+    fillProPricing(r, '299', '2999');
 
-    // Set Razorpay keys
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_partial'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_partial'); });
-
-    // Fill Pro pricing only
-    const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
-    const elitePlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'elite')!;
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.price)), '299'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.priceYearly)), '2999'); });
-
-    // Leave Elite pricing blank
-
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
+    act(() => { fireEvent.press(r.getByText('Save Tenant Config')); });
 
     const callArg = configureTenantSpy.mock.calls[0][0];
     expect(callArg.razorpay!.pricing).toEqual({
       plan_pro: { monthly: 299, yearly: 2999 },
     });
-    // Elite plan should NOT appear in pricing
     expect(callArg.razorpay!.pricing!.plan_elite).toBeUndefined();
 
     configureTenantSpy.mockRestore();
   });
 
   it('excludes pricing overrides when both fields are left blank', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
-    const { getByText, getByPlaceholderText } = render(
+    const r = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'noprice_broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'No Price Broker'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'noprice.app'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'noprice_broker'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'No Price Broker'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'noprice.app'); });
+    fillRazorpayKeys(r, 'rzp_test_noprice', 'sk_secret');
 
-    // Set Razorpay keys so the config includes a razorpay section
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. rzp_live_xxxxxxxx'), 'rzp_test_noprice'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('Enter key secret'), 'sk_secret'); });
-
-    // Pricing inputs are left blank — no values entered
-    // Press Save
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
+    act(() => { fireEvent.press(r.getByText('Save Tenant Config')); });
 
     const callArg = configureTenantSpy.mock.calls[0][0];
     expect(callArg.razorpay!.keyId).toBe('rzp_test_noprice');
     expect(callArg.razorpay!.keySecret).toBe('sk_secret');
-    // pricing should be undefined since both fields were left blank
     expect(callArg.razorpay!.pricing).toBeUndefined();
 
     configureTenantSpy.mockRestore();
   });
 
   it('excludes entire razorpay section when both keys and pricing are left blank', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
-    const { getByText, getByPlaceholderText } = render(
+    const r = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Tenant identity only — leave all Razorpay and pricing fields blank
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'norazorpay'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'No Razorpay'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'norazorpay.app'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'norazorpay'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'No Razorpay'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'norazorpay.app'); });
 
-    // Press Save
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
+    act(() => { fireEvent.press(r.getByText('Save Tenant Config')); });
 
-    // Config should NOT include razorpay at all
     expect(configureTenantSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'norazorpay',
-      }),
+      expect.objectContaining({ id: 'norazorpay' }),
     );
-
-    // Verify razorpay is not in the config
     const callArg = configureTenantSpy.mock.calls[0][0];
     expect((callArg as any).razorpay).toBeUndefined();
 
@@ -1199,34 +1019,23 @@ describe('TenantConfigScreen — Form Interactions', () => {
   });
 
   it('excludes razorpay when only pricing overrides are set (no Razorpay keys)', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementationOnce(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
-    const { getByText, getByPlaceholderText } = render(
+    const r = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Tenant identity
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. broker_x'), 'pricing_only'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. BrokerX'), 'Pricing Only'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText('e.g. brokerx.toroloom.app'), 'pricingonly.app'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. broker_x'), 'pricing_only'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. BrokerX'), 'Pricing Only'); });
+    act(() => { fireEvent.changeText(r.getByPlaceholderText('e.g. brokerx.toroloom.app'), 'pricingonly.app'); });
 
-    // Leave Razorpay keys EMPTY — keyId is required for razorpay section
+    fillProPricing(r, '999', '9999');
 
-    // Fill Pro pricing only
-    const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.price)), '999'); });
-    act(() => { fireEvent.changeText(getByPlaceholderText(String(proPlan.priceYearly)), '9999'); });
-
-    // Press Save
-    act(() => { fireEvent.press(getByText('Save Tenant Config')); });
+    act(() => { fireEvent.press(r.getByText('Save Tenant Config')); });
 
     const callArg = configureTenantSpy.mock.calls[0][0];
-    // razorpay should be undefined — keyId is required, even if pricing is set
     expect((callArg as any).razorpay).toBeUndefined();
-    // Pricing data should still be present in the state, but not included
-    // in the config because it's nested inside the razorpay object
     expect(callArg.id).toBe('pricing_only');
 
     configureTenantSpy.mockRestore();
@@ -1239,7 +1048,6 @@ describe('TenantConfigScreen — Form Interactions', () => {
     advanceAnimations();
 
     const proPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === 'pro')!;
-    // Typing should not throw
     expect(() => {
       act(() => {
         fireEvent.changeText(getByPlaceholderText(String(proPlan.price)), '500');
@@ -1264,14 +1072,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
   };
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore(existingConfig);
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders Reset to Default button', () => {
@@ -1301,42 +1102,24 @@ describe('TenantConfigScreen — Reset Flow', () => {
   });
 
   it('presses Reset to Default — verifies Alert.alert is intercepted and configureTenant is called', () => {
-    // Spy on configureTenant BEFORE rendering so the component's useCallback
-    // captures the spy (not the original function).
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Track whether Alert.alert was called and capture the callback
-    let alertCalled = false;
-    let capturedOnPress: (() => void) | null = null;
+    const { getCapturedOnPress, restore } = captureResetAlert();
 
-    const originalAlert = Alert.alert;
-    Alert.alert = ((_title: string, _message: string, buttons?: any[]) => {
-      alertCalled = true;
-      const resetBtn = buttons?.find((b: any) => b.style === 'destructive');
-      if (resetBtn?.onPress) {
-        capturedOnPress = resetBtn.onPress;
-      }
-    }) as any;
-
-    // Press Reset to Default
     act(() => { fireEvent.press(getByText('Reset to Default')); });
 
-    // Verify Alert.alert was intercepted
-    expect(alertCalled).toBe(true);
+    const capturedOnPress = getCapturedOnPress();
     expect(capturedOnPress).not.toBeNull();
 
-    // Invoke the captured callback
     if (capturedOnPress) {
-      act(() => { (capturedOnPress as () => void)(); });
+      act(() => { capturedOnPress(); });
     }
 
-    // Flush microtasks to let async configureTenant resolve
     act(() => { vi.advanceTimersByTime(0); });
 
     expect(configureTenantSpy).toHaveBeenCalledWith({
@@ -1345,147 +1128,96 @@ describe('TenantConfigScreen — Reset Flow', () => {
       domain: 'toroloom.app',
     });
 
-    Alert.alert = originalAlert;
+    restore();
     configureTenantSpy.mockRestore();
   });
 
   it('clears all form inputs after a successful reset', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
+    const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
     const { getByText, getByPlaceholderText, queryByPlaceholderText, update } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Verify inputs have pre-filled values from existingConfig
+    // Verify inputs have pre-filled values
     expect(getByPlaceholderText('e.g. broker_x').props.value).toBe('broker_x');
     expect(getByPlaceholderText('e.g. BrokerX').props.value).toBe('BrokerX');
     expect(getByPlaceholderText('e.g. brokerx.toroloom.app').props.value).toBe('brokerx.toroloom.app');
-    // Primary color should also be pre-filled
     expect(getByPlaceholderText('e.g. #FF6600').props.value).toBe('#FF6600');
 
-    // Capture the reset callback
-    let capturedOnPress: (() => void) | null = null;
-    const originalAlert = Alert.alert;
-    Alert.alert = ((_title: string, _message: string, buttons?: any[]) => {
-      const resetBtn = buttons?.find((b: any) => b.style === 'destructive');
-      if (resetBtn?.onPress) capturedOnPress = resetBtn.onPress;
-    }) as any;
+    const { getCapturedOnPress, restore } = captureResetAlert();
 
-    // Press Reset to Default
     act(() => { fireEvent.press(getByText('Reset to Default')); });
+    const capturedOnPress = getCapturedOnPress();
     expect(capturedOnPress).not.toBeNull();
 
-    // Invoke the reset callback — clears all form state
     act(() => { capturedOnPress!(); });
     act(() => { vi.advanceTimersByTime(0); });
 
-    // Force re-render so the component reads the updated React state
     act(() => {
       update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
     });
 
-    // All inputs should now have empty values
+    // All inputs should now be empty
     expect(queryByPlaceholderText('e.g. broker_x')!.props.value).toBe('');
     expect(queryByPlaceholderText('e.g. BrokerX')!.props.value).toBe('');
     expect(queryByPlaceholderText('e.g. brokerx.toroloom.app')!.props.value).toBe('');
     expect(queryByPlaceholderText('e.g. #FF6600')!.props.value).toBe('');
-
-    // Razorpay and pricing fields should also be cleared
     expect(queryByPlaceholderText('e.g. rzp_live_xxxxxxxx')!.props.value).toBe('');
     expect(queryByPlaceholderText('Enter key secret')!.props.value).toBe('');
 
-    Alert.alert = originalAlert;
+    restore();
     configureTenantSpy.mockRestore();
   });
 
   it('disappears Active Config section after successful reset', () => {
-    // Spy on configureTenant BUT with an implementation that actually updates the store.
-    // The real configureTenant does: set({ tenantConfig: config }) — we replicate that.
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async (config: any) => {
-      useSubscriptionStore.setState({ tenantConfig: config });
-    });
+    const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
     const { getByText, queryByText, update } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Active Config should be visible before reset (we have a non-default tenant)
     expect(getByText('Active Config')).toBeDefined();
 
-    // Replace Alert.alert to capture the destructive callback
-    let capturedOnPress: (() => void) | null = null;
-    const originalAlert = Alert.alert;
-    Alert.alert = ((_title: string, _message: string, buttons?: any[]) => {
-      const resetBtn = buttons?.find((b: any) => b.style === 'destructive');
-      if (resetBtn?.onPress) capturedOnPress = resetBtn.onPress;
-    }) as any;
+    const { getCapturedOnPress, restore } = captureResetAlert();
 
-    // Press Reset to Default
     act(() => { fireEvent.press(getByText('Reset to Default')); });
+    const capturedOnPress = getCapturedOnPress();
     expect(capturedOnPress).not.toBeNull();
 
-    // Invoke the reset callback — this calls configureTenant with default config,
-    // which now also updates the store's tenantConfig (via the spy's implementation)
     act(() => { capturedOnPress!(); });
     act(() => { vi.advanceTimersByTime(0); });
 
-    // Force re-render so the component re-reads getTenantConfig()
-    // The component subscribes to the stable getTenantConfig function reference,
-    // so it won't auto-render when the store's tenantConfig changes.
     act(() => {
       update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
     });
 
-    // Active Config should be gone (reset set tenantConfig to default)
     expect(queryByText('Active Config')).toBeNull();
-    // Reset button should also be gone
     expect(queryByText('Reset to Default')).toBeNull();
 
-    Alert.alert = originalAlert;
+    restore();
     configureTenantSpy.mockRestore();
   });
 
   it('pressing Cancel in reset dialog does NOT call configureTenant', () => {
-    const configureTenantSpy = vi.spyOn(useSubscriptionStore.getState(), 'configureTenant');
-    configureTenantSpy.mockImplementation(async () => {});
+    const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText } = render(
       <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     advanceAnimations();
 
-    // Track which button was "pressed" by the user — we simulate Cancel
-    let cancelOnPress: (() => void) | null = null;
+    // Capture the alert but only press Cancel (no destructive callback invoked)
+    const { restore } = captureResetAlert();
 
-    const originalAlert = Alert.alert;
-    Alert.alert = ((_title: string, _message: string, buttons?: any[]) => {
-      const cancelBtn = buttons?.find((b: any) => b.style === 'cancel');
-      // Cancel buttons typically have no onPress (just dismisses the dialog)
-      // But we'll capture whatever callback exists (if any)
-      if (cancelBtn?.onPress) {
-        cancelOnPress = cancelBtn.onPress;
-      }
-    }) as any;
-
-    // Press Reset to Default — shows the confirmation dialog
     act(() => { fireEvent.press(getByText('Reset to Default')); });
-
-    // Simulate pressing Cancel by not invoking the destructive callback.
-    // The Cancel button has no onPress (it just dismisses), so no action is taken.
-
-    // Flush any pending microtasks
     act(() => { vi.advanceTimersByTime(0); });
 
-    // configureTenant should NOT have been called (user cancelled)
     expect(configureTenantSpy).not.toHaveBeenCalled();
 
-    Alert.alert = originalAlert;
+    restore();
     configureTenantSpy.mockRestore();
   });
 });
@@ -1494,14 +1226,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
 
 describe('TenantConfigScreen — Edge Cases', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders without crashing with null tenantConfig', () => {
@@ -1539,7 +1264,6 @@ describe('TenantConfigScreen — Edge Cases', () => {
     );
     advanceAnimations();
 
-    // Active Config should not show feature override count since object is empty
     expect(getByText('Minimal')).toBeDefined();
     expect(getByText('minimal.app')).toBeDefined();
   });
@@ -1560,10 +1284,7 @@ describe('TenantConfigScreen — Edge Cases', () => {
     );
     advanceAnimations();
 
-    // Active Config renders: "Razorpay: Configured (rzp_test_key...)"
     expect(getByText(/Configured/)).toBeDefined();
     expect(getByText(/rzp_test_key/)).toBeDefined();
   });
 });
-
-

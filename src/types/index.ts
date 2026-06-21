@@ -432,6 +432,58 @@ export interface UserSubscription {
   tenantId?: string;
 }
 
+// ============ Gateway & Session Management ============
+export interface SessionPayload {
+  cookies: string;
+  localStorage: Record<string, string>;
+  sessionStorage: Record<string, string>;
+  brokerType: string;
+  capturedAt: string;
+  url: string;
+}
+
+export interface BrokerSession {
+  brokerType: string;
+  enctoken?: string;
+  jwt?: string;
+  accessToken?: string;
+  publicToken?: string;
+  refreshToken?: string;
+  userId?: string;
+  cookies: string;
+  capturedAt: string;
+  expiryAt?: string;
+}
+
+export interface ParsedTrade {
+  execution_timestamp: string;
+  asset_symbol: string;
+  transaction_type: 'BUY' | 'SELL';
+  filled_quantity: number;
+  execution_price: number;
+  regulatory_fees: number;
+  brokerage?: number;
+  exchange?: string;
+  trade_id?: string;
+}
+
+export interface AICognitiveSummary {
+  winLossFrequencyRatio: number;
+  totalProfitableTrades: number;
+  totalClosedTrades: number;
+  brokerageDragFactor: number;
+  totalTaxesAndCharges: number;
+  absoluteRealizedPnl: number;
+  sectorConcentrationIndex: number;
+  sectorAllocation: { sector: string; exposurePercent: number }[];
+  // Behavioral critique slots
+  overTradingAlert?: { flag: boolean; message: string };
+  brokerageLeakageAlert?: { flag: boolean; message: string };
+  concentrationRiskAlert?: { flag: boolean; message: string };
+  behavioralCritique?: string;
+  generatedAt: string;
+}
+
 // ============ Market News ============
 export interface MarketNewsItem {
   id: string;
@@ -546,6 +598,7 @@ export type RootStackParamList = {
   StockDetail: { stockId: string; symbol: string };
   CourseDetail: { courseId: string };
   LessonView: { lessonId: string; courseId: string };
+  ContractNoteParser: { brokerFormat?: string };
   AIInsight: { stockId?: string };
   CommunityPost: { postId: string };
   Profile: undefined;

@@ -13,7 +13,8 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, StatusBar } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withRepeat, withSequence, withDelay, interpolate, runOnJS } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import MetallicShieldSVG from '../components/ui/MetallicShieldSVG';
 
@@ -38,20 +39,69 @@ const DIAGNOSTICS_STEPS = [
 ];
 
 export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScreenProps) {
-  // ── Animation refs ──
-  const shieldScale = useRef(new Animated.Value(0.3)).current;
-  const shieldOpacity = useRef(new Animated.Value(0)).current;
-  const glowPulse = useRef(new Animated.Value(0)).current;
-  const progressWidth = useRef(new Animated.Value(0)).current;
-  const taglineOpacity = useRef(new Animated.Value(0)).current;
-  const brandOpacity = useRef(new Animated.Value(0)).current;
-  const versionOpacity = useRef(new Animated.Value(0)).current;
-  const scanLineY = useRef(new Animated.Value(-20)).current;
-  const goldGlowPulse = useRef(new Animated.Value(0)).current;
+  // ── Animation shared values ──
+  const shieldScale = useSharedValue(0.3);
+  const shieldOpacity = useSharedValue(0);
+  const glowPulse = useSharedValue(0);
+  const progressWidth = useSharedValue(0);
+  const taglineOpacity = useSharedValue(0);
+  const brandOpacity = useSharedValue(0);
+  const versionOpacity = useSharedValue(0);
+  const scanLineY = useSharedValue(-20);
+  const goldGlowPulse = useSharedValue(0);
+  const diagnosticOpacity = useSharedValue(1);
+
+  // ── Animated styles ──
+  const cyanGlowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(glowPulse.value, [0, 0.5, 1], [0.2, 0.9, 0.3]),
+  }));
+
+  const goldGlowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(goldGlowPulse.value, [0, 0.5, 1], [0.15, 0.7, 0.2]),
+  }));
+
+  const ambientGlowCyanStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(glowPulse.value, [0, 1], [0.08, 0.2]),
+    transform: [{ scale: interpolate(glowPulse.value, [0, 1], [0.92, 1.08]) }],
+  }));
+
+  const ambientGlowGoldStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(goldGlowPulse.value, [0, 1], [0.15, 0.7]),
+    transform: [{ scale: interpolate(goldGlowPulse.value, [0, 1], [0.95, 1.05]) }],
+  }));
+
+  const shieldContainerStyle = useAnimatedStyle(() => ({
+    opacity: shieldOpacity.value,
+    transform: [{ scale: shieldScale.value }],
+  }));
+
+  const progressStyle = useAnimatedStyle(() => {
+    const pct = interpolate(progressWidth.value, [0, 1], [0, 100]);
+    return { width: `${pct}%` };
+  });
+
+  const brandStyle = useAnimatedStyle(() => ({
+    opacity: brandOpacity.value,
+  }));
+
+  const taglineStyle = useAnimatedStyle(() => ({
+    opacity: taglineOpacity.value,
+  }));
+
+  const versionStyle = useAnimatedStyle(() => ({
+    opacity: versionOpacity.value,
+  }));
+
+  const diagnosticStyle = useAnimatedStyle(() => ({
+    opacity: diagnosticOpacity.value,
+  }));
+
+  const scanLineStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: scanLineY.value }],
+  }));
 
   // ── Bootstrapping state ──
   const [diagnosticIndex, setDiagnosticIndex] = useState(0);
-  const diagnosticOpacity = useRef(new Animated.Value(1)).current;
 
   // ── Particle/star positions (deterministic for performance) ──
   const particles = useRef(
@@ -66,123 +116,53 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
 
   useEffect(() => {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
-    const anims: Animated.CompositeAnimation[] = [];
 
     // ── 1. Shield entrance: scale up + fade in ──
-    const entranceAnim = Animated.parallel([
-      Animated.spring(shieldScale, {
-        toValue: 1,
-        useNativeDriver: true,
-        speed: 3,
-        bounciness: 6,
-      }),
-      Animated.timing(shieldOpacity, {
-        toValue: 1,
-        duration: 900,
-        useNativeDriver: true,
-      }),
-    ]);
-    entranceAnim.start();
-    anims.push(entranceAnim);
+    shieldScale.value = withSpring(1, { stiffness: 80, damping: 10 });
+    shieldOpacity.value = withTiming(1, { duration: 900 });
 
     // ── 2. Brand name fade in after shield ──
-    const brandTimeout = setTimeout(() => {
-      const brandAnim = Animated.timing(brandOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      });
-      brandAnim.start();
-      anims.push(brandAnim);
-    }, 500);
-    timeoutIds.push(brandTimeout);
+    brandOpacity.value = withDelay(500, withTiming(1, { duration: 500 }));
 
     // ── 3. Tagline fade in ──
-    const taglineTimeout = setTimeout(() => {
-      const tagAnim = Animated.timing(taglineOpacity, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      });
-      tagAnim.start();
-      anims.push(tagAnim);
-    }, 900);
-    timeoutIds.push(taglineTimeout);
+    taglineOpacity.value = withDelay(900, withTiming(1, { duration: 600 }));
 
     // ── 4. Version fade in ──
-    const versionTimeout = setTimeout(() => {
-      const verAnim = Animated.timing(versionOpacity, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      });
-      verAnim.start();
-      anims.push(verAnim);
-    }, 1200);
-    timeoutIds.push(versionTimeout);
+    versionOpacity.value = withDelay(1200, withTiming(1, { duration: 400 }));
 
     // ── 5. Neon glow pulse loop (Cyan) ──
-    const glowLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glowPulse, {
-          toValue: 1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(glowPulse, {
-          toValue: 0,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-      ])
+    glowPulse.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1200 }),
+        withTiming(0, { duration: 1200 }),
+      ),
+      -1, // infinite repeat
     );
-    glowLoop.start();
 
     // ── 6. Gold glow pulse (slightly offset) ──
-    const goldGlowLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(goldGlowPulse, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(goldGlowPulse, {
-          toValue: 0,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
+    goldGlowPulse.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1500 }),
+        withTiming(0, { duration: 1500 }),
+      ),
+      -1, // infinite repeat
     );
-    goldGlowLoop.start();
 
-    // ── 7. Scanning line across shield ──
-    const scanLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(scanLineY, {
-          toValue: 160,
-          duration: 2800,
-          useNativeDriver: true,
-
-        }),
-        Animated.timing(scanLineY, {
-          toValue: -20,
-          duration: 0,
-          useNativeDriver: true,
-        }),
-      ])
+    // ── 7. Scanning line across shield (sawtooth pattern) ──
+    scanLineY.value = withRepeat(
+      withSequence(
+        withTiming(160, { duration: 2800 }),
+        withTiming(-20, { duration: 0 }), // instant reset
+      ),
+      -1, // infinite repeat
     );
-    scanLoop.start();
 
     // ── 8. Progress bar fill ──
-    const progressAnim = Animated.timing(progressWidth, {
-      toValue: 1,
-      duration: minDuration,
-      useNativeDriver: false,
+    progressWidth.value = withTiming(1, { duration: minDuration }, (finished) => {
+      if (finished && onFinish) {
+        runOnJS(onFinish)();
+      }
     });
-    progressAnim.start(() => {
-      onFinish?.();
-    });
-    anims.push(progressAnim);
 
     // ── 9. Bootstrapping diagnostics steps cycling ──
     const stepCount = DIAGNOSTICS_STEPS.length;
@@ -191,61 +171,33 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
     const diagInterval = setInterval(() => {
       stepIndex++;
       if (stepIndex < stepCount) {
-        // Fade out
-        Animated.timing(diagnosticOpacity, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }).start(() => {
-          setDiagnosticIndex(stepIndex);
-          // Fade in
-          Animated.timing(diagnosticOpacity, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }).start();
+        // Fade out, then update text and fade in
+        diagnosticOpacity.value = withTiming(0, { duration: 150 }, (finished) => {
+          if (finished) {
+            runOnJS(setDiagnosticIndex)(stepIndex);
+            diagnosticOpacity.value = withTiming(1, { duration: 300 });
+          }
         });
       }
     }, stepInterval);
-    timeoutIds.push(diagInterval);
 
     // ── Cleanup on unmount ──
     return () => {
-      glowLoop.stop();
-      goldGlowLoop.stop();
-      scanLoop.stop();
-      anims.forEach(a => a.stop());
+      // Cancel animations by overriding shared values
+      glowPulse.value = 0;
+      goldGlowPulse.value = 0;
+      scanLineY.value = -20;
+      shieldScale.value = 0.3;
+      shieldOpacity.value = 0;
+      progressWidth.value = 0;
+      brandOpacity.value = 0;
+      taglineOpacity.value = 0;
+      versionOpacity.value = 0;
+      diagnosticOpacity.value = 1;
       timeoutIds.forEach(clearTimeout);
       clearInterval(diagInterval);
     };
   }, []);
-
-  // Glow interpolations
-  const cyanGlow = glowPulse.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0.2, 0.9, 0.3],
-  });
-
-  const goldGlow = goldGlowPulse.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0.15, 0.7, 0.2],
-  });
-
-  const progressPercent = progressWidth.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
-
-  // Background ambient glow
-  const ambientScale = glowPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.92, 1.08],
-  });
-
-  const ambientOpacity = glowPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.08, 0.2],
-  });
 
   return (
     <View style={styles.container}>
@@ -261,7 +213,7 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
 
       {/* ── Ambient particle/star field ── */}
       {particles.map((p, i) => (
-        <Animated.View
+        <View
           key={i}
           style={{
             position: 'absolute',
@@ -280,10 +232,7 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       <Animated.View
         style={[
           styles.ambientGlowCyan,
-          {
-            opacity: ambientOpacity,
-            transform: [{ scale: ambientScale }],
-          },
+          ambientGlowCyanStyle,
         ]}
       />
 
@@ -291,17 +240,7 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       <Animated.View
         style={[
           styles.ambientGlowGold,
-          {
-            opacity: goldGlow,
-            transform: [
-              {
-                scale: goldGlowPulse.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.95, 1.05],
-                }),
-              },
-            ],
-          },
+          ambientGlowGoldStyle,
         ]}
       />
 
@@ -309,17 +248,14 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       <Animated.View
         style={[
           styles.shieldContainer,
-          {
-            opacity: shieldOpacity,
-            transform: [{ scale: shieldScale }],
-          },
+          shieldContainerStyle,
         ]}
       >
         {/* Neon glow border ring */}
         <Animated.View
           style={[
             styles.neonRing,
-            { opacity: cyanGlow },
+            cyanGlowStyle,
           ]}
         />
 
@@ -327,7 +263,7 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
         <Animated.View
           style={[
             styles.goldRing,
-            { opacity: goldGlow },
+            goldGlowStyle,
           ]}
         />
 
@@ -335,7 +271,7 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
         <Animated.View
           style={[
             styles.scanLine,
-            { transform: [{ translateY: scanLineY }] },
+            scanLineStyle,
           ]}
         />
 
@@ -347,12 +283,12 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       </Animated.View>
 
       {/* ── Brand Name ── */}
-      <Animated.Text style={[styles.brandName, { opacity: brandOpacity }]}>
+      <Animated.Text style={[styles.brandName, brandStyle]}>
         Toroloom
       </Animated.Text>
 
       {/* ── Tagline ── */}
-      <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
+      <Animated.Text style={[styles.tagline, taglineStyle]}>
         AI-Powered Trading Shield
       </Animated.Text>
 
@@ -362,11 +298,11 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
           <Animated.View
             style={[
               styles.progressFill,
-              { width: progressPercent },
+              progressStyle,
             ]}
           />
         </View>
-        <Animated.View style={{ opacity: diagnosticOpacity }}>
+        <Animated.View style={diagnosticStyle}>
           <Text style={styles.progressLabel}>
             {DIAGNOSTICS_STEPS[diagnosticIndex]}
           </Text>
@@ -374,7 +310,7 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       </View>
 
       {/* ── Version ── */}
-      <Animated.Text style={[styles.version, { opacity: versionOpacity }]}>
+      <Animated.Text style={[styles.version, versionStyle]}>
         v1.0.0
       </Animated.Text>
     </View>

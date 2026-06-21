@@ -17,8 +17,9 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, Animated, Dimensions,
+  View, Text, StyleSheet, Dimensions,
 } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, withRepeat, withSequence, interpolate, runOnJS } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -45,11 +46,29 @@ export default function IronLockOverlay() {
   const [visible, setVisible] = useState(false);
 
   // Animations
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.5)).current;
-  const pulseAnim = useRef(new Animated.Value(0)).current;
-  const iconIndex = useRef(new Animated.Value(0)).current;
-  const glowPulse = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useSharedValue(0);
+  const scaleAnim = useSharedValue(0.5);
+  const pulseAnim = useSharedValue(0);
+  const glowPulse = useSharedValue(0);
+
+  // Animated styles
+  const wrapperStyle = useAnimatedStyle(() => ({
+    opacity: fadeAnim.value,
+    transform: [{ scale: scaleAnim.value }],
+  }));
+
+  const glowRingStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(glowPulse.value, [0, 1], [0.15, 0.4]),
+    transform: [{ scale: interpolate(glowPulse.value, [0, 1], [1, 1.15]) }],
+  }));
+
+  const innerGlowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(glowPulse.value, [0, 1], [0.15, 0.4]),
+  }));
+
+  const lockIconStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pulseAnim.value, [0, 1], [0.8, 1]),
+  }));
 
   // Countdown
   const [timeRemaining, setTimeRemaining] = useState('');
@@ -57,7 +76,6 @@ export default function IronLockOverlay() {
 
   // Refs for cleanup
   const iconIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const animationLoopRef = useRef<Animated.CompositeAnimation | null>(null);
 
   // ── Lockdown trigger/lift detection + animation ──────────
   useEffect(() => {
@@ -72,38 +90,30 @@ export default function IronLockOverlay() {
       speak(VOICE_MESSAGES.stopLossBreached);
 
       // Reset anim values
-      fadeAnim.setValue(0);
-      scaleAnim.setValue(0.5);
-      pulseAnim.setValue(0);
-      glowPulse.setValue(0);
+      fadeAnim.value = 0;
+      scaleAnim.value = 0.5;
+      pulseAnim.value = 0;
+      glowPulse.value = 0;
 
-      const pulseLoop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 0, duration: 2000, useNativeDriver: true }),
-        ]),
+      // Start loops
+      pulseAnim.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 2000 }),
+          withTiming(0, { duration: 2000 }),
+        ),
+        -1,
       );
-      const glowLoop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(glowPulse, { toValue: 1, duration: 3000, useNativeDriver: true }),
-          Animated.timing(glowPulse, { toValue: 0, duration: 3000, useNativeDriver: true }),
-        ]),
-      );
-      const iconLoop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(iconIndex, { toValue: 1, duration: 4000, useNativeDriver: true }),
-          Animated.timing(iconIndex, { toValue: 0, duration: 4000, useNativeDriver: true }),
-        ]),
+      glowPulse.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 3000 }),
+          withTiming(0, { duration: 3000 }),
+        ),
+        -1,
       );
 
-      Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-        Animated.spring(scaleAnim, { toValue: 1, speed: 8, bounciness: 6, useNativeDriver: true }),
-        pulseLoop,
-        glowLoop,
-      ]).start();
-      iconLoop.start();
-      animationLoopRef.current = iconLoop;
+      // Entrance animation
+      fadeAnim.value = withTiming(1, { duration: 500 });
+      scaleAnim.value = withSpring(1, { stiffness: 80, damping: 12 });
 
       // Cycle through lock icons
       let idx = 0;
@@ -117,22 +127,23 @@ export default function IronLockOverlay() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       speak(VOICE_MESSAGES.lockdownLifted);
 
-      // Clean up animations
+      // Clean up icon interval
       if (iconIntervalRef.current) {
         clearInterval(iconIntervalRef.current);
         iconIntervalRef.current = null;
       }
-      if (animationLoopRef.current) {
-        animationLoopRef.current.stop();
-        animationLoopRef.current = null;
-      }
 
-      Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
-        Animated.timing(scaleAnim, { toValue: 0.8, duration: 300, useNativeDriver: true }),
-      ]).start(() => {
-        setVisible(false);
+      // Cancel loops by overriding values
+      pulseAnim.value = 0;
+      glowPulse.value = 0;
+
+      // Exit animation with completion callback
+      fadeAnim.value = withTiming(0, { duration: 400 }, (finished) => {
+        if (finished) {
+          runOnJS(setVisible)(false);
+        }
       });
+      scaleAnim.value = withTiming(0.8, { duration: 300 });
 
     } else if (current === 'cooldown' && prev !== 'cooldown') {
       // Transitioned to cooldown — show overlay with cooldown icon
@@ -146,10 +157,11 @@ export default function IronLockOverlay() {
         clearInterval(iconIntervalRef.current);
         iconIntervalRef.current = null;
       }
-      if (animationLoopRef.current) {
-        animationLoopRef.current.stop();
-        animationLoopRef.current = null;
-      }
+      // Cancel running animations
+      fadeAnim.value = 0;
+      scaleAnim.value = 0.5;
+      pulseAnim.value = 0;
+      glowPulse.value = 0;
     };
   }, [lockdown.status]);
 
@@ -182,30 +194,13 @@ export default function IronLockOverlay() {
     return () => clearInterval(interval);
   }, [lockdown.liftsAt]);
 
-  // ── Glow style ────────────────────────────────────────────
-  const glowScale = glowPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.15],
-  });
-
-  const glowOpacity = glowPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.15, 0.4],
-  });
-
-  // ── Pulse style ───────────────────────────────────────────
-  const lockOpacity = pulseAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1],
-  });
-
   if (!visible || (!isLockdown)) return null;
 
   return (
     <Animated.View
       style={[
         styles.wrapper,
-        { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+        wrapperStyle,
       ]}
       pointerEvents="auto"
     >
@@ -221,24 +216,19 @@ export default function IronLockOverlay() {
           <Animated.View
             style={[
               styles.glowRing,
-              {
-                opacity: glowOpacity,
-                transform: [{ scale: glowScale }],
-              },
+              glowRingStyle,
             ]}
           />
           {/* Inner glow */}
           <Animated.View
             style={[
               styles.innerGlow,
-              {
-                opacity: glowOpacity,
-                backgroundColor: ALERT_RED,
-              },
+              innerGlowStyle,
+              { backgroundColor: ALERT_RED },
             ]}
           />
           {/* Lock icon */}
-          <Animated.View style={{ opacity: lockOpacity }}>
+          <Animated.View style={lockIconStyle}>
             <Ionicons name={iconName as any} size={80} color={ALERT_RED} />
           </Animated.View>
         </View>

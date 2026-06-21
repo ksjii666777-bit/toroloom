@@ -1,5 +1,6 @@
-import React, { useRef, useMemo, useCallback } from 'react';
-import { Pressable, View, Animated, StyleSheet, ViewStyle, StyleProp, Platform } from 'react-native';
+import React, { useCallback } from 'react';
+import { Pressable, StyleSheet, ViewStyle, StyleProp, Platform } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, interpolate } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { BORDER_RADIUS } from '../../constants/theme';
@@ -12,6 +13,7 @@ interface AnimatedPressableProps {
   onPressOut?: () => void;
   disabled?: boolean;
   testID?: string;
+  accessibilityLabel?: string;
   scaleTo?: number;
   haptic?: 'light' | 'medium' | 'heavy' | 'selection' | 'none' | 'success' | 'warning' | 'error';
   style?: StyleProp<ViewStyle>;
@@ -32,6 +34,7 @@ export default function AnimatedPressable({
   onPressOut,
   disabled = false,
   testID,
+  accessibilityLabel,
   scaleTo = 0.96,
   haptic = 'light',
   style,
@@ -42,9 +45,9 @@ export default function AnimatedPressable({
   borderRadius = BORDER_RADIUS.md,
 }: AnimatedPressableProps) {
   const { colors } = useTheme();
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const opacityAnim = useRef(new Animated.Value(1)).current;
-  const highlightAnim = useRef(new Animated.Value(0)).current;
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+  const highlightProgress = useSharedValue(0);
 
   const triggerHaptic = useCallback(() => {
     if (Platform.OS === 'web') return;
@@ -62,58 +65,21 @@ export default function AnimatedPressable({
 
   const handlePressIn = useCallback(() => {
     onPressIn?.();
-    const anims: Animated.CompositeAnimation[] = [
-      Animated.spring(scaleAnim, {
-        toValue: scaleTo,
-        useNativeDriver: true,
-        speed: 50,
-        bounciness: 4,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: activeOpacity,
-        duration: 80,
-        useNativeDriver: true,
-      }),
-    ];
-    // opacity IS supported by native driver, so highlightAnim can use useNativeDriver: true too
+    scale.value = withSpring(scaleTo, { stiffness: 200, damping: 15 });
+    opacity.value = withTiming(activeOpacity, { duration: 80 });
     if (highlight) {
-      anims.push(
-        Animated.timing(highlightAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-      );
+      highlightProgress.value = withTiming(1, { duration: 100 });
     }
-    Animated.parallel(anims).start();
-  }, [scaleAnim, opacityAnim, highlightAnim, scaleTo, activeOpacity, highlight, onPressIn]);
+  }, [scale, opacity, highlightProgress, scaleTo, activeOpacity, highlight, onPressIn]);
 
   const handlePressOut = useCallback(() => {
     onPressOut?.();
-    const anims: Animated.CompositeAnimation[] = [
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        speed: 20,
-        bounciness: 8,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 120,
-        useNativeDriver: true,
-      }),
-    ];
+    scale.value = withSpring(1, { stiffness: 100, damping: 12 });
+    opacity.value = withTiming(1, { duration: 120 });
     if (highlight) {
-      anims.push(
-        Animated.timing(highlightAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      );
+      highlightProgress.value = withTiming(0, { duration: 200 });
     }
-    Animated.parallel(anims).start();
-  }, [scaleAnim, opacityAnim, highlightAnim, highlight, onPressOut]);
+  }, [scale, opacity, highlightProgress, highlight, onPressOut]);
 
   const handlePress = useCallback(() => {
     if (disabled) return;
@@ -129,16 +95,19 @@ export default function AnimatedPressable({
     onLongPress?.();
   }, [disabled, onLongPress]);
 
-  const animatedStyle = useMemo(() => ({
-    transform: [{ scale: scaleAnim }],
-    opacity: opacityAnim,
-  }), [scaleAnim, opacityAnim]);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
 
   const hColor = highlightColor || colors.primary;
-  const hOpacity = highlightAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 0.12],
-  });
+
+  const highlightStyle = useAnimatedStyle(() => ({
+    ...StyleSheet.absoluteFill,
+    borderRadius,
+    opacity: interpolate(highlightProgress.value, [0, 1], [0, 0.12]),
+    pointerEvents: 'none' as const,
+  }));
 
   return (
     <Pressable
@@ -147,20 +116,12 @@ export default function AnimatedPressable({
       onPress={handlePress}
       onLongPress={!disabled ? handleLongPress : undefined}
       disabled={disabled}
+      testID={testID}
+      accessibilityLabel={accessibilityLabel}
     >
-      <Animated.View testID={testID} style={[style, animatedStyle, containerStyle]}>
+      <Animated.View style={[style, animatedStyle, containerStyle]}>
         {highlight && (
-          <Animated.View
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                borderRadius,
-                backgroundColor: hColor,
-                opacity: hOpacity,
-                pointerEvents: 'none',
-              },
-            ]}
-          />
+          <Animated.View style={[highlightStyle, { backgroundColor: hColor }]} />
         )}
         {children}
       </Animated.View>

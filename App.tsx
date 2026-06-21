@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -10,6 +10,8 @@ import { configureApi } from './src/services/api';
 import { useAuthStore, useRiskStore, useSubscriptionStore, useOnboardingStore } from './src/store';
 import Sentry, { isSentryEnabled } from './src/services/sentry';
 import useLoadFonts from './src/hooks/useLoadFonts';
+
+import { seedAllBrokerSessions, seedE2EBrokerSession } from './src/services/gateway/seedE2ESession';
 
 // Initialize notification channels on app launch
 // notificationService uses lazy imports internally, so this won't crash if native modules aren't available
@@ -67,6 +69,43 @@ function AppContent() {
     return () => {
       useRiskStore.getState().stopListeningToWS();
     };
+  }, [isLoggedIn]);
+
+  // ── E2E Deep Link Handler (dev-only) ─────────────────────
+  // Handles toroloom://e2e/seed-broker to pre-seed the keychain
+  // with mock broker sessions for Maestro E2E testing.
+  useEffect(() => {
+    if (!__DEV__) return;
+
+    async function handleE2EDeepLink(url: string | null) {
+      if (!url) return;
+      try {
+        const parsed = new URL(url);
+        if (parsed.pathname === '/e2e/seed-broker' || parsed.hostname === 'e2e') {
+          const broker = parsed.searchParams.get('broker') || 'zerodha';
+          const results = broker === 'all'
+            ? await seedAllBrokerSessions()
+            : [await seedE2EBrokerSession(broker as any)];
+          const allOk = results.every(Boolean);
+          if (allOk) {
+            console.log('[E2E] Broker session(s) seeded successfully.');
+          } else {
+            console.warn('[E2E] One or more broker sessions failed to seed.');
+          }
+        }
+      } catch {
+        // Invalid URL — ignore
+      }
+    }
+
+    // Check cold start
+    Linking.getInitialURL().then(handleE2EDeepLink);
+    // Listen for warm starts
+    const sub = Linking.addEventListener('url', (event) => {
+      handleE2EDeepLink(event.url);
+    });
+
+    return () => sub.remove();
   }, [isLoggedIn]);
 
   return (

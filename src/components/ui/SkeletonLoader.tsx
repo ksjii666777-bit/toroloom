@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Animated, StyleSheet, ViewStyle } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
 import { BORDER_RADIUS, SPACING } from '../../constants/theme';
 
@@ -13,26 +14,23 @@ interface SkeletonLoaderProps {
 
 export function SkeletonBlock({ width = '100%', height = 20, borderRadius = BORDER_RADIUS.sm, style, variant = 'rect' }: SkeletonLoaderProps) {
   const { colors } = useTheme();
-  const opacity = useRef(new Animated.Value(0.3)).current;
+  const opacity = useSharedValue(0.3);
+
+  const shimmerStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
 
   useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 0.7,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 0.3,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.7, { duration: 800 }),
+        withTiming(0.3, { duration: 800 }),
+      ),
+      -1, // infinite repeat
+      true // yoyo (reverse each cycle)
     );
-    animation.start();
-    return () => animation.stop();
-  }, [opacity]);
+    return () => { opacity.value = 0.3; }; // cleanup
+  }, []);
 
   const finalBorderRadius = variant === 'circle' ? 999 : borderRadius;
 
@@ -44,8 +42,8 @@ export function SkeletonBlock({ width = '100%', height = 20, borderRadius = BORD
           height,
           borderRadius: finalBorderRadius,
           backgroundColor: colors.bgCardLight,
-          opacity,
         },
+        shimmerStyle,
         style,
       ]}
     />

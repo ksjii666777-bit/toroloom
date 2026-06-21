@@ -44,10 +44,9 @@ export default function TenantConfigScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  // ── Load existing tenant config ──────────────────────────
+  // ── Load existing tenant config (reactive subscription) ──
   const configureTenant = useSubscriptionStore(s => s.configureTenant);
-  const getTenantConfig = useSubscriptionStore(s => s.getTenantConfig);
-  const existingConfig = getTenantConfig();
+  const existingConfig = useSubscriptionStore(s => s.tenantConfig);
 
   // ── Form state ───────────────────────────────────────────
   const [id, setId] = useState(existingConfig?.id ?? '');

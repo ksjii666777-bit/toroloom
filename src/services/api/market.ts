@@ -2,9 +2,7 @@ import { api } from './client';
 import type { MarketIndex, Stock, StockHistoryPoint } from '../../types';
 
 // The broker interface types – these mirror what the backend returns
-export interface BrokerStock extends Stock {
-  // The backend returns the same fields — we reuse the frontend type
-}
+export type BrokerStock = Stock;
 
 export const marketApi = {
   getIndices: () => api.get<MarketIndex[]>('/market/indices'),

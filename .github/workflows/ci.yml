@@ -53,7 +53,10 @@ jobs:
         run: npm ci
 
       - name: TypeScript compilation check
-        run: npx tsc --noEmit
+        run: npm run typecheck
+
+      - name: Lint check
+        run: npm run lint
 
       - name: Run unit tests with coverage (excluding integration tests)
         # Also exclude cross-file isolation tests — they run in a dedicated
@@ -195,7 +198,10 @@ jobs:
       # Vitest globals (`vi`, `describe`, `it`, `expect`) are made available
       # to TypeScript via src/vitest.d.ts  —  no separate test tsconfig needed.
       - name: TypeScript compilation check
-        run: npx tsc --noEmit
+        run: npm run typecheck
+
+      - name: Lint check
+        run: npm run lint
 
       - name: Run vitest tests with coverage
         run: npx vitest run --reporter=verbose --coverage

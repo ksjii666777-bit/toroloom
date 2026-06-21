@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Animated } from 'react-native';
-import ReanimatedAnimated from 'react-native-reanimated';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl } from 'react-native';
+import ReanimatedAnimated, { useSharedValue, withTiming, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -59,21 +59,21 @@ export default function PortfolioScreen({ navigation }: any) {
     duration: 350,
   });
 
-  // Animated count-up effect for numbers
-  const countUpAnim = useRef(new Animated.Value(0)).current;
+  // Reanimated count-up effect for numbers
+  const countUpProgress = useSharedValue(0);
   const [displayProgress, setDisplayProgress] = useState(0);
+
   useEffect(() => {
-    countUpAnim.setValue(0);
-    Animated.timing(countUpAnim, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: false,
-    }).start();
-    const listener = countUpAnim.addListener(({ value }) => {
-      setDisplayProgress(value);
-    });
-    return () => countUpAnim.removeListener(listener);
-  }, [portfolioValue, countUpAnim]);
+    countUpProgress.value = 0;
+    countUpProgress.value = withTiming(1, { duration: 1000 });
+  }, [portfolioValue]);
+
+  useAnimatedReaction(
+    () => countUpProgress.value,
+    (value) => {
+      runOnJS(setDisplayProgress)(value);
+    },
+  );
 
   // Smooth transition values
   const displayInvested = invested;

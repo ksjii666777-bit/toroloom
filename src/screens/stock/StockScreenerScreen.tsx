@@ -615,7 +615,7 @@ export default function StockScreenerScreen({ navigation }: any) {
   const sortedResults = useMemo(() => {
     const results = screenerResults.length > 0 ? [...screenerResults] : [];
     results.sort((a, b) => {
-      let cmp = 0;
+      let cmp: number;
       switch (sortBy) {
         case 'price': cmp = a.price - b.price; break;
         case 'changePercent': cmp = a.changePercent - b.changePercent; break;

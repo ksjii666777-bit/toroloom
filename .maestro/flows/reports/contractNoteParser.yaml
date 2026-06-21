@@ -1,0 +1,238 @@
+# =============================================================================
+# Contract Note Parser — E2E Test
+# =============================================================================
+# Tests the Contract Note Parser screen via paste-text flow:
+#   1. Login with test credentials
+#   2. Navigate: More → Reports → Contract Note Parser
+#   3. Verify all action cards render correctly
+#   4. Expand paste-text input area
+#   5. Paste a sample contract note text and parse it
+#   6. Verify parsed results (Trades Extracted, Export CSV)
+#   7. Clear results
+#   8. Test empty input validation
+#
+# NOTE: File picker (Upload PDF / Batch Upload) cannot be automated via
+# Maestro because it opens the system document picker. The paste-text
+# flow is fully automatable and exercises the same parse pipeline.
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ═══════════════════════════════════════════════════════════════════════════
+# 1. Login
+# ═══════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: "Welcome Back! 👋"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# Navigate to Home tab (More tab is default, but we go Home for consistency)
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 2. Navigate: More → Reports → Contract Note Parser
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "More"
+- waitForAnimationToEnd
+
+# Scroll down to find Reports in the Investments section
+- scrollUntilVisible:
+    element:
+      text: "Reports"
+    direction: DOWN
+- tapOn:
+    text: "Reports"
+- waitForAnimationToEnd
+
+# Verify Reports screen rendered
+- assertVisible:
+    text: "Analytics"
+
+# Scroll to Contract Note Parser card and tap it
+- scrollUntilVisible:
+    element:
+      text: "Contract Note Parser"
+    direction: DOWN
+- tapOn:
+    text: "Contract Note Parser"
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 3. Verify Contract Note Parser UI — Action Cards
+# ═══════════════════════════════════════════════════════════════════════════
+# Header
+- assertVisible:
+    text: "Contract Note Parser"
+- assertVisible:
+    text: "Upload broker PDF or paste text to extract trades"
+
+# Upload PDF card
+- assertVisible:
+    text: "Upload PDF Contract Note"
+- assertVisible:
+    text: "Select a PDF from your device"
+
+# Batch Upload card
+- assertVisible:
+    text: "Batch Upload (Multi)"
+- assertVisible:
+    text: "Select multiple PDFs to process at once"
+
+# Paste Text card
+- assertVisible:
+    text: "Paste Contract Note Text"
+- assertVisible:
+    text: "Copy-paste from your broker's email or portal"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 4. Expand Paste-Text Input Area
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    text: "Paste Contract Note Text"
+- waitForAnimationToEnd
+
+# Verify the paste text input is now visible
+- assertVisible:
+    text: "Paste your contract note text here..."
+
+# Parse Text button should be visible but dimmed (empty input)
+- assertVisible:
+    text: "Parse Text"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 5. Test Empty Input Validation
+# ═══════════════════════════════════════════════════════════════════════════
+# Tap Parse Text with empty input to trigger validation alert
+- tapOn:
+    text: "Parse Text"
+- waitForAnimationToEnd
+
+# Alert should appear with "Empty" title
+- assertVisible:
+    text: "Empty"
+- assertVisible:
+    text: "Please paste your contract note text first."
+
+# Dismiss the alert
+- tapOn:
+    text: "OK"
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 6. Paste Sample Contract Note Text and Parse
+# ═══════════════════════════════════════════════════════════════════════════
+# Tap the paste input and enter sample Zerodha contract note text
+- tapOn:
+    text: "Paste your contract note text here..."
+- inputText: |
+    ZERODHA BROKING LTD
+    Contract Note
+
+    Scrip Name             Buy/Sell  Qty    Rate    Value
+    15-06-2026 10:30:00 NSE RELIANCE BUY    50      2890.50 144525.00
+    15-06-2026 14:45:00 NSE TCS      SELL   20      3890.00 77800.00
+    16-06-2026 09:15:00 NSE HDFCBANK BUY    100     1680.25 168025.00
+
+    Total                                 1000000.00
+    Brokerage                             150.00
+    STT                                   200.00
+
+- hideKeyboard
+
+# Tap Parse Text to parse the sample contract note
+- tapOn:
+    text: "Parse Text"
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 7. Verify Parsed Results
+# ═══════════════════════════════════════════════════════════════════════════
+# Parse results summary should appear
+- assertVisible:
+    text: "Trades Extracted"
+
+# Stats should show trades, buys, sells
+- assertVisible:
+    text: "Trades"
+- assertVisible:
+    text: "Buys"
+- assertVisible:
+    text: "Sells"
+
+# Verify the parsed trades table is visible
+- assertVisible:
+    text: "Parsed Trades"
+- assertVisible:
+    text: "Symbol"
+- assertVisible:
+    text: "RELIANCE"
+
+# Verify broker detection
+- assertVisible:
+    text: "Zerodha"
+
+# Verify source label
+- assertVisible:
+    text: "Local fallback parse"
+
+# Verify Export CSV button is visible (only appears on successful parse)
+- assertVisible:
+    text: "Export CSV"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 8. Clear Results
+# ═══════════════════════════════════════════════════════════════════════════
+# Tap the clear (X) button (testID-based) to reset
+- tapOn:
+    id: "clearBtn"
+
+# Wait for results to clear
+- waitForAnimationToEnd
+
+# Verify we're back to the action cards
+- assertVisible:
+    text: "Upload PDF Contract Note"
+- assertVisible:
+    text: "Batch Upload (Multi)"
+- assertVisible:
+    text: "Paste Contract Note Text"
+
+# Verify results are gone
+- assertNotVisible:
+    text: "Trades Extracted"
+- assertNotVisible:
+    text: "Export CSV"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 9. Navigate Back to More
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+# Verify back on Reports screen
+- assertVisible:
+    text: "Analytics"
+
+# Go back to More
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+# Verify back on More screen
+- assertVisible:
+    text: "More"

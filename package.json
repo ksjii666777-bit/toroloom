@@ -20,6 +20,7 @@
     "expo-background-fetch": "~56.0.19",
     "expo-dev-client": "~56.0.20",
     "expo-device": "^56.0.4",
+    "expo-document-picker": "~56.0.4",
     "expo-file-system": "~56.0.8",
     "expo-font": "~56.0.7",
     "expo-haptics": "~56.0.3",
@@ -34,6 +35,7 @@
     "react-dom": "19.2.3",
     "react-native": "0.85.3",
     "react-native-gesture-handler": "~2.31.1",
+    "react-native-keychain": "^10.0.0",
     "react-native-razorpay": "^3.0.0",
     "react-native-reanimated": "4.3.1",
     "react-native-safe-area-context": "~5.7.0",
@@ -46,11 +48,14 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/react": "~19.2.2",
     "@vitest/coverage-v8": "^4.1.7",
+    "eslint": "^10.5.0",
     "qrcode-terminal": "^0.12.0",
     "react-test-renderer": "^19.2.3",
     "typescript": "~6.0.3",
+    "typescript-eslint": "^8.61.1",
     "vitest": "^4.1.7"
   },
   "expo": {
@@ -79,6 +84,9 @@
     "test:int:down": "bash scripts/run-integration-tests.sh --down",
     "test:e2e": "maestro test .maestro/flows",
     "test:e2e:studio": "maestro studio",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run test",
+    "lint": "eslint src/",
     "test:e2e:ci": "maestro test .maestro/flows"
   },
   "private": true

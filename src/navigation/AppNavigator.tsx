@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Alert, Linking } from 'react-native';
+import { View, Text, StyleSheet, Alert, Linking } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -50,7 +51,7 @@ import TransferScreen from '../screens/funds/TransferScreen';
 import UPIScreen from '../screens/funds/UPIScreen';
 import FundsDashboardScreen from '../screens/funds/FundsDashboardScreen';
 import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
-import BrokerConnectScreen from '../screens/broker/BrokerConnectScreen';
+import ConnectBrokerView from '../screens/broker/ConnectBrokerView';
 import TenantConfigScreen from '../screens/settings/TenantConfigScreen';
 import VoiceSettingsScreen from '../screens/settings/VoiceSettingsScreen';
 import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
@@ -58,6 +59,7 @@ import NewsFeedScreen from '../screens/news/NewsFeedScreen';
 import ChatRoomListScreen from '../screens/chat/ChatRoomListScreen';
 import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
 import BehavioralJournalScreen from '../screens/journal/BehavioralJournalScreen';
+import ContractNoteUploadScreen from '../screens/reports/ContractNoteUploadScreen';
 import AvatarWidget from '../components/AvatarWidget';
 import IronLockOverlay from '../components/IronLockOverlay';
 
@@ -65,38 +67,36 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function TabIcon({ name, focused, color, badgeCount }: { name: string; focused: boolean; color: string; badgeCount?: number }) {
-  const scaleAnim = useRef(new Animated.Value(focused ? 1 : 0.85)).current;
-  const badgeScale = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useSharedValue(focused ? 1 : 0.85);
+  const badgeScale = useSharedValue(1);
   const prevBadgeCount = useRef(badgeCount);
 
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scaleAnim.value }],
+  }));
+
+  const badgeStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: badgeScale.value }],
+  }));
+
   React.useEffect(() => {
-    Animated.spring(scaleAnim, {
-      toValue: focused ? 1 : 0.85,
-      useNativeDriver: true,
-      speed: 12,
-      bounciness: 6,
-    }).start();
-  }, [focused, scaleAnim]);
+    scaleAnim.value = withSpring(focused ? 1 : 0.85, { stiffness: 120, damping: 12 });
+  }, [focused]);
 
   // Pulse badge when count increases
   React.useEffect(() => {
     if (badgeCount !== undefined && prevBadgeCount.current !== undefined && badgeCount > prevBadgeCount.current) {
-      badgeScale.setValue(1.5);
-      Animated.spring(badgeScale, {
-        toValue: 1,
-        useNativeDriver: true,
-        speed: 8,
-        bounciness: 14,
-      }).start();
+      badgeScale.value = 1.5;
+      badgeScale.value = withSpring(1, { stiffness: 80, damping: 14 });
     }
     prevBadgeCount.current = badgeCount;
-  }, [badgeCount, badgeScale]);
+  }, [badgeCount]);
 
   return (
-    <Animated.View style={[tabStyles.iconContainer, { transform: [{ scale: scaleAnim }] }]}>
+    <Animated.View style={[tabStyles.iconContainer, iconStyle]}>
       <Ionicons name={name as any} size={24} color={color} />
       {badgeCount !== undefined && badgeCount > 0 && (
-        <Animated.View style={[tabStyles.badgeOverlay, { transform: [{ scale: badgeScale }] }]}>
+        <Animated.View style={[tabStyles.badgeOverlay, badgeStyle]}>
           <Text style={tabStyles.badgeText}>
             {badgeCount > 9 ? '9+' : badgeCount}
           </Text>
@@ -336,6 +336,7 @@ export default function AppNavigator() {
             <Stack.Screen name="ChatList" component={ChatRoomListScreen} />
             <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
             <Stack.Screen name="BehavioralJournal" component={BehavioralJournalScreen} />
+            <Stack.Screen name="ContractNoteParser" component={ContractNoteUploadScreen} />
             <Stack.Screen name="Learn" component={LearnScreen} />
             <Stack.Screen name="Community" component={CommunityScreen} />
             <Stack.Screen name="AIInsights" component={AIInsightsScreen} />
@@ -361,7 +362,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Transfer" component={TransferScreen} />
             <Stack.Screen name="UPI" component={UPIScreen} />
             <Stack.Screen name="FundsDashboard" component={FundsDashboardScreen} />
-            <Stack.Screen name="BrokerConnect" component={BrokerConnectScreen} />
+            <Stack.Screen name="BrokerConnect" component={ConnectBrokerView} />
             <Stack.Screen name="TenantConfig" component={TenantConfigScreen} />
             <Stack.Screen name="VoiceSettings" component={VoiceSettingsScreen} />
           </>

@@ -3,4 +3,5 @@
 // __DEV__ is a global boolean provided by Expo / React Native / Metro bundler.
 // It is true in development builds and false in production. vitest's Node
 // environment does not define it, so we declare it here and set it in setup.ts.
+// eslint-disable-next-line no-var -- `var` is required for globalThis property in .d.ts
 declare var __DEV__: boolean | undefined;

@@ -62,10 +62,17 @@ vi.mock('react-native-reanimated', () => ({
     callback?.(true);
     return toValue;
   },
+  useAnimatedReaction: (_prepare: any, _react: any) => {},
   withDelay: (_delay: number, value: any) => value,
+  interpolate: (_value: number, _inputRange: number[], _outputRange: number[]) => _outputRange[0],
+  interpolateColor: (_value: number, _inputRange: number[], _outputRange: string[]) => _outputRange[0],
   withSpring: (toValue: any) => toValue,
+  withRepeat: (animation: any) => animation,
+  withSequence: (...animations: any[]) => animations[animations.length - 1],
   runOnJS: (fn: any) => fn,
-  Easing: { in: (e: any) => e, out: (e: any) => e, ease: undefined },
+  useAnimatedScrollHandler: (handler: any) => handler.onScroll || handler,
+  Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
+  Easing: { in: (e: any) => e, out: (e: any) => e, inOut: (e: any) => e, ease: undefined },
   default: { View: 'View', Text: 'Text' },
 }));
 
@@ -110,6 +117,12 @@ vi.mock('expo-notifications', () => ({
   AndroidImportance: { HIGH: 'high', DEFAULT: 'default', LOW: 'low', NONE: 'none' },
   IosAuthorizationStatus: { GRANTED: 1, DENIED: 0 },
   Importance: { NONE: 0, LOW: 1, UNSPECIFIED: 2, DEFAULT: 3, HIGH: 4 },
+}));
+
+// ==================== Mock expo-document-picker ====================
+// The package triggers expo-modules-core EventEmitter on import
+vi.mock('expo-document-picker', () => ({
+  getDocumentAsync: vi.fn(() => Promise.resolve({ canceled: true })),
 }));
 
 // ==================== Mock expo-haptics ====================
@@ -393,5 +406,19 @@ vi.mock('expo-file-system/legacy', () => ({
 vi.mock('react-native-webview', () => ({
   WebView: 'WebView',
   default: 'WebView',
+}));
+
+// ==================== Mock react-native-keychain ====================
+// The package ships TypeScript source in lib/commonjs/ which vitest cannot
+// parse. Mock it to prevent SyntaxError on import.
+vi.mock('react-native-keychain', () => ({
+  setGenericPassword: vi.fn(() => Promise.resolve()),
+  getGenericPassword: vi.fn(() => Promise.resolve({ service: '', username: '', password: '' })),
+  resetGenericPassword: vi.fn(() => Promise.resolve()),
+  default: {
+    setGenericPassword: vi.fn(() => Promise.resolve()),
+    getGenericPassword: vi.fn(() => Promise.resolve({ service: '', username: '', password: '' })),
+    resetGenericPassword: vi.fn(() => Promise.resolve()),
+  },
 }));
 

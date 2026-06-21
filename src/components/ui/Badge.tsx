@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay } from 'react-native-reanimated';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 interface BadgeProps {
@@ -23,26 +24,23 @@ const badgeColors = {
 
 export default function Badge({ label, variant = 'primary', size = 'small', animated = false, animationDelay = 0 }: BadgeProps) {
   const colors = badgeColors[variant];
-  const scaleAnim = useRef(new Animated.Value(animated ? 0 : 1)).current;
+  const scaleAnim = useSharedValue(animated ? 0 : 1);
+  const badgeStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scaleAnim.value }],
+  }));
 
   useEffect(() => {
     if (animated) {
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        delay: animationDelay,
-        speed: 14,
-        bounciness: 8,
-      }).start();
+      scaleAnim.value = withDelay(animationDelay, withSpring(1, { stiffness: 120, damping: 14 }));
     }
-  }, [animated, animationDelay, scaleAnim]);
+  }, [animated, animationDelay]);
 
   return (
     <Animated.View style={[
       styles.badge,
       { backgroundColor: colors.bg },
       size === 'medium' && styles.badgeMedium,
-      { transform: [{ scale: scaleAnim }] },
+      badgeStyle,
     ]}>
       <View style={[styles.dot, { backgroundColor: colors.text }]} />
       <Text style={[

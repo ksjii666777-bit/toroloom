@@ -475,7 +475,7 @@ describe('AppNavigator — Deep Link URL Parsing', () => {
 
 describe('AppNavigator — Warm-Start Deep Links', () => {
   let warmStartHandler: ((event: { url: string }) => void) | undefined;
-  let removeSubscription: () => void;
+  let removeSubscription: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     // Set up logged-in state for the navigator
@@ -595,12 +595,6 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
   });
 
   it('cleans up the addEventListener subscription on unmount', async () => {
-    const removeMock = vi.fn();
-    vi.spyOn(Linking, 'addEventListener').mockImplementation((_event: string, _handler: (event: { url: string }) => void) => {
-      warmStartHandler = _handler;
-      return { remove: removeMock } as any;
-    });
-
     let root: TestRenderer.ReactTestRenderer;
     TestRenderer.act(() => {
       root = TestRenderer.create(<AppNavigator />);
@@ -610,7 +604,7 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
       root!.unmount();
     });
 
-    expect(removeMock).toHaveBeenCalled();
+    expect(removeSubscription).toHaveBeenCalled();
   });
 
   it('does not set up event listener when user is not logged in', async () => {

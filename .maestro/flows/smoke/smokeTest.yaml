@@ -10,7 +10,9 @@
 # 6. Logout
 # =============================================================================
 
-appId: host.exp.exponent
+# NOTE: Use com.anonymous.Toroloom for dev builds.
+# Change to host.exp.exponent when running via Expo Go.
+appId: com.anonymous.Toroloom
 ---
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:

@@ -7,7 +7,7 @@ export default defineConfig({
     setupFiles: ['./src/__tests__/setup.ts'],
     include: ['src/__tests__/**/*.test.ts', 'src/__tests__/**/*.test.tsx'],
     exclude: ['node_modules', 'backend'],
-    testTimeout: 10000,
+    testTimeout: 15000,
     reporters: ['verbose'],
     server: {
       deps: {

@@ -420,7 +420,7 @@ function computePnlHistory(
 ): { date: string; value: number; cumulativePnl: number }[] {
   const today = new Date();
   const history: { date: string; value: number; cumulativePnl: number }[] = [];
-  let cumulativePnl = 0;
+  let cumulativePnl: number;
 
   // Build a map of trade dates for quick lookup
   const tradeMap = new Map<string, number>();

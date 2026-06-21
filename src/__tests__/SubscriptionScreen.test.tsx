@@ -87,18 +87,23 @@ function resetStore(subscriptionOverrides?: Record<string, any>) {
   });
 }
 
+// ==================== File-level Setup ====================
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  mockNavigate.mockClear();
+  mockGoBack.mockClear();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 // ==================== Free User ====================
 
 describe('SubscriptionScreen — Free User', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders the hero section with default branding', () => {
@@ -210,14 +215,7 @@ describe('SubscriptionScreen — Free User', () => {
 
 describe('SubscriptionScreen — Pro User', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore({ tier: 'pro', planId: 'plan_pro', status: 'active', autoRenew: true });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders hero with Pro badge', () => {
@@ -286,14 +284,7 @@ describe('SubscriptionScreen — Pro User', () => {
 
 describe('SubscriptionScreen — Elite User', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore({ tier: 'elite', planId: 'plan_elite', status: 'active', autoRenew: true });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders hero with Elite badge', () => {
@@ -318,13 +309,7 @@ describe('SubscriptionScreen — Elite User', () => {
 
 describe('SubscriptionScreen — Tenant Branding', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
+    // Note: no resetStore() — each test sets up its own store state
   });
 
   it('shows tenant name in hero title when a tenant is configured', () => {
@@ -378,14 +363,7 @@ describe('SubscriptionScreen — Tenant Branding', () => {
 
 describe('SubscriptionScreen — Dynamic Pricing', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('shows tenant-pricing overrides in plan cards', () => {
@@ -438,14 +416,7 @@ describe('SubscriptionScreen — Dynamic Pricing', () => {
 
 describe('SubscriptionScreen — Feature Comparison Table', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders all 15 features from the matrix', () => {
@@ -497,14 +468,7 @@ describe('SubscriptionScreen — Feature Comparison Table', () => {
 
 describe('SubscriptionScreen — Feature List', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
     resetStore();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('renders feature labels from the matrix in plan cards', () => {
@@ -533,13 +497,7 @@ describe('SubscriptionScreen — Feature List', () => {
 
 describe('SubscriptionScreen — Edge Cases', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
+    // Note: no resetStore() — each test sets up its own store state
   });
 
   it('renders without crashing when subscription is cancelled', () => {

@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Animated, Platform, Alert } from 'react-native';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Platform, Alert } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -22,26 +23,33 @@ export default function SubscriptionScreen({ navigation }: any) {
   const getPlanPrice = useSubscriptionStore(s => s.getPlanPrice);
   const getFeaturesForTier = useSubscriptionStore(s => s.getFeaturesForTier);
   const getEffectiveFeatureMatrix = useSubscriptionStore(s => s.getEffectiveFeatureMatrix);
-  const getTenantConfig = useSubscriptionStore(s => s.getTenantConfig);
   const effectiveMatrix = getEffectiveFeatureMatrix();
-  const tenantConfig = getTenantConfig();
+  const tenantConfig = useSubscriptionStore(s => s.tenantConfig);
   const [isYearly, setIsYearly] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState(subscription.planId);
 
   // Animated values for plan cards staggered entrance
-  const cardAnims = useRef(SUBSCRIPTION_PLANS.map(() => new Animated.Value(0))).current;
+  const cardAnim0 = useSharedValue(0);
+  const cardAnim1 = useSharedValue(0);
+  const cardAnim2 = useSharedValue(0);
+  const cardAnims = [cardAnim0, cardAnim1, cardAnim2];
+
+  const cardStyle0 = useAnimatedStyle(() => ({
+    transform: [{ scale: cardAnim0.value }],
+  }));
+  const cardStyle1 = useAnimatedStyle(() => ({
+    transform: [{ scale: cardAnim1.value }],
+  }));
+  const cardStyle2 = useAnimatedStyle(() => ({
+    transform: [{ scale: cardAnim2.value }],
+  }));
+  const cardStyles = [cardStyle0, cardStyle1, cardStyle2];
 
   useEffect(() => {
-    Animated.stagger(150, cardAnims.map((anim, i) =>
-      Animated.spring(anim, {
-        toValue: 1,
-        useNativeDriver: true,
-        speed: 12,
-        bounciness: 6,
-        delay: i * 100,
-      })
-    )).start();
-  }, [cardAnims]);
+    cardAnims.forEach((anim, i) => {
+      anim.value = withDelay(i * 150, withSpring(1, { stiffness: 120, damping: 12 }));
+    });
+  }, []);
 
 
 
@@ -189,7 +197,7 @@ export default function SubscriptionScreen({ navigation }: any) {
                     styles.planCard,
                     isSelected && styles.planCardSelected,
                     isCurrent && styles.planCardCurrent,
-                    { transform: [{ scale: cardAnims[i] }] },
+                    cardStyles[i],
                   ]}
                 >
                   {/* Card Header Gradient */}

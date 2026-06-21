@@ -1,6 +1,6 @@
-import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Animated } from 'react-native';
-import ReanimatedAnimated from 'react-native-reanimated';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl } from 'react-native';
+import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, Easing, interpolate } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -119,21 +119,22 @@ export default function HomeScreen({ navigation }: any) {
     return `\u20B9${val.toFixed(0)}`;
   };
 
-  const portfolioGlow = useRef(new Animated.Value(0)).current;
+  const glowProgress = useSharedValue(0);
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(portfolioGlow, { toValue: 1, duration: 2500, useNativeDriver: true }),
-        Animated.timing(portfolioGlow, { toValue: 0, duration: 2500, useNativeDriver: true }),
-      ])
-    ).start();
-  }, [portfolioGlow]);
+    glowProgress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+      ),
+      -1, // infinite repeat
+      true // yoyo (reverse each cycle)
+    );
+  }, []);
 
-  const glowOpacity = portfolioGlow.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.2, 0.5],
-  });
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(glowProgress.value, [0, 1], [0.2, 0.5]),
+  }));
 
   if (isLoading) {
     return (
@@ -210,7 +211,7 @@ export default function HomeScreen({ navigation }: any) {
           </View>
 
           {/* Glow effect behind portfolio card */}
-          <Animated.View style={[styles.portfolioGlow, { opacity: glowOpacity }]} />
+          <ReanimatedAnimated.View style={[styles.portfolioGlow, glowStyle]} />
 
           {/* Portfolio Summary Card */}
           <View style={styles.portfolioCardWrapper}>

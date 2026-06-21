@@ -44,18 +44,18 @@ async function getAnalytics() {
 export interface AnalyticsEvents {
   login: { method: 'email' | 'google' | 'apple' };
   signup: { method: 'email' | 'google' | 'apple' };
-  logout: {};
+  logout: Record<string, never>;
   stock_view: { symbol: string; name: string; sector?: string };
   stock_add_to_watchlist: { symbol: string };
   stock_remove_from_watchlist: { symbol: string };
   order_placed: { symbol: string; type: 'buy' | 'sell'; quantity: number; value: number };
   order_executed: { symbol: string; type: 'buy' | 'sell'; quantity: number; value: number };
-  portfolio_view: {};
+  portfolio_view: Record<string, never>;
   course_started: { courseId: string; courseName: string };
   lesson_completed: { courseId: string; lessonId: string };
   ai_insight_viewed: { symbol: string };
-  community_post_created: {};
-  community_post_liked: {};
+  community_post_created: Record<string, never>;
+  community_post_liked: Record<string, never>;
   notification_opened: { type: string };
   onboarding_completed: { completed: boolean; skipped?: boolean; replay?: boolean };
   onboarding_started: { source: string; variant: 'default' | 'referral' };
