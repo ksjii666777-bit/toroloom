@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useAIStore } from '../../store/aiStore';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -8,7 +8,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { formatCurrency } from '../../utils/formatters';
 
-export default function AIInsightsScreen({ navigation }: any) {
+export default function AIInsightsScreen({ _navigation }: any) {
   const { insights } = useAIStore();
 
   const getTypeColor = (type: string) => {

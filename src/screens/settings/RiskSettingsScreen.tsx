@@ -11,12 +11,12 @@ import {
   selectExitOnlyMode, selectDailyPnL, selectDailyLossPercent,
 } from '../../store/riskStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
-import { formatCurrency, formatPercent } from '../../utils/formatters';
+import { formatCurrency} from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 export default function RiskSettingsScreen({ navigation }: any) {
   const { colors } = useTheme();

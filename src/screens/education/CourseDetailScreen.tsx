@@ -5,13 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
-import { Course } from '../../types';
+
 import { mockCourses, mockLessons } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const levelGradients: Record<string, readonly [string, string]> = {
   beginner: GRADIENTS.success,

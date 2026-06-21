@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useCommunityStore } from '../../store/communityStore';
-import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { COLORS, SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { formatTimeAgo } from '../../utils/formatters';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const trendingTags = ['RELIANCE', 'Nifty', 'SIP', 'Budget2025', 'TCS', 'IPO', 'Dividend', 'Crypto'];
 
-export default function CommunityScreen({ navigation }: any) {
+export default function CommunityScreen({ _navigation }: any) {
   const { posts, likePost, addPost } = useCommunityStore();
   const [showPostInput, setShowPostInput] = useState(false);
   const [postContent, setPostContent] = useState('');

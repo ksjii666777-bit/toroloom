@@ -6,7 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import ToroloomLogo from '../../components/ui/ToroloomLogo';
-import { SPACING, FONTS, BORDER_RADIUS, SCREEN } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 
 interface LoginScreenProps {

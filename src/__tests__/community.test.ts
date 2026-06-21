@@ -51,7 +51,7 @@ describe('communityApi — getPosts', () => {
 
   it('sends GET with custom page and limit', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve({ posts: [], total: 0, page: 2, totalPages: 5 }) };
     });
@@ -62,7 +62,7 @@ describe('communityApi — getPosts', () => {
 
   it('sends GET with tag filter', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve({ posts: [], total: 0, page: 1, totalPages: 0 }) };
     });
@@ -73,7 +73,7 @@ describe('communityApi — getPosts', () => {
 
   it('encodes special characters in tag', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve({ posts: [], total: 0, page: 1, totalPages: 0 }) };
     });

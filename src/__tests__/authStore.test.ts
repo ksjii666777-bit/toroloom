@@ -7,7 +7,7 @@
  * and balance updates.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi} from 'vitest';
 import { useAuthStore } from '../store/authStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

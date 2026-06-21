@@ -46,7 +46,7 @@ export const useEducationStore = create<EducationState>((set, get) => ({
     }
   },
 
-  enrollInCourse: (courseId) => {
+  enrollInCourse: (_courseId) => {
     // Enroll logic — no backend endpoint yet
   },
 

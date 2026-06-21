@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import { Platform } from 'react-native';
+
 import { log } from '../utils/logger';
 
 // Store the analytics instance and the module reference separately so we

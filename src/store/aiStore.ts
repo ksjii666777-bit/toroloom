@@ -10,7 +10,7 @@ interface AIState {
   generateInsight: (symbol: string) => Promise<void>;
 }
 
-export const useAIStore = create<AIState>((set, get) => ({
+export const useAIStore = create<AIState>((set, _get) => ({
   insights: mockAIInsights,
   isLoading: false,
 

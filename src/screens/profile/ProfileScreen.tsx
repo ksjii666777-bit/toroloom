@@ -10,7 +10,7 @@ import { formatCurrency, formatDate } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const kycSteps = [
   { key: 'pan', label: 'PAN Verification', icon: 'card-outline', done: true },

@@ -10,9 +10,9 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
-import { SkeletonBlock, SkeletonCard, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
+import { SkeletonBlock} from '../../components/ui/SkeletonLoader';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 export default function LearnScreen({ navigation }: any) {
   const { colors } = useTheme();

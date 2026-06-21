@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act } from 'react-test-renderer';
-import { render, fireEvent } from './testUtils';
+import { render } from './testUtils';
 
 vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({

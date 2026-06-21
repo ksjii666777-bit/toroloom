@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, Linking } from 'react-native';
+import { Text, StyleSheet, Alert, Linking} from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -7,7 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore, useOnboardingStore, useRiskStore, useNotificationStore } from '../store';
 import { useTheme } from '../context/ThemeContext';
-import { FONTS } from '../constants/theme';
+
 import { analytics } from '../services/analytics';
 import { authApi } from '../services/api';
 

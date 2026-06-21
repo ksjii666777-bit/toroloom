@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import Input from '../../components/ui/Input';

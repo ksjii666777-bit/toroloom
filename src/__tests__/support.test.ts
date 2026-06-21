@@ -156,7 +156,7 @@ describe('supportApi — searchFAQs', () => {
 
   it('handles special characters in query', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });
@@ -176,7 +176,7 @@ describe('supportApi — searchFAQs', () => {
 
   it('handles empty search query', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });

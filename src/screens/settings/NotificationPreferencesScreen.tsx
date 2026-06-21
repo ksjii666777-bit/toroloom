@@ -15,7 +15,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useNotificationStore } from '../../store/notificationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const PREFERENCE_SECTIONS = [
   {

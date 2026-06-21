@@ -11,7 +11,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
-import { formatCurrency, formatTimestamp } from '../../utils/formatters';
+import { formatCurrency} from '../../utils/formatters';
 
 const { width } = Dimensions.get('window');
 

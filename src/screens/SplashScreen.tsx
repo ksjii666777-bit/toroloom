@@ -105,7 +105,7 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
 
   // ── Particle/star positions (deterministic for performance) ──
   const particles = useRef(
-    Array.from({ length: 20 }, (_, i) => ({
+    Array.from({ length: 20 }, (_, _i) => ({
       x: Math.random() * width,
       y: Math.random() * height * 0.6,
       size: 1 + Math.random() * 2.5,

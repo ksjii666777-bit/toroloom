@@ -55,9 +55,9 @@ vi.mock('../context/ThemeContext', () => ({
 // ==================== Imports ====================
 
 import { render, fireEvent } from './testUtils';
-import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../store/subscriptionStore';
+import { useSubscriptionStore} from '../store/subscriptionStore';
 import { DEFAULT_FEATURE_MATRIX } from '../types';
-import type { TenantConfig, SubscriptionFeature, SubscriptionTier } from '../types';
+import type { TenantConfig, SubscriptionFeature} from '../types';
 import SubscriptionScreen from '../screens/settings/SubscriptionScreen';
 
 // ==================== Helpers ====================

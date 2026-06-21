@@ -177,7 +177,7 @@ describe('marketApi — getBulkQuotes', () => {
 
   it('handles single symbol', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });
@@ -188,7 +188,7 @@ describe('marketApi — getBulkQuotes', () => {
 
   it('handles empty symbol array', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });
@@ -228,7 +228,7 @@ describe('marketApi — getOHLC', () => {
 
   it('sends GET with custom interval and days', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });
@@ -239,7 +239,7 @@ describe('marketApi — getOHLC', () => {
 
   it('sends GET with custom interval only', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });
@@ -295,7 +295,7 @@ describe('marketApi — search', () => {
 
   it('handles special characters in query', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });

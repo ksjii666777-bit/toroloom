@@ -17,7 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, BORDER_RADIUS} from '../../constants/theme';
 import { mockNews } from '../../constants/mockData';
 import { MarketNewsItem } from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -503,7 +503,7 @@ const detailStyles = StyleSheet.create({
 });
 
 // ─── Main Screen ──────────────────────────────────────────
-export default function NewsFeedScreen({ navigation }: any) {
+export default function NewsFeedScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');

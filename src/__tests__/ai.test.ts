@@ -53,7 +53,7 @@ describe('aiApi — getInsights', () => {
 
   it('sends GET to /ai/insights with stockId query param', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });

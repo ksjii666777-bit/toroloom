@@ -65,7 +65,7 @@ GST                                          50.00`;
 
 // ─── ICICI Direct Contract Note ────────────────────────────
 
-const ICICI_CONTRACT = `ICICI Direct - Trade Confirmation
+const _ICICI_CONTRACT = `ICICI Direct - Trade Confirmation
 Contract Note
 
 Order No  Trade Time           Contract Description  B(S)  Qty  Gross Rate  Net Total
@@ -79,7 +79,7 @@ GST                                                     61.20`;
 
 // ─── HDFC Securities Contract Note ─────────────────────────
 
-const HDFC_CONTRACT = `HDFC Securities
+const _HDFC_CONTRACT = `HDFC Securities
 Contract Note
 
 Order No  Trade Time           Security   Exch/Seg  B/S  Qty  Net Rate  Net Total
@@ -93,7 +93,7 @@ STT                                                            200.00`;
 
 // ─── Kotak Securities Contract Note ─────────────────────────
 
-const KOTAK_CONTRACT = `Kotak Securities
+const _KOTAK_CONTRACT = `Kotak Securities
 Contract Note
 
 Trade Date/Time      Scrip Name    B/S  Qty  Rate     Total     Brokerage

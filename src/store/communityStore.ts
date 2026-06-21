@@ -13,7 +13,7 @@ interface CommunityState {
   likePost: (postId: string) => Promise<void>;
 }
 
-export const useCommunityStore = create<CommunityState>((set, get) => ({
+export const useCommunityStore = create<CommunityState>((set, _get) => ({
   posts: mockPosts,
   isLoading: false,
   totalPages: 1,

@@ -19,12 +19,12 @@ import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore'
 import { useAuthStore } from '../../store/authStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
-import { formatCurrency, formatPercent, formatNumber } from '../../utils/formatters';
+import { formatCurrency, formatPercent} from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import PnLChart from '../../components/PnLChart';
 import { exportPDF, exportCSV } from '../../services/reportExport';
-import type { PortfolioAnalytics } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 

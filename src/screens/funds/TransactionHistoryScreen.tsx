@@ -10,7 +10,7 @@ import { useFundStore, FundTransaction } from '../../store/fundStore';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatTimestamp } from '../../utils/formatters';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 type TxFilter = 'all' | 'add' | 'withdraw';
 

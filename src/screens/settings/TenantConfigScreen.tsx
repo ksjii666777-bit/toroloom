@@ -34,7 +34,7 @@ import {
   TenantConfig,
   PaywallOverride,
 } from '../../types';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 

@@ -12,7 +12,6 @@ import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
 import { mockUser } from '../constants/mockData';
-import type { FundTransaction } from '../store/fundStore';
 
 // ==================== Mocks (hoisted) ====================
 
@@ -227,7 +226,7 @@ describe('FundsDashboardScreen — Transaction Detail', () => {
     advanceAndRender(500);
     // '+' for add, '-' for withdraw
     expect(getByText(/\+/)).toBeDefined();
-    expect(getByText(/\-/)).toBeDefined();
+    expect(getByText(/-/)).toBeDefined();
   });
 
   it('shows transaction method and timestamp', () => {
@@ -339,4 +338,4 @@ describe('FundsDashboardScreen — Empty Transactions', () => {
 });
 
 // Re-import for mock override type safety
-import { useFundStore } from '../store/fundStore';
+import { useFundStore, FundTransaction } from '../store/fundStore';

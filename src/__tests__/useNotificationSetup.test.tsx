@@ -82,7 +82,7 @@ vi.mock('../services/notificationService', () => ({
   sendPriceAlert: vi.fn(),
   sendTradeConfirmation: vi.fn(),
   sendEducationalReminder: vi.fn(),
-  getScreenForType: vi.fn((type: string) => 'Home'),
+  getScreenForType: vi.fn((_type: string) => 'Home'),
 }));
 
 // ==================== Imports ====================

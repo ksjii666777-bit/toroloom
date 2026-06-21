@@ -10,9 +10,9 @@
 
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, fireEvent } from './testUtils';
+import { render} from './testUtils';
 import { mockTrades } from '../constants/mockData';
-import { usePortfolioStore } from '../store/portfolioStore';
+
 
 // ==================== Mocks (hoisted) ====================
 

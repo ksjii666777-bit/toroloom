@@ -53,7 +53,7 @@ describe('notificationApi — getAll', () => {
 
   it('sends GET to /notifications?unread=true when unreadOnly is true', async () => {
     let capturedUrl = '';
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, _opts: any) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve([]) };
     });

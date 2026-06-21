@@ -13,7 +13,7 @@ import { formatCurrency, formatPercent } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const riskColors: Record<string, string> = {
   low: '#00C853',

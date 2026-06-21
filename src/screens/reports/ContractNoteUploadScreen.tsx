@@ -51,9 +51,9 @@ import type {
   ContractNoteParseResult,
   BatchParseResult,
 } from '../../services/gateway/pdfExtractor';
-import type { ParsedTrade } from '../../types';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 

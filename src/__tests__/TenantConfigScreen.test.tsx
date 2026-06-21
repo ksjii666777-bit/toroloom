@@ -686,7 +686,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const pricingVariants = [
       {
         name: 'Razorpay keys only (no pricing)',
-        fillPricing: (r: RenderResult) => {},
+        fillPricing: (_r: RenderResult) => {},
         expectedPlans: null,
         expectPricingSection: false,
         expectConfigured: true,

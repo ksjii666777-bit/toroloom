@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Alert} from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

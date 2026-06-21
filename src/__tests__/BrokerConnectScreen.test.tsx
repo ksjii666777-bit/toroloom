@@ -17,7 +17,6 @@
 
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { TenantConfig, SubscriptionFeature, SubscriptionTier } from '../types';
 
 // ==================== Mocks (hoisted) ====================
 
@@ -106,7 +105,6 @@ vi.mock('../components/ui/AnimatedPressable', () => ({
 
 import { render, fireEvent } from './testUtils';
 import BrokerConnectScreen from '../screens/broker/BrokerConnectScreen';
-import { Alert } from 'react-native';
 
 // ==================== Helpers ====================
 

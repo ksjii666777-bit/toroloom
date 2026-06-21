@@ -12,7 +12,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
-import { SkeletonBlock, PortfolioSkeleton, SkeletonCard } from '../../components/ui/SkeletonLoader';
+import { SkeletonBlock} from '../../components/ui/SkeletonLoader';
 
 const { width } = Dimensions.get('window');
 const BADGE_DISPLAY_COUNT = 8;

@@ -39,12 +39,12 @@ const mockNavigate = vi.fn();
 const mockGoBack = vi.fn();
 
 // ── Mock pdfExtractor Service ──────────────────────────────
-let mockPickAndParse = vi.fn();
-let mockPickAndParseBatch = vi.fn();
-let mockParseText = vi.fn();
-let mockExportSingle = vi.fn();
-let mockExportBatch = vi.fn();
-let mockExportSelected = vi.fn();
+const mockPickAndParse = vi.fn();
+const mockPickAndParseBatch = vi.fn();
+const mockParseText = vi.fn();
+const mockExportSingle = vi.fn();
+const mockExportBatch = vi.fn();
+const mockExportSelected = vi.fn();
 
 vi.mock('../services/gateway/pdfExtractor', () => ({
   pickAndParseContractNote: (...args: any[]) => mockPickAndParse(...args),

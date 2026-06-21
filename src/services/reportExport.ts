@@ -22,7 +22,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { cacheDirectory, moveAsync, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 import type { PortfolioAnalytics, Holding, Trade } from '../types';
-import { formatCurrency, formatPercent, formatNumber } from '../utils/formatters';
+import { formatCurrency, formatPercent} from '../utils/formatters';
 
 // ==================== Types ====================
 

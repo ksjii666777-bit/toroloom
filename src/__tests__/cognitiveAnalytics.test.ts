@@ -20,7 +20,7 @@ import {
   computeSimplifiedSummary,
   generateBehavioralPrompt,
 } from '../services/gateway/cognitiveAnalytics';
-import type { ParsedTrade, AICognitiveSummary, Holding } from '../types';
+import type { ParsedTrade, Holding} from '../types';
 
 // ─── Test Fixtures ─────────────────────────────────────────
 

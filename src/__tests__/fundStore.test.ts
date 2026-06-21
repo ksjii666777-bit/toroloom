@@ -7,7 +7,7 @@
  * and addTransaction for various scenarios (add, withdraw, pending, failed).
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach} from 'vitest';
 import { useFundStore, FundTransaction } from '../store/fundStore';
 
 describe('FundStore — Initial State', () => {

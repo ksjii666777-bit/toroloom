@@ -4,7 +4,7 @@ import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withSpring, withT
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useMarketStore } from '../../store/marketStore';
-import { SPACING, FONTS, BORDER_RADIUS, SCREEN } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import StockItem from '../../components/StockItem';
 import MarketCard from '../../components/MarketCard';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';

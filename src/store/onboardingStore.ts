@@ -91,7 +91,7 @@ interface OnboardingState {
   setReferralSource: (source: string) => void;
 }
 
-export const useOnboardingStore = create<OnboardingState>((set, get) => ({
+export const useOnboardingStore = create<OnboardingState>((set, _get) => ({
   hasCompletedOnboarding: false,
   currentStep: 0,
   isFirstLaunch: true,

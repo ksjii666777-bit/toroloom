@@ -27,9 +27,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useRiskStore, selectIsLockdownActive } from '../store/riskStore';
 import { useVoiceStore, VOICE_MESSAGES } from '../store/voiceStore';
-import { BORDER_RADIUS, GRADIENTS } from '../constants/theme';
+import { BORDER_RADIUS} from '../constants/theme';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const LOCK_ICONS = ['lock-closed', 'lock-closed', 'shield-checkmark', 'key'] as const;
 const NEO_CYAN = '#00F0FF';

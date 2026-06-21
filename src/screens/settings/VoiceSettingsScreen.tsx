@@ -10,7 +10,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const RATE_PRESETS = [
   { label: 'Slow', value: 0.6, icon: 'timer-outline' },

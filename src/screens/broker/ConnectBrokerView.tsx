@@ -431,7 +431,7 @@ export default function ConnectBrokerView({ navigation }: any) {
 
         {/* Broker Grid */}
         <View style={styles.brokerGrid}>
-          {BROKERS.map((broker, idx) => {
+          {BROKERS.map((broker, _idx) => {
             const isConnected = connectedBroker === broker.type;
             return (
               <Animated.View

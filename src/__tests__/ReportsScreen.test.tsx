@@ -115,10 +115,10 @@ function buildMockAnalytics(overrides?: any) {
 }
 
 let mockAnalytics: any = buildMockAnalytics();
-let getAnalyticsSpy = vi.fn(() => mockAnalytics);
-let mockIsLive = false;
-let mockLastUpdated: string | null = null;
-let mockPnlHistoryStream: any[] = [];
+const getAnalyticsSpy = vi.fn(() => mockAnalytics);
+const mockIsLive = false;
+const mockLastUpdated: string | null = null;
+const mockPnlHistoryStream: any[] = [];
 const mockSubscribe = vi.fn();
 const mockUnsubscribe = vi.fn();
 

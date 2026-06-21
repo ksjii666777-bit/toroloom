@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { Text, TouchableOpacity } from 'react-native';
+import { Text } from 'react-native';
 import Card from '../components/ui/Card';
 import { render } from './testUtils';
 

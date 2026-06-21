@@ -20,7 +20,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 export default function HomeScreen({ navigation }: any) {
   const { colors } = useTheme();

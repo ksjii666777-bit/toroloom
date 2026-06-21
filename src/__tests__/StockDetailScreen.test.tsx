@@ -68,7 +68,7 @@ vi.mock('../store/portfolioStore', () => ({
   })),
 }));
 
-let currentWatchlists: Array<{
+const currentWatchlists: Array<{
   id: string;
   name: string;
   stocks: typeof mockStocks;

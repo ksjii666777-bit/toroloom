@@ -214,7 +214,7 @@ export async function hasValidSession(brokerType: string): Promise<boolean> {
  * Delete a stored broker session from the keychain.
  */
 export async function clearBrokerSession(
-  brokerType: string,
+  _brokerType: string,
 ): Promise<boolean> {
   try {
     await Keychain.resetGenericPassword({

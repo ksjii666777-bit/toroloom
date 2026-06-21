@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { Holding } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../constants/theme';

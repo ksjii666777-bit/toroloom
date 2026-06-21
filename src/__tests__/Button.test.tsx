@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { Text, View } from 'react-native';
+import { Text } from 'react-native';
 import Button from '../components/ui/Button';
 import { render, fireEvent } from './testUtils';
 

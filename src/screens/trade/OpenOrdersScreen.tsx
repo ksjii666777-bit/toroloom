@@ -20,7 +20,7 @@ import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { OpenOrder } from '../../types';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const STATUS_COLORS: Record<string, string> = {
   open: '#FFC107',
@@ -213,7 +213,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
         }
       >
         {filteredOrders.length > 0 ? (
-          filteredOrders.map((order, idx) => (
+          filteredOrders.map((order, _idx) => (
             <AnimatedPressable
               key={order.id}
               onPress={() => handleViewStock(order.symbol)}

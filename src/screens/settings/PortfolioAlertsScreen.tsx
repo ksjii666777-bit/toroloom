@@ -16,11 +16,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotificationStore, isInQuietHours, PortfolioAlertKind } from '../../store/notificationStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
-import { formatCurrency, formatPercent } from '../../utils/formatters';
+import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
+import { formatCurrency} from '../../utils/formatters';
 import { sendPortfolioAlert } from '../../services/notificationService';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const ALERT_KINDS: {
   kind: PortfolioAlertKind;

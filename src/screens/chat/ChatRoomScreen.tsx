@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, BORDER_RADIUS} from '../../constants/theme';
 import type { ChatMessage } from '../../types';
 import { useChatStore } from '../../store/chatStore';
 

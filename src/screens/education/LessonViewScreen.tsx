@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
-import { Lesson, QuizQuestion } from '../../types';
+
 import { mockLessons } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Card from '../../components/ui/Card';

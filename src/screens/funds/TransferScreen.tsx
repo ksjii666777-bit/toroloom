@@ -13,7 +13,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 const TRANSFER_PRESETS = [1000, 5000, 10000, 25000];
 

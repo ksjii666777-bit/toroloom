@@ -18,7 +18,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../store/subscriptionStore';
+import { useSubscriptionStore} from '../store/subscriptionStore';
 import type { TenantConfig, PaywallOverride } from '../types';
 
 // ==================== Reset Store Before Each Test ====================

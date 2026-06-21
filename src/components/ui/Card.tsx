@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, interpolate } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, FONTS, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 
 interface CardProps {
   children: React.ReactNode;

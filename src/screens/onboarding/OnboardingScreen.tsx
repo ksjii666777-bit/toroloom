@@ -16,9 +16,9 @@ import * as Haptics from 'expo-haptics';
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width - SPACING.xl * 2;
 const CARD_GAP = SPACING.md;
-const MAX_CARDS = 5; // ONBOARDING_STEPS max length
+const _MAX_CARDS = 5; // ONBOARDING_STEPS max length
 
-export default function OnboardingScreen({ navigation }: any) {
+export default function OnboardingScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { currentStep, setCurrentStep, skipOnboarding, referralSource } = useOnboardingStore();

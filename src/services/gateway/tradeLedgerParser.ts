@@ -47,7 +47,7 @@ const PATTERNS = {
   action: /\b(BUY|SELL|B|S)\b/gi,
 
   /** ISIN (12-char alphanumeric) or trading symbol (3-10 uppercase/dash) */
-  symbol: /\b([A-Z0-9]{12}|[A-Z][A-Z\-]{2,9})\b/g,
+  symbol: /\b([A-Z0-9]{12}|[A-Z][A-Z-]{2,9})\b/g,
 
   /** Decimal price values: numbers with exactly 2 decimal places */
   price: /\b(\d+\.\d{2})\b/g,
@@ -413,17 +413,17 @@ function extractSymbol(row: string): string | null {
   if (isinMatch) return isinMatch[1];
 
   // Broker symbol patterns (NSE/BSE prefixes)
-  const symbolMatch = row.match(/NSE:\s*([A-Z][A-Z0-9\-]{1,9})\b/i);
+  const symbolMatch = row.match(/NSE:\s*([A-Z][A-Z0-9-]{1,9})\b/i);
   if (symbolMatch) return symbolMatch[1].toUpperCase();
 
-  const bseMatch = row.match(/BSE:\s*([A-Z][A-Z0-9\-]{1,9})\b/i);
+  const bseMatch = row.match(/BSE:\s*([A-Z][A-Z0-9-]{1,9})\b/i);
   if (bseMatch) return bseMatch[1].toUpperCase();
 
   // Standalone uppercase symbol 3-10 chars (after skipping known keywords)
   const words = row.split(/[\s,]+/);
   for (let i = 0; i < words.length; i++) {
-    const w = words[i].replace(/[^A-Za-z0-9\-]/g, '');
-    if (/^[A-Z][A-Z0-9\-]{2,9}$/.test(w) && !isKeyword(w)) {
+    const w = words[i].replace(/[^A-Za-z0-9-]/g, '');
+    if (/^[A-Z][A-Z0-9-]{2,9}$/.test(w) && !isKeyword(w)) {
       return w;
     }
   }

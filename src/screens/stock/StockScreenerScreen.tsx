@@ -40,12 +40,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useMarketStore, getMarketCapCategory, parseMarketCap, type ScreenerFilters } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
-import { formatCurrency } from '../../utils/formatters';
+
 import StockItem from '../../components/StockItem';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 
-const { width } = Dimensions.get('window');
+Dimensions.get('window');
 
 
 const SECTORS = ['All', 'Technology', 'Finance', 'Energy', 'Consumer', 'Automobile', 'Telecom'];

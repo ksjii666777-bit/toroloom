@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
-import { formatCurrency, formatDate, formatTimeAgo } from '../../utils/formatters';
+import { formatCurrency, formatDate} from '../../utils/formatters';
 import { Trade } from '../../types';
 
 const { width } = Dimensions.get('window');

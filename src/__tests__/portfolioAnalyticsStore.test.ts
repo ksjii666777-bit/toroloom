@@ -12,12 +12,12 @@
  *   - Caching & invalidation
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach} from 'vitest';
 import { usePortfolioAnalyticsStore } from '../store/portfolioAnalyticsStore';
 import { usePortfolioStore } from '../store/portfolioStore';
 import { getActiveWS } from '../services/wsRegistry';
 import type { Holding, Trade } from '../types';
-import type { PnLUpdateCallback } from '../services/wsService';
+
 
 // ==================== Test Fixtures ====================
 
