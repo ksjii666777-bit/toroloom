@@ -201,7 +201,7 @@ class BrokerRegistry {
         const instance = plugin.factory(config);
 
         if (plugin.initialize) {
-          const authResult = await plugin.initialize(config);
+          const authResult = await plugin.initialize(instance, config);
           if (!authResult) {
             incrementBrokerAuthError(type);
             throw new Error(`Authentication failed for broker: ${type}`);
@@ -247,7 +247,8 @@ class BrokerRegistry {
 
     let lastError: Error | null = null;
 
-    for (const plugin of ordered) {
+    for (let i = 0; i < ordered.length; i++) {
+      const plugin = ordered[i];
       const cb = getCircuitBreaker(`broker-${plugin.type}`);
 
       if (!cb.isAvailable()) {
@@ -271,12 +272,14 @@ class BrokerRegistry {
         return { broker, type: plugin.type };
       } catch (error: any) {
         lastError = error;
-        incrementBrokerReconnects(plugin.type);
+        // Only increment reconnects for failover targets (i > 0), not the
+        // primary broker that was explicitly requested or is first in priority.
+        if (i > 0) incrementBrokerReconnects(plugin.type);
         this.emit('broker-failover', {
           failed: plugin.type,
           label: plugin.label,
           error: error.message,
-          next: ordered.find(p => p.type !== plugin.type)?.type,
+          next: ordered[i + 1]?.type,
         });
         continue;
       }

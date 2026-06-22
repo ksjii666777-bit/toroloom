@@ -18,7 +18,7 @@ import { IbkrBroker } from '../services/broker/ibkrBroker';
 const mockFetch = vi.fn();
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
   // @ts-ignore - mock global fetch
   global.fetch = mockFetch;
 });
@@ -84,7 +84,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle(); // Initial tickle from startTickle interval
 
       const result = await broker.authenticate({ apiKey: 'test' });
       expect(result).toBe(true);
@@ -97,7 +96,6 @@ describe('IbkrBroker', () => {
     it('should use provided accountId', async () => {
       mockGatewayHealth();
       mockAuthStatus(true);
-      mockTickle(); // Initial tickle
 
       const result = await broker.authenticate({ apiKey: 'test', accountId: 'U9999999' });
       expect(result).toBe(true);
@@ -115,7 +113,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       // Mock secdef search
@@ -158,7 +155,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       // Mock portfolio positions
@@ -200,7 +196,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       mockFetch.mockRejectedValueOnce(new Error('API error'));
@@ -217,7 +212,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       // Mock secdef search
@@ -248,7 +242,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       mockFetch.mockResolvedValueOnce(mockResponse([])); // Empty search
@@ -275,7 +268,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       mockFetch.mockResolvedValueOnce(mockResponse({
@@ -314,7 +306,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       mockFetch.mockResolvedValueOnce(mockResponse({}));
@@ -332,7 +323,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       // Mock secdef search
@@ -364,7 +354,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       mockFetch.mockResolvedValueOnce(mockResponse([
@@ -386,7 +375,6 @@ describe('IbkrBroker', () => {
       mockGatewayHealth();
       mockAuthStatus(true);
       mockAccounts();
-      mockTickle();
       await broker.authenticate({ apiKey: 'test' });
 
       const cleanup = broker.subscribeTicks(['AAPL'], () => {});

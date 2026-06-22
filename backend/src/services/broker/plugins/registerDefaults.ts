@@ -38,6 +38,9 @@ const mockPlugin: BrokerPlugin = {
   gradient: ['#6B7280', '#374151'] as const,
   features: ['Simulated Data', 'No Config Required', 'Test Orders'],
   factory: () => new MockBroker(),
+  initialize: async (instance, _config) => {
+    return instance.authenticate({ apiKey: 'mock' });
+  },
   defaultConfig: { apiKey: 'mock' },
 };
 
@@ -65,9 +68,8 @@ const zerodhaPlugin: BrokerPlugin = {
     { key: 'accessToken', label: 'Access Token', type: 'secret', required: false, placeholder: 'Existing access token', authModes: ['credentials'] },
   ],
   factory: () => new ZerodhaBroker(),
-  initialize: async (config) => {
-    const broker = new ZerodhaBroker();
-    return broker.authenticate(config);
+  initialize: async (instance, config) => {
+    return instance.authenticate(config);
   },
   defaultConfig: {} as Partial<BrokerConfig>, // Filled from env at startup
 };
@@ -95,9 +97,8 @@ const angelPlugin: BrokerPlugin = {
     { key: 'accessToken', label: 'Access Token', type: 'secret', required: false, placeholder: 'Existing JWT token' },
   ],
   factory: () => new AngelBroker(),
-  initialize: async (config) => {
-    const broker = new AngelBroker();
-    return broker.authenticate(config);
+  initialize: async (instance, config) => {
+    return instance.authenticate(config);
   },
   defaultConfig: {} as Partial<import('../../broker/interface').BrokerConfig>, // Filled from env at startup
 };
@@ -122,9 +123,8 @@ const growwPlugin: BrokerPlugin = {
     { key: 'accessToken', label: 'Access Token', type: 'password', required: true, placeholder: 'Enter your access token' },
   ],
   factory: () => new GrowwBroker(),
-  initialize: async (config) => {
-    const broker = new GrowwBroker();
-    return broker.authenticate(config);
+  initialize: async (instance, config) => {
+    return instance.authenticate(config);
   },
   defaultConfig: {} as Partial<BrokerConfig>, // Filled from env at startup
 };

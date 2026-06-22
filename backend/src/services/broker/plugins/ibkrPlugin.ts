@@ -22,7 +22,7 @@ export const ibkrPlugin: BrokerPlugin = {
   label: 'Interactive Brokers',
   tagline: 'Trade global markets — stocks, options, futures, forex & more',
   region: 'global',
-  regions: ['global', 'us', 'europe', 'uk', 'canada', 'australia', 'singapore', 'japan', 'brazil', 'uae'],
+  regions: ['global', 'us', 'europe', 'uk', 'canada', 'australia', 'singapore', 'japan', 'brazil', 'uae', 'india', 'asia'],
   capabilities: [
     'stocks', 'options', 'futures', 'forex', 'etfs', 'bonds',
     'margin', 'short_selling', 'realtime_data', 'historical_data',
@@ -57,9 +57,8 @@ export const ibkrPlugin: BrokerPlugin = {
     },
   ],
   factory: () => new IbkrBroker(),
-  initialize: async (config) => {
-    const broker = new IbkrBroker();
-    return broker.authenticate(config);
+  initialize: async (instance, config) => {
+    return instance.authenticate(config);
   },
   defaultConfig: {
     gatewayUrl: process.env.IBKR_GATEWAY_URL || 'http://localhost:5000',

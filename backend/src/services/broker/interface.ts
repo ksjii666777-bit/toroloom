@@ -207,6 +207,9 @@ export interface BrokerConfig {
   appId?: string;
   // Zerodha specific
   requestToken?: string;
+  // Interactive Brokers specific
+  gatewayUrl?: string;
+  accountId?: string;
 }
 
 export interface IBroker {

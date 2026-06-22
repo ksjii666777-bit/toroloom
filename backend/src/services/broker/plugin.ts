@@ -19,6 +19,7 @@ import type { IBroker, BrokerConfig } from './interface';
 
 export type BrokerRegion =
   | 'global'      // Multi-region / worldwide (e.g. Interactive Brokers)
+  | 'asia'
   | 'india'
   | 'us'
   | 'europe'
@@ -147,11 +148,15 @@ export interface BrokerPlugin {
   /** Feature highlights shown on the broker card */
   features?: string[];
 
-  /** Factory function: creates an authenticated IBroker instance */
+  /** Factory function: creates a broker instance (not yet authenticated) */
   factory: (config: BrokerConfig) => IBroker;
 
-  /** Optional async initializer (e.g. to verify credentials are valid) */
-  initialize?: (config: BrokerConfig) => Promise<boolean>;
+  /**
+   * Optional async initializer that authenticates the broker instance
+   * created by factory(). Receives both the instance and config so it
+   * can authenticate the same object that will be returned to callers.
+   */
+  initialize?: (instance: IBroker, config: BrokerConfig) => Promise<boolean>;
 }
 
 // ──── Registration Metadata (what the registry exposes) ───────────────────
