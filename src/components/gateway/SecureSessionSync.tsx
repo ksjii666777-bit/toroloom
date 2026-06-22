@@ -203,7 +203,7 @@ export default function SecureSessionSync({
     if (loginConfigOverride) {
       return { ...config, ...loginConfigOverride } as BrokerLoginConfig;
     }
-    return config;
+    return config ?? null;
   }, [brokerType, loginConfigOverride]);
 
   // Determine extraction strategy for this broker

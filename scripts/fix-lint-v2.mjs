@@ -82,6 +82,7 @@ fixFile('src/__tests__/testUtils.tsx', [
 // The fix is to add a comment or use them, or just remove them entirely.
 // Since they're test fixtures that might be useful later, let me just turn them into strings or add a comment.
 // Simplest: add a void reference
+fixFile('src/__tests__/tradeLedgerParser.test.ts', [
   c => c + `\n// Reference unused fixture strings to suppress lint\nvoid (_ICICI_CONTRACT, _HDFC_CONTRACT, _KOTAK_CONTRACT);\n`,
 ]);
 
