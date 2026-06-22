@@ -195,7 +195,7 @@ describe('IronLockOverlay', () => {
   it('does not show overlay when lockdown status is none', () => {
     // Phase 1: render with active lockdown
     // Phase 2: transition to none (lockdown lifted) — should hide
-    const { getByText, queryByText } = renderAndTransition(
+    const { queryByText } = renderAndTransition(
       { lockdown: defaultLockdown },
       { lockdown: { status: 'active', triggeredAt: '2025-06-01T10:00:00Z', liftsAt: new Date(Date.now() + 3600000).toISOString(), triggerLoss: 55000, breachedLimit: 'daily_loss' } },
     );

@@ -628,9 +628,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 function parseTimeToMinutes(str: string): number {
   const [timePart, period] = str.split(' ');
   let [h, m] = timePart.split(':').map(Number);
+  m = m || 0;
   if (period === 'PM' && h !== 12) h += 12;
   if (period === 'AM' && h === 12) h = 0;
-  return h * 60 + (m || 0);
+  return h * 60 + m;
 }
 
 /**

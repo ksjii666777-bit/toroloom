@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
-import Svg, { Path, Line, Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
+import Svg, { Path, Line, Rect, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { formatCurrency } from '../utils/formatters';
@@ -492,7 +492,7 @@ interface TechnicalIndicatorsProps {
   /** Called when user taps an indicator toggle */
   onIndicatorToggle?: (type: IndicatorType) => void;
   /** Compact mode (smaller panels, no headers) */
-  compact?: boolean;
+  compact?: boolean; // prettier-ignore
 }
 
 export default function TechnicalIndicators({
@@ -500,7 +500,7 @@ export default function TechnicalIndicators({
   width = Dimensions.get('window').width - 48,
   indicators,
   onIndicatorToggle,
-  compact = false,
+  compact: _compact = false,
 }: TechnicalIndicatorsProps) {
   const { colors } = useTheme();
 

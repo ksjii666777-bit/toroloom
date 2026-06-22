@@ -26,7 +26,7 @@ function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-function makeDateLabel(): string {
+function _makeDateLabel(): string {
   const now = new Date();
   const today = format(now, 'yyyy-MM-dd');
   const _yesterday = format(new Date(now.getTime() - 86400000), 'yyyy-MM-dd');

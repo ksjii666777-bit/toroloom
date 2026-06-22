@@ -745,9 +745,8 @@ describe('PortfolioAnalyticsStore — Live Subscription', () => {
     // Simulate a change by updating portfolioStore holdings
     // The WS price map has prices, so updating holdings should trigger
     // the analytics store's subscription callback
-    const ws = getActiveWS();
-    const currentPrice = ws.getCurrentPrice('RELIANCE');
-    const newValue = Math.round(currentPrice * 50 * 100) / 100;
+    const ws = getActiveWS();      const currentPrice = ws.getCurrentPrice('RELIANCE');
+      const _newValue = Math.round(currentPrice * 50 * 100) / 100;
 
     // Manually trigger a portfolioStore change
     const { holdings } = usePortfolioStore.getState();

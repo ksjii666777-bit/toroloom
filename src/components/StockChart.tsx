@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path, Line, Rect, G, Text as SvgText, Defs as SvgDefs, LinearGradient as SvgLinearGradient, Stop as SvgStop } from 'react-native-svg';
+import Svg, { Path, Line, Rect, Text as SvgText, Defs as SvgDefs, LinearGradient as SvgLinearGradient, Stop as SvgStop } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS} from '../constants/theme';
 import { formatCurrency } from '../utils/formatters';

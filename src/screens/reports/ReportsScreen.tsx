@@ -21,7 +21,7 @@ import { useNotificationStore } from '../../store/notificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatPercent} from '../../utils/formatters';
 import Card from '../../components/ui/Card';
-import AnimatedPressable from '../../components/ui/AnimatedPressable';
+
 import PnLChart from '../../components/PnLChart';
 import { exportPDF, exportCSV } from '../../services/reportExport';
 

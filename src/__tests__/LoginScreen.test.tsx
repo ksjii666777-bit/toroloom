@@ -193,7 +193,7 @@ describe('LoginScreen — Validation & Error States', () => {
   it('shows error when login returns false (invalid credentials)', async () => {
     mockLogin.mockResolvedValue(false);
 
-    const { getByText, getByPlaceholderText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
 
     // We can't easily set input values in the custom test renderer, but the

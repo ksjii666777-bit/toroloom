@@ -25,9 +25,19 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { env } from '../config/env';
+import { registry } from '../services/broker/registry';
 
 const router = Router();
 router.use(authMiddleware);
+
+// Lazy-loaded KiteConnect SDK (only loaded for Zerodha OAuth flow)
+function getKiteConnect(): any {
+  try {
+    return require('kiteconnect').KiteConnect;
+  } catch {
+    return null;
+  }
+}
 
 // ──── Types ────────────────────────────────────────────────────────────────
 
@@ -50,26 +60,21 @@ interface BrokerLink {
 // In-memory store — replace with database in production
 const brokerLinks = new Map<string, BrokerLink>();
 
-const BROKER_META: Record<string, { label: string; icon: string; color: string; hasOAuth: boolean }> = {
-  zerodha: {
-    label: 'Zerodha',
-    icon: 'Z',
-    color: '#2874F0',
-    hasOAuth: true,
-  },
-  angel: {
-    label: 'Angel One',
-    icon: 'A',
-    color: '#FF6B00',
-    hasOAuth: false,
-  },
-  groww: {
-    label: 'Groww',
-    icon: 'G',
-    color: '#00A86B',
-    hasOAuth: false,
-  },
-};
+/**
+ * Build available brokers list dynamically from the registry.
+ * Returns the same shape as the old BROKER_META for backward compatibility.
+ */
+function getAvailableBrokers(): Array<{ type: string; label: string; icon: string; color: string; hasOAuth: boolean; hasZeroApi: boolean; requiresConfig: boolean }> {
+  return registry.getAllMeta().map(meta => ({
+    type: meta.type,
+    label: meta.label,
+    icon: meta.icon || meta.type.charAt(0).toUpperCase(),
+    color: meta.color || '#6B7280',
+    hasOAuth: meta.hasOAuth,
+    hasZeroApi: meta.hasZeroApi,
+    requiresConfig: meta.type !== 'mock',
+  }));
+}
 
 // ──── Routes ───────────────────────────────────────────────────────────────
 
@@ -89,14 +94,7 @@ router.get('/status', (req: Request, res: Response) => {
       brokerType: null,
       label: null,
       connectedAt: null,
-      availableBrokers: Object.entries(BROKER_META).map(([key, meta]) => ({
-        type: key,
-        label: meta.label,
-        icon: meta.icon,
-        color: meta.color,
-        hasOAuth: meta.hasOAuth,
-        requiresConfig: env.broker === 'mock', // True if no global broker configured
-      })),
+      availableBrokers: getAvailableBrokers(),
     });
     return;
   }
@@ -106,14 +104,7 @@ router.get('/status', (req: Request, res: Response) => {
     brokerType: link.brokerType,
     label: link.label,
     connectedAt: link.connectedAt,
-    availableBrokers: Object.entries(BROKER_META).map(([key, meta]) => ({
-      type: key,
-      label: meta.label,
-      icon: meta.icon,
-      color: meta.color,
-      hasOAuth: meta.hasOAuth,
-      requiresConfig: env.broker === 'mock',
-    })),
+    availableBrokers: getAvailableBrokers(),
   });
 });
 
@@ -128,7 +119,7 @@ router.get('/status', (req: Request, res: Response) => {
  *   credentials: { ... }
  * }
  */
-router.post('/connect', (req: Request, res: Response) => {
+router.post('/connect', async (req: Request, res: Response) => {
   const userId = req.user!.userId;
   const { brokerType, credentials } = req.body;
 
@@ -140,15 +131,17 @@ router.post('/connect', (req: Request, res: Response) => {
   if (!credentials || typeof credentials !== 'object') {
     res.status(400).json({ error: 'credentials object is required' });
     return;
-  }    // Validate required fields per broker
-    // For OAuth flow (zerodha with request_token), apiKey can be empty
-    const isOAuthFlow = brokerType === 'zerodha' && credentials.apiSecret && !credentials.apiKey;
-    const missingFields: string[] = [];
-    switch (brokerType) {
-      case 'zerodha':
-        if (!isOAuthFlow && !credentials.apiKey) missingFields.push('apiKey');
-        if (!credentials.apiSecret) missingFields.push('apiSecret');
-        break;
+  }
+
+  // Validate required fields per broker
+  // For OAuth flow (zerodha with request_token), apiKey can be empty
+  const isOAuthFlow = brokerType === 'zerodha' && credentials.apiSecret && !credentials.apiKey;
+  const missingFields: string[] = [];
+  switch (brokerType) {
+    case 'zerodha':
+      if (!isOAuthFlow && !credentials.apiKey) missingFields.push('apiKey');
+      if (!credentials.apiSecret) missingFields.push('apiSecret');
+      break;
     case 'angel':
       if (!credentials.apiKey) missingFields.push('apiKey');
       if (!credentials.clientId) missingFields.push('clientId');
@@ -166,6 +159,37 @@ router.post('/connect', (req: Request, res: Response) => {
     return;
   }
 
+  let resolvedAccessToken = credentials.accessToken;
+  let resolvedApiSecret = credentials.apiSecret;
+  let exchangeErrorMessage: string | undefined;
+
+  // ── Zerodha OAuth: exchange request_token → access_token ─────────
+  if (isOAuthFlow && brokerType === 'zerodha') {
+    const apiKey = env.zerodha.apiKey;
+    const apiSecret = env.zerodha.apiSecret;
+    const requestToken = credentials.apiSecret;
+
+    if (apiKey && apiSecret && requestToken) {
+      const KiteConnectClass = getKiteConnect();
+      if (KiteConnectClass) {
+        try {
+          const kite = new KiteConnectClass({ api_key: apiKey });
+          const session = await kite.generateSession(requestToken, apiSecret);
+          resolvedAccessToken = session.access_token;
+          resolvedApiSecret = apiSecret; // Keep the real apiSecret, not the request_token
+          console.log(`[BrokerLink] Zerodha OAuth: exchanged request_token → access_token for user ${userId}`);
+        } catch (exchangeError: any) {
+          console.warn(`[BrokerLink] Kite Connect token exchange failed: ${exchangeError.message}`);
+          resolvedAccessToken = '';
+          exchangeErrorMessage = exchangeError.message;
+        }
+      }
+    } else {
+      console.warn(`[BrokerLink] Zerodha OAuth exchange skipped: ZERODHA_API_KEY or ZERODHA_API_SECRET not configured`);
+      exchangeErrorMessage = 'Zerodha API credentials not configured on server';
+    }
+  }
+
   // Store the link
   const link: BrokerLink = {
     brokerType: brokerType as BrokerLink['brokerType'],
@@ -173,13 +197,13 @@ router.post('/connect', (req: Request, res: Response) => {
     connectedAt: new Date().toISOString(),
     credentials: {
       apiKey: credentials.apiKey,
-      apiSecret: credentials.apiSecret,
-      accessToken: credentials.accessToken,
+      apiSecret: resolvedApiSecret,
+      accessToken: resolvedAccessToken || credentials.accessToken,
       clientId: credentials.clientId,
       password: credentials.password,
       totp: credentials.totp,
     },
-    label: BROKER_META[brokerType]?.label || brokerType,
+    label: registry.getPlugin(brokerType)?.label || brokerType,
   };
 
   brokerLinks.set(userId, link);
@@ -192,6 +216,8 @@ router.post('/connect', (req: Request, res: Response) => {
     brokerType: link.brokerType,
     label: link.label,
     connectedAt: link.connectedAt,
+    hasAccessToken: !!resolvedAccessToken,
+    ...(exchangeErrorMessage ? { exchangeError: exchangeErrorMessage } : {}),
   });
 });
 

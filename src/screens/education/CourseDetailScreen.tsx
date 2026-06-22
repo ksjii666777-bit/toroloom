@@ -23,7 +23,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
   const { courseId } = route.params;
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { currentLesson, fetchLesson, markLessonComplete, lessonProgress } = useEducationStore();
+  const { fetchLesson, markLessonComplete, lessonProgress } = useEducationStore();
   const { addXp } = useGamificationStore();
 
   const course = mockCourses.find(c => c.id === courseId);

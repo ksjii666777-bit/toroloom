@@ -43,7 +43,7 @@ export default function CandlestickChart({
   const volumeHeight = showVolume ? 40 : 0;
 
   // Calculate price range
-  const { minPrice, maxPrice, priceRange } = useMemo(() => {
+  const { minPrice: _minPrice, maxPrice, priceRange } = useMemo(() => {
     if (!data || data.length === 0) return { minPrice: 0, maxPrice: 0, priceRange: 1 };
     let mn = Infinity, mx = -Infinity;
     for (const d of data) {
@@ -93,7 +93,7 @@ export default function CandlestickChart({
     ? Math.max((chartWidth / data.length) * CANDLE_WIDTH, CANDLE_MIN_WIDTH)
     : 0;
   const candleSpacing = data && data.length > 0 ? chartWidth / data.length : 0;
-  const halfSpacing = candleSpacing / 2;
+  const _halfSpacing = candleSpacing / 2;
 
   const getX = useCallback((index: number) => padding.left + index * candleSpacing, [padding.left, candleSpacing]);
   const getY = useCallback((price: number) => padding.top + ((maxPrice - price) / priceRange) * chartHeight, [padding.top, maxPrice, priceRange, chartHeight]);

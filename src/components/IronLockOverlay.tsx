@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, Dimensions,
 } from 'react-native';
@@ -36,7 +36,6 @@ const NEO_CYAN = '#00F0FF';
 const ALERT_RED = '#FF3366';
 
 export default function IronLockOverlay() {
-  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const isLockdown = useRiskStore(selectIsLockdownActive);
   const lockdown = useRiskStore(s => s.lockdown);

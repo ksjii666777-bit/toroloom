@@ -294,7 +294,7 @@ describe('PortfolioAlertsScreen — Add Alert Grid', () => {
   });
 
   it('shows Active badges on add cards for rules that are already enabled', () => {
-    const { getByText, queryByText } = renderScreen();
+    const { getByText } = renderScreen();
     advanceAnimations();
     // Two enabled rules exist → their add cards show an "Active" badge
     // Portfolio P&L % add card should have "Active" badge visible

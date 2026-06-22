@@ -20,7 +20,7 @@ const { width } = Dimensions.get('window');
 const TIMEFRAMES = ['1D', '1W', '1M', '3M', '1Y', 'Max'];
 
 export default function StockDetailScreen({ route, navigation }: any) {
-  const { stockId, symbol } = route.params;
+  const { stockId } = route.params;
   const { colors } = useTheme();
   const { stocks } = useMarketStore();
   const { insights } = useAIStore();

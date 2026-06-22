@@ -321,7 +321,7 @@ describe('ContractNoteUploadScreen — Paste Text', () => {
   });
 
   it('shows alert when Parse Text is pressed with empty input', () => {
-    const { getByText, queryByPlaceholderText } = render(
+    const { getByText } = render(
       <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
     );
     fireEvent.press(getByText('Paste Contract Note Text'));

@@ -149,7 +149,7 @@ describe('Button', () => {
 
   it('is disabled when loading is true even without disabled prop', () => {
     const onPress = vi.fn();
-    const { getByText } = render(
+    render(
       <Button title="Loading" onPress={onPress} loading />
     );
     // Title is not rendered when loading, but the root should have disabled state
@@ -184,7 +184,7 @@ describe('Button', () => {
 
   it('does not call onPress when both disabled and loading are true', () => {
     const onPress = vi.fn();
-    const { getByText } = render(
+    render(
       <Button title="No Press" onPress={onPress} disabled loading />
     );
     // Verify render doesn't crash

@@ -15,7 +15,7 @@ import Badge from '../../components/ui/Badge';
 
 Dimensions.get('window');
 
-const riskColors: Record<string, string> = {
+const _riskColors: Record<string, string> = {
   low: '#00C853',
   moderate: '#FFC107',
   high: '#FF1744',

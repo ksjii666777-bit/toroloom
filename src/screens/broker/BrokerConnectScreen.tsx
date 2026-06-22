@@ -285,11 +285,21 @@ export default function BrokerConnectScreen({ navigation }: any) {
   // ── Connect broker via OAuth token (dedicated for WebView flow) ──
   const handleOAuthConnect = useCallback(async (brokerType: string, requestToken: string) => {
     try {
-      await api.post('/broker-link/connect', {
+      const res = await api.post<any>('/broker-link/connect', {
         brokerType,
         credentials: { apiSecret: requestToken },
       });
+
       setShowWebView(false);
+
+      // If token exchange failed, warn the user; otherwise show standard success
+      if (!res.hasAccessToken && res.exchangeError) {
+        Alert.alert(
+          'Limited Connection',
+          `Connected but token exchange failed: ${res.exchangeError}. Some features may be unavailable until you reconnect.`,
+        );
+      }
+
       showConnectedSuccess();
     } catch (err: any) {
       setShowWebView(false);

@@ -20,7 +20,7 @@ export default [
   {
     rules: {
       // Allow unused vars with underscore prefix (_foo, _bar)
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
       // Allow explicit any (longstanding usage in the codebase)
       '@typescript-eslint/no-explicit-any': 'off',
       // Prefer const over let when variable is never reassigned (warn, not error)

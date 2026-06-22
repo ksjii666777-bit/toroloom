@@ -301,7 +301,7 @@ describe('BrokerConnectScreen — Connected State', () => {
   });
 
   it('renders connected status badge on the connected broker card', async () => {
-    const { getByText, getAllByText } = render(
+    const { getAllByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     await advanceAndFlush();

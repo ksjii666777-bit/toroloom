@@ -17,6 +17,11 @@
 vi.hoisted(() => {
   process.env.BROKER = 'mock';
   process.env.DATA_SOURCE = 'mock';
+  // Unset AI provider keys so isAIConfigured() returns false in tests.
+  // dotenv won't override env vars that are already set, so setting these
+  // before env.ts loads prevents the real AI API from being called.
+  process.env.OPENROUTER_API_KEY = '';
+  process.env.GOOGLE_GEMINI_API_KEY = '';
 });
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';

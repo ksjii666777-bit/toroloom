@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import Svg, { Path, Line, Rect, G, Text as SvgText, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
+import Svg, { Path, Line, Rect, Text as SvgText, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { formatCurrency } from '../utils/formatters';

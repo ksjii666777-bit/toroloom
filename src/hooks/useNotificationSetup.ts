@@ -6,7 +6,6 @@ import * as Notifications from 'expo-notifications';
 import {
   registerForPushNotifications,
   setupNotificationResponseListener,
-  getScreenForType,
   registerPortfolioAlertBackgroundTask,
   evaluatePortfolioAlertsInBackground,
 } from '../services/notificationService';

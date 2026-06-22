@@ -43,7 +43,6 @@ export default function NotificationsScreen({ navigation }: any) {
     removeNotification,
     clearAll,
     updatePreference,
-    addPriceAlertRule,
     removePriceAlertRule,
   } = useNotificationStore();
 

@@ -1,16 +1,14 @@
 import { env } from '../../config/env';
-import { IBroker, BrokerConfig } from './interface';
-import { MockBroker } from './mockBroker';
-import { ZerodhaBroker } from './zerodhaBroker';
-import { AngelBroker } from './angelBroker';
-import { GrowwBroker } from './growwBroker';
+import { IBroker } from './interface';
+import { registry } from './registry';
+import { registerDefaultPlugins, updatePluginEnvConfig } from './plugins/registerDefaults';
 import { getCircuitBreaker, CircuitOpenError } from '../circuitBreaker';
 import { auditTrail } from '../auditTrail';
 import type { StorageEngine } from '../storage/types';
 import { setBrokerConnected, incrementBrokerAuthError, incrementBrokerReconnects } from '../metrics';
 
 let brokerInstance: IBroker | null = null;
-let currentBrokerType: 'zerodha' | 'angel' | 'groww' | 'mock' | null = null;
+let currentBrokerType: string | null = null;
 
 /**
  * Optional StorageEngine for persisting broker state across restarts.
@@ -24,16 +22,13 @@ let brokerStorage: StorageEngine | null = null;
  * the audit trail with repeated BROKER_DISCONNECTED entries
  * every time getBroker() is called while a circuit is OPEN.
  */
-const brokerStateCache = new Map<
-  'zerodha' | 'angel' | 'groww' | 'mock',
-  { lastEvent: 'BROKER_CONNECTED' | 'BROKER_DISCONNECTED'; timestamp: number }
->();
+const brokerStateCache = new Map<string, { lastEvent: 'BROKER_CONNECTED' | 'BROKER_DISCONNECTED'; timestamp: number }>();
 
-interface BrokerFactoryEntry {
-  type: 'zerodha' | 'angel' | 'groww' | 'mock';
-  factory: () => IBroker;
-  config: BrokerConfig;
-}
+// ─── Initialize default plugins on first import ─────────────────────────
+// This runs when the module is first loaded (e.g. during server startup).
+// Safe to call multiple times — registry.register overwrites duplicates.
+registerDefaultPlugins();
+updatePluginEnvConfig(env);
 
 /**
  * Configure the broker factory with a StorageEngine for persistence.
@@ -51,10 +46,10 @@ export async function loadBrokerStateFromStorage(): Promise<void> {
   if (!brokerStorage) return;
   const state = await brokerStorage.loadBrokerState();
   if (state.currentBrokerType) {
-    currentBrokerType = state.currentBrokerType as any;
+    currentBrokerType = state.currentBrokerType;
   }
   for (const [key, val] of Object.entries(state.dedupCache)) {
-    brokerStateCache.set(key as any, val);
+    brokerStateCache.set(key, val);
   }
 }
 
@@ -74,159 +69,32 @@ async function persistBrokerState(): Promise<void> {
 }
 
 /**
- * Dedup-aware helper to log a BROKER_DISCONNECTED event.
- * Only appends to the audit trail if this broker type wasn't
- * already known to be disconnected, preventing audit trail flooding.
- */
-async function tryLogDisconnection(
-  type: 'zerodha' | 'angel' | 'groww' | 'mock',
-  reason: string,
-  metadata?: Record<string, unknown>,
-): Promise<void> {
-  const prevState = brokerStateCache.get(type);
-  if (prevState?.lastEvent === 'BROKER_DISCONNECTED') return;
-
-  brokerStateCache.set(type, {
-    lastEvent: 'BROKER_DISCONNECTED',
-    timestamp: Date.now(),
-  });
-
-  await auditTrail.append({
-    userId: 'system',
-    eventType: 'BROKER_DISCONNECTED',
-    data: { brokerType: type, reason },
-    ...(metadata ? { metadata } : {}),
-  });
-
-  await persistBrokerState();
-}
-
-/**
- * Create an authenticated broker instance with fallback chain.
- *
- * Strategy:
- *   1. Try the configured broker first (env.broker)
- *   2. If it fails → fall back to the next broker in chain
- *   3. Always fall back to MockBroker as the last resort
- *   4. Each broker call is protected by its own circuit breaker
+ * Creates and authenticates the broker instance.
+ * Uses the registry's fallback chain (dynamic, plugin-based).
  */
 async function createBrokerWithFallback(): Promise<IBroker> {
-  const brokers: BrokerFactoryEntry[] = [
-    {
-      type: 'zerodha',
-      factory: () => new ZerodhaBroker(),
-      config: {
-        apiKey: env.zerodha.apiKey,
-        apiSecret: env.zerodha.apiSecret,
-        accessToken: env.zerodha.accessToken,
-        requestToken: env.zerodha.requestToken,
-      },
-    },
-    {
-      type: 'angel',
-      factory: () => new AngelBroker(),
-      config: {
-        apiKey: env.angel.apiKey,
-        clientId: env.angel.clientId,
-        accessToken: env.angel.accessToken,
-        password: env.angel.password,
-        totp: env.angel.totp,
-      },
-    },
-    {
-      type: 'groww',
-      factory: () => new GrowwBroker(),
-      config: {
-        apiKey: env.groww?.apiKey || '',
-        accessToken: env.groww?.accessToken || '',
-      },
-    },
-    {
-      type: 'mock',
-      factory: () => new MockBroker(),
-      config: { apiKey: 'mock' },
-    },
-  ];
+  const configuredBroker = env.broker !== 'mock' ? env.broker : undefined;
 
-  // Determine starting index based on configured broker preference
-  const startIndex = env.broker === 'zerodha' ? 0 : env.broker === 'angel' ? 1 : env.broker === 'groww' ? 2 : 3;
+  const { broker, type } = await registry.createWithFallback(configuredBroker, {
+    // Only provide env-based config overrides; the registry uses
+    // defaultConfig from each plugin, which was populated by updatePluginEnvConfig
+  });
 
-  let lastError: Error | null = null;
+  // Connection successful — record it
+  currentBrokerType = type;
+  brokerStateCache.set(type, {
+    lastEvent: 'BROKER_CONNECTED',
+    timestamp: Date.now(),
+  });
+  setBrokerConnected(type, true);
+  await auditTrail.append({
+    userId: 'system',
+    eventType: 'BROKER_CONNECTED',
+    data: { brokerType: type, mode: env.isMock ? 'mock' : 'live' },
+  });
+  await persistBrokerState();
 
-  for (let i = startIndex; i < brokers.length; i++) {
-    const { type, factory, config } = brokers[i];
-
-    // Check circuit breaker — skip if circuit is OPEN for this broker
-    const cb = getCircuitBreaker(`broker-${type}`, {
-      failureThreshold: 3,
-      successThreshold: 2,
-      timeoutMs: 60_000, // 1 minute cooldown for broker circuits
-      retryCount: 1,
-    });
-
-    if (!cb.isAvailable()) {
-      await tryLogDisconnection(type, 'Circuit breaker OPEN', { circuitSnapshot: cb.snapshot() });
-      continue; // Skip this broker — circuit is open
-    }
-
-    try {
-      const broker = await cb.call(async () => {
-        const instance = factory();
-        const authResult = await instance.authenticate(config);
-        if (!authResult) {
-          incrementBrokerAuthError(type);
-          throw new Error(`Authentication failed for broker: ${type}`);
-        }
-        return instance;
-      });
-
-      // Connection successful — record it
-      setBrokerConnected(type, true);
-      currentBrokerType = type;
-      brokerStateCache.set(type, {
-        lastEvent: 'BROKER_CONNECTED',
-        timestamp: Date.now(),
-      });
-      await auditTrail.append({
-        userId: 'system',
-        eventType: 'BROKER_CONNECTED',
-        data: { brokerType: type, mode: env.isMock ? 'mock' : 'live' },
-      });
-      await persistBrokerState();
-
-      return broker;
-    } catch (error: any) {
-      lastError = error;
-
-      if (error instanceof CircuitOpenError) {
-        await tryLogDisconnection(type, error.message);
-      } else {
-        // Track the auth failure and reconnection attempt
-        incrementBrokerAuthError(type);
-        if (i > 0) incrementBrokerReconnects(type); // failover
-        await auditTrail.append({
-          userId: 'system',
-          eventType: 'BROKER_FAILOVER',
-          data: {
-            failedBroker: type,
-            nextBroker: i + 1 < brokers.length ? brokers[i + 1].type : 'none',
-            error: error.message,
-          },
-        });
-      }
-
-      continue;
-    }
-  }
-
-  throw new Error(
-    `All brokers unavailable after fallback chain. ` +
-    `Last error: ${lastError?.message || 'Unknown error'}. ` +
-    `Circuit states: ${brokers.map(b => {
-      const cb = getCircuitBreaker(`broker-${b.type}`);
-      return `${b.type}=${cb.snapshot().state}`;
-    }).join(', ')}`,
-  );
+  return broker;
 }
 
 /**
@@ -255,21 +123,19 @@ export function resetBroker(): void {
   brokerInstance = null;
   currentBrokerType = null;
   brokerStateCache.clear();
+  registry.resetConnections();
 }
 
 /**
  * Reset the deduplication state for a specific broker type.
  */
-export function resetBrokerDeduplication(type: 'zerodha' | 'angel' | 'groww' | 'mock'): void {
+export function resetBrokerDeduplication(type: string): void {
   brokerStateCache.delete(type);
 }
 
 /**
  * Get the current deduplication state (for testing/observability).
  */
-export function getBrokerDeduplicationState(): Map<
-  'zerodha' | 'angel' | 'groww' | 'mock',
-  { lastEvent: string; timestamp: number }
-> {
+export function getBrokerDeduplicationState(): Map<string, { lastEvent: string; timestamp: number }> {
   return new Map(brokerStateCache);
 }

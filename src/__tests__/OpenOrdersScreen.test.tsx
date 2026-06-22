@@ -283,7 +283,7 @@ describe('OpenOrdersScreen — Stats Cards', () => {
     const { getByText } = renderScreen();
     advanceAnimations();
 
-    const sellOrders = defaultMockOrders.filter(o => o.transactionType === 'SELL');
+    const _sellOrders = defaultMockOrders.filter(o => o.transactionType === 'SELL');
     expect(getByText(/1 orders?/)).toBeDefined();
   });
 

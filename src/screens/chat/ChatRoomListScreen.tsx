@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  TextInput, Animated, Platform,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -215,7 +215,7 @@ const roomCardStyles = StyleSheet.create({
 export default function ChatRoomListScreen({ navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const { rooms, activeRoomId, setActiveRoom, typingUsers } = useChatStore();
+  const { rooms, setActiveRoom } = useChatStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const searchRef = useRef<TextInput>(null);

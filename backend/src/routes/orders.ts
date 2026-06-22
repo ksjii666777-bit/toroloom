@@ -335,6 +335,10 @@ router.post('/modify', async (req: Request, res: Response) => {
       res.status(400).json({ error: 'price must be a positive number' });
       return;
     }
+    if (triggerPrice !== undefined && (typeof triggerPrice !== 'number' || triggerPrice <= 0)) {
+      res.status(400).json({ error: 'triggerPrice must be a positive number' });
+      return;
+    }
 
     const broker = await getBroker();
     const result = await broker.modifyOrder({

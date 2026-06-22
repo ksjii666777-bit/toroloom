@@ -312,7 +312,7 @@ describe('ProfileScreen — Back Navigation', () => {
   });
 
   it('navigates back when back button is pressed', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
     // The back button is represented by Ionicons arrow-back icon
     // It's wrapped in a TouchableOpacity with an onPress that calls navigation.goBack()
