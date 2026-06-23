@@ -46,6 +46,7 @@ import {
 } from '../services/riskEngine';
 import { MongoDBStorage } from '../services/storage/mongodb';
 import { CONNECT_TIMEOUT } from './testUtils';
+import { TEST_MONGODB_URI, TEST_MONGODB_DB } from './testConfig';
 
 // IMPORTANT: This test file must NOT run in parallel with other *.int.test.ts
 // files that configure riskEngine (e.g. orderExecutionPipeline.postgres.int.test.ts)
@@ -53,9 +54,8 @@ import { CONNECT_TIMEOUT } from './testUtils';
 // configureStorage() overwrites the previous one. Run files individually or
 // use vitest's --sequence.concurrent=false flag.
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://toroloom:toroloom_dev@localhost:27017';
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'toroloom_test';
+const MONGODB_URI = TEST_MONGODB_URI;
+const MONGODB_DB_NAME = TEST_MONGODB_DB;
 
 const TEST_USER = 'order_mongo_int_user';
 const LOAD_TEST_USER = 'order_mongo_load_user';

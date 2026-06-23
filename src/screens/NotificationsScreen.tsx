@@ -8,7 +8,6 @@ import {
   Switch,
   Alert,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotificationStore } from '../store/notificationStore';
 import { useTheme } from '../context/ThemeContext';
@@ -391,7 +390,7 @@ export default function NotificationsScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient colors={[colors.bg, colors.bgSecondary]} style={styles.header}>
+      <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -437,7 +436,7 @@ export default function NotificationsScreen({ navigation }: any) {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </LinearGradient>
+      </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Price Alert Rules */}

@@ -78,6 +78,7 @@ function getRazorpayClient(tenantId?: string): Razorpay | null {
 }
 
 // ============ POST /api/payments/create-order ============
+// Creates a Razorpay order for a subscription plan
 
 router.post('/create-order', async (req: Request, res: Response) => {
   try {
@@ -103,6 +104,7 @@ router.post('/create-order', async (req: Request, res: Response) => {
           userId: req.user!.userId,
           planId,
           billingPeriod,
+          type: 'subscription',
           tenantId: tenantId || 'default',
         },
       });
@@ -128,14 +130,79 @@ router.post('/create-order', async (req: Request, res: Response) => {
   }
 });
 
+// ============ POST /api/payments/create-fund-order ============
+// Creates a Razorpay order for adding funds to the user's wallet
+
+router.post('/create-fund-order', async (req: Request, res: Response) => {
+  try {
+    const { amount, currency = 'INR' } = req.body;
+
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      res.status(400).json({ error: 'A valid positive amount is required' });
+      return;
+    }
+
+    if (amount < 500) {
+      res.status(400).json({ error: 'Minimum add amount is ₹500' });
+      return;
+    }
+
+    if (amount > 500000) {
+      res.status(400).json({ error: 'Maximum add amount is ₹5,00,000 per transaction' });
+      return;
+    }
+
+    const amountInPaise = Math.round(amount * 100);
+
+    const razorpay = getRazorpayClient();
+    const { keyId } = resolveRazorpayKeys();
+
+    if (razorpay && keyId) {
+      const order = await razorpay.orders.create({
+        amount: amountInPaise,
+        currency,
+        receipt: `toroloom_fund_${Date.now()}`,
+        notes: {
+          userId: req.user!.userId,
+          type: 'fund_add',
+        },
+      });
+
+      res.json({
+        orderId: order.id,
+        keyId: keyId,
+        amount: order.amount,
+        currency: order.currency,
+      });
+    } else {
+      // Development fallback — return mock order
+      res.json({
+        orderId: `order_mock_${Date.now()}`,
+        keyId: keyId || 'rzp_test_placeholder',
+        amount: amountInPaise,
+        currency,
+      });
+    }
+  } catch (error: any) {
+    console.error('[Payments] create-fund-order error:', error);
+    res.status(500).json({ error: error?.message || 'Failed to create fund order' });
+  }
+});
+
 // ============ POST /api/payments/verify ============
+// Verifies a completed Razorpay payment (supports both subscription & fund-add)
 
 router.post('/verify', async (req: Request, res: Response) => {
   try {
-    const { razorpayPaymentId, razorpayOrderId, razorpaySignature, planId, tenantId } = req.body;
+    const { razorpayPaymentId, razorpayOrderId, razorpaySignature, planId, tenantId, type } = req.body;
 
-    if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature || !planId) {
+    if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
       res.status(400).json({ error: 'Missing required payment fields' });
+      return;
+    }
+
+    if (!planId && type !== 'fund_add') {
+      res.status(400).json({ error: 'Missing planId for subscription payment' });
       return;
     }
 
@@ -163,14 +230,32 @@ router.post('/verify', async (req: Request, res: Response) => {
       }
     }
 
-    // In production, persist the subscription in the database with tenantId
-    console.log(`[Payments] User ${req.user!.userId} subscribed to ${planId}, ` +
-      `payment ${razorpayPaymentId}, tenant: ${tenantId || 'default'}`);
+    if (type === 'fund_add') {
+      // Handle fund-add verification
+      console.log(`[Payments] User ${req.user!.userId} added funds, ` +
+        `payment ${razorpayPaymentId}, tenant: ${tenantId || 'default'}`);
 
-    res.json({
-      success: true,
-      message: 'Payment verified successfully. Your subscription is now active.',
-    });
+      res.json({
+        success: true,
+        message: 'Payment verified successfully. Funds will be credited to your account.',
+        type: 'fund_add',
+      });
+    } else {
+      // Handle subscription verification
+      if (!planId) {
+        res.status(400).json({ error: 'Missing planId for subscription payment' });
+        return;
+      }
+
+      console.log(`[Payments] User ${req.user!.userId} subscribed to ${planId}, ` +
+        `payment ${razorpayPaymentId}, tenant: ${tenantId || 'default'}`);
+
+      res.json({
+        success: true,
+        message: 'Payment verified successfully. Your subscription is now active.',
+        type: 'subscription',
+      });
+    }
   } catch (error: any) {
     console.error('[Payments] verify error:', error);
     res.status(500).json({ error: error?.message || 'Payment verification failed' });

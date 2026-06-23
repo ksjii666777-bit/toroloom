@@ -45,6 +45,7 @@ import {
 } from '../services/riskEngine';
 import { PostgreSQLStorage } from '../services/storage/postgres';
 import { CONNECT_TIMEOUT } from './testUtils';
+import { TEST_DATABASE_URL } from './testConfig';
 
 // IMPORTANT: This test file must NOT run in parallel with other *.int.test.ts
 // files that configure riskEngine (e.g. websocketPnLBridge.mongodb.int.test.ts)
@@ -52,8 +53,7 @@ import { CONNECT_TIMEOUT } from './testUtils';
 // configureStorage() overwrites the previous one. Run files individually or
 // use vitest's --sequence.concurrent=false flag.
 
-const DATABASE_URL =
-  process.env.DATABASE_URL || 'postgresql://toroloom:toroloom_dev@localhost:5432/toroloom';
+const DATABASE_URL = TEST_DATABASE_URL;
 
 const TEST_USER = 'order_pg_int_user';
 const LOAD_TEST_USER = 'order_pg_load_user';

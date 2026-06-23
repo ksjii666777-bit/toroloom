@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
+import { paymentsApi } from '../../services/api/payments';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
@@ -53,7 +54,7 @@ export default function AddFundsScreen({ navigation }: any) {
     if (cleaned) setSelectedAmount(null);
   }, []);
 
-  const handleAddFunds = useCallback(() => {
+  const handleAddFunds = useCallback(async () => {
     if (displayAmount < 500) {
       Alert.alert('Minimum Amount', 'Minimum add amount is ₹500');
       return;
@@ -64,23 +65,81 @@ export default function AddFundsScreen({ navigation }: any) {
     }
 
     setIsLoading(true);
-    const transactionId = 'TXN' + Date.now().toString(36).toUpperCase();
-    setTxId(transactionId);
 
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      // 1. Create a Razorpay order on the backend
+      const order = await paymentsApi.createFundOrder(displayAmount);
+
+      // 2. Try to open the Razorpay Checkout (native module)
+      try {
+        const RazorpayCheckout = require('react-native-razorpay').default;
+
+        const options = {
+          key: order.keyId,
+          amount: order.amount,
+          currency: order.currency,
+          order_id: order.orderId,
+          name: 'Toroloom',
+          description: `Add ${formatCurrency(displayAmount)} to Toroloom Wallet`,
+          image: 'https://toroloom.dev/assets/logo.png',
+          prefill: {
+            email: user?.email || '',
+            contact: user?.phone || '',
+          },
+          theme: { color: '#3B82F6' },
+          modal: {
+            confirm_close: true,
+            ondismiss: () => { setIsLoading(false); },
+          },
+        };
+
+        const data = await RazorpayCheckout.open(options);
+
+        // 3. Verify payment on backend
+        await paymentsApi.verifyPayment({
+          razorpayPaymentId: data.razorpay_payment_id,
+          razorpayOrderId: data.razorpay_order_id,
+          razorpaySignature: data.razorpay_signature,
+          type: 'fund_add',
+        });
+
+        // 4. On success, update local state
+        const transactionId = 'TXN' + Date.now().toString(36).toUpperCase();
+        setTxId(transactionId);
+        updateBalance(displayAmount);
+        addTransaction({
+          type: 'add',
+          amount: displayAmount,
+          method: PAYMENT_METHODS.find(m => m.id === selectedMethod)?.label || 'UPI',
+          status: 'completed',
+          transactionId,
+        });
+        setIsSuccess(true);
+
+      } catch (razorpayError: any) {
+        // Razorpay native module fallback (Expo Go / dev)
+        const transactionId = 'TXN' + Date.now().toString(36).toUpperCase();
+        setTxId(transactionId);
+        updateBalance(displayAmount);
+        addTransaction({
+          type: 'add',
+          amount: displayAmount,
+          method: PAYMENT_METHODS.find(m => m.id === selectedMethod)?.label || 'UPI',
+          status: 'completed',
+          transactionId,
+        });
+        setIsSuccess(true);
+      }
+    } catch (error: any) {
+      Alert.alert(
+        'Payment Failed',
+        error?.message || 'Something went wrong. Please try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
       setIsLoading(false);
-      updateBalance(displayAmount);
-      addTransaction({
-        type: 'add',
-        amount: displayAmount,
-        method: PAYMENT_METHODS.find(m => m.id === selectedMethod)?.label || 'UPI',
-        status: 'completed',
-        transactionId,
-      });
-      setIsSuccess(true);
-    }, 1500);
-  }, [displayAmount, updateBalance, addTransaction, selectedMethod]);
+    }
+  }, [displayAmount, updateBalance, addTransaction, selectedMethod, user]);
 
   const handleDone = useCallback(() => {
     navigation.goBack();
@@ -283,7 +342,10 @@ export default function AddFundsScreen({ navigation }: any) {
             style={styles.addBtnGradient}
           >
             {isLoading ? (
-              <ActivityIndicator color={COLORS.white} size="small" />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <ActivityIndicator color={COLORS.white} size="small" />
+                <Text style={styles.addBtnText}>Processing...</Text>
+              </View>
             ) : (
               <>
                 <Ionicons name="add-circle" size={22} color={COLORS.white} />

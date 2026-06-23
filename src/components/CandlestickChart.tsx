@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useMemo, useCallback } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder } from 'react-native';
 import Svg, { Path, Line, Rect, G, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { formatCurrency, formatCompactNumber } from '../utils/formatters';
+import { useChartCrosshair } from './ChartCrosshairContext';
 import type { StockHistoryPoint } from '../types';
 
 interface CandlestickChartProps {
@@ -35,7 +36,7 @@ export default function CandlestickChart({
 }: CandlestickChartProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const [crosshair, setCrosshair] = useState<{ x: number; y: number; data: StockHistoryPoint } | null>(null);
+  const { focusedIndex, setFocusedIndex } = useChartCrosshair();
 
   const padding = { top: 16, right: 16, bottom: showVolume ? 80 : 32, left: 60 };
   const chartWidth = width - padding.left - padding.right;
@@ -43,15 +44,15 @@ export default function CandlestickChart({
   const volumeHeight = showVolume ? 40 : 0;
 
   // Calculate price range
-  const { minPrice: _minPrice, maxPrice, priceRange } = useMemo(() => {
+  const { maxPrice, priceRange } = useMemo(() => {
     if (!data || data.length === 0) return { minPrice: 0, maxPrice: 0, priceRange: 1 };
     let mn = Infinity, mx = -Infinity;
     for (const d of data) {
       if (d.low < mn) mn = d.low;
       if (d.high > mx) mx = d.high;
     }
-    const padding = (mx - mn) * 0.05 || mn * 0.02;
-    return { minPrice: mn - padding, maxPrice: mx + padding, priceRange: mx - mn + padding * 2 };
+    const p = (mx - mn) * 0.05 || mn * 0.02;
+    return { minPrice: mn - p, maxPrice: mx + p, priceRange: mx - mn + p * 2 };
   }, [data]);
 
   // Calculate volume range
@@ -88,12 +89,11 @@ export default function CandlestickChart({
     return { ma20, ma50 };
   }, [data, showMA]);
 
-  // Mapping functions
+  // Spacing calculations
   const candleWidth = data && data.length > 0
     ? Math.max((chartWidth / data.length) * CANDLE_WIDTH, CANDLE_MIN_WIDTH)
     : 0;
   const candleSpacing = data && data.length > 0 ? chartWidth / data.length : 0;
-  const _halfSpacing = candleSpacing / 2;
 
   const getX = useCallback((index: number) => padding.left + index * candleSpacing, [padding.left, candleSpacing]);
   const getY = useCallback((price: number) => padding.top + ((maxPrice - price) / priceRange) * chartHeight, [padding.top, maxPrice, priceRange, chartHeight]);
@@ -101,6 +101,49 @@ export default function CandlestickChart({
     const volChartTop = height - padding.bottom + 10;
     return volChartTop + (1 - vol / maxVolume) * volumeHeight;
   }, [height, padding.bottom, maxVolume, volumeHeight]);
+
+  // Convert touch location to data index
+  const touchToIndex = useCallback((x: number) => {
+    if (!data || data.length === 0) return null;
+    const relativeX = x - padding.left;
+    const index = Math.round(relativeX / candleSpacing);
+    return Math.max(0, Math.min(data.length - 1, index));
+  }, [data, padding.left, candleSpacing]);
+
+  // Update crosshair for a given screen x
+  const updateCrosshair = useCallback((x: number) => {
+    const index = touchToIndex(x);
+    if (index === null || !data) return;
+    setFocusedIndex(index);
+  }, [touchToIndex, data, setFocusedIndex]);
+
+  // PanResponder for smooth touch/drag crosshair
+  const panResponder = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: (e) => {
+      const x = e.nativeEvent.locationX + padding.left;
+      updateCrosshair(x);
+    },
+    onPanResponderMove: (e) => {
+      const x = e.nativeEvent.locationX + padding.left;
+      updateCrosshair(x);
+    },
+    onPanResponderRelease: () => {
+      // Keep crosshair visible after touch ends
+    },
+  }), [updateCrosshair, padding.left]);
+
+  // Compute crosshair from focusedIndex (single source of truth)
+  const crosshair = useMemo(() => {
+    if (focusedIndex === null || !data || focusedIndex >= data.length) return null;
+    const point = data[focusedIndex];
+    return {
+      x: getX(focusedIndex),
+      y: getY(point.close),
+      data: point,
+    };
+  }, [focusedIndex, data, getX, getY]);
 
   // Y-axis labels
   const yLabels = useMemo(() => {
@@ -112,7 +155,7 @@ export default function CandlestickChart({
     return labels;
   }, [maxPrice, priceRange]);
 
-  // X-axis labels (show ~5 labels)
+  // X-axis labels
   const xLabels = useMemo(() => {
     if (!data || data.length === 0) return [];
     const count = Math.min(6, data.length);
@@ -120,10 +163,8 @@ export default function CandlestickChart({
     const labels: { index: number; label: string }[] = [];
     for (let i = 0; i < data.length; i += step) {
       const date = new Date(data[i].date);
-      const label = `${date.getDate()}/${date.getMonth() + 1}`;
-      labels.push({ index: i, label });
+      labels.push({ index: i, label: `${date.getDate()}/${date.getMonth() + 1}` });
     }
-    // Always include last
     const last = data.length - 1;
     if (labels[labels.length - 1]?.index !== last) {
       const date = new Date(data[last].date);
@@ -131,20 +172,6 @@ export default function CandlestickChart({
     }
     return labels;
   }, [data]);
-
-  // Handle touch for crosshair
-  const handleTouch = useCallback((x: number) => {
-    if (!data || data.length === 0) return;
-    const relativeX = x - padding.left;
-    const index = Math.round(relativeX / candleSpacing);
-    const clampedIndex = Math.max(0, Math.min(data.length - 1, index));
-    const point = data[clampedIndex];
-    setCrosshair({
-      x: getX(clampedIndex),
-      y: getY(point.close),
-      data: point,
-    });
-  }, [data, padding.left, candleSpacing, getX, getY]);
 
   if (loading) {
     return (
@@ -249,24 +276,8 @@ export default function CandlestickChart({
 
           return (
             <G key={`candle-${i}`}>
-              {/* Wick / Shadow */}
-              <Line
-                x1={candleX}
-                y1={yHigh}
-                x2={candleX}
-                y2={yLow}
-                stroke={color}
-                strokeWidth={1.2}
-              />
-              {/* Body */}
-              <Rect
-                x={x}
-                y={yTop}
-                width={candleWidth}
-                height={bodyHeight}
-                fill={isBullish ? color : color}
-                rx={0.5}
-              />
+              <Line x1={candleX} y1={yHigh} x2={candleX} y2={yLow} stroke={color} strokeWidth={1.2} />
+              <Rect x={x} y={yTop} width={candleWidth} height={bodyHeight} fill={color} rx={0.5} />
             </G>
           );
         })}
@@ -274,7 +285,6 @@ export default function CandlestickChart({
         {/* Moving Averages */}
         {showMA && maData && (
           <>
-            {/* MA20 */}
             {(() => {
               let ma20Path = '';
               maData.ma20.forEach((val, i) => {
@@ -288,7 +298,6 @@ export default function CandlestickChart({
                 <Path d={ma20Path} stroke={colors.marketNeutral} strokeWidth={1.5} fill="none" />
               ) : null;
             })()}
-            {/* MA50 */}
             {(() => {
               let ma50Path = '';
               maData.ma50.forEach((val, i) => {
@@ -376,18 +385,14 @@ export default function CandlestickChart({
           </>
         )}
 
-        {/* Touch overlay */}
+        {/* Touch overlay with PanResponder */}
         <Rect
           x={padding.left}
           y={padding.top}
           width={chartWidth}
-          height={chartHeight}
+          height={chartHeight + (showVolume ? volumeHeight + 10 : 0)}
           fill="transparent"
-          onPress={(e: any) => {
-            if (e?.nativeEvent?.locationX) {
-              handleTouch(e.nativeEvent.locationX + padding.left);
-            }
-          }}
+          {...panResponder.panHandlers}
         />
       </Svg>
 
@@ -397,7 +402,10 @@ export default function CandlestickChart({
           <TouchableOpacity
             key={tf}
             style={[styles.timeframeBtn, activeTimeframe === tf && styles.timeframeActive]}
-            onPress={() => onTimeframeChange?.(tf)}
+            onPress={() => {
+              setFocusedIndex(null);
+              onTimeframeChange?.(tf);
+            }}
           >
             <Text style={[styles.timeframeText, activeTimeframe === tf && styles.timeframeTextActive]}>
               {tf}
@@ -461,7 +469,7 @@ const createStyles = (colors: any) =>
       marginTop: 1,
     },
     crosshairVol: {
-      color: colors.info,
+      color: colors.info || colors.textSecondary,
       fontSize: FONTS.size.xs,
       fontFamily: 'System',
       marginTop: 2,

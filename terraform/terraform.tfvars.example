@@ -1,0 +1,67 @@
+# ==============================================================================
+# Toroloom — Terraform Variables Example
+# ==============================================================================
+# Copy this file to terraform.tfvars and fill in your values:
+#   cp terraform/terraform.tfvars.example terraform/terraform.tfvars
+#
+# WARNING: terraform.tfvars contains secrets (db_password).
+# Add it to .gitignore and never commit it.
+#
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  REMOTE STATE BACKEND: Before running terraform apply, set up S3 state ║
+# ║                                                                          ║
+# ║    ./scripts/bootstrap-terraform.sh                                     ║
+# ║                                                                          ║
+# ║  This creates the S3 bucket + DynamoDB table and initializes the         ║
+# ║  Terraform module with remote state. See terraform/backend.tf for        ║
+# ║  details.                                                                ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+# ==============================================================================
+
+# ── AWS Region (Mumbai for India users) ─────────────────────────────────────
+aws_region = "ap-south-1"
+
+# ── VPC Configuration ──────────────────────────────────────────────────────
+# Leave both empty to auto-create a new VPC with private/public subnets.
+# Provide values to use an existing VPC.
+# vpc_id     = "vpc-xxxxxxxxxxxxxxxxx"
+# subnet_ids = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-yyyyyyyyyyyyyyyyy"]
+
+# ── Security Groups Allowed to Connect ─────────────────────────────────────
+# EKS nodes: find in EC2 → Security Groups, look for "eks-cluster-sg-*"
+# Railway: use your Railway deployment's egress IPs
+allowed_security_group_ids = [
+  # "sg-xxxxxxxxxxxxxxxxx",  # EKS node security group
+]
+
+# ── For migration window only (lock down after migration) ──────────────────
+# Uncomment this during migration, then lock down to specific IPs after.
+allowed_cidr_blocks = [
+  "0.0.0.0/0",  # ⚠ Temporarily open for migration — lock down after!
+]
+
+# ── Database Credentials ───────────────────────────────────────────────────
+# Generate a strong password:
+#   openssl rand -base64 16
+db_username = "toroloom"
+db_password = "your-strong-password-here"
+
+# ── Instance Configuration ─────────────────────────────────────────────────
+db_instance_class     = "db.t4g.medium"    # 2 vCPU, 4 GB RAM (~$60/month)
+db_allocated_storage  = 100                # GB (~$12/month for gp3)
+db_engine_version     = "16.6"
+
+# ── High Availability (enable for production SLA) ──────────────────────────
+multi_az                   = false   # true = ~2x cost for standby replica
+backup_retention_period    = 7
+deletion_protection        = true
+
+# ── Read Replica (enable when scaling analytics) ───────────────────────────
+create_read_replica        = false
+# read_replica_instance_class = "db.t4g.medium"
+
+# ── Monitoring ─────────────────────────────────────────────────────────────
+create_cloudwatch_alarms   = true
+alarm_cpu_threshold        = 80
+alarm_connections_threshold = 80
+# sns_topic_arn = "arn:aws:sns:ap-south-1:123456789012:toroloom-alerts"

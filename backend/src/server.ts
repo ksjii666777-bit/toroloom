@@ -3,7 +3,7 @@ import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
-import { env } from './config/env';
+import { env, validateRequiredEnv } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
 import { apiLimiter, authLimiter } from './middleware/rateLimiter';
 import { setupWebSocket } from './websocket/handler';
@@ -179,6 +179,29 @@ async function initializeStorage(): Promise<void> {
 // ============ Start Server ============
 
 async function start(): Promise<http.Server> {
+  // ── Validate required environment variables ─────────────────────
+  // Fails fast in production if JWT_SECRET or DATABASE_URL are missing.
+  // Prints warnings in development for missing optional config.
+  const missingVars = validateRequiredEnv();
+  if (missingVars.length > 0) {
+    const isProduction = env.nodeEnv === 'production' || !env.isMock;
+    if (isProduction) {
+      console.error('[env] MISSING REQUIRED ENVIRONMENT VARIABLES:');
+      for (const v of missingVars) {
+        console.error('[env]   - ' + v);
+      }
+      console.error('[env]');
+      console.error('[env] Set them in:');
+      console.error('[env]   Production: Railway Dashboard - Variables');
+      console.error('[env]   Local:       backend/.env');
+      console.error('[env]   K8s:         kubectl create secret generic toroloom-secrets');
+      console.error('[env] Server cannot start without required variables. Exiting.');
+      process.exit(1);
+    } else {
+      console.warn('[env] WARNING: Missing optional env vars: ' + missingVars.join(', '));
+    }
+  }
+
   await initializeStorage();
 
   return new Promise((resolve) => {

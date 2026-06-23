@@ -8,65 +8,65 @@ const { width, height } = Dimensions.get('window');
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const COLORS = {
-  // Background
-  bg: '#0B0F19',
-  bgSecondary: '#0E121D',
-  bgCard: '#111827',
-  bgCardLight: '#1A2235',
-  bgInput: '#0F131E',
-  bgDark: '#070A11',
-  bgOverlay: 'rgba(7, 10, 17, 0.85)',
+  // Background — Deep midnight canvas
+  bg: '#06080C',
+  bgSecondary: '#0A0D14',
+  bgCard: 'rgba(255,255,255,0.03)',
+  bgCardLight: 'rgba(255,255,255,0.045)',
+  bgInput: '#0A0D14',
+  bgDark: '#040608',
+  bgOverlay: 'rgba(6,8,12,0.85)',
 
-  // Brand — Sovereign Premium
+  // Brand — Electric Blue
   primary: '#3B82F6',
   primaryLight: '#60A5FA',
   primaryDark: '#2563EB',
   primaryGradient: ['#3B82F6', '#1D4ED8'] as const,
 
-  // Secondary
-  secondary: '#EF4444',
-  secondaryLight: '#F87171',
-  secondaryGradient: ['#EF4444', '#DC2626'] as const,
+  // Secondary — Rose Crimson for alerts
+  secondary: '#FF5252',
+  secondaryLight: '#FF8A80',
+  secondaryGradient: ['#FF5252', '#D32F2F'] as const,
 
-  // Accent — Emerald for growth
-  accent: '#10B981',
-  accentLight: '#34D399',
-  accentGradient: ['#10B981', '#059669'] as const,
+  // Accent — Muted Emerald for growth indicators
+  accent: '#00E676',
+  accentLight: '#69F0AE',
+  accentGradient: ['#00E676', '#00C853'] as const,
 
   // Success / Risk
-  success: '#10B981',
-  successLight: '#6EE7B7',
-  danger: '#EF4444',
-  dangerLight: '#FCA5A5',
-  warning: '#F59E0B',
-  warningLight: '#FCD34D',
+  success: '#00E676',
+  successLight: '#69F0AE',
+  danger: '#FF5252',
+  dangerLight: '#FF8A80',
+  warning: '#FFAB40',
+  warningLight: '#FFD180',
 
-  // Market
-  marketUp: '#10B981',
-  marketDown: '#EF4444',
-  marketNeutral: '#F59E0B',
+  // Market — muted terminal palette
+  marketUp: '#00E676',
+  marketDown: '#FF5252',
+  marketNeutral: '#FFAB40',
 
-  // Text
-  text: '#FFFFFF',
-  textSecondary: '#9CA3AF',
-  textMuted: '#6B7280',
-  textDark: '#111827',
+  // Text — Platinum Silver & Muted Slate
+  text: '#E0E6ED',
+  textSecondary: '#64748B',
+  textMuted: '#475569',
+  textDark: '#0A0D14',
   textOnPrimary: '#FFFFFF',
 
-  // UI — Crisp 1px borders
-  border: '#1F2937',
-  borderLight: '#374151',
-  divider: '#1E293B',
+  // UI — Subtle micro-borders
+  border: 'rgba(255,255,255,0.07)',
+  borderLight: 'rgba(255,255,255,0.12)',
+  divider: 'rgba(255,255,255,0.05)',
   shadow: '#000000',
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
 
-  // Categories
+  // Categories (kept for sector data — not container backgrounds)
   tech: '#3B82F6',
-  finance: '#10B981',
-  healthcare: '#EF4444',
-  energy: '#F59E0B',
+  finance: '#00E676',
+  healthcare: '#FF5252',
+  energy: '#FFAB40',
   consumer: '#8B5CF6',
   industrial: '#06B6D4',
 };
@@ -77,26 +77,26 @@ export const LIGHT_COLORS = {
   primaryDark: '#2563EB',
   primaryGradient: ['#3B82F6', '#1D4ED8'] as const,
 
-  secondary: '#EF4444',
-  secondaryLight: '#F87171',
-  secondaryGradient: ['#EF4444', '#DC2626'] as const,
+  secondary: '#FF5252',
+  secondaryLight: '#FF8A80',
+  secondaryGradient: ['#FF5252', '#D32F2F'] as const,
 
-  accent: '#10B981',
-  accentLight: '#34D399',
-  accentGradient: ['#10B981', '#059669'] as const,
+  accent: '#00E676',
+  accentLight: '#69F0AE',
+  accentGradient: ['#00E676', '#00C853'] as const,
 
-  success: '#10B981',
-  successLight: '#6EE7B7',
-  danger: '#EF4444',
-  dangerLight: '#FCA5A5',
-  warning: '#F59E0B',
-  warningLight: '#FCD34D',
+  success: '#00E676',
+  successLight: '#69F0AE',
+  danger: '#FF5252',
+  dangerLight: '#FF8A80',
+  warning: '#FFAB40',
+  warningLight: '#FFD180',
 
-  marketUp: '#10B981',
-  marketDown: '#EF4444',
-  marketNeutral: '#F59E0B',
+  marketUp: '#00E676',
+  marketDown: '#FF5252',
+  marketNeutral: '#FFAB40',
 
-  // Background — Light mode
+  // Background — Light mode (crisp white)
   bg: '#F8FAFC',
   bgSecondary: '#FFFFFF',
   bgCard: '#FFFFFF',
@@ -120,9 +120,9 @@ export const LIGHT_COLORS = {
   transparent: 'transparent',
 
   tech: '#3B82F6',
-  finance: '#10B981',
-  healthcare: '#EF4444',
-  energy: '#F59E0B',
+  finance: '#00E676',
+  healthcare: '#FF5252',
+  energy: '#FFAB40',
   consumer: '#8B5CF6',
   industrial: '#06B6D4',
 };
@@ -130,18 +130,25 @@ export const LIGHT_COLORS = {
 export type ThemeColors = typeof COLORS;
 
 export const GRADIENTS = {
+  // Interactive elements (buttons, CTAs) — kept for action, not containers
   primary: ['#3B82F6', '#1D4ED8'] as const,
-  secondary: ['#EF4444', '#DC2626'] as const,
-  accent: ['#10B981', '#059669'] as const,
-  success: ['#10B981', '#047857'] as const,
-  danger: ['#EF4444', '#B91C1C'] as const,
-  warning: ['#F59E0B', '#D97706'] as const,
-  card: ['#111827', '#0E121D'] as const,
-  gold: ['#F59E0B', '#D97706'] as const,
-  midnight: ['#0B0F19', '#111827'] as const,
-  purple: ['#8B5CF6', '#6D28D9'] as const,
-  emerald: ['#10B981', '#047857'] as const,
-  electric: ['#3B82F6', '#6366F1'] as const,
+  secondary: ['#FF5252', '#D32F2F'] as const,
+  accent: ['#00E676', '#00C853'] as const,
+
+  // Data accents (subdued, used only for emphasis on data)
+  success: ['rgba(0,230,118,0.15)', 'rgba(0,200,83,0.08)'] as const,
+  danger: ['rgba(255,82,82,0.15)', 'rgba(211,47,47,0.08)'] as const,
+  warning: ['rgba(255,171,64,0.12)', 'rgba(255,143,0,0.06)'] as const,
+  gold: ['rgba(255,171,64,0.12)', 'rgba(255,143,0,0.06)'] as const,
+
+  // Glassmorphic card gradients (subtle, no solid colors)
+  card: ['rgba(255,255,255,0.035)', 'rgba(255,255,255,0.015)'] as const,
+  midnight: ['#06080C', '#0A0D14'] as const,
+
+  // Thematic (for section backgrounds — low opacity)
+  purple: ['rgba(139,92,246,0.10)', 'rgba(109,40,217,0.05)'] as const,
+  emerald: ['rgba(0,230,118,0.10)', 'rgba(0,200,83,0.05)'] as const,
+  electric: ['rgba(59,130,246,0.10)', 'rgba(99,102,241,0.05)'] as const,
 };
 
 export const SPACING = {

@@ -98,6 +98,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await AsyncStorage.multiRemove(['toroloom_token', 'toroloom_user']);
+    // Clear offline cache so next user doesn't see stale portfolio/watchlist data
+    try {
+      const { usePortfolioStore, useWatchlistStore } = await import('../store');
+      usePortfolioStore.getState().clearCache();
+      useWatchlistStore.getState().clearCache();
+    } catch { /* best-effort */ }
     set({ user: null, token: null, isLoggedIn: false });
     analytics.logEvent('logout', {});
     analytics.reset();

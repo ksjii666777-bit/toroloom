@@ -207,6 +207,20 @@ export const Clipboard = {
   setString: (_text: string) => {},
 };
 
+// ── PanResponder ———————————————————————————————————————————
+export const PanResponder = {
+  create: (_config: any) => ({
+    panHandlers: {
+      onStartShouldSetResponder: () => true,
+      onMoveShouldSetResponder: () => true,
+      onResponderGrant: () => {},
+      onResponderMove: () => {},
+      onResponderRelease: () => {},
+      onResponderTerminationRequest: () => true,
+    },
+  }),
+};
+
 // ── Vibration ————————————————————————————————————————————————
 export const Vibration = {
   vibrate: (_pattern?: number | number[]) => {},
@@ -320,6 +334,7 @@ const ReactNative = {
   AppState,
   Clipboard,
   Vibration,
+  PanResponder,
   NativeModules,
   I18nManager,
   InteractionManager,

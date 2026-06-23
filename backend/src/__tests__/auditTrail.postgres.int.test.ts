@@ -27,9 +27,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { AuditTrail } from '../services/auditTrail';
 import { PostgreSQLStorage } from '../services/storage/postgres';
 import { CONNECT_TIMEOUT } from './testUtils';
+import { TEST_DATABASE_URL } from './testConfig';
 
-const DATABASE_URL =
-  process.env.DATABASE_URL || 'postgresql://toroloom:toroloom_dev@localhost:5432/toroloom';
+const DATABASE_URL = TEST_DATABASE_URL;
 
 describe('AuditTrail — PostgreSQL Integration', () => {
   let storage: PostgreSQLStorage;

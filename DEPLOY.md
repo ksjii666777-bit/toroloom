@@ -470,6 +470,475 @@ Railway connects to your GitHub repo and auto-deploys on every push to `master`:
 | App crashes with exit code 137 | Out of memory | Upgrade to a paid plan or add swap ([docs](https://docs.railway.com/deployments/swap)) |
 | `401` on API calls | JWT_SECRET mismatch | Verify the Railway `JWT_SECRET` matches the frontend's config
 
+### Step 6 (Optional): Add PgBouncer Connection Pooling
+
+PgBouncer sits between the backend and PostgreSQL, multiplexing many short-lived
+connections into a smaller pool of persistent DB connections. This is critical
+when using `STORAGE_BACKEND=postgres` with the Railway PostgreSQL plugin, because
+Railway's free tier limits you to **10 concurrent connections** — and each
+WebSocket user, AI analysis request, or analytics query opens a new pool slot.
+
+> **Without PgBouncer:** 20 app connections → 20 direct DB connections (exhausts pool)
+> **With PgBouncer:** 20 app connections → multiplexed into 5-10 actual DB connections
+
+```
+App ──▶ PgBouncer (port 6432, transaction mode) ──▶ Railway PostgreSQL (:5432, managed)
+```
+
+The backend's database provider (`database.provider.ts`) already has built-in
+PgBouncer compatibility:
+- `detectPgbouncerPort()` warns when connecting directly to port 5432 in production
+- `getReader()` / `queryReader()` support read-replica offload (optional)
+- Connection pool auto-sizing works with both pooled and direct connections
+
+---
+
+#### Option A: Host PgBouncer as a separate Railway Service
+
+This is the recommended approach — PgBouncer runs in its own container on
+Railway's network, and the backend connects to it via an internal URL.
+
+**Step 1 — Add a PgBouncer service to your Railway project:**
+
+Use Railway's **Deploy from Docker image** feature — no repo files needed:
+
+1. In Railway Dashboard, click **+ New** → **Empty Service** → name it `pgbouncer`
+2. Click **Deploy from Docker image** → enter `bitnami/pgbouncer:1.23`
+3. Railway pulls the image and creates the service
+
+> **Important:** Enable **Private Networking** in Railway project settings
+> (Project Settings → Networking → Private Networking → Enable).
+> Without this, services cannot resolve each other by name and
+> `pgbouncer:6432` from the backend will fail to connect.
+
+**Step 2 — Set environment variables on the PgBouncer service:**
+
+Railway's PostgreSQL plugin injects `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD` into the
+**backend** service, but not into the PgBouncer service. You must copy the values
+manually from the Railway dashboard (PostgreSQL service → Variables tab):
+
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `PGBOUNCER_PORT` | `6432` | Listen port |
+| `PGBOUNCER_DATABASE` | `*` | Accept all DB names |
+| `POSTGRESQL_HOST` | (Railway PG `PGHOST` value) | Copy from Railway PostgreSQL variables |
+| `POSTGRESQL_PORT` | `5432` | Standard PostgreSQL port |
+| `POSTGRESQL_USERNAME` | (Railway PG `PGUSER` value) | Copy from Railway variables |
+| `POSTGRESQL_PASSWORD` | (Railway PG `PGPASSWORD` value) | Copy from Railway variables |
+| `POSTGRESQL_DATABASE` | `toroloom` or Railway PG DB name | |
+| `PGBOUNCER_POOL_MODE` | `transaction` | **Required** — safe for REST + WebSocket |
+| `PGBOUNCER_DEFAULT_POOL_SIZE` | `20` | Matches PostgreSQL's max_connections |
+| `PGBOUNCER_MAX_CLIENT_CONN` | `200` | How many app connections to accept |
+| `PGBOUNCER_CLIENT_IDLE_TIMEOUT` | `120` | Close idle client connections after 2 min |
+| `PGBOUNCER_QUERY_TIMEOUT` | `30` | Cancel queries running longer than 30s |
+| `PGBOUNCER_AUTH_TYPE` | `scram-sha-256` | Use SCRAM (not `trust`) in production |
+
+**Step 3 — Update the backend's `DATABASE_URL`:**
+
+Go to your backend service → **Variables** → change:
+
+```
+# BEFORE (direct to Railway PG):
+DATABASE_URL=postgresql://user:pass@railway-pg-host:5432/toroloom
+
+# AFTER (through PgBouncer):
+DATABASE_URL=postgresql://user:pass@pgbouncer:6432/toroloom
+```
+
+The internal Railway DNS (`pgbouncer`) resolves to the PgBouncer service container.
+
+**Step 4 — Verify:**
+
+```bash
+# Check deployment logs — should show PgBouncer connecting
+# Railway will auto-inject the internal hostname into both services
+```
+
+---
+
+#### Option B: Railway PostgreSQL Plugin with Native Pooling
+
+If running a separate PgBouncer container is too much overhead, you can keep
+the backend's pool size small to stay within Railway's free-tier limits.
+The Pool configuration is in `backend/src/lib/database.provider.ts` —
+`initializePool()` creates a `pg.Pool` with default max=20. Edit that file
+to reduce the max to 5:
+
+```typescript
+const pool = new Pool({
+  connectionString: url,
+  max: 5,                // Was 20 — keep within Railway's 10-connection limit
+  idleTimeoutMillis: 10_000,  // Return idle connections after 10s
+  connectionTimeoutMillis: 5_000, // Fail fast if DB is unreachable
+});
+```
+
+Then:
+1. **Add Railway PostgreSQL** via **+ New** → **Database** → **PostgreSQL**
+2. Railway auto-injects `DATABASE_URL` into the backend
+3. Set `STORAGE_BACKEND=postgres` on the backend service
+
+> **Trade-off:** Without PgBouncer, every pool slot is a real DB connection.
+> With 5 slots and 200 concurrent app requests, requests queue up waiting
+> for a free slot. This is acceptable for low-traffic deployments (< 50
+> concurrent users). Beyond that, use Option A.
+
+> **Future:** The `database.provider.ts` can be extended to read `PG_MAX_POOL_SIZE`
+> from environment variables. Track this in the SCALING_BLUEPRINT.md.
+
+---
+
+#### Option C: Railway + External RDS with PgBouncer
+
+For production-scale deployments (see SCALING_BLUEPRINT.md Phase 1):
+
+1. **Provision RDS** (or any managed PostgreSQL)
+2. **Deploy PgBouncer** on Railway (Option A above) pointing to RDS instead of Railway PG
+3. **Set backend env vars:**
+
+```bash
+DATABASE_URL=postgresql://toroloom:password@pgbouncer:6432/toroloom
+# DATABASE_URL_READER=postgresql://toroloom:password@reader-endpoint:6432/toroloom  # optional
+```
+
+This gives you the Railway deployment experience (auto-build, auto-deploy,
+logging) with the production-grade database reliability of AWS RDS.
+
+---
+
+#### Config Reference
+
+The full PgBouncer configuration is maintained at:
+
+| File | Purpose |
+|------|---------|
+| `backend/pgbouncer/pgbouncer.ini` | Connection pool, timeouts, auth mode |
+| `backend/pgbouncer/userlist.txt` | User authentication entries (for `md5`/`scram` auth) |
+| `docker-compose.yml` | Dev: PgBouncer via Bitnami env vars |
+| `docker-compose.prod.yml` | Prod: PgBouncer with resource limits + health checks |
+
+Key settings for Railway:
+
+```ini
+# backend/pgbouncer/pgbouncer.ini
+[pgbouncer]
+pool_mode = transaction          # Must be 'transaction' for REST+WS workloads
+listen_port = 6432
+default_pool_size = 20           # Matches Railway PG's max_connections
+max_client_conn = 200            # Number of app connections to pool
+reserve_pool_size = 5            # Extra slots for admin/health queries
+reserve_pool_timeout = 5         # Seconds before reserve pool activates
+query_timeout = 30               # Kill runaway queries after 30s
+client_idle_timeout = 120        # Reclaim idle client connections after 2 min
+server_idle_timeout = 600        # Return server connections to pool after 10 min
+auth_type = scram-sha-256        # Use SCRAM auth in production
+```
+
+> **Important:** On Railway, set `auth_type = scram-sha-256` (not `trust`)
+> because Railway PostgreSQL requires password authentication.
+> The `userlist.txt` must contain the user-password SCRAM hash.
+> Generate one with:
+> ```bash
+> # Generate a SCRAM-SHA-256 hash for userlist.txt:
+> echo -n "toroloom" | openssl dgst -sha256 -hmac "your_postgres_password"
+> ```
+> Then add to `userlist.txt`:
+> ```
+> "toroloom" "SCRAM-SHA-256$<hash>"
+> ```
+
+---
+
+## RDS Provisioning & Migration
+
+This section covers provisioning an AWS RDS PostgreSQL instance and migrating
+data from Railway PostgreSQL to RDS with zero downtime.
+
+### 1. Provision RDS via Terraform (preferred)
+
+> **Prerequisites:** Terraform ≥ 1.6, AWS CLI configured, and PostgreSQL client tools
+> (`pg_dump`, `pg_restore`, `psql`) installed on your machine.
+
+The [`terraform/`](../terraform/) directory contains a complete Terraform module
+that provisions everything you need — VPC, subnets, security group, RDS instance,
+parameter group, enhanced monitoring, Performance Insights, and CloudWatch alarms.
+
+```bash
+# 1. Navigate to the terraform directory
+cd terraform
+
+# 2. Copy the example vars file and edit with your password
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars — you only need to set db_password:
+#   db_password = "$(openssl rand -base64 16)"
+#
+# vpc_id and subnet_ids are OPTIONAL — leave them commented out to
+# auto-create a new VPC with public/private subnets.
+
+# 3. Initialize Terraform
+terraform init
+
+# 4. Preview what will be created
+terraform plan
+
+# 5. Apply (takes 5-10 minutes)
+terraform apply -auto-approve
+
+# 6. Get the DATABASE_URL
+terraform output -raw database_url
+```
+
+**What the Terraform module creates:**
+
+| Resource | Details |
+|----------|---------|
+| VPC | New VPC (10.0.0.0/16) with public + private subnets across 2 AZs |
+| Internet Gateway | For public subnet outbound access |
+| Security Group | PostgreSQL port 5432 — allowlisted via `allowed_cidr_blocks` and `allowed_security_group_ids` |
+| DB Subnet Group | Private subnets for Multi-AZ readiness |
+| DB Parameter Group | `statement_timeout=30s`, slow query logging enabled |
+| RDS Instance | `db.t4g.medium`, 100GB gp3, auto-scaling to 500GB |
+| Automated Backups | 7-day retention, point-in-time recovery |
+| Performance Insights | 7-day retention (free tier) |
+| Enhanced Monitoring | 60s granularity |
+| IAM Role | For Enhanced Monitoring (RDS pushes metrics to CloudWatch) |
+| CloudWatch Alarms | CPU > 80%, connections > 80, storage < 5GB |
+| Read Replica (opt.) | Optional read replica for analytics offload |
+
+**Outputs after apply:**
+
+| Output | Description |
+|--------|-------------|
+| `database_url` | Full DATABASE_URL with `?sslmode=require` (sensitive) |
+| `database_url_reader` | Read replica URL (if created) |
+| `db_endpoint` | RDS host:port |
+| `migration_command` | Ready-to-use migration script command |
+| `env_vars_for_railway` | Variables to copy to Railway Dashboard |
+
+**Cost estimate (single-AZ):**
+
+| Resource | Monthly Cost |
+|----------|-------------|
+| RDS db.t4g.medium | ~$60 |
+| Storage 100GB gp3 | ~$12 |
+| Backup storage | ~$2 |
+| Performance Insights | Free (7-day retention) |
+| **Total** | **~$74/month** |
+
+> To use an existing VPC instead of auto-creating one, set `vpc_id` and
+> `subnet_ids` in your `terraform.tfvars`. See [`terraform/README.md`](../terraform/README.md)
+> for all available configuration options.
+
+---
+
+### Alternative: Provision RDS via AWS CLI
+
+If you prefer not to use Terraform, you can provision RDS directly via the
+AWS CLI. This requires a pre-existing VPC with subnets.
+
+**Step 1 — Create a parameter group:**
+
+```bash
+aws rds create-db-parameter-group \
+  --db-parameter-group-family postgres16 \
+  --db-parameter-group-name toroloom-pg16 \
+  --description "Toroloom PostgreSQL 16 parameters"
+
+aws rds modify-db-parameter-group \
+  --db-parameter-group-name toroloom-pg16 \
+  --parameters "ParameterName=statement_timeout,ParameterValue=30000,ApplyMethod=immediate"
+```
+
+**Step 2 — Provision the instance:**
+
+```bash
+aws rds create-db-instance \
+  --db-instance-identifier toroloom-db \
+  --db-instance-class db.t4g.medium \
+  --engine postgres \
+  --engine-version 16.6 \
+  --master-username toroloom \
+  --master-user-password "$(openssl rand -base64 16)" \
+  --db-name toroloom \
+  --allocated-storage 100 \
+  --storage-type gp3 \
+  --backup-retention-period 7 \
+  --db-parameter-group-name toroloom-pg16 \
+  --enable-performance-insights \
+  --performance-insights-retention-period 7 \
+  --publicly-accessible \
+  --vpc-security-group-ids sg-xxxxxxxx \
+  --db-subnet-group-name your-subnet-group
+```
+
+> Provisioning takes **5–10 minutes**. The endpoint will be available as
+> `toroloom-db.xxxxxxxxxxxx.us-east-1.rds.amazonaws.com:5432`.
+
+**Step 3 — Allowlist Railway IPs:**
+
+```bash
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-xxxxxxxx \
+  --protocol tcp \
+  --port 5432 \
+  --cidr 0.0.0.0/0
+```
+
+> **Important:** Remove this wide-open rule after migration is complete.
+
+---
+
+### 2. Migration: Railway PG → RDS
+
+Use the automated migration script:
+
+```bash
+# 1. Run in dry-run mode first (validates connections + audits source)
+./scripts/migrate-to-rds.sh \
+  --source="postgresql://toroloom:password@railway-host:5432/toroloom" \
+  --target="$(cd terraform && terraform output -raw database_url)"
+
+# 2. Review the audit output, then run with --apply
+./scripts/migrate-to-rds.sh \
+  --source="postgresql://toroloom:password@railway-host:5432/toroloom" \
+  --target="$(cd terraform && terraform output -raw database_url)" \
+  --apply
+```
+
+**What the script does:**
+
+| Step | Action | Details |
+|------|--------|---------|
+| 1 | Validates connections | Tests both source and target are reachable |
+| 2 | Audits source DB | Table sizes, row counts, extensions, index count |
+| 3 | Dumps source | `pg_dump --format=custom --compress=9` (excludes migration tracking tables) |
+| 4 | Restores to RDS | `pg_restore --jobs=$(nproc)` — parallel restore capped at 4 CPUs |
+| 5 | Runs core migration | Applies `migrations/init_scalability_core.sql` on RDS |
+| 6 | Validates | Row count comparison across all tables |
+
+**Manual approach (if you prefer step-by-step):**
+
+```bash
+# 1. Dump schema + data from Railway PG (custom format, compressed)
+pg_dump "$RAILWAY_DATABASE_URL" \
+  --format=custom \
+  --compress=9 \
+  --no-owner \
+  --no-acl \
+  --exclude-table=migrations \
+  --file=toroloom.dump
+
+# 2. Restore to RDS (parallel restore)
+pg_restore \
+  --dbname="$RDS_DATABASE_URL" \
+  --jobs=4 \
+  --no-owner \
+  --no-acl \
+  --exit-on-error \
+  toroloom.dump
+
+# 3. Apply scalability core migration
+psql "$RDS_DATABASE_URL" -f migrations/init_scalability_core.sql
+
+# 4. Verify row counts
+psql "$RDS_DATABASE_URL" -c "
+  SELECT schemaname, relname, n_live_tup
+  FROM pg_stat_user_tables
+  ORDER BY n_live_tup DESC;
+"
+```
+
+---
+
+### 3. Cutover: Flip DATABASE_URL
+
+Once the migration is validated:
+
+1. **Update the backend's `DATABASE_URL`** on Railway:
+   - Go to Railway Dashboard → Backend service → **Variables**
+   - Change `DATABASE_URL` to the RDS endpoint
+   - Railway auto-redeploys the backend
+
+2. **Verify the deployment:**
+
+```bash
+curl https://your-service.up.railway.app/health
+# Expected: {"status":"ok","storageBackend":"postgres","storageHealthy":true,...}
+
+# Verify data is accessible (try a few endpoints)
+curl https://your-service.up.railway.app/api/portfolio/holdings \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+3. **Keep Railway PG running for 48 hours** as rollback window.
+   To rollback: restore the old `DATABASE_URL` and redeploy.
+
+4. **Deprovision Railway PG** after confirmation:
+   - Railway Dashboard → PostgreSQL service → **Settings** → **Delete**
+
+---
+
+### 4. Post-Migration Hardening
+
+**Lock down RDS security group:**
+
+```bash
+# Remove the wide-open rule
+aws ec2 revoke-security-group-ingress \
+  --group-id sg-xxxxxxxx \
+  --protocol tcp \
+  --port 5432 \
+  --cidr 0.0.0.0/0
+
+# Allow only the backend's egress IP (or use RDS Proxy)
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-xxxxxxxx \
+  --protocol tcp \
+  --port 5432 \
+  --cidr YOUR_BACKEND_IP/32
+```
+
+**Enable PgBouncer (if not already):**
+
+After migrating to RDS, point PgBouncer at RDS instead of Railway PG:
+
+```bash
+# Update PgBouncer env vars to point to RDS endpoint
+POSTGRESQL_HOST=toroloom-db.xxxxxxxxxxxx.us-east-1.rds.amazonaws.com
+POSTGRESQL_PORT=5432
+```
+
+**Set up monitoring alerts:**
+
+| Alert | Condition | Recommended Action |
+|-------|-----------|-------------------|
+| CPU > 80% | `rds.cpu_utilization > 80` | Scale up instance class |
+| Connections > 80% of max | `rds.database_connections > 80` | Add PgBouncer or scale |
+| Free storage < 5 GB | `rds.free_storage_space < 5GB` | Increase allocated storage |
+| Replica lag > 30s | `rds.replica_lag > 30` | Check reader workload |
+
+---
+
+### 5. Rollback Plan
+
+If the RDS migration causes issues, rollback is straightforward:
+
+```bash
+# 1. Restore old DATABASE_URL on Railway backend
+#    Point back to Railway PostgreSQL
+DATABASE_URL=postgresql://toroloom:password@railway-host:5432/toroloom
+
+# 2. Railway redeploys — verify health endpoint
+
+# 3. Investigate RDS issue while Railway PG serves traffic
+
+# 4. After fix, re-run the migration script
+```
+
+> **Note:** Any data written to RDS during the window between cutover and
+> rollback will be lost. To avoid this, run in dual-write mode if available,
+> or schedule a maintenance window with read-only mode.
+
 ---
 
 ## Database Setup

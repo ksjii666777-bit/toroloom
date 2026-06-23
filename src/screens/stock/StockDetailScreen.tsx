@@ -11,6 +11,7 @@ import { formatCurrency, formatCompactNumber, hexToRgba } from '../../utils/form
 import CandlestickChart from '../../components/CandlestickChart';
 import TechnicalIndicators from '../../components/TechnicalIndicators';
 import type { IndicatorType } from '../../components/TechnicalIndicators';
+import { ChartCrosshairContext } from '../../components/ChartCrosshairContext';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { useRealtimePrice } from '../../hooks/useRealtimePrice';
@@ -30,6 +31,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
   const [activeTimeframe, setActiveTimeframe] = useState('1M');
   const [showMA, setShowMA] = useState(false);
   const [activeIndicators, setActiveIndicators] = useState<IndicatorType[]>([]);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
   // Real-time price updates via mock WebSocket
   const {
@@ -644,27 +646,29 @@ export default function StockDetailScreen({ route, navigation }: any) {
             <Text style={[styles.chartOptionText, activeIndicators.includes('bollinger') && styles.chartOptionTextActive]}>BB</Text>
           </TouchableOpacity>
         </View>
-        <CandlestickChart
-          data={candleHistory}
-          height={280}
-          width={width - 64}
-          timeframes={TIMEFRAMES}
-          activeTimeframe={activeTimeframe}
-          onTimeframeChange={handleTimeframeChange}
-          showVolume={true}
-          showMA={showMA}
-          loading={candleHistory.length === 0}
-        />
-
-        {/* Technical Indicators Panel */}
-        {activeIndicators.length > 0 && (
-          <TechnicalIndicators
+        <ChartCrosshairContext.Provider value={{ focusedIndex, setFocusedIndex }}>
+          <CandlestickChart
             data={candleHistory}
+            height={280}
             width={width - 64}
-            indicators={activeIndicators}
-            onIndicatorToggle={handleIndicatorToggle}
+            timeframes={TIMEFRAMES}
+            activeTimeframe={activeTimeframe}
+            onTimeframeChange={handleTimeframeChange}
+            showVolume={true}
+            showMA={showMA}
+            loading={candleHistory.length === 0}
           />
-        )}
+
+          {/* Technical Indicators Panel */}
+          {activeIndicators.length > 0 && (
+            <TechnicalIndicators
+              data={candleHistory}
+              width={width - 64}
+              indicators={activeIndicators}
+              onIndicatorToggle={handleIndicatorToggle}
+            />
+          )}
+        </ChartCrosshairContext.Provider>
 
         {/* Key Stats */}
         <View style={{ ...styles.statsGrid, marginTop: SPACING.lg }}>

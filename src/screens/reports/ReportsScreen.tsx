@@ -11,14 +11,13 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { useAuthStore } from '../../store/authStore';
 import { useNotificationStore } from '../../store/notificationStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatPercent} from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 
@@ -258,8 +257,8 @@ export default function ReportsScreen({ navigation }: any) {
           <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
         </TouchableOpacity>
 
-        {/* ── Portfolio Snapshot ─────────────────────────────── */}
-        <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.snapshotCard}>
+        {/* ── Portfolio Snapshot — Glassmorphic ────────────── */}
+        <View style={styles.snapshotCard}>
           <View style={styles.snapshotTop}>
             <View>
               <Text style={styles.snapshotLabel}>Portfolio Value</Text>
@@ -309,7 +308,7 @@ export default function ReportsScreen({ navigation }: any) {
               <Text style={styles.snapshotItemLabel}>Holdings</Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         {/* ── Tab Switcher ───────────────────────────────────── */}
         <View style={styles.tabRow}>
@@ -354,20 +353,20 @@ export default function ReportsScreen({ navigation }: any) {
 
             {/* P&L Summary Cards */}
             <View style={styles.pnlSummaryRow}>
-              <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.pnlSummaryCard}>
+              <View style={styles.pnlSummaryCard}>
                 <Text style={styles.pnlSummaryLabel}>Realized P&L</Text>
-                <Text style={[styles.pnlSummaryValue, { color: m.realizedPnl >= 0 ? '#00C853' : '#FF1744' }]}>
+                <Text style={[styles.pnlSummaryValue, { color: m.realizedPnl >= 0 ? '#00E676' : '#FF5252' }]}>
                   {m.realizedPnl >= 0 ? '+' : ''}{formatCurrency(m.realizedPnl, true)}
                 </Text>
                 <Text style={styles.pnlSummarySub}>From closed positions</Text>
-              </LinearGradient>
-              <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.pnlSummaryCard}>
+              </View>
+              <View style={styles.pnlSummaryCard}>
                 <Text style={styles.pnlSummaryLabel}>Unrealized P&L</Text>
-                <Text style={[styles.pnlSummaryValue, { color: m.unrealizedPnl >= 0 ? '#00C853' : '#FF1744' }]}>
+                <Text style={[styles.pnlSummaryValue, { color: m.unrealizedPnl >= 0 ? '#00E676' : '#FF5252' }]}>
                   {m.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(m.unrealizedPnl, true)}
                 </Text>
                 <Text style={styles.pnlSummarySub}>From open positions</Text>
-              </LinearGradient>
+              </View>
             </View>
 
             {/* Day P&L */}
@@ -434,19 +433,21 @@ export default function ReportsScreen({ navigation }: any) {
             <Text style={styles.sectionTitle}>Risk & Return</Text>
             <View style={styles.perfGrid}>
               {[
-                { icon: 'cash', label: 'Total Return', value: formatCurrency(m.totalReturn, true), color: m.totalReturn >= 0 ? colors.marketUp : colors.marketDown, bg: GRADIENTS.primary },
-                { icon: 'analytics', label: 'Return %', value: formatPercent(m.totalReturnPercent), color: m.totalReturnPercent >= 0 ? colors.marketUp : colors.marketDown, bg: GRADIENTS.accent },
-                { icon: 'trophy', label: 'Sharpe Ratio', value: m.sharpeRatio.toFixed(2), color: m.sharpeRatio >= 1 ? colors.marketUp : m.sharpeRatio >= 0 ? colors.warning : colors.marketDown, bg: GRADIENTS.gold },
-                { icon: 'trending-down', label: 'Max Drawdown', value: formatPercent(m.maxDrawdownPercent), color: colors.danger, bg: GRADIENTS.danger },
-                { icon: 'flag', label: 'Profit Factor', value: m.profitFactor.toFixed(2), color: m.profitFactor >= 2 ? colors.marketUp : m.profitFactor >= 1 ? colors.warning : colors.marketDown, bg: GRADIENTS.success },
-                { icon: 'calendar', label: 'Avg Holding', value: `${m.avgHoldingDays}d`, color: colors.text, bg: GRADIENTS.purple },
+                { icon: 'cash', label: 'Total Return', value: formatCurrency(m.totalReturn, true), color: m.totalReturn >= 0 ? colors.marketUp : colors.marketDown },
+                { icon: 'analytics', label: 'Return %', value: formatPercent(m.totalReturnPercent), color: m.totalReturnPercent >= 0 ? colors.marketUp : colors.marketDown },
+                { icon: 'trophy', label: 'Sharpe Ratio', value: m.sharpeRatio.toFixed(2), color: m.sharpeRatio >= 1 ? colors.marketUp : m.sharpeRatio >= 0 ? colors.warning : colors.marketDown },
+                { icon: 'trending-down', label: 'Max Drawdown', value: formatPercent(m.maxDrawdownPercent), color: colors.danger },
+                { icon: 'flag', label: 'Profit Factor', value: m.profitFactor.toFixed(2), color: m.profitFactor >= 2 ? colors.marketUp : m.profitFactor >= 1 ? colors.warning : colors.marketDown },
+                { icon: 'calendar', label: 'Avg Holding', value: `${m.avgHoldingDays}d`, color: colors.text },
               ].map((item, i) => (
-                <LinearGradient key={i} colors={item.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                <View key={i}
                   style={styles.perfCard}>
-                  <Ionicons name={item.icon as any} size={22} color="rgba(255,255,255,0.8)" />
+                  <View style={styles.perfCardIcon}>
+                    <Ionicons name={item.icon as any} size={22} color={item.color} />
+                  </View>
                   <Text style={styles.perfCardLabel}>{item.label}</Text>
                   <Text style={[styles.perfCardValue, { color: item.color }]}>{item.value}</Text>
-                </LinearGradient>
+                </View>
               ))}
             </View>
 
@@ -543,7 +544,7 @@ export default function ReportsScreen({ navigation }: any) {
           <>
             {/* Tax Summary */}
             <Text style={styles.sectionTitle}>Capital Gains Tax Summary</Text>
-            <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.taxSummaryCard}>
+            <View style={styles.taxSummaryCard}>
               <View style={styles.taxIconRow}>
                 <View style={styles.taxIconCircle}>
                   <Ionicons name="document-text" size={28} color={colors.warning} />
@@ -560,7 +561,7 @@ export default function ReportsScreen({ navigation }: any) {
                   {formatCurrency(cg.totalEstimatedTax, true)}
                 </Text>
               </View>
-            </LinearGradient>
+            </View>
 
             {/* STCG vs LTCG Breakdown */}
             <View style={styles.taxCardsRow}>
@@ -818,7 +819,7 @@ export default function ReportsScreen({ navigation }: any) {
                   <Text style={styles.sectionTitle}>Period Comparison</Text>
                   <View style={styles.histCardsRow}>
                     {/* Current Period */}
-                    <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.histPeriodCard}>
+                    <View style={styles.histPeriodCard}>
                       <Text style={styles.histPeriodLabel}>Current Period</Text>
                       <Text style={styles.histPeriodDate}>
                         {new Date(currentPeriod[0].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} — {new Date(currentPeriod[currentPeriod.length - 1].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -841,10 +842,10 @@ export default function ReportsScreen({ navigation }: any) {
                         <Text style={[styles.histMetricValue, { color: colors.marketUp }]}>{cpWin.wins}/{cpWin.total}</Text>
                         <Text style={styles.histMetricLabel}>Win Days</Text>
                       </View>
-                    </LinearGradient>
+                    </View>
 
                     {/* Previous Period */}
-                    <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.histPeriodCard}>
+                    <View style={styles.histPeriodCard}>
                       <Text style={styles.histPeriodLabel}>Previous Period</Text>
                       <Text style={styles.histPeriodDate}>
                         {new Date(previousPeriod[0].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} — {new Date(previousPeriod[previousPeriod.length - 1].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -867,7 +868,7 @@ export default function ReportsScreen({ navigation }: any) {
                         <Text style={[styles.histMetricValue, { color: colors.marketUp }]}>{ppWin.wins}/{ppWin.total}</Text>
                         <Text style={styles.histMetricLabel}>Win Days</Text>
                       </View>
-                    </LinearGradient>
+                    </View>
                   </View>
 
                   {/* Comparison Delta Bar */}
@@ -1038,9 +1039,9 @@ export default function ReportsScreen({ navigation }: any) {
               onPress={() => handleExport('pdf')}
               disabled={exporting}
             >
-              <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exportOptionIcon}>
-                <Ionicons name="document-text" size={22} color={colors.white} />
-              </LinearGradient>
+              <View style={styles.exportOptionIcon}>
+                <Ionicons name="document-text" size={22} color={colors.primary} />
+              </View>
               <View style={styles.exportOptionText}>
                 <Text style={styles.exportOptionLabel}>PDF Report</Text>
                 <Text style={styles.exportOptionDesc}>Styled report with tables &amp; charts — perfect for printing or sharing</Text>
@@ -1053,9 +1054,9 @@ export default function ReportsScreen({ navigation }: any) {
               onPress={() => handleExport('csv')}
               disabled={exporting}
             >
-              <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exportOptionIcon}>
-                <Ionicons name="grid" size={22} color={colors.white} />
-              </LinearGradient>
+              <View style={styles.exportOptionIcon}>
+                <Ionicons name="grid" size={22} color={colors.accent} />
+              </View>
               <View style={styles.exportOptionText}>
                 <Text style={styles.exportOptionLabel}>CSV (Spreadsheet)</Text>
                 <Text style={styles.exportOptionDesc}>Raw data for Excel, Google Sheets, or other analysis tools</Text>
@@ -1159,10 +1160,11 @@ const createStyles = (colors: any) => StyleSheet.create({
   pnlSummaryRow: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.lg, marginBottom: SPACING.lg },
   pnlSummaryCard: {
     flex: 1, padding: SPACING.lg, borderRadius: BORDER_RADIUS.md,
+    backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border,
   },
-  pnlSummaryLabel: { ...FONTS.regular, fontSize: FONTS.size.xs, color: 'rgba(255,255,255,0.7)' },
+  pnlSummaryLabel: { ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textSecondary },
   pnlSummaryValue: { ...FONTS.bold, fontSize: FONTS.size.xl, marginTop: 4 },
-  pnlSummarySub: { ...FONTS.regular, fontSize: FONTS.size.xs, color: 'rgba(255,255,255,0.5)', marginTop: 2 },
+  pnlSummarySub: { ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted, marginTop: 2 },
   dayPnlRow: { flexDirection: 'row', gap: SPACING.xl },
   dayPnlItem: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   dayPnlLabel: { ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted },
@@ -1179,9 +1181,15 @@ const createStyles = (colors: any) => StyleSheet.create({
   perfCard: {
     width: (width - SPACING.xl * 2 - SPACING.md) / 2,
     padding: SPACING.lg, borderRadius: BORDER_RADIUS.lg, gap: SPACING.xs,
+    backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border,
   },
-  perfCardLabel: { ...FONTS.regular, fontSize: FONTS.size.xs, color: 'rgba(255,255,255,0.7)' },
+  perfCardLabel: { ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textSecondary },
   perfCardValue: { ...FONTS.bold, fontSize: FONTS.size.lg },
+  perfCardIcon: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: colors.bgCard, justifyContent: 'center', alignItems: 'center',
+    marginBottom: 4,
+  },
   tradeStatRow: { flexDirection: 'row' },
   tradeStatItem: { flex: 1, alignItems: 'center' },
   tradeStatNum: { ...FONTS.black, fontSize: FONTS.size.xxl, color: colors.text },
@@ -1201,7 +1209,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   investBarLabel: { ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted, textAlign: 'right', marginTop: 4 },
 
   // ── Tax Tab ──
-  taxSummaryCard: { padding: SPACING.xl, borderRadius: BORDER_RADIUS.xl, marginBottom: SPACING.lg },
+  taxSummaryCard: { padding: SPACING.xl, borderRadius: BORDER_RADIUS.xl, marginBottom: SPACING.lg, backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
   taxIconRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginBottom: SPACING.lg },
   taxIconCircle: { width: 48, height: 48, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.1)', justifyContent: 'center', alignItems: 'center' },
   taxSummaryTitle: { ...FONTS.semiBold, fontSize: FONTS.size.md, color: colors.text },
@@ -1319,6 +1327,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   exportOptionIcon: {
     width: 44, height: 44, borderRadius: 12,
+    backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border,
     justifyContent: 'center', alignItems: 'center',
   },
   exportOptionText: { flex: 1, marginLeft: SPACING.md, marginRight: SPACING.sm },

@@ -28,10 +28,10 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { AuditTrail } from '../services/auditTrail';
 import { MongoDBStorage } from '../services/storage/mongodb';
 import { CONNECT_TIMEOUT } from './testUtils';
+import { TEST_MONGODB_URI, TEST_MONGODB_DB } from './testConfig';
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://toroloom:toroloom_dev@localhost:27017/toroloom?authSource=admin';
-const MONGODB_DB = process.env.MONGODB_DB_NAME || 'toroloom_test';
+const MONGODB_URI = TEST_MONGODB_URI;
+const MONGODB_DB = TEST_MONGODB_DB;
 
 describe('AuditTrail — MongoDB Integration', () => {
   let storage: MongoDBStorage;

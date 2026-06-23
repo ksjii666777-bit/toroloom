@@ -17,7 +17,7 @@ import { configureApi } from '../services/api/client';
 import { marketApi } from '../services/api/market';
 import type { Mock } from 'vitest';
 
-const API_BASE = 'http://localhost:3000/api';
+import { TEST_API_BASE as API_BASE } from './testConfig';
 const originalFetch = globalThis.fetch;
 
 // ============================================================================

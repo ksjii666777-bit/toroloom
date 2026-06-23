@@ -2,22 +2,21 @@ import React, { useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore, FundTransaction } from '../../store/fundStore';
-import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatTimestamp } from '../../utils/formatters';
 
 const { width } = Dimensions.get('window');
 
 const quickActions = [
-  { icon: 'add-circle', label: 'Add Funds', gradient: GRADIENTS.success, screen: 'AddFunds' },
-  { icon: 'arrow-up-circle', label: 'Withdraw', gradient: GRADIENTS.danger, screen: 'Withdraw' },
-  { icon: 'swap-horizontal', label: 'Transfer', gradient: GRADIENTS.primary, screen: 'Transfer' },
-  { icon: 'qr-code', label: 'UPI', gradient: GRADIENTS.accent, screen: 'UPI' },
+  { icon: 'add-circle', label: 'Add Funds', screen: 'AddFunds' },
+  { icon: 'arrow-up-circle', label: 'Withdraw', screen: 'Withdraw' },
+  { icon: 'swap-horizontal', label: 'Transfer', screen: 'Transfer' },
+  { icon: 'qr-code', label: 'UPI', screen: 'UPI' },
 ] as const;
 
 export default function FundsDashboardScreen({ navigation }: any) {
@@ -75,29 +74,29 @@ export default function FundsDashboardScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.white} />
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Funds Dashboard</Text>
         <TouchableOpacity
           style={styles.historyBtn}
           onPress={() => navigation.navigate('TransactionHistory')}
         >
-          <Ionicons name="time-outline" size={20} color={COLORS.white} />
+          <Ionicons name="time-outline" size={20} color={colors.white} />
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Balance Card */}
-        <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.balanceCard}>
+        {/* Balance Card — Glassmorphic */}
+        <View style={styles.balanceCard}>
+          <View style={[StyleSheet.absoluteFill, styles.balanceGlow]} />
           <Text style={styles.balanceLabel}>Available Balance</Text>
           <Text style={styles.balanceValue}>{formatLargeCurrency(balance)}</Text>
           <View style={styles.balanceSubRow}>
-            <Ionicons name="wallet-outline" size={14} color="rgba(255,255,255,0.7)" />
+            <Ionicons name="wallet-outline" size={14} color="rgba(255,255,255,0.5)" />
             <Text style={styles.balanceSub}>{formatCurrency(balance)}</Text>
           </View>
-        </LinearGradient>
+        </View>
 
         {/* Quick Actions */}
         <View style={styles.quickActionsRow}>
@@ -107,9 +106,9 @@ export default function FundsDashboardScreen({ navigation }: any) {
               style={styles.quickAction}
               onPress={() => handleQuickAction(action.screen)}
             >
-              <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
-                <Ionicons name={action.icon as any} size={22} color={COLORS.white} />
-              </LinearGradient>
+              <View style={styles.qaIcon}>
+                <Ionicons name={action.icon as any} size={22} color={colors.primary} />
+              </View>
               <Text style={styles.qaLabel}>{action.label}</Text>
             </TouchableOpacity>
           ))}
@@ -118,15 +117,15 @@ export default function FundsDashboardScreen({ navigation }: any) {
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           <View style={[styles.statCard, { borderColor: colors.border }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: COLORS.success + '20' }]}>
-              <Ionicons name="add-circle" size={20} color={COLORS.success} />
+            <View style={[styles.statIconWrap, { backgroundColor: colors.accent + '20' }]}>
+              <Ionicons name="add-circle" size={20} color={colors.accent} />
             </View>
             <Text style={styles.statValue}>{formatLargeCurrency(stats.totalAdd)}</Text>
             <Text style={styles.statLabel}>Total Added</Text>
           </View>
           <View style={[styles.statCard, { borderColor: colors.border }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: COLORS.danger + '20' }]}>
-              <Ionicons name="arrow-up-circle" size={20} color={COLORS.danger} />
+            <View style={[styles.statIconWrap, { backgroundColor: colors.danger + '20' }]}>
+              <Ionicons name="arrow-up-circle" size={20} color={colors.danger} />
             </View>
             <Text style={styles.statValue}>{formatLargeCurrency(stats.totalWithdraw)}</Text>
             <Text style={styles.statLabel}>Withdrawn</Text>
@@ -135,14 +134,14 @@ export default function FundsDashboardScreen({ navigation }: any) {
             <View style={[styles.statIconWrap, { backgroundColor: colors.primary + '20' }]}>
               <Ionicons name="trending-up" size={20} color={colors.primary} />
             </View>
-            <Text style={[styles.statValue, { color: stats.net >= 0 ? COLORS.success : COLORS.danger }]}>
+            <Text style={[styles.statValue, { color: stats.net >= 0 ? colors.accent : colors.danger }]}>
               {stats.net >= 0 ? '+' : ''}{formatLargeCurrency(Math.abs(stats.net))}
             </Text>
             <Text style={styles.statLabel}>Net Addition</Text>
           </View>
           <View style={[styles.statCard, { borderColor: colors.border }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: COLORS.warning + '20' }]}>
-              <Ionicons name="swap-horizontal" size={20} color={COLORS.warning} />
+            <View style={[styles.statIconWrap, { backgroundColor: colors.warning + '20' }]}>
+              <Ionicons name="swap-horizontal" size={20} color={colors.warning} />
             </View>
             <Text style={styles.statValue}>{stats.count}</Text>
             <Text style={styles.statLabel}>Transactions</Text>
@@ -158,31 +157,31 @@ export default function FundsDashboardScreen({ navigation }: any) {
           <View style={styles.monthlyBars}>
             <View style={styles.monthlyBarItem}>
               <View style={styles.monthlyBarLabel}>
-                <Ionicons name="add-circle" size={14} color={COLORS.success} />
+                <Ionicons name="add-circle" size={14} color={colors.accent} />
                 <Text style={styles.monthlyBarLabelText}>Added</Text>
               </View>
               <View style={styles.monthlyBarTrack}>
                 <View style={[styles.monthlyBarFill, {
                   width: `${Math.min((monthlyActivity.add / Math.max(monthlyActivity.add + monthlyActivity.withdraw, 1)) * 100, 100)}%`,
-                  backgroundColor: COLORS.success,
+                  backgroundColor: colors.accent,
                 }]} />
               </View>
-              <Text style={[styles.monthlyBarValue, { color: COLORS.success }]}>
+              <Text style={[styles.monthlyBarValue, { color: colors.accent }]}>
                 {formatCurrency(monthlyActivity.add, true)}
               </Text>
             </View>
             <View style={styles.monthlyBarItem}>
               <View style={styles.monthlyBarLabel}>
-                <Ionicons name="arrow-up-circle" size={14} color={COLORS.danger} />
+                <Ionicons name="arrow-up-circle" size={14} color={colors.danger} />
                 <Text style={styles.monthlyBarLabelText}>Withdrawn</Text>
               </View>
               <View style={styles.monthlyBarTrack}>
                 <View style={[styles.monthlyBarFill, {
                   width: `${Math.min((monthlyActivity.withdraw / Math.max(monthlyActivity.add + monthlyActivity.withdraw, 1)) * 100, 100)}%`,
-                  backgroundColor: COLORS.danger,
+                  backgroundColor: colors.danger,
                 }]} />
               </View>
-              <Text style={[styles.monthlyBarValue, { color: COLORS.danger }]}>
+              <Text style={[styles.monthlyBarValue, { color: colors.danger }]}>
                 {formatCurrency(monthlyActivity.withdraw, true)}
               </Text>
             </View>
@@ -191,7 +190,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
             <View style={styles.monthlyNet}>
               <Text style={styles.monthlyNetLabel}>Net this month</Text>
               <Text style={[styles.monthlyNetValue, {
-                color: (monthlyActivity.add - monthlyActivity.withdraw) >= 0 ? COLORS.success : COLORS.danger,
+                color: (monthlyActivity.add - monthlyActivity.withdraw) >= 0 ? colors.accent : colors.danger,
               }]}>
                 {monthlyActivity.add - monthlyActivity.withdraw >= 0 ? '+' : ''}
                 {formatCurrency(monthlyActivity.add - monthlyActivity.withdraw, true)}
@@ -235,7 +234,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
                     <Ionicons
                       name={tx.type === 'add' ? 'add-circle' : 'arrow-up-circle'}
                       size={20}
-                      color={tx.type === 'add' ? COLORS.success : COLORS.danger}
+                      color={tx.type === 'add' ? colors.accent : colors.danger}
                     />
                   </View>
                   <View style={styles.txInfo}>
@@ -247,7 +246,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
                     </Text>
                   </View>
                   <Text style={[styles.txAmount, {
-                    color: tx.type === 'add' ? COLORS.success : COLORS.danger,
+                    color: tx.type === 'add' ? colors.accent : colors.danger,
                   }]}>
                     {tx.type === 'add' ? '+' : '-'}{formatCurrency(tx.amount, true)}
                   </Text>
@@ -261,14 +260,14 @@ export default function FundsDashboardScreen({ navigation }: any) {
         <View style={[styles.footerCard, { borderColor: colors.border }]}>
           <View style={styles.footerRow}>
             <Text style={styles.footerLabel}>Total Deposits</Text>
-            <Text style={[styles.footerValue, { color: COLORS.success }]}>
+            <Text style={[styles.footerValue, { color: colors.accent }]}>
               {formatCurrency(stats.totalAdd, true)}
             </Text>
           </View>
           <View style={[styles.footerDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.footerRow}>
             <Text style={styles.footerLabel}>Total Withdrawals</Text>
-            <Text style={[styles.footerValue, { color: COLORS.danger }]}>
+            <Text style={[styles.footerValue, { color: colors.danger }]}>
               {formatCurrency(stats.totalWithdraw, true)}
             </Text>
           </View>
@@ -332,16 +331,24 @@ const createStyles = (colors: any) => StyleSheet.create({
     padding: SPACING.xl,
     marginBottom: SPACING.lg,
     alignItems: 'center',
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  balanceGlow: {
+    backgroundColor: 'rgba(59,130,246,0.04)',
+    borderRadius: BORDER_RADIUS.xl,
   },
   balanceLabel: {
     ...FONTS.regular,
     fontSize: FONTS.size.sm,
-    color: 'rgba(255,255,255,0.7)',
+    color: colors.textSecondary,
   },
   balanceValue: {
     ...FONTS.black,
     fontSize: FONTS.size.hero,
-    color: COLORS.white,
+    color: colors.text,
     marginTop: SPACING.xs,
   },
   balanceSubRow: {
@@ -372,6 +379,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   qaLabel: {
     ...FONTS.regular,
@@ -572,7 +582,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   emptyBtnText: {
     ...FONTS.medium,
     fontSize: FONTS.size.sm,
-    color: COLORS.white,
+    color: colors.white,
   },
 
   // Footer Summary

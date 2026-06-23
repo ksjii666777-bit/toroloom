@@ -1,0 +1,113 @@
+# ── Ingress: API + WebSocket traffic ────────────────────────────────────────
+#
+# Compatible with:
+#   - AWS Load Balancer Controller (ALB) via alb.ingress.kubernetes.io/*
+#   - nginx-ingress controller via kubernetes.io/ingress.class annotation
+#   - Choose by setting the ingressClassName or annotation below.
+#
+# TLS via cert-manager: install https://cert-manager.io and a ClusterIssuer
+# named "letsencrypt-prod" for automatic certificate provisioning.
+#
+# WebSocket: nginx proxy_read_timeout / proxy_send_timeout must be high to
+# prevent idle WebSocket connections from being killed.
+#
+# Rate limiting: nginx limit-rps annotation prevents abuse per IP.
+#
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: toroloom-api
+  namespace: toroloom
+  labels:
+    app.kubernetes.io/name: toroloom
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: toroloom
+  annotations:
+    # ── Ingress controller ──────────────────────────────────────────────
+    # Use "alb" for AWS Load Balancer Controller, "nginx" for nginx-ingress
+    kubernetes.io/ingress.class: "nginx"
+
+    # ── TLS: cert-manager ───────────────────────────────────────────────
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+    # ── WebSocket support (nginx) ───────────────────────────────────────
+    # Prevent timeout on idle WebSocket connections (up to 1 hour)
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+
+    # ── CORS ────────────────────────────────────────────────────────────
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://toroloom.app"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-max-age: "86400"
+
+    # ── Body size ───────────────────────────────────────────────────────
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+
+    # ── Rate limiting ───────────────────────────────────────────────────
+    # 100 requests per minute per client IP for the API
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-whitelist: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16"
+
+    # ── AWS ALB annotations (alternative, uncomment to use) ─────────────
+    # alb.ingress.kubernetes.io/scheme: internet-facing
+    # alb.ingress.kubernetes.io/target-type: ip
+    # alb.ingress.kubernetes.io/healthcheck-path: /health
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:XXXXX:certificate/XXXXX
+    # alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=3600
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.toroloom.app
+        - ws.toroloom.app
+      secretName: toroloom-api-tls
+  rules:
+    - host: api.toroloom.app
+      http:
+        paths:
+          # ── REST API ──────────────────────────────────────────────
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: toroloom-api
+                port:
+                  number: 80
+          # ── Health check ──────────────────────────────────────────
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: toroloom-api
+                port:
+                  number: 80
+          # ── Metrics ───────────────────────────────────────────────
+          - path: /metrics
+            pathType: Exact
+            backend:
+              service:
+                name: toroloom-api
+                port:
+                  number: 80
+    - host: ws.toroloom.app
+      http:
+        paths:
+          # ── WebSocket ─────────────────────────────────────────────
+          # Long-lived connections routed to the same service
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: toroloom-api
+                port:
+                  number: 80

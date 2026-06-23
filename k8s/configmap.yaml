@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: toroloom-config
+  namespace: toroloom
+  labels:
+    app.kubernetes.io/name: toroloom
+    app.kubernetes.io/part-of: toroloom
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  CLUSTER_MODE: "1"
+  BROKER: "mock"
+  DATA_SOURCE: "mock"
+  STORAGE_BACKEND: "postgres"
+  JWT_EXPIRES_IN: "7d"
+  LOG_LEVEL: "info"

@@ -30,15 +30,29 @@ export const paymentsApi = {
   },
 
   /**
+   * Creates a Razorpay order for adding funds to the user's wallet.
+   */
+  createFundOrder: async (
+    amount: number,
+    currency: string = 'INR',
+  ): Promise<CreateOrderResponse> => {
+    return api.post<CreateOrderResponse>('/payments/create-fund-order', {
+      amount,
+      currency,
+    });
+  },
+
+  /**
    * Verifies a completed Razorpay payment on the backend.
    */
   verifyPayment: async (params: {
     razorpayPaymentId: string;
     razorpayOrderId: string;
     razorpaySignature: string;
-    planId: string;
+    planId?: string;
+    type?: 'subscription' | 'fund_add';
     tenantId?: string;
-  }): Promise<VerifyPaymentResponse> => {
-    return api.post<VerifyPaymentResponse>('/payments/verify', params);
+  }): Promise<VerifyPaymentResponse & { type?: string }> => {
+    return api.post<VerifyPaymentResponse & { type?: string }>('/payments/verify', params);
   },
 };

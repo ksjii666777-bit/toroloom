@@ -90,10 +90,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
-    boxShadow: `0px 4px 8px ${colors.shadow}40`,
+    boxShadow: '0px 1px 2px rgba(0,0,0,0.3)',
   },
   gradientContainer: {
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   header: {
     flexDirection: 'row',

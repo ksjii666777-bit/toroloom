@@ -1,0 +1,50 @@
+# ── Main service: load-balanced REST API + WebSocket ────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: toroloom-api
+  namespace: toroloom
+  labels:
+    app.kubernetes.io/name: toroloom
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: toroloom
+  annotations:
+    # Prometheus scrapes pods directly (not through the service)
+    prometheus.io/scrape: "false"
+    # For AWS NLB: preserve client IP for WebSocket stickiness
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: toroloom-api
+---
+# ── Headless service: direct pod DNS for WebSocket stateful awareness ───────
+# Use this when you need to target a specific pod (e.g. WebSocket reconnect
+# stickiness).  Pods are resolvable as <pod-name>.<service-name>.<namespace>
+#
+# Example:
+#   toroloom-api-0.toroloom-api-headless.toroloom.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: toroloom-api-headless
+  namespace: toroloom
+  labels:
+    app.kubernetes.io/name: toroloom
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: toroloom
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless — no load balancing, direct pod DNS
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: toroloom-api

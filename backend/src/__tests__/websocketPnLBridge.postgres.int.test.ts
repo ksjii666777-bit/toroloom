@@ -44,6 +44,7 @@ import { riskEngine, LockdownStatus, DEFAULT_RISK_LIMITS } from '../services/ris
 import { PostgreSQLStorage } from '../services/storage/postgres';
 import { generateToken } from '../middleware/auth';
 import { CONNECT_TIMEOUT, createBufferedClient } from './testUtils';
+import { TEST_DATABASE_URL } from './testConfig';
 
 // ──── Configuration ─────────────────────────────────────────────────────────
 
@@ -53,8 +54,7 @@ import { CONNECT_TIMEOUT, createBufferedClient } from './testUtils';
 // configureStorage() overwrites the previous one. Run files individually or
 // use vitest's --sequence.concurrent=false flag.
 
-const DATABASE_URL =
-  process.env.DATABASE_URL || 'postgresql://toroloom:toroloom_dev@localhost:5432/toroloom';
+const DATABASE_URL = TEST_DATABASE_URL;
 
 const TEST_USER = { userId: 'ws_pg_int_user', email: 'ws-pg-int@toroloom.dev' };
 const VALID_TOKEN = generateToken(TEST_USER);

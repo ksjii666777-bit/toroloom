@@ -1,22 +1,49 @@
 /**
- * Toroloom API Client
+ * ============================================================================
+ * Toroloom — API Client
+ * ============================================================================
  *
  * Lightweight fetch wrapper used by all stores to talk to the backend.
  * Attaches the auth token automatically and normalises error responses.
+ *
+ * ACQUISITION COMPLIANCE:
+ *   The base URL MUST be set via configureApi() before any API calls.
+ *   No hardcoded default — the acquiring organization must explicitly
+ *   configure the backend endpoint for their environment.
+ *
+ *   Configure during app initialization:
+ *     import { configureApi } from './services/api/client';
+ *     configureApi({
+ *       baseUrl: process.env.EXPO_PUBLIC_API_URL || 'https://api.toroloom.app/api',
+ *       getToken: () => authStore.getState().token,
+ *     });
+ *
+ * ============================================================================
  */
 
-// Dynamically resolve the base URL at call-time so stores don't need
-// a hard-coded constant. The host app can override this before any
-// API call if needed.
-let _baseUrl = 'http://localhost:3000/api';
+// Must be explicitly configured. No hardcoded fallback.
+let _baseUrl = '';
 let _getToken: () => string | null = () => null;
 
+/**
+ * Configure the API client with the backend base URL and token provider.
+ * Call this once during app initialization, before any API calls.
+ *
+ * @param config.baseUrl — The backend API root URL (e.g., 'https://api.toroloom.app/api')
+ * @param config.getToken — Function that returns the current auth token (or null)
+ */
 export function configureApi(config: { baseUrl?: string; getToken?: () => string | null }) {
   if (config.baseUrl !== undefined) _baseUrl = config.baseUrl;
   if (config.getToken !== undefined) _getToken = config.getToken;
 }
 
 export function getBaseUrl() {
+  if (!_baseUrl) {
+    console.warn(
+      '[API Client] Base URL not configured. Call configureApi() before making API calls.\n' +
+      '  Example: configureApi({ baseUrl: "https://api.toroloom.app/api" })',
+    );
+  }
   return _baseUrl;
 }
 
@@ -44,7 +71,12 @@ async function request<T>(
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token && !opts?.skipAuth) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${_baseUrl}${path}`, {
+  const baseUrl = getBaseUrl();
+  if (!baseUrl) {
+    throw new ApiError(0, { error: 'API base URL not configured. Call configureApi() first.' });
+  }
+
+  const res = await fetch(`${baseUrl}${path}`, {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,

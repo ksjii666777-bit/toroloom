@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: toroloom-api
+  namespace: toroloom
+  labels:
+    app.kubernetes.io/name: toroloom
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: toroloom
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: toroloom-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero-downtime: never drop below desired count
+  template:
+    metadata:
+      labels:
+        app: toroloom-api
+        app.kubernetes.io/name: toroloom
+        app.kubernetes.io/component: api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Spread pods across nodes and zones for high availability
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: toroloom-api
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: toroloom-api
+      # Prefer pods on different nodes from each other
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: toroloom-api
+                topologyKey: kubernetes.io/hostname
+      # Graceful shutdown: 30s for active WebSocket connections to drain
+      terminationGracePeriodSeconds: 30
+      # Use a service account if you need pod-level AWS IAM roles (IRSA)
+      # serviceAccountName: toroloom-api
+      containers:
+        - name: api
+          image: ghcr.io/ksjii666777-bit/toroloom:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: toroloom-config
+            - secretRef:
+                name: toroloom-secrets
+          # ── Resource limits ──────────────────────────────────────────
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1
+              memory: 512Mi
+          # ── Health checks ────────────────────────────────────────────
+          # Liveness: restart if /health doesn't respond (stuck process)
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Readiness: remove from service if /health fails (not ready)
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          # ── Startup probe: give the app more time for cold start ─────
+          # Useful when DB needs time to accept connections on fresh pod.
+          # Once this passes, liveness + readiness take over.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 12  # 5s * 12 = 60s max startup time
+          # ── Lifecycle hooks ──────────────────────────────────────────
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sleep
+                  - "10"  # Give the service controller time to remove this pod
+---
+# ── PodDisruptionBudget: ensure at least 1 pod is always available ──────────
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: toroloom-api-pdb
+  namespace: toroloom
+  labels:
+    app.kubernetes.io/name: toroloom
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: toroloom
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: toroloom-api

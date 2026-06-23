@@ -7,7 +7,7 @@ import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { setupChannels } from './src/services/notificationService';
 import { configureApi } from './src/services/api';
-import { useAuthStore, useRiskStore, useSubscriptionStore, useOnboardingStore } from './src/store';
+import { useAuthStore, useRiskStore, useSubscriptionStore, useOnboardingStore, usePortfolioStore, useWatchlistStore } from './src/store';
 import Sentry, { isSentryEnabled } from './src/services/sentry';
 import useLoadFonts from './src/hooks/useLoadFonts';
 
@@ -56,7 +56,17 @@ function AppContent() {
     loadSubscription();
     // Restore onboarding state from AsyncStorage
     loadOnboarding();
+
   }, []);
+
+  // Load cached portfolio & watchlist data once auth is restored
+  // (only meaningful for logged-in users — avoids wasting cache reads when logged out)
+  useEffect(() => {
+    if (isLoggedIn) {
+      usePortfolioStore.getState().loadCachedPortfolio();
+      useWatchlistStore.getState().loadCachedWatchlists();
+    }
+  }, [isLoggedIn]);
 
   // Wire up the risk store to the WebSocket risk bridge whenever
   // the user is authenticated.  This enables real-time lockdown

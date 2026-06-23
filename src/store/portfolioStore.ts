@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Stock, Holding, Trade, OpenOrder } from '../types';
 import { mockHoldings, mockTrades, mockOpenOrders } from '../constants/mockData';
 import { api, portfolioApi } from '../services/api';
+import { offlineCache } from '../services/offlineCache';
 import { useAuthStore } from './authStore';
 import { sendTradeConfirmation } from '../services/notificationService';
 import { log } from '../utils/logger';
@@ -13,12 +14,19 @@ interface PortfolioState {
   openOrders: OpenOrder[];
   ordersLoading: boolean;
   isLoading: boolean;
+  /** True when serving stale cached data because network is unavailable */
+  isOffline: boolean;
+
   buyStock: (stock: Stock, quantity: number, price: number) => Promise<void>;
   sellStock: (holdingId: string, quantity: number, price: number) => Promise<void>;
   refreshPortfolio: () => Promise<void>;
   fetchOpenOrders: () => Promise<void>;
   modifyOrder: (orderId: string, updates: Partial<OpenOrder>) => Promise<boolean>;
   cancelOrder: (orderId: string) => Promise<boolean>;
+  /** Load cached portfolio data at app startup for instant display */
+  loadCachedPortfolio: () => Promise<void>;
+  /** Clear offline cache */
+  clearCache: () => Promise<void>;
 }
 
 export const usePortfolioStore = create<PortfolioState>((set, get) => ({
@@ -27,18 +35,40 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   openOrders: mockOpenOrders as OpenOrder[],
   ordersLoading: false,
   isLoading: false,
+  isOffline: false,
+
+  /** Load cached portfolio data (used at app startup for instant display) */
+  loadCachedPortfolio: async () => {
+    const cached = await offlineCache.load<{ holdings: Holding[]; trades: Trade[] }>('portfolio');
+    if (cached) {
+      set({ holdings: cached.data.holdings, trades: cached.data.trades });
+    }
+  },
 
   refreshPortfolio: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, isOffline: false });
     try {
       const [holdings, trades] = await Promise.all([
         portfolioApi.getHoldings(),
         portfolioApi.getTrades(),
       ]);
-      set({ holdings, trades, isLoading: false });
+      // Cache on successful fetch
+      await offlineCache.save('portfolio', { holdings, trades });
+      set({ holdings, trades, isLoading: false, isOffline: false });
     } catch {
-      // Backend unavailable — keep existing mock data
-      set({ isLoading: false });
+      // Backend unavailable — try serving stale cache only if current holdings are empty
+      const current = get();
+      if (current.holdings.length === 0) {
+        const cached = await offlineCache.load<{ holdings: Holding[]; trades: Trade[] }>('portfolio');
+        if (cached) {
+          set({ holdings: cached.data.holdings, trades: cached.data.trades, isLoading: false, isOffline: true });
+          log.info('[Portfolio] Serving stale cached portfolio data');
+          return;
+        }
+      }
+      // Keep current in-memory data (mock, cached-from-startup, or user-modified)
+      log.info('[Portfolio] Backend unavailable — keeping existing data');
+      set({ isLoading: false, isOffline: true });
     }
   },
 
@@ -46,11 +76,23 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     set({ ordersLoading: true });
     try {
       const openOrders = await portfolioApi.getOpenOrders();
+      await offlineCache.save('openOrders', openOrders);
       set({ openOrders, ordersLoading: false });
     } catch {
-      // Backend unavailable — keep existing mock data
-      set({ ordersLoading: false });
+      // Backend unavailable — try stale cache
+      const cached = await offlineCache.load<OpenOrder[]>('openOrders');
+      if (cached) {
+        set({ openOrders: cached.data, ordersLoading: false });
+      } else {
+        set({ ordersLoading: false });
+      }
     }
+  },
+
+  /** Clear offline cache (e.g. on logout) */
+  clearCache: async () => {
+    await offlineCache.remove('portfolio');
+    await offlineCache.remove('openOrders');
   },
 
   modifyOrder: async (orderId, updates) => {
@@ -203,6 +245,9 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       });
     }
 
+    // Update cache after local mutation
+    offlineCache.save('portfolio', { holdings: get().holdings, trades: get().trades });
+
     analytics.logEvent('order_placed', {
       symbol: stock.symbol,
       type: 'buy',
@@ -294,6 +339,9 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
         }, ...state.trades],
       });
     }
+
+    // Update cache after local mutation
+    offlineCache.save('portfolio', { holdings: get().holdings, trades: get().trades });
 
     analytics.logEvent('order_placed', {
       symbol: holding.symbol,

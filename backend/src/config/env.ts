@@ -1,90 +1,105 @@
+/**
+ * ============================================================================
+ * Toroloom — Enterprise Environment Configuration
+ * ============================================================================
+ *
+ * ACQUISITION COMPLIANCE MANDATE:
+ *   Zero hardcoded credentials, endpoints, or secrets.
+ *   Every cloud resource, database, broker API, and service account must be
+ *   configured exclusively via runtime environment variables.
+ *
+ *   The acquiring organization can switch providers (AWS RDS → on-premise
+ *   PostgreSQL, Railway → GCP, etc.) by changing DATABASE_URL and related
+ *   variables — no code changes required.
+ *
+ * SAFE DEFAULTS (non-sensitive, infra-agnostic):
+ *   PORT, NODE_ENV, JWT_EXPIRES_IN, STORAGE_BACKEND, DATA_SOURCE, BROKER
+ *   These are operational defaults, not credentials.
+ *
+ * EMPTY-STRING DEFAULTS (secrets / endpoints — must be set by operator):
+ *   JWT_SECRET, DATABASE_URL, MONGODB_URI, REDIS_URL, all API keys
+ *   The application degrades gracefully or refuses to start with a clear
+ *   diagnostic message when these are missing.
+ *
+ * USAGE:
+ *   import { env } from '../config/env';
+ *   if (!env.jwtSecret) { throw new Error('JWT_SECRET is required'); }
+ *
+ * ============================================================================
+ */
+
 import dotenv from 'dotenv';
 import path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export const env = {
+  // ──── Safe operational defaults (not credentials) ────────────────────────
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
-  jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+
   dataSource: (process.env.DATA_SOURCE || 'mock') as 'mock' | 'live',
   broker: (process.env.BROKER || 'mock') as 'mock' | 'zerodha' | 'angel' | 'groww',
 
-  // ──── Storage Backend ────
+  // ──── Storage Backend ────────────────────────────────────────────────
   // 'memory'   → InMemoryStorage (default, no deps)
   // 'postgres' → PostgreSQLStorage (requires DATABASE_URL)
   // 'mongodb'  → MongoDBStorage (requires MONGODB_URI + MONGODB_DB_NAME)
   storageBackend: (process.env.STORAGE_BACKEND || 'memory') as 'memory' | 'postgres' | 'mongodb',
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://localhost:5432/toroloom',
-  mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017',
-  mongodbDbName: process.env.MONGODB_DB_NAME || 'toroloom',
 
-  // ──── Zerodha Kite Connect ────
-  // To get credentials: https://kite.trade/connect/login
+  // ──── ZERO-HARDCODING ZONE — all blank below ─────────────────────────
+  // Each must be set via the execution environment. No fallback values
+  // that leak infrastructure identity.
+
+  /** REQUIRED for auth. App startup MUST fail if this is empty in production. */
+  jwtSecret: process.env.JWT_SECRET || '',
+
+  /** Connection string for the primary database. Provider-agnostic. */
+  databaseUrl: process.env.DATABASE_URL || '',
+
+  /** MongoDB URI (alternative storage backend). */
+  mongodbUri: process.env.MONGODB_URI || '',
+
+  /** MongoDB database name. */
+  mongodbDbName: process.env.MONGODB_DB_NAME || '',
+
+  // ──── Broker Credentials ─────────────────────────────────────────────
   zerodha: {
     apiKey: process.env.ZERODHA_API_KEY || '',
     apiSecret: process.env.ZERODHA_API_SECRET || '',
     accessToken: process.env.ZERODHA_ACCESS_TOKEN || '',
-    // If you don't have an access_token, provide the request_token
-    // from the redirect URL after Kite login:
     requestToken: process.env.ZERODHA_REQUEST_TOKEN || '',
   },
 
-  // ──── Angel One SmartAPI ────
-  // To get credentials: https://smartapi.angelbroking.com/
   angel: {
     clientId: process.env.ANGEL_CLIENT_ID || '',
     apiKey: process.env.ANGEL_API_KEY || '',
     accessToken: process.env.ANGEL_ACCESS_TOKEN || '',
-    // Required for generateSession (if accessToken not provided):
     password: process.env.ANGEL_PASSWORD || '',
     totp: process.env.ANGEL_TOTP || '',
   },
 
-  // ──── Groww Trade API ────
-  // To get credentials: visit https://groww.in/trade-api
-  // Required: GROWW_API_KEY and GROWW_ACCESS_TOKEN
   groww: {
     apiKey: process.env.GROWW_API_KEY || '',
     accessToken: process.env.GROWW_ACCESS_TOKEN || '',
   },
 
-  // ──── AI Configuration ────────────────────────────────────────
-  // Two providers supported:
-  //   1. OpenRouter (https://openrouter.ai/keys) — unified API for many models
-  //   2. Google Gemini (https://aistudio.google.com/apikey) — direct Gemini API
-  //
-  // AI_PROVIDER controls which one is used:
-  //   'openrouter' → uses OPENROUTER_API_KEY (default)
-  //   'google'     → uses GOOGLE_GEMINI_API_KEY
-  //
-  // If the primary provider's key is missing, falls back to the other.
-  // If neither key is set, isAIConfigured() returns false (mock data).
+  // ──── AI Configuration ──────────────────────────────────────────────
   aiProvider: (process.env.AI_PROVIDER || 'openrouter') as 'openrouter' | 'google',
-
-  // OpenRouter config
   openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
-  openRouterModel: process.env.OPENROUTER_MODEL || 'google/gemini-3.5-flash',
-
-  // Google Gemini config (direct API, no OpenRouter needed)
+  openRouterModel: process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-lite-001',
   googleGeminiApiKey: process.env.GOOGLE_GEMINI_API_KEY || '',
-  googleGeminiModel: process.env.GOOGLE_GEMINI_MODEL || 'gemini-3.5-flash',
+  googleGeminiModel: process.env.GOOGLE_GEMINI_MODEL || 'gemini-2.0-flash-lite-001',
 
-  // ──── Razorpay (payment gateway) ───────────────────────────
-  // Get keys from https://dashboard.razorpay.com/app/keys
+  // ──── Payments ───────────────────────────────────────────────────────
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
 
-  // ──── Sentry (error tracking) ──────────────────────────────
-  // DSN for Sentry crash/error reporting.
-  // If not set, Sentry is disabled (no events sent).
+  // ──── Error Tracking ─────────────────────────────────────────────────
   sentryDsn: process.env.SENTRY_DSN || '',
 
-  // ──── Redis (pub/sub for cross-worker sync) ────────────────
-  // If not provided, falls back to Node.js cluster IPC (single-machine)
-  // or local-only mode (single process).
-  // Format: redis://[:password@]host[:port][/db]
+  // ──── Redis ──────────────────────────────────────────────────────────
   redisUrl: process.env.REDIS_URL || '',
 
   get isDev() {
@@ -93,4 +108,36 @@ export const env = {
   get isMock() {
     return this.dataSource === 'mock';
   },
-};
+} as const;
+
+/**
+ * Validate that REQUIRED secrets are set.
+ * Call this at app startup before serving traffic.
+ * Returns a list of missing variables; empty array = all good.
+ */
+export function validateRequiredEnv(): string[] {
+  const missing: string[] = [];
+  const isProduction = env.nodeEnv === 'production' || !env.isMock;
+
+  if (!env.jwtSecret) {
+    missing.push('JWT_SECRET');
+  }
+
+  if (env.storageBackend === 'postgres' && !env.databaseUrl) {
+    missing.push('DATABASE_URL');
+  }
+
+  if (env.storageBackend === 'mongodb' && !env.mongodbUri) {
+    missing.push('MONGODB_URI');
+  }
+
+  // In production, warn if no AI keys are configured (the app will return mock data)
+  if (isProduction && !env.openRouterApiKey && !env.googleGeminiApiKey) {
+    console.warn(
+      '[env] WARNING: No AI provider configured (OPENROUTER_API_KEY / GOOGLE_GEMINI_API_KEY).\n' +
+      '      AI analysis endpoints will return mock/fallback data.',
+    );
+  }
+
+  return missing;
+}

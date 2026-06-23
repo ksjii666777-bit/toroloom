@@ -46,6 +46,7 @@ import { riskEngine, LockdownStatus, DEFAULT_RISK_LIMITS } from '../services/ris
 import { MongoDBStorage } from '../services/storage/mongodb';
 import { generateToken } from '../middleware/auth';
 import { CONNECT_TIMEOUT, createBufferedClient } from './testUtils';
+import { TEST_MONGODB_URI, TEST_MONGODB_DB } from './testConfig';
 
 // ──── Configuration ─────────────────────────────────────────────────────────
 
@@ -55,9 +56,8 @@ import { CONNECT_TIMEOUT, createBufferedClient } from './testUtils';
 // configureStorage() overwrites the previous one. Run files individually or
 // use vitest's --sequence.concurrent=false flag.
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://toroloom:toroloom_dev@localhost:27017/toroloom?authSource=admin';
-const MONGODB_DB = process.env.MONGODB_DB_NAME || 'toroloom_test';
+const MONGODB_URI = TEST_MONGODB_URI;
+const MONGODB_DB = TEST_MONGODB_DB;
 
 const TEST_USER = { userId: 'ws_mongo_int_user', email: 'ws-mongo-int@toroloom.dev' };
 const VALID_TOKEN = generateToken(TEST_USER);

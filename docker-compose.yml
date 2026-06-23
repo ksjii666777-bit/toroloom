@@ -1,16 +1,57 @@
 # ============================================================================
-# Toroloom — Development Database Services
+# Toroloom — Development Database & Cache Services
 # ============================================================================
 # Start:   docker compose up -d
 # Stop:    docker compose down
 # Reset:   docker compose down -v
 #
 # Services:
-#   postgres  — Primary relational store (port 5432)
-#   mongodb   — Document store for flexible schemas (port 27017)
+#   postgres   — Primary relational store (port 5432)
+#   mongodb    — Document store for flexible schemas (port 27017)
+#   pgbouncer  — Connection pooler for PostgreSQL (port 6432)
+#   redis      — Cache + pub/sub for cross-worker sync (port 6379)
 # ============================================================================
 
 services:
+  # ──── PgBouncer Connection Pooler ──────────────────────────────────────
+  # Sits between the app and PostgreSQL.  The app connects to :6432,
+  # PgBouncer multiplexes to :5432.  This keeps DB connections low even
+  # under high app concurrency.
+  #
+  # Pool mode: transaction — safe for REST + WebSocket workloads.
+  # Config: backend/pgbouncer/pgbouncer.ini
+  #
+  pgbouncer:
+    image: bitnami/pgbouncer:1.23
+    container_name: toroloom-pgbouncer
+    restart: unless-stopped
+    ports:
+      - '6432:6432'
+    environment:
+      # Bitnami image uses these env vars to auto-generate pgbouncer.ini
+      PGBOUNCER_PORT: '6432'
+      PGBOUNCER_DATABASE: '*'                        # Accept all DB names
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: '5432'
+      POSTGRESQL_USERNAME: toroloom
+      POSTGRESQL_PASSWORD: toroloom_dev
+      POSTGRESQL_DATABASE: toroloom
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_DEFAULT_POOL_SIZE: '20'
+      PGBOUNCER_MAX_CLIENT_CONN: '200'
+      PGBOUNCER_CLIENT_IDLE_TIMEOUT: '120'
+      PGBOUNCER_QUERY_TIMEOUT: '30'
+      PGBOUNCER_AUTH_TYPE: trust
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', '/opt/bitnami/scripts/pgbouncer/healthcheck.sh']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
   postgres:
     image: postgres:16-alpine
     container_name: toroloom-postgres
@@ -45,6 +86,22 @@ services:
       - mongodata:/data/db
     healthcheck:
       test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ──── Redis (cache + pub/sub for cross-worker sync) ──────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: toroloom-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    # No password in dev — only accessible on localhost
+    command: ['redis-server', '--appendonly', 'no']
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       interval: 5s
       timeout: 5s
       retries: 10

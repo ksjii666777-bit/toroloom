@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: toroloom
+  labels:
+    name: toroloom
+    environment: production
+    app.kubernetes.io/part-of: toroloom

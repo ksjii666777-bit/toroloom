@@ -176,8 +176,8 @@ export default function HomeScreen({ navigation }: any) {
           />
         }
       >
-        {/* Header */}
-        <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
+        {/* Header — Glassmorphic */}
+        <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
               <Text style={styles.greeting}>{greeting},</Text>
@@ -213,13 +213,13 @@ export default function HomeScreen({ navigation }: any) {
           {/* Glow effect behind portfolio card */}
           <ReanimatedAnimated.View style={[styles.portfolioGlow, glowStyle]} />
 
-          {/* Portfolio Summary Card */}
+          {/* Portfolio Summary Card — Glassmorphic */}
           <View style={styles.portfolioCardWrapper}>
-            <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.portfolioCard}>
+            <View style={[styles.portfolioCard, { backgroundColor: 'rgba(0,230,118,0.04)', borderWidth: 1, borderColor: 'rgba(0,230,118,0.12)' }]}>
               <Text style={styles.portfolioLabel}>Portfolio Value</Text>
               <Text style={styles.portfolioValue}>{formatLargeCurrency(displayInvested || 1250000)}</Text>
               <View style={styles.portfolioChange}>
-                <View style={[styles.changeChip, { backgroundColor: displayPnl >= 0 ? '#00C85330' : '#FF174430' }]}>
+                <View style={[styles.changeChip, { backgroundColor: displayPnl >= 0 ? 'rgba(0,230,118,0.15)' : 'rgba(255,82,82,0.15)' }]}>
                   <Ionicons name={displayPnl >= 0 ? 'caret-up' : 'caret-down'} size={16} color={displayPnl >= 0 ? colors.marketUp : colors.marketDown} />
                   <Text style={[styles.changeText, { color: displayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
                     {formatPercent(displayPnlPercent || 12.5)}
@@ -229,46 +229,46 @@ export default function HomeScreen({ navigation }: any) {
               </View>
               <View style={styles.portfolioActions}>
                 <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>
-                  <View style={styles.actionBtn}>
-                    <Ionicons name="add-circle" size={20} color={colors.white} />
+                  <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
+                    <Ionicons name="add-circle" size={20} color={colors.marketUp} />
                     <Text style={styles.actionText}>Add Funds</Text>
                   </View>
                 </AnimatedPressable>
                 <AnimatedPressable onPress={() => navigation.navigate('Transfer')} haptic="light" scaleTo={0.95}>
-                  <View style={styles.actionBtn}>
-                    <Ionicons name="swap-horizontal" size={20} color={colors.white} />
+                  <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
+                    <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
                     <Text style={styles.actionText}>Transfer</Text>
                   </View>
                 </AnimatedPressable>
                 <AnimatedPressable onPress={() => navigation.navigate('FundsDashboard')} haptic="light" scaleTo={0.95}>
-                  <View style={styles.actionBtn}>
-                    <Ionicons name="wallet" size={20} color={colors.white} />
+                  <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
+                    <Ionicons name="wallet" size={20} color={colors.accent} />
                     <Text style={styles.actionText}>Balance</Text>
                   </View>
                 </AnimatedPressable>
               </View>
-            </LinearGradient>
+            </View>
           </View>
 
-          {/* Quick Actions */}
+          {/* Quick Actions — Glassmorphic */}
           <View style={styles.quickActions}>
             {[
-              { icon: 'trending-up', label: 'Buy', screen: 'Markets', gradient: GRADIENTS.success },
-              { icon: 'trending-down', label: 'Sell', screen: 'Portfolio', gradient: GRADIENTS.danger },
-              { icon: 'pie-chart', label: 'SIP', screen: 'MutualFunds', gradient: GRADIENTS.primary },
-              { icon: 'school', label: 'Learn', screen: 'Learn', gradient: GRADIENTS.warning },
+              { icon: 'trending-up', label: 'Buy', screen: 'Markets', color: colors.marketUp },
+              { icon: 'trending-down', label: 'Sell', screen: 'Portfolio', color: colors.marketDown },
+              { icon: 'pie-chart', label: 'SIP', screen: 'MutualFunds', color: colors.primary },
+              { icon: 'school', label: 'Learn', screen: 'Learn', color: colors.warning },
             ].map((item, i) => (
               <AnimatedPressable key={i} onPress={() => navigation.navigate(item.screen)} haptic="light" scaleTo={0.92}>
                 <View style={styles.quickAction}>
-                  <LinearGradient colors={item.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.quickActionIcon}>
-                    <Ionicons name={item.icon as any} size={22} color={colors.white} />
-                  </LinearGradient>
+                  <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }]}>
+                    <Ionicons name={item.icon as any} size={22} color={item.color} />
+                  </View>
                   <Text style={styles.quickActionLabel}>{item.label}</Text>
                 </View>
               </AnimatedPressable>
             ))}
           </View>
-        </LinearGradient>
+        </View>
 
         {/* Market Breadth */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[0]]}>

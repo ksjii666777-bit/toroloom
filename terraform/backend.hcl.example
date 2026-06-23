@@ -1,0 +1,20 @@
+# ==============================================================================
+# Toroloom — Terraform Remote State Backend Config
+# ==============================================================================
+#
+# Usage:
+#   1. Copy this file to backend.hcl (it is .gitignored)
+#   2. Edit the values to match your environment
+#   3. Run: terraform init -backend-config=backend.hcl
+#
+# First-time setup:
+#   cd terraform/bootstrap
+#   terraform init && terraform apply
+#   # This creates the S3 bucket and DynamoDB table referenced below.
+# ==============================================================================
+
+bucket         = "toroloom-terraform-state-production"
+key            = "rds/terraform.tfstate"
+region         = "ap-south-1"
+dynamodb_table = "toroloom-terraform-locks"
+encrypt        = true

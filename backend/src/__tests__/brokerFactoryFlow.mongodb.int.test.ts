@@ -44,6 +44,7 @@ vi.mock('../config/env', () => ({
 
 import { MongoDBStorage } from '../services/storage/mongodb';
 import { CONNECT_TIMEOUT } from './testUtils';
+import { TEST_MONGODB_URI, TEST_MONGODB_DB } from './testConfig';
 import {
   configureBrokerPersistence,
   loadBrokerStateFromStorage,
@@ -55,9 +56,8 @@ import {
 import { getCircuitBreaker, circuitRegistry, CircuitState } from '../services/circuitBreaker';
 import { auditTrail } from '../services/auditTrail';
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://toroloom:toroloom_dev@localhost:27017';
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'toroloom_test';
+const MONGODB_URI = TEST_MONGODB_URI;
+const MONGODB_DB_NAME = TEST_MONGODB_DB;
 
 describe('Broker Factory Flow — MongoDB', () => {
   let storage: MongoDBStorage;

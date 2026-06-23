@@ -1,13 +1,12 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl } from 'react-native';
 import ReanimatedAnimated, { useSharedValue, withTiming, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import PortfolioHolding from '../../components/PortfolioHolding';
 import PnLChart from '../../components/PnLChart';
@@ -122,9 +121,9 @@ export default function PortfolioScreen({ navigation }: any) {
           <Text style={styles.subtitle}>Track your investments</Text>
         </View>
 
-        {/* Portfolio Summary */}
+        {/* Portfolio Summary — Glassmorphic */}
         <View style={styles.paddingHorizontal}>
-          <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summaryCard}>
+          <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Invested</Text>
@@ -183,7 +182,7 @@ export default function PortfolioScreen({ navigation }: any) {
                 </View>
               )}
             </View>
-          </LinearGradient>
+          </View>
         </View>
 
         {/* View Toggle */}
@@ -350,23 +349,22 @@ export default function PortfolioScreen({ navigation }: any) {
           );
         })()}
 
-        {/* Analytics CTA */}
+        {/* Analytics CTA — Glassmorphic */}
         <AnimatedPressable onPress={() => navigation.navigate('Reports')} scaleTo={0.97}>
-          <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-            style={styles.analyticsCta}>
+          <View style={[styles.analyticsCta, { backgroundColor: 'rgba(59,130,246,0.06)', borderWidth: 1, borderColor: 'rgba(59,130,246,0.12)' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.md }}>
-              <View style={styles.analyticsCtaIcon}>
-                <Ionicons name="stats-chart" size={24} color={colors.white} />
+              <View style={[styles.analyticsCtaIcon, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
+                <Ionicons name="stats-chart" size={24} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.analyticsCtaTitle}>Advanced Analytics</Text>
-                <Text style={styles.analyticsCtaSub}>
+                <Text style={[styles.analyticsCtaTitle, { color: colors.text }]}>Advanced Analytics</Text>
+                <Text style={[styles.analyticsCtaSub, { color: colors.textSecondary }]}>
                   P&L charts · Sharpe: {a.sharpeRatio.toFixed(1)} · Win rate: {a.winRate.toFixed(0)}% · Tax reports
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
-          </LinearGradient>
+          </View>
         </AnimatedPressable>
 
         <View style={{ height: 100 }} />

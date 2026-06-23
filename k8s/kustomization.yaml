@@ -1,0 +1,94 @@
+# ==============================================================================
+# Toroloom — Kustomize Configuration
+# ==============================================================================
+#
+# Apply the entire manifest set to the cluster:
+#
+#   kubectl apply -k k8s/
+#
+# Or with a specific overlay (e.g. staging vs production):
+#
+#   kubectl apply -k k8s/overlays/production
+#
+# Generate a final YAML for review:
+#
+#   kubectl kustomize k8s/
+#
+# ==============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ── Resource metadata ────────────────────────────────────────────────────────
+# Applied to ALL resources in this kustomization
+commonLabels:
+  app.kubernetes.io/name: toroloom
+  app.kubernetes.io/part-of: toroloom
+  app.kubernetes.io/managed-by: kustomize
+
+# ── Resources ────────────────────────────────────────────────────────────────
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - hpa.yaml
+  - ingress.yaml
+  # secrets.yaml intentionally NOT included in resources — it's a template.
+  # Create secrets manually before applying:
+  #   kubectl create secret generic toroloom-secrets \
+  #     --namespace toroloom \
+  #     --from-literal=JWT_SECRET='$(openssl rand -hex 32)' \
+  #     --from-literal=DATABASE_URL='postgresql://...' \
+  #     --from-literal=REDIS_URL='redis://...'
+  # Or uncomment the secretGenerator below to read from .env.secret.
+
+# ── ConfigMap Generator ──────────────────────────────────────────────────────
+# Generates ConfigMaps from literal key-value pairs (or files).
+# When values change, Kustomize renames the ConfigMap (name hash suffix),
+# which triggers a rolling update of the Deployment.
+#
+# IMPORTANT: Edit config values HERE and re-run `kubectl apply -k k8s/`
+# instead of editing configmap.yaml directly.
+configMapGenerator:
+  - name: toroloom-config
+    literals:
+      - NODE_ENV=production
+      - PORT=3000
+      - CLUSTER_MODE=1
+      - BROKER=mock
+      - DATA_SOURCE=mock
+      - STORAGE_BACKEND=postgres
+      - JWT_EXPIRES_IN=7d
+      - LOG_LEVEL=info
+    options:
+      disableNameSuffixHash: false  # True → pods restart on config change
+      labels:
+        app.kubernetes.io/component: api
+
+# ── Secret Generator (optional) ──────────────────────────────────────────────
+# Secrets are generated from environment files (.env) or literal values.
+# DO NOT commit the actual .env.secret file — add it to .gitignore.
+#
+# Usage:
+#   1. Create k8s/.env.secret (gitignored)
+#   2. Uncomment the secretGenerator block below
+#   3. Run: kubectl apply -k k8s/
+#
+# For production, use External Secrets Operator instead:
+#   https://external-secrets.io
+#
+# secretGenerator:
+#   - name: toroloom-secrets
+#     envs:
+#       - .env.secret
+#     options:
+#       disableNameSuffixHash: false
+
+# ── Namespace ────────────────────────────────────────────────────────────────
+# Set the default namespace for all resources
+namespace: toroloom
+
+# ── Images ───────────────────────────────────────────────────────────────────
+# Override the image tag across all resources (e.g. for staging vs prod)
+images:
+  - name: ghcr.io/ksjii666777-bit/toroloom
+    newTag: latest  # Change to a specific tag for reproducible deploys

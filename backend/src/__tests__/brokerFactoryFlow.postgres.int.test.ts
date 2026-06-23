@@ -43,6 +43,7 @@ vi.mock('../config/env', () => ({
 
 import { PostgreSQLStorage } from '../services/storage/postgres';
 import { CONNECT_TIMEOUT } from './testUtils';
+import { TEST_DATABASE_URL } from './testConfig';
 import {
   configureBrokerPersistence,
   loadBrokerStateFromStorage,
@@ -54,8 +55,7 @@ import {
 import { getCircuitBreaker, circuitRegistry, CircuitState } from '../services/circuitBreaker';
 import { auditTrail } from '../services/auditTrail';
 
-const DATABASE_URL =
-  process.env.DATABASE_URL || 'postgresql://toroloom:toroloom_dev@localhost:5432/toroloom';
+const DATABASE_URL = TEST_DATABASE_URL;
 
 describe('Broker Factory Flow — PostgreSQL', () => {
   let storage: PostgreSQLStorage;

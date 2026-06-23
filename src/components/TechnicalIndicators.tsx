@@ -1,9 +1,10 @@
-import React, { useMemo, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder } from 'react-native';
 import Svg, { Path, Line, Rect, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { formatCurrency } from '../utils/formatters';
+import { useChartCrosshair } from './ChartCrosshairContext';
 import type { StockHistoryPoint } from '../types';
 
 // ============================================================================
@@ -82,11 +83,9 @@ function computeMACD(closes: number[]): {
     }
   }
 
-  // Signal line = 9-period EMA of MACD line
   const validMACD = macdLine.filter((v): v is number => v !== null);
   const signalLine = ema(validMACD, signalPeriod);
 
-  // Pad signal with nulls to align with macdLine
   const paddedSignal: (number | null)[] = [];
   let signalIdx = 0;
   for (let i = 0; i < macdLine.length; i++) {
@@ -98,7 +97,6 @@ function computeMACD(closes: number[]): {
     }
   }
 
-  // Histogram = MACD - Signal
   const histogram: (number | null)[] = [];
   for (let i = 0; i < macdLine.length; i++) {
     if (macdLine[i] !== null && paddedSignal[i] !== null) {
@@ -108,7 +106,6 @@ function computeMACD(closes: number[]): {
     }
   }
 
-  // First valid MACD value starts at index slow-1 (after both EMAs are defined)
   return { macd: macdLine, signal: paddedSignal, histogram };
 }
 
@@ -160,6 +157,76 @@ const CHART_PADDING = { top: 16, right: 12, bottom: 20, left: 52 };
 export type IndicatorType = 'rsi' | 'macd' | 'bollinger';
 
 // ============================================================================
+// Crosshair vertical line overlay — shared by all panels
+// ============================================================================
+
+function CrosshairLine({
+  index,
+  dataLength,
+  width,
+  colors,
+  chartH,
+}: {
+  index: number | null;
+  dataLength: number;
+  width: number;
+  colors: any;
+  chartH: number;
+}) {
+  if (index === null || dataLength < 2) return null;
+  const pad = CHART_PADDING;
+  const chartW = width - pad.left - pad.right;
+  const x = pad.left + (index / (dataLength - 1)) * chartW;
+  return (
+    <>
+      <Line
+        x1={x} y1={pad.top}
+        x2={x} y2={pad.top + chartH}
+        stroke={colors.textSecondary}
+        strokeWidth={1}
+        strokeDasharray="4,4"
+        opacity={0.7}
+      />
+      <Line
+        x1={x} y1={pad.top}
+        x2={x} y2={pad.top + chartH}
+        stroke={colors.textSecondary}
+        strokeWidth={0.5}
+        opacity={0.3}
+      />
+    </>
+  );
+}
+
+// ============================================================================
+// Touch overlay for updating crosshair
+// ============================================================================
+
+function useCrosshairTouch(dataLength: number, width: number, onIndexChange: (index: number | null) => void) {
+  const pad = CHART_PADDING;
+  const chartW = width - pad.left - pad.right;
+
+  const panResponder = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: (e) => {
+      const x = e.nativeEvent.locationX;
+      const relativeX = x - pad.left;
+      const index = Math.round((relativeX / chartW) * (dataLength - 1));
+      onIndexChange(Math.max(0, Math.min(dataLength - 1, index)));
+    },
+    onPanResponderMove: (e) => {
+      const x = e.nativeEvent.locationX;
+      const relativeX = x - pad.left;
+      const index = Math.round((relativeX / chartW) * (dataLength - 1));
+      onIndexChange(Math.max(0, Math.min(dataLength - 1, index)));
+    },
+  }), [dataLength, width, onIndexChange, pad.left, chartW]);
+
+  return panResponder;
+}
+
+// ============================================================================
 // RSI Panel
 // ============================================================================
 
@@ -173,6 +240,7 @@ const RSIPanel = React.memo(({
   width: number;
 }) => {
   const { rsi } = data;
+  const { focusedIndex, setFocusedIndex } = useChartCrosshair();
   const panelHeight = PANEL_HEIGHT;
   const pad = CHART_PADDING;
   const chartW = width - pad.left - pad.right;
@@ -181,8 +249,8 @@ const RSIPanel = React.memo(({
   const validPoints = rsi.filter((v): v is number => v !== null);
   if (validPoints.length < 2) {
     return (
-      <View style={[indicatorStyles.panel, { height: panelHeight, width }]}>
-        <Text style={indicatorStyles.emptyText}>Not enough data</Text>
+      <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
+        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>Not enough data</Text>
       </View>
     );
   }
@@ -199,40 +267,64 @@ const RSIPanel = React.memo(({
     rsiPath += rsiPath ? ` L ${x} ${y}` : `M ${x} ${y}`;
   }
 
-  // Current RSI value
   const lastRSI = validPoints[validPoints.length - 1];
   const isOverbought = lastRSI > 70;
   const isOversold = lastRSI < 30;
 
+  // Crosshair value
+  const crosshairRSI = focusedIndex !== null && rsi[focusedIndex] !== null
+    ? rsi[focusedIndex] : null;
+
+  const touchPan = useCrosshairTouch(rsi.length, width, setFocusedIndex);
+
   return (
-    <View style={[indicatorStyles.panel, { height: panelHeight, width }]}>
+    <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
       <View style={indicatorStyles.panelHeader}>
-        <Text style={indicatorStyles.panelTitle}>RSI (14)</Text>
+        <Text style={[indicatorStyles.panelTitle, { color: colors.textMuted }]}>RSI (14)</Text>
         <Text style={[indicatorStyles.panelValue, {
-          color: isOverbought ? colors.marketDown : isOversold ? colors.marketUp : colors.text,
+          color: crosshairRSI !== null
+            ? (crosshairRSI > 70 ? colors.marketDown : crosshairRSI < 30 ? colors.marketUp : colors.text)
+            : (isOverbought ? colors.marketDown : isOversold ? colors.marketUp : colors.text),
         }]}>
-          {lastRSI.toFixed(1)}
+          {crosshairRSI !== null ? crosshairRSI.toFixed(1) : lastRSI.toFixed(1)}
         </Text>
-        <Text style={indicatorStyles.panelStatus}>
-          {isOverbought ? 'Overbought' : isOversold ? 'Oversold' : 'Neutral'}
+        <Text style={[indicatorStyles.panelStatus, { color: colors.textMuted }]}>
+          {crosshairRSI !== null
+            ? (crosshairRSI > 70 ? 'Overbought' : crosshairRSI < 30 ? 'Oversold' : 'Neutral')
+            : (isOverbought ? 'Overbought' : isOversold ? 'Oversold' : 'Neutral')}
         </Text>
       </View>
-      <Svg width={width} height={panelHeight}>
-        {/* Overbought line */}
-        <Line x1={pad.left} y1={getY(70)} x2={width - pad.right} y2={getY(70)}
-          stroke={colors.marketDown} strokeWidth={0.5} strokeDasharray="3,3" opacity={0.5} />
-        {/* Oversold line */}
-        <Line x1={pad.left} y1={getY(30)} x2={width - pad.right} y2={getY(30)}
-          stroke={colors.marketUp} strokeWidth={0.5} strokeDasharray="3,3" opacity={0.5} />
-        {/* Mid line */}
-        <Line x1={pad.left} y1={getY(50)} x2={width - pad.right} y2={getY(50)}
-          stroke={colors.borderLight} strokeWidth={0.5} opacity={0.3} />
-        {/* RSI Line */}
-        <Path d={rsiPath} stroke={colors.accent} strokeWidth={1.5} fill="none" />
-        {/* End dot */}
-        <Circle cx={getX(rsi.length - 1)} cy={getY(lastRSI)} r={3}
-          fill={isOverbought ? colors.marketDown : isOversold ? colors.marketUp : colors.accent} />
-      </Svg>
+      <View {...touchPan.panHandlers} style={{ flex: 1 }}>
+        <Svg width={width} height={panelHeight}>
+          {/* Overbought line */}
+          <Line x1={pad.left} y1={getY(70)} x2={width - pad.right} y2={getY(70)}
+            stroke={colors.marketDown} strokeWidth={0.5} strokeDasharray="3,3" opacity={0.5} />
+          {/* Oversold line */}
+          <Line x1={pad.left} y1={getY(30)} x2={width - pad.right} y2={getY(30)}
+            stroke={colors.marketUp} strokeWidth={0.5} strokeDasharray="3,3" opacity={0.5} />
+          {/* Mid line */}
+          <Line x1={pad.left} y1={getY(50)} x2={width - pad.right} y2={getY(50)}
+            stroke={colors.borderLight} strokeWidth={0.5} opacity={0.3} />
+          {/* RSI Line */}
+          <Path d={rsiPath} stroke={colors.accent} strokeWidth={1.5} fill="none" />
+          {/* End dot */}
+          <Circle cx={getX(rsi.length - 1)} cy={getY(lastRSI)} r={3}
+            fill={isOverbought ? colors.marketDown : isOversold ? colors.marketUp : colors.accent} />
+          {/* Crosshair line */}
+          <CrosshairLine index={focusedIndex} dataLength={rsi.length} width={width} colors={colors} chartH={chartH} />
+          {/* Crosshair value dot */}
+          {crosshairRSI !== null && (
+            <Circle
+              cx={getX(focusedIndex!)}
+              cy={getY(crosshairRSI)}
+              r={4}
+              fill={colors.accent}
+              stroke={colors.bg}
+              strokeWidth={1.5}
+            />
+          )}
+        </Svg>
+      </View>
     </View>
   );
 });
@@ -251,6 +343,7 @@ const MACDPanel = React.memo(({
   width: number;
 }) => {
   const { macd, signal, histogram } = data;
+  const { focusedIndex, setFocusedIndex } = useChartCrosshair();
   const panelHeight = PANEL_HEIGHT;
   const pad = CHART_PADDING;
   const chartW = width - pad.left - pad.right;
@@ -263,8 +356,8 @@ const MACDPanel = React.memo(({
   ];
   if (allValues.length < 2) {
     return (
-      <View style={[indicatorStyles.panel, { height: panelHeight, width }]}>
-        <Text style={indicatorStyles.emptyText}>Not enough data</Text>
+      <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
+        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>Not enough data</Text>
       </View>
     );
   }
@@ -291,54 +384,76 @@ const MACDPanel = React.memo(({
     signalPath += signalPath ? ` L ${x} ${y}` : `M ${x} ${y}`;
   }
 
-  // Get last values
   const lastMACD = macd.filter((v): v is number => v !== null).pop() || 0;
   const lastSignal = signal.filter((v): v is number => v !== null).pop() || 0;
-  const _lastHistogram = histogram.filter((v): v is number => v !== null).pop() || 0;
+
+  // Crosshair values
+  const crosshairMACD = focusedIndex !== null && macd[focusedIndex] !== null ? macd[focusedIndex] : null;
+  const crosshairSignal = focusedIndex !== null && signal[focusedIndex] !== null ? signal[focusedIndex] : null;
+
+  const touchPan = useCrosshairTouch(macd.length, width, setFocusedIndex);
 
   return (
-    <View style={[indicatorStyles.panel, { height: panelHeight, width }]}>
+    <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
       <View style={indicatorStyles.panelHeader}>
-        <Text style={indicatorStyles.panelTitle}>MACD (12,26,9)</Text>
-        <Text style={[indicatorStyles.panelValue, { color: lastMACD >= 0 ? colors.marketUp : colors.marketDown, fontSize: 12 }]}>
-          {lastMACD >= 0 ? '+' : ''}{lastMACD.toFixed(1)}
+        <Text style={[indicatorStyles.panelTitle, { color: colors.textMuted }]}>MACD (12,26,9)</Text>
+        <Text style={[indicatorStyles.panelValue, {
+          color: (crosshairMACD ?? lastMACD) >= 0 ? colors.marketUp : colors.marketDown,
+          fontSize: 12,
+        }]}>
+          {(crosshairMACD ?? lastMACD) >= 0 ? '+' : ''}{(crosshairMACD ?? lastMACD).toFixed(1)}
         </Text>
         <Text style={[indicatorStyles.panelValue, { color: colors.textSecondary, fontSize: 11 }]}>
-          Signal: {lastSignal.toFixed(1)}
+          Signal: {(crosshairSignal ?? lastSignal).toFixed(1)}
         </Text>
       </View>
-      <Svg width={width} height={panelHeight}>
-        {/* Zero line */}
-        <Line x1={pad.left} y1={getY(0)} x2={width - pad.right} y2={getY(0)}
-          stroke={colors.borderLight} strokeWidth={0.5} strokeDasharray="3,3" opacity={0.4} />
+      <View {...touchPan.panHandlers} style={{ flex: 1 }}>
+        <Svg width={width} height={panelHeight}>
+          {/* Zero line */}
+          <Line x1={pad.left} y1={getY(0)} x2={width - pad.right} y2={getY(0)}
+            stroke={colors.borderLight} strokeWidth={0.5} strokeDasharray="3,3" opacity={0.4} />
 
-        {/* Histogram bars */}
-        {histogram.map((val, i) => {
-          if (val === null) return null;
-          const x = getX(i);
-          const barWidth = Math.max(chartW / histogram.length * 0.6, 1);
-          const isPos = val >= 0;
-          const y0 = getY(0);
-          const yVal = getY(val);
-          return (
-            <Rect
-              key={`hist-${i}`}
-              x={x - barWidth / 2}
-              y={isPos ? yVal : y0}
-              width={barWidth}
-              height={Math.max(Math.abs(yVal - y0), 1)}
-              fill={isPos ? colors.marketUp : colors.marketDown}
-              opacity={0.6}
-              rx={0.5}
-            />
-          );
-        })}
+          {/* Histogram bars */}
+          {histogram.map((val, i) => {
+            if (val === null) return null;
+            const x = getX(i);
+            const barWidth = Math.max(chartW / histogram.length * 0.6, 1);
+            const isPos = val >= 0;
+            const y0 = getY(0);
+            const yVal = getY(val);
+            return (
+              <Rect
+                key={`hist-${i}`}
+                x={x - barWidth / 2}
+                y={isPos ? yVal : y0}
+                width={barWidth}
+                height={Math.max(Math.abs(yVal - y0), 1)}
+                fill={isPos ? colors.marketUp : colors.marketDown}
+                opacity={0.6}
+                rx={0.5}
+              />
+            );
+          })}
 
-        {/* MACD line */}
-        <Path d={macdPath} stroke={colors.primary} strokeWidth={1.5} fill="none" />
-        {/* Signal line */}
-        <Path d={signalPath} stroke={colors.warning} strokeWidth={1.5} fill="none" />
-      </Svg>
+          {/* MACD line */}
+          <Path d={macdPath} stroke={colors.primary} strokeWidth={1.5} fill="none" />
+          {/* Signal line */}
+          <Path d={signalPath} stroke={colors.warning} strokeWidth={1.5} fill="none" />
+
+          {/* Crosshair line */}
+          <CrosshairLine index={focusedIndex} dataLength={macd.length} width={width} colors={colors} chartH={chartH} />
+
+          {/* Crosshair value dots */}
+          {crosshairMACD !== null && (
+            <Circle cx={getX(focusedIndex!)} cy={getY(crosshairMACD)} r={3}
+              fill={colors.primary} stroke={colors.bg} strokeWidth={1.5} />
+          )}
+          {crosshairSignal !== null && (
+            <Circle cx={getX(focusedIndex!)} cy={getY(crosshairSignal)} r={3}
+              fill={colors.warning} stroke={colors.bg} strokeWidth={1.5} />
+          )}
+        </Svg>
+      </View>
     </View>
   );
 });
@@ -359,6 +474,7 @@ const BollingerPanel = React.memo(({
   candleData: StockHistoryPoint[];
 }) => {
   const { upper, middle, lower } = data;
+  const { focusedIndex, setFocusedIndex } = useChartCrosshair();
   const panelHeight = PANEL_HEIGHT;
   const pad = CHART_PADDING;
   const chartW = width - pad.left - pad.right;
@@ -367,13 +483,12 @@ const BollingerPanel = React.memo(({
   const validUpper = upper.filter((v): v is number => v !== null);
   if (validUpper.length < 2) {
     return (
-      <View style={[indicatorStyles.panel, { height: panelHeight, width }]}>
-        <Text style={indicatorStyles.emptyText}>Not enough data</Text>
+      <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
+        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>Not enough data</Text>
       </View>
     );
   }
 
-  // Find range across bands and close prices
   const allPrices = [
     ...upper.filter((v): v is number => v !== null),
     ...middle.filter((v): v is number => v !== null),
@@ -387,7 +502,6 @@ const BollingerPanel = React.memo(({
   const getX = (i: number) => pad.left + (i / (upper.length - 1)) * chartW;
   const getY = (price: number) => pad.top + ((maxP - price) / range) * chartH;
 
-  // Build paths
   const buildPath = (arr: (number | null)[]) => {
     let path = '';
     for (let i = 0; i < arr.length; i++) {
@@ -403,8 +517,7 @@ const BollingerPanel = React.memo(({
   const middlePath = buildPath(middle);
   const lowerPath = buildPath(lower);
 
-  // Build fill path (upper + reverse lower)
-  const _lastIdx = upper.length - 1;
+  let fillPath = upperPath;
   let firstUpperIdx = -1, lastUpperIdx = -1;
   for (let i = 0; i < upper.length; i++) {
     if (upper[i] !== null) {
@@ -412,10 +525,7 @@ const BollingerPanel = React.memo(({
       lastUpperIdx = i;
     }
   }
-
-  let fillPath = upperPath;
   if (fillPath && firstUpperIdx >= 0 && lastUpperIdx >= 0) {
-    // Reverse lower path
     let revPath = '';
     for (let i = lower.length - 1; i >= 0; i--) {
       if (lower[i] === null) continue;
@@ -426,56 +536,76 @@ const BollingerPanel = React.memo(({
     fillPath = `${fillPath}${revPath} Z`;
   }
 
-  const _lastMiddle = middle.filter((v): v is number => v !== null).pop() || 0;
   const lastUpperVal = upper.filter((v): v is number => v !== null).pop() || 0;
   const lastLowerVal = lower.filter((v): v is number => v !== null).pop() || 0;
 
+  // Crosshair values
+  const crosshairUpper = focusedIndex !== null && upper[focusedIndex] !== null ? upper[focusedIndex] : null;
+  const crosshairLower = focusedIndex !== null && lower[focusedIndex] !== null ? lower[focusedIndex] : null;
+
+  const touchPan = useCrosshairTouch(upper.length, width, setFocusedIndex);
+
   return (
-    <View style={[indicatorStyles.panel, { height: panelHeight, width }]}>
+    <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
       <View style={indicatorStyles.panelHeader}>
-        <Text style={indicatorStyles.panelTitle}>Bollinger (20,2)</Text>
-        <Text style={[indicatorStyles.panelValue, { fontSize: 11 }]}>
-          U: {formatCurrency(lastUpperVal, true)}
+        <Text style={[indicatorStyles.panelTitle, { color: colors.textMuted }]}>Bollinger (20,2)</Text>
+        <Text style={[indicatorStyles.panelValue, { fontSize: 11, color: colors.text }]}>
+          U: {formatCurrency(crosshairUpper ?? lastUpperVal, true)}
         </Text>
         <Text style={[indicatorStyles.panelValue, { fontSize: 11, color: colors.textSecondary }]}>
-          L: {formatCurrency(lastLowerVal, true)}
+          L: {formatCurrency(crosshairLower ?? lastLowerVal, true)}
         </Text>
       </View>
-      <Svg width={width} height={panelHeight}>
-        <Defs>
-          <LinearGradient id="bbFill" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor={colors.primary} stopOpacity="0.08" />
-            <Stop offset="100%" stopColor={colors.primary} stopOpacity="0.02" />
-          </LinearGradient>
-        </Defs>
+      <View {...touchPan.panHandlers} style={{ flex: 1 }}>
+        <Svg width={width} height={panelHeight}>
+          <Defs>
+            <LinearGradient id="bbFill" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor={colors.primary} stopOpacity="0.08" />
+              <Stop offset="100%" stopColor={colors.primary} stopOpacity="0.02" />
+            </LinearGradient>
+          </Defs>
 
-        {/* Fill area between bands */}
-        {fillPath && <Path d={fillPath} fill="url(#bbFill)" />}
+          {/* Fill area between bands */}
+          {fillPath && <Path d={fillPath} fill="url(#bbFill)" />}
 
-        {/* Upper band */}
-        <Path d={upperPath} stroke={colors.primary} strokeWidth={1} fill="none" strokeDasharray="4,2" opacity={0.7} />
-        {/* Middle band (SMA 20) */}
-        <Path d={middlePath} stroke={colors.warning} strokeWidth={1.5} fill="none" />
-        {/* Lower band */}
-        <Path d={lowerPath} stroke={colors.primary} strokeWidth={1} fill="none" strokeDasharray="4,2" opacity={0.7} />
+          {/* Upper band */}
+          <Path d={upperPath} stroke={colors.primary} strokeWidth={1} fill="none" strokeDasharray="4,2" opacity={0.7} />
+          {/* Middle band (SMA 20) */}
+          <Path d={middlePath} stroke={colors.warning} strokeWidth={1.5} fill="none" />
+          {/* Lower band */}
+          <Path d={lowerPath} stroke={colors.primary} strokeWidth={1} fill="none" strokeDasharray="4,2" opacity={0.7} />
 
-        {/* Close price overlay */}
-        {(() => {
-          const offset = upper.length - candleData.length;
-          let closePath = '';
-          for (let i = 0; i < candleData.length; i++) {
-            const idx = offset + i;
-            if (idx < 0 || idx >= upper.length) continue;
-            if (upper[idx] === null) continue;
-            const x = getX(idx);
-            const y = getY(candleData[i].close);
-            closePath += closePath ? ` L ${x} ${y}` : `M ${x} ${y}`;
-          }
-          return closePath ? (
-            <Path d={closePath} stroke={colors.text} strokeWidth={1.5} fill="none" opacity={0.8} />
-          ) : null;
-        })()}
-      </Svg>
+          {/* Close price overlay */}
+          {(() => {
+            const offset = upper.length - candleData.length;
+            let closePath = '';
+            for (let i = 0; i < candleData.length; i++) {
+              const idx = offset + i;
+              if (idx < 0 || idx >= upper.length) continue;
+              if (upper[idx] === null) continue;
+              const x = getX(idx);
+              const y = getY(candleData[i].close);
+              closePath += closePath ? ` L ${x} ${y}` : `M ${x} ${y}`;
+            }
+            return closePath ? (
+              <Path d={closePath} stroke={colors.text} strokeWidth={1.5} fill="none" opacity={0.8} />
+            ) : null;
+          })()}
+
+          {/* Crosshair line */}
+          <CrosshairLine index={focusedIndex} dataLength={upper.length} width={width} colors={colors} chartH={chartH} />
+
+          {/* Crosshair value dots on upper/lower bands */}
+          {crosshairUpper !== null && (
+            <Circle cx={getX(focusedIndex!)} cy={getY(crosshairUpper)} r={3}
+              fill={colors.primary} stroke={colors.bg} strokeWidth={1.5} opacity={0.8} />
+          )}
+          {crosshairLower !== null && (
+            <Circle cx={getX(focusedIndex!)} cy={getY(crosshairLower)} r={3}
+              fill={colors.primary} stroke={colors.bg} strokeWidth={1.5} opacity={0.8} />
+          )}
+        </Svg>
+      </View>
     </View>
   );
 });
@@ -492,7 +622,7 @@ interface TechnicalIndicatorsProps {
   /** Called when user taps an indicator toggle */
   onIndicatorToggle?: (type: IndicatorType) => void;
   /** Compact mode (smaller panels, no headers) */
-  compact?: boolean; // prettier-ignore
+  compact?: boolean;
 }
 
 export default function TechnicalIndicators({
@@ -529,7 +659,7 @@ export default function TechnicalIndicators({
   if (!data || data.length < 15) {
     return (
       <View style={indicatorStyles.emptyContainer}>
-        <Text style={indicatorStyles.emptyText}>
+        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>
           Need at least 15 data points for indicators
         </Text>
       </View>
@@ -547,10 +677,18 @@ export default function TechnicalIndicators({
           return (
             <TouchableOpacity
               key={type}
-              style={[indicatorStyles.toggleChip, isActive && indicatorStyles.toggleChipActive]}
+              style={[
+                indicatorStyles.toggleChip,
+                isActive && indicatorStyles.toggleChipActive,
+                { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary : colors.border },
+              ]}
               onPress={() => toggleIndicator(type)}
             >
-              <Text style={[indicatorStyles.toggleText, isActive && indicatorStyles.toggleTextActive]}>
+              <Text style={[
+                indicatorStyles.toggleText,
+                isActive && indicatorStyles.toggleTextActive,
+                { color: isActive ? colors.primary : colors.textMuted },
+              ]}>
                 {type === 'rsi' ? 'RSI' : type === 'macd' ? 'MACD' : 'Bollinger'}
               </Text>
             </TouchableOpacity>
@@ -591,31 +729,21 @@ const indicatorStyles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs + 2,
     borderRadius: BORDER_RADIUS.full,
-    backgroundColor: '#1F2937',
     borderWidth: 1,
-    borderColor: '#374151',
   },
-  toggleChipActive: {
-    backgroundColor: '#3B82F6' + '25',
-    borderColor: '#3B82F6',
-  },
+  toggleChipActive: {},
   toggleText: {
     fontFamily: 'System',
     fontSize: FONTS.size.sm,
     fontWeight: '600',
-    color: '#9CA3AF',
   },
-  toggleTextActive: {
-    color: '#3B82F6',
-  },
+  toggleTextActive: {},
   panels: {
     gap: SPACING.sm,
   },
   panel: {
-    backgroundColor: '#111827',
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
-    borderColor: '#1F2937',
     overflow: 'hidden',
     paddingTop: SPACING.sm,
   },
@@ -630,7 +758,6 @@ const indicatorStyles = StyleSheet.create({
     fontFamily: 'System',
     fontSize: FONTS.size.xs,
     fontWeight: '600',
-    color: '#9CA3AF',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -638,13 +765,11 @@ const indicatorStyles = StyleSheet.create({
     fontFamily: 'System',
     fontSize: FONTS.size.sm,
     fontWeight: '700',
-    color: '#FFFFFF',
   },
   panelStatus: {
     fontFamily: 'System',
     fontSize: FONTS.size.xs,
     fontWeight: '500',
-    color: '#6B7280',
   },
   emptyContainer: {
     padding: SPACING.lg,
@@ -653,6 +778,5 @@ const indicatorStyles = StyleSheet.create({
   emptyText: {
     fontFamily: 'System',
     fontSize: FONTS.size.sm,
-    color: '#6B7280',
   },
 });

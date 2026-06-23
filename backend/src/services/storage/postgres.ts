@@ -29,6 +29,29 @@
  *                  timestamp TEXT, tags JSONB)
  *   idx_community_timestamp ON timestamp DESC
  *
+ * users (id UUID PK, external_id, email, phone, display_name, password_hash,
+ *        role, kyc_status, metadata JSONB, created_at, updated_at)
+ *   idx_users_email             ON email (unique, partial)
+ *   idx_users_external_id       ON external_id (unique)
+ *   idx_users_email_password    ON (email, password_hash) partial
+ *   idx_users_created_at        ON created_at DESC
+ *
+ * broker_sessions (id UUID PK, user_id UUID → users, broker_type,
+ *                  encrypted_token, encrypted_secret, status, expires_at,
+ *                  last_used_at, created_at, updated_at)
+ *   idx_broker_sessions_active   ON (user_id, broker_type) WHERE status='active'
+ *   idx_broker_sessions_cleanup  ON expires_at WHERE status='active'
+ *
+ * parsed_ledgers (id UUID PK, user_id UUID → users, broker_session_id UUID,
+ *                 execution_timestamp, asset_symbol, transaction_type,
+ *                 filled_quantity, execution_price, regulatory_fees,
+ *                 net_value, source, raw_text_hash, metadata JSONB, created_at)
+ *   idx_parsed_ledgers_user_time        ON (user_id, execution_timestamp DESC)
+ *   idx_parsed_ledgers_user_type_time   ON (user_id, transaction_type, execution_timestamp DESC)
+ *   idx_parsed_ledgers_user_symbol      ON (user_id, asset_symbol, execution_timestamp DESC)
+ *   idx_parsed_ledgers_exec_time        ON execution_timestamp DESC INCLUDE (...)
+ *   idx_parsed_ledgers_raw_hash         ON raw_text_hash (unique, partial)
+ *
  * ====================== Auto-migration on connect() ========================
  * Tables and indexes are created via CREATE TABLE/INDEX IF NOT EXISTS
  * every time the app starts. A standalone SQL init script is deliberately
@@ -229,6 +252,104 @@ export class PostgreSQLStorage implements StorageEngine {
       );
       CREATE INDEX IF NOT EXISTS idx_community_timestamp ON community_posts (timestamp DESC);
     `);
+
+    // ──── Scalability Core Tables ───────────────────────────────────
+    // users, broker_sessions, parsed_ledgers
+    // Full reference: migrations/init_scalability_core.sql
+
+    await this.pool.query(`
+      CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+      CREATE TABLE IF NOT EXISTS users (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        external_id     TEXT NOT NULL,
+        email           TEXT,
+        phone           TEXT,
+        display_name    TEXT NOT NULL DEFAULT '',
+        password_hash   TEXT,
+        role            TEXT NOT NULL DEFAULT 'free',
+        kyc_status      TEXT NOT NULL DEFAULT 'pending',
+        metadata        JSONB NOT NULL DEFAULT '{}',
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email
+          ON users (email) WHERE email IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone
+          ON users (phone) WHERE phone IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_external_id
+          ON users (external_id);
+      CREATE INDEX IF NOT EXISTS idx_users_email_password
+          ON users (email, password_hash)
+          WHERE email IS NOT NULL AND password_hash IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_users_role
+          ON users (role) WHERE role IN ('pro', 'elite', 'admin');
+      CREATE INDEX IF NOT EXISTS idx_users_kyc_status
+          ON users (kyc_status) WHERE kyc_status != 'verified';
+      CREATE INDEX IF NOT EXISTS idx_users_created_at
+          ON users (created_at DESC);
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS broker_sessions (
+        id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        broker_type       TEXT NOT NULL,
+        encrypted_token   TEXT NOT NULL,
+        encrypted_secret  TEXT,
+        status            TEXT NOT NULL DEFAULT 'active',
+        expires_at        TIMESTAMPTZ,
+        last_used_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+        created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_broker_sessions_active
+          ON broker_sessions (user_id, broker_type)
+          WHERE status = 'active';
+      CREATE INDEX IF NOT EXISTS idx_broker_sessions_last_used
+          ON broker_sessions (user_id, last_used_at DESC)
+          WHERE status = 'active';
+      CREATE INDEX IF NOT EXISTS idx_broker_sessions_user
+          ON broker_sessions (user_id, created_at DESC);
+      -- Cleanup index: covers both (expires_at < now()) range scans
+      -- AND (expires_at IS NOT NULL) filters — no separate index needed.
+      CREATE INDEX IF NOT EXISTS idx_broker_sessions_cleanup
+          ON broker_sessions (expires_at)
+          WHERE status = 'active';
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS parsed_ledgers (
+        id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        broker_session_id   UUID REFERENCES broker_sessions(id) ON DELETE SET NULL,
+        execution_timestamp TIMESTAMPTZ NOT NULL,
+        asset_symbol        TEXT NOT NULL,
+        transaction_type    TEXT NOT NULL CHECK (transaction_type IN ('BUY', 'SELL')),
+        filled_quantity     NUMERIC(18,4) NOT NULL CHECK (filled_quantity > 0),
+        execution_price     NUMERIC(18,2) NOT NULL CHECK (execution_price > 0),
+        regulatory_fees     NUMERIC(18,2) NOT NULL DEFAULT 0,
+        net_value           NUMERIC(18,2) NOT NULL,
+        source              TEXT NOT NULL DEFAULT 'manual',
+        raw_text_hash       TEXT,
+        metadata            JSONB NOT NULL DEFAULT '{}',
+        created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_parsed_ledgers_user_time
+          ON parsed_ledgers (user_id, execution_timestamp DESC);
+      CREATE INDEX IF NOT EXISTS idx_parsed_ledgers_user_type_time
+          ON parsed_ledgers (user_id, transaction_type, execution_timestamp DESC);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_parsed_ledgers_raw_hash
+          ON parsed_ledgers (raw_text_hash) WHERE raw_text_hash IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_parsed_ledgers_user_symbol
+          ON parsed_ledgers (user_id, asset_symbol, execution_timestamp DESC);
+      CREATE INDEX IF NOT EXISTS idx_parsed_ledgers_exec_time
+          ON parsed_ledgers (execution_timestamp DESC)
+          INCLUDE (user_id, asset_symbol, transaction_type, filled_quantity, execution_price, net_value);
+    `);
   }
 
   // ──── Audit Trail ────
@@ -316,6 +437,9 @@ export class PostgreSQLStorage implements StorageEngine {
 
   async clearForTesting(): Promise<void> {
     if (!this.pool) return;
+    await this.pool.query('DELETE FROM parsed_ledgers');
+    await this.pool.query('DELETE FROM broker_sessions');
+    await this.pool.query('DELETE FROM users');
     await this.pool.query('DELETE FROM audit_events');
     await this.pool.query('DELETE FROM risk_profiles');
     await this.pool.query('DELETE FROM broker_state');

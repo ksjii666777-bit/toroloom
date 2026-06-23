@@ -10,6 +10,7 @@ import {
 } from '../services/ai';
 import type { AIInsight } from '../services/ai';
 import { insightCache } from '../services/insightCache';
+import { get as cacheGet, set as cacheSet, del as cacheDel, CacheKeys } from '../middleware/cacheService';
 
 const router = Router();
 router.use(authMiddleware);
@@ -51,6 +52,55 @@ router.get('/insights/:id', (req: Request, res: Response) => {
   res.json(insight);
 });
 
+/**
+ * Multi-layered cache for AI insights:
+ *   L1 — In-memory insightCache (fastest, stale-while-revalidate)
+ *   L2 — Redis cacheService (persistent across restarts & pods)
+ *   L3 — AI API (slowest, only if both caches miss)
+ *
+ * Redis keys use CacheKeys.aiCognitiveSummary(symbol) from cacheService.
+ * TTL: 600s (10 minutes) — defined in cacheService KEY_TTL.
+ */
+
+/**
+ * Fetch an insight with L1 → L2 → L3 fallback.
+ * Sets both caches on miss so subsequent requests hit L1.
+ */
+async function fetchWithRedisCache(symbol: string): Promise<AIInsight> {
+  // L1: In-memory cache (microsecond, always first)
+  const l1Hit = insightCache.get(symbol);
+  if (l1Hit) {
+    if (l1Hit.stale) {
+      // Stale — return immediately but refresh L2 asynchronously
+      insightCache.getOrRefresh(symbol, () => generateInsight(symbol));
+    }
+    return l1Hit.data;
+  }
+
+  // L2: Redis cache (millisecond, across restarts/pods)
+  const l2Key = CacheKeys.aiCognitiveSummary(symbol);
+  const l2Raw = await cacheGet(l2Key);
+  if (l2Raw) {
+    try {
+      const parsed = JSON.parse(l2Raw) as AIInsight;
+      // Seed L1 so subsequent requests don't hit Redis
+      insightCache.set(symbol, parsed);
+      return parsed;
+    } catch {
+      // Corrupted Redis entry — fall through to L3
+      await cacheDel(l2Key);
+    }
+  }
+
+  // L3: AI API (seconds, expensive)
+  const insight = await insightCache.getOrRefresh(symbol, () => generateInsight(symbol));
+
+  // Seed L2 asynchronously (don't block response on Redis write)
+  cacheSet(l2Key, JSON.stringify(insight)).catch(() => {});
+
+  return insight;
+}
+
 // POST /api/ai/analyze
 router.post('/analyze', async (req: Request, res: Response) => {
   const { symbol } = req.body;
@@ -84,9 +134,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
   }
 
   try {
-    // getOrRefresh handles: cache hit → return, stale → return + bg refresh, miss → fetch
-    const insight = await insightCache.getOrRefresh(symbol, () => generateInsight(symbol));
-    // Attach provider info for diagnostics
+    const insight = await fetchWithRedisCache(symbol);
     insight._provider = getActiveProviderName();
     res.json(insight);
   } catch (error: any) {
@@ -137,24 +185,47 @@ router.post('/analyze/batch', async (req: Request, res: Response) => {
   }
 
   try {
-    // Phase 1: Collect cached results and identify uncached symbols
-    const cached: AIInsight[] = [];
-    const uncached: string[] = [];
+    // Phase 1: Check L1 (in-memory) + L2 (Redis) in parallel
+    const l1Hits = new Map<string, AIInsight>();
+    const l2Misses: string[] = [];
 
     for (const sym of symbols) {
-      const hit = insightCache.get(sym);
-      if (hit) {
-        cached.push(hit.data);
-        // Stale → trigger background refresh (deduplicated via cache's inflight map)
-        if (hit.stale) {
+      const l1 = insightCache.get(sym);
+      if (l1) {
+        l1Hits.set(sym, l1.data);
+        if (l1.stale) {
           insightCache.getOrRefresh(sym, () => generateInsight(sym));
         }
       } else {
-        uncached.push(sym);
+        l2Misses.push(sym);
       }
     }
 
-    // Phase 2: Fetch uncached symbols — batch if 3+, parallel if fewer
+    // Phase 2: Check Redis for L1 misses
+    const l2Promises = l2Misses.map(async (sym) => {
+      const l2Key = CacheKeys.aiCognitiveSummary(sym);
+      const raw = await cacheGet(l2Key);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as AIInsight;
+          insightCache.set(sym, parsed); // Seed L1
+          l1Hits.set(sym, parsed);
+          return; // Redis hit
+        } catch {
+          await cacheDel(l2Key);
+        }
+      }
+      l1Hits.set(sym, null as any); // marker for L3 fetch needed
+    });
+    await Promise.all(l2Promises);
+
+    // Phase 3: Identify symbols that need L3 (AI API)
+    const uncached = symbols.filter(sym => {
+      const hit = l1Hits.get(sym);
+      return hit === null; // null marker from L2 miss
+    });
+
+    // Phase 4: Fetch uncached — batch if 3+, parallel if fewer
     let fresh: AIInsight[] = [];
     if (uncached.length >= 3) {
       fresh = await generateBatchInsight(uncached);
@@ -162,14 +233,25 @@ router.post('/analyze/batch', async (req: Request, res: Response) => {
       fresh = await generateInsights(uncached);
     }
 
-    // Phase 3: Cache fresh results
+    // Phase 5: Seed both L1 and L2
     for (const insight of fresh) {
       if (insight.symbol) {
         insightCache.set(insight.symbol, insight);
+        const l2Key = CacheKeys.aiCognitiveSummary(insight.symbol);
+        cacheSet(l2Key, JSON.stringify(insight)).catch(() => {});
       }
     }
 
-    res.json([...cached, ...fresh]);
+    // Build final result preserving original order
+    const result = symbols
+      .map(sym => {
+        const cached = l1Hits.get(sym);
+        if (cached && cached !== null) return cached;
+        return fresh.find(i => i.symbol === sym);
+      })
+      .filter(Boolean) as AIInsight[];
+
+    res.json(result);
   } catch (error: any) {
     console.error('[AI Route] Batch analysis failed:', error.message);
     res.status(503).json({

@@ -1,0 +1,51 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: toroloom-api-hpa
+  namespace: toroloom
+  labels:
+    app.kubernetes.io/name: toroloom
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: toroloom
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: toroloom-api
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    # ── CPU-based scaling ──────────────────────────────────────────────
+    # Scales up when average CPU across all pods exceeds 70% of request.
+    # Scales down when sustained CPU drops below 70%.
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    # ── Memory-based scaling (secondary metric) ────────────────────────
+    # Scales up when average memory exceeds 80% of request.
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  # ── Scaling behavior ──────────────────────────────────────────────────
+  # Prevents flapping: scales up fast, scales down slowly.
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60       # Wait 1 min before acting
+      policies:
+        - type: Percent
+          value: 100                        # Double replicas per evaluation
+          periodSeconds: 60                 # Every 60s
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300      # Wait 5 min before scaling down
+      policies:
+        - type: Percent
+          value: 25                         # Reduce by max 25% per evaluation
+          periodSeconds: 60
+      selectPolicy: Min

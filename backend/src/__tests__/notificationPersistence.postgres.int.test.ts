@@ -24,6 +24,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { PostgreSQLStorage } from '../services/storage/postgres';
 import { CONNECT_TIMEOUT } from './testUtils';
+import { TEST_DATABASE_URL } from './testConfig';
 import {
   configureNotificationPersistence,
   getNotifications,
@@ -34,8 +35,7 @@ import {
 } from '../services/notifications';
 import type { NotificationData } from '../services/storage/types';
 
-const DATABASE_URL =
-  process.env.DATABASE_URL || 'postgresql://toroloom:toroloom_dev@localhost:5432/toroloom';
+const DATABASE_URL = TEST_DATABASE_URL;
 
 describe('Notification Persistence — PostgreSQL', () => {
   let storage: PostgreSQLStorage;
