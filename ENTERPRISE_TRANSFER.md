@@ -153,6 +153,108 @@ gh api repos/acquirer-org/toroloom/collaborators/ksjii666777 -X DELETE
 | `EXPO_TOKEN` | Expo account settings | EAS builds |
 | `SLACK_WEBHOOK` | Slack workspace | Deployment notifications |
 
+### 2.4 GPG Signing Key Setup
+
+After the transfer, every commit the acquirer's team pushes to the repo
+should be **signed with a GPG key** to establish cryptographic provenance.
+This ensures the audit trail is cryptographically verifiable — no one can
+retroactively attribute a commit to the acquiring org without their private
+key.
+
+> **Why this matters for an acquisition:** Signed commits let the acquirer:
+> - Prove that every commit in the repo's post-transfer history originated
+>   from their team (not an unauthorized third party)
+> - Enforce signing as a required branch protection rule, preventing merge
+>   of unsigned commits even with admin bypass
+> - Meet SOC 2 / ISO 27001 change-control requirements for code provenance
+
+```bash
+# ── Step 1: Each acquirer team member generates a GPG key ───────────────
+gpg --full-generate-key
+# Select:
+#   Kind: (1) RSA and RSA
+#   Keysize: 4096
+#   Expiry: 2y (or 0 for no expiry — rotate on employee departure)
+#   Real name:   Acquirer Engineer Name
+#   Email:       engineer@acquirer-org.com
+
+# ── Step 2: Export the public key and add it to GitHub ──────────────────
+# Get the key ID (8-hex-char suffix of the sec line):
+gpg --list-secret-keys --keyid-format=long
+
+# Export the public key block:
+gpg --armor --export <KEY_ID>
+
+# Add to GitHub:
+#   https://github.com/settings/gpg/keys → "New GPG Key" → paste block
+
+# ── Step 3: Configure git to sign every commit locally ──────────────────
+git config --global user.signingkey <KEY_ID>
+git config --global commit.gpgsign true
+git config --global gpg.program $(which gpg)
+
+# ── Step 4: (Optional — macOS) Export to pinentry-mac for password prompt
+# If using GPG Suite or pinentry-mac, ensure the gpg-agent is running:
+gpgconf --launch gpg-agent
+
+# ── Step 5: Verify signing works ───────────────────────────────────────────
+git commit --allow-empty -m "test: verify GPG signing for acquirer team"
+git log --show-signature -1
+# Expected: "gpg: Signature made ..." + "gpg: Good signature from ..."
+# GitHub will show a "Verified" badge next to this commit.# ── Step 6: Roll the key into the organization ─────────────────────────────
+    # Create an org-level GPG key for CI/CD (e.g., GitHub Actions bots):
+CI_PASSPHRASE=$(openssl rand -base64 24)
+
+gpg --batch --gen-key <<EOF
+Key-Type: RSA
+Key-Length: 4096
+Key-Usage: sign
+Name-Real: Toroloom CI/CD
+Name-Email: ci@acquirer-org.com
+Expire-Date: 0
+Passphrase: $CI_PASSPHRASE
+EOF
+
+# Export the CI key to GitHub Actions secrets:
+gpg --armor --export-secret-keys <CI_KEY_ID> | \
+  gh secret set CI_GPG_PRIVATE_KEY --org acquirer-org --repos toroloom
+echo "$CI_PASSPHRASE" | \
+  gh secret set CI_GPG_PASSPHRASE --org acquirer-org --repos toroloom
+
+# Then configure a GitHub Action step to import and sign:
+#   - name: Import GPG key
+#     uses: crazy-max/ghaction-import-gpg@v6
+#     with:
+#       gpg_private_key: \${{ secrets.CI_GPG_PRIVATE_KEY }}
+#       passphrase: \${{ secrets.CI_GPG_PASSPHRASE }}
+```
+
+#### Enforce Signing on the Master Branch
+
+After at least one acquirer team member has pushed a signed commit, update
+the branch protection rule to require signed commits:
+
+```bash
+gh api repos/acquirer-org/toroloom/branches/master/protection \
+  --method PUT \
+  --input - <<< '{
+    "required_status_checks": {
+      "strict": true,
+      "contexts": ["typecheck", "lint", "test"]
+    },
+    "enforce_admins": true,
+    "required_pull_request_reviews": {
+      "required_approving_review_count": 2
+    },
+    "required_signatures": true
+  }'
+```
+
+With `required_signatures: true`, GitHub will block any unsigned commit
+from being merged — even by admins — ensuring every line of code in the
+repo carries a verifiable cryptographic signature from an authorized
+acquirer team member.
+
 ---
 
 ## 3. Cloud Infrastructure Handover
