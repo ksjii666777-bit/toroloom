@@ -4,6 +4,9 @@
 [![Coverage — Frontend](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ksjii666777-bit/toroloom/gh-pages/badges/frontend-coverage.json)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml)
 [![Coverage — Backend](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ksjii666777-bit/toroloom/gh-pages/badges/backend-coverage.json)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Deployed on Render](https://img.shields.io/badge/Render-Deployed-46E3B7?style=flat&logo=render&logoColor=white)](https://toroloom-backend.onrender.com)
+
+**Live deployment:** [`https://toroloom-backend.onrender.com`](https://toroloom-backend.onrender.com) — REST API + WebSocket, auto-deployed on every `master` push.
 
 A full-stack trading platform built with **React Native (Expo)** and **Node.js**, featuring real-time WebSocket market data, multi-broker support (Zerodha, Angel One), a risk engine with automatic lockdown, and an immutable audit trail.
 
