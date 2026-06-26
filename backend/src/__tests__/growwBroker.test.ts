@@ -210,7 +210,8 @@ describe('GrowwBroker', () => {
     });
 
     it('should fall back to LTP for OHLC when ohlc string is missing', async () => {
-      const { ohlc, ...payloadWithoutOhlc } = mockQuotePayload;
+      const payloadWithoutOhlc = { ...mockQuotePayload };
+      delete (payloadWithoutOhlc as { ohlc?: string }).ohlc;
       fetchMock.mockResolvedValueOnce(mockFetchResponse({ payload: { ...payloadWithoutOhlc, last_price: 2900 } }));
 
       const quote = await broker.getQuote('RELIANCE');
@@ -256,7 +257,8 @@ describe('GrowwBroker', () => {
     });
 
     it('should compute change from OHLC close when day_change is missing', async () => {
-      const { day_change, ...payloadNoDayChange } = mockQuotePayload;
+      const payloadNoDayChange = { ...mockQuotePayload };
+      delete (payloadNoDayChange as { day_change?: number }).day_change;
       fetchMock.mockResolvedValueOnce(mockFetchResponse({ payload: payloadNoDayChange }));
 
       const quote = await broker.getQuote('RELIANCE');

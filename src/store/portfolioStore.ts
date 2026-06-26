@@ -7,6 +7,7 @@ import { useAuthStore } from './authStore';
 import { sendTradeConfirmation } from '../services/notificationService';
 import { log } from '../utils/logger';
 import { analytics } from '../services/analytics';
+import { offlineMutationQueue } from '../services/offlineMutationQueue';
 
 interface PortfolioState {
   holdings: Holding[];
@@ -14,8 +15,6 @@ interface PortfolioState {
   openOrders: OpenOrder[];
   ordersLoading: boolean;
   isLoading: boolean;
-  /** True when serving stale cached data because network is unavailable */
-  isOffline: boolean;
 
   buyStock: (stock: Stock, quantity: number, price: number) => Promise<void>;
   sellStock: (holdingId: string, quantity: number, price: number) => Promise<void>;
@@ -27,6 +26,8 @@ interface PortfolioState {
   loadCachedPortfolio: () => Promise<void>;
   /** Clear offline cache */
   clearCache: () => Promise<void>;
+  /** Sync pending offline mutations with backend */
+  syncOfflineMutations: () => Promise<void>;
 }
 
 export const usePortfolioStore = create<PortfolioState>((set, get) => ({
@@ -35,7 +36,6 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   openOrders: mockOpenOrders as OpenOrder[],
   ordersLoading: false,
   isLoading: false,
-  isOffline: false,
 
   /** Load cached portfolio data (used at app startup for instant display) */
   loadCachedPortfolio: async () => {
@@ -46,7 +46,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   },
 
   refreshPortfolio: async () => {
-    set({ isLoading: true, isOffline: false });
+    set({ isLoading: true });
     try {
       const [holdings, trades] = await Promise.all([
         portfolioApi.getHoldings(),
@@ -54,21 +54,21 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       ]);
       // Cache on successful fetch
       await offlineCache.save('portfolio', { holdings, trades });
-      set({ holdings, trades, isLoading: false, isOffline: false });
+      set({ holdings, trades, isLoading: false });
     } catch {
       // Backend unavailable — try serving stale cache only if current holdings are empty
       const current = get();
       if (current.holdings.length === 0) {
         const cached = await offlineCache.load<{ holdings: Holding[]; trades: Trade[] }>('portfolio');
         if (cached) {
-          set({ holdings: cached.data.holdings, trades: cached.data.trades, isLoading: false, isOffline: true });
+          set({ holdings: cached.data.holdings, trades: cached.data.trades, isLoading: false });
           log.info('[Portfolio] Serving stale cached portfolio data');
           return;
         }
       }
       // Keep current in-memory data (mock, cached-from-startup, or user-modified)
       log.info('[Portfolio] Backend unavailable — keeping existing data');
-      set({ isLoading: false, isOffline: true });
+      set({ isLoading: false });
     }
   },
 
@@ -93,6 +93,17 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
   clearCache: async () => {
     await offlineCache.remove('portfolio');
     await offlineCache.remove('openOrders');
+  },
+
+  syncOfflineMutations: async () => {
+    const results = await offlineMutationQueue.processAll();
+    for (const result of results) {
+      if (result.success) {
+        log.info('[Portfolio] Synced offline mutation:', result.type);
+      } else {
+        log.warn('[Portfolio] Failed to sync offline mutation:', result.type, result.error);
+      }
+    }
   },
 
   modifyOrder: async (orderId, updates) => {
@@ -171,7 +182,14 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       }
     } catch (err: unknown) {
       if (api.isNetworkError(err)) {
-        // Backend unavailable — execute locally
+        // Backend unavailable — queue mutation for later sync
+        log.info('[Portfolio] Offline: queuing BUY for sync');
+        offlineMutationQueue.enqueue('BUY_STOCK', {
+          symbol: stock.symbol,
+          quantity,
+          price,
+          productType: 'CNC',
+        }).catch(() => {});
       } else {
         // Server responded but error occurred — still proceed locally for demo
         log.warn('[Portfolio] Order execution API error:', err);
@@ -287,7 +305,15 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       }
     } catch (err: unknown) {
       if (api.isNetworkError(err)) {
-        // Backend unavailable — execute locally
+        // Backend unavailable — queue mutation for later sync
+        log.info('[Portfolio] Offline: queuing SELL for sync');
+        offlineMutationQueue.enqueue('SELL_STOCK', {
+          symbol: holding.symbol,
+          quantity,
+          price,
+          avgBuyPrice: holding.buyPrice,
+          productType: 'CNC',
+        }).catch(() => {});
       } else {
         log.warn('[Portfolio] Order execution API error:', err);
       }

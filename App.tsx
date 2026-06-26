@@ -7,7 +7,7 @@ import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { setupChannels } from './src/services/notificationService';
 import { configureApi } from './src/services/api';
-import { useAuthStore, useRiskStore, useSubscriptionStore, useOnboardingStore, usePortfolioStore, useWatchlistStore } from './src/store';
+import { useAuthStore, useRiskStore, useSubscriptionStore, useOnboardingStore, usePortfolioStore, useWatchlistStore, useMarketStore, useEducationStore } from './src/store';
 import Sentry, { isSentryEnabled } from './src/services/sentry';
 import useLoadFonts from './src/hooks/useLoadFonts';
 
@@ -59,9 +59,12 @@ function AppContent() {
 
   }, []);
 
-  // Load cached portfolio & watchlist data once auth is restored
-  // (only meaningful for logged-in users — avoids wasting cache reads when logged out)
+  // Load cached data once auth is restored
+  // (cached market & education are also loaded for logged-out users for instant display)
   useEffect(() => {
+    useMarketStore.getState().loadCachedMarket();
+    useEducationStore.getState().loadCachedCourses();
+
     if (isLoggedIn) {
       usePortfolioStore.getState().loadCachedPortfolio();
       useWatchlistStore.getState().loadCachedWatchlists();

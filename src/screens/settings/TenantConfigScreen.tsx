@@ -211,7 +211,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
-            {...({ id: 'tenant-id', name: 'tenantId' } as any)}
+            {...({ id: 'tenant-id', name: 'tenantId' } as { id: string; name: string })}
           />
 
           <Text style={styles.fieldLabel}>Tenant Name</Text>
@@ -221,7 +221,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             onChangeText={setName}
             placeholder="e.g. BrokerX"
             placeholderTextColor={colors.textMuted}
-            {...({ id: 'tenant-name', name: 'tenantName' } as any)}
+            {...({ id: 'tenant-name', name: 'tenantName' } as { id: string; name: string })}
           />
 
           <Text style={styles.fieldLabel}>Domain</Text>
@@ -233,7 +233,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
-            {...({ id: 'tenant-domain', name: 'domain' } as any)}
+            {...({ id: 'tenant-domain', name: 'domain' } as { id: string; name: string })}
           />
 
           <Text style={styles.fieldLabel}>Primary Color (hex)</Text>
@@ -244,7 +244,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             placeholder="e.g. #FF6600"
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
-            {...({ id: 'tenant-primary-color', name: 'primaryColor' } as any)}
+            {...({ id: 'tenant-primary-color', name: 'primaryColor' } as { id: string; name: string })}
           />
         </Card>
 
@@ -333,7 +333,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             return (
               <View key={plan.id} style={styles.pricingSection}>
                 <View style={styles.pricingHeader}>
-                  <Ionicons name={plan.icon as any} size={18} color={colors.primary} />
+                  <Ionicons name={plan.icon as keyof typeof Ionicons.glyphMap} size={18} color={colors.primary} />
                   <Text style={styles.pricingPlanName}>{plan.name}</Text>
                 </View>
                 <View style={styles.pricingRow}>
@@ -351,7 +351,7 @@ export default function TenantConfigScreen({ navigation }: any) {
                       placeholder={String(plan.price)}
                       placeholderTextColor={colors.textMuted}
                       keyboardType="numeric"
-                      {...({ id: `pricing-${plan.id}-monthly`, name: `${plan.id}_monthly` } as any)}
+                      {...({ id: `pricing-${plan.id}-monthly`, name: `${plan.id}_monthly` } as { id: string; name: string })}
                     />
                   </View>
                   <View style={styles.pricingField}>
@@ -368,7 +368,7 @@ export default function TenantConfigScreen({ navigation }: any) {
                       placeholder={String(plan.priceYearly)}
                       placeholderTextColor={colors.textMuted}
                       keyboardType="numeric"
-                      {...({ id: `pricing-${plan.id}-yearly`, name: `${plan.id}_yearly` } as any)}
+                      {...({ id: `pricing-${plan.id}-yearly`, name: `${plan.id}_yearly` } as { id: string; name: string })}
                     />
                   </View>
                 </View>
@@ -393,7 +393,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
-            {...({ id: 'tenant-razorpay-key-id', name: 'razorpayKeyId' } as any)}
+            {...({ id: 'tenant-razorpay-key-id', name: 'razorpayKeyId' } as { id: string; name: string })}
           />
 
           <Text style={styles.fieldLabel}>Key Secret</Text>
@@ -406,7 +406,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             autoCapitalize="none"
             autoCorrect={false}
             secureTextEntry
-            {...({ id: 'tenant-razorpay-key-secret', name: 'razorpayKeySecret' } as any)}
+            {...({ id: 'tenant-razorpay-key-secret', name: 'razorpayKeySecret' } as { id: string; name: string })}
           />
         </Card>
 

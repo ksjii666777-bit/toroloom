@@ -12,23 +12,9 @@ import { useFundStore } from '../../store/fundStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
+import { LINKED_BANKS, WITHDRAW_PRESETS } from '../../services/mockDataService';
 
 Dimensions.get('window');
-
-const WITHDRAW_PRESETS = [5000, 10000, 25000, 50000];
-
-interface BankAccount {
-  id: string;
-  bankName: string;
-  accountNumber: string;
-  ifsc: string;
-  isPrimary: boolean;
-}
-
-const LINKED_BANKS: BankAccount[] = [
-  { id: '1', bankName: 'HDFC Bank', accountNumber: 'XXXX1234', ifsc: 'HDFC0001234', isPrimary: true },
-  { id: '2', bankName: 'ICICI Bank', accountNumber: 'XXXX5678', ifsc: 'ICIC0005678', isPrimary: false },
-];
 
 export default function WithdrawScreen({ navigation }: any) {
   const { colors } = useTheme();

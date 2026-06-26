@@ -97,7 +97,7 @@ export default function VoiceSettingsScreen({ navigation }: any) {
                 ]}
               >
                 <Ionicons
-                  name={p.icon as any}
+                  name={p.icon as keyof typeof Ionicons.glyphMap}
                   size={20}
                   color={Math.abs(rate - p.value) < 0.01 ? colors.primary : colors.textMuted}
                 />
@@ -126,7 +126,7 @@ export default function VoiceSettingsScreen({ navigation }: any) {
                 ]}
               >
                 <Ionicons
-                  name={p.icon as any}
+                  name={p.icon as keyof typeof Ionicons.glyphMap}
                   size={20}
                   color={Math.abs(pitch - p.value) < 0.01 ? colors.primary : colors.textMuted}
                 />

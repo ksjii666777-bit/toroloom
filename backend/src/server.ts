@@ -5,7 +5,7 @@ import cors from 'cors';
 import http from 'http';
 import { env, validateRequiredEnv } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
-import { apiLimiter, authLimiter } from './middleware/rateLimiter';
+import { apiLimiter, authLimiter, writeLimiter, readLimiter, adminLimiter } from './middleware/rateLimiter';
 import { setupWebSocket } from './websocket/handler';
 import { getStorage, getStorageIfInitialized } from './services/storage';
 import { auditTrail } from './services/auditTrail';
@@ -36,6 +36,7 @@ import wsStatusRoutes from './routes/wsStatus';
 import ironLockRoutes from './routes/ironLock';
 import metricsRoutes from './routes/metrics';
 import paymentsRoutes from './routes/payments';
+import subscriptionRoutes, { webhookRouter, configureSubscriptionPersistence, setWebhookSecret } from './routes/subscriptions';
 import pushNotificationsRoutes from './routes/pushNotifications';
 import contractNoteRoutes from './routes/contractNote';
 
@@ -63,6 +64,12 @@ app.use(cors({
 
 app.use(express.json({ limit: '1mb' }));
 app.use('/api', apiLimiter);
+
+// Per-route rate limiters applied below:
+//   authLimiter  → auth routes (login/signup) — strictest
+//   readLimiter  → reads: market, portfolio, education, community
+//   writeLimiter → writes: orders, payments, funds, broker
+//   adminLimiter → system, metrics, health
 
 // Serve .well-known files for Universal Links / Android App Links verification
 app.use('/.well-known', express.static(path.join(__dirname, '../public/.well-known'), {
@@ -97,29 +104,41 @@ app.get('/health', async (_req, res) => {
   });
 });
 
-// ============ API Routes ============
+// ============ API Routes (with per-group rate limiters) ============
 
+// ── Auth — strictest limiter (10 req / 15 min) ────────────────────────
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/market', marketRoutes);
-app.use('/api/portfolio', portfolioRoutes);
-app.use('/api/watchlist', watchlistRoutes);
-app.use('/api/mutual-funds', mutualFundsRoutes);
-app.use('/api/education', educationRoutes);
-app.use('/api/community', communityRoutes);
-app.use('/api/ai', aiInsightsRoutes);
-app.use('/api/notifications', notificationsRoutes);
-app.use('/api/notifications', pushNotificationsRoutes);
-app.use('/api/risk', riskRoutes);
-app.use('/api/support', supportRoutes);
-app.use('/api/funds', fundsRoutes);
-app.use('/api/orders', ordersRoutes);
-app.use('/api/broker', brokerRoutes);
-app.use('/api/broker-link', brokerLinkRoutes);
-app.use('/api/system', systemRoutes);
-app.use('/api/system', wsStatusRoutes);
-app.use('/api/iron-lock', ironLockRoutes);
-app.use('/api/payments', paymentsRoutes);
-app.use('/api/contract-note', contractNoteRoutes);
+
+// ── Reads — 200 req / min ────────────────────────────────────────────
+app.use('/api/market', readLimiter, marketRoutes);
+app.use('/api/portfolio', readLimiter, portfolioRoutes);
+app.use('/api/watchlist', readLimiter, watchlistRoutes);
+app.use('/api/mutual-funds', readLimiter, mutualFundsRoutes);
+app.use('/api/education', readLimiter, educationRoutes);
+app.use('/api/community', readLimiter, communityRoutes);
+app.use('/api/ai', readLimiter, aiInsightsRoutes);
+app.use('/api/notifications', readLimiter, notificationsRoutes);
+app.use('/api/notifications', readLimiter, pushNotificationsRoutes);
+app.use('/api/risk', readLimiter, riskRoutes);
+app.use('/api/support', readLimiter, supportRoutes);
+app.use('/api/system', readLimiter, systemRoutes);
+app.use('/api/system', readLimiter, wsStatusRoutes);
+
+// ── Writes — 50 req / min ────────────────────────────────────────────
+app.use('/api/funds', writeLimiter, fundsRoutes);
+app.use('/api/orders', writeLimiter, ordersRoutes);
+app.use('/api/broker', writeLimiter, brokerRoutes);
+app.use('/api/broker-link', writeLimiter, brokerLinkRoutes);
+app.use('/api/iron-lock', writeLimiter, ironLockRoutes);
+app.use('/api/payments', writeLimiter, paymentsRoutes);
+// Protected subscription routes (authMiddleware applied inside router)
+app.use('/api/subscriptions', writeLimiter, subscriptionRoutes);
+// Webhook route — NO authMiddleware, NO rate limiter (validated via signature)
+app.use('/api/subscriptions', webhookRouter);
+app.use('/api/contract-note', writeLimiter, contractNoteRoutes);
+
+// ── Admin — 20 req / min ─────────────────────────────────────────────
+app.use('/metrics', adminLimiter, metricsRoutes);
 
 // ============ Sentry Error Handler (must be before custom error handler) ============
 
@@ -164,6 +183,12 @@ async function initializeStorage(): Promise<void> {
 
     // Wire storage into the Badge Count service for persistence
     configureBadgeCountPersistence(storage);
+
+    // Wire storage into the Subscription service for persistence
+    configureSubscriptionPersistence(storage);
+    if (env.razorpayWebhookSecret) {
+      setWebhookSecret(env.razorpayWebhookSecret);
+    }
 
     // Load persisted broker state (type + dedup cache)
     await loadBrokerStateFromStorage();

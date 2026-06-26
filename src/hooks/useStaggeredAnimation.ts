@@ -176,7 +176,7 @@ export function useStaggeredAnimation(
 
   // ── Build the returned animated styles array ────────────────
   // We slice to safeCount so callers only get the styles they asked for.
-  const animatedStyles = allStyles.slice(0, safeCount) as any[];
+  const animatedStyles = allStyles.slice(0, safeCount);
 
   // ── Animation helpers ──────────────────────────────────────
 

@@ -163,10 +163,10 @@ resource "aws_db_instance" "primary" {
   monitoring_interval = var.monitoring_interval
   monitoring_role_arn = var.monitoring_interval > 0 ? aws_iam_role.rds_monitoring[0].arn : null
 
-  storage_encrypted         = true
-  publicly_accessible       = length(var.allowed_cidr_blocks) > 0
+  storage_encrypted          = true
+  publicly_accessible        = length(var.allowed_cidr_blocks) > 0
   auto_minor_version_upgrade = true
-  copy_tags_to_snapshot     = true
+  copy_tags_to_snapshot      = true
 
   tags = {
     Name = local.db_identifier

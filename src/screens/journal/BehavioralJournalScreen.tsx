@@ -70,7 +70,7 @@ function MetricCard({
   return (
     <View style={[jbStyles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
       <View style={[jbStyles.metricIcon, { backgroundColor: color + '20' }]}>
-        <Ionicons name={icon as any} size={18} color={color} />
+        <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={color} />
       </View>
       <Text style={[jbStyles.metricValue, { color: colors.text }]}>{value}</Text>
       <Text style={[jbStyles.metricLabel, { color: colors.textSecondary }]}>{label}</Text>
@@ -97,7 +97,7 @@ function JournalEntryCard({
             <Text style={[jbStyles.entrySymbol, { color: colors.text }]}>{entry.symbol}</Text>
             <Text style={[jbStyles.entryDir, { color: colors.textSecondary }]}>{entry.direction === 'long' ? '▲' : '▼'}</Text>
             <View style={[jbStyles.entryEmotionBadge, { backgroundColor: EMOTION_COLORS[entry.emotionalState] + '20' }]}>
-              <Ionicons name={EMOTION_ICONS[entry.emotionalState] as any} size={12} color={EMOTION_COLORS[entry.emotionalState]} />
+              <Ionicons name={EMOTION_ICONS[entry.emotionalState] as keyof typeof Ionicons.glyphMap} size={12} color={EMOTION_COLORS[entry.emotionalState]} />
               <Text style={[jbStyles.entryEmotionText, { color: EMOTION_COLORS[entry.emotionalState] }]}>
                 {entry.emotionalState}
               </Text>
@@ -192,7 +192,6 @@ export default function BehavioralJournalScreen() {
   const { colors } = useTheme();
   const {
     entries, allMetrics, reports, addEntry, deleteEntry,
-    showEntryModal, setShowEntryModal, editingEntry, setEditingEntry,
     getFilteredEntries,
   } = useBehaviorJournalStore();
 
@@ -618,7 +617,7 @@ export default function BehavioralJournalScreen() {
                       formEmotion === em && { backgroundColor: EMOTION_COLORS[em] + '20', borderColor: EMOTION_COLORS[em] },
                     ]}
                   >
-                    <Ionicons name={EMOTION_ICONS[em] as any} size={18} color={formEmotion === em ? EMOTION_COLORS[em] : colors.textMuted} />
+                    <Ionicons name={EMOTION_ICONS[em] as keyof typeof Ionicons.glyphMap} size={18} color={formEmotion === em ? EMOTION_COLORS[em] : colors.textMuted} />
                     <Text style={[jbStyles.emotionChipText, { color: formEmotion === em ? EMOTION_COLORS[em] : colors.textMuted }]}>{em}</Text>
                   </TouchableOpacity>
                 ))}

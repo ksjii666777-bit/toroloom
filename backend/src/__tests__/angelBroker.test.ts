@@ -103,8 +103,8 @@ describe('AngelBroker', () => {
   let mockWebSocket: ReturnType<typeof createMockWebSocketV2>;
   let broker: AngelBroker;
 
-  function MockSmartAPI(this: any, ...args: any[]) { return mockSmartApi; }
-  function MockWebSocketV2(this: any, ...args: any[]) { return mockWebSocket; }
+  function MockSmartAPI(this: any, ..._args: any[]) { return mockSmartApi; }
+  function MockWebSocketV2(this: any, ..._args: any[]) { return mockWebSocket; }
 
   beforeEach(() => {
     mockSmartApi = createMockSmartApi();
@@ -754,7 +754,7 @@ describe('AngelBroker', () => {
 
     it('should handle WebSocket setup failure', async () => {
       // Create a broker whose WebSocketV2 constructor throws
-      function ThrowingWS(this: any, ...args: any[]) { throw new Error('SDK not available'); }
+      function ThrowingWS(this: any, ..._args: any[]) { throw new Error('SDK not available'); }
       const brokenBroker = new AngelBroker({ SmartAPI: MockSmartAPI as any, WebSocketV2: ThrowingWS as any });
       await brokenBroker.authenticate(createConfig({ accessToken: undefined, password: 'pwd' } as any));
       vi.clearAllMocks();

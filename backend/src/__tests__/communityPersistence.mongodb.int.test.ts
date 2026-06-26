@@ -34,7 +34,7 @@ import {
   likePost,
   resetCommunityService,
 } from '../services/community';
-import type { CommunityPostData } from '../services/storage/types';
+
 
 const MONGODB_URI = TEST_MONGODB_URI;
 const MONGODB_DB_NAME = TEST_MONGODB_DB;

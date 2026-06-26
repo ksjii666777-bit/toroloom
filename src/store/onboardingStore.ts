@@ -80,6 +80,10 @@ interface OnboardingState {
   initialized: boolean;
   /** Set to 'referral' when user signed up via referral link — skips welcome step */
   referralSource: string | null;
+  /** Track which steps the user has interacted with (for interactive demos) */
+  interactedSteps: Record<string, boolean>;
+  /** Whether the user completed all interactive demos on a step */
+  stepDemoCompleted: Record<string, boolean>;
 
   // Actions
   completeOnboarding: () => Promise<void>;
@@ -89,6 +93,10 @@ interface OnboardingState {
   resetOnboarding: () => Promise<void>;
   /** Mark onboarding as referred — causes the welcome step to be skipped */
   setReferralSource: (source: string) => void;
+  /** Mark a step as interacted (user tapped something) */
+  markStepInteracted: (stepId: string) => void;
+  /** Mark a step's demo as fully completed */
+  markStepDemoCompleted: (stepId: string) => void;
 }
 
 export const useOnboardingStore = create<OnboardingState>((set, _get) => ({
@@ -97,6 +105,8 @@ export const useOnboardingStore = create<OnboardingState>((set, _get) => ({
   isFirstLaunch: true,
   initialized: false,
   referralSource: null,
+  interactedSteps: {},
+  stepDemoCompleted: {},
 
   loadOnboardingState: async () => {
     try {
@@ -172,17 +182,32 @@ export const useOnboardingStore = create<OnboardingState>((set, _get) => ({
     analytics.setUserProperty('referral_source', source).catch(() => {});
   },
 
+  /** Mark a step as interacted — user tapped something on this step */
+  markStepInteracted: (stepId: string) => {
+    set((state) => ({
+      interactedSteps: { ...state.interactedSteps, [stepId]: true },
+    }));
+  },
+
+  /** Mark a step's interactive demo as fully completed */
+  markStepDemoCompleted: (stepId: string) => {
+    set((state) => ({
+      stepDemoCompleted: { ...state.stepDemoCompleted, [stepId]: true },
+      interactedSteps: { ...state.interactedSteps, [stepId]: true },
+    }));
+  },
+
   /** Reset onboarding so the navigator shows the walkthrough again */
   resetOnboarding: async () => {
     try {
       await AsyncStorage.removeItem('toroloom_onboarding');
-      set({ hasCompletedOnboarding: false, currentStep: 0, isFirstLaunch: false, initialized: true });
+      set({ hasCompletedOnboarding: false, currentStep: 0, isFirstLaunch: false, initialized: true, interactedSteps: {}, stepDemoCompleted: {} });
 
       // Track replay in analytics
       analytics.logEvent('onboarding_completed', { completed: false, replay: true }).catch(() => {});
       analytics.setUserProperty('onboarding_status', 'replay').catch(() => {});
     } catch {
-      set({ hasCompletedOnboarding: false, currentStep: 0, isFirstLaunch: false, initialized: true });
+      set({ hasCompletedOnboarding: false, currentStep: 0, isFirstLaunch: false, initialized: true, interactedSteps: {}, stepDemoCompleted: {} });
     }
   },
 }));

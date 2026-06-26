@@ -116,7 +116,7 @@ export default function AddFundsScreen({ navigation }: any) {
         });
         setIsSuccess(true);
 
-      } catch (razorpayError: any) {
+      } catch (_razorpayError: any) {
         // Razorpay native module fallback (Expo Go / dev)
         const transactionId = 'TXN' + Date.now().toString(36).toUpperCase();
         setTxId(transactionId);

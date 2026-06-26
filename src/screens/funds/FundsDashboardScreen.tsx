@@ -107,7 +107,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
               onPress={() => handleQuickAction(action.screen)}
             >
               <View style={styles.qaIcon}>
-                <Ionicons name={action.icon as any} size={22} color={colors.primary} />
+                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={22} color={colors.primary} />
               </View>
               <Text style={styles.qaLabel}>{action.label}</Text>
             </TouchableOpacity>

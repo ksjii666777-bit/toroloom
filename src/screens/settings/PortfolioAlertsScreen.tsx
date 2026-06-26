@@ -329,7 +329,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
       <View key={rule.id} style={[styles.alertCard, !rule.enabled && styles.alertCardDisabled]}>
         <View style={styles.alertHeader}>
           <View style={[styles.alertIcon, { backgroundColor: config.color + '20' }]}>
-            <Ionicons name={config.icon as any} size={22} color={config.color} />
+            <Ionicons name={config.icon as keyof typeof Ionicons.glyphMap} size={22} color={config.color} />
           </View>
           <View style={styles.alertInfo}>
             <Text style={styles.alertLabel}>
@@ -502,7 +502,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                   activeOpacity={exists ? 1 : 0.7}
                 >
                   <View style={[styles.addCardIcon, { backgroundColor: config.color + '20' }]}>
-                    <Ionicons name={config.icon as any} size={24} color={exists ? colors.textMuted : config.color} />
+                    <Ionicons name={config.icon as keyof typeof Ionicons.glyphMap} size={24} color={exists ? colors.textMuted : config.color} />
                   </View>
                   <Text style={[styles.addCardLabel, exists && { color: colors.textMuted }]}>
                     {config.label}

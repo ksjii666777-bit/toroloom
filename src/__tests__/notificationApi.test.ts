@@ -8,7 +8,7 @@
  * ============================================================================
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 
 // We must set __DEV__ before anything else
 vi.hoisted(() => {
@@ -24,6 +24,13 @@ vi.mock('../services/api/notifications', async () => {
 // ==================== Imports ====================
 
 import { notificationApi } from '../services/api/notifications';
+import { configureApi } from '../services/api/client';
+
+const API_BASE = 'http://localhost:3000/api';
+
+beforeAll(() => {
+  configureApi({ baseUrl: API_BASE, getToken: () => 'test-token' });
+});
 
 // ==================== Tests ====================
 

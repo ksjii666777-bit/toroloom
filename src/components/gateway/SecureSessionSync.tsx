@@ -25,6 +25,7 @@
  */
 
 import React, { useCallback, useRef, useEffect, useMemo, useState } from 'react';
+import { log } from '../../utils/logger';
 import {
   View,
   StyleSheet,
@@ -38,12 +39,10 @@ import type { SessionPayload } from '../../types';
 // ─── Broker Login Config ───────────────────────────────────────────────────
 
 import {
-  getBrokerLoginConfig,
   getBrokerDashboardPatterns,
   getBrokerTokenParams,
   getBrokerMfaPatterns,
   getBrokerExtractionStrategy,
-  brokerBlocksWebView,
   type BrokerLoginConfig,
   type ExtractionStrategy,
 } from '../../services/gateway/brokerLoginConfig';
@@ -149,32 +148,6 @@ const SESSION_EXTRACTION_SCRIPT = `
 })();
 `;
 
-/**
- * Script to check if the WebView has been detected as automated.
- * Some brokers inject warnings or redirect if they detect WebView usage.
- */
-const WEBVIEW_DETECTION_SCRIPT = `
-(function() {
-  var isDetected = false;
-  var detection = '';
-  var agents = ['HeadlessChrome', 'PhantomJS', 'Selenium', 'Cypress', 'Puppeteer'];
-  for (var i = 0; i < agents.length; i++) {
-    if (navigator.userAgent.indexOf(agents[i]) >= 0) {
-      isDetected = true;
-      detection = 'user_agent: ' + agents[i];
-    }
-  }
-  // Check if window has been flagged
-  if (window.__webdriver === true) {
-    isDetected = true;
-    detection = 'webdriver_flag';
-  }
-  if (isDetected) {
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'WEBVIEW_DETECTED', detection: detection }));
-  }
-})();
-`;
-
 // ─── Component ─────────────────────────────────────────────────────────────
 
 export default function SecureSessionSync({
@@ -195,16 +168,6 @@ export default function SecureSessionSync({
   // Brokers known to block WebView access
   const [isWebViewBlocked, setIsWebViewBlocked] = useState(false);
   const [currentMfaStep, setCurrentMfaStep] = useState<0 | 1 | 2>(0);
-
-  // Load broker config from registry (with optional override)
-  const brokerConfig = useMemo<BrokerLoginConfig | null>(() => {
-    const config = getBrokerLoginConfig(brokerType);
-    if (!config && !loginConfigOverride) return null;
-    if (loginConfigOverride) {
-      return { ...config, ...loginConfigOverride } as BrokerLoginConfig;
-    }
-    return config ?? null;
-  }, [brokerType, loginConfigOverride]);
 
   // Determine extraction strategy for this broker
   const extractionStrategy = useMemo<ExtractionStrategy>(() => {
@@ -502,20 +465,20 @@ export default function SecureSessionSync({
 
       // Social login redirect — wait for redirect back to broker
       if (isSocialLoginRedirect(url)) {
-        console.log(`[SecureSessionSync] Social login detected for ${brokerType}, waiting for redirect back...`);
+        log.info(`[SecureSessionSync] Social login detected for ${brokerType}, waiting for redirect back...`);
         return;
       }
 
       // QR code flow — check if we need to display QR
       if (isQrCodeFlow(url)) {
-        console.log(`[SecureSessionSync] QR code scan detected for ${brokerType}`);
+        log.info(`[SecureSessionSync] QR code scan detected for ${brokerType}`);
         return;
       }
 
       // Token parameters in hash fragment (SPA OAuth flow)
       if (!hasCapturedRef.current && hasAuthTokens(url) && !isSocialLoginRedirect(url)) {
         hasCapturedRef.current = true;
-        console.log(`[SecureSessionSync] Auth tokens detected in URL for ${brokerType}, extracting...`);
+        log.info(`[SecureSessionSync] Auth tokens detected in URL for ${brokerType}, extracting...`);
 
         // For token_param strategy, extract immediately
         if (extractionStrategy === 'token_param') {
@@ -578,7 +541,7 @@ export default function SecureSessionSync({
         } else if (message.type === 'SESSION_ERROR') {
           onError(message.error || 'Session extraction failed');
         } else if (message.type === 'WEBVIEW_DETECTED') {
-          console.warn(`[SecureSessionSync] WebView detected by ${brokerType}: ${message.detection}`);
+          log.warn(`[SecureSessionSync] WebView detected by ${brokerType}: ${message.detection}`);
           setIsWebViewBlocked(true);
           onError(
             `This broker (${brokerType}) has detected the in-app browser. ` +

@@ -88,7 +88,7 @@ for (const arg of args) {
   if (key) parsed[key] = value || '';
 }
 
-const users = parsed.users ? parsed.users.split(',').map(s => s.trim()).filter(Boolean) : [];
+const targetUsers = parsed.users ? parsed.users.split(',').map(s => s.trim()).filter(Boolean) : [];
 const prefix = parsed.prefix || '';
 const limit = parseInt(parsed.limit || '10', 10);
 const dryRun = parsed['dry-run'] === '' || parsed['dry-run'] === 'true';

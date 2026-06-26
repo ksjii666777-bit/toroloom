@@ -40,7 +40,7 @@ describe('Custom Features — Extension Point', () => {
     // can be satisfied by a valid implementation (should compile in TS).
     const sampleHook = {
       name: 'Sample Strategy',
-      async execute(context: any) {
+      async execute(_context: any) {
         return { blocked: false };
       },
     };

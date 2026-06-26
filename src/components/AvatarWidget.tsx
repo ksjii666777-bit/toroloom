@@ -220,7 +220,7 @@ export default function AvatarWidget() {
             messageStyle,
           ]}
         >
-          <Ionicons name={avatarIcon as any} size={20} color={avatarColor} />
+          <Ionicons name={avatarIcon as keyof typeof Ionicons.glyphMap} size={20} color={avatarColor} />
           <Text style={[styles.bannerText, { color: colors.text }]} numberOfLines={3}>
             {message}
           </Text>
@@ -243,7 +243,7 @@ export default function AvatarWidget() {
               glowStyle,
             ]}
           />
-          <Ionicons name={avatarIcon as any} size={24} color={avatarColor} />
+          <Ionicons name={avatarIcon as keyof typeof Ionicons.glyphMap} size={24} color={avatarColor} />
         </View>
         {/* Small label */}
         <Text style={[styles.avatarLabel, { color: colors.textMuted }]}>

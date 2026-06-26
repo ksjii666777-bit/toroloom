@@ -146,7 +146,9 @@ export default function ReportsScreen({ navigation }: any) {
           `Est. Tax Liability: ${formatCurrency(cg.totalEstimatedTax, true)}\n\n` +
           `Download Toroloom for AI-powered trading!`,
       });
-    } catch {}
+    } catch {
+      // Share cancelled or failed
+    }
   };
 
   // ── Export PDF / CSV ──────────────────────────────────────────
@@ -325,7 +327,7 @@ export default function ReportsScreen({ navigation }: any) {
               onPress={() => setActiveTab(tab.key)}
             >
               <Ionicons
-                name={tab.icon as any}
+                name={tab.icon as keyof typeof Ionicons.glyphMap}
                 size={16}
                 color={activeTab === tab.key ? colors.white : colors.textMuted}
               />
@@ -443,7 +445,7 @@ export default function ReportsScreen({ navigation }: any) {
                 <View key={i}
                   style={styles.perfCard}>
                   <View style={styles.perfCardIcon}>
-                    <Ionicons name={item.icon as any} size={22} color={item.color} />
+                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
                   </View>
                   <Text style={styles.perfCardLabel}>{item.label}</Text>
                   <Text style={[styles.perfCardValue, { color: item.color }]}>{item.value}</Text>

@@ -11,7 +11,7 @@
  * ============================================================================
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { auditTrail } from '../services/auditTrail';
 
 vi.mock('../config/env', () => ({
@@ -73,7 +73,7 @@ describe('Broker Factory — BROKER_DISCONNECTED Deduplication', () => {
     });
     expect(event1).toBeDefined();
 
-    const event2 = await auditTrail.append({
+    await auditTrail.append({
       userId: 'system',
       eventType: 'BROKER_DISCONNECTED',
       data: { brokerType: 'zerodha', reason: 'Circuit breaker OPEN' },

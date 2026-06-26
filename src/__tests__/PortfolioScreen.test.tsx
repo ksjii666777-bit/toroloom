@@ -10,8 +10,9 @@
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render } from './testUtils';
-import { mockHoldings, mockTrades } from '../constants/mockData';
+import { mockHoldings, mockTrades, mockStocks } from '../constants/mockData';
 import { usePortfolioStore } from '../store/portfolioStore';
+import { useMarketStore } from '../store/marketStore';
 
 // ==================== Mocks (hoisted) ====================
 
@@ -55,6 +56,56 @@ vi.mock('../store/portfolioStore', () => {
   );
   return { usePortfolioStore };
 });
+
+vi.mock('../store/marketStore', () => ({
+  useMarketStore: vi.fn(() => ({
+    stocks: mockStocks,
+  })),
+}));
+
+const portfolioAnalyticsState = {
+  getAnalytics: () => ({
+    metrics: {
+      sharpeRatio: 1.5,
+      winRate: 62,
+      profitFactor: 1.8,
+      avgHoldingDays: 45,
+      maxDrawdownPercent: 8.5,
+      volatility: 15.2,
+      alpha: 2.3,
+      beta: 0.85,
+    },
+    pnlHistory: [
+      { date: '2025-01', value: 0 },
+      { date: '2025-02', value: 25000 },
+      { date: '2025-03', value: 48000 },
+      { date: '2025-04', value: 72000 },
+      { date: '2025-05', value: 100000 },
+    ],
+    sectorAllocation: [
+      { sector: 'Energy', percent: 30, count: 1 },
+      { sector: 'Finance', percent: 45, count: 2 },
+      { sector: 'Technology', percent: 25, count: 2 },
+    ],
+    monthlyReturns: [
+      { month: '2025-01', returnPercent: 2.1 },
+      { month: '2025-02', returnPercent: 3.5 },
+      { month: '2025-03', returnPercent: -1.2 },
+      { month: '2025-04', returnPercent: 4.8 },
+      { month: '2025-05', returnPercent: 2.9 },
+    ],
+    capitalGains: {
+      shortTerm: { gains: 45000 },
+      longTerm: { gains: 55000 },
+    },
+  }),
+};
+
+vi.mock('../store/portfolioAnalyticsStore', () => ({
+  usePortfolioAnalyticsStore: vi.fn((selector: (s: typeof portfolioAnalyticsState) => any) =>
+    selector(portfolioAnalyticsState)
+  ),
+}));
 
 // ==================== Imports ====================
 
@@ -181,5 +232,87 @@ describe('PortfolioScreen — Empty Holdings', () => {
     expect(getByText('No Holdings Yet')).toBeDefined();
     expect(getByText('Start investing to build your portfolio')).toBeDefined();
     expect(getByText('Explore Markets')).toBeDefined();
+  });
+});
+
+describe('PortfolioScreen — Dividend Calendar', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('renders the Dividend Calendar section title', () => {
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText('Dividend Calendar')).toBeDefined();
+  });
+
+  it('renders the total annual dividend chip with ₹ amount', () => {
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    // Find text that includes '/yr' to identify the annual dividend chip
+    expect(getByText(/\/yr/)).toBeDefined();
+  });
+
+  it('renders the Upcoming Estimates section when stocks have dividends', () => {
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(getByText('Upcoming Estimates')).toBeDefined();
+  });
+
+  it('renders dividend stock symbols in the summary', () => {
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    // Holdings with dividends (RELIANCE 0.85%, HDFCBANK 1.05%, TCS 1.20%, INFY 1.80%, SBIN 2.15%)
+    expect(getByText('RELIANCE')).toBeDefined();
+    expect(getByText('HDFCBANK')).toBeDefined();
+    expect(getByText('TCS')).toBeDefined();
+    expect(getByText('INFY')).toBeDefined();
+    expect(getByText('SBIN')).toBeDefined();
+  });
+
+  it('renders dividend yield percentages for holdings', () => {
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    // All mock holdings have dividend > 0, so yield text should appear
+    expect(getByText(/% yield/)).toBeDefined();
+  });
+});
+
+describe('PortfolioScreen — No Dividend Stocks', () => {
+  const defaultMarketImpl = vi.mocked(useMarketStore).getMockImplementation();
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    // Override marketStore mock to return stocks with zero dividends
+    vi.mocked(useMarketStore).mockImplementation(() => ({
+      stocks: mockStocks.map(s => ({ ...s, dividend: 0 })),
+    }));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    // Restore marketStore mock
+    if (defaultMarketImpl) {
+      vi.mocked(useMarketStore).mockImplementation(defaultMarketImpl as any);
+    }
+  });
+
+  it('does NOT render Upcoming Estimates when no stocks pay dividends', () => {
+    const { queryByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    // Holdings exist but none pay dividends → timeline section should not appear
+    expect(queryByText('Upcoming Estimates')).toBeNull();
+  });
+
+  it('does NOT crash when all stocks have zero dividend', () => {
+    const { toJSON } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+    expect(toJSON).not.toBeNull();
   });
 });

@@ -91,10 +91,6 @@ Total Turnover: 382585.50
 Brokerage: 0.00
 `;
 
-const LONG_TRADE_TEXT = Array.from({ length: 30 }, (_, i) =>
-  `15-01-2024 ${String(9 + Math.floor(i / 6)).padStart(2, '0')}:${String((i % 6) * 10).padStart(2, '0')}:00 SYMBOL${i} ${i % 2 === 0 ? 'BUY' : 'SELL'} ${i + 1} ${(100 + i * 10 + 0.50).toFixed(2)}`,
-).join('\n');
-
 // ============================================================================
 // CSV Generation Helpers (mirrors frontend pdfExtractor.ts logic)
 // ============================================================================
@@ -152,14 +148,6 @@ function parseTradesFromText(text: string): Array<{
     exchange?: string;
     trade_id?: string;
   }> = [];
-
-  // Detected broker
-  const lower = text.toLowerCase();
-  const brokerDetected = lower.includes('zerodha')
-    ? 'zerodha'
-    : lower.includes('angel')
-      ? 'angel'
-      : undefined;
 
   const lines = text.split('\n');
   for (const line of lines) {

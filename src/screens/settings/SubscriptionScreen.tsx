@@ -207,7 +207,7 @@ export default function SubscriptionScreen({ navigation }: any) {
                     end={{ x: 1, y: 1 }}
                     style={styles.planHeader}
                   >
-                    <Ionicons name={plan.icon as any} size={32} color={colors.white} />
+                    <Ionicons name={plan.icon as keyof typeof Ionicons.glyphMap} size={32} color={colors.white} />
                     {plan.popular && (
                       <View style={styles.popularBadge}>
                         <Text style={styles.popularBadgeText}>{plan.badge}</Text>

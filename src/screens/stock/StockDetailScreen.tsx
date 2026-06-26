@@ -20,6 +20,18 @@ const { width } = Dimensions.get('window');
 
 const TIMEFRAMES = ['1D', '1W', '1M', '3M', '1Y', 'Max'];
 
+// Parse a market cap string like "₹19,56,000 Cr" into a compact value
+function formatCompactMarketCap(marketCap: string): string {
+  const cleaned = marketCap.replace(/[₹,\s]/g, '');
+  if (cleaned.includes('Cr')) {
+    const num = parseFloat(cleaned);
+    if (num >= 100000) return `${(num / 100000).toFixed(1)}L Cr`;
+    return `${num.toFixed(0)} Cr`;
+  }
+  if (cleaned.includes('L')) return cleaned;
+  return marketCap;
+}
+
 export default function StockDetailScreen({ route, navigation }: any) {
   const { stockId } = route.params;
   const { colors } = useTheme();
@@ -32,6 +44,41 @@ export default function StockDetailScreen({ route, navigation }: any) {
   const [showMA, setShowMA] = useState(false);
   const [activeIndicators, setActiveIndicators] = useState<IndicatorType[]>([]);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+
+  // ── Sector Performance Data ───────────────────────────────
+  const sectorData = useMemo(() => {
+    const sectorStocks = stocks.filter(s => s.sector === stock.sector);
+    if (sectorStocks.length === 0) return null;
+
+    const avgChange = sectorStocks.reduce((sum, s) => sum + s.changePercent, 0) / sectorStocks.length;
+    const best = [...sectorStocks].sort((a, b) => b.changePercent - a.changePercent)[0];
+    const worst = [...sectorStocks].sort((a, b) => a.changePercent - b.changePercent)[0];
+
+    // Compute sector ranking
+    const allSectors = new Map<string, number>();
+    for (const s of stocks) {
+      allSectors.set(s.sector, (allSectors.get(s.sector) || 0) + s.changePercent);
+    }
+    const sectorAvg = Array.from(allSectors.entries()).map(([name, total]) => {
+      const count = stocks.filter(s => s.sector === name).length;
+      return { name, avgChange: total / count };
+    }).sort((a, b) => b.avgChange - a.avgChange);
+
+    const rank = sectorAvg.findIndex(s => s.name === stock.sector) + 1;
+    const bestSector = sectorAvg[0];
+    const worstSector = sectorAvg[sectorAvg.length - 1];
+
+    return {
+      stocks: sectorStocks,
+      avgChange: Math.round(avgChange * 100) / 100,
+      best,
+      worst,
+      rank,
+      totalSectors: sectorAvg.length,
+      bestSector,
+      worstSector,
+    };
+  }, [stocks, stock.sector]);
 
   // Real-time price updates via mock WebSocket
   const {
@@ -48,7 +95,6 @@ export default function StockDetailScreen({ route, navigation }: any) {
   const displayPrice = currentPrice;
   const displayChange = priceChange;
   const displayChangePercent = priceChangePercent;
-  const changeColor = isPositive ? colors.marketUp : colors.marketDown;
 
   const aiInsight = insights.find(i => i.stockId === stockId);
   const inWatchlist = isInWatchlist(stockId);
@@ -80,19 +126,20 @@ export default function StockDetailScreen({ route, navigation }: any) {
     navigation.navigate('PlaceOrder', { stockId: stock.id, symbol: stock.symbol, tradeType: type });
   }, [navigation, stock]);
 
+  const INTRADAY_CANDLE_COUNT = 390;
+
   // Compute day range from candle data
   const dayHigh = candleHistory.length > 0
-    ? Math.max(...candleHistory.slice(-390).map(c => c.high))
+    ? Math.max(...candleHistory.slice(-INTRADAY_CANDLE_COUNT).map(c => c.high))
     : stock.high52;
   const dayLow = candleHistory.length > 0
-    ? Math.min(...candleHistory.slice(-390).map(c => c.low))
+    ? Math.min(...candleHistory.slice(-INTRADAY_CANDLE_COUNT).map(c => c.low))
     : stock.low52;
   const volume = candleHistory.length > 0
     ? candleHistory[candleHistory.length - 1]?.volume
     : 0;
 
   const styles = useMemo(() => {
-    const changeColor = isPositive ? colors.marketUp : colors.marketDown;
     return StyleSheet.create({
       container: {
         flex: 1,
@@ -139,9 +186,8 @@ export default function StockDetailScreen({ route, navigation }: any) {
         borderRadius: 3,
       },
       connectionText: {
-        fontFamily: 'System',
+        ...FONTS.medium,
         fontSize: FONTS.size.xs,
-        fontWeight: '500',
       },
       stockInfo: {
         marginBottom: SPACING.lg,
@@ -152,14 +198,12 @@ export default function StockDetailScreen({ route, navigation }: any) {
         alignItems: 'flex-start',
       },
       symbol: {
-        fontFamily: 'System',
-        fontWeight: '800',
+        ...FONTS.extraBold,
         fontSize: FONTS.size.hero,
         color: colors.text,
       },
       name: {
-        fontFamily: 'System',
-        fontWeight: '400',
+        ...FONTS.regular,
         fontSize: FONTS.size.sm,
         color: colors.textSecondary,
         marginTop: 4,
@@ -171,8 +215,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         marginTop: SPACING.md,
       },
       price: {
-        fontFamily: 'System',
-        fontWeight: '900',
+        ...FONTS.black,
         fontSize: FONTS.size.display,
         color: colors.text,
       },
@@ -185,8 +228,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         gap: 4,
       },
       changeText: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.sm,
       },
       liveIndicator: {
@@ -201,7 +243,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         borderRadius: 4,
       },
       liveText: {
-        fontFamily: 'System',
+        ...FONTS.regular,
         fontSize: FONTS.size.xs,
         color: colors.textMuted,
       },
@@ -224,10 +266,9 @@ export default function StockDetailScreen({ route, navigation }: any) {
         backgroundColor: colors.primary + '15',
       },
       chartOptionText: {
-        fontFamily: 'System',
+        ...FONTS.medium,
         fontSize: FONTS.size.xs,
         color: colors.textSecondary,
-        fontWeight: '500',
       },
       chartOptionTextActive: {
         color: colors.primary,
@@ -248,27 +289,23 @@ export default function StockDetailScreen({ route, navigation }: any) {
         borderColor: colors.border,
       },
       statLabel: {
-        fontFamily: 'System',
-        fontWeight: '400',
+        ...FONTS.regular,
         fontSize: FONTS.size.xs,
         color: colors.textMuted,
         marginBottom: 4,
       },
       statValue: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.sm,
         color: colors.text,
       },
       statValueHigh: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.sm,
         color: colors.marketUp,
       },
       statValueLow: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.sm,
         color: colors.marketDown,
       },
@@ -276,8 +313,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         marginBottom: SPACING.lg,
       },
       aboutText: {
-        fontFamily: 'System',
-        fontWeight: '400',
+        ...FONTS.regular,
         fontSize: FONTS.size.sm,
         color: colors.textSecondary,
         lineHeight: 20,
@@ -309,14 +345,12 @@ export default function StockDetailScreen({ route, navigation }: any) {
         alignItems: 'center',
       },
       aiTitle: {
-        fontFamily: 'System',
-        fontWeight: '700',
+        ...FONTS.bold,
         fontSize: FONTS.size.md,
         color: colors.text,
       },
       aiSubtitle: {
-        fontFamily: 'System',
-        fontWeight: '400',
+        ...FONTS.regular,
         fontSize: FONTS.size.xs,
         marginTop: 1,
       },
@@ -329,8 +363,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         borderRadius: BORDER_RADIUS.full,
       },
       sentimentText: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.xs,
       },
       confidenceRow: {
@@ -343,13 +376,11 @@ export default function StockDetailScreen({ route, navigation }: any) {
         marginBottom: 6,
       },
       confidenceLabel: {
-        fontFamily: 'System',
-        fontWeight: '400',
+        ...FONTS.regular,
         fontSize: FONTS.size.xs,
       },
       confidenceValue: {
-        fontFamily: 'System',
-        fontWeight: '700',
+        ...FONTS.bold,
         fontSize: FONTS.size.sm,
       },
       confidenceBar: {
@@ -362,15 +393,13 @@ export default function StockDetailScreen({ route, navigation }: any) {
         borderRadius: 3,
       },
       aiSummary: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.sm,
         color: colors.text,
         marginBottom: SPACING.sm,
       },
       aiAnalysis: {
-        fontFamily: 'System',
-        fontWeight: '400',
+        ...FONTS.regular,
         fontSize: FONTS.size.sm,
         color: colors.textSecondary,
         lineHeight: 20,
@@ -380,8 +409,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         marginBottom: SPACING.md,
       },
       targetsLabel: {
-        fontFamily: 'System',
-        fontWeight: '500',
+        ...FONTS.medium,
         fontSize: FONTS.size.xs,
         marginBottom: SPACING.sm,
         textTransform: 'uppercase',
@@ -398,14 +426,12 @@ export default function StockDetailScreen({ route, navigation }: any) {
         alignItems: 'center',
       },
       targetProb: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.xs,
         marginBottom: 2,
       },
       targetValue: {
-        fontFamily: 'System',
-        fontWeight: '700',
+        ...FONTS.bold,
         fontSize: FONTS.size.sm,
         color: colors.text,
         marginBottom: 6,
@@ -429,20 +455,17 @@ export default function StockDetailScreen({ route, navigation }: any) {
         borderTopWidth: 1,
       },
       aiCtaText: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.sm,
       },
 
       // ── Section Title ──
       sectionTitle: {
-        fontFamily: 'System',
-        fontWeight: '700',
+        ...FONTS.bold,
         fontSize: FONTS.size.lg,
       },
       sectionSubtitle: {
-        fontFamily: 'System',
-        fontWeight: '400',
+        ...FONTS.regular,
         fontSize: FONTS.size.xs,
       },
 
@@ -454,8 +477,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         borderBottomWidth: 1,
       },
       peerHeaderCell: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.xs,
         flex: 1,
         textAlign: 'right',
@@ -479,13 +501,11 @@ export default function StockDetailScreen({ route, navigation }: any) {
         marginTop: 2,
       },
       peerSymbolText: {
-        fontFamily: 'System',
-        fontWeight: '600',
+        ...FONTS.semiBold,
         fontSize: FONTS.size.sm,
       },
       peerCellText: {
-        fontFamily: 'System',
-        fontWeight: '500',
+        ...FONTS.medium,
         fontSize: FONTS.size.sm,
         flex: 1,
         textAlign: 'right',
@@ -496,8 +516,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         borderRadius: 4,
       },
       youBadgeText: {
-        fontFamily: 'System',
-        fontWeight: '700',
+        ...FONTS.bold,
         fontSize: 8,
       },
       bottomBar: {
@@ -518,14 +537,12 @@ export default function StockDetailScreen({ route, navigation }: any) {
         alignItems: 'center',
       },
       ltpLabel: {
-        fontFamily: 'System',
-        fontWeight: '400',
+        ...FONTS.regular,
         fontSize: FONTS.size.xs,
         color: colors.textMuted,
       },
       ltpValue: {
-        fontFamily: 'System',
-        fontWeight: '700',
+        ...FONTS.bold,
         fontSize: FONTS.size.xl,
         color: colors.text,
       },
@@ -552,13 +569,113 @@ export default function StockDetailScreen({ route, navigation }: any) {
         paddingVertical: SPACING.md,
       },
       tradeBtnText: {
-        fontFamily: 'System',
-        fontWeight: '700',
+        ...FONTS.bold,
         fontSize: FONTS.size.md,
         color: colors.white,
       },
+
+      // ── Sector Context ──
+      sectorPerfCard: {
+        borderRadius: BORDER_RADIUS.md,
+        borderWidth: 1,
+        padding: SPACING.md,
+        gap: 3,
+      },
+      sectorPerfHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: SPACING.sm,
+      },
+      sectorPerfLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+      },
+      sectorPerfName: {
+        ...FONTS.semiBold,
+        fontSize: FONTS.size.sm,
+      },
+      sectorPerfBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 3,
+        borderRadius: BORDER_RADIUS.full,
+      },
+      sectorPerfChange: {
+        ...FONTS.bold,
+        fontSize: FONTS.size.sm,
+      },
+      sectorBarBg: {
+        height: 6,
+        borderRadius: 3,
+        overflow: 'hidden',
+        marginBottom: SPACING.md,
+      },
+      sectorBarFill: {
+        height: '100%',
+        borderRadius: 3,
+      },
+      sectorStatsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingTop: SPACING.sm,
+        borderTopWidth: 1,
+      },
+      sectorStatItem: {
+        flex: 1,
+        alignItems: 'center',
+      },
+      sectorStatValue: {
+        ...FONTS.bold,
+        fontSize: FONTS.size.sm,
+      },
+      sectorStatLabel: {
+        ...FONTS.regular,
+        fontSize: 10,
+        marginTop: 2,
+      },
+      sectorStatDivider: {
+        width: 1,
+        height: 24,
+      },
+      sectorRankRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        padding: SPACING.sm,
+        borderRadius: BORDER_RADIUS.sm,
+        borderWidth: 1,
+        marginTop: SPACING.sm,
+      },
+      sectorRankText: {
+        ...FONTS.regular,
+        fontSize: 10,
+        flex: 1,
+        lineHeight: 16,
+      },
+
+      // ── Peer Comparison Enhanced ──
+      peerCellWithBar: {
+        flex: 1,
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        gap: 3,
+      },
+      peerBarBg: {
+        width: '100%',
+        height: 3,
+        borderRadius: 2,
+        overflow: 'hidden',
+      },
+      peerBarFill: {
+        height: '100%',
+        borderRadius: 2,
+      },
     });
-  }, [colors, isPositive, SPACING, FONTS, BORDER_RADIUS]);
+  }, [colors, SPACING, FONTS, BORDER_RADIUS]);
 
   return (
     <View style={styles.container}>
@@ -598,9 +715,9 @@ export default function StockDetailScreen({ route, navigation }: any) {
 
           <View style={styles.priceSection}>
             <Text style={styles.price}>{formatCurrency(displayPrice)}</Text>
-            <View style={[styles.changeBadge, { backgroundColor: changeColor + '20' }]}>
-              <Ionicons name={isPositive ? 'caret-up' : 'caret-down'} size={18} color={changeColor} />
-              <Text style={[styles.changeText, { color: changeColor }]}>
+            <View style={[styles.changeBadge, { backgroundColor: (isPositive ? colors.marketUp : colors.marketDown) + '20' }]}>
+              <Ionicons name={isPositive ? 'caret-up' : 'caret-down'} size={18} color={isPositive ? colors.marketUp : colors.marketDown} />
+              <Text style={[styles.changeText, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
                 {isPositive ? '+' : ''}{displayChange.toFixed(2)} ({isPositive ? '+' : ''}{displayChangePercent.toFixed(2)}%)
               </Text>
             </View>
@@ -723,6 +840,77 @@ export default function StockDetailScreen({ route, navigation }: any) {
           </Text>
         </Card>
 
+        {/* Sector Context */}
+        {sectorData && (() => {
+          const isSectorGreen = sectorData.avgChange >= 0;
+          const intensity = Math.min(Math.abs(sectorData.avgChange) / 5, 1);
+          return (
+            <View style={{ marginBottom: SPACING.lg }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md }}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Sector Context</Text>
+                <Badge label={`#${sectorData.rank} of ${sectorData.totalSectors}`} variant={sectorData.rank <= 3 ? 'success' : sectorData.rank >= sectorData.totalSectors - 2 ? 'danger' : 'info'} />
+              </View>
+
+              {/* Sector Performance Bar */}
+              <View style={[styles.sectorPerfCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={styles.sectorPerfHeader}>
+                  <View style={styles.sectorPerfLeft}>
+                    <Ionicons name="business" size={18} color={isSectorGreen ? colors.marketUp : colors.marketDown} />
+                    <Text style={[styles.sectorPerfName, { color: colors.text }]}>{stock.sector} Sector</Text>
+                  </View>
+                  <View style={[styles.sectorPerfBadge, {
+                    backgroundColor: isSectorGreen
+                      ? `rgba(0, 230, 118, ${Math.max(0.1, intensity)})`
+                      : `rgba(255, 82, 82, ${Math.max(0.1, intensity)})`,
+                  }]}>
+                    <Ionicons name={isSectorGreen ? 'trending-up' : 'trending-down'} size={14} color={isSectorGreen ? colors.marketUp : colors.marketDown} />
+                    <Text style={[styles.sectorPerfChange, {
+                      color: isSectorGreen ? colors.marketUp : colors.marketDown,
+                    }]}>
+                      {isSectorGreen ? '+' : ''}{sectorData.avgChange.toFixed(2)}%
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Sector performance bar */}
+                <View style={[styles.sectorBarBg, { backgroundColor: colors.bgInput }]}>
+                  <View style={[styles.sectorBarFill, {
+                    width: `${Math.min(Math.abs(sectorData.avgChange) * 15, 100)}%`,
+                    backgroundColor: isSectorGreen ? colors.marketUp : colors.marketDown,
+                  }]} />
+                </View>
+
+                {/* Sector stats row */}
+                <View style={[styles.sectorStatsRow, { borderTopColor: colors.divider }]}>
+                  <View style={styles.sectorStatItem}>
+                    <Text style={[styles.sectorStatValue, { color: colors.text }]}>{sectorData.stocks.length}</Text>
+                    <Text style={[styles.sectorStatLabel, { color: colors.textMuted }]}>Stocks</Text>
+                  </View>
+                  <View style={[styles.sectorStatDivider, { backgroundColor: colors.divider }]} />
+                  <View style={styles.sectorStatItem}>
+                    <Text style={[styles.sectorStatValue, { color: colors.marketUp }]}>{sectorData.best.symbol}</Text>
+                    <Text style={[styles.sectorStatLabel, { color: colors.textMuted }]}>Best</Text>
+                  </View>
+                  <View style={[styles.sectorStatDivider, { backgroundColor: colors.divider }]} />
+                  <View style={styles.sectorStatItem}>
+                    <Text style={[styles.sectorStatValue, { color: colors.marketDown }]}>{sectorData.worst.symbol}</Text>
+                    <Text style={[styles.sectorStatLabel, { color: colors.textMuted }]}>Worst</Text>
+                  </View>
+                </View>
+
+                {/* Sector ranking context */}
+                <View style={[styles.sectorRankRow, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
+                  <Ionicons name="podium" size={14} color={colors.textMuted} />
+                  <Text style={[styles.sectorRankText, { color: colors.textMuted }]}>
+                    {stock.sector} is #{sectorData.rank} of {sectorData.totalSectors} sectors
+                    {' ('}+{sectorData.bestSector.avgChange.toFixed(1)}% best — {sectorData.worstSector.avgChange.toFixed(1)}% worst)
+                  </Text>
+                </View>
+              </View>
+            </View>
+          );
+        })()}
+
         {/* Peer Comparison */}
         {(() => {
           const peers = stocks.filter(s => s.sector === stock.sector && s.id !== stockId).slice(0, 5);
@@ -734,46 +922,72 @@ export default function StockDetailScreen({ route, navigation }: any) {
                 <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{stock.sector}</Text>
               </View>
 
+
+
               {/* Table header */}
               <View style={[styles.peerHeader, { borderColor: colors.border }]}>
                 <Text style={[styles.peerHeaderCell, styles.peerCellSymbol, { color: colors.textMuted }]}>Symbol</Text>
                 <Text style={[styles.peerHeaderCell, { color: colors.textMuted }]}>P/E</Text>
+                <Text style={[styles.peerHeaderCell, { color: colors.textMuted }]}>M.Cap</Text>
                 <Text style={[styles.peerHeaderCell, { color: colors.textMuted }]}>Chg%</Text>
-                <Text style={[styles.peerHeaderCell, { color: colors.textMuted }]}>Div</Text>
               </View>
 
               {/* Current stock (highlighted) */}
-              <View style={[styles.peerRow, { backgroundColor: colors.primary + '12', borderColor: colors.primary + '40' }]}>
-                <View style={styles.peerCellSymbol}>
-                  <Text style={[styles.peerSymbolText, { color: colors.primary }]}>{stock.symbol}</Text>
-                  <View style={[styles.youBadge, { backgroundColor: colors.primary + '20' }]}>
-                    <Text style={[styles.youBadgeText, { color: colors.primary }]}>YOU</Text>
+              {(() => {
+                const allPeers = [stock, ...peers];
+                const maxPE = Math.max(...allPeers.map(p => p.pe), 1);
+                const peBarWidth = (stock.pe / maxPE) * 100;
+                return (
+                  <View style={[styles.peerRow, { backgroundColor: colors.primary + '12', borderColor: colors.primary + '40' }]}>
+                    <View style={styles.peerCellSymbol}>
+                      <Text style={[styles.peerSymbolText, { color: colors.primary }]}>{stock.symbol}</Text>
+                      <View style={[styles.youBadge, { backgroundColor: colors.primary + '20' }]}>
+                        <Text style={[styles.youBadgeText, { color: colors.primary }]}>YOU</Text>
+                      </View>
+                    </View>
+                    <View style={styles.peerCellWithBar}>
+                      <Text style={[styles.peerCellText, { color: colors.text }]}>{stock.pe.toFixed(1)}</Text>
+                      <View style={[styles.peerBarBg, { backgroundColor: colors.bgInput }]}>
+                        <View style={[styles.peerBarFill, { width: `${peBarWidth}%`, backgroundColor: colors.primary, opacity: 0.7 }]} />
+                      </View>
+                    </View>
+                    <Text style={[styles.peerCellText, { color: colors.text }]}>{formatCompactMarketCap(stock.marketCap)}</Text>
+                    <Text style={[styles.peerCellText, { color: stock.changePercent >= 0 ? colors.marketUp : colors.marketDown }]}>
+                      {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                    </Text>
                   </View>
-                </View>
-                <Text style={[styles.peerCellText, { color: colors.text }]}>{stock.pe.toFixed(1)}</Text>
-                <Text style={[styles.peerCellText, { color: stock.changePercent >= 0 ? colors.marketUp : colors.marketDown }]}>
-                  {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
-                </Text>
-                <Text style={[styles.peerCellText, { color: colors.text }]}>{stock.dividend.toFixed(2)}%</Text>
-              </View>
+                );
+              })()}
 
               {/* Peer stocks */}
-              {peers.map(p => (
-                <TouchableOpacity
-                  key={p.id}
-                  style={[styles.peerRow, { borderColor: colors.border }]}
-                  onPress={() => navigation.navigate('StockDetail', { stockId: p.id, symbol: p.symbol })}
-                >
-                  <View style={styles.peerCellSymbol}>
-                    <Text style={[styles.peerSymbolText, { color: colors.text }]}>{p.symbol}</Text>
-                  </View>
-                  <Text style={[styles.peerCellText, { color: colors.text }]}>{p.pe.toFixed(1)}</Text>
-                  <Text style={[styles.peerCellText, { color: p.changePercent >= 0 ? colors.marketUp : colors.marketDown }]}>
-                    {p.changePercent >= 0 ? '+' : ''}{p.changePercent.toFixed(2)}%
-                  </Text>
-                  <Text style={[styles.peerCellText, { color: colors.text }]}>{p.dividend.toFixed(2)}%</Text>
-                </TouchableOpacity>
-              ))}
+              {(() => {
+                const allPeers = [stock, ...peers];
+                const maxPE = Math.max(...allPeers.map(p => p.pe), 1);
+                return peers.map(p => {
+                  const peBarWidth = (p.pe / maxPE) * 100;
+                  return (
+                    <TouchableOpacity
+                      key={p.id}
+                      style={[styles.peerRow, { borderColor: colors.border }]}
+                      onPress={() => navigation.navigate('StockDetail', { stockId: p.id, symbol: p.symbol })}
+                    >
+                      <View style={styles.peerCellSymbol}>
+                        <Text style={[styles.peerSymbolText, { color: colors.text }]}>{p.symbol}</Text>
+                      </View>
+                      <View style={styles.peerCellWithBar}>
+                        <Text style={[styles.peerCellText, { color: colors.text }]}>{p.pe.toFixed(1)}</Text>
+                        <View style={[styles.peerBarBg, { backgroundColor: colors.bgInput }]}>
+                          <View style={[styles.peerBarFill, { width: `${peBarWidth}%`, backgroundColor: colors.textMuted, opacity: 0.3 }]} />
+                        </View>
+                      </View>
+                      <Text style={[styles.peerCellText, { color: colors.text }]}>{formatCompactMarketCap(p.marketCap)}</Text>
+                      <Text style={[styles.peerCellText, { color: p.changePercent >= 0 ? colors.marketUp : colors.marketDown }]}>
+                        {p.changePercent >= 0 ? '+' : ''}{p.changePercent.toFixed(2)}%
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                });
+              })()}
             </View>
           );
         })()}
@@ -816,7 +1030,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
                 </View>
                 <View style={[styles.confidenceBar, { backgroundColor: colors.bgInput }]}>
                   <View style={[styles.confidenceFill, {
-                    width: `${aiInsight.confidence}%` as any,
+                    width: `${aiInsight.confidence}%`,
                     backgroundColor: sentimentColor,
                   }]} />
                 </View>
@@ -839,7 +1053,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
                         <Text style={[styles.targetValue, { color: colors.text }]}>{formatCurrency(t.target)}</Text>
                         <View style={[styles.probBar, { backgroundColor: colors.bgInput }]}>
                           <View style={[styles.probFill, {
-                            width: `${t.probability}%` as any,
+                            width: `${t.probability}%`,
                             backgroundColor: sentimentColor,
                             opacity: 0.6 + (i / aiInsight.targets.length) * 0.4,
                           }]} />

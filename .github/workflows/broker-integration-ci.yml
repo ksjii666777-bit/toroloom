@@ -1,0 +1,104 @@
+# ==============================================================================
+# Toroloom — Broker Integration CI
+# ==============================================================================
+#
+# Fast-track job that runs the ConnectBrokerFlow end-to-end integration tests
+# on every pull request.  This covers the full broker connect/disconnect flow:
+# loading state, disconnected state (broker grid, status pills, info card),
+# session sync modal interaction, connected state (banner, Test API, Disconnect
+# button), proxy request, and state transition integrity.
+#
+# Triggered only when broker-related source or test files change — typically
+# runs in ~30s vs. the full frontend suite's ~2min.
+#
+# Test file:
+#   - ConnectBrokerFlow.int.test.tsx  (20 integration tests)
+# ==============================================================================
+
+name: Broker Integration CI
+
+on:
+  pull_request:
+    branches: [master, main]
+    # Only trigger when broker-related source or test files change
+    paths:
+      # Integration test file
+      - 'src/__tests__/ConnectBrokerFlow*'
+      # Broker screen source
+      - 'src/screens/broker/**'
+      # Gateway services (sessionStorage, proxyClient, brokerLoginConfig)
+      - 'src/services/gateway/**'
+      # SecureSessionSync component
+      - 'src/components/gateway/**'
+      # Shared dependencies
+      - 'src/__tests__/testUtils*'
+      - 'src/__tests__/setup*'
+      - 'src/context/ThemeContext*'
+      - 'src/constants/theme*'
+      - 'src/types/index*'
+      # The unit test file (co-located coverage for the same screens)
+      - 'src/__tests__/ConnectBrokerView*'
+      # Workflow definition itself
+      - '.github/workflows/broker-integration-ci.yml'
+  workflow_dispatch:            # Allow manual trigger from the Actions tab
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true     # Cancel in-flight runs on the same branch
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  broker-integration-tests:
+    name: Broker Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Run the broker integration test suite.
+      # This covers the full end-to-end flow: loading → disconnected →
+      # session sync → connected → Test API → disconnect.
+      - name: Run broker integration tests
+        run: npx vitest run --reporter=verbose \
+          src/__tests__/ConnectBrokerFlow.int.test.tsx
+        env:
+          NODE_ENV: test
+
+      # Post a concise summary to the GitHub Actions job summary
+      - name: Post test summary
+        if: always()
+        shell: bash
+        run: |
+          cat <<'EOF' >> $GITHUB_STEP_SUMMARY
+          ## Broker Integration Tests
+
+          | Suite | Tests | Coverage |
+          |-------|-------|----------|
+          | ConnectBrokerFlow.int.test.tsx | All | Full E2E: loading, disconnected, session sync modal, connected, Test API, disconnect, broker switching |
+
+          **Flows tested:**
+          - Zero-API Sync Flow (loading → disconnected → tap broker → modal → close)
+          - Existing Session on Mount (Zerodha, Angel One, Groww)
+          - Test API Proxy Request (success, loading state, failure recovery)
+          - Disconnect Flow (Disconnect button, tapping connected card)
+          - Loading Edge Cases (indicator visible, error recovery)
+          - State Transition Integrity (features, pills, info card, connected banner)
+          - Broker Switching (sequential modal open/close for all 3 brokers)
+
+          Run via \`broker-integration-ci.yml\` — fast-track broker E2E job.
+          EOF

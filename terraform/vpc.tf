@@ -107,6 +107,6 @@ resource "aws_route_table_association" "public" {
 
 # ──── Outputs for referencing from main.tf ──────────────────────────────────
 locals {
-  resolved_vpc_id  = local.create_vpc ? aws_vpc.main[0].id : var.vpc_id
+  resolved_vpc_id     = local.create_vpc ? aws_vpc.main[0].id : var.vpc_id
   resolved_subnet_ids = local.create_vpc ? aws_subnet.private[*].id : var.subnet_ids
 }

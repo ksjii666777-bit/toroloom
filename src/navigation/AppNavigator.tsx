@@ -60,8 +60,15 @@ import ChatRoomListScreen from '../screens/chat/ChatRoomListScreen';
 import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
 import BehavioralJournalScreen from '../screens/journal/BehavioralJournalScreen';
 import ContractNoteUploadScreen from '../screens/reports/ContractNoteUploadScreen';
+
+// Calculator Screens
+import SIPCalculator from '../screens/calculators/SIPCalculator';
+import LumpsumCalculator from '../screens/calculators/LumpsumCalculator';
+import EMICalculator from '../screens/calculators/EMICalculator';
+import TaxCalculator from '../screens/calculators/TaxCalculator';
 import AvatarWidget from '../components/AvatarWidget';
 import IronLockOverlay from '../components/IronLockOverlay';
+import OfflineBanner from '../components/ui/OfflineBanner';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -94,7 +101,7 @@ function TabIcon({ name, focused, color, badgeCount }: { name: string; focused: 
 
   return (
     <Animated.View style={[tabStyles.iconContainer, iconStyle]}>
-      <Ionicons name={name as any} size={24} color={color} />
+      <Ionicons name={name as keyof typeof Ionicons.glyphMap} size={24} color={color} />
       {badgeCount !== undefined && badgeCount > 0 && (
         <Animated.View style={[tabStyles.badgeOverlay, badgeStyle]}>
           <Text style={tabStyles.badgeText}>
@@ -202,6 +209,7 @@ function MainTabs() {
     </Tab.Navigator>
       <AvatarWidget />
       <IronLockOverlay />
+      <OfflineBanner />
     </>
   );
 }
@@ -365,6 +373,10 @@ export default function AppNavigator() {
             <Stack.Screen name="BrokerConnect" component={ConnectBrokerView} />
             <Stack.Screen name="TenantConfig" component={TenantConfigScreen} />
             <Stack.Screen name="VoiceSettings" component={VoiceSettingsScreen} />
+            <Stack.Screen name="SIPCalculator" component={SIPCalculator} />
+            <Stack.Screen name="LumpsumCalculator" component={LumpsumCalculator} />
+            <Stack.Screen name="EMICalculator" component={EMICalculator} />
+            <Stack.Screen name="TaxCalculator" component={TaxCalculator} />
           </>
         )}
       </Stack.Navigator>

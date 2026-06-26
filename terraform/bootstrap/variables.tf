@@ -9,11 +9,11 @@ variable "aws_region" {
 }
 
 variable "state_bucket_name" {
-  description = <<-EOF
+  description = <<EOF
     Globally unique name for the S3 bucket storing Terraform state files.
     Convention: {project}-terraform-state-{env}
     Example:    toroloom-terraform-state-production
-  EOF
+EOF
   type        = string
 }
 
@@ -56,11 +56,12 @@ variable "create_storage_alarm" {
 variable "storage_alarm_threshold_bytes" {
   description = "S3 bucket storage size alarm threshold in bytes (default: 1 GB)"
   type        = number
-  default     = 1_073_741_824  # 1 GB
+  # 1 GB
+  default = 1073741824
 }
 
 variable "allowed_iam_principals" {
-  description = <<-EOF
+  description = <<EOF
     List of IAM principal ARN patterns allowed to access Terraform state files.
     Uses ArnLike condition — supports wildcards.
     Examples:
@@ -68,7 +69,7 @@ variable "allowed_iam_principals" {
       ["arn:aws:iam::*:role/terraform-*"]
       ["arn:aws:iam::*:user/terraform-*", "arn:aws:iam::*:role/ci-*"]
     Leave empty to allow any authenticated IAM principal (still enforces TLS).
-  EOF
+EOF
   type        = list(string)
   default     = []
 }
@@ -77,8 +78,8 @@ variable "tags" {
   description = "Common tags applied to all bootstrap resources"
   type        = map(string)
   default = {
-    Project     = "Toroloom"
-    ManagedBy   = "Terraform"
-    Component   = "terraform-state-backend"
+    Project   = "Toroloom"
+    ManagedBy = "Terraform"
+    Component = "terraform-state-backend"
   }
 }

@@ -32,7 +32,7 @@ export default function MarketCard({ index, onPress }: MarketCardProps) {
       >
         <View style={styles.header}>
           <Ionicons
-            name={index.icon as any}
+            name={index.icon as keyof typeof Ionicons.glyphMap}
             size={16}
             color={changeColor}
           />

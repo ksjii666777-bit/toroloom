@@ -11,7 +11,7 @@
  * ============================================================================
  */
 
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -189,6 +189,17 @@ export class InMemoryStorage implements StorageEngine {
 
   async deleteCommunityPost(postId: string): Promise<void> {
     this.communityPosts = this.communityPosts.filter((p) => p.id !== postId);
+  }
+
+  // ──── Subscriptions ────
+  private subscriptions = new Map<string, UserSubscriptionData>();
+
+  async loadSubscription(userId: string): Promise<UserSubscriptionData | null> {
+    return this.subscriptions.get(userId) ?? null;
+  }
+
+  async saveSubscription(userId: string, sub: UserSubscriptionData): Promise<void> {
+    this.subscriptions.set(userId, sub);
   }
 
   // ──── Lifecycle ────

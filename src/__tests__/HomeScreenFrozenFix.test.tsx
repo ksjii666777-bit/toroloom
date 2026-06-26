@@ -343,7 +343,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
       expect(mockNavigate).toHaveBeenCalledWith('Portfolio');
 
       fireEvent.press(getByText('SIP'));
-      expect(mockNavigate).toHaveBeenCalledWith('MutualFunds');
+      expect(mockNavigate).toHaveBeenCalledWith('SIPCalculator');
 
       fireEvent.press(getByText('Learn'));
       expect(mockNavigate).toHaveBeenCalledWith('Learn');

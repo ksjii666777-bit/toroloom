@@ -12,29 +12,11 @@ import { useFundStore } from '../../store/fundStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
+import { LINKED_BANKS, INTERNAL_ACCOUNTS, TRANSFER_PRESETS } from '../../services/mockDataService';
 
 Dimensions.get('window');
 
-const TRANSFER_PRESETS = [1000, 5000, 10000, 25000];
-
 type TransferTab = 'internal' | 'external';
-
-interface InternalAccount {
-  id: string;
-  label: string;
-  type: string;
-  balance: number;
-}
-
-const INTERNAL_ACCOUNTS: InternalAccount[] = [
-  { id: 'trading', label: 'Trading Account', type: 'Trading', balance: 2500000 },
-  { id: 'demats', label: 'Demat Account', type: 'Demat', balance: 0 },
-];
-
-const LINKED_BANKS = [
-  { id: 'b1', bankName: 'HDFC Bank', accountNumber: 'XXXX1234', ifsc: 'HDFC0001234', isPrimary: true },
-  { id: 'b2', bankName: 'ICICI Bank', accountNumber: 'XXXX5678', ifsc: 'ICIC0005678', isPrimary: false },
-];
 
 export default function TransferScreen({ navigation }: any) {
   const { colors } = useTheme();

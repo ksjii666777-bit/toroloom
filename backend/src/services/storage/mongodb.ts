@@ -18,7 +18,7 @@
  */
 
 import type { Collection, Db, MongoClient, MongoClientOptions, Filter } from 'mongodb';
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -151,6 +151,9 @@ export class MongoDBStorage implements StorageEngine {
 
     const posts = this.db.collection('community_posts');
     await posts.createIndex({ timestamp: -1 });
+
+    const subs = this.db.collection('subscriptions');
+    await subs.createIndex({ userId: 1 }, { unique: true });
   }
 
   private getAuditCollection(): Collection<AuditEvent> {
@@ -256,6 +259,7 @@ export class MongoDBStorage implements StorageEngine {
     await this.db.collection('notifications').deleteMany({});
     await this.db.collection('badge_counts').deleteMany({});
     await this.db.collection('community_posts').deleteMany({});
+    await this.db.collection('subscriptions').deleteMany({});
   }
 
   // ──── Risk Profiles ────
@@ -355,6 +359,27 @@ export class MongoDBStorage implements StorageEngine {
   async deleteNotification(notificationId: string): Promise<void> {
     const col = this.getNotificationCollection();
     await col.deleteOne({ id: notificationId } as unknown as Filter<NotificationData & { _id?: string }>);
+  }
+
+  // ──── Subscriptions ────
+
+  async loadSubscription(userId: string): Promise<UserSubscriptionData | null> {
+    if (!this.db) return null;
+    const col = this.db.collection('subscriptions');
+    const doc: any = await col.findOne({ userId });
+    if (!doc) return null;
+    const { _id, ...sub } = doc;
+    return sub as unknown as UserSubscriptionData;
+  }
+
+  async saveSubscription(userId: string, sub: UserSubscriptionData): Promise<void> {
+    if (!this.db) return;
+    const col = this.db.collection('subscriptions');
+    await col.updateOne(
+      { userId },
+      { $set: sub },
+      { upsert: true },
+    );
   }
 
   // ──── Badge Counts ────

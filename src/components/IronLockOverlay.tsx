@@ -24,7 +24,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../context/ThemeContext';
 import { useRiskStore, selectIsLockdownActive } from '../store/riskStore';
 import { useVoiceStore, VOICE_MESSAGES } from '../store/voiceStore';
 import { BORDER_RADIUS} from '../constants/theme';
@@ -228,7 +227,7 @@ export default function IronLockOverlay() {
           />
           {/* Lock icon */}
           <Animated.View style={lockIconStyle}>
-            <Ionicons name={iconName as any} size={80} color={ALERT_RED} />
+            <Ionicons name={iconName as keyof typeof Ionicons.glyphMap} size={80} color={ALERT_RED} />
           </Animated.View>
         </View>
 

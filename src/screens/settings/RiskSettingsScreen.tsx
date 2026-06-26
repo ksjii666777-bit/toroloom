@@ -51,7 +51,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
   };
 
   const toggleLimit = async (key: keyof typeof limits, current: boolean) => {
-    const result = await updateLimits({ [key]: !current } as any);
+    const result = await updateLimits({ [key]: !current } as Partial<import('../../store/riskStore').RiskLimits>);
     if (!result.success) {
       Alert.alert('Settings Frozen', result.message);
     }
@@ -60,7 +60,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
   const adjustLimit = async (key: keyof typeof limits, delta: number) => {
     const current = limits[key] as number;
     const newVal = Math.max(0, current + delta);
-    const result = await updateLimits({ [key]: newVal } as any);
+    const result = await updateLimits({ [key]: newVal } as Partial<import('../../store/riskStore').RiskLimits>);
     if (!result.success) {
       Alert.alert('Settings Frozen', result.message);
     }
@@ -232,7 +232,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
                   <View key={item.key}>
                     <View style={styles.limitRow}>
                       <View style={[styles.limitIcon, { backgroundColor: item.color + '20' }]}>
-                        <Ionicons name={item.icon as any} size={20} color={item.color} />
+                        <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={item.color} />
                       </View>
                       <View style={styles.limitInfo}>
                         <Text style={styles.limitLabel}>{item.label}</Text>
@@ -282,7 +282,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
                   return (
                     <View key={check.action} style={styles.checkRow}>
                       <View style={styles.checkLeft}>
-                        <Ionicons name={check.icon as any} size={18} color={result.allowed ? '#00C853' : '#FF1744'} />
+                        <Ionicons name={check.icon as keyof typeof Ionicons.glyphMap} size={18} color={result.allowed ? '#00C853' : '#FF1744'} />
                         <Text style={styles.checkLabel}>{check.label}</Text>
                       </View>
                       <View style={[styles.checkBadge, { backgroundColor: result.allowed ? '#00C85320' : '#FF174420' }]}>

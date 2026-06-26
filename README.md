@@ -1,6 +1,8 @@
 # Toroloom
 
 [![CI](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml/badge.svg)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml)
+[![Broker Integration CI](https://github.com/ksjii666777-bit/toroloom/actions/workflows/broker-integration-ci.yml/badge.svg)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/broker-integration-ci.yml)
+[![Calculator / Chat / Broker CI](https://github.com/ksjii666777-bit/toroloom/actions/workflows/calculator-broker-chat-ci.yml/badge.svg)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/calculator-broker-chat-ci.yml)
 [![Coverage — Frontend](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ksjii666777-bit/toroloom/gh-pages/badges/frontend-coverage.json)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml)
 [![Coverage — Backend](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ksjii666777-bit/toroloom/gh-pages/badges/backend-coverage.json)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -85,7 +87,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup and [DEPLOY.md
 
 ## CI/CD
 
-Every push to `master`/`main` triggers a GitHub Actions workflow with 4 parallel jobs:
+Every push to `master`/`main` triggers the **main CI workflow** with 4 parallel jobs. Two additional **path-filtered workflows** run on pull requests when relevant files change, providing faster feedback.
+
+### Main CI — [`ci.yml`](.github/workflows/ci.yml)
+
+Runs on every push/PR to the default branch.
 
 | Job | Status |
 |-----|--------|
@@ -93,6 +99,17 @@ Every push to `master`/`main` triggers a GitHub Actions workflow with 4 parallel
 | **Frontend** | TypeScript check + unit tests with coverage |
 | **Integration (PG + Mongo)** | Integration tests against real databases |
 | **WebSocket Stress** | Long-running P&L bridge load test |
+
+### Fast-Track PR Workflows
+
+These run in parallel with the main CI — they're triggered by path filters so they only execute when the relevant source or test files change.
+
+| Workflow | Trigger | What it runs | Typical time |
+|----------|---------|-------------|--------------|
+| [**Calculator / Chat / Broker CI**](.github/workflows/calculator-broker-chat-ci.yml) | Calculator, chat, or broker screen/test changes | 6 unit test suites (SIP, Lumpsum, EMI, Tax, ChatRoom, ConnectBrokerView) | ~30s |
+| [**Broker Integration CI**](.github/workflows/broker-integration-ci.yml) | Broker screen, gateway services, or SecureSessionSync changes | Full broker end-to-end flow (loading → disconnected → session sync → connected → Test API → disconnect) | ~15s |
+
+Both fast-track jobs use `npm ci` with the pre-installed cache and have a 5-minute timeout. The main CI always runs the full frontend suite regardless, so no gaps in coverage.
 
 ---
 

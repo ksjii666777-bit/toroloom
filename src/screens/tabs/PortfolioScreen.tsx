@@ -37,7 +37,8 @@ export default function PortfolioScreen({ navigation }: any) {
 
   const analytics = usePortfolioAnalyticsStore(s => s.getAnalytics());
   const a = analytics.metrics;
-  const { pnlHistory } = analytics;
+  const { pnlHistory, sectorAllocation, monthlyReturns, capitalGains } = analytics;
+  const [showDetailedAnalytics, setShowDetailedAnalytics] = useState(false);
   const { stocks } = useMarketStore();
   const portfolioValue = holdings.reduce((sum, h) => sum + h.currentValue, 0) || 1250000;
   const invested = holdings.reduce((sum, h) => sum + h.totalInvested, 0) || 1100000;
@@ -303,10 +304,11 @@ export default function PortfolioScreen({ navigation }: any) {
                 </View>
               </View>
 
-              <View style={styles.dividendTimeline}>
-                <Text style={[styles.timelineLabel, { color: colors.textMuted }]}>Upcoming Estimates</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dividendScroll}>
-                  {dividendEvents[0]?.upcoming.map((event, ei) => {
+              {dividendEvents.length > 0 && (
+                <View style={styles.dividendTimeline}>
+                  <Text style={[styles.timelineLabel, { color: colors.textMuted }]}>Upcoming Estimates</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dividendScroll}>
+                    {dividendEvents[0]?.upcoming.map((event, ei) => {
                     const totalForMonth = dividendEvents.reduce((s, d) => s + (d.upcoming[ei]?.amount || 0), 0);
                     return (
                       <View key={ei} style={[styles.dividendChip, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -329,8 +331,10 @@ export default function PortfolioScreen({ navigation }: any) {
                   })}
                 </ScrollView>
               </View>
+              )}
 
               {/* Holdings dividend summary */}
+              {dividendEvents.length > 0 && (
               <View style={[styles.dividendSummary, { borderColor: colors.border }]}>
                 {dividendEvents.map(d => (
                   <View key={d.symbol} style={styles.dividendSummaryRow}>
@@ -345,9 +349,118 @@ export default function PortfolioScreen({ navigation }: any) {
                   </View>
                 ))}
               </View>
+              )}
             </View>
           );
         })()}
+
+        {/* Detailed Analytics Section — Expandable */}
+        <View style={[styles.paddingHorizontal, { marginTop: SPACING.lg }]}>
+          <AnimatedPressable onPress={() => setShowDetailedAnalytics(!showDetailedAnalytics)} scaleTo={0.98}>
+            <View style={[styles.analyticsToggle, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
+                <Ionicons name="stats-chart" size={18} color={colors.primary} />
+                <Text style={[styles.analyticsToggleText, { color: colors.text }]}>Detailed Analytics</Text>
+              </View>
+              <Ionicons name={showDetailedAnalytics ? 'chevron-up' : 'chevron-down'} size={18} color={colors.textMuted} />
+            </View>
+          </AnimatedPressable>
+
+          {showDetailedAnalytics && (
+            <>
+              {/* Sector Allocation */}
+              {sectorAllocation.length > 0 && (
+                <View style={[styles.analyticsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>Sector Allocation</Text>
+                  {sectorAllocation.map((sector) => (
+                    <View key={sector.sector} style={styles.sectorRow}>
+                      <View style={styles.sectorLeft}>
+                        <Text style={[styles.sectorName, { color: colors.text }]}>{sector.sector}</Text>
+                        <Text style={[styles.sectorCount, { color: colors.textMuted }]}>{sector.count} holdings</Text>
+                      </View>
+                      <View style={styles.sectorRight}>
+                        <View style={styles.sectorBarContainer}>
+                          <View style={[styles.sectorBar, { width: `${sector.percent}%`, backgroundColor: colors.primary }]} />
+                        </View>
+                        <Text style={[styles.sectorPercent, { color: colors.text }]}>{sector.percent.toFixed(1)}%</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Monthly Returns */}
+              {monthlyReturns.length > 0 && (
+                <View style={[styles.analyticsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>Monthly Returns</Text>
+                  {monthlyReturns.slice(-6).map((mr) => {
+                    const isPositive = mr.returnPercent >= 0;
+                    return (
+                      <View key={mr.month} style={styles.monthlyRow}>
+                        <Text style={[styles.monthlyLabel, { color: colors.textSecondary }]}>
+                          {new Date(mr.month + '-01').toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })}
+                        </Text>
+                        <View style={styles.monthlyBarTrack}>
+                          <View style={[styles.monthlyBar, {
+                            width: `${Math.min(Math.abs(mr.returnPercent) * 5, 100)}%`,
+                            backgroundColor: isPositive ? colors.marketUp : colors.marketDown,
+                            alignSelf: isPositive ? 'flex-start' : 'flex-end',
+                          }]} />
+                        </View>
+                        <Text style={[styles.monthlyValue, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
+                          {isPositive ? '+' : ''}{mr.returnPercent.toFixed(1)}%
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Capital Gains Summary */}
+              <View style={[styles.analyticsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>Capital Gains & Tax</Text>
+                <View style={styles.cgRow}>
+                  <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Short-term Gains</Text>
+                  <Text style={[styles.cgValue, { color: capitalGains.shortTerm.gains >= 0 ? colors.marketUp : colors.marketDown }]}>
+                    {formatCurrency(capitalGains.shortTerm.gains)}
+                  </Text>
+                </View>
+                <View style={styles.cgRow}>
+                  <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Long-term Gains</Text>
+                  <Text style={[styles.cgValue, { color: capitalGains.longTerm.gains >= 0 ? colors.marketUp : colors.marketDown }]}>
+                    {formatCurrency(capitalGains.longTerm.gains)}
+                  </Text>
+                </View>
+                {a.winRate > 0 && (
+                  <View style={styles.cgDivider} />
+                )}
+                {a.winRate > 0 && (
+                  <>
+                    <View style={styles.cgRow}>
+                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Win Rate</Text>
+                      <View style={styles.winRateContainer}>
+                        <View style={[styles.winRateBar, { width: `${a.winRate}%`, backgroundColor: a.winRate >= 50 ? colors.marketUp : colors.warning }]} />
+                      </View>
+                      <Text style={[styles.cgValue, { color: a.winRate >= 50 ? colors.marketUp : colors.warning }]}>{a.winRate.toFixed(0)}%</Text>
+                    </View>
+                    <View style={styles.cgRow}>
+                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Profit Factor</Text>
+                      <Text style={[styles.cgValue, { color: colors.text }]}>{a.profitFactor > 0 ? a.profitFactor.toFixed(2) : 'N/A'}</Text>
+                    </View>
+                    <View style={styles.cgRow}>
+                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Avg Hold</Text>
+                      <Text style={[styles.cgValue, { color: colors.text }]}>{a.avgHoldingDays}d</Text>
+                    </View>
+                    <View style={styles.cgRow}>
+                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Max Drawdown</Text>
+                      <Text style={[styles.cgValue, { color: colors.marketDown }]}>{a.maxDrawdownPercent.toFixed(1)}%</Text>
+                    </View>
+                  </>
+                )}
+              </View>
+            </>
+          )}
+        </View>
 
         {/* Analytics CTA — Glassmorphic */}
         <AnimatedPressable onPress={() => navigation.navigate('Reports')} scaleTo={0.97}>
@@ -580,8 +693,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: SPACING.sm,
   },
   sectionTitle: {
-    fontFamily: 'System',
-    fontWeight: '700',
+    ...FONTS.bold,
     fontSize: FONTS.size.lg,
   },
   annualChip: {
@@ -590,16 +702,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: BORDER_RADIUS.full,
   },
   annualChipText: {
-    fontFamily: 'System',
-    fontWeight: '700',
+    ...FONTS.bold,
     fontSize: FONTS.size.xs,
   },
   dividendTimeline: {
     marginBottom: SPACING.md,
   },
   timelineLabel: {
-    fontFamily: 'System',
-    fontWeight: '500',
+    ...FONTS.medium,
     fontSize: FONTS.size.xs,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -617,13 +727,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     minWidth: 140,
   },
   dividendMonth: {
-    fontFamily: 'System',
-    fontWeight: '500',
+    ...FONTS.medium,
     fontSize: FONTS.size.xs,
   },
   dividendAmount: {
-    fontFamily: 'System',
-    fontWeight: '700',
+    ...FONTS.bold,
     fontSize: FONTS.size.md,
     marginTop: 4,
   },
@@ -637,13 +745,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
   },
   dividendStockSymbol: {
-    fontFamily: 'System',
-    fontWeight: '500',
+    ...FONTS.medium,
     fontSize: 10,
   },
   dividendStockAmt: {
-    fontFamily: 'System',
-    fontWeight: '600',
+    ...FONTS.semiBold,
     fontSize: 10,
   },
   dividendSummary: {
@@ -662,26 +768,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: SPACING.sm,
   },
   dividendSummarySymbol: {
-    fontFamily: 'System',
-    fontWeight: '600',
+    ...FONTS.semiBold,
     fontSize: FONTS.size.sm,
   },
   dividendSummaryYield: {
-    fontFamily: 'System',
-    fontWeight: '400',
+    ...FONTS.regular,
     fontSize: 10,
   },
   dividendSummaryRight: {
     alignItems: 'flex-end',
   },
   dividendSummaryQty: {
-    fontFamily: 'System',
-    fontWeight: '400',
+    ...FONTS.regular,
     fontSize: 10,
   },
   dividendSummaryAmount: {
-    fontFamily: 'System',
-    fontWeight: '700',
+    ...FONTS.bold,
     fontSize: FONTS.size.sm,
     marginTop: 1,
   },
@@ -690,6 +792,139 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.semiBold,
     fontSize: FONTS.size.md,
     color: colors.white,
+  },
+
+  // ── Detailed Analytics ──
+  analyticsToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+  },
+  analyticsToggleText: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+  },
+  analyticsCard: {
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginTop: SPACING.md,
+  },
+  analyticsSectionTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    marginBottom: SPACING.md,
+  },
+
+  // ── Sector Allocation ──
+  sectorRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  sectorLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    minWidth: 100,
+  },
+  sectorName: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  sectorCount: {
+    ...FONTS.regular,
+    fontSize: 10,
+  },
+  sectorRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  sectorBarContainer: {
+    flex: 1,
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  sectorBar: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  sectorPercent: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.xs,
+    minWidth: 40,
+    textAlign: 'right',
+  },
+
+  // ── Monthly Returns ──
+  monthlyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  monthlyLabel: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.xs,
+    width: 50,
+  },
+  monthlyBarTrack: {
+    flex: 1,
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 3,
+    marginHorizontal: SPACING.sm,
+    overflow: 'hidden',
+  },
+  monthlyBar: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  monthlyValue: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.xs,
+    width: 55,
+    textAlign: 'right',
+  },
+
+  // ── Capital Gains ──
+  cgRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  cgLabel: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+  },
+  cgValue: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  cgDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    marginVertical: SPACING.xs,
+  },
+  winRateContainer: {
+    flex: 1,
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginHorizontal: SPACING.sm,
+  },
+  winRateBar: {
+    height: '100%',
+    borderRadius: 3,
   },
   tradeItem: {
     flexDirection: 'row',

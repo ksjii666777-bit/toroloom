@@ -27,6 +27,8 @@ function Harness({ count, config }: HarnessProps) {
 
 // ── Tests ──────────────────────────────────────────────────────
 
+// Minimal mock shape that matches what the hook actually returns.
+// The hook returns AnimatedStyleHandle<Record<string, any>> at the type level.
 type MockAnimatedStyle = { opacity: number; transform: { translateY: number }[] };
 
 describe('useStaggeredAnimation', () => {
@@ -47,7 +49,7 @@ describe('useStaggeredAnimation', () => {
     render(<Harness count={5} />);
     // With count=5, animatedStyles should exist for indices 0-4
     for (let i = 0; i < 5; i++) {
-      const style = harnessResult.animatedStyles[i] as MockAnimatedStyle;
+      const style = harnessResult.animatedStyles[i] as unknown as MockAnimatedStyle;
       expect(style).toBeDefined();
       expect(style).toHaveProperty('opacity');
       expect(style).toHaveProperty('transform');
@@ -63,14 +65,14 @@ describe('useStaggeredAnimation', () => {
 
   it('uses default config values', () => {
     render(<Harness count={1} />);
-    const style = harnessResult.animatedStyles[0] as MockAnimatedStyle;
+    const style = harnessResult.animatedStyles[0] as unknown as MockAnimatedStyle;
     expect(style).toHaveProperty('opacity');
     expect(style).toHaveProperty('transform');
   });
 
   it('uses custom config values', () => {
     render(<Harness count={1} config={{ fromOpacity: 0.5, fromTranslateY: 50 }} />);
-    const style = harnessResult.animatedStyles[0] as MockAnimatedStyle;
+    const style = harnessResult.animatedStyles[0] as unknown as MockAnimatedStyle;
     expect(style).toHaveProperty('opacity');
     expect(style).toHaveProperty('transform');
   });
@@ -101,7 +103,7 @@ describe('useStaggeredAnimation', () => {
 
   it('handles count of 1 gracefully', () => {
     render(<Harness count={1} />);
-    const style = harnessResult.animatedStyles[0] as MockAnimatedStyle;
+    const style = harnessResult.animatedStyles[0] as unknown as MockAnimatedStyle;
     expect(style).toHaveProperty('opacity');
     expect(style).toHaveProperty('transform');
   });
@@ -113,7 +115,7 @@ describe('useStaggeredAnimation', () => {
       update(<Harness count={4} />);
     });
     expect(harnessResult.animatedStyles[3]).toBeDefined();
-    expect(typeof (harnessResult.animatedStyles[3] as MockAnimatedStyle).opacity).not.toBe('undefined');
+    expect(typeof (harnessResult.animatedStyles[3] as unknown as MockAnimatedStyle).opacity).not.toBe('undefined');
   });
 
   it('handles count decrease after initial render', async () => {
@@ -134,7 +136,7 @@ describe('useStaggeredAnimation', () => {
     // animatedStyles are computed once at creation time (useAnimatedStyle mock
     // calls updater() once). At that point progressValues are 0, so opacity = 0.
     // The real reanimated tracks shared values reactively; the mock does not.
-    const style = harnessResult.animatedStyles[0] as MockAnimatedStyle;
+    const style = harnessResult.animatedStyles[0] as unknown as MockAnimatedStyle;
     expect(style).toBeDefined();
     expect(typeof style.opacity).toBe('number');
     expect(Array.isArray(style.transform)).toBe(true);

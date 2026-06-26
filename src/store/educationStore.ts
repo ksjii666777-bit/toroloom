@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { Course, Lesson } from '../types';
 import { mockCourses, mockLessons } from '../constants/mockData';
 import { educationApi } from '../services/api';
+import { offlineCache } from '../services/offlineCache';
+import { log } from '../utils/logger';
 import { sendEducationalReminder } from '../services/notificationService';
 
 interface EducationState {
@@ -11,6 +13,7 @@ interface EducationState {
   isLoading: boolean;
   fetchCourses: () => Promise<void>;
   fetchLesson: (lessonId: string) => Promise<void>;
+  loadCachedCourses: () => Promise<void>;
   enrollInCourse: (courseId: string) => void;
   markLessonComplete: (lessonId: string) => Promise<void>;
   setCurrentLesson: (lesson: Lesson | null) => void;
@@ -23,12 +26,28 @@ export const useEducationStore = create<EducationState>((set, get) => ({
   lessonProgress: {},
   isLoading: false,
 
+  /** Load cached courses at app startup for instant display */
+  loadCachedCourses: async () => {
+    const cached = await offlineCache.load<{ courses: Course[] }>('education');
+    if (cached) {
+      set({ courses: cached.data.courses });
+    }
+  },
+
   fetchCourses: async () => {
     set({ isLoading: true });
     try {
       const courses = await educationApi.getCourses();
+      await offlineCache.save('education', { courses });
       set({ courses, isLoading: false });
     } catch {
+      // Backend unavailable — try stale cache
+      const cached = await offlineCache.load<{ courses: Course[] }>('education');
+      if (cached) {
+        set({ courses: cached.data.courses, isLoading: false });
+        log.info('[Education] Serving stale cached courses');
+        return;
+      }
       set({ isLoading: false });
     }
   },

@@ -81,7 +81,6 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
 
         {/* Form */}
         <View
-          accessibilityRole={'form' as any}
           style={styles.form}
         >
           {error && (

@@ -228,7 +228,7 @@ export function resetWebSocketState(): void {
  */
 export function checkRateLimit(ws: WebSocket): boolean {
   const now = Date.now();
-  let state = rateLimitMap.get(ws);
+  const state = rateLimitMap.get(ws);
 
   if (!state || now >= state.windowStart + RATE_LIMIT_WINDOW_MS) {
     // First message or window expired — start a fresh window

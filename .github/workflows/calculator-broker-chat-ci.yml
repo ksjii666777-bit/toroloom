@@ -1,0 +1,102 @@
+# ==============================================================================
+# Toroloom — Calculator + Chat + Broker CI
+# ==============================================================================
+#
+# Fast-track job that runs only the calculator, chat room, and broker
+# connection tests on every pull request.  These are the 6 most recently
+# added test suites and serve as a quick smoke test (~30s vs. the full
+# frontend suite's ~2min).
+#
+# Test files:
+#   - SIPCalculator.test.tsx
+#   - LumpsumCalculator.test.tsx
+#   - EMICalculator.test.tsx
+#   - TaxCalculator.test.tsx
+#   - ChatRoomScreen.test.tsx
+#   - ConnectBrokerView.test.tsx
+# ==============================================================================
+
+name: Calculator / Chat / Broker CI
+
+on:
+  pull_request:
+    branches: [master, main]
+    # Only trigger when one of these test files or the screen source changes
+    paths:
+      - 'src/__tests__/SIPCalculator*'
+      - 'src/__tests__/LumpsumCalculator*'
+      - 'src/__tests__/EMICalculator*'
+      - 'src/__tests__/TaxCalculator*'
+      - 'src/__tests__/ChatRoomScreen*'
+      - 'src/__tests__/ConnectBrokerView*'
+      - 'src/screens/calculators/**'
+      - 'src/screens/chat/ChatRoomScreen*'
+      - 'src/screens/broker/ConnectBrokerView*'
+      - 'src/store/chatStore*'
+      - 'src/services/gateway/**'
+      - 'src/__tests__/testUtils*'
+      - 'src/__tests__/setup*'
+      - 'src/context/ThemeContext*'
+      - 'src/constants/theme*'
+      - 'src/utils/formatters*'
+      - 'src/types/index*'
+      - '.github/workflows/calculator-broker-chat-ci.yml'
+  workflow_dispatch:            # Allow manual trigger
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  calculator-chat-broker-tests:
+    name: Calculator / Chat / Broker Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Run only the 6 calculator/chat/broker test files for fast feedback.
+      # The full frontend suite (including coverage) still runs in the main CI.
+      - name: Run calculator + chat + broker tests
+        run: npx vitest run --reporter=verbose \
+          src/__tests__/SIPCalculator.test.tsx \
+          src/__tests__/LumpsumCalculator.test.tsx \
+          src/__tests__/EMICalculator.test.tsx \
+          src/__tests__/TaxCalculator.test.tsx \
+          src/__tests__/ChatRoomScreen.test.tsx \
+          src/__tests__/ConnectBrokerView.test.tsx
+        env:
+          NODE_ENV: test
+
+      # Post a concise summary to the GitHub Actions job summary
+      - name: Post test summary
+        if: always()
+        shell: bash
+        run: |
+          cat <<'EOF' >> $GITHUB_STEP_SUMMARY
+          ## Calculator / Chat / Broker Tests
+
+          | Suite | Files |
+          |-------|-------|
+          | Calculators | SIP, Lumpsum, EMI, Tax |
+          | Chat | ChatRoomScreen (group, DM, typing, messages) |
+          | Broker | ConnectBrokerView (loading, connected, disconnected) |
+
+          Run via \`calculator-broker-chat-ci.yml\` — fast smoke-test job.
+          EOF

@@ -92,7 +92,7 @@ export default function ProfileScreen({ navigation }: any) {
           ].map((action, i) => (
             <TouchableOpacity key={i} style={styles.quickAction}>
               <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
-                <Ionicons name={action.icon as any} size={24} color={colors.white} />
+                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={24} color={colors.white} />
               </LinearGradient>
               <Text style={styles.qaLabel}>{action.label}</Text>
             </TouchableOpacity>
@@ -182,7 +182,7 @@ export default function ProfileScreen({ navigation }: any) {
                   <View key={step.key} style={styles.kycStepRow}>
                     <View style={[styles.kycStepIcon, step.done && { backgroundColor: '#00C85320' }]}>
                       <Ionicons
-                        name={step.done ? 'checkmark-circle' : (step.icon as any)}
+                        name={step.done ? 'checkmark-circle' : (step.icon as keyof typeof Ionicons.glyphMap)}
                         size={20}
                         color={step.done ? '#00C853' : colors.textMuted}
                       />

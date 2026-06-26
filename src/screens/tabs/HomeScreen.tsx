@@ -1,7 +1,6 @@
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl } from 'react-native';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, TextInput } from 'react-native';
 import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, Easing, interpolate } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
@@ -10,7 +9,7 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { useAIStore } from '../../store/aiStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import MarketCard from '../../components/MarketCard';
 import StockItem from '../../components/StockItem';
@@ -19,8 +18,7 @@ import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
-
-Dimensions.get('window');
+import { mockNews } from '../../constants/mockData';
 
 export default function HomeScreen({ navigation }: any) {
   const { colors } = useTheme();
@@ -35,7 +33,6 @@ export default function HomeScreen({ navigation }: any) {
   const totalInvested = holdings.reduce((sum, h) => sum + h.totalInvested, 0);
   const currentValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
   const totalPnl = currentValue - totalInvested;
-  const _totalPnlPercent = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
   const unreadCount = notifications.filter(n => !n.read).length;
 
   // ── Dynamic greeting ────────────────────────────────────────
@@ -64,6 +61,8 @@ export default function HomeScreen({ navigation }: any) {
 
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<TextInput>(null);
 
   // Count-up animation via setInterval (works with fake timers in tests)
   const [displayProgress, setDisplayProgress] = useState(1);
@@ -101,7 +100,39 @@ export default function HomeScreen({ navigation }: any) {
   const topGainers = [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 3);
   const topLosers = [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 3);
 
-  const sectionCount = 9;
+  // ── Sector Heatmap ────────────────────────────────────────────
+  const sectorPerformance = useMemo(() => {
+    const sectors = new Map<string, { change: number; count: number; stocks: typeof stocks }>();
+    for (const s of stocks) {
+      const existing = sectors.get(s.sector) || { change: 0, count: 0, stocks: [] };
+      existing.change += s.changePercent;
+      existing.count++;
+      existing.stocks.push(s);
+      sectors.set(s.sector, existing);
+    }
+    return Array.from(sectors.entries())
+      .map(([sector, data]) => ({
+        sector,
+        avgChange: Math.round((data.change / data.count) * 100) / 100,
+        count: data.count,
+      }))
+      .sort((a, b) => b.avgChange - a.avgChange);
+  }, [stocks]);
+
+  // ── Filtered stocks for search ────────────────────────────────
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return stocks.filter(s =>
+      s.symbol.toLowerCase().includes(q) ||
+      s.name.toLowerCase().includes(q)
+    ).slice(0, 8);
+  }, [searchQuery, stocks]);
+
+  // ── Latest news headlines ─────────────────────────────────────
+  const latestNews = useMemo(() => mockNews.slice(0, 4), []);
+
+  const sectionCount = 12;
   const { animatedStyles: sectionStyles } = useStaggeredAnimation(sectionCount, {
     initialDelay: 200,
     staggerDelay: 120,
@@ -255,13 +286,13 @@ export default function HomeScreen({ navigation }: any) {
             {[
               { icon: 'trending-up', label: 'Buy', screen: 'Markets', color: colors.marketUp },
               { icon: 'trending-down', label: 'Sell', screen: 'Portfolio', color: colors.marketDown },
-              { icon: 'pie-chart', label: 'SIP', screen: 'MutualFunds', color: colors.primary },
+              { icon: 'pie-chart', label: 'SIP', screen: 'SIPCalculator', color: colors.primary },
               { icon: 'school', label: 'Learn', screen: 'Learn', color: colors.warning },
             ].map((item, i) => (
               <AnimatedPressable key={i} onPress={() => navigation.navigate(item.screen)} haptic="light" scaleTo={0.92}>
                 <View style={styles.quickAction}>
                   <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }]}>
-                    <Ionicons name={item.icon as any} size={22} color={item.color} />
+                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
                   </View>
                   <Text style={styles.quickActionLabel}>{item.label}</Text>
                 </View>
@@ -270,8 +301,54 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* Market Breadth */}
+        {/* Stock Search Bar */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[0]]}>
+          <View style={[styles.searchContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="search" size={18} color={colors.textMuted} />
+            <TextInput
+              ref={searchInputRef}
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder="Search stocks by name or symbol..."
+              placeholderTextColor={colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => { setSearchQuery(''); searchInputRef.current?.blur(); }}>
+                <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+              </TouchableOpacity>
+            )}
+          </View>
+          {searchResults.length > 0 && (
+            <View style={[styles.searchResults, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+              {searchResults.map(stock => (
+                <TouchableOpacity
+                  key={stock.id}
+                  style={[styles.searchResultItem, { borderBottomColor: colors.divider }]}
+                  onPress={() => {
+                    setSearchQuery('');
+                    navigation.navigate('StockDetail', { stockId: stock.id, symbol: stock.symbol });
+                  }}
+                >
+                  <View style={styles.searchResultLeft}>
+                    <Text style={[styles.searchResultSymbol, { color: colors.text }]}>{stock.symbol}</Text>
+                    <Text style={[styles.searchResultName, { color: colors.textMuted }]} numberOfLines={1}>{stock.name}</Text>
+                  </View>
+                  <View style={styles.searchResultRight}>
+                    <Text style={[styles.searchResultPrice, { color: colors.text }]}>₹{stock.price.toFixed(2)}</Text>
+                    <Text style={[styles.searchResultChange, { color: stock.isPositive ? colors.marketUp : colors.marketDown }]}>
+                      {stock.isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </ReanimatedAnimated.View>
+
+        {/* Market Breadth */}
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[1]]}>
           <View style={styles.marketBreadthRow}>
             <View style={[styles.breadthCard, { borderColor: colors.border }]}>
               <Ionicons name="arrow-up-circle" size={18} color="#00C853" />
@@ -299,7 +376,7 @@ export default function HomeScreen({ navigation }: any) {
         </ReanimatedAnimated.View>
 
         {/* Market Indices */}
-        <ReanimatedAnimated.View style={[styles.section, sectionStyles[0]]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[1]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Market Indices</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -313,9 +390,70 @@ export default function HomeScreen({ navigation }: any) {
           </ScrollView>
         </ReanimatedAnimated.View>
 
+        {/* Sector Heatmap */}
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[2]]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Sector Performance 🔥</Text>
+          </View>
+          <View style={[styles.heatmapContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            {sectorPerformance.slice(0, 6).map((sector, i) => {
+              const intensity = Math.min(Math.abs(sector.avgChange) / 5, 1);
+              const isGreen = sector.avgChange >= 0;
+              return (
+                <View key={sector.sector} style={[styles.heatmapItem, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                  <View style={styles.heatmapLeft}>
+                    <Text style={[styles.heatmapSector, { color: colors.text }]}>{sector.sector}</Text>
+                    <Text style={[styles.heatmapCount, { color: colors.textMuted }]}>{sector.count} stocks</Text>
+                  </View>
+                  <View style={[styles.heatmapBar, {
+                    backgroundColor: isGreen
+                      ? `rgba(0, 230, 118, ${Math.max(0.1, intensity)})`
+                      : `rgba(255, 82, 82, ${Math.max(0.1, intensity)})`,
+                    width: `${Math.max(Math.abs(sector.avgChange) * 8, 8)}%`,
+                  }]}>
+                    <Text style={[styles.heatmapValue, {
+                      color: isGreen ? colors.marketUp : colors.marketDown,
+                    }]}>
+                      {isGreen ? '+' : ''}{sector.avgChange.toFixed(1)}%
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </ReanimatedAnimated.View>
+
+        {/* Quick Calculators */}
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[3]]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Financial Calculators 🧮</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {[
+              { icon: 'calculator', label: 'SIP', desc: 'Systematic Investment', color: colors.primary, screen: 'SIPCalculator' },
+              { icon: 'briefcase', label: 'Lumpsum', desc: 'One-time Investment', color: colors.accent, screen: 'LumpsumCalculator' },
+              { icon: 'trending-up', label: 'EMI', desc: 'Loan Calculator', color: colors.warning, screen: 'EMICalculator' },
+              { icon: 'cash', label: 'Tax', desc: 'Capital Gains Tax', color: colors.secondary, screen: 'TaxCalculator' },
+            ].map((calc, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.calcCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                onPress={() => navigation.navigate(calc.screen)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.calcIcon, { backgroundColor: `${calc.color}20` }]}>
+                  <Ionicons name={calc.icon as keyof typeof Ionicons.glyphMap} size={24} color={calc.color} />
+                </View>
+                <Text style={[styles.calcLabel, { color: colors.text }]}>{calc.label}</Text>
+                <Text style={[styles.calcDesc, { color: colors.textMuted }]}>{calc.desc}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </ReanimatedAnimated.View>
+
         {/* AI Market Insight */}
         {topInsight && (
-          <ReanimatedAnimated.View style={[styles.section, sectionStyles[1]]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[4]]}>
             <Card animated animationDelay={500}>
               <View style={styles.aiInsightHeader}>
                 <View style={styles.aiInsightLeft}>
@@ -354,7 +492,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
 
         {/* Level & XP */}
-        <ReanimatedAnimated.View style={[styles.section, sectionStyles[2]]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[5]]}>
           <Card animated animationDelay={400}>
             <View style={styles.levelRow}>
               <View style={styles.levelInfo}>
@@ -382,7 +520,7 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Top Holdings */}
         {topHoldings.length > 0 && (
-          <ReanimatedAnimated.View style={[styles.section, sectionStyles[3]]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[6]]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Top Holdings 📊</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Portfolio')}>
@@ -424,7 +562,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
 
         {/* Top Gainers */}
-        <ReanimatedAnimated.View style={[styles.section, sectionStyles[4]]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[7]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Gainers 🔥</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -441,7 +579,7 @@ export default function HomeScreen({ navigation }: any) {
         </ReanimatedAnimated.View>
 
         {/* Top Losers */}
-        <ReanimatedAnimated.View style={[styles.section, sectionStyles[5]]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[8]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Losers 📉</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -459,7 +597,7 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Recent Trades */}
         {recentTrades.length > 0 && (
-          <ReanimatedAnimated.View style={[styles.section, sectionStyles[6]]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[9]]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Recent Activity 📋</Text>
               <TouchableOpacity onPress={() => navigation.navigate('TradeHistory')}>
@@ -492,7 +630,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
 
         {/* Watchlist Preview */}
-        <ReanimatedAnimated.View style={[styles.section, sectionStyles[7]]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[10]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Watchlist ⭐</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Watchlist')}>
@@ -509,6 +647,44 @@ export default function HomeScreen({ navigation }: any) {
             />
           ))}
         </ReanimatedAnimated.View>
+
+        {/* Market News */}
+        {latestNews.length > 0 && (
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[11]]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Market News 📰</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('NewsFeed')}>
+                <Text style={styles.seeAll}>All News</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {latestNews.map((news: any, i: number) => (
+                <TouchableOpacity
+                  key={news.id || i}
+                  style={[styles.newsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                  onPress={() => navigation.navigate('NewsFeed')}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.newsCategoryBadge, {
+                    backgroundColor: news.sentiment === 'positive' ? '#00C85320' : news.sentiment === 'negative' ? '#FF174420' : '#FFAB4020',
+                  }]}>
+                    <Text style={[styles.newsCategoryText, {
+                      color: news.sentiment === 'positive' ? '#00C853' : news.sentiment === 'negative' ? '#FF1744' : '#FFAB40',
+                    }]}>
+                      {news.category.toUpperCase()}
+                    </Text>
+                  </View>
+                  <Text style={[styles.newsTitle, { color: colors.text }]} numberOfLines={2}>
+                    {news.title}
+                  </Text>
+                  <Text style={[styles.newsSource, { color: colors.textMuted }]}>
+                    {news.source} · {new Date(news.publishedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </ReanimatedAnimated.View>
+        )}
 
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -705,6 +881,159 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.medium,
     fontSize: FONTS.size.sm,
     color: colors.text,
+  },
+
+  // ── Search Bar ──
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginBottom: SPACING.md,
+  },
+  searchInput: {
+    flex: 1,
+    ...FONTS.regular,
+    fontSize: FONTS.size.md,
+    marginLeft: SPACING.sm,
+    paddingVertical: 2,
+  },
+  searchResults: {
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  searchResultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderBottomWidth: 1,
+  },
+  searchResultLeft: {
+    flex: 1,
+  },
+  searchResultSymbol: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  searchResultName: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    marginTop: 1,
+  },
+  searchResultRight: {
+    alignItems: 'flex-end',
+  },
+  searchResultPrice: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  searchResultChange: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.xs,
+    marginTop: 1,
+  },
+
+  // ── Sector Heatmap ──
+  heatmapContainer: {
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  heatmapItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+  },
+  heatmapLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    minWidth: 100,
+  },
+  heatmapSector: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+  },
+  heatmapCount: {
+    ...FONTS.regular,
+    fontSize: 10,
+  },
+  heatmapBar: {
+    borderRadius: BORDER_RADIUS.full,
+    paddingVertical: 3,
+    paddingHorizontal: SPACING.sm,
+    alignItems: 'center',
+  },
+  heatmapValue: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.xs,
+  },
+
+  // ── Quick Calculators ──
+  calcCard: {
+    width: 140,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginRight: SPACING.md,
+    alignItems: 'center',
+  },
+  calcIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  calcLabel: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+  },
+  calcDesc: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+
+  // ── Market News ──
+  newsCard: {
+    width: 260,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginRight: SPACING.md,
+  },
+  newsCategoryBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.full,
+    marginBottom: SPACING.sm,
+  },
+  newsCategoryText: {
+    ...FONTS.medium,
+    fontSize: 9,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  newsTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
+  },
+  newsSource: {
+    ...FONTS.regular,
+    fontSize: 10,
   },
   section: {
     marginTop: SPACING.xl,

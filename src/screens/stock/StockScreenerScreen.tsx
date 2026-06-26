@@ -98,7 +98,7 @@ function FilterSection({ title, icon, children, color }: FilterSectionProps) {
   return (
     <View style={[sFilterSection.container, { borderColor: colors.border }]}>
       <View style={sFilterSection.header}>
-        <Ionicons name={icon as any} size={18} color={color || colors.primary} />
+        <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color={color || colors.primary} />
         <Text style={[sFilterSection.title, { color: colors.text }]}>{title}</Text>
       </View>
       {children}
@@ -220,7 +220,7 @@ function ChipRow({ options, selectedValue, onSelect }: ChipRowProps) {
             ]}>
               {opt.icon && (
                 <Ionicons
-                  name={opt.icon as any}
+                  name={opt.icon as keyof typeof Ionicons.glyphMap}
                   size={14}
                   color={isActive ? colors.primary : colors.textMuted}
                 />
@@ -904,7 +904,7 @@ export default function StockScreenerScreen({ navigation }: any) {
             <ChipRow
               options={MARKET_CAP_OPTIONS.map(o => ({ label: o.label, value: o.value, icon: o.icon }))}
               selectedValue={screenerFilters.marketCapCategory}
-              onSelect={(val) => setScreenerFilters({ marketCapCategory: val as any })}
+              onSelect={(val) => setScreenerFilters({ marketCapCategory: val as 'small' | 'mid' | 'large' | 'all' })}
             />
           </FilterSection>
         </View>
@@ -1014,7 +1014,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                     onPress={() => handleSort(opt.key)}
                   >
                     <Ionicons
-                      name={opt.icon as any}
+                      name={opt.icon as keyof typeof Ionicons.glyphMap}
                       size={12}
                       color={isActive ? colors.primary : colors.textMuted}
                     />

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, useRef } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder } from 'react-native';
 import Svg, { Path, Line, Rect, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';

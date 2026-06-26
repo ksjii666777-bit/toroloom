@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 
 interface ChartCrosshairContextType {
   /** The data index the crosshair is on, or null if hidden */

@@ -21,6 +21,8 @@
  * ============================================================================
  */
 
+import { log } from '../../utils/logger';
+
 // Must be explicitly configured. No hardcoded fallback.
 let _baseUrl = '';
 let _getToken: () => string | null = () => null;
@@ -39,7 +41,7 @@ export function configureApi(config: { baseUrl?: string; getToken?: () => string
 
 export function getBaseUrl() {
   if (!_baseUrl) {
-    console.warn(
+    log.warn(
       '[API Client] Base URL not configured. Call configureApi() before making API calls.\n' +
       '  Example: configureApi({ baseUrl: "https://api.toroloom.app/api" })',
     );

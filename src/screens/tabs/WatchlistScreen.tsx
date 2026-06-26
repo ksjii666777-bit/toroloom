@@ -101,6 +101,8 @@ export default function WatchlistScreen({ navigation }: any) {
   const [activeSector, setActiveSector] = useState<string | null>(null);
   const [activeMarketCap, setActiveMarketCap] = useState<string | null>(null);
   const [activeTopMovers, setActiveTopMovers] = useState(false);
+  const [priceRange, setPriceRange] = useState<'all' | 'under100' | '100to500' | '500to2000' | 'over2000'>('all');
+  const [listSearchQuery, setListSearchQuery] = useState('');
 
   // Gainers/Losers quick toggle
   const [performanceView, setPerformanceView] = useState<'all' | 'gainers' | 'losers'>('all');
@@ -167,6 +169,25 @@ export default function WatchlistScreen({ navigation }: any) {
       filtered = filtered.filter(s => s.changePercent > 0);
     } else if (performanceView === 'losers') {
       filtered = filtered.filter(s => s.changePercent < 0);
+    }    // Text search filter
+    if (listSearchQuery.trim()) {
+      const q = listSearchQuery.toLowerCase();
+      filtered = filtered.filter(s =>
+        s.symbol.toLowerCase().includes(q) ||
+        s.name.toLowerCase().includes(q)
+      );
+    }
+    // Price range filter
+    if (priceRange !== 'all') {
+      filtered = filtered.filter(s => {
+        switch (priceRange) {
+          case 'under100': return s.price < 100;
+          case '100to500': return s.price >= 100 && s.price <= 500;
+          case '500to2000': return s.price >= 500 && s.price <= 2000;
+          case 'over2000': return s.price > 2000;
+          default: return true;
+        }
+      });
     }
     filtered.sort((a, b) => {
       let cmp = 0;
@@ -416,7 +437,7 @@ export default function WatchlistScreen({ navigation }: any) {
               }}
             >
               <Ionicons
-                name={opt.icon as any}
+                name={opt.icon as keyof typeof Ionicons.glyphMap}
                 size={18}
                 color={sortBy === opt.field ? colors.primary : colors.textMuted}
               />
@@ -531,6 +552,23 @@ export default function WatchlistScreen({ navigation }: any) {
           </View>
         </View>
 
+        {/* Stock Search Bar */}
+        <View style={[styles.searchContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+          <Ionicons name="search" size={16} color={colors.textMuted} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder="Filter stocks..."
+            placeholderTextColor={colors.textMuted}
+            value={listSearchQuery}
+            onChangeText={setListSearchQuery}
+          />
+          {listSearchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setListSearchQuery('')}>
+              <Ionicons name="close-circle" size={16} color={colors.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
+
         {/* Active Sort Indicator */}
         <View style={[styles.sortIndicator, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="funnel" size={14} color={colors.textMuted} />
@@ -563,7 +601,7 @@ export default function WatchlistScreen({ navigation }: any) {
                 ]}
               >
                 <Ionicons
-                  name={(SECTOR_ICONS[sector] || 'business') as any}
+                  name={(SECTOR_ICONS[sector] || 'business') as keyof typeof Ionicons.glyphMap}
                   size={13}
                   color={isActive ? colors.primary : colors.textMuted}
                 />
@@ -615,6 +653,32 @@ export default function WatchlistScreen({ navigation }: any) {
               Top Movers
             </Text>
           </TouchableOpacity>
+
+          {/* Price Range chips */}
+          {([
+            { value: 'under100' as const, label: '<₹100' },
+            { value: '100to500' as const, label: '₹100-500' },
+            { value: '500to2000' as const, label: '₹500-2K' },
+            { value: 'over2000' as const, label: '>₹2K' },
+          ]).map(range => {
+            const isActive = priceRange === range.value;
+            return (
+              <TouchableOpacity
+                key={range.value}
+                onPress={() => setPriceRange(isActive ? 'all' : range.value)}
+                style={[
+                  styles.filterChip,
+                  { backgroundColor: colors.bgCard, borderColor: colors.border },
+                  isActive && { backgroundColor: '#3B82F625', borderColor: colors.primary },
+                ]}
+              >
+                <Ionicons name="cash" size={13} color={isActive ? colors.primary : colors.textMuted} />
+                <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textSecondary }]}>
+                  {range.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
 
           {/* Clear filters */}
           {hasActiveFilters && (
@@ -886,6 +950,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
   },
   perfBtnCount: { ...FONTS.semiBold, fontSize: 11 },
+
+  // Search
+  searchContainer: { flexDirection: 'row', alignItems: 'center', marginHorizontal: SPACING.xl, marginBottom: SPACING.sm, paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: BORDER_RADIUS.md, borderWidth: 1 },
+  searchInput: { flex: 1, ...FONTS.regular, fontSize: FONTS.size.sm, marginLeft: SPACING.sm, paddingVertical: 2 },
 
   // Sort
   sortBtn: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },

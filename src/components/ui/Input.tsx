@@ -112,7 +112,7 @@ export default function Input({
           cursorColor={colors.primary}
           onSubmitEditing={onSubmitEditing}
           returnKeyType={onSubmitEditing ? 'go' : 'default'}
-          {...({ id, name } as any)}
+          {...({ id, name } as { id?: string; name?: string })}
         />
         {secureTextEntry && (
           <Ionicons

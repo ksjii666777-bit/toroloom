@@ -8,10 +8,10 @@
  * ============================================================================
  */
 
-const eslint = require('@eslint/js');
-const tseslint = require('typescript-eslint');
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
-module.exports = [
+export default [
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {

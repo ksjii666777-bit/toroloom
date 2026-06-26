@@ -323,7 +323,7 @@ describe('HomeScreen — Quick Action Navigation', () => {
     const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('SIP')); });
-    expect(mockNavigate).toHaveBeenCalledWith('MutualFunds');
+    expect(mockNavigate).toHaveBeenCalledWith('SIPCalculator');
   });
 
   it('navigates to Learn when Learn quick action is pressed', () => {

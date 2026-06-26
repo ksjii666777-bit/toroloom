@@ -2,7 +2,9 @@ import { create } from 'zustand';
 import { Stock, MarketIndex } from '../types';
 import { mockIndices, mockStocks } from '../constants/mockData';
 import { marketApi } from '../services/api';
+import { offlineCache } from '../services/offlineCache';
 import { analytics } from '../services/analytics';
+import { log } from '../utils/logger';
 import { sendPriceAlert } from '../services/notificationService';
 
 // ── Stock Screener Filter Types ───────────────────────────────
@@ -72,6 +74,7 @@ interface MarketState {
   setSearchQuery: (query: string) => void;
   selectStock: (stock: Stock) => void;
   refreshMarket: () => Promise<void>;
+  loadCachedMarket: () => Promise<void>;
   simulatePriceAlert: (symbol?: string) => void;
 
   // Screener actions
@@ -138,6 +141,14 @@ export const useMarketStore = create<MarketState>((set, get) => ({
     });
   },
 
+  /** Load cached market data at app startup for instant display */
+  loadCachedMarket: async () => {
+    const cached = await offlineCache.load<{ indices: MarketIndex[]; stocks: Stock[] }>('market');
+    if (cached) {
+      set({ indices: cached.data.indices, stocks: cached.data.stocks });
+    }
+  },
+
   refreshMarket: async () => {
     set({ isLoading: true });
 
@@ -146,9 +157,18 @@ export const useMarketStore = create<MarketState>((set, get) => ({
         marketApi.getIndices(),
         marketApi.getStocks(),
       ]);
+      // Cache on successful fetch
+      await offlineCache.save('market', { indices, stocks });
       set({ indices, stocks, isLoading: false });
     } catch {
-      // Backend unavailable — fall back to mock data with simulated changes
+      // Backend unavailable — try stale cache
+      const cached = await offlineCache.load<{ indices: MarketIndex[]; stocks: Stock[] }>('market');
+      if (cached) {
+        set({ indices: cached.data.indices, stocks: cached.data.stocks, isLoading: false });
+        log.info('[Market] Serving stale cached market data');
+        return;
+      }
+      // Fall back to mock data with simulated changes
       const updatedStocks = mockStocks.map(s => ({
         ...s,
         price: +(s.price * (1 + (Math.random() - 0.5) * 0.02)).toFixed(2),

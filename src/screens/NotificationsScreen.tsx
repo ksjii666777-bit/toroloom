@@ -126,7 +126,7 @@ export default function NotificationsScreen({ navigation }: any) {
         }}
       >
         <View style={[styles.notifIcon, { backgroundColor: meta.color + '20' }]}>
-          <Ionicons name={meta.icon as any} size={20} color={meta.color} />
+          <Ionicons name={meta.icon as keyof typeof Ionicons.glyphMap} size={20} color={meta.color} />
         </View>
         <View style={styles.notifContent}>
           <View style={styles.notifHeader}>
@@ -426,7 +426,7 @@ export default function NotificationsScreen({ navigation }: any) {
               onPress={() => setActiveTab(tab.key)}
             >
               <Ionicons
-                name={tab.icon as any}
+                name={tab.icon as keyof typeof Ionicons.glyphMap}
                 size={16}
                 color={activeTab === tab.key ? colors.primary : colors.textMuted}
               />
@@ -475,7 +475,7 @@ export default function NotificationsScreen({ navigation }: any) {
               ] as const).map(item => (
                 <View key={item.key} style={styles.prefItem}>
                   <View style={[styles.prefIcon, { backgroundColor: item.color + '20' }]}>
-                    <Ionicons name={item.icon as any} size={18} color={item.color} />
+                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={18} color={item.color} />
                   </View>
                   <View style={styles.prefInfo}>
                     <Text style={styles.prefLabel}>{item.label}</Text>

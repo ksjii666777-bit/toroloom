@@ -62,6 +62,12 @@ export interface AnalyticsEvents {
   funds_added: { amount: number; method: string };
   funds_withdrawn: { amount: number };
   error_occurred: { code: string; message: string; screen?: string };
+  connectivity_restored: {
+    reconnectedAt: string;
+    offlineDurationMs: number;
+    mutationsSynced: number;
+    storesRefreshed: boolean;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEvents;

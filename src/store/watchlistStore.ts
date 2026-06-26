@@ -4,6 +4,7 @@ import { mockWatchlists } from '../constants/mockData';
 import { watchlistApi } from '../services/api';
 import { offlineCache } from '../services/offlineCache';
 import { log } from '../utils/logger';
+import { offlineMutationQueue } from '../services/offlineMutationQueue';
 
 // Monotonically increasing counter for locally-created watchlist IDs.
 // Avoids duplicate IDs when createWatchlist is called multiple times
@@ -13,8 +14,6 @@ let _localIdCounter = 0;
 interface WatchlistState {
   watchlists: Watchlist[];
   isLoading: boolean;
-  /** True when we're serving stale cached data because the network is down */
-  isOffline: boolean;
   fetchWatchlists: () => Promise<void>;
   addToWatchlist: (watchlistId: string, stock: Stock) => Promise<void>;
   removeFromWatchlist: (watchlistId: string, stockId: string, symbol: string) => Promise<void>;
@@ -25,12 +24,13 @@ interface WatchlistState {
   loadCachedWatchlists: () => Promise<void>;
   /** Clear offline cache */
   clearCache: () => Promise<void>;
+  /** Sync pending offline mutations with backend */
+  syncOfflineMutations: () => Promise<void>;
 }
 
 export const useWatchlistStore = create<WatchlistState>((set, get) => ({
   watchlists: mockWatchlists,
   isLoading: false,
-  isOffline: false,
 
   loadCachedWatchlists: async () => {
     const cached = await offlineCache.load<{ watchlists: Watchlist[] }>('watchlist');
@@ -40,7 +40,7 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
   },
 
   fetchWatchlists: async () => {
-    set({ isLoading: true, isOffline: false });
+    set({ isLoading: true });
     try {
       const data = await watchlistApi.getAll();
       const transformed = data.map(w => ({
@@ -54,7 +54,6 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
       set({
         watchlists: transformed,
         isLoading: false,
-        isOffline: false,
       });
     } catch {
       // Backend unavailable — try stale cache only if current watchlists are empty
@@ -65,7 +64,6 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
           set({
             watchlists: cached.data.watchlists,
             isLoading: false,
-            isOffline: true,
           });
           log.info('[Watchlist] Serving stale cached watchlist data');
           return;
@@ -73,7 +71,7 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
       }
       // Keep current in-memory data (mock, cached-from-startup, or user-modified)
       log.info('[Watchlist] Backend unavailable — keeping existing data');
-      set({ isLoading: false, isOffline: true });
+      set({ isLoading: false });
     }
   },
 
@@ -81,7 +79,12 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     try {
       await watchlistApi.addStock(watchlistId, stock.symbol);
     } catch {
-      // Backend unavailable — execute locally
+      // Backend unavailable — queue for later sync
+      log.info('[Watchlist] Offline: queuing ADD for sync');
+      offlineMutationQueue.enqueue('ADD_TO_WATCHLIST', {
+        watchlistId,
+        symbol: stock.symbol,
+      }).catch(() => {});
     }
 
     set(state => ({
@@ -100,7 +103,12 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     try {
       await watchlistApi.removeStock(watchlistId, symbol);
     } catch {
-      // Backend unavailable — execute locally
+      // Backend unavailable — queue for later sync
+      log.info('[Watchlist] Offline: queuing REMOVE for sync');
+      offlineMutationQueue.enqueue('REMOVE_FROM_WATCHLIST', {
+        watchlistId,
+        symbol,
+      }).catch(() => {});
     }
 
     set(state => ({
@@ -128,7 +136,9 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
       await offlineCache.save('watchlist', { watchlists: newWatchlists });
       return;
     } catch {
-      // Backend unavailable — create locally
+      // Backend unavailable — queue for later sync
+      log.info('[Watchlist] Offline: queuing CREATE for sync');
+      offlineMutationQueue.enqueue('CREATE_WATCHLIST', { name }).catch(() => {});
     }
 
     const newWatchlists = [...get().watchlists, {
@@ -145,7 +155,9 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     try {
       await watchlistApi.delete(watchlistId);
     } catch {
-      // Backend unavailable — execute locally
+      // Backend unavailable — queue for later sync
+      log.info('[Watchlist] Offline: queuing DELETE for sync');
+      offlineMutationQueue.enqueue('DELETE_WATCHLIST', { watchlistId }).catch(() => {});
     }
 
     set(state => ({
@@ -162,5 +174,17 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
 
   clearCache: async () => {
     await offlineCache.remove('watchlist');
+    await offlineMutationQueue.clearAll();
+  },
+
+  syncOfflineMutations: async () => {
+    const results = await offlineMutationQueue.processAll();
+    for (const result of results) {
+      if (result.success) {
+        log.info('[Watchlist] Synced offline mutation:', result.type);
+      } else {
+        log.warn('[Watchlist] Failed to sync offline mutation:', result.type, result.error);
+      }
+    }
   },
 }));

@@ -84,7 +84,7 @@ output "migration_command" {
   --target="${local.database_url}" \
   --apply
 EOF
-  sensitive = true
+  sensitive   = true
 }
 
 output "env_vars_for_railway" {
@@ -95,5 +95,5 @@ DATABASE_URL="${local.database_url}"
 ${var.create_read_replica ? "DATABASE_URL_READER=\"${local.reader_url}\"" : "# DATABASE_URL_READER=(optional)"}
 STORAGE_BACKEND=postgres
 EOF
-  sensitive = true
+  sensitive   = true
 }

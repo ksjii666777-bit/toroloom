@@ -150,16 +150,21 @@ export default function ConnectBrokerView({ navigation }: any) {
   }, []);
 
   const checkExistingSessions = async () => {
-    const brokers = ['zerodha', 'angel', 'groww'];
-    for (const b of brokers) {
-      const valid = await hasValidSession(b);
-      if (valid) {
-        setConnectedBroker(b);
-        setConnectedLabel(BROKERS.find((br) => br.type === b)?.label || b);
-        break;
+    try {
+      const brokers = ['zerodha', 'angel', 'groww'];
+      for (const b of brokers) {
+        const valid = await hasValidSession(b);
+        if (valid) {
+          setConnectedBroker(b);
+          setConnectedLabel(BROKERS.find((br) => br.type === b)?.label || b);
+          break;
+        }
       }
+    } catch {
+      // Session storage unavailable — gracefully fall through to disconnected state
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   // ── Open Credentials Modal ──────────────────────────────────

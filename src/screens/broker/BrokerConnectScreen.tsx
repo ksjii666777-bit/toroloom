@@ -258,7 +258,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
     if (!selectedBroker) return;
 
     try {
-      const payload: any = { brokerType: selectedBroker.type, credentials };
+      const payload: { brokerType: string; credentials: BrokerCredentials } = { brokerType: selectedBroker.type, credentials };
 
       // Only send relevant fields for this broker type
       if (selectedBroker.type === 'zerodha') {
@@ -471,7 +471,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                     >
                       {/* Glow effect when connected */}
                       {isConnected && (
-                        <View style={[styles.connectedGlow, { opacity: cardGlow as any }]} />
+                        <View style={[styles.connectedGlow, { opacity: cardGlow }]} />
                       )}
 
                       {/* Broker Icon */}
@@ -615,7 +615,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                     autoCapitalize="none"
                     autoCorrect={false}
                     secureTextEntry
-                    {...({ id: 'broker-api-secret', name: 'apiSecret' } as any)}
+                    {...({ id: 'broker-api-secret', name: 'apiSecret' } as { id: string; name: string })}
                   />
                 </View>
               )}
@@ -664,7 +664,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                       autoCapitalize="none"
                       autoCorrect={false}
                       secureTextEntry
-                      {...({ id: 'broker-password', name: 'password' } as any)}
+                      {...({ id: 'broker-password', name: 'password' } as { id: string; name: string })}
                     />
                   </View>
                   <View style={styles.inputGroup}>
@@ -713,7 +713,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                     autoCapitalize="none"
                     autoCorrect={false}
                     secureTextEntry
-                    {...({ id: 'broker-access-token', name: 'accessToken' } as any)}
+                    {...({ id: 'broker-access-token', name: 'accessToken' } as { id: string; name: string })}
                   />
                 </View>
               )}

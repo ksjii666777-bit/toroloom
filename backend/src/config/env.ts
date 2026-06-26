@@ -95,12 +95,17 @@ export const env = {
   // ──── Payments ───────────────────────────────────────────────────────
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
+  razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
 
   // ──── Error Tracking ─────────────────────────────────────────────────
   sentryDsn: process.env.SENTRY_DSN || '',
 
   // ──── Redis ──────────────────────────────────────────────────────────
   redisUrl: process.env.REDIS_URL || '',
+
+  // ──── Feature Flags ──────────────────────────────────────────────────
+  /** Enable subscription feature gating middleware globally */
+  subscriptionGatingEnabled: process.env.SUBSCRIPTION_GATING_ENABLED === 'true',
 
   get isDev() {
     return this.nodeEnv === 'development';

@@ -13,29 +13,10 @@ import { paymentsApi } from '../../services/api/payments';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency} from '../../utils/formatters';
+import { LINKED_UPI_ACCOUNTS, RECENT_UPI_CONTACTS, UPI_PRESETS } from '../../services/mockDataService';
+import type { UPILinkedAccount } from '../../services/mockDataService';
 
 const { width } = Dimensions.get('window');
-
-const UPI_PRESETS = [500, 1000, 2000, 5000];
-
-interface UPILinkedAccount {
-  upiId: string;
-  bankName: string;
-  accountNumber: string;
-  isPrimary: boolean;
-}
-
-const LINKED_UPI_ACCOUNTS: UPILinkedAccount[] = [
-  { upiId: 'rahul@hdfc', bankName: 'HDFC Bank', accountNumber: 'XXXX1234', isPrimary: true },
-  { upiId: 'rahul.sharma@paytm', bankName: 'Paytm Payments Bank', accountNumber: 'XXXX5678', isPrimary: false },
-  { upiId: 'rahul@icici', bankName: 'ICICI Bank', accountNumber: 'XXXX9012', isPrimary: false },
-];
-
-const RECENT_UPI_CONTACTS = [
-  { name: 'Priya Patel', upiId: 'priya@paytm', avatar: 'P' },
-  { name: 'Amit Singh', upiId: 'amit@hdfc', avatar: 'A' },
-  { name: 'Neha Gupta', upiId: 'neha@icici', avatar: 'N' },
-];
 
 export default function UPIScreen({ navigation }: any) {
   const { colors } = useTheme();

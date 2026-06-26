@@ -60,7 +60,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
         {/* Login Form */}
         <View
-          accessibilityRole={'form' as any}
           style={styles.formSection}
         >
           <Text style={styles.welcomeBack}>Welcome Back! 👋</Text>

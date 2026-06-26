@@ -200,7 +200,7 @@ export default function MoreScreen({ navigation }: any) {
             <Animated.View key={i} style={qaStyles[i]}>
               <AnimatedPressable onPress={() => handleQuickAction(action.label)} haptic="light" scaleTo={0.92}>
                 <View style={styles.qaCard}>
-                  <Ionicons name={action.icon as any} size={20} color={action.gradient[0]} />
+                  <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={action.gradient[0]} />
                   <Text style={styles.qaLabel}>{action.label}</Text>
                 </View>
               </AnimatedPressable>
@@ -264,7 +264,7 @@ export default function MoreScreen({ navigation }: any) {
                   >
                     <View style={styles.menuItem}>
                       <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
-                        <Ionicons name={item.icon as any} size={22} color={item.color} />
+                        <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
                       </View>
                       <Text style={styles.menuLabel}>{item.label}</Text>
                     </View>

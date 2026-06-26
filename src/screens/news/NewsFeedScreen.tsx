@@ -60,7 +60,7 @@ function SentimentBadge({ sentiment }: { sentiment: MarketNewsItem['sentiment'] 
   const config = SENTIMENT_CONFIG[sentiment];
   return (
     <View style={[sentimentBadgeStyles.container, { backgroundColor: config.bgColor }]}>
-      <Ionicons name={config.icon as any} size={12} color={config.color} />
+      <Ionicons name={config.icon as keyof typeof Ionicons.glyphMap} size={12} color={config.color} />
       <Text style={[sentimentBadgeStyles.label, { color: config.color }]}>{config.label}</Text>
     </View>
   );
@@ -105,7 +105,7 @@ function CategoryChip({
       ]}
     >
       <Ionicons
-        name={category.icon as any}
+        name={category.icon as keyof typeof Ionicons.glyphMap}
         size={14}
         color={isActive ? '#FFFFFF' : colors.textSecondary}
       />

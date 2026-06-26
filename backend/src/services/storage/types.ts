@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import type { AuditEvent, AuditQuery, AuditTrailSnapshot, AuditEventType } from '../auditTrail';
+import type { AuditEvent, AuditEventType } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
 // ==================== Audit Domain ====================
@@ -60,6 +60,23 @@ export interface NotificationData {
   timestamp: string;
   data?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+}
+
+// ==================== Subscription Domain ====================
+
+export interface UserSubscriptionData {
+  userId: string;
+  tier: 'free' | 'pro' | 'elite';
+  planId: string;
+  status: 'active' | 'expired' | 'cancelled' | 'trial';
+  startDate: string;
+  endDate: string;
+  autoRenew: boolean;
+  paymentMethod?: string;
+  razorpayOrderId?: string;
+  lastPaymentDate?: string;
+  tenantId?: string;
+  updatedAt: string;
 }
 
 // ==================== Community Domain ====================
@@ -169,6 +186,14 @@ export interface StorageEngine {
 
   /** Save (overwrite) the badge count for a user. */
   saveBadgeCount(userId: string, count: number): Promise<void>;
+
+  // ──── Subscriptions ────
+
+  /** Load subscription for a user. Returns null if not set. */
+  loadSubscription(userId: string): Promise<UserSubscriptionData | null>;
+
+  /** Save (insert or overwrite) a user's subscription. */
+  saveSubscription(userId: string, sub: UserSubscriptionData): Promise<void>;
 
   // ──── Lifecycle ────
 

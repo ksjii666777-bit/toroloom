@@ -25,6 +25,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { log } from '../utils/logger';
 
 // ──── Constants ────────────────────────────────────────────────────────────
 
@@ -81,7 +82,7 @@ export const offlineCache = {
       await AsyncStorage.setItem(cacheKey(namespace), JSON.stringify(entry));
     } catch (error) {
       // Non-critical — cache writes are best-effort
-      console.warn(`[OfflineCache] Failed to save "${namespace}":`, error);
+      log.warn(`[OfflineCache] Failed to save "${namespace}":`, error);
     }
   },
 

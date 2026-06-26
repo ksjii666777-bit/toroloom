@@ -18,6 +18,17 @@ import { act } from 'react';
 import type { ReactTestInstance } from 'react-test-renderer';
 import { render, fireEvent } from './testUtils';
 
+// ==================== Mock Razorpay ====================
+vi.mock('react-native-razorpay', () => ({
+  default: {
+    open: vi.fn(() => Promise.resolve({
+      razorpay_payment_id: 'pay_mock_123',
+      razorpay_order_id: 'order_mock_123',
+      razorpay_signature: 'sig_mock_123',
+    })),
+  },
+}));
+
 // ==================== Mock Setup (hoisted) ====================
 
 vi.mock('react-native', async () => {
@@ -60,6 +71,24 @@ vi.mock('../store/fundStore', () => ({
   useFundStore: () => ({
     addTransaction: mockAddTransaction,
   }),
+}));
+
+vi.mock('../services/api/payments', () => ({
+  paymentsApi: {
+    createFundOrder: vi.fn(() => Promise.resolve({
+      orderId: 'order_mock_123',
+      keyId: 'rzp_test_abc123',
+      amount: 5000,
+      currency: 'INR',
+    })),
+    verifyPayment: vi.fn(() => Promise.resolve({ success: true, message: 'Payment verified' })),
+    createOrder: vi.fn(() => Promise.resolve({
+      orderId: 'order_mock_456',
+      keyId: 'rzp_test_abc123',
+      amount: 1000,
+      currency: 'INR',
+    })),
+  },
 }));
 
 // ==================== Imports ====================
@@ -324,16 +353,16 @@ describe('UPIScreen — Payment Flow', () => {
     );
   });
 
-  it('processes payment when confirmation is accepted', () => {
+  it('processes payment when confirmation is accepted', async () => {
     const { getByText, getByPlaceholderText } = renderUPI();
     changeText(getByPlaceholderText('Enter UPI ID (e.g., name@bank)'), 'test@paytm');
     changeText(getByPlaceholderText('Enter amount'), '5000');
     press(getByText(/Pay ₹5,000/));
 
     expect(confirmCallback).toBeDefined();
-    act(() => { confirmCallback!(); });
+    await act(async () => { confirmCallback!(); });
 
-    act(() => { vi.advanceTimersByTime(2000); });
+    await act(async () => { vi.advanceTimersByTime(2000); });
 
     expect(mockUpdateBalance).toHaveBeenCalledWith(-5000);
     expect(mockAddTransaction).toHaveBeenCalledWith(expect.objectContaining({
@@ -345,26 +374,26 @@ describe('UPIScreen — Payment Flow', () => {
     }));
   });
 
-  it('shows success state after payment completes', () => {
+  it('shows success state after payment completes', async () => {
     const { getByText, getByPlaceholderText } = renderUPI();
     changeText(getByPlaceholderText('Enter UPI ID (e.g., name@bank)'), 'test@paytm');
     changeText(getByPlaceholderText('Enter amount'), '5000');
     press(getByText(/Pay ₹5,000/));
-    act(() => { confirmCallback!(); });
-    act(() => { vi.advanceTimersByTime(2000); });
+    await act(async () => { confirmCallback!(); });
+    await act(async () => { vi.advanceTimersByTime(2000); });
 
     expect(getByText('Payment Successful!')).toBeDefined();
     expect(getByText(/₹5,000/)).toBeDefined();
     expect(getByText(/test@paytm/)).toBeDefined();
   });
 
-  it('done button navigates back after success', () => {
+  it('done button navigates back after success', async () => {
     const { getByText, getByPlaceholderText } = renderUPI();
     changeText(getByPlaceholderText('Enter UPI ID (e.g., name@bank)'), 'test@paytm');
     changeText(getByPlaceholderText('Enter amount'), '5000');
     press(getByText(/Pay ₹5,000/));
-    act(() => { confirmCallback!(); });
-    act(() => { vi.advanceTimersByTime(2000); });
+    await act(async () => { confirmCallback!(); });
+    await act(async () => { vi.advanceTimersByTime(2000); });
 
     press(getByText('Done'));
     expect(mockGoBack).toHaveBeenCalledTimes(1);
@@ -389,25 +418,25 @@ describe('UPIScreen — Edge Cases', () => {
     expect(getByText(/₹1,500/)).toBeDefined();
   });
 
-  it('shows remaining balance in success screen', () => {
+  it('shows remaining balance in success screen', async () => {
     const { getByText, getByPlaceholderText } = renderUPI();
 
     changeText(getByPlaceholderText('Enter UPI ID (e.g., name@bank)'), 'test@paytm');
     changeText(getByPlaceholderText('Enter amount'), '5000');
     press(getByText(/Pay ₹5,000/));
-    act(() => { confirmCallback!(); });
-    act(() => { vi.advanceTimersByTime(2000); });
+    await act(async () => { confirmCallback!(); });
+    await act(async () => { vi.advanceTimersByTime(2000); });
 
     expect(getByText('Remaining Balance')).toBeDefined();
   });
 
-  it('navigates to transaction history from success screen in dev mode', () => {
+  it('navigates to transaction history from success screen in dev mode', async () => {
     const { getByText, getByPlaceholderText } = renderUPI();
     changeText(getByPlaceholderText('Enter UPI ID (e.g., name@bank)'), 'test@paytm');
     changeText(getByPlaceholderText('Enter amount'), '5000');
     press(getByText(/Pay ₹5,000/));
-    act(() => { confirmCallback!(); });
-    act(() => { vi.advanceTimersByTime(2000); });
+    await act(async () => { confirmCallback!(); });
+    await act(async () => { vi.advanceTimersByTime(2000); });
 
     press(getByText('View Transaction History'));
     expect(mockNavigate).toHaveBeenCalledWith('TransactionHistory');

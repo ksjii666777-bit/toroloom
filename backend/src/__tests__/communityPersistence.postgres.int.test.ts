@@ -33,7 +33,7 @@ import {
   likePost,
   resetCommunityService,
 } from '../services/community';
-import type { CommunityPostData } from '../services/storage/types';
+
 
 const DATABASE_URL = TEST_DATABASE_URL;
 

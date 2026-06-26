@@ -60,7 +60,7 @@
  */
 
 import type { Pool, PoolConfig } from 'pg';
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -251,6 +251,22 @@ export class PostgreSQLStorage implements StorageEngine {
         tags JSONB DEFAULT '[]'
       );
       CREATE INDEX IF NOT EXISTS idx_community_timestamp ON community_posts (timestamp DESC);
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS subscriptions (
+        user_id TEXT PRIMARY KEY,
+        tier TEXT NOT NULL DEFAULT 'free',
+        plan_id TEXT NOT NULL DEFAULT 'plan_free',
+        status TEXT NOT NULL DEFAULT 'active',
+        start_date TEXT NOT NULL,
+        end_date TEXT NOT NULL,
+        auto_renew BOOLEAN NOT NULL DEFAULT false,
+        payment_method TEXT,
+        razorpay_order_id TEXT,
+        last_payment_date TEXT,
+        tenant_id TEXT
+      );
     `);
 
     // ──── Scalability Core Tables ───────────────────────────────────
@@ -446,6 +462,7 @@ export class PostgreSQLStorage implements StorageEngine {
     await this.pool.query('DELETE FROM notifications');
     await this.pool.query('DELETE FROM badge_counts');
     await this.pool.query('DELETE FROM community_posts');
+    await this.pool.query('DELETE FROM subscriptions');
   }
 
   private rowToEvent(row: any): AuditEvent {
@@ -606,6 +623,65 @@ export class PostgreSQLStorage implements StorageEngine {
       data: row.data ? parseJSON(row.data) : undefined,
       metadata: row.metadata ? parseJSON(row.metadata) : undefined,
     };
+  }
+
+  // ──── Subscriptions ────
+
+  async loadSubscription(userId: string): Promise<UserSubscriptionData | null> {
+    if (!this.pool) return null;
+    const result = await this.pool.query(
+      'SELECT * FROM subscriptions WHERE user_id = $1',
+      [userId],
+    );
+    if (result.rows.length === 0) return null;
+    return {
+      userId: result.rows[0].user_id,
+      tier: result.rows[0].tier,
+      planId: result.rows[0].plan_id,
+      status: result.rows[0].status,
+      startDate: result.rows[0].start_date,
+      endDate: result.rows[0].end_date,
+      autoRenew: result.rows[0].auto_renew,
+      paymentMethod: result.rows[0].payment_method || undefined,
+      razorpayOrderId: result.rows[0].razorpay_order_id || undefined,
+      lastPaymentDate: result.rows[0].last_payment_date || undefined,
+      tenantId: result.rows[0].tenant_id || undefined,
+      updatedAt: result.rows[0].updated_at,
+    };
+  }
+
+  async saveSubscription(userId: string, sub: UserSubscriptionData): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO subscriptions (user_id, tier, plan_id, status, start_date, end_date, auto_renew, payment_method, razorpay_order_id, last_payment_date, tenant_id, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       ON CONFLICT (user_id) DO UPDATE SET
+         tier = EXCLUDED.tier,
+         plan_id = EXCLUDED.plan_id,
+         status = EXCLUDED.status,
+         start_date = EXCLUDED.start_date,
+         end_date = EXCLUDED.end_date,
+         auto_renew = EXCLUDED.auto_renew,
+         payment_method = EXCLUDED.payment_method,
+         razorpay_order_id = EXCLUDED.razorpay_order_id,
+         last_payment_date = EXCLUDED.last_payment_date,
+         tenant_id = EXCLUDED.tenant_id,
+         updated_at = EXCLUDED.updated_at`,
+      [
+        userId,
+        sub.tier,
+        sub.planId,
+        sub.status,
+        sub.startDate,
+        sub.endDate,
+        sub.autoRenew,
+        sub.paymentMethod || null,
+        sub.razorpayOrderId || null,
+        sub.lastPaymentDate || null,
+        sub.tenantId || null,
+        sub.updatedAt,
+      ],
+    );
   }
 
   // ──── Community ────

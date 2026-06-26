@@ -149,6 +149,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
     id     = "transition-noncurrent-versions"
     status = "Enabled"
 
+    filter {}
+
     # ── Transition to Glacier Deep Archive ─────────────────────────
     # Terraform state versions older than the transition cutoff are
     # moved to Glacier Deep Archive (~$1/TB/month, 12h restore).
@@ -196,7 +198,7 @@ resource "aws_cloudwatch_metric_alarm" "state_bucket_size" {
   comparison_operator = "GreaterThanThreshold"
   threshold           = var.storage_alarm_threshold_bytes
   evaluation_periods  = 1
-  period              = 86400  # Daily granularity (S3 storage metrics update daily)
+  period              = 86400 # Daily granularity (S3 storage metrics update daily)
   treat_missing_data  = "notBreaching"
 
   dimensions = {
@@ -236,9 +238,9 @@ resource "aws_dynamodb_table" "terraform_locks" {
 #   governed solely by IAM identity-based policies.
 # ==============================================================================
 resource "aws_dynamodb_resource_policy" "terraform_locks" {
-  count      = length(var.allowed_iam_principals) > 0 ? 1 : 0
-  table_name = aws_dynamodb_table.terraform_locks.name
-  policy     = data.aws_iam_policy_document.terraform_locks[0].json
+  count        = length(var.allowed_iam_principals) > 0 ? 1 : 0
+  resource_arn = aws_dynamodb_table.terraform_locks.arn
+  policy       = data.aws_iam_policy_document.terraform_locks[0].json
 }
 
 data "aws_iam_policy_document" "terraform_locks" {

@@ -21,6 +21,7 @@
 
 import * as Keychain from 'react-native-keychain';
 import type { BrokerSession, SessionPayload } from '../../types';
+import { log } from '../../utils/logger';
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 
@@ -165,7 +166,7 @@ export async function storeBrokerSession(
 
     return true;
   } catch (error) {
-    console.error('[SessionStorage] Failed to store broker session:', error);
+    log.error('[SessionStorage] Failed to store broker session:', error);
     return false;
   }
 }
@@ -189,7 +190,7 @@ export async function getBrokerSession(
 
     return JSON.parse(credentials.password) as BrokerSession;
   } catch (error) {
-    console.error('[SessionStorage] Failed to retrieve broker session:', error);
+    log.error('[SessionStorage] Failed to retrieve broker session:', error);
     return null;
   }
 }
@@ -222,7 +223,7 @@ export async function clearBrokerSession(
     });
     return true;
   } catch (error) {
-    console.error('[SessionStorage] Failed to clear broker session:', error);
+    log.error('[SessionStorage] Failed to clear broker session:', error);
     return false;
   }
 }

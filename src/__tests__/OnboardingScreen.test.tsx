@@ -71,6 +71,9 @@ vi.mock('../store/onboardingStore', () => ({
       completeOnboarding: vi.fn(),
       hasCompletedOnboarding: false,
       initialized: true,
+      interactedSteps: {},
+      markStepInteracted: vi.fn(),
+      markStepDemoCompleted: vi.fn(),
     };
     return sel ? sel(state) : state;
   }),

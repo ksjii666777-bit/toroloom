@@ -36,7 +36,7 @@ function getNotifications(): any {
 
   // Check for test-injected mock first (vitest globalThis bridge).
   const testModules: Record<string, any> | undefined =
-    (globalThis as any)[TEST_GLOBAL_KEY];
+    (globalThis as Record<string, any>)[TEST_GLOBAL_KEY];
   if (testModules && testModules['expo-notifications']) {
     entry.value = testModules['expo-notifications'];
     return entry.value;
@@ -53,7 +53,7 @@ function getNotifications(): any {
           try {
             entry.value = require('expo-notifications');
           } catch {
-            const currentTestModules = (globalThis as any)[TEST_GLOBAL_KEY];
+            const currentTestModules = (globalThis as Record<string, any>)[TEST_GLOBAL_KEY];
             if (currentTestModules && currentTestModules['expo-notifications']) {
               entry.value = currentTestModules['expo-notifications'];
             }
@@ -70,7 +70,7 @@ function getDevice(): any {
   const entry = _deviceCache;
   if (entry.value) return entry.value;
 
-  const testModules = (globalThis as any)[TEST_GLOBAL_KEY];
+  const testModules = (globalThis as Record<string, any>)[TEST_GLOBAL_KEY];
   if (testModules && testModules['expo-device']) {
     entry.value = testModules['expo-device'];
     return entry.value;
@@ -86,7 +86,7 @@ function getDevice(): any {
           try {
             entry.value = require('expo-device');
           } catch {
-            const currentTestModules = (globalThis as any)[TEST_GLOBAL_KEY];
+            const currentTestModules = (globalThis as Record<string, any>)[TEST_GLOBAL_KEY];
             if (currentTestModules && currentTestModules['expo-device']) {
               entry.value = currentTestModules['expo-device'];
             }
@@ -103,7 +103,7 @@ function getTaskManager(): any {
   const entry = _taskMgrCache;
   if (entry.value) return entry.value;
 
-  const testModules = (globalThis as any)[TEST_GLOBAL_KEY];
+  const testModules = (globalThis as Record<string, any>)[TEST_GLOBAL_KEY];
   if (testModules && testModules['expo-task-manager']) {
     entry.value = testModules['expo-task-manager'];
     return entry.value;
@@ -119,7 +119,7 @@ function getTaskManager(): any {
           try {
             entry.value = require('expo-task-manager');
           } catch {
-            const currentTestModules = (globalThis as any)[TEST_GLOBAL_KEY];
+            const currentTestModules = (globalThis as Record<string, any>)[TEST_GLOBAL_KEY];
             if (currentTestModules && currentTestModules['expo-task-manager']) {
               entry.value = currentTestModules['expo-task-manager'];
             }
@@ -136,7 +136,7 @@ function getBackgroundFetch(): any {
   const entry = _bgFetchCache;
   if (entry.value) return entry.value;
 
-  const testModules = (globalThis as any)[TEST_GLOBAL_KEY];
+  const testModules = (globalThis as Record<string, any>)[TEST_GLOBAL_KEY];
   if (testModules && testModules['expo-background-fetch']) {
     entry.value = testModules['expo-background-fetch'];
     return entry.value;
@@ -152,7 +152,7 @@ function getBackgroundFetch(): any {
           try {
             entry.value = require('expo-background-fetch');
           } catch {
-            const currentTestModules = (globalThis as any)[TEST_GLOBAL_KEY];
+            const currentTestModules = (globalThis as Record<string, any>)[TEST_GLOBAL_KEY];
             if (currentTestModules && currentTestModules['expo-background-fetch']) {
               entry.value = currentTestModules['expo-background-fetch'];
             }
@@ -206,7 +206,7 @@ if (Platform.OS !== 'web') {
 // The lazy module getter ensures vitest mocks resolve correctly during tests.
 function getImportanceValue(key: 'HIGH' | 'DEFAULT'): number | string {
   const N = getNotifications();
-  const ai = (N as any).AndroidImportance;
+  const ai = N.AndroidImportance;
   if (ai && ai[key] !== undefined) return ai[key];
   const fallbacks: Record<string, number | string> = { HIGH: 5, DEFAULT: 3 };
   return fallbacks[key];

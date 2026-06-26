@@ -66,7 +66,7 @@ variable "allowed_cidr_blocks" {
 variable "db_instance_class" {
   description = "RDS instance class (https://aws.amazon.com/rds/instance-types/)"
   type        = string
-  default     = "db.t4g.medium"  # 2 vCPU, 4 GB RAM, burstable
+  default     = "db.t4g.medium" # 2 vCPU, 4 GB RAM, burstable
 }
 
 variable "db_allocated_storage" {
@@ -90,13 +90,13 @@ variable "db_storage_type" {
 variable "db_iops" {
   description = "Provisioned IOPS (0 for gp3 default which provides 3000 IOPS)"
   type        = number
-  default     = 0  # gp3 default: 3000 IOPS
+  default     = 0 # gp3 default: 3000 IOPS
 }
 
 variable "db_storage_throughput" {
   description = "Storage throughput in MB/s (gp3 only, 0 for default which is 125 MB/s)"
   type        = number
-  default     = 0  # gp3 default: 125 MB/s
+  default     = 0 # gp3 default: 125 MB/s
 }
 
 variable "db_engine_version" {
@@ -139,7 +139,7 @@ variable "db_parameter_group_family" {
 variable "statement_timeout" {
   description = "Query timeout in milliseconds (0 to disable)"
   type        = number
-  default     = 30000  # 30 seconds
+  default     = 30000 # 30 seconds
 }
 
 # ── High Availability ────────────────────────────────────────────────────────
@@ -147,7 +147,7 @@ variable "statement_timeout" {
 variable "multi_az" {
   description = "Enable Multi-AZ deployment for high availability"
   type        = bool
-  default     = false  # Start with single-AZ for cost; enable when scaling
+  default     = false # Start with single-AZ for cost; enable when scaling
 }
 
 variable "backup_retention_period" {
@@ -229,7 +229,8 @@ variable "alarm_connections_threshold" {
 variable "alarm_free_storage_threshold" {
   description = "Free storage space alarm threshold in bytes (5 GB)"
   type        = number
-  default     = 5_368_709_120  # 5 GB in bytes
+  # 5 GB in bytes
+  default = 5368709120
 }
 
 variable "alarm_replica_lag_threshold" {

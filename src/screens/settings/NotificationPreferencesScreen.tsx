@@ -97,7 +97,7 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
                 <React.Fragment key={item.key}>
                   <View style={styles.prefRow}>
                     <View style={[styles.prefIcon, { backgroundColor: item.color + '20' }]}>
-                      <Ionicons name={item.icon as any} size={20} color={item.color} />
+                      <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={item.color} />
                     </View>
                     <View style={styles.prefInfo}>
                       <Text style={styles.prefLabel}>{item.label}</Text>

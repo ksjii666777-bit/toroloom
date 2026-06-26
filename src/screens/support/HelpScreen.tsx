@@ -150,7 +150,7 @@ export default function HelpScreen({ navigation }: any) {
               activeOpacity={0.6}
             >
               <View style={[styles.topicIcon, { backgroundColor: topic.color + '20' }]}>
-                <Ionicons name={topic.icon as any} size={22} color={topic.color} />
+                <Ionicons name={topic.icon as keyof typeof Ionicons.glyphMap} size={22} color={topic.color} />
               </View>
               <Text style={styles.topicLabel}>{topic.label}</Text>
             </TouchableOpacity>
@@ -167,7 +167,7 @@ export default function HelpScreen({ navigation }: any) {
               onPress={() => handleContact(option)}
             >
               <LinearGradient colors={option.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
-                <Ionicons name={option.icon as any} size={22} color={COLORS.white} />
+                <Ionicons name={option.icon as keyof typeof Ionicons.glyphMap} size={22} color={COLORS.white} />
               </LinearGradient>
               <Text style={styles.contactLabel}>{option.label}</Text>
               <Text style={styles.contactDetail}>{option.detail}</Text>
