@@ -52,16 +52,20 @@ const mockTagSets = [
   ['AssetAllocation', 'Portfolio', 'Strategy'],
 ];
 
-const mockPosts: CommunityPostData[] = Array.from({ length: 10 }, (_, i) => ({
-  id: `p${i + 1}`,
-  userId: `u${i + 2}`,
-  userName: mockUserNames[i],
-  content: mockPostContents[i],
-  likes: Math.floor(Math.random() * 300) + 20,
-  comments: Math.floor(Math.random() * 50) + 5,
-  timestamp: new Date(Date.now() - Math.random() * 7 * 86400000).toISOString(),
-  tags: mockTagSets[i],
-}));
+function generateMockPosts(): CommunityPostData[] {
+  return Array.from({ length: 10 }, (_, i) => ({
+    id: `p${i + 1}`,
+    userId: `u${i + 2}`,
+    userName: mockUserNames[i],
+    content: mockPostContents[i],
+    likes: Math.floor(Math.random() * 300) + 20,
+    comments: Math.floor(Math.random() * 50) + 5,
+    timestamp: new Date(Date.now() - Math.random() * 7 * 86400000).toISOString(),
+    tags: mockTagSets[i],
+  }));
+}
+
+let mockPosts: CommunityPostData[] = generateMockPosts();
 
 let mockInitialized = false;
 
@@ -152,7 +156,7 @@ export async function likePost(postId: string): Promise<number> {
  */
 export function resetCommunityService(): void {
   communityStorage = null;
-  mockPosts.length = 0;
+  mockPosts = generateMockPosts();
   mockInitialized = false;
 }
 

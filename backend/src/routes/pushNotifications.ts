@@ -118,8 +118,8 @@ router.post('/portfolio-rules/sync', async (req: Request, res: Response) => {
 
     console.log(`[PortfolioAlerts] Synced ${rules.length} rules for user ${userId}`);
     res.json({ success: true, count: rules.length });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to sync rules' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to sync rules' });
   }
 });
 
@@ -134,8 +134,8 @@ router.get('/portfolio-rules', async (req: Request, res: Response) => {
   try {
     const rules = await getPortfolioAlertRules(userId);
     res.json(rules);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch rules' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch rules' });
   }
 });
 
@@ -152,8 +152,8 @@ router.put('/portfolio-rules/:ruleId', async (req: Request, res: Response) => {
   try {
     await updatePortfolioAlertRule(ruleId as string, updates);
     res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to update rule' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to update rule' });
   }
 });
 
@@ -168,8 +168,8 @@ router.delete('/portfolio-rules/:ruleId', async (req: Request, res: Response) =>
   try {
     await deletePortfolioAlertRule(ruleId as string);
     res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to delete rule' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to delete rule' });
   }
 });
 
@@ -256,7 +256,7 @@ router.post('/portfolio-alert/evaluate', async (req: Request, res: Response) => 
         totalInvested,
         currentValue,
         peakValue,
-        consecutiveLossDays: calcConsecutiveLossDays(positions),
+        consecutiveLossDays: calcConsecutiveLossDays(positions as { dayPnL?: number }[]),
       };
     }
 
@@ -275,8 +275,8 @@ router.post('/portfolio-alert/evaluate', async (req: Request, res: Response) => 
       badgeCount: currentBadgeCount,
       fired,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to evaluate portfolio alerts' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to evaluate portfolio alerts' });
   }
 });
 
@@ -297,8 +297,8 @@ router.post('/portfolio-alert/reset-triggers', async (req: Request, res: Respons
     // Also reset the badge count — new trading day = clean slate
     await resetUserBadgeCount(userId);
     res.json({ success: true, count: rules.length });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to reset triggers' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to reset triggers' });
   }
 });
 
@@ -306,11 +306,11 @@ router.post('/portfolio-alert/reset-triggers', async (req: Request, res: Respons
  * Simple helper to estimate consecutive loss days from position data.
  * This is a best-effort heuristic — the frontend computes the actual value.
  */
-function calcConsecutiveLossDays(positions: any[]): number {
+function calcConsecutiveLossDays(positions: { dayPnL?: number }[]): number {
   // If positions have dayPnL data, count consecutive negative days
   let count = 0;
   for (const pos of positions) {
-    if (pos.dayPnL < 0) count++;
+    if ((pos.dayPnL ?? 0) < 0) count++;
     else break;
   }
   return count;

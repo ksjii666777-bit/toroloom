@@ -45,7 +45,7 @@ import Redis from 'ioredis';
 
 // ──── Config ───────────────────────────────────────────────────────────────
 
-const REDIS_URL = process.env.REDIS_URL || '';
+const REDIS_URL = process.env.REDIS_URL || process.env.RAILWAY_REDIS_URL || '';
 const KEY_PREFIX = 'toroloom:cache:';
 const LOG_PREFIX = '[WarmCache]';
 

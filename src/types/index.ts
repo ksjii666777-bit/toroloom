@@ -591,6 +591,138 @@ export interface ChatRoom {
   stockSymbol?: string;
 }
 
+// ============ F&O (Futures & Options) Types ============
+
+export type FnOExpiryType = 'weekly' | 'monthly';
+
+export interface FnOExpiry {
+  id: string;
+  date: string; // ISO date
+  type: FnOExpiryType;
+  daysToExpiry: number;
+  isMonthly: boolean;
+}
+
+export interface FutureContract {
+  symbol: string;
+  underlying: string;
+  expiry: string;
+  expiryDate: string;
+  lotSize: number;
+  price: number;
+  change: number;
+  changePercent: number;
+  openInterest: number;
+  oiChange: number;
+  oiChangePercent: number;
+  volume: number;
+  basis: number; // futures - spot
+  basisPercent: number;
+}
+
+export interface OptionContract {
+  strike: number;
+  expiry: string;
+  type: 'CE' | 'PE';
+  
+  // Pricing
+  ltp: number;
+  bid: number;
+  ask: number;
+  change: number;
+  changePercent: number;
+  iv: number; // Implied Volatility (%)
+  
+  // Greeks
+  delta: number;
+  gamma: number;
+  theta: number;
+  vega: number;
+  rho: number;
+  
+  // Volume & OI
+  volume: number;
+  openInterest: number;
+  oiChange: number;
+  
+  // Moneyness
+  moneyness: 'ITM' | 'ATM' | 'OTM';
+  intrinsicValue: number;
+  timeValue: number;
+}
+
+export interface OptionChainRow {
+  strike: number;
+  ce: OptionContract | null;
+  pe: OptionContract | null;
+}
+
+export interface OptionChain {
+  underlying: string;
+  underlyingPrice: number;
+  spotPrice: number;
+  expiry: string;
+  expiryDate: string;
+  rows: OptionChainRow[];
+  totalCEOi: number;
+  totalPEOi: number;
+  totalCEVolume: number;
+  totalPEVolume: number;
+  maxPain: number;
+  pcr: number; // Put-Call Ratio
+}
+
+export type StrategyLegAction = 'buy' | 'sell';
+export type StrategyLegType = 'CE' | 'PE' | 'FUTURE';
+
+export interface StrategyLeg {
+  id: string;
+  action: StrategyLegAction;
+  type: StrategyLegType;
+  strike: number;
+  expiry: string;
+  quantity: number;
+  premium: number; // per unit (lot)
+  lotSize: number;
+}
+
+export interface FnOStrategy {
+  id: string;
+  name: string;
+  description: string;
+  legs: StrategyLeg[];
+  maxProfit: number;
+  maxLoss: number;
+  breakevenPoints: number[];
+  isBullish: boolean;
+  isBearish: boolean;
+  isNeutral: boolean;
+  riskCategory: 'low' | 'moderate' | 'high';
+}
+
+export interface StrategyPnLPoint {
+  underlyingPrice: number;
+  pnl: number;
+  legPnls?: number[];
+}
+
+export interface FnOPosition {
+  id: string;
+  symbol: string;
+  type: 'FUTURE' | 'CE' | 'PE';
+  strike?: number;
+  expiry: string;
+  action: 'buy' | 'sell';
+  quantity: number;
+  lotSize: number;
+  entryPrice: number;
+  currentPrice: number;
+  premium?: number;
+  pnl: number;
+  pnlPercent: number;
+  timestamp: string;
+}
+
 // ============ Navigation Types ============
 export type RootStackParamList = {
   Auth: undefined;

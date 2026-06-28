@@ -46,7 +46,7 @@ const router = Router();
 router.get('/circuit-breakers', (_req: Request, res: Response) => {
   try {
     const all = circuitRegistry.getAll();
-    const circuitBreakers: Record<string, any> = {};
+    const circuitBreakers: Record<string, Record<string, unknown>> = {};
     let openCount = 0;
     let halfOpenCount = 0;
     let closedCount = 0;
@@ -100,11 +100,9 @@ router.get('/circuit-breakers', (_req: Request, res: Response) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       error: 'Failed to fetch circuit breaker states',
-      message: error.message,
-      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -126,7 +124,6 @@ router.get('/circuit-breakers/:name', (req: Request, res: Response) => {
         error: 'Circuit breaker not found',
         name,
         hint: 'Circuit breakers are lazily created on first use. Try performing an action that creates one first.',
-        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -162,11 +159,9 @@ router.get('/circuit-breakers/:name', (req: Request, res: Response) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       error: 'Failed to fetch circuit breaker state',
-      message: error.message,
-      timestamp: new Date().toISOString(),
     });
   }
 });

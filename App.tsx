@@ -8,8 +8,11 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { setupChannels } from './src/services/notificationService';
 import { configureApi } from './src/services/api';
 import { useAuthStore, useRiskStore, useSubscriptionStore, useOnboardingStore, usePortfolioStore, useWatchlistStore, useMarketStore, useEducationStore } from './src/store';
+import { useUpgradePromptStore } from './src/store/subscriptionUIStore';
+import { onPaymentRequired } from './src/services/api/client';
 import Sentry, { isSentryEnabled } from './src/services/sentry';
 import useLoadFonts from './src/hooks/useLoadFonts';
+import BiometricUnlockOverlay from './src/components/BiometricUnlockOverlay';
 
 import { seedAllBrokerSessions, seedE2EBrokerSession } from './src/services/gateway/seedE2ESession';
 
@@ -21,6 +24,27 @@ setupChannels().catch(() => {});
 configureApi({
   baseUrl: 'https://toroloom-backend.onrender.com/api',
   getToken: () => useAuthStore.getState().token,
+});
+
+// Wire up the 402 Payment Required interceptor → upgrade prompt modal
+onPaymentRequired((body) => {
+  const userSubscription = useSubscriptionStore.getState().subscription;
+  const requiredTier = (body.requiredTier ?? 'pro') as 'free' | 'pro' | 'elite';
+
+  // Derive a user-friendly feature name from the required tier
+  const featureName =
+    requiredTier === 'elite'
+      ? 'Iron Lock & Elite Features'
+      : requiredTier === 'pro'
+        ? 'Pro Features'
+        : 'This feature';
+
+  useUpgradePromptStore.getState().show({
+    featureName,
+    featureIcon: requiredTier === 'elite' ? 'shield' : 'diamond',
+    requiredTier,
+    currentTier: (body.currentTier ?? userSubscription.tier ?? 'free') as 'free' | 'pro' | 'elite',
+  });
 });
 
 function FontLoadingGate({ children }: { children: React.ReactNode }) {
@@ -125,6 +149,7 @@ function AppContent() {
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <AppNavigator />
+      <BiometricUnlockOverlay />
     </>
   );
 }

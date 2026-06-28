@@ -14,8 +14,8 @@ router.get('/indices', async (_req: Request, res: Response) => {
       CACHE_TTL.INDICES,
     );
     res.json(indices);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch indices' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch indices' });
   }
 });
 
@@ -29,8 +29,8 @@ router.get('/stocks', async (_req: Request, res: Response) => {
       CACHE_TTL.STOCKS,
     );
     res.json(stocks);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch stocks' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch stocks' });
   }
 });
 
@@ -45,8 +45,8 @@ router.get('/quote/:symbol', async (req: Request, res: Response) => {
       CACHE_TTL.QUOTE,
     );
     res.json(quote);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch quote' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch quote' });
   }
 });
 
@@ -61,7 +61,7 @@ router.get('/quotes', async (req: Request, res: Response) => {
     }
 
     // Check cache for each symbol; collect misses
-    const cached: any[] = [];
+    const cached: unknown[] = [];
     const misses: string[] = [];
     for (const symbol of symbols) {
       const cachedQuote = marketCache.get<any>(`quote:${symbol}`);
@@ -83,8 +83,8 @@ router.get('/quotes', async (req: Request, res: Response) => {
     }
 
     res.json(cached);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch quotes' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch quotes' });
   }
 });
 
@@ -102,8 +102,8 @@ router.get('/ohlc/:symbol', async (req: Request, res: Response) => {
       CACHE_TTL.OHLC,
     );
     res.json(ohlc);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch OHLC data' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch OHLC data' });
   }
 });
 
@@ -122,8 +122,8 @@ router.get('/search', async (req: Request, res: Response) => {
       CACHE_TTL.SEARCH,
     );
     res.json(results);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Search failed' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Search failed' });
   }
 });
 

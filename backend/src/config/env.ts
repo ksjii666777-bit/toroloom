@@ -101,11 +101,17 @@ export const env = {
   sentryDsn: process.env.SENTRY_DSN || '',
 
   // ──── Redis ──────────────────────────────────────────────────────────
-  redisUrl: process.env.REDIS_URL || '',
+  /** REDIS_URL or RAILWAY_REDIS_URL (auto-injected by Railway Redis plugin) */
+  redisUrl: process.env.REDIS_URL || process.env.RAILWAY_REDIS_URL || '',
 
   // ──── Feature Flags ──────────────────────────────────────────────────
   /** Enable subscription feature gating middleware globally */
   subscriptionGatingEnabled: process.env.SUBSCRIPTION_GATING_ENABLED === 'true',
+
+  /** Whether Redis is available (injected by Railway or set manually) */
+  get hasRedis(): boolean {
+    return !!(process.env.REDIS_URL || process.env.RAILWAY_REDIS_URL);
+  },
 
   get isDev() {
     return this.nodeEnv === 'development';

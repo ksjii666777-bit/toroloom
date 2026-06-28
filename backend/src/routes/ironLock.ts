@@ -156,8 +156,8 @@ router.get('/status', (req: Request, res: Response) => {
         maxPositionSizePercent: profile.limits.maxPositionSizePercent,
       },
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch Iron Lock status' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch Iron Lock status' });
   }
 });
 
@@ -205,8 +205,8 @@ router.get('/config', (req: Request, res: Response) => {
         maxPositionSizePercent: profile.limits.maxPositionSizePercent,
       },
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch Iron Lock config' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch Iron Lock config' });
   }
 });
 
@@ -252,8 +252,8 @@ router.post('/force-unlock', (req: Request, res: Response) => {
         },
       },
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to release Iron Lock' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to release Iron Lock' });
   }
 });
 
@@ -292,7 +292,15 @@ router.post('/check-order', (req: Request, res: Response) => {
     const isFrozen = profile.settingsFrozen;
 
     // Build the response
-    const result: any = {
+    const result: {
+      allowed: boolean;
+      ironLockActive: boolean;
+      lockdownStatus: string;
+      checks: { exitAction: boolean; lockdown: boolean; settingsFrozen: boolean; marketHours: boolean };
+      reason?: string;
+      message?: string;
+      warning?: string;
+    } = {
       allowed: true,
       ironLockActive: isLockdown && isFrozen,
       lockdownStatus: profile.lockdown.status,
@@ -323,8 +331,8 @@ router.post('/check-order', (req: Request, res: Response) => {
     }
 
     res.json(result);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Iron Lock check failed' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Iron Lock check failed' });
   }
 });
 

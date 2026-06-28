@@ -209,6 +209,17 @@ export async function updatePortfolioAlertRule(
 }
 
 /**
+ * Reset the portfolio alert service state (for testing).
+ * Clears in-memory rules and storage reference.
+ */
+export function resetPortfolioAlertService(): void {
+  inMemoryRules = [];
+  ruleStorage = null;
+  badgeCountStorage = null;
+  userBadgeCounts.clear();
+}
+
+/**
  * Reset all triggers for a user's rules (for a new trading day).
  */
 export async function resetPortfolioAlertTriggers(userId: string): Promise<void> {

@@ -42,7 +42,16 @@ function dummyComponent(name: string): ComponentType<any> {
 export const View = dummyComponent('View');
 export const Text = dummyComponent('Text');
 export const Image = dummyComponent('Image');
-export const ScrollView = dummyComponent('ScrollView');
+// Custom ScrollView mock that renders refreshControl as a child element
+// so tests can find and trigger onRefresh via tree traversal.
+export const ScrollView = (props: any) => {
+  const { children, refreshControl, ...rest } = props;
+  if (refreshControl) {
+    return React.createElement('ScrollView', rest, refreshControl, children);
+  }
+  return React.createElement('ScrollView', rest, children);
+};
+ScrollView.displayName = 'ScrollView';
 export const FlatList = dummyComponent('FlatList');
 export const SectionList = dummyComponent('SectionList');
 export const TouchableOpacity = dummyComponent('TouchableOpacity');

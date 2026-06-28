@@ -137,11 +137,10 @@ router.post('/analyze', async (req: Request, res: Response) => {
     const insight = await fetchWithRedisCache(symbol);
     insight._provider = getActiveProviderName();
     res.json(insight);
-  } catch (error: any) {
-    console.error('[AI Route] Analysis failed:', error.message);
+  } catch (error: unknown) {
+    console.error('[AI Route] Analysis failed:', (error as Error).message);
     res.status(503).json({
       error: 'AI analysis temporarily unavailable. Please try again later.',
-      details: error.message,
     });
   }
 });
@@ -252,11 +251,10 @@ router.post('/analyze/batch', async (req: Request, res: Response) => {
       .filter(Boolean) as AIInsight[];
 
     res.json(result);
-  } catch (error: any) {
-    console.error('[AI Route] Batch analysis failed:', error.message);
+  } catch (error: unknown) {
+    console.error('[AI Route] Batch analysis failed:', (error as Error).message);
     res.status(503).json({
       error: 'Batch AI analysis temporarily unavailable. Please try again later.',
-      details: error.message,
     });
   }
 });

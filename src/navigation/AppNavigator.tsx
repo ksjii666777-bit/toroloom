@@ -54,12 +54,15 @@ import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
 import ConnectBrokerView from '../screens/broker/ConnectBrokerView';
 import TenantConfigScreen from '../screens/settings/TenantConfigScreen';
 import VoiceSettingsScreen from '../screens/settings/VoiceSettingsScreen';
+import SecuritySettingsScreen from '../screens/settings/SecuritySettingsScreen';
 import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
 import NewsFeedScreen from '../screens/news/NewsFeedScreen';
 import ChatRoomListScreen from '../screens/chat/ChatRoomListScreen';
 import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
 import BehavioralJournalScreen from '../screens/journal/BehavioralJournalScreen';
 import ContractNoteUploadScreen from '../screens/reports/ContractNoteUploadScreen';
+import FnOOptionsChainScreen from '../screens/trade/FnOOptionsChainScreen';
+import StrategyBuilderScreen from '../screens/trade/StrategyBuilderScreen';
 
 // Calculator Screens
 import SIPCalculator from '../screens/calculators/SIPCalculator';
@@ -68,6 +71,7 @@ import EMICalculator from '../screens/calculators/EMICalculator';
 import TaxCalculator from '../screens/calculators/TaxCalculator';
 import AvatarWidget from '../components/AvatarWidget';
 import IronLockOverlay from '../components/IronLockOverlay';
+import UpgradePromptModal from '../components/UpgradePromptModal';
 import OfflineBanner from '../components/ui/OfflineBanner';
 
 const Stack = createNativeStackNavigator();
@@ -209,6 +213,7 @@ function MainTabs() {
     </Tab.Navigator>
       <AvatarWidget />
       <IronLockOverlay />
+      <UpgradePromptModal />
       <OfflineBanner />
     </>
   );
@@ -373,6 +378,9 @@ export default function AppNavigator() {
             <Stack.Screen name="BrokerConnect" component={ConnectBrokerView} />
             <Stack.Screen name="TenantConfig" component={TenantConfigScreen} />
             <Stack.Screen name="VoiceSettings" component={VoiceSettingsScreen} />
+            <Stack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
+            <Stack.Screen name="FnOOptionsChain" component={FnOOptionsChainScreen} />
+            <Stack.Screen name="StrategyBuilder" component={StrategyBuilderScreen} />
             <Stack.Screen name="SIPCalculator" component={SIPCalculator} />
             <Stack.Screen name="LumpsumCalculator" component={LumpsumCalculator} />
             <Stack.Screen name="EMICalculator" component={EMICalculator} />

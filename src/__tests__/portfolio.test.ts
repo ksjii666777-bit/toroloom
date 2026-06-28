@@ -172,7 +172,7 @@ describe('portfolioApi — placeOrder', () => {
     globalThis.fetch = originalFetch;
   });
 
-  it('sends POST to /portfolio/orders with order data', async () => {
+  it('sends POST to /orders/execute with order data', async () => {
     let capturedUrl = '', capturedMethod = '', capturedBody = '';
     const mockResult = { success: true, orderId: 'ord_123', riskEvaluation: { allowed: true } };
     (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
@@ -187,8 +187,11 @@ describe('portfolioApi — placeOrder', () => {
     });
 
     expect(capturedMethod).toBe('POST');
-    expect(capturedUrl).toBe(`${API_BASE}/portfolio/orders`);
-    expect(JSON.parse(capturedBody)).toEqual({ symbol: 'RELIANCE', transactionType: 'BUY', quantity: 50, price: 2650 });
+    expect(capturedUrl).toBe(`${API_BASE}/orders/execute`);
+    expect(JSON.parse(capturedBody)).toEqual({
+      symbol: 'RELIANCE', transactionType: 'BUY', quantity: 50, price: 2650,
+      actionType: 'BUY',
+    });
     expect(result).toEqual(mockResult);
   });
 
@@ -207,6 +210,7 @@ describe('portfolioApi — placeOrder', () => {
     expect(JSON.parse(capturedBody)).toEqual({
       symbol: 'TCS', exchange: 'NSE', transactionType: 'SELL', quantity: 20, price: 3900,
       productType: 'DELIVERY', orderType: 'LIMIT', metadata: { strategy: 'swing' },
+      actionType: 'SELL',
     });
   });
 

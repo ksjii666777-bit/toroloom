@@ -50,8 +50,8 @@ export async function sendExpoPushNotification(
   data?: Record<string, unknown>,
   badge?: number,
 ): Promise<ExpoPushResponse> {
-  // Validate token format — Expo push tokens start with "ExponentPushToken["
-  if (!pushToken || !pushToken.startsWith('ExponentPushToken[')) {
+  // Validate token format — Expo push tokens start with "ExponentPushToken[" and end with "]"
+  if (!pushToken || !pushToken.startsWith('ExponentPushToken[') || !pushToken.endsWith(']')) {
     return { status: 'error', message: 'Invalid push token format' };
   }
 

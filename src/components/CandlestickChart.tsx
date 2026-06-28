@@ -1,11 +1,26 @@
-import React, { useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder } from 'react-native';
-import Svg, { Path, Line, Rect, G, Text as SvgText } from 'react-native-svg';
+import React, { useMemo, useCallback, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder, LayoutChangeEvent } from 'react-native';
+import Svg, { Path, Line, Rect, G, Text as SvgText, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
-import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { formatCurrency, formatCompactNumber } from '../utils/formatters';
 import { useChartCrosshair } from './ChartCrosshairContext';
+import TechnicalIndicators, { IndicatorType } from './TechnicalIndicators';
 import type { StockHistoryPoint } from '../types';
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const CANDLE_WIDTH = 0.6;
+const CANDLE_MIN_WIDTH = 2;
+const MIN_VISIBLE_CANDLES = 10;
+const MAX_ZOOM = 1;
+const PINCH_THRESHOLD = 10; // minimum distance change to trigger zoom
+
+// ============================================================================
+// Props
+// ============================================================================
 
 interface CandlestickChartProps {
   data: StockHistoryPoint[];
@@ -18,10 +33,23 @@ interface CandlestickChartProps {
   showVolume?: boolean;
   showMA?: boolean;
   loading?: boolean;
+
+  // ── New: Technical indicator toggles ──
+  showRSI?: boolean;
+  showMACD?: boolean;
+  showBollinger?: boolean;
+  onIndicatorToggle?: (type: IndicatorType) => void;
+
+  // ── New: Zoom/pan control (optional, for reset via parent) ──
+  zoomLevel?: number;
+  onZoomChange?: (level: number) => void;
+  scrollOffset?: number;
+  onScrollChange?: (offset: number) => void;
 }
 
-const CANDLE_WIDTH = 0.6;
-const CANDLE_MIN_WIDTH = 2;
+// ============================================================================
+// Component
+// ============================================================================
 
 export default function CandlestickChart({
   data,
@@ -33,119 +61,246 @@ export default function CandlestickChart({
   showVolume = true,
   showMA = false,
   loading = false,
+
+  showRSI = false,
+  showMACD = false,
+  showBollinger = false,
+  onIndicatorToggle,
+
+  zoomLevel: externalZoom,
+  onZoomChange,
+  scrollOffset: externalScroll,
+  onScrollChange,
 }: CandlestickChartProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { focusedIndex, setFocusedIndex } = useChartCrosshair();
+
+  // ── Zoom / Pan state (controlled or local) ──
+  const [localZoom, setLocalZoom] = useState(0);
+  const [localScroll, setLocalScroll] = useState(0);
+
+  const zoomLevel = externalZoom ?? localZoom;
+  const scrollOffset = externalScroll ?? localScroll;
+
+  const setZoom = useCallback((v: number) => {
+    const clamped = Math.max(0, Math.min(MAX_ZOOM, v));
+    if (onZoomChange) onZoomChange(clamped);
+    else setLocalZoom(clamped);
+  }, [onZoomChange]);
+
+  const setScroll = useCallback((v: number) => {
+    const clamped = Math.max(0, Math.min(1, v));
+    if (onScrollChange) onScrollChange(clamped);
+    else setLocalScroll(clamped);
+  }, [onScrollChange]);
+
+  const resetZoom = useCallback(() => {
+    setZoom(0);
+    setScroll(0);
+  }, [setZoom, setScroll]);
+
+  // ── Pinch + Pan refs ──
+  const pinchRef = useRef({ initialDist: 0, initialZoom: 0 });
+  const panRef = useRef({ startX: 0, startScroll: 0, isTap: true, moved: false });
+  const lastTapRef = useRef(0);
+
+  // ── Compute visible data slice ──
+  const { visibleData, visibleStartIndex } = useMemo(() => {
+    if (!data || data.length === 0) return { visibleData: data || [], visibleStartIndex: 0 };
+
+    const totalLen = data.length;
+    // zoomLevel 0 → all visible, 1 → only MIN_VISIBLE_CANDLES / total visible
+    const visibleCount = Math.max(
+      MIN_VISIBLE_CANDLES,
+      Math.round(totalLen * (1 - zoomLevel * 0.85)),
+    );
+    const maxStart = totalLen - visibleCount;
+    const startIndex = Math.round(scrollOffset * maxStart);
+    return {
+      visibleData: data.slice(startIndex, startIndex + visibleCount),
+      visibleStartIndex: startIndex,
+    };
+  }, [data, zoomLevel, scrollOffset]);
 
   const padding = { top: 16, right: 16, bottom: showVolume ? 80 : 32, left: 60 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
   const volumeHeight = showVolume ? 40 : 0;
 
-  // Calculate price range
+  // ── Compute price range from visible data ──
   const { maxPrice, priceRange } = useMemo(() => {
-    if (!data || data.length === 0) return { minPrice: 0, maxPrice: 0, priceRange: 1 };
+    if (!visibleData || visibleData.length === 0) return { minPrice: 0, maxPrice: 0, priceRange: 1 };
     let mn = Infinity, mx = -Infinity;
-    for (const d of data) {
+    for (const d of visibleData) {
       if (d.low < mn) mn = d.low;
       if (d.high > mx) mx = d.high;
     }
     const p = (mx - mn) * 0.05 || mn * 0.02;
     return { minPrice: mn - p, maxPrice: mx + p, priceRange: mx - mn + p * 2 };
-  }, [data]);
+  }, [visibleData]);
 
-  // Calculate volume range
+  // ── Compute volume range from visible data ──
   const { maxVolume } = useMemo(() => {
-    if (!data || data.length === 0) return { maxVolume: 1 };
+    if (!visibleData || visibleData.length === 0) return { maxVolume: 1 };
     let mv = 0;
-    for (const d of data) {
+    for (const d of visibleData) {
       if (d.volume > mv) mv = d.volume;
     }
     return { maxVolume: mv || 1 };
-  }, [data]);
+  }, [visibleData]);
 
-  // Calculate MA(20) and MA(50)
+  // ── MA(20) and MA(50) on visible data ──
   const maData = useMemo(() => {
-    if (!showMA || !data) return null;
+    if (!showMA || !visibleData) return null;
     const ma20: (number | null)[] = [];
     const ma50: (number | null)[] = [];
-    for (let i = 0; i < data.length; i++) {
-      if (i >= 19) {
+    // Include some data before visible window for accurate MA values
+    const extendedStart = Math.max(0, visibleStartIndex - 50);
+    const extendedData = data!.slice(extendedStart, visibleStartIndex + visibleData.length);
+    const localOffset = visibleStartIndex - extendedStart;
+
+    for (let i = 0; i < visibleData.length; i++) {
+      const globalI = localOffset + i;
+      if (globalI >= 19) {
         let sum = 0;
-        for (let j = i - 19; j <= i; j++) sum += data[j].close;
+        for (let j = globalI - 19; j <= globalI; j++) sum += extendedData[j].close;
         ma20.push(sum / 20);
       } else {
         ma20.push(null);
       }
-      if (i >= 49) {
+      if (globalI >= 49) {
         let sum = 0;
-        for (let j = i - 49; j <= i; j++) sum += data[j].close;
+        for (let j = globalI - 49; j <= globalI; j++) sum += extendedData[j].close;
         ma50.push(sum / 50);
       } else {
         ma50.push(null);
       }
     }
     return { ma20, ma50 };
-  }, [data, showMA]);
+  }, [visibleData, visibleStartIndex, data, showMA]);
 
-  // Spacing calculations
-  const candleWidth = data && data.length > 0
-    ? Math.max((chartWidth / data.length) * CANDLE_WIDTH, CANDLE_MIN_WIDTH)
+  // ── Layout calculations for visible data ──
+  const candleWidth = visibleData.length > 0
+    ? Math.max((chartWidth / visibleData.length) * CANDLE_WIDTH, CANDLE_MIN_WIDTH)
     : 0;
-  const candleSpacing = data && data.length > 0 ? chartWidth / data.length : 0;
+  const candleSpacing = visibleData.length > 0 ? chartWidth / visibleData.length : 0;
 
-  const getX = useCallback((index: number) => padding.left + index * candleSpacing, [padding.left, candleSpacing]);
+  // getX/getY for visible data (local index 0 = first visible candle)
+  const getX = useCallback((localIndex: number) => padding.left + localIndex * candleSpacing, [padding.left, candleSpacing]);
   const getY = useCallback((price: number) => padding.top + ((maxPrice - price) / priceRange) * chartHeight, [padding.top, maxPrice, priceRange, chartHeight]);
   const getVolumeY = useCallback((vol: number) => {
     const volChartTop = height - padding.bottom + 10;
     return volChartTop + (1 - vol / maxVolume) * volumeHeight;
   }, [height, padding.bottom, maxVolume, volumeHeight]);
 
-  // Convert touch location to data index
-  const touchToIndex = useCallback((x: number) => {
-    if (!data || data.length === 0) return null;
-    const relativeX = x - padding.left;
+  // ── Local touch → visible data index ──
+  const touchToLocalIndex = useCallback((touchX: number) => {
+    if (!visibleData || visibleData.length === 0) return null;
+    const relativeX = touchX - padding.left;
     const index = Math.round(relativeX / candleSpacing);
-    return Math.max(0, Math.min(data.length - 1, index));
-  }, [data, padding.left, candleSpacing]);
+    return Math.max(0, Math.min(visibleData.length - 1, index));
+  }, [visibleData, padding.left, candleSpacing]);
 
-  // Update crosshair for a given screen x
-  const updateCrosshair = useCallback((x: number) => {
-    const index = touchToIndex(x);
-    if (index === null || !data) return;
-    setFocusedIndex(index);
-  }, [touchToIndex, data, setFocusedIndex]);
+  // ── Global index (full dataset) from local index ──
+  const localToGlobalIndex = useCallback((localIdx: number) => {
+    return visibleStartIndex + localIdx;
+  }, [visibleStartIndex]);
 
-  // PanResponder for smooth touch/drag crosshair
+  // ── Update crosshair from screen x ──
+  const updateCrosshair = useCallback((screenX: number) => {
+    const localIdx = touchToLocalIndex(screenX);
+    if (localIdx === null || !visibleData) return;
+    setFocusedIndex(localToGlobalIndex(localIdx));
+  }, [touchToLocalIndex, visibleData, setFocusedIndex, localToGlobalIndex]);
+
+  // ── PanResponder: handles crosshair, pan, and pinch-to-zoom ──
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: (_, gs) => Math.abs(gs.dx) > 3 || Math.abs(gs.dy) > 3,
     onPanResponderGrant: (e) => {
-      const x = e.nativeEvent.locationX + padding.left;
-      updateCrosshair(x);
+      const touches = e.nativeEvent.touches;
+      if (touches && touches.length >= 2) {
+        // Pinch start
+        const dx = touches[1].pageX - touches[0].pageX;
+        const dy = touches[1].pageY - touches[0].pageY;
+        pinchRef.current.initialDist = Math.sqrt(dx * dx + dy * dy);
+        pinchRef.current.initialZoom = zoomLevel;
+        panRef.current.moved = true;
+      } else {
+        // Single touch start
+        panRef.current.startX = e.nativeEvent.locationX;
+        panRef.current.startScroll = scrollOffset;
+        panRef.current.isTap = true;
+        panRef.current.moved = false;
+      }
     },
-    onPanResponderMove: (e) => {
-      const x = e.nativeEvent.locationX + padding.left;
-      updateCrosshair(x);
-    },
-    onPanResponderRelease: () => {
-      // Keep crosshair visible after touch ends
-    },
-  }), [updateCrosshair, padding.left]);
+    onPanResponderMove: (e, gs) => {
+      const touches = e.nativeEvent.touches;
+      if (touches && touches.length >= 2) {
+        panRef.current.moved = true;
+        const dx = touches[1].pageX - touches[0].pageX;
+        const dy = touches[1].pageY - touches[0].pageY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const delta = dist - pinchRef.current.initialDist;
 
-  // Compute crosshair from focusedIndex (single source of truth)
+        if (Math.abs(delta) > PINCH_THRESHOLD) {
+          const zoomDelta = delta / (width * 0.5);
+          const newZoom = Math.max(0, Math.min(MAX_ZOOM, pinchRef.current.initialZoom + zoomDelta));
+          setZoom(newZoom);
+        }
+      } else {
+        panRef.current.moved = true;
+        if (zoomLevel > 0) {
+          // Pan mode: single finger scroll when zoomed
+          const pixelsPerUnit = chartWidth / (zoomLevel * 0.85);
+          const dxPixels = gs.dx - (panRef.current.startX - e.nativeEvent.locationX);
+          // Recalculate from grant position
+          const panDelta = (e.nativeEvent.locationX - panRef.current.startX) / (chartWidth || 1);
+          const newScroll = Math.max(0, Math.min(1, panRef.current.startScroll - panDelta));
+          setScroll(newScroll);
+        } else {
+          // Crosshair mode
+          const x = e.nativeEvent.locationX;
+          updateCrosshair(x);
+        }
+      }
+    },
+    onPanResponderRelease: (e) => {
+      if (!panRef.current.moved) {
+        // Tap — update crosshair
+        const x = e.nativeEvent.locationX;
+        updateCrosshair(x);
+
+        // Double-tap detection for reset
+        const now = Date.now();
+        if (now - lastTapRef.current < 300 && zoomLevel > 0) {
+          resetZoom();
+        }
+        lastTapRef.current = now;
+      }
+    },
+  }), [updateCrosshair, zoomLevel, scrollOffset, setZoom, setScroll, chartWidth, width, resetZoom]);
+
+  // ── Crosshair (global index → visible local index) ──
+  const crosshairLocalIndex = useMemo(() => {
+    if (focusedIndex === null || !visibleData) return null;
+    const local = focusedIndex - visibleStartIndex;
+    if (local < 0 || local >= visibleData.length) return null;
+    return local;
+  }, [focusedIndex, visibleStartIndex, visibleData]);
+
   const crosshair = useMemo(() => {
-    if (focusedIndex === null || !data || focusedIndex >= data.length) return null;
-    const point = data[focusedIndex];
+    if (crosshairLocalIndex === null || !visibleData) return null;
+    const point = visibleData[crosshairLocalIndex];
     return {
-      x: getX(focusedIndex),
+      x: getX(crosshairLocalIndex),
       y: getY(point.close),
       data: point,
     };
-  }, [focusedIndex, data, getX, getY]);
+  }, [crosshairLocalIndex, visibleData, getX, getY]);
 
-  // Y-axis labels
+  // ── Y-axis labels ──
   const yLabels = useMemo(() => {
     const count = 5;
     const labels: number[] = [];
@@ -155,23 +310,39 @@ export default function CandlestickChart({
     return labels;
   }, [maxPrice, priceRange]);
 
-  // X-axis labels
+  // ── X-axis labels ──
   const xLabels = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    const count = Math.min(6, data.length);
-    const step = Math.max(1, Math.floor(data.length / (count - 1)));
+    if (!visibleData || visibleData.length === 0) return [];
+    const count = Math.min(6, visibleData.length);
+    const step = Math.max(1, Math.floor(visibleData.length / (count - 1)));
     const labels: { index: number; label: string }[] = [];
-    for (let i = 0; i < data.length; i += step) {
-      const date = new Date(data[i].date);
+    for (let i = 0; i < visibleData.length; i += step) {
+      const date = new Date(visibleData[i].date);
       labels.push({ index: i, label: `${date.getDate()}/${date.getMonth() + 1}` });
     }
-    const last = data.length - 1;
+    const last = visibleData.length - 1;
     if (labels[labels.length - 1]?.index !== last) {
-      const date = new Date(data[last].date);
+      const date = new Date(visibleData[last].date);
       labels.push({ index: last, label: `${date.getDate()}/${date.getMonth() + 1}` });
     }
     return labels;
-  }, [data]);
+  }, [visibleData]);
+
+  // ── Active indicators for TechnicalIndicators ──
+  const activeIndicators = useMemo(() => {
+    const inds: IndicatorType[] = [];
+    if (showRSI) inds.push('rsi');
+    if (showMACD) inds.push('macd');
+    if (showBollinger) inds.push('bollinger');
+    return inds;
+  }, [showRSI, showMACD, showBollinger]);
+
+  // ── Zoom indicator text ──
+  const zoomPercent = Math.round(zoomLevel * 100);
+
+  // ════════════════════════════════════════════════════════════
+  // Render
+  // ════════════════════════════════════════════════════════════
 
   if (loading) {
     return (
@@ -194,8 +365,8 @@ export default function CandlestickChart({
   }
 
   return (
-    <View style={[styles.container, { height }]}>
-      {/* Crosshair price info */}
+    <View style={[styles.container, { width }]}>
+      {/* ── Crosshair tooltip ── */}
       {crosshair && (
         <View style={[styles.crosshairInfo, { left: Math.min(Math.max(crosshair.x - 60, 8), width - 128) }]}>
           <Text style={styles.crosshairPrice}>{formatCurrency(crosshair.data.close)}</Text>
@@ -214,6 +385,21 @@ export default function CandlestickChart({
         </View>
       )}
 
+      {/* ── Zoom indicator ── */}
+      {zoomLevel > 0 && (
+        <View style={styles.zoomBadge}>
+          <Text style={styles.zoomBadgeText}>{zoomPercent}%</Text>
+        </View>
+      )}
+
+      {/* ── Reset zoom button ── */}
+      {zoomLevel > 0 && (
+        <TouchableOpacity style={styles.resetZoomBtn} onPress={resetZoom} activeOpacity={0.7}>
+          <Text style={styles.resetZoomText}>Reset</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* ── SVG Chart ── */}
       <Svg width={width} height={height}>
         {/* Grid lines */}
         {yLabels.map((price, i) => (
@@ -259,30 +445,7 @@ export default function CandlestickChart({
           </SvgText>
         ))}
 
-        {/* Candlesticks */}
-        {data.map((point, i) => {
-          const x = getX(i) - candleWidth / 2;
-          const candleX = getX(i);
-          const open = point.open;
-          const close = point.close;
-          const isBullish = close >= open;
-          const color = isBullish ? colors.marketUp : colors.marketDown;
-
-          const yTop = getY(Math.max(open, close));
-          const yBottom = getY(Math.min(open, close));
-          const yHigh = getY(point.high);
-          const yLow = getY(point.low);
-          const bodyHeight = Math.max(yBottom - yTop, 1);
-
-          return (
-            <G key={`candle-${i}`}>
-              <Line x1={candleX} y1={yHigh} x2={candleX} y2={yLow} stroke={color} strokeWidth={1.2} />
-              <Rect x={x} y={yTop} width={candleWidth} height={bodyHeight} fill={color} rx={0.5} />
-            </G>
-          );
-        })}
-
-        {/* Moving Averages */}
+        {/* Moving Averages (behind candles) */}
         {showMA && maData && (
           <>
             {(() => {
@@ -314,8 +477,31 @@ export default function CandlestickChart({
           </>
         )}
 
+        {/* Candlesticks */}
+        {visibleData.map((point, i) => {
+          const x = getX(i) - candleWidth / 2;
+          const candleX = getX(i);
+          const open = point.open;
+          const close = point.close;
+          const isBullish = close >= open;
+          const color = isBullish ? colors.marketUp : colors.marketDown;
+
+          const yTop = getY(Math.max(open, close));
+          const yBottom = getY(Math.min(open, close));
+          const yHigh = getY(point.high);
+          const yLow = getY(point.low);
+          const bodyHeight = Math.max(yBottom - yTop, 1);
+
+          return (
+            <G key={`candle-${i}`}>
+              <Line x1={candleX} y1={yHigh} x2={candleX} y2={yLow} stroke={color} strokeWidth={1.2} />
+              <Rect x={x} y={yTop} width={candleWidth} height={bodyHeight} fill={color} rx={0.5} />
+            </G>
+          );
+        })}
+
         {/* Volume bars */}
-        {showVolume && data.map((point, i) => {
+        {showVolume && visibleData.map((point, i) => {
           const isBullish = point.close >= point.open;
           const color = isBullish ? colors.marketUp : colors.marketDown;
           const volBarWidth = Math.max(candleWidth * 0.7, 1.5);
@@ -352,7 +538,7 @@ export default function CandlestickChart({
           </SvgText>
         )}
 
-        {/* Crosshair */}
+        {/* Crosshair lines */}
         {crosshair && (
           <>
             <Line
@@ -373,14 +559,14 @@ export default function CandlestickChart({
               strokeWidth={1}
               strokeDasharray="4,4"
             />
-            <Rect
-              x={crosshair.x - 5}
-              y={crosshair.y - 5}
-              width={10}
-              height={10}
-              rx={5}
+            <Circle
+              cx={crosshair.x}
+              cy={crosshair.y}
+              r={5}
               fill={colors.primary}
               opacity={0.8}
+              stroke={colors.bgCard}
+              strokeWidth={1.5}
             />
           </>
         )}
@@ -396,7 +582,7 @@ export default function CandlestickChart({
         />
       </Svg>
 
-      {/* Timeframe selector */}
+      {/* ── Timeframe selector ── */}
       <View style={styles.timeframes}>
         {timeframes.map((tf) => (
           <TouchableOpacity
@@ -404,6 +590,7 @@ export default function CandlestickChart({
             style={[styles.timeframeBtn, activeTimeframe === tf && styles.timeframeActive]}
             onPress={() => {
               setFocusedIndex(null);
+              resetZoom();
               onTimeframeChange?.(tf);
             }}
           >
@@ -413,9 +600,24 @@ export default function CandlestickChart({
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* ── Technical Indicators panels ── */}
+      {activeIndicators.length > 0 && (
+        <TechnicalIndicators
+          data={data}
+          width={width - SPACING.md * 2}
+          indicators={activeIndicators}
+          onIndicatorToggle={onIndicatorToggle}
+          compact
+        />
+      )}
     </View>
   );
 }
+
+// ============================================================================
+// Styles
+// ============================================================================
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
@@ -431,6 +633,7 @@ const createStyles = (colors: any) =>
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      minHeight: 120,
     },
     loadingText: {
       color: colors.textMuted,
@@ -447,8 +650,7 @@ const createStyles = (colors: any) =>
       borderWidth: 1,
       borderColor: colors.border,
       minWidth: 120,
-      boxShadow: `0px 2px 4px ${colors.shadow}40`,
-      elevation: 5,
+      ...SHADOWS.medium,
     },
     crosshairPrice: {
       color: colors.text,
@@ -474,6 +676,42 @@ const createStyles = (colors: any) =>
       fontFamily: 'System',
       marginTop: 2,
     },
+    // ── Zoom controls ──
+    zoomBadge: {
+      position: 'absolute',
+      top: SPACING.sm,
+      right: SPACING.sm,
+      backgroundColor: colors.primary + '30',
+      borderRadius: BORDER_RADIUS.sm,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: 2,
+      zIndex: 10,
+    },
+    zoomBadgeText: {
+      color: colors.primary,
+      fontSize: FONTS.size.xs,
+      fontFamily: 'System',
+      fontWeight: '700',
+    },
+    resetZoomBtn: {
+      position: 'absolute',
+      bottom: 100,
+      right: SPACING.sm,
+      backgroundColor: colors.bgCardLight,
+      borderRadius: BORDER_RADIUS.full,
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.xs,
+      borderWidth: 1,
+      borderColor: colors.border,
+      zIndex: 10,
+    },
+    resetZoomText: {
+      color: colors.textSecondary,
+      fontSize: FONTS.size.xs,
+      fontFamily: 'System',
+      fontWeight: '600',
+    },
+    // ── Timeframes ──
     timeframes: {
       flexDirection: 'row',
       justifyContent: 'space-around',
@@ -500,4 +738,5 @@ const createStyles = (colors: any) =>
       color: colors.primary,
       fontWeight: '700',
     },
+
   });

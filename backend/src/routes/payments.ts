@@ -124,9 +124,9 @@ router.post('/create-order', async (req: Request, res: Response) => {
         currency: 'INR',
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Payments] create-order error:', error);
-    res.status(500).json({ error: error?.message || 'Failed to create order' });
+    res.status(500).json({ error: (error as Error).message || 'Failed to create order' });
   }
 });
 
@@ -183,9 +183,9 @@ router.post('/create-fund-order', async (req: Request, res: Response) => {
         currency,
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Payments] create-fund-order error:', error);
-    res.status(500).json({ error: error?.message || 'Failed to create fund order' });
+    res.status(500).json({ error: (error as Error).message || 'Failed to create fund order' });
   }
 });
 
@@ -256,9 +256,9 @@ router.post('/verify', async (req: Request, res: Response) => {
         type: 'subscription',
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Payments] verify error:', error);
-    res.status(500).json({ error: error?.message || 'Payment verification failed' });
+    res.status(500).json({ error: (error as Error).message || 'Payment verification failed' });
   }
 });
 

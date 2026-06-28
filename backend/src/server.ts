@@ -6,6 +6,8 @@ import http from 'http';
 import { env, validateRequiredEnv } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
 import { apiLimiter, authLimiter, writeLimiter, readLimiter, adminLimiter } from './middleware/rateLimiter';
+import { authMiddleware } from './middleware/auth';
+import { requireSubscription, configureSubscriptionGating } from './middleware/subscriptionGate';
 import { setupWebSocket } from './websocket/handler';
 import { getStorage, getStorageIfInitialized } from './services/storage';
 import { auditTrail } from './services/auditTrail';
@@ -39,6 +41,7 @@ import paymentsRoutes from './routes/payments';
 import subscriptionRoutes, { webhookRouter, configureSubscriptionPersistence, setWebhookSecret } from './routes/subscriptions';
 import pushNotificationsRoutes from './routes/pushNotifications';
 import contractNoteRoutes from './routes/contractNote';
+import fnoRoutes from './routes/fno';
 
 // ============ Sentry Initialization ============
 
@@ -61,6 +64,11 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// ── Webhook route MUST use raw body for Razorpay signature verification ──
+// Mounted BEFORE express.json() to prevent body consumption by JSON parser.
+// Razorpay sends application/json with HMAC-SHA256 over the raw body bytes.
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }), webhookRouter);
 
 app.use(express.json({ limit: '1mb' }));
 app.use('/api', apiLimiter);
@@ -116,7 +124,7 @@ app.use('/api/watchlist', readLimiter, watchlistRoutes);
 app.use('/api/mutual-funds', readLimiter, mutualFundsRoutes);
 app.use('/api/education', readLimiter, educationRoutes);
 app.use('/api/community', readLimiter, communityRoutes);
-app.use('/api/ai', readLimiter, aiInsightsRoutes);
+app.use('/api/ai', readLimiter, authMiddleware, requireSubscription('pro'), aiInsightsRoutes);
 app.use('/api/notifications', readLimiter, notificationsRoutes);
 app.use('/api/notifications', readLimiter, pushNotificationsRoutes);
 app.use('/api/risk', readLimiter, riskRoutes);
@@ -128,14 +136,15 @@ app.use('/api/system', readLimiter, wsStatusRoutes);
 app.use('/api/funds', writeLimiter, fundsRoutes);
 app.use('/api/orders', writeLimiter, ordersRoutes);
 app.use('/api/broker', writeLimiter, brokerRoutes);
-app.use('/api/broker-link', writeLimiter, brokerLinkRoutes);
-app.use('/api/iron-lock', writeLimiter, ironLockRoutes);
+app.use('/api/broker-link', writeLimiter, authMiddleware, requireSubscription('pro'), brokerLinkRoutes);
+app.use('/api/iron-lock', writeLimiter, authMiddleware, requireSubscription('elite'), ironLockRoutes);
 app.use('/api/payments', writeLimiter, paymentsRoutes);
 // Protected subscription routes (authMiddleware applied inside router)
 app.use('/api/subscriptions', writeLimiter, subscriptionRoutes);
-// Webhook route — NO authMiddleware, NO rate limiter (validated via signature)
-app.use('/api/subscriptions', webhookRouter);
-app.use('/api/contract-note', writeLimiter, contractNoteRoutes);
+app.use('/api/contract-note', writeLimiter, authMiddleware, requireSubscription('pro'), contractNoteRoutes);
+
+// ── F&O — 100 req / min (data reads), 50 req / min (writes) ────────────
+app.use('/api/fno', readLimiter, fnoRoutes);
 
 // ── Admin — 20 req / min ─────────────────────────────────────────────
 app.use('/metrics', adminLimiter, metricsRoutes);
@@ -186,6 +195,9 @@ async function initializeStorage(): Promise<void> {
 
     // Wire storage into the Subscription service for persistence
     configureSubscriptionPersistence(storage);
+
+    // Wire storage into the Subscription Gate middleware
+    configureSubscriptionGating(storage);
     if (env.razorpayWebhookSecret) {
       setWebhookSecret(env.razorpayWebhookSecret);
     }

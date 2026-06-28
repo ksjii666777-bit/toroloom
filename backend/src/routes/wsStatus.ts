@@ -76,10 +76,10 @@ router.get('/ws-status', (_req: Request, res: Response) => {
       users,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       error: 'Failed to fetch WebSocket status',
-      message: error.message,
+      message: (error as Error).message,
       timestamp: new Date().toISOString(),
     });
   }

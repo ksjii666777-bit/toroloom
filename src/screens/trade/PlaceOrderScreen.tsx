@@ -18,6 +18,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useAuthStore } from '../../store/authStore';
+import { useBiometricStore } from '../../store/biometricStore';
+import { biometricAuth } from '../../services/biometricService';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, hexToRgba } from '../../utils/formatters';
 import Button from '../../components/ui/Button';
@@ -116,9 +118,29 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
     });
   }, [tradeType, ownedQuantity]);
 
-  // Place order handler
+  // Place order handler with biometric check
   const handlePlaceOrder = useCallback(async () => {
     if (!canPlaceOrder) return;
+
+    // Check if biometric trade confirmation is enabled
+    const { enabled: bioEnabled, requireForTrades } = useBiometricStore.getState();
+    if (bioEnabled && requireForTrades) {
+      setIsProcessing(true);
+      const bioLabel = await biometricAuth.getBiometricLabel();
+      const result = await biometricAuth.authenticate(
+        `Confirm ${tradeType === 'buy' ? 'Buy' : 'Sell'} order with ${bioLabel}`,
+        true,
+      );
+      setIsProcessing(false);
+
+      if (!result.success) {
+        if (result.error !== 'Authentication cancelled') {
+          Alert.alert('Order Cancelled', result.error || 'Biometric verification failed.');
+        }
+        return;
+      }
+    }
+
     setIsProcessing(true);
 
     try {

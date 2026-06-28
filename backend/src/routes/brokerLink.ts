@@ -30,8 +30,16 @@ import { registry } from '../services/broker/registry';
 const router = Router();
 router.use(authMiddleware);
 
+interface KiteConnectInstance {
+  generateSession(requestToken: string, apiSecret: string): Promise<{ access_token: string }>;
+}
+
+interface KiteConnectConstructor {
+  new(config: { api_key: string }): KiteConnectInstance;
+}
+
 // Lazy-loaded KiteConnect SDK (only loaded for Zerodha OAuth flow)
-function getKiteConnect(): any {
+function getKiteConnect(): KiteConnectConstructor | null {
   try {
     return require('kiteconnect').KiteConnect;
   } catch {
@@ -178,10 +186,10 @@ router.post('/connect', async (req: Request, res: Response) => {
           resolvedAccessToken = session.access_token;
           resolvedApiSecret = apiSecret; // Keep the real apiSecret, not the request_token
           console.log(`[BrokerLink] Zerodha OAuth: exchanged request_token → access_token for user ${userId}`);
-        } catch (exchangeError: any) {
-          console.warn(`[BrokerLink] Kite Connect token exchange failed: ${exchangeError.message}`);
+        } catch (exchangeError: unknown) {
+          console.warn(`[BrokerLink] Kite Connect token exchange failed: ${(exchangeError as Error).message}`);
           resolvedAccessToken = '';
-          exchangeErrorMessage = exchangeError.message;
+          exchangeErrorMessage = (exchangeError as Error).message;
         }
       }
     } else {

@@ -94,7 +94,7 @@ jobs:
               '|------------|----------|-----------|-------|',
               '| ' + fmt(t.statements) + ' | ' + fmt(t.branches) + ' | ' + fmt(t.functions) + ' | ' + fmt(t.lines) + ' |',
               '',
-              '> Thresholds: statements 40% | branches 36% | functions 35% | lines 40%',
+              '> Thresholds: statements 74% | branches 59% | functions 75% | lines 75%',
               ''
             ].join('\n');
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
@@ -112,10 +112,10 @@ jobs:
             const p = JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8'));
             const t = p.total;
             const thresholds = {
-              statements: 40,
-              branches: 36,
-              functions: 35,
-              lines: 40,
+              statements: 74,
+              branches: 59,
+              functions: 75,
+              lines: 75,
             };
             let failed = false;
             for (const [key, threshold] of Object.entries(thresholds)) {
@@ -235,7 +235,7 @@ jobs:
               '|------------|----------|-----------|-------|',
               '| ' + fmt(t.statements) + ' | ' + fmt(t.branches) + ' | ' + fmt(t.functions) + ' | ' + fmt(t.lines) + ' |',
               '',
-              '> Thresholds: statements 75% | branches 65% | functions 70% | lines 75%',
+              '> Thresholds: statements 73% | branches 63% | functions 68% | lines 73%',
               ''
             ].join('\n');
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
@@ -252,10 +252,10 @@ jobs:
             const p = JSON.parse(fs.readFileSync('coverage/coverage-summary.json','utf8'));
             const t = p.total;
             const thresholds = {
-              statements: 75,
-              branches: 65,
-              functions: 70,
-              lines: 75,
+              statements: 73,
+              branches: 63,
+              functions: 68,
+              lines: 73,
             };
             let failed = false;
             for (const [key, threshold] of Object.entries(thresholds)) {

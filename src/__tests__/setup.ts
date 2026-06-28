@@ -209,6 +209,21 @@ vi.mock('expo-background-fetch', () => ({
   BackgroundFetchResult: { NoData: 1, NewData: 2, Failed: 3 },
 }));
 
+// ==================== Mock expo-local-authentication ====================
+// Required by PlaceOrderScreen (biometric trade confirmation) and
+// SecuritySettingsScreen, BiometricUnlockOverlay, biometricService
+vi.mock('expo-local-authentication', () => ({
+  hasHardwareAsync: vi.fn(() => Promise.resolve(true)),
+  isEnrolledAsync: vi.fn(() => Promise.resolve(true)),
+  supportedAuthenticationTypesAsync: vi.fn(() => Promise.resolve([1])),
+  authenticateAsync: vi.fn(() => Promise.resolve({ success: true })),
+  AuthenticationType: {
+    FINGERPRINT: 1,
+    FACIAL_RECOGNITION: 2,
+    IRIS: 3,
+  },
+}));
+
 // ==================== Mock expo-device ====================
 vi.mock('expo-device', () => ({
   deviceName: 'Test Device',

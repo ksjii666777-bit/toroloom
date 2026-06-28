@@ -31,7 +31,7 @@ import type { Request } from 'express';
 // ──── Helpers ──────────────────────────────────────────────────────────────
 
 /** Safely extract userId from Authorization header without failing on invalid tokens. */
-function extractUserId(req: Request): string | null {
+export function extractUserId(req: Request): string | null {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) return null;
   const token = header.split(' ')[1];
@@ -53,7 +53,7 @@ function extractUserId(req: Request): string | null {
  * while still protecting unauthenticated endpoints (login, signup) from
  * brute-force via IP tracking.
  */
-function userOrIpKeyGenerator(req: Request): string {
+export function userOrIpKeyGenerator(req: Request): string {
   const userId = extractUserId(req);
   if (userId) return `user:${userId}`;
   return `ip:${req.ip ?? req.socket.remoteAddress ?? 'unknown'}`;
@@ -61,7 +61,7 @@ function userOrIpKeyGenerator(req: Request): string {
 
 // ──── Configuration Helpers ───────────────────────────────────────────────
 
-function parseMax(defaultVal: number, envVar?: string): number {
+export function parseMax(defaultVal: number, envVar?: string): number {
   if (!envVar) return defaultVal;
   const parsed = parseInt(envVar, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultVal;

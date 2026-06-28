@@ -74,6 +74,7 @@ export interface UserSubscriptionData {
   autoRenew: boolean;
   paymentMethod?: string;
   razorpayOrderId?: string;
+  razorpayPaymentId?: string;
   lastPaymentDate?: string;
   tenantId?: string;
   updatedAt: string;

@@ -1,141 +1,144 @@
 /**
  * ============================================================================
- * Toroloom — Subscription Feature Gate Middleware
+ * Toroloom — Subscription Gating Middleware
  * ============================================================================
  *
- * Express middleware that enforces subscription tier requirements on a
- * per-route or per-router basis.
+ * Per-route subscription tier enforcement.  Use the factory function to
+ * create middleware that checks the authenticated user's subscription tier
+ * against the minimum required for a given route group.
  *
- * Usage:
- *   import { requireTier } from '../middleware/subscriptionGate';
+ * Usage (in server.ts):
  *
- *   // Only Elite users can access Iron Lock endpoints
- *   router.use('/api/iron-lock', requireTier('elite'), ironLockRoutes);
+ *   import { requireSubscription } from './middleware/subscriptionGate';
  *
- *   // Pro+ users can access AI insights
- *   router.get('/api/ai/insights', requireTier('pro'), aiHandler);
+ *   // Gate AI endpoints — Pro tier required
+ *   app.use('/api/ai', readLimiter, requireSubscription('pro'), aiInsightsRoutes);
  *
- * Behavior:
- *   - Reads the user's tier from the in-memory store (populated at login)
- *   - Falls back to querying the subscription backend on first access
- *   - Returns 402 Payment Required with upgrade prompt if tier is insufficient
- *   - Attaches `req.subscription` for downstream handlers
+ *   // Gate Iron Lock — Elite tier required
+ *   app.use('/api/iron-lock', writeLimiter, requireSubscription('elite'), ironLockRoutes);
+ *
+ * Behaviour:
+ *   - If SUBSCRIPTION_GATING_ENABLED !== 'true' in env, ALL requests pass
+ *     through (no gating).  This allows development and testing without
+ *     a subscription service.
+ *   - If the user is not authenticated (no req.user), the request is
+ *     rejected with 401 — this middleware MUST be placed after authMiddleware.
+ *   - If the user's tier meets or exceeds the requirement, the request
+ *     proceeds and the `x-subscription-tier` response header is set for
+ *     downstream middleware / route handlers.
+ *   - If the user's tier is insufficient, returns 402 Payment Required.
+ *
+ * Tier ranking (low to high):
+ *   free  (0)  →  pro  (1)  →  elite (2)
  *
  * ============================================================================
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { getStorageIfInitialized } from '../services/storage';
+import { env } from '../config/env';
+import { TIER_RANK } from '../routes/subscriptions';
 import type { UserSubscriptionData } from '../services/storage/types';
 
-// ──── Tier ranking ─────────────────────────────────────────────────────────
+// ──── Tier Ranking (imported from subscriptions.ts) ─────────────────────────
+// TIER_RANK is defined in subscriptions.ts and reused here to avoid drift.
 
-const TIER_RANK: Record<string, number> = {
-  free: 0,
-  pro: 1,
-  elite: 2,
-};
+export type SubscriptionTier = keyof typeof TIER_RANK;
 
-// ──── In-memory tier cache (per-request, populated by this middleware) ─────
+// ──── Storage reference (set at startup via configureSubscriptionGating) ─────
 
-declare global {
-  namespace Express {
-    interface Request {
-      /** The user's resolved subscription, populated by requireTier middleware. */
-      subscription?: UserSubscriptionData;
-    }
-  }
-}
-
-// ──── Default free subscription ─────────────────────────────────────────────
-
-function defaultFreeSubscription(userId: string): UserSubscriptionData {
-  return {
-    userId,
-    tier: 'free',
-    planId: 'plan_free',
-    status: 'active',
-    startDate: new Date().toISOString(),
-    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-    autoRenew: false,
-    updatedAt: new Date().toISOString(),
-  };
-}
-
-// ──── Resolve user subscription ────────────────────────────────────────────
-
-async function resolveSubscription(userId: string): Promise<UserSubscriptionData> {
-  const storage = getStorageIfInitialized();
-  if (!storage) return defaultFreeSubscription(userId);
-
-  try {
-    const sub = await storage.loadSubscription(userId);
-    return sub ?? defaultFreeSubscription(userId);
-  } catch {
-    return defaultFreeSubscription(userId);
-  }
-}
-
-// ──── Middleware Factory ────────────────────────────────────────────────────
+let _subscriptionStore: {
+  loadSubscription(userId: string): Promise<UserSubscriptionData | null>;
+} | null = null;
 
 /**
- * Creates an Express middleware that requires the user to have at least the
- * specified subscription tier to access the route.
+ * Configure the subscription gate with a storage engine.
+ * Called during server initialization so the middleware can load
+ * subscription data at runtime.
+ */
+export function configureSubscriptionGating(storage: {
+  loadSubscription(userId: string): Promise<UserSubscriptionData | null>;
+}): void {
+  _subscriptionStore = storage;
+}
+
+/**
+ * Reset the storage reference (for testing).
+ */
+export function resetSubscriptionGating(): void {
+  _subscriptionStore = null;
+}
+
+// ──── Middleware Factory ───────────────────────────────────────────────────
+
+/**
+ * Create Express middleware that requires the authenticated user to have
+ * at least the specified subscription tier.
  *
- * @param minTier - The minimum required tier ('pro' or 'elite')
+ * @param minTier — The minimum subscription tier required ('free' | 'pro' | 'elite')
  * @returns Express middleware function
+ *
+ * @example
+ *   // Protect AI insight endpoints (Pro required)
+ *   router.use(requireSubscription('pro'));
  */
-export function requireTier(minTier: 'pro' | 'elite') {
+export function requireSubscription(minTier: SubscriptionTier) {
+  const minRank = TIER_RANK[minTier];
+
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    if (!req.user) {
-      res.status(401).json({ error: 'Authentication required' });
-      return;
-    }
-
-    const subscription = await resolveSubscription(req.user.userId);
-    req.subscription = subscription;
-
-    const userRank = TIER_RANK[subscription.tier] ?? 0;
-    const requiredRank = TIER_RANK[minTier];
-
-    if (userRank >= requiredRank) {
+    // ── Feature flag — skip gating when disabled ────────────────────
+    if (!env.subscriptionGatingEnabled) {
       next();
       return;
     }
 
-    // Determine which plan to suggest for upgrade
-    const upgradePlanId = minTier === 'elite' ? 'plan_elite' : 'plan_pro';
-    const upgradePlanName = minTier === 'elite' ? 'Elite' : 'Pro';
+    // ── Auth check — must be after authMiddleware ───────────────────
+    if (!req.user) {
+      res.status(401).json({
+        error: 'Authentication required for subscription gating',
+        code: 'AUTH_REQUIRED',
+      });
+      return;
+    }
 
+    // ── Free tier is always allowed ────────────────────────────────
+    // No need to load subscription if the route is free for everyone.
+    if (minRank <= TIER_RANK.free) {
+      next();
+      return;
+    }
+
+    // ── Load subscription from storage ─────────────────────────────
+    let userTier: SubscriptionTier = 'free';
+
+    if (_subscriptionStore) {
+      try {
+        const subscription = await _subscriptionStore.loadSubscription(req.user.userId);
+        if (subscription && subscription.status === 'active') {
+          userTier = subscription.tier;
+        }
+      } catch {
+        // Storage unavailable — fall back to free tier (conservative)
+        console.warn('[SubscriptionGate] Storage unavailable, falling back to free tier');
+      }
+    }
+
+    // ── Set response header for downstream use (e.g., ironLock.ts) ──
+    res.setHeader('x-subscription-tier', userTier);
+
+    // ── Check tier ─────────────────────────────────────────────────
+    const userRank = TIER_RANK[userTier];
+    if (userRank >= minRank) {
+      next();
+      return;
+    }
+
+    // ── Insufficient tier — return 402 Payment Required ────────────
     res.status(402).json({
-      error: `This feature requires the ${upgradePlanName} plan or higher`,
-      code: 'INSUFFICIENT_TIER',
-      currentTier: subscription.tier,
+      error: `This feature requires a ${minTier} subscription. Please upgrade to access it.`,
+      code: 'SUBSCRIPTION_REQUIRED',
       requiredTier: minTier,
-      upgradePlanId,
-      upgradeUrl: `/api/payments/create-order`,
-      message: `Upgrade to ${upgradePlanName} (₹${minTier === 'elite' ? '999' : '399'}/mo) to access this feature.`,
+      currentTier: userTier,
+      upgradeUrl: `/api/subscriptions/upgrade`,
     });
   };
-}
-
-/**
- * Middleware that attaches the user's subscription info to the request
- * without blocking access. Useful for routes that adapt behavior based
- * on tier (e.g., limited preview for free users).
- */
-export function attachSubscription(req: Request, _res: Response, next: NextFunction): void {
-  if (!req.user) {
-    next();
-    return;
-  }
-
-  resolveSubscription(req.user.userId)
-    .then((sub) => {
-      req.subscription = sub;
-      next();
-    })
-    .catch(() => {
-      next();
-    });
 }

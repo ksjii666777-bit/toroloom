@@ -70,6 +70,7 @@ router.post('/execute', async (req: Request, res: Response) => {
     const userId = req.user!.userId;
     const {
       actionType,
+      transactionType, // Legacy alias — maps to actionType
       symbol,
       exchange,
       quantity,
@@ -83,12 +84,15 @@ router.post('/execute', async (req: Request, res: Response) => {
     // INPUT VALIDATION
     // ──────────────────────────────────────────────────────────────
 
-    if (!actionType) {
+    // Backward compatibility: accept transactionType (old) as alias for actionType
+    const resolvedAction = (actionType || transactionType) as string | undefined;
+
+    if (!resolvedAction) {
       res.status(400).json({ error: 'actionType is required (BUY | SELL | SQUARE_OFF | MODIFY | CANCEL)' });
       return;
     }
 
-    const normalizedAction = (actionType as string).toUpperCase() as OrderActionType;
+    const normalizedAction = resolvedAction.toUpperCase() as OrderActionType;
     if (!Object.values(OrderActionType).includes(normalizedAction)) {
       res.status(400).json({
         error: `Invalid actionType. Must be one of: ${Object.values(OrderActionType).join(', ')}`,
@@ -195,11 +199,10 @@ router.post('/execute', async (req: Request, res: Response) => {
     const result = await orderPipeline.execute(params);
     res.status(200).json(result);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Orders] Route error:', error);
     res.status(500).json({
-      success: false,
-      message: error.message || 'Internal server error',
+      error: (error as Error).message || 'Internal server error',
     });
   }
 });
@@ -263,10 +266,9 @@ router.post('/validate', async (req: Request, res: Response) => {
     });
 
     res.status(200).json(evaluation);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
-      success: false,
-      message: `Validation error: ${error.message}`,
+      error: `Validation error: ${(error as Error).message}`,
     });
   }
 });
@@ -285,9 +287,9 @@ router.get('/open', async (_req: Request, res: Response) => {
     const broker = await getBroker();
     const openOrders = await broker.getOpenOrders();
     res.json(openOrders);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Orders] Failed to fetch open orders:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch open orders' });
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch open orders' });
   }
 });
 
@@ -369,13 +371,10 @@ router.post('/modify', async (req: Request, res: Response) => {
     });
 
     res.status(200).json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Orders] Modify order error:', error);
     res.status(500).json({
-      id: req.body?.orderId || 'unknown',
-      status: 'rejected',
-      message: error.message || 'Failed to modify order',
-      timestamp: new Date().toISOString(),
+      error: (error as Error).message || 'Failed to modify order',
     });
   }
 });
@@ -416,13 +415,10 @@ router.post('/cancel', async (req: Request, res: Response) => {
     });
 
     res.status(200).json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Orders] Cancel order error:', error);
     res.status(500).json({
-      id: req.body?.orderId || 'unknown',
-      status: 'rejected',
-      message: error.message || 'Failed to cancel order',
-      timestamp: new Date().toISOString(),
+      error: (error as Error).message || 'Failed to cancel order',
     });
   }
 });

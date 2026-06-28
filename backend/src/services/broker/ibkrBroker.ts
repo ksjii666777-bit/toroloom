@@ -446,7 +446,7 @@ export class IbkrBroker implements IBroker {
       return data.orders
         .filter((o: IbkrOrder) => {
           const status = (o.status || '').toUpperCase();
-          return ['OPEN', 'PENDING', 'PRE_SUBMITTED', 'INACTIVE'].includes(status);
+          return ['OPEN', 'PENDING', 'PRE_SUBMITTED', 'INACTIVE', 'SUBMITTED', 'PARTIALLY_FILLED', 'PARTIAL'].includes(status);
         })
         .map((o: IbkrOrder) => ({
           id: String(o.orderId),

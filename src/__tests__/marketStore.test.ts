@@ -1,283 +1,257 @@
 /**
  * ============================================================================
- * Toroloom — Market Store Tests
+ * Toroloom — Market Store Unit Tests
  * ============================================================================
  *
- * Tests the market store: search functionality, stock/index data,
- * and price alert simulation.
+ * Run: npx vitest run --reporter=verbose src/__tests__/marketStore.test.ts
+ * ============================================================================
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useMarketStore } from '../store/marketStore';
-import { marketApi } from '../services/api/market';
+import { useMarketStore, DEFAULT_SCREENER_FILTERS, getMarketCapCategory, parseMarketCap } from '../store/marketStore';
+import type { Stock } from '../types';
 
-describe('MarketStore — Initial State', () => {
-  beforeEach(() => {
-    // Reset to initial (with mock data from the store definition)
-    useMarketStore.setState({
-      indices: [],
-      stocks: [],
-      selectedStock: null,
-      isLoading: false,
-      searchQuery: '',
-      searchResults: [],
-    });
-  });
+// ─── Mocks (vi.hoisted to make variables available inside vi.mock factories) ─
 
-  it('starts with empty data when reset', () => {
-    const state = useMarketStore.getState();
-    expect(state.indices).toEqual([]);
-    expect(state.stocks).toEqual([]);
-    expect(state.selectedStock).toBeNull();
-    expect(state.searchQuery).toBe('');
-    expect(state.searchResults).toEqual([]);
-    expect(state.isLoading).toBe(false);
-  });
-});
+const { mockSearch, mockGetIndices, mockGetStocks, mockCacheLoad, mockCacheSave, mockAnalyticsLog, mockSendPriceAlert } = vi.hoisted(() => ({
+  mockSearch: vi.fn().mockResolvedValue([]),
+  mockGetIndices: vi.fn().mockResolvedValue([]),
+  mockGetStocks: vi.fn().mockResolvedValue([]),
+  mockCacheLoad: vi.fn().mockResolvedValue(null),
+  mockCacheSave: vi.fn().mockResolvedValue(undefined),
+  mockAnalyticsLog: vi.fn(),
+  mockSendPriceAlert: vi.fn(),
+}));
 
-describe('MarketStore — Search', () => {
-  beforeEach(() => {
-    useMarketStore.setState({
-      stocks: [
-        { id: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries Ltd.', sector: 'Energy', price: 2890, change: 45, changePercent: 1.59, isPositive: true, marketCap: '₹19,56,000 Cr', volume: '12.5M', high52: 3020, low52: 2200, pe: 28.5, pb: 3.2, dividend: 0.85 },
-        { id: 'TCS', symbol: 'TCS', name: 'Tata Consultancy Services', sector: 'Technology', price: 3890, change: -34, changePercent: -0.88, isPositive: false, marketCap: '₹14,20,000 Cr', volume: '8.2M', high52: 4200, low52: 3300, pe: 35.2, pb: 12.5, dividend: 1.20 },
-        { id: 'HDFCBANK', symbol: 'HDFCBANK', name: 'HDFC Bank Ltd.', sector: 'Finance', price: 1678, change: 23, changePercent: 1.42, isPositive: true, marketCap: '₹9,35,000 Cr', volume: '15.1M', high52: 1800, low52: 1360, pe: 18.9, pb: 2.8, dividend: 1.05 },
-      ],
-      searchQuery: '',
-      searchResults: [],
-      indices: [],
-      selectedStock: null,
-      isLoading: false,
-    });
-  });
+vi.mock('../constants/mockData', () => ({
+  mockIndices: [
+    { id: 'idx1', name: 'NIFTY 50', shortName: 'NIFTY', currentValue: 24500, change: 125, changePercent: 0.51, isPositive: true, icon: 'trending-up' },
+    { id: 'idx2', name: 'SENSEX', shortName: 'SENSEX', currentValue: 81000, change: -200, changePercent: -0.25, isPositive: false, icon: 'trending-down' },
+  ],
+  mockStocks: [],
+}));
 
-  it('finds stocks by symbol', () => {
-    useMarketStore.getState().setSearchQuery('RELIANCE');
-    const state = useMarketStore.getState();
-    expect(state.searchResults).toHaveLength(1);
-    expect(state.searchResults[0].symbol).toBe('RELIANCE');
-  });
+vi.mock('../services/api', () => ({
+  marketApi: { search: mockSearch, getIndices: mockGetIndices, getStocks: mockGetStocks },
+}));
 
-  it('finds stocks by name (partial match)', () => {
-    useMarketStore.getState().setSearchQuery('Tata');
-    const state = useMarketStore.getState();
-    expect(state.searchResults).toHaveLength(1);
-    expect(state.searchResults[0].name).toContain('Tata');
-  });
+vi.mock('../services/offlineCache', () => ({
+  offlineCache: { load: mockCacheLoad, save: mockCacheSave },
+}));
 
-  it('returns empty results for non-matching query', () => {
-    useMarketStore.getState().setSearchQuery('XYZNONEXISTENT');
-    const state = useMarketStore.getState();
-    expect(state.searchResults).toEqual([]);
-  });
+vi.mock('../services/analytics', () => ({
+  analytics: { logEvent: mockAnalyticsLog },
+}));
 
-  it('clears results on empty query', () => {
-    // First populate results
-    useMarketStore.getState().setSearchQuery('RELIANCE');
-    expect(useMarketStore.getState().searchResults.length).toBeGreaterThan(0);
+vi.mock('../utils/logger', () => ({
+  log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
 
-    // Then clear
-    useMarketStore.getState().setSearchQuery('');
-    expect(useMarketStore.getState().searchResults).toEqual([]);
-  });
+vi.mock('../services/notificationService', () => ({
+  sendPriceAlert: mockSendPriceAlert,
+}));
 
-  it('is case insensitive', () => {
-    useMarketStore.getState().setSearchQuery('reliance');
-    const state = useMarketStore.getState();
-    expect(state.searchResults).toHaveLength(1);
-    expect(state.searchResults[0].symbol).toBe('RELIANCE');
-  });
-
-  it('searches across multiple fields', () => {
-    useMarketStore.getState().setSearchQuery('bank');
-    const state = useMarketStore.getState();
-    expect(state.searchResults).toHaveLength(1);
-    expect(state.searchResults[0].symbol).toBe('HDFCBANK');
-  });
-
-  it('updates searchQuery in state', () => {
-    useMarketStore.getState().setSearchQuery('TCS');
-    expect(useMarketStore.getState().searchQuery).toBe('TCS');
-  });
-});
-
-describe('MarketStore — Stock Selection', () => {
-  const mockStock = { id: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries Ltd.', sector: 'Energy', price: 2890, change: 45, changePercent: 1.59, isPositive: true, marketCap: '₹19,56,000 Cr', volume: '12.5M', high52: 3020, low52: 2200, pe: 28.5, pb: 3.2, dividend: 0.85 };
-
-  beforeEach(() => {
-    useMarketStore.setState({
-      indices: [],
-      stocks: [],
-      selectedStock: null,
-      isLoading: false,
-      searchQuery: '',
-      searchResults: [],
-    });
-  });
-
-  it('selects a stock', () => {
-    useMarketStore.getState().selectStock(mockStock);
-    expect(useMarketStore.getState().selectedStock?.symbol).toBe('RELIANCE');
-  });
-
-  it('replaces previously selected stock', () => {
-    useMarketStore.getState().selectStock(mockStock);
-    useMarketStore.getState().selectStock({ ...mockStock, id: 'TCS', symbol: 'TCS' });
-    expect(useMarketStore.getState().selectedStock?.symbol).toBe('TCS');
-  });
-});
-
-describe('MarketStore — Simulate Price Alert', () => {
-  beforeEach(() => {
-    useMarketStore.setState({
-      stocks: [
-        { id: 'STOCK1', symbol: 'STOCK1', name: 'Stock One', sector: 'Tech', price: 100, change: 3, changePercent: 3.0, isPositive: true, marketCap: '₹1,000 Cr', volume: '1M', high52: 150, low52: 80, pe: 20, pb: 3, dividend: 0.5 },
-        { id: 'STOCK2', symbol: 'STOCK2', name: 'Stock Two', sector: 'Finance', price: 200, change: -4, changePercent: -2.0, isPositive: false, marketCap: '₹2,000 Cr', volume: '2M', high52: 300, low52: 150, pe: 15, pb: 2, dividend: 1.0 },
-      ],
-      indices: [],
-      selectedStock: null,
-      isLoading: false,
-      searchQuery: '',
-      searchResults: [],
-    });
-  });
-
-  it('triggers alert for specific symbol', () => {
-    // Just verify it doesn't throw
-    expect(() => {
-      useMarketStore.getState().simulatePriceAlert('STOCK1');
-    }).not.toThrow();
-  });
-
-  it('triggers alerts for all high-change stocks', () => {
-    expect(() => {
-      useMarketStore.getState().simulatePriceAlert();
-    }).not.toThrow();
-  });
-});
-
-describe('MarketStore — Refresh Market', () => {
+describe('Market Store', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useMarketStore.setState({
-      indices: [],
-      stocks: [],
-      selectedStock: null,
-      isLoading: false,
-      searchQuery: '',
-      searchResults: [],
+      indices: [], stocks: [], selectedStock: null, isLoading: false,
+      searchQuery: '', searchResults: [],
+      screenerFilters: { ...DEFAULT_SCREENER_FILTERS }, screenerResults: [], isScreenerVisible: false,
     });
   });
 
-  it('fetches market data from backend successfully', async () => {
-    const mockIndices = [
-      {
-        id: 'NIFTY', name: 'NIFTY 50', shortName: 'NIFTY', currentValue: 24500,
-        change: 120, changePercent: 0.49, isPositive: true, icon: '📈',
-      },
-    ];
-    const mockStocks = [
-      {
-        id: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries',
-        sector: 'Energy', price: 2890, change: 45, changePercent: 1.59,
-        isPositive: true, marketCap: '₹19,56,000 Cr', volume: '12.5M',
-        high52: 3020, low52: 2200, pe: 28.5, pb: 3.2, dividend: 0.85,
-      },
-    ];
+  // ─────────────────────────────────────────────────────────────────────────
+  // Utility Functions
+  // ─────────────────────────────────────────────────────────────────────────
 
-    vi.mocked(marketApi.getIndices).mockResolvedValueOnce(mockIndices);
-    vi.mocked(marketApi.getStocks).mockResolvedValueOnce(mockStocks);
-
-    await useMarketStore.getState().refreshMarket();
-
-    const state = useMarketStore.getState();
-    expect(state.indices).toEqual(mockIndices);
-    expect(state.stocks).toEqual(mockStocks);
-    expect(state.isLoading).toBe(false);
+  describe('Utility Functions', () => {
+    it('large cap (>= 100000 Cr)', () => expect(getMarketCapCategory('₹17,50,000Cr')).toBe('large'));
+    it('mid cap (10000-99999 Cr)', () => expect(getMarketCapCategory('₹50,000Cr')).toBe('mid'));
+    it('small cap (< 10000 Cr)', () => expect(getMarketCapCategory('₹5,000Cr')).toBe('small'));
+    it('L suffix large', () => expect(getMarketCapCategory('₹50,000L')).toBe('large'));
+    it('L suffix mid', () => expect(getMarketCapCategory('₹500L')).toBe('mid'));
+    it('parse Cr', () => expect(parseMarketCap('₹10Cr')).toBe(100000000));
+    it('parse L', () => expect(parseMarketCap('₹50L')).toBe(5000000));
+    it('parse K', () => expect(parseMarketCap('₹100K')).toBe(100000));
+    it('parse invalid', () => expect(parseMarketCap('')).toBe(0));
+    it('DEFAULT_SCREENER_FILTERS has required fields', () => {
+      (['priceMin','priceMax','peMin','peMax','marketCapCategory','sector','dayChangeMin','dayChangeMax'] as const)
+        .forEach(k => expect(DEFAULT_SCREENER_FILTERS).toHaveProperty(k));
+    });
   });
 
-  it('falls back to mock data when backend is unavailable', async () => {
-    vi.mocked(marketApi.getIndices).mockRejectedValueOnce(new Error('Network error'));
-    vi.mocked(marketApi.getStocks).mockRejectedValueOnce(new Error('Network error'));
+  // ─────────────────────────────────────────────────────────────────────────
+  // Search
+  // ─────────────────────────────────────────────────────────────────────────
 
-    await useMarketStore.getState().refreshMarket();
+  describe('Search', () => {
+    it('filters by symbol', () => {
+      useMarketStore.setState({ stocks: mkStock([
+        ['RELIANCE','Reliance'], ['TCS','TCS'],
+      ])});
+      useMarketStore.getState().setSearchQuery('RELIANCE');
+      expect(useMarketStore.getState().searchResults).toHaveLength(1);
+    });
 
-    const state = useMarketStore.getState();
-    expect(state.stocks.length).toBeGreaterThan(0);
-    expect(state.indices.length).toBeGreaterThan(0);
-    expect(state.isLoading).toBe(false);
+    it('filters by name case-insensitive', () => {
+      useMarketStore.setState({ stocks: mkStock([['R','Reliance Industries']]) });
+      useMarketStore.getState().setSearchQuery('reliance');
+      expect(useMarketStore.getState().searchResults).toHaveLength(1);
+    });
+
+    it('clears results on empty query', () => {
+      useMarketStore.getState().setSearchQuery('X');
+      useMarketStore.getState().setSearchQuery('');
+      expect(useMarketStore.getState().searchResults).toEqual([]);
+    });
+
+    it('calls backend for >=2 char query', () => {
+      useMarketStore.getState().setSearchQuery('TC');
+      expect(mockSearch).toHaveBeenCalledWith('TC');
+    });
+
+    it('updates results from backend', async () => {
+      const backendStock = mkOne('BACKEND','Backend Co');
+      mockSearch.mockResolvedValueOnce([backendStock]);
+      useMarketStore.getState().setSearchQuery('TC');
+      await new Promise(r => setTimeout(r, 5));
+      expect(useMarketStore.getState().searchResults).toEqual([backendStock]);
+    });
   });
 
-  it('sets loading state during refresh', () => {
-    vi.mocked(marketApi.getIndices).mockReturnValueOnce(new Promise(() => {}));
-    vi.mocked(marketApi.getStocks).mockReturnValueOnce(new Promise(() => {}));
+  // ─────────────────────────────────────────────────────────────────────────
+  // Select Stock
+  // ─────────────────────────────────────────────────────────────────────────
 
-    useMarketStore.getState().refreshMarket();
+  it('selects stock and logs analytics', () => {
+    const s = mkOne('TEST','Test Co');
+    useMarketStore.getState().selectStock(s);
+    expect(useMarketStore.getState().selectedStock?.symbol).toBe('TEST');
+    expect(mockAnalyticsLog).toHaveBeenCalledWith('stock_view', { symbol: 'TEST', name: 'Test Co', sector: 'E' });
+  });
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Cache
+  // ─────────────────────────────────────────────────────────────────────────
+
+  it('loads cached data', async () => {
+    mockCacheLoad.mockResolvedValueOnce({ data: { indices: [], stocks: [mkOne('C','Cached')] } });
+    await useMarketStore.getState().loadCachedMarket();
+    expect(useMarketStore.getState().stocks).toHaveLength(1);
+  });
+
+  it('keeps empty state when no cache', async () => {
+    mockCacheLoad.mockResolvedValueOnce(null);
+    await useMarketStore.getState().loadCachedMarket();
+    expect(useMarketStore.getState().stocks).toEqual([]);
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Refresh Market
+  // ─────────────────────────────────────────────────────────────────────────
+
+  it('shows loading during refresh, clears after', async () => {
+    mockGetIndices.mockRejectedValueOnce(new Error('done'));
+    mockGetStocks.mockRejectedValueOnce(new Error('done'));
+    mockCacheLoad.mockResolvedValueOnce(null);
+    const p = useMarketStore.getState().refreshMarket();
     expect(useMarketStore.getState().isLoading).toBe(true);
+    await p.catch(() => {});
+    expect(useMarketStore.getState().isLoading).toBe(false);
+  });
+
+  it('updates on success', async () => {
+    mockGetIndices.mockResolvedValueOnce([{ id:'i', name:'N', shortName:'N', currentValue:100, change:1, changePercent:0.5, isPositive:true, icon:'x' }]);
+    mockGetStocks.mockResolvedValueOnce([mkOne('S','S')]);
+    await useMarketStore.getState().refreshMarket();
+    expect(useMarketStore.getState().indices[0].currentValue).toBe(100);
+    expect(useMarketStore.getState().isLoading).toBe(false);
+  });
+
+  it('caches on success', async () => {
+    mockGetIndices.mockResolvedValueOnce([]);
+    mockGetStocks.mockResolvedValueOnce([]);
+    await useMarketStore.getState().refreshMarket();
+    expect(mockCacheSave).toHaveBeenCalled();
+  });
+
+  it('falls back to stale cache on API fail', async () => {
+    mockGetIndices.mockRejectedValueOnce(new Error('fail'));
+    mockGetStocks.mockRejectedValueOnce(new Error('fail'));
+    mockCacheLoad.mockResolvedValueOnce({ data: { indices: [], stocks: [mkOne('C','Cached')] } });
+    await useMarketStore.getState().refreshMarket();
+    expect(useMarketStore.getState().stocks).toHaveLength(1);
+  });
+
+  it('falls back to mock on API+cache fail', async () => {
+    mockGetIndices.mockRejectedValueOnce(new Error('fail'));
+    mockGetStocks.mockRejectedValueOnce(new Error('fail'));
+    mockCacheLoad.mockResolvedValueOnce(null);
+    await useMarketStore.getState().refreshMarket();
+    expect(useMarketStore.getState().isLoading).toBe(false);
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Screener
+  // ─────────────────────────────────────────────────────────────────────────
+
+  it('sets filter', () => {
+    useMarketStore.getState().setScreenerFilters({ sector: 'IT' });
+    expect(useMarketStore.getState().screenerFilters.sector).toBe('IT');
+  });
+
+  it('applies screener by sector', () => {
+    useMarketStore.setState({ stocks: [mkOne('A','A','IT'), mkOne('B','B','Energy')] });
+    useMarketStore.getState().setScreenerFilters({ sector: 'IT' });
+    useMarketStore.getState().applyScreener();
+    expect(useMarketStore.getState().screenerResults).toHaveLength(1);
+  });
+
+  it('closes screener after apply', () => {
+    useMarketStore.setState({ isScreenerVisible: true });
+    useMarketStore.getState().applyScreener();
+    expect(useMarketStore.getState().isScreenerVisible).toBe(false);
+  });
+
+  it('resets filters', () => {
+    useMarketStore.getState().setScreenerFilters({ sector: 'IT' });
+    useMarketStore.getState().resetScreenerFilters();
+    expect(useMarketStore.getState().screenerFilters).toEqual(DEFAULT_SCREENER_FILTERS);
+  });
+
+  it('toggles visibility', () => {
+    useMarketStore.getState().toggleScreener();
+    expect(useMarketStore.getState().isScreenerVisible).toBe(true);
+    useMarketStore.getState().toggleScreener();
+    expect(useMarketStore.getState().isScreenerVisible).toBe(false);
+  });
+
+  it('filters by price range', () => {
+    useMarketStore.setState({ stocks: [
+      mkOne('A','A','E',50), mkOne('B','B','E',150), mkOne('C','C','E',250),
+    ]});
+    useMarketStore.getState().setScreenerFilters({ priceMin: 100, priceMax: 200 });
+    useMarketStore.getState().applyScreener();
+    expect(useMarketStore.getState().screenerResults).toHaveLength(1);
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Price Alerts
+  // ─────────────────────────────────────────────────────────────────────────
+
+  it('sends alert for specific symbol', () => {
+    useMarketStore.setState({ stocks: [mkOne('TEST','Test Inc','E',200)] });
+    useMarketStore.getState().simulatePriceAlert('TEST');
+    expect(mockSendPriceAlert).toHaveBeenCalledWith('Test Inc', 'TEST', 200, expect.any(String));
   });
 });
 
-describe('MarketStore — Backend Search', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    useMarketStore.setState({
-      stocks: [
-        {
-          id: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries Ltd.',
-          sector: 'Energy', price: 2890, change: 45, changePercent: 1.59,
-          isPositive: true, marketCap: '₹19,56,000 Cr', volume: '12.5M',
-          high52: 3020, low52: 2200, pe: 28.5, pb: 3.2, dividend: 0.85,
-        },
-      ],
-      searchQuery: '',
-      searchResults: [],
-      indices: [],
-      selectedStock: null,
-      isLoading: false,
-    });
-  });
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
-  it('uses backend search results when available', async () => {
-    const backendResults = [
-      {
-        id: 'TCS', symbol: 'TCS', name: 'Tata Consultancy Services',
-        sector: 'Technology', price: 3890, change: -34, changePercent: -0.88,
-        isPositive: false, marketCap: '₹14,20,000 Cr', volume: '8.2M',
-        high52: 4200, low52: 3300, pe: 35.2, pb: 12.5, dividend: 1.20,
-      },
-    ];
-    vi.mocked(marketApi.search).mockResolvedValueOnce(backendResults);
-
-    useMarketStore.getState().setSearchQuery('TCS');
-
-    // Let the async backend .then() callback fire
-    await new Promise(resolve => setTimeout(resolve, 0));
-
-    expect(useMarketStore.getState().searchResults).toEqual(backendResults);
-  });
-
-  it('keeps local search results when backend returns empty', async () => {
-    vi.mocked(marketApi.search).mockResolvedValueOnce([]);
-
-    useMarketStore.getState().setSearchQuery('RELIANCE');
-
-    await new Promise(resolve => setTimeout(resolve, 0));
-
-    const state = useMarketStore.getState();
-    expect(state.searchResults).toHaveLength(1);
-    expect(state.searchResults[0].symbol).toBe('RELIANCE');
-  });
-
-  it('keeps local results on backend search failure', async () => {
-    vi.mocked(marketApi.search).mockRejectedValueOnce(new Error('Network error'));
-
-    useMarketStore.getState().setSearchQuery('RELIANCE');
-
-    await new Promise(resolve => setTimeout(resolve, 0));
-
-    const state = useMarketStore.getState();
-    expect(state.searchResults).toHaveLength(1);
-    expect(state.searchResults[0].symbol).toBe('RELIANCE');
-  });
-});
+function mkOne(symbol: string, name: string, sector = 'E', price = 100): Stock {
+  return { id: symbol, symbol, name, sector, price, change: 0, changePercent: 0, isPositive: true, marketCap: '₹1Cr', volume: '1K', high52: 200, low52: 50, pe: 10, pb: 1, dividend: 0 };
+}
+function mkStock(arr: [string, string][]): Stock[] {
+  return arr.map(([s, n]) => mkOne(s, n));
+}

@@ -88,10 +88,11 @@ router.post('/edis/verify', async (req: Request, res: Response) => {
     const result = await broker.verifyEDIS(request);
 
     res.status(200).json(result);
-  } catch (error: any) {
-    const statusCode = error.message?.includes('only available') ? 400 : 500;
+  } catch (error: unknown) {
+    const errMsg = (error as Error).message || '';
+    const statusCode = errMsg.includes('only available') ? 400 : 500;
     res.status(statusCode).json({
-      error: error.message || 'Failed to initiate EDIS verification',
+      error: errMsg || 'Failed to initiate EDIS verification',
     });
   }
 });
@@ -132,10 +133,11 @@ router.post('/edis/generate-tpin', async (req: Request, res: Response) => {
     const result = await broker.generateTPIN(request);
 
     res.status(200).json(result);
-  } catch (error: any) {
-    const statusCode = error.message?.includes('only available') ? 400 : 500;
+  } catch (error: unknown) {
+    const errMsg = (error as Error).message || '';
+    const statusCode = errMsg.includes('only available') ? 400 : 500;
     res.status(statusCode).json({
-      error: error.message || 'Failed to generate TPIN',
+      error: errMsg || 'Failed to generate TPIN',
     });
   }
 });
@@ -165,10 +167,11 @@ router.post('/edis/tran-status', async (req: Request, res: Response) => {
     const result = await broker.getEDISTranStatus(request);
 
     res.status(200).json(result);
-  } catch (error: any) {
-    const statusCode = error.message?.includes('only available') ? 400 : 500;
+  } catch (error: unknown) {
+    const errMsg = (error as Error).message || '';
+    const statusCode = errMsg.includes('only available') ? 400 : 500;
     res.status(statusCode).json({
-      error: error.message || 'Failed to check EDIS status',
+      error: errMsg || 'Failed to check EDIS status',
     });
   }
 });
@@ -232,10 +235,11 @@ router.post('/brokerage/estimate', async (req: Request, res: Response) => {
     const result = await broker.estimateBrokerage(request);
 
     res.status(200).json(result);
-  } catch (error: any) {
-    const statusCode = error.message?.includes('only available') ? 400 : 500;
+  } catch (error: unknown) {
+    const errMsg = (error as Error).message || '';
+    const statusCode = errMsg.includes('only available') ? 400 : 500;
     res.status(statusCode).json({
-      error: error.message || 'Failed to estimate brokerage',
+      error: errMsg || 'Failed to estimate brokerage',
     });
   }
 });

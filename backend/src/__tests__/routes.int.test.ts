@@ -1951,3 +1951,273 @@ describe('GET /api/system', () => {
     cb.reset();
   });
 });
+
+// ============================================================================
+// 18. PUSH NOTIFICATION ROUTES (push-token CRUD, portfolio-rules CRUD)
+// ============================================================================
+
+describe('POST /api/notifications/push-token', () => {
+  it('should reject without auth', async () => {
+    const { status } = await post('/api/notifications/push-token', { pushToken: 'ExponentPushToken[abc]' });
+    expect(status).toBe(401);
+  });
+
+  it('should register a push token', async () => {
+    const { status, body } = await post(
+      '/api/notifications/push-token',
+      { pushToken: 'ExponentPushToken[test-token-001]' },
+      AUTH_HEADER,
+    );
+
+    expect(status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(body.userId).toBe(TEST_USER_ID);
+  });
+
+  it('should reject without pushToken', async () => {
+    const { status, body } = await post('/api/notifications/push-token', {}, AUTH_HEADER);
+    expect(status).toBe(400);
+    expect(body.error).toContain('pushToken');
+  });
+
+  it('should reject non-string pushToken', async () => {
+    const { status, body } = await post('/api/notifications/push-token', { pushToken: 123 }, AUTH_HEADER);
+    expect(status).toBe(400);
+    expect(body.error).toContain('pushToken');
+  });
+});
+
+describe('GET /api/notifications/push-token', () => {
+  beforeEach(async () => {
+    // Clean up any push token registered by earlier tests
+    await del('/api/notifications/push-token', AUTH_HEADER);
+  });
+
+  it('should reject without auth', async () => {
+    const { status } = await get('/api/notifications/push-token');
+    expect(status).toBe(401);
+  });
+
+  it('should return registered=false when no token registered', async () => {
+    const { status, body } = await get('/api/notifications/push-token', AUTH_HEADER);
+    expect(status).toBe(200);
+    expect(body.registered).toBe(false);
+    expect(body.userId).toBe(TEST_USER_ID);
+  });
+
+  it('should return registered=true after registering a token', async () => {
+    // First register a token
+    await post('/api/notifications/push-token', { pushToken: 'ExponentPushToken[check-token]' }, AUTH_HEADER);
+
+    const { status, body } = await get('/api/notifications/push-token', AUTH_HEADER);
+    expect(status).toBe(200);
+    expect(body.registered).toBe(true);
+  });
+});
+
+describe('DELETE /api/notifications/push-token', () => {
+  it('should reject without auth', async () => {
+    const { status } = await del('/api/notifications/push-token');
+    expect(status).toBe(401);
+  });
+
+  it('should unregister a push token', async () => {
+    // First register, then unregister
+    await post('/api/notifications/push-token', { pushToken: 'ExponentPushToken[del-token]' }, AUTH_HEADER);
+
+    const { status, body } = await del('/api/notifications/push-token', AUTH_HEADER);
+    expect(status).toBe(200);
+    expect(body.success).toBe(true);
+
+    // Verify it's gone
+    const { body: check } = await get('/api/notifications/push-token', AUTH_HEADER);
+    expect(check.registered).toBe(false);
+  });
+});
+
+describe('GET /api/notifications/portfolio-rules', () => {
+  beforeEach(async () => {
+    // Clear any rules created by earlier tests (e.g., badge-count section)
+    await post('/api/notifications/portfolio-rules/sync', { rules: [] }, AUTH_HEADER);
+  });
+
+  it('should reject without auth', async () => {
+    const { status } = await get('/api/notifications/portfolio-rules');
+    expect(status).toBe(401);
+  });
+
+  it('should return empty array when no rules exist', async () => {
+    const { status, body } = await get('/api/notifications/portfolio-rules', AUTH_HEADER);
+    expect(status).toBe(200);
+    expect(Array.isArray(body)).toBe(true);
+    expect(body).toHaveLength(0);
+  });
+
+  it('should return synced rules', async () => {
+    const rule = {
+      id: 'list-test-rule',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'List Test P&L',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+
+    const { status, body } = await get('/api/notifications/portfolio-rules', AUTH_HEADER);
+    expect(status).toBe(200);
+    expect(Array.isArray(body)).toBe(true);
+    expect(body).toHaveLength(1);
+    expect(body[0].id).toBe('list-test-rule');
+  });
+});
+
+describe('POST /api/notifications/portfolio-rules/sync errors', () => {
+  it('should reject when rules is not an array', async () => {
+    const { status, body } = await post('/api/notifications/portfolio-rules/sync', { rules: 'not-array' }, AUTH_HEADER);
+    expect(status).toBe(400);
+    expect(body.error).toContain('rules array');
+  });
+
+  it('should accept empty rules array', async () => {
+    const { status, body } = await post('/api/notifications/portfolio-rules/sync', { rules: [] }, AUTH_HEADER);
+    expect(status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(body.count).toBe(0);
+  });
+});
+
+describe('PUT /api/notifications/portfolio-rules/:ruleId', () => {
+  let ruleId: string;
+
+  beforeEach(async () => {
+    await post('/api/notifications/portfolio-alert/reset-triggers', {}, AUTH_HEADER);
+    const rule = {
+      id: 'put-test-rule',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'PUT Test',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+    ruleId = 'put-test-rule';
+  });
+
+  it('should reject without auth', async () => {
+    const { status } = await put(`/api/notifications/portfolio-rules/${ruleId}`, { label: 'Updated' });
+    expect(status).toBe(401);
+  });
+
+  it('should update a rule', async () => {
+    const { status, body } = await put(
+      `/api/notifications/portfolio-rules/${ruleId}`,
+      { label: 'Updated Label', threshold: -10 },
+      AUTH_HEADER,
+    );
+    expect(status).toBe(200);
+    expect(body.success).toBe(true);
+  });
+});
+
+describe('DELETE /api/notifications/portfolio-rules/:ruleId', () => {
+  let ruleId: string;
+
+  beforeEach(async () => {
+    await post('/api/notifications/portfolio-alert/reset-triggers', {}, AUTH_HEADER);
+    const rule = {
+      id: 'del-test-rule',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'DELETE Test',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+    ruleId = 'del-test-rule';
+  });
+
+  it('should reject without auth', async () => {
+    const { status } = await del(`/api/notifications/portfolio-rules/${ruleId}`);
+    expect(status).toBe(401);
+  });
+
+  it('should delete a rule', async () => {
+    const { status, body } = await del(`/api/notifications/portfolio-rules/${ruleId}`, AUTH_HEADER);
+    expect(status).toBe(200);
+    expect(body.success).toBe(true);
+
+    // Verify it's gone
+    const { body: rules } = await get('/api/notifications/portfolio-rules', AUTH_HEADER);
+    expect(rules.find((r: any) => r.id === ruleId)).toBeUndefined();
+  });
+});
+
+describe('POST /api/notifications/portfolio-alert/evaluate - badgeCount sync', () => {
+  beforeEach(async () => {
+    await post('/api/notifications/portfolio-alert/reset-triggers', {}, AUTH_HEADER);
+  });
+
+  it('should sync badgeCount when client value is higher than server', async () => {
+    // Provide a badgeCount that's higher than server (which is 0 after reset-triggers)
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: 5,
+        totalReturn: 1000,
+        totalInvested: 100000,
+        currentValue: 101000,
+        peakValue: 101000,
+        consecutiveLossDays: 0,
+      },
+      badgeCount: 3,
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    expect(body.evaluated).toBe(true);
+    // Server synced badgeCount from 0 to 3 (3 increments), then no rule fired so stays at 3
+    expect(body.badgeCount).toBe(3);
+  });
+
+  it('should not sync when client badgeCount is lower than server', async () => {
+    // First fire a rule to increment badge count
+    const rule = {
+      id: 'badge-sync-rule',
+      userId: TEST_USER_ID,
+      kind: 'portfolio_pnl_pct',
+      label: 'Badge Sync',
+      threshold: -5,
+      direction: 'below',
+      triggered: false,
+      createdAt: new Date().toISOString(),
+      enabled: true,
+    };
+    await post('/api/notifications/portfolio-rules/sync', { rules: [rule] }, AUTH_HEADER);
+
+    // Fire the rule — badge count becomes 1
+    await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: { totalReturnPercent: -10, totalReturn: -50000, totalInvested: 500000, currentValue: 450000, peakValue: 550000, consecutiveLossDays: 0 },
+    }, AUTH_HEADER);
+
+    // Now send a LOWER badgeCount — server should NOT sync down
+    const { status, body } = await post('/api/notifications/portfolio-alert/evaluate', {
+      portfolioData: {
+        totalReturnPercent: 5, totalReturn: 1000, totalInvested: 100000,
+        currentValue: 101000, peakValue: 101000, consecutiveLossDays: 0,
+      },
+      badgeCount: 0,
+    }, AUTH_HEADER);
+
+    expect(status).toBe(200);
+    // Server badge count stays at 1 (not reset to 0)
+    expect(body.badgeCount).toBeGreaterThanOrEqual(1);
+  });
+});

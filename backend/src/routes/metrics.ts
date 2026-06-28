@@ -38,9 +38,9 @@ router.get('/', async (_req: Request, res: Response) => {
     res.setHeader('Content-Type', getMetricsRegistry().contentType);
     const metrics = await getMetricsRegistry().metrics();
     res.end(metrics);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).setHeader('Content-Type', 'text/plain');
-    res.end(`# Error collecting metrics: ${error.message}\n`);
+    res.end(`# Error collecting metrics: ${(error as Error).message}\n`);
   }
 });
 

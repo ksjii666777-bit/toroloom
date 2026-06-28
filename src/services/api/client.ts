@@ -18,6 +18,11 @@
  *       getToken: () => authStore.getState().token,
  *     });
  *
+ * 402 Payment Required Interceptor:
+ *   When a subscription-gated endpoint returns 402, a global callback is
+ *   fired to show the upgrade prompt modal. Register a handler via
+ *   onPaymentRequired() or use the default subscriptionUIStore bridge.
+ *
  * ============================================================================
  */
 
@@ -26,6 +31,43 @@ import { log } from '../../utils/logger';
 // Must be explicitly configured. No hardcoded fallback.
 let _baseUrl = '';
 let _getToken: () => string | null = () => null;
+
+/**
+ * Global callback invoked when any API endpoint returns HTTP 402.
+ * Set this once during app initialization to trigger the upgrade prompt.
+ *
+ * @example
+ *   import { useUpgradePromptStore } from '../store/subscriptionUIStore';
+ *   import type { SubscriptionTier } from '../types';
+ *
+ *   onPaymentRequired((body) => {
+ *     useUpgradePromptStore.getState().show({
+ *       featureName: '...',
+ *       featureIcon: '...',
+ *       requiredTier: body.requiredTier ?? 'pro',
+ *       currentTier: body.currentTier ?? 'free',
+ *     });
+ *   });
+ */
+let _onPaymentRequired: ((body: {
+  error?: string;
+  code?: string;
+  requiredTier?: string;
+  currentTier?: string;
+  upgradeUrl?: string;
+}) => void) | null = null;
+
+export function onPaymentRequired(
+  handler: ((body: {
+    error?: string;
+    code?: string;
+    requiredTier?: string;
+    currentTier?: string;
+    upgradeUrl?: string;
+  }) => void) | null,
+): void {
+  _onPaymentRequired = handler;
+}
 
 /**
  * Configure the API client with the backend base URL and token provider.
@@ -53,7 +95,7 @@ export function getBaseUrl() {
 // Generic helpers
 // ---------------------------------------------------------------------------
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
   body: any;
   constructor(status: number, body: any) {
@@ -88,6 +130,13 @@ async function request<T>(
   if (res.status === 204) return undefined as unknown as T;
 
   const json = await res.json().catch(() => null);
+
+  // ── 402 Payment Required — fire global upgrade prompt callback ─────
+  if (res.status === 402 && _onPaymentRequired && json) {
+    // Schedule on next tick so the caller's catch block can handle first
+    setTimeout(() => _onPaymentRequired!(json), 0);
+  }
+
   if (!res.ok) throw new ApiError(res.status, json);
   return json as T;
 }
@@ -126,4 +175,3 @@ export const api = {
   },
 };
 
-export { ApiError };

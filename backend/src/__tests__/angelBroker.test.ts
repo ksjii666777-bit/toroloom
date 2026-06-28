@@ -70,6 +70,23 @@ function createMockSmartApi() {
         { tradingsymbol: 'RELIANCE', quantity: '50', average_price: '2650', ltp: '2890', pnl: '12000', pnl_percentage: '9.05' },
       ],
     }),
+    getOrderBook: vi.fn().mockResolvedValue({
+      data: [
+        { orderid: 'ord_open_1', tradingsymbol: 'RELIANCE', exchange: 'NSE', transactiontype: 'BUY', quantity: '10', filledqty: '5', price: '2650', order_status: 'OPEN', producttype: 'CNC', ordertype: 'LIMIT', exch_tm: '2025-05-30T10:00:00' },
+        { orderid: 'ord_trigger_1', tradingsymbol: 'TCS', exchange: 'NSE', transactiontype: 'SELL', quantity: '5', filledqty: '0', price: '4000', trigger_price: '3950', order_status: 'TRIGGER_PENDING', producttype: 'MIS', ordertype: 'SL', exch_tm: '2025-05-30T09:30:00' },
+        { orderid: 'ord_partial_1', tradingsymbol: 'INFY', exchange: 'NSE', transactiontype: 'BUY', quantity: '20', filledqty: '10', price: '1800', order_status: 'PARTIALLY_FILLED', producttype: 'CNC', ordertype: 'LIMIT', exch_tm: '2025-05-30T08:00:00' },
+        { orderid: 'ord_completed_1', tradingsymbol: 'SBIN', exchange: 'NSE', transactiontype: 'SELL', quantity: '15', filledqty: '15', price: '850', order_status: 'COMPLETE', producttype: 'CNC', ordertype: 'MARKET', exch_tm: '2025-05-29T15:30:00' },
+      ],
+    }),
+    modifyOrder: vi.fn().mockResolvedValue({
+      status: 'success',
+      data: { orderid: 'ord_open_1', message: 'Order modified successfully' },
+      message: 'Order modified successfully',
+    }),
+    cancelOrder: vi.fn().mockResolvedValue({
+      status: 'success',
+      message: 'Order cancelled successfully',
+    }),
   };
 }
 
@@ -634,6 +651,131 @@ describe('AngelBroker', () => {
         'Angel One placeOrder returned no result',
       );
     });
+
+    it('should mark order as rejected when message includes "reject"', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
+      });
+      mockSmartApi.placeOrder.mockResolvedValue({
+        status: 'error',
+        message: 'Order rejected by exchange',
+        data: {},
+      });
+
+      const result = await broker.placeOrder(sampleOrder);
+      expect(result.status).toBe('rejected');
+    });
+  });
+
+  // ──────────────── Trading: modifyOrder ────────────────
+
+  describe('modifyOrder', () => {
+    const modifyPayload = {
+      orderId: 'ord_open_1',
+      symbol: 'RELIANCE',
+      exchange: 'NSE' as const,
+      orderType: 'LIMIT' as const,
+      quantity: 15,
+      price: 2700,
+    };
+
+    beforeEach(async () => {
+      await broker.authenticate(createConfig());
+      vi.clearAllMocks();
+    });
+
+    it('should modify an existing order successfully', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
+      });
+
+      const result = await broker.modifyOrder(modifyPayload);
+
+      expect(result.status).toBe('confirmed');
+      expect(result.id).toBe('ord_open_1');
+      expect(mockSmartApi.modifyOrder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderid: 'ord_open_1',
+          quantity: '15',
+          price: '2700',
+        }),
+      );
+    });
+
+    it('should throw when no result from API', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
+      });
+      mockSmartApi.modifyOrder.mockResolvedValue(null);
+
+      await expect(broker.modifyOrder(modifyPayload)).rejects.toThrow(
+        'Angel One modifyOrder returned no result',
+      );
+    });
+
+    it('should return rejected status on failure', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
+      });
+      mockSmartApi.modifyOrder.mockResolvedValue({
+        status: 'error',
+        message: 'Order modification rejected',
+      });
+
+      const result = await broker.modifyOrder(modifyPayload);
+      expect(result.status).toBe('rejected');
+    });
+
+    it('should map product types for modifyOrder', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'TCS', symboltoken: '67890' }],
+      });
+
+      await broker.modifyOrder({ ...modifyPayload, symbol: 'TCS', productType: 'MIS' });
+
+      expect(mockSmartApi.modifyOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ producttype: 'INTRADAY' }),
+      );
+    });
+
+    it('should use default DELIVERY product type for unknown productType', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'TCS', symboltoken: '67890' }],
+      });
+
+      await broker.modifyOrder({ ...modifyPayload, symbol: 'TCS', productType: 'UNKNOWN' as any });
+
+      expect(mockSmartApi.modifyOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ producttype: 'DELIVERY' }),
+      );
+    });
+  });
+
+  // ──────────────── Trading: cancelOrder ────────────────
+
+  describe('cancelOrder', () => {
+    beforeEach(async () => {
+      await broker.authenticate(createConfig());
+      vi.clearAllMocks();
+    });
+
+    it('should cancel an existing order successfully', async () => {
+      const result = await broker.cancelOrder({ orderId: 'ord_open_1' });
+
+      expect(result.status).toBe('cancelled');
+      expect(result.id).toBe('ord_open_1');
+      expect(mockSmartApi.cancelOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ orderid: 'ord_open_1' }),
+      );
+    });
+
+    it('should throw when no result from API', async () => {
+      mockSmartApi.cancelOrder.mockResolvedValue(null);
+
+      await expect(broker.cancelOrder({ orderId: 'ghost' })).rejects.toThrow(
+        'Angel One cancelOrder returned no result',
+      );
+    });
   });
 
   // ──────────────── Trading: getPositions ────────────────
@@ -658,6 +800,25 @@ describe('AngelBroker', () => {
       const positions = await broker.getPositions();
       expect(positions).toEqual([]);
     });
+
+    it('should filter out zero-quantity positions', async () => {
+      mockSmartApi.getPosition.mockResolvedValue({
+        data: [
+          { tradingsymbol: 'RELIANCE', quantity: '50', buy_price: '2650', ltp: '2890', pnl: '12000', pnl_percentage: '9.05' },
+          { tradingsymbol: 'DEAD', quantity: '0', buy_price: '0', ltp: '0', pnl: '0', pnl_percentage: '0' },
+          { tradingsymbol: 'LIQUID', quantity: '0', buy_price: '100', ltp: '100', pnl: '0', pnl_percentage: '0' },
+        ],
+      });
+
+      const positions = await broker.getPositions();
+      expect(positions.length).toBe(1);
+      expect(positions[0].symbol).toBe('RELIANCE');
+    });
+
+    it('should return empty array when result is null', async () => {
+      mockSmartApi.getPosition.mockResolvedValue(null);
+      expect(await broker.getPositions()).toEqual([]);
+    });
   });
 
   // ──────────────── Trading: getTradeHistory ────────────────
@@ -677,9 +838,60 @@ describe('AngelBroker', () => {
       expect(trades[0].type).toBe('buy');
     });
 
-    it('should return empty array', async () => {
+    it('should return empty array when trade book is empty', async () => {
       mockSmartApi.getTradeBook.mockResolvedValue({ data: [] });
       expect(await broker.getTradeHistory()).toEqual([]);
+    });
+  });
+
+  // ──────────────── Trading: getOpenOrders ────────────────
+
+  describe('getOpenOrders', () => {
+    beforeEach(async () => {
+      await broker.authenticate(createConfig());
+      vi.clearAllMocks();
+    });
+
+    it('should return open orders excluding completed ones', async () => {
+      const orders = await broker.getOpenOrders();
+      // The mock returns 3 open (OPEN, TRIGGER_PENDING, PARTIALLY_FILLED) + 1 COMPLETE (filtered out)
+      expect(orders.length).toBe(3);
+      expect(orders[0].id).toBe('ord_open_1');
+      expect(orders[0].symbol).toBe('RELIANCE');
+      expect(orders[0].transactionType).toBe('BUY');
+      expect(orders[0].status).toBe('open');
+      expect(orders[1].status).toBe('trigger_pending');
+      expect(orders[2].status).toBe('partially_filled');
+    });
+
+    it('should return empty array when no order book data', async () => {
+      mockSmartApi.getOrderBook.mockResolvedValue({ data: [] });
+      expect(await broker.getOpenOrders()).toEqual([]);
+    });
+
+    it('should return empty array when result is null', async () => {
+      mockSmartApi.getOrderBook.mockResolvedValue(null);
+      expect(await broker.getOpenOrders()).toEqual([]);
+    });
+
+    it('should handle PARTFILLED status via mapAngelOrderStatus', async () => {
+      // Note: The getOpenOrders filter does NOT include PARTFILLED (only PARTIALLY_FILLED),
+      // so this exercises mapAngelOrderStatus directly via private method access.
+      const status = broker['mapAngelOrderStatus']({ order_status: 'PARTFILLED' });
+      expect(status).toBe('partially_filled');
+    });
+
+    it('should map pending status through the full pipeline', async () => {
+      // 'PENDING' is included in the filter, but mapAngelOrderStatus falls through to 'pending'
+      mockSmartApi.getOrderBook.mockResolvedValue({
+        data: [
+          { orderid: 'pending_1', tradingsymbol: 'HDFC', exchange: 'NSE', transactiontype: 'BUY', quantity: '5', filledqty: '0', price: '1700', order_status: 'PENDING', producttype: 'CNC', ordertype: 'MARKET', exch_tm: '2025-05-30T10:00:00' },
+        ],
+      });
+
+      const orders = await broker.getOpenOrders();
+      expect(orders.length).toBe(1);
+      expect(orders[0].status).toBe('pending');
     });
   });
 
@@ -697,9 +909,148 @@ describe('AngelBroker', () => {
       expect(holdings[0].symbol).toBe('RELIANCE');
     });
 
-    it('should return empty array', async () => {
+    it('should return empty array when no data', async () => {
       mockSmartApi.getHolding.mockResolvedValue({ data: [] });
       expect(await broker.getHoldings()).toEqual([]);
+    });
+
+    it('should filter out zero-quantity holdings', async () => {
+      mockSmartApi.getHolding.mockResolvedValue({
+        data: [
+          { tradingsymbol: 'RELIANCE', quantity: '50', average_price: '2650', ltp: '2890', pnl: '12000', pnl_percentage: '9.05' },
+          { tradingsymbol: 'SOLD', quantity: '0', average_price: '2700', ltp: '2800', pnl: '0', pnl_percentage: '0' },
+        ],
+      });
+
+      const holdings = await broker.getHoldings();
+      expect(holdings.length).toBe(1);
+      expect(holdings[0].symbol).toBe('RELIANCE');
+    });
+
+    it('should return empty array when result is null', async () => {
+      mockSmartApi.getHolding.mockResolvedValue(null);
+      expect(await broker.getHoldings()).toEqual([]);
+    });
+  });
+
+  // ──────────────── Token Resolution: resolveToken ────────────────
+
+  describe('resolveToken (private)', () => {
+    beforeEach(async () => {
+      await broker.authenticate(createConfig());
+      vi.clearAllMocks();
+    });
+
+    it('should cache resolved token for subsequent calls', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
+      });
+
+      const token1 = await broker['resolveToken']('RELIANCE');
+      const token2 = await broker['resolveToken']('RELIANCE');
+
+      expect(token1).toBe('12345');
+      expect(token2).toBe('12345');
+      expect(mockSmartApi.searchScrip).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle searchScrip returning data as direct array', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue([
+        { tradingsymbol: 'TCS', symboltoken: '67890' },
+      ]);
+
+      const token = await broker['resolveToken']('TCS');
+      expect(token).toBe('67890');
+    });
+
+    it('should fall back to list[0] when exact match not found', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'TCS_EQ', symboltoken: '67890' }],
+      });
+
+      const token = await broker['resolveToken']('TCS');
+      expect(token).toBe('67890');
+    });
+
+    it('should throw when list is empty', async () => {
+      mockSmartApi.searchScrip.mockResolvedValue({ data: [] });
+
+      await expect(broker['resolveToken']('FAKE')).rejects.toThrow(
+        'Could not resolve symbol token for: FAKE',
+      );
+    });
+
+    it('should throw when searchScrip fails', async () => {
+      mockSmartApi.searchScrip.mockRejectedValue(new Error('API error'));
+
+      await expect(broker['resolveToken']('ERROR')).rejects.toThrow(
+        'Could not resolve symbol token for: ERROR',
+      );
+    });
+  });
+
+  // ──────────────── Re-authentication ────────────────
+
+  describe('re-authentication on session expiry', () => {
+    // Capture the session expiry hook before vi.clearAllMocks() so we can trigger it
+    let sessionExpiryHook: () => void;
+
+    beforeEach(async () => {
+      mockSmartApi.generateSession.mockResolvedValue({
+        data: { jwtToken: 'refreshed-jwt', feedToken: 'refreshed-feed-token' },
+      });
+      // Must include password for reAuthenticate() to work after session expiry
+      await broker.authenticate(createConfig({ accessToken: 'test-access-token', password: 'test-password' } as any));
+
+      // Capture the hook reference BEFORE clearing mocks
+      sessionExpiryHook = mockSmartApi.setSessionExpiryHook.mock.calls[0][0];
+
+      vi.clearAllMocks();
+    });
+
+    it('should auto re-authenticate when session expiry hook fires', async () => {
+      // Trigger the session expiry hook (simulates JWT token expiry)
+      sessionExpiryHook();
+      expect(broker.isConnected()).toBe(false);
+
+      // The broker should re-authenticate on the next requireAuth call
+      mockSmartApi.searchScrip.mockResolvedValue({
+        data: [{ tradingsymbol: 'RELIANCE', symboltoken: '12345' }],
+      });
+      mockSmartApi.marketData.mockResolvedValue({
+        data: {
+          fetched: [{ ltp: 2900, last_price: 2900, net_change: 10, open: 2880, high: 2920, low: 2870, close: 2880, volume: 1000000 }],
+        },
+      });
+
+      // This should trigger requireAuth -> reAuthenticate -> generateSession
+      const quote = await broker.getQuote('RELIANCE');
+
+      expect(quote.lastPrice).toBe(2900);
+      expect(mockSmartApi.generateSession).toHaveBeenCalled();
+      expect(broker.isConnected()).toBe(true);
+    });
+
+    it('should throw when re-authentication credentials are missing', async () => {
+      // Create a broker with access token but no password
+      const noPwdSmartApi = createMockSmartApi();
+      function NoPwdSmartAPI(this: any) { return noPwdSmartApi; }
+      function NoPwdWS(this: any) { return createMockWebSocketV2(); }
+      const noPwdBroker = new AngelBroker({ SmartAPI: NoPwdSmartAPI as any, WebSocketV2: NoPwdWS as any });
+      await noPwdBroker.authenticate(createConfig());
+
+      const hook = noPwdSmartApi.setSessionExpiryHook.mock.calls[0][0];
+      vi.clearAllMocks();
+
+      // After expiry hook fires, isConnected = false
+      hook();
+
+      // Private access to verify the password is empty for this broker
+      expect((noPwdBroker as any).password).toBe('');
+
+      await expect(
+        noPwdBroker.getQuote('RELIANCE'),
+      ).rejects.toThrow('Angel One broker not authenticated');
     });
   });
 

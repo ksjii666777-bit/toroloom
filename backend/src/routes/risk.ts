@@ -42,8 +42,8 @@ router.get('/state', (req: Request, res: Response) => {
       portfolioValueAtOpen: profile.portfolioValueAtOpen,
       updatedAt: profile.updatedAt,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to fetch risk state' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch risk state' });
   }
 });
 
@@ -90,8 +90,8 @@ router.get('/evaluate', (req: Request, res: Response) => {
     });
 
     res.json(evaluation);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Risk evaluation failed' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Risk evaluation failed' });
   }
 });
 
@@ -138,8 +138,8 @@ router.put('/limits', (req: Request, res: Response) => {
     }
 
     res.json(result);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to update risk limits' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to update risk limits' });
   }
 });
 
@@ -159,8 +159,8 @@ router.post('/reset', (req: Request, res: Response) => {
       success: true,
       message: 'Daily risk tracking has been reset.',
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to reset risk state' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to reset risk state' });
   }
 });
 

@@ -45,7 +45,11 @@ export const portfolioApi = {
   getTrades: () => api.get<Trade[]>('/portfolio/trades'),
 
   placeOrder: (order: PlaceOrderRequest) =>
-    api.post<OrderResult>('/portfolio/orders', order),
+    api.post<OrderResult>('/orders/execute', {
+      ...order,
+      // Map transactionType (old field name) to actionType
+      actionType: order.transactionType,
+    }),
 
   /** Fetch all open/pending orders */
   getOpenOrders: () => api.get<OpenOrder[]>('/orders/open'),

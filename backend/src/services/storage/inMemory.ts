@@ -210,10 +210,12 @@ export class InMemoryStorage implements StorageEngine {
   async disconnect(): Promise<void> {
     this.events = [];
     this.riskProfiles.clear();
+    this.badgeCounts.clear();
     this.brokerCurrentType = null;
     this.brokerDedupCache = {};
     this.notifications = [];
     this.communityPosts = [];
+    this.subscriptions.clear();
   }
 
   async isHealthy(): Promise<boolean> {

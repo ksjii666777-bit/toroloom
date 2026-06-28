@@ -23,7 +23,7 @@ import multer, { FileFilterCallback, MulterError } from 'multer';
 // pdf-parse v2 exports a PDFParse class (NOT a function).
 // Use destructured require with class instantiation.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { PDFParse } = require('pdf-parse') as { PDFParse: new (opts: { data: Buffer }) => { getText(): Promise<{ text: string; pages: any[]; total: number }>; getInfo(): Promise<{ info: Record<string, string>; metadata: Record<string, string> }> } };
+const { PDFParse } = require('pdf-parse') as { PDFParse: new (opts: { data: Buffer }) => { getText(): Promise<{ text: string; pages: unknown[]; total: number }>; getInfo(): Promise<{ info: Record<string, string>; metadata: Record<string, string> }> } };
 
 const router = Router();
 
@@ -123,10 +123,10 @@ router.post(
         pages: result.total,
         metadata: extractMetadata(info),
       } satisfies ParseResponse);
-    } catch (error: any) {
+    } catch (error: unknown) {
       res.status(500).json({
         success: false,
-        error: `PDF parsing failed: ${error.message || 'Unknown error'}`,
+        error: `PDF parsing failed: ${(error as Error).message || 'Unknown error'}`,
       } satisfies ParseResponse);
     }
   },

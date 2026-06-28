@@ -68,8 +68,8 @@ router.post('/price-alert', async (req: Request, res: Response) => {
 
     await saveNotification(newNotification);
     res.status(201).json(newNotification);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to create price alert' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to create price alert' });
   }
 });
 

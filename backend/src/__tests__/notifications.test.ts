@@ -282,6 +282,58 @@ describe('Notification Service — Storage-backed Operations', () => {
 
   // ==================== Edge Cases ====================
 
+  // ==================== No-Storage Operations ====================
+
+  it('should mark notification as read without storage configured', async () => {
+    resetNotificationService();
+    // Save a notification in memory (no storage)
+    await saveNotification({
+      id: 'no-store-read', userId: 'no_store_user', type: 'trade',
+      title: 'No Store', message: 'Test', read: false,
+      timestamp: new Date().toISOString(),
+    });
+
+    await markNotificationRead('no-store-read');
+    const notifs = await getNotifications('no_store_user');
+    expect(notifs[0].read).toBe(true);
+  });
+
+  it('should mark all notifications as read without storage configured', async () => {
+    resetNotificationService();
+    await saveNotification({ id: 'ns-a', userId: 'ns_user', type: 'trade', title: 'A', message: 'A', read: false, timestamp: new Date().toISOString() });
+    await saveNotification({ id: 'ns-b', userId: 'ns_user', type: 'news', title: 'B', message: 'B', read: false, timestamp: new Date().toISOString() });
+
+    await markAllNotificationsRead('ns_user');
+    const notifs = await getNotifications('ns_user');
+    expect(notifs).toHaveLength(2);
+    notifs.forEach((n) => expect(n.read).toBe(true));
+  });
+
+  it('should save notification without storage configured (append to empty)', async () => {
+    resetNotificationService();
+    await saveNotification({
+      id: 'ns-1', userId: 'ns_user', type: 'system',
+      title: 'Test', message: 'Test message', read: true,
+      timestamp: new Date().toISOString(),
+    });
+
+    const notifs = await getNotifications('ns_user');
+    expect(notifs).toHaveLength(1);
+    expect(notifs[0].id).toBe('ns-1');
+    expect(notifs[0].read).toBe(true);
+  });
+
+  it('should return empty string for markNotificationRead of non-existent id without storage', async () => {
+    resetNotificationService();
+    // Should not throw
+    await expect(markNotificationRead('ghost-id')).resolves.not.toThrow();
+  });
+
+  it('should return empty for markAllNotificationsRead of unknown user without storage', async () => {
+    resetNotificationService();
+    await expect(markAllNotificationsRead('ghost_user')).resolves.not.toThrow();
+  });
+
   it('should handle concurrent mark read operations', async () => {
     await configureNotificationPersistence(storage);
 
