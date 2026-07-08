@@ -6,13 +6,29 @@
     "scheme": "toroloom",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0F19",
+    "primaryColor": "#3B82F6",
+    "description": "Toroloom — AI-powered trading & investment platform. F&O options chain with Greeks, social copy trading, portfolio analytics, and KYC.",
+    
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.toroloom.app",
+      "buildNumber": "1",
       "associatedDomains": [
         "applinks:toroloom.com"
-      ]
+      ],
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Toroloom uses Face ID to secure your account and authorize trades.",
+        "NSPhotoLibraryUsageDescription": "Toroloom needs access to your photo library to upload profile pictures and document scans for KYC verification.",
+        "NSCameraUsageDescription": "Toroloom uses the camera for Aadhaar eKYC verification and QR code scanning.",
+        "NSMicrophoneUsageDescription": "Toroloom uses the microphone for voice commands and voice search."
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
+
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#0D1117",
@@ -21,7 +37,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Toroloom",
+      "package": "com.toroloom.app",
       "backgroundColor": "#0D1117",
       "softwareKeyboardLayoutMode": "resize",
       "googleServicesFile": "./google-services.json",
@@ -39,6 +55,7 @@
         }
       ]
     },
+
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
@@ -52,22 +69,36 @@
       "orientation": "any",
       "themeColor": "#0D1117"
     },
+
     "plugins": [
       "expo-sharing",
       "@react-native-firebase/app",
       "@react-native-firebase/analytics",
       "expo-font",
-      "@sentry/react-native"
+      "@sentry/react-native",
+      "expo-local-authentication",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#3B82F6"
+        }
+      ]
     ],
+
     "updates": {
       "enabled": false,
       "fallbackToCacheTimeout": 0
     },
+
     "extra": {
       "eas": {
         "projectId": "516f5031-c683-43e5-a463-f714660154b0"
       }
     },
-    "owner": "hgdghdghh"
+
+    "owner": "hgdghdghh",
+
+    "platforms": ["ios", "android"]
   }
 }

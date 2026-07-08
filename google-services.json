@@ -9,7 +9,45 @@
       "client_info": {
         "mobilesdk_app_id": "1:998795844306:android:7852f5c47bcdb3bba22b0b",
         "android_client_info": {
-          "package_name": "com.anonymous.Toroloom"
+          "package_name": "com.toroloom.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA761K-7KrKH8S0Amw4EhNKdWCILoXUnfY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:998795844306:android:7852f5c47bcdb3bba22b0b",
+        "android_client_info": {
+          "package_name": "com.toroloom.app.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA761K-7KrKH8S0Amw4EhNKdWCILoXUnfY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:998795844306:android:7852f5c47bcdb3bba22b0b",
+        "android_client_info": {
+          "package_name": "com.toroloom.app.preview"
         }
       },
       "oauth_client": [],
