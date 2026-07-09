@@ -14,6 +14,7 @@ import { onPaymentRequired } from './src/services/api/client';
 import Sentry, { isSentryEnabled } from './src/services/sentry';
 import useLoadFonts from './src/hooks/useLoadFonts';
 import BiometricUnlockOverlay from './src/components/BiometricUnlockOverlay';
+import './src/utils/debugTextError'; // Debug: catches Text error with component stack
 
 import { seedAllBrokerSessions, seedE2EBrokerSession } from './src/services/gateway/seedE2ESession';
 
