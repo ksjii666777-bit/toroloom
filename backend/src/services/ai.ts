@@ -1,12 +1,16 @@
 /**
- * Toroloom AI Service — OpenRouter Integration
+ * Toroloom AI Service — OpenRouter, Google Gemini & Choreo Claude API
  *
- * Uses OpenRouter's unified API (https://openrouter.ai) to generate
- * real AI-powered market insights via models like Gemini, GPT-4o, Claude, etc.
+ * Supports multiple AI providers:
+ *   1. OpenRouter (unified API — Gemini, GPT, Claude)
+ *   2. Google Gemini (direct API)
+ *   3. Choreo API Gateway → Anthropic Claude
  *
  * Set env vars:
  *   OPENROUTER_API_KEY=sk-or-v1-...
- *   OPENROUTER_MODEL=google/gemini-2.0-flash-001
+ *   GOOGLE_GEMINI_API_KEY=...
+ *   CHOREO_CLAUDE_API_KEY=<JWT token>
+ *   CHOREO_CLAUDE_ENDPOINT=https://eg-...azure.bijiraapis.dev/.../v1.0
  */
 
 import { env } from '../config/env';
@@ -52,10 +56,26 @@ interface GeminiResponse {
   }[];
 }
 
+/** Anthropic Claude Messages API response (via Choreo gateway) */
+interface AnthropicResponse {
+  id: string;
+  type: 'message';
+  role: 'assistant';
+  content: { type: 'text'; text: string }[];
+  model: string;
+  stop_reason: string;
+  stop_sequence: string | null;
+  usage: {
+    input_tokens: number;
+    output_tokens: number;
+  };
+}
+
 // ──── Constants ────────────────────────────────────────────────────────────
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const GOOGLE_GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+const CHOREO_ANTHROPIC_PATH = '/v1/messages';
 
 const SYSTEM_PROMPT = `You are Toroloom AI, an expert Indian stock market analyst assistant.
 You provide concise, data-driven stock analysis for NSE/BSE-listed companies.
@@ -100,10 +120,12 @@ Return them in a JSON array format: [{...}, {...}, ...]`;
 /**
  * Determine which AI provider to use based on env config and available keys.
  */
-function getActiveProvider(): 'openrouter' | 'google' | null {
+function getActiveProvider(): 'openrouter' | 'google' | 'choreo' | null {
+  if (env.aiProvider === 'choreo' && env.choreoClaudeApiKey) return 'choreo';
   if (env.aiProvider === 'google' && env.googleGeminiApiKey) return 'google';
   if (env.aiProvider === 'openrouter' && env.openRouterApiKey) return 'openrouter';
   // Fallback: use whichever key is available
+  if (env.choreoClaudeApiKey) return 'choreo';
   if (env.openRouterApiKey) return 'openrouter';
   if (env.googleGeminiApiKey) return 'google';
   return null;
@@ -123,6 +145,7 @@ export function getActiveProviderName(): string {
   const provider = getActiveProvider();
   if (provider === 'google') return 'Google Gemini';
   if (provider === 'openrouter') return 'OpenRouter';
+  if (provider === 'choreo') return 'Choreo Claude';
   return 'none';
 }
 
@@ -165,6 +188,47 @@ function toAIInsight(raw: any, symbol: string): AIInsight | null {
 function parseAIResponse(content: string): any {
   const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
   return JSON.parse(jsonStr);
+}
+
+/**
+ * Call Anthropic Claude via Choreo API Gateway.
+ * Uses the Anthropic Messages API format through the Choreo-managed endpoint.
+ * Authentication is via Bearer JWT (Choreo Internal Key).
+ */
+async function callChoreoClaude(systemPrompt: string, userPrompt: string): Promise<string> {
+  const url = env.choreoClaudeEndpoint.replace(/\/+$/, '') + CHOREO_ANTHROPIC_PATH;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${env.choreoClaudeApiKey}`,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: env.choreoClaudeModel,
+      max_tokens: 4096,
+      system: systemPrompt,
+      messages: [
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.2,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => 'Unknown error');
+    throw new Error(`Choreo Claude API error (${response.status}): ${errorText}`);
+  }
+
+  const data = (await response.json()) as AnthropicResponse;
+  const content = data.content?.[0]?.text;
+
+  if (!content) {
+    throw new Error('Choreo Claude returned empty response');
+  }
+
+  return content;
 }
 
 /**
@@ -218,10 +282,12 @@ export async function generateInsight(symbol: string): Promise<AIInsight> {
   try {
     let content: string;
 
-    if (provider === 'google') {
+    if (provider === 'choreo') {
+      content = await callChoreoClaude(SYSTEM_PROMPT, userPrompt);
+    } else if (provider === 'google') {
       content = await callGoogleGemini(SYSTEM_PROMPT, userPrompt);
     } else {
-      // OpenRouter
+      // OpenRouter (default)
       const response = await fetch(OPENROUTER_API_URL, {
         method: 'POST',
         headers: {
@@ -299,7 +365,9 @@ Return VALID JSON ARRAY ONLY following the schema.`;
   try {
     let content: string;
 
-    if (provider === 'google') {
+    if (provider === 'choreo') {
+      content = await callChoreoClaude(BATCH_SYSTEM_PROMPT, userPrompt);
+    } else if (provider === 'google') {
       content = await callGoogleGemini(BATCH_SYSTEM_PROMPT, userPrompt);
     } else {
       const response = await fetch(OPENROUTER_API_URL, {

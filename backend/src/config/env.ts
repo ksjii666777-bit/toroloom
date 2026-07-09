@@ -80,11 +80,16 @@ export const env = {
   // requests using encrypted session tokens stored in device keychain.
 
   // ──── AI Configuration ──────────────────────────────────────────────
-  aiProvider: (process.env.AI_PROVIDER || 'openrouter') as 'openrouter' | 'google',
+  aiProvider: (process.env.AI_PROVIDER || 'openrouter') as 'openrouter' | 'google' | 'choreo',
   openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
   openRouterModel: process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-lite-001',
   googleGeminiApiKey: process.env.GOOGLE_GEMINI_API_KEY || '',
   googleGeminiModel: process.env.GOOGLE_GEMINI_MODEL || 'gemini-2.0-flash-lite-001',
+
+  /** Choreo API Gateway — Anthropic Claude (via Choreo managed subscription) */
+  choreoClaudeApiKey: process.env.CHOREO_CLAUDE_API_KEY || '',
+  choreoClaudeEndpoint: process.env.CHOREO_CLAUDE_ENDPOINT || 'https://eg-e521a28e-6678-46f8-806b-9f325829eaaa-dev.e1-us-east-azure.bijiraapis.dev/default/anthropic-claude-api/v1.0',
+  choreoClaudeModel: process.env.CHOREO_CLAUDE_MODEL || 'claude-sonnet-4-20250514',
 
   // ──── Payments ───────────────────────────────────────────────────────
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
@@ -144,9 +149,9 @@ export function validateRequiredEnv(): string[] {
   }
 
   // In production, warn if no AI keys are configured (the app will return mock data)
-  if (isProduction && !env.openRouterApiKey && !env.googleGeminiApiKey) {
+  if (isProduction && !env.openRouterApiKey && !env.googleGeminiApiKey && !env.choreoClaudeApiKey) {
     console.warn(
-      '[env] WARNING: No AI provider configured (OPENROUTER_API_KEY / GOOGLE_GEMINI_API_KEY).\n' +
+      '[env] WARNING: No AI provider configured (OPENROUTER_API_KEY / GOOGLE_GEMINI_API_KEY / CHOREO_CLAUDE_API_KEY).\n' +
       '      AI analysis endpoints will return mock/fallback data.',
     );
   }
