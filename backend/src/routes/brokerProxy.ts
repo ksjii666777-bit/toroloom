@@ -57,7 +57,7 @@ const BROKER_USER_AGENTS = [
 
 router.post('/:brokerType/*', async (req: Request, res: Response) => {
   try {
-    const brokerType: string = req.params.brokerType;
+    const brokerType = req.params.brokerType as string;
     if (!isBrokerType(brokerType)) {
       res.status(400).json({ success: false, error: `Unknown broker: ${brokerType}` });
       return;
