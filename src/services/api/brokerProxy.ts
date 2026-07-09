@@ -103,32 +103,32 @@ const BROKER_ENDPOINTS: Record<string, Record<string, string>> = {
 
 export const brokerProxyApi = {
   /** Fetch portfolio holdings */
-  getHoldings: (brokerType: string) => {
+  getHoldings: (brokerType: string): Promise<ProxyResult> => {
     const ep = BROKER_ENDPOINTS[brokerType]?.holdings;
-    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
+    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, data: undefined, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
   },
 
   /** Fetch open positions */
-  getPositions: (brokerType: string) => {
+  getPositions: (brokerType: string): Promise<ProxyResult> => {
     const ep = BROKER_ENDPOINTS[brokerType]?.positions;
-    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
+    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, data: undefined, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
   },
 
   /** Fetch order book */
-  getOrders: (brokerType: string) => {
+  getOrders: (brokerType: string): Promise<ProxyResult> => {
     const ep = BROKER_ENDPOINTS[brokerType]?.orders;
-    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
+    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, data: undefined, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
   },
 
   /** Fetch trade book */
-  getTrades: (brokerType: string) => {
+  getTrades: (brokerType: string): Promise<ProxyResult> => {
     const ep = BROKER_ENDPOINTS[brokerType]?.trades;
-    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
+    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, data: undefined, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
   },
 
   /** Fetch available margin */
-  getMargins: (brokerType: string) => {
+  getMargins: (brokerType: string): Promise<ProxyResult> => {
     const ep = BROKER_ENDPOINTS[brokerType]?.margins;
-    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
+    return ep ? proxyRequest(brokerType, ep) : Promise.resolve({ success: false, data: undefined, error: `Unsupported broker: ${brokerType}`, statusCode: 400 });
   },
 };

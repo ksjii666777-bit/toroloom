@@ -40,7 +40,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SecureSessionSync from '../../components/gateway/SecureSessionSync';
 import { clearBrokerSession, hasValidSession } from '../../services/gateway/sessionStorage';
-import { getBrokerHoldings } from '../../services/gateway/proxyClient';
+import { brokerProxyApi } from '../../services/api';
 import type { SessionPayload } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -228,19 +228,15 @@ export default function ConnectBrokerView({ navigation }: any) {
     setIsTestingProxy(true);
 
     try {
-      const result = await getBrokerHoldings(connectedBroker);
+      // Route through backend proxy so endpoints can be updated server-side
+      const result = await brokerProxyApi.getHoldings(connectedBroker);
 
       const title = result.success ? '✅ Proxy Success' : '❌ Proxy Failed';
       const body = [
-        `Status: HTTP ${result.statusCode}`,
         `Broker: ${connectedBroker.toUpperCase()}`,
-        `Endpoint: /portfolio/holdings`,
-        '',
         result.success
           ? `Data: ${JSON.stringify(result.data, null, 2).slice(0, 800)}`
           : `Error: ${result.error}`,
-        '',
-        `Timestamp: ${new Date().toLocaleTimeString()}`,
       ].join('\n');
 
       Alert.alert(title, body);

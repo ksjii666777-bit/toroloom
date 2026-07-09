@@ -26,6 +26,7 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  Platform,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import Animated, {
@@ -217,7 +218,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
 
   // ── Unlink ──
   const handleUnlink = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Warning);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
       'Unlink Telegram?',
       'You will stop receiving notifications via Telegram. You can reconnect anytime.',
