@@ -43,6 +43,7 @@ import subscriptionRoutes, { webhookRouter, configureSubscriptionPersistence, se
 import pushNotificationsRoutes from './routes/pushNotifications';
 import contractNoteRoutes from './routes/contractNote';
 import fnoRoutes from './routes/fno';
+import newsRoutes from './routes/news';
 import socialRoutes from './routes/social';
 import kycRoutes from './routes/kyc';
 import twoFactorRoutes from './routes/twoFactor';
@@ -170,6 +171,9 @@ app.use('/api/kyc', writeLimiter, authMiddleware, kycRoutes);
 app.use('/api/auth/2fa', writeLimiter, authMiddleware, twoFactorRoutes);
 
 // ── Sync — 100 req / min — delta sync + conflict detection ──────────────────
+// ── News — 100 req / min ──────────────────────────────────────────
+app.use('/api/news', readLimiter, newsRoutes);
+
 app.use('/api/sync', writeLimiter, authMiddleware, syncRoutes);
 
 // ── Analytics — 200 req / min — Redis-cached endpoints ─────────────────────

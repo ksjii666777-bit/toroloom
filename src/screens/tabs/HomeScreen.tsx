@@ -23,9 +23,9 @@ import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
-import { mockNews } from '../../constants/mockData';
 import { getMockAlertRules, getMockAlertTriggers, createDefaultRule } from '../../services/ai/sentimentAlertService';
-import { mockSentimentData } from '../../constants/mockData';
+import { mockSentimentData, mockNews } from '../../constants/mockData';
+import { newsApi } from '../../services/api';
 import type { SentimentAlertRule, SentimentAlertSensitivity, SentimentAlertDirection } from '../../types';
 import { generateInitialFeedEvents, generateRandomFeedEvent, formatFeedTimestamp, getSourceIcon } from '../../services/ai/sentimentLiveFeed';
 import type { LiveFeedEvent } from '../../services/ai/sentimentLiveFeed';
@@ -141,6 +141,27 @@ export default function HomeScreen({ navigation }: any) {
   }, [searchQuery, stocks]);
 
   // ── Latest news headlines ─────────────────────────────────────
+  const [liveNews, setLiveNews] = useState(mockNews.slice(0, 4));
+  const [newsLoading, setNewsLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchNews = async () => {
+      try {
+        const result = await newsApi.getNews({ pageSize: 4 });
+        if (mounted && result.articles?.length > 0) {
+          setLiveNews(result.articles);
+        }
+      } catch {
+        // Use mock data as fallback
+      } finally {
+        if (mounted) setNewsLoading(false);
+      }
+    };
+    fetchNews();
+    return () => { mounted = false; };
+  }, []);
+
   const alertRules = useMemo(() => getMockAlertRules(), []);
   const alertTriggers = useMemo(() => getMockAlertTriggers(), []);
   const activeAlertCount = useMemo(() => alertRules.filter(r => r.enabled).length, [alertRules]);
@@ -166,7 +187,7 @@ export default function HomeScreen({ navigation }: any) {
     return () => clearInterval(interval);
   }, []);
 
-  const latestNews = useMemo(() => mockNews.slice(0, 4), []);
+  const latestNews = liveNews;
 
   const sectionCount = 14;
   const { animatedStyles: sectionStyles } = useStaggeredAnimation(sectionCount, {

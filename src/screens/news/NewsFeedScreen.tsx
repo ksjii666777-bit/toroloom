@@ -18,9 +18,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, BORDER_RADIUS} from '../../constants/theme';
-import { mockNews } from '../../constants/mockData';
 import { MarketNewsItem } from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import { newsApi } from '../../services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -508,7 +508,28 @@ export default function NewsFeedScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<NewsCategory>('all');
-  const [news, setNews] = useState<MarketNewsItem[]>(mockNews);
+  const [news, setNews] = useState<MarketNewsItem[]>([]);
+  const [isLoadingNews, setIsLoadingNews] = useState(true);
+
+  // Fetch news from backend API on mount
+  useEffect(() => {
+    let mounted = true;
+    const fetchNews = async () => {
+      setIsLoadingNews(true);
+      try {
+        const result = await newsApi.getNews({ pageSize: 30 });
+        if (mounted && result.articles) {
+          setNews(result.articles);
+        }
+      } catch {
+        // API failed — use empty state, error handled gracefully
+      } finally {
+        if (mounted) setIsLoadingNews(false);
+      }
+    };
+    fetchNews();
+    return () => { mounted = false; };
+  }, []);
   const [selectedArticle, setSelectedArticle] = useState<MarketNewsItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [showSearch, setShowSearch] = useState(false);

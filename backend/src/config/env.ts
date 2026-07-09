@@ -91,6 +91,13 @@ export const env = {
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
   razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
 
+  // ──── External API Keys ──────────────────────────────────────────────
+  /** MarketStack API key for real-time stock prices and market data */
+  marketstackKey: process.env.MARKETSTACK_KEY || '',
+
+  /** NewsAPI.org key for financial news articles */
+  newsApiKey: process.env.NEWSAPI_KEY || '',
+
   // ──── Error Tracking ─────────────────────────────────────────────────
   sentryDsn: process.env.SENTRY_DSN || '',
 
