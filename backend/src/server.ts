@@ -50,6 +50,7 @@ import fnoRoutes from './routes/fno';
 import newsRoutes from './routes/news';
 import telegramRoutes from './routes/telegram';
 import brokerProxyRoutes from './routes/brokerProxy';
+import angelConnectRoutes from './routes/angelConnect';
 import socialRoutes from './routes/social';
 import kycRoutes from './routes/kyc';
 import twoFactorRoutes from './routes/twoFactor';
@@ -184,6 +185,9 @@ app.use('/api/telegram', writeLimiter, telegramRoutes);
 
 // ── Broker Proxy — 100 req / min (auth required) ────────────────────
 app.use('/api/broker-proxy', writeLimiter, brokerProxyRoutes);
+
+// ── Angel One SmartAPI (per-user) — 50 req / min ────────────────────
+app.use('/api/angel', writeLimiter, angelConnectRoutes);
 
 app.use('/api/sync', writeLimiter, authMiddleware, syncRoutes);
 

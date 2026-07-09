@@ -14,3 +14,4 @@ export { fnoApi } from './fno';
 export { newsApi } from './news';
 export { telegramApi } from './telegram';
 export { brokerProxyApi } from './brokerProxy';
+export { angelConnectApi } from './angelConnect';

@@ -100,6 +100,9 @@ export const env = {
   /** Telegram Bot Token for sending trading alerts to users */
   telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || '',
 
+  /** Angel One SmartAPI developer API key (server-level, free from smartapi.angelbroking.com) */
+  angelSmartApiKey: process.env.ANGEL_SMARTAPI_KEY || '',
+
   /** MarketStack API key for real-time stock prices and market data */
   marketstackKey: process.env.MARKETSTACK_KEY || '',
 
