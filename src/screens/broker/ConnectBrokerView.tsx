@@ -29,7 +29,6 @@ import {
   Dimensions,
   Alert,
   ActivityIndicator,
-  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,7 +40,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SecureSessionSync from '../../components/gateway/SecureSessionSync';
 import { clearBrokerSession, hasValidSession } from '../../services/gateway/sessionStorage';
-import { brokerProxyApi, angelConnectApi } from '../../services/api';
+import { brokerProxyApi } from '../../services/api';
 import type { SessionPayload } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -119,18 +118,6 @@ export default function ConnectBrokerView({ navigation }: any) {
   const [showSessionSync, setShowSessionSync] = useState(false);
   const [sessionSyncUrl, setSessionSyncUrl] = useState('');
 
-  // Angel One SmartAPI states
-  const [showAngelOptions, setShowAngelOptions] = useState(false);
-  const [showSmartApiForm, setShowSmartApiForm] = useState(false);
-  const [smartApiClientId, setSmartApiClientId] = useState('');
-  const [smartApiPassword, setSmartApiPassword] = useState('');
-  const [smartApiTotp, setSmartApiTotp] = useState('');
-  const [isConnectingSmartApi, setIsConnectingSmartApi] = useState(false);
-  // No separate state variables needed — connectedBroker + showSuccess handle all UI states
-
-  // Credential form state removed — Zero-API Gateway only (see SECURE-SESSION-SYNC.md)
-  // All broker connections are handled exclusively via SecureSessionSync WebView extraction.
-
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -167,8 +154,6 @@ export default function ConnectBrokerView({ navigation }: any) {
     }
   };
 
-  // Credentials modal removed per MANDATE 1 — Zero-API Hybrid Gateway only
-
   // ── Show Connected Success Overlay ──────────────────────────
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -188,11 +173,10 @@ export default function ConnectBrokerView({ navigation }: any) {
     };
   }, []);
 
-  // Manual credential connection removed per MANDATE 1 — Zero-API Gateway only
-
   // ── Open Session Sync (Zero-API Gateway) ────────────────────
   const openSessionSync = useCallback(
     (broker: BrokerMeta) => {
+      setSelectedBroker(broker);
       triggerHaptic(ImpactFeedbackStyle.Medium);
 
       // Map broker to their production login URL for session extraction
@@ -213,67 +197,6 @@ export default function ConnectBrokerView({ navigation }: any) {
     },
     [],
   );
-
-  // ── Open Broker Selection ───────────────────────────────────
-  const openBrokerSelection = useCallback(
-    (broker: BrokerMeta) => {
-      setSelectedBroker(broker);
-      triggerHaptic(ImpactFeedbackStyle.Medium);
-
-      // Angel One has TWO connection methods: SmartAPI (official) + Zero-API
-      if (broker.type === 'angel') {
-        setShowAngelOptions(true);
-      } else {
-        // Other brokers: direct Zero-API sync
-        openSessionSync(broker);
-      }
-    },
-    [openSessionSync],
-  );
-
-  // ── Angel One SmartAPI Connect ──────────────────────────────
-  const handleSmartApiConnect = useCallback(async () => {
-    if (!smartApiClientId.trim() || !smartApiPassword.trim() || !smartApiTotp.trim()) {
-      Alert.alert('Required Fields', 'Please fill in all fields: Client ID, Password, and TOTP Secret.');
-      return;
-    }
-
-    setIsConnectingSmartApi(true);
-
-    try {
-      const result = await angelConnectApi.connect(
-        smartApiClientId.trim(),
-        smartApiPassword,
-        smartApiTotp.trim(),
-      );
-
-      if (result.success) {
-        setShowSmartApiForm(false);
-        setConnectedBroker('angel');
-        setConnectedLabel('Angel One (SmartAPI)');
-        showConnectedSuccess();
-      }
-    } catch (err: any) {
-      Alert.alert('Connection Failed', err.message || 'Failed to connect Angel One. Check your credentials.');
-    } finally {
-      setIsConnectingSmartApi(false);
-    }
-  }, [smartApiClientId, smartApiPassword, smartApiTotp, showConnectedSuccess]);
-
-  // ── Check Angel SmartAPI Status on mount ────────────────────
-  useEffect(() => {
-    (async () => {
-      try {
-        const status = await angelConnectApi.status();
-        if (status.connected) {
-          setConnectedBroker('angel');
-          setConnectedLabel('Angel One (SmartAPI)');
-        }
-      } catch {
-        // Not connected — fine
-      }
-    })();
-  }, []);
 
   // ── Handle Session Captured ─────────────────────────────────
   const handleSessionCaptured = useCallback(
@@ -455,7 +378,7 @@ export default function ConnectBrokerView({ navigation }: any) {
                     if (isConnected) {
                       handleDisconnect(broker.type);
                     } else {
-                      openBrokerSelection(broker);
+                      openSessionSync(broker);
                     }
                   }}
                 >
@@ -545,206 +468,6 @@ export default function ConnectBrokerView({ navigation }: any) {
 
         <View style={{ height: 60 }} />
       </ScrollView>
-
-      {/* ── Angel One Selection Modal ───────────────────────── */}
-      <Modal
-        visible={showAngelOptions}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowAngelOptions(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <Animated.View style={[styles.angelOptionsContainer, { opacity: fadeAnim }]}>
-            <Text style={styles.angelOptionsTitle}>Connect Angel One</Text>
-            <Text style={styles.angelOptionsSubtitle}>Choose your connection method</Text>
-
-            {/* SmartAPI Option */}
-            <TouchableOpacity
-              style={[styles.angelOptionCard, { backgroundColor: 'rgba(255,107,0,0.1)', borderColor: 'rgba(255,107,0,0.3)' }]}
-              onPress={() => {
-                setShowAngelOptions(false);
-                setShowSmartApiForm(true);
-              }}
-            >
-              <View style={styles.angelOptionRow}>
-                <View style={[styles.angelOptionIcon, { backgroundColor: 'rgba(255,107,0,0.2)' }]}>
-                  <Ionicons name="code-slash" size={22} color="#FF6B00" />
-                </View>
-                <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.angelOptionTitle}>SmartAPI (Official)</Text>
-                  <Text style={styles.angelOptionDesc}>
-                    Use official Angel One SmartAPI. Most reliable — real holdings, positions & trades.
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.angelOptionBadgeRow}>
-                <View style={[styles.angelOptionBadge, { backgroundColor: 'rgba(16,185,129,0.2)' }]}>
-                  <Text style={[styles.angelOptionBadgeText, { color: '#10B981' }]}>✅ Most Reliable</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            {/* Zero-API Option */}
-            <TouchableOpacity
-              style={[styles.angelOptionCard, { backgroundColor: 'rgba(0,242,254,0.06)', borderColor: 'rgba(0,242,254,0.2)' }]}
-              onPress={() => {
-                setShowAngelOptions(false);
-                if (selectedBroker) openSessionSync(selectedBroker);
-              }}
-            >
-              <View style={styles.angelOptionRow}>
-                <View style={[styles.angelOptionIcon, { backgroundColor: 'rgba(0,242,254,0.12)' }]}>
-                  <Ionicons name="wifi" size={22} color="#00F2FE" />
-                </View>
-                <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.angelOptionTitle}>Zero-API Sync</Text>
-                  <Text style={styles.angelOptionDesc}>
-                    No credentials needed. Login via WebView — session auto-extracted.
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.angelOptionBadgeRow}>
-                <View style={[styles.angelOptionBadge, { backgroundColor: 'rgba(0,242,254,0.12)' }]}>
-                  <Text style={[styles.angelOptionBadgeText, { color: '#00F2FE' }]}>🔒 No Credentials</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setShowAngelOptions(false)}
-              style={styles.angelOptionCancel}
-            >
-              <Text style={styles.angelOptionCancelText}>Cancel</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      </Modal>
-
-      {/* ── Angel One SmartAPI Credential Form Modal ──────────── */}
-      <Modal
-        visible={showSmartApiForm}
-        animationType="slide"
-        onRequestClose={() => setShowSmartApiForm(false)}
-      >
-        <View style={[styles.webViewContainer, { backgroundColor: MIDNIGHT_BG }]}>
-          <View
-            style={[
-              styles.webViewHeader,
-              {
-                backgroundColor: MIDNIGHT_BG,
-                paddingTop: 60 + insets.top,
-                borderBottomWidth: 1,
-                borderBottomColor: GLASS_BORDER,
-              },
-            ]}
-          >
-            <TouchableOpacity onPress={() => setShowSmartApiForm(false)} style={styles.webViewBack}>
-              <Ionicons name="close" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-            <Text style={styles.webViewTitle}>Angel One SmartAPI</Text>
-            <View style={{ width: 24 }} />
-          </View>
-
-          <ScrollView contentContainerStyle={styles.smartApiFormContent}>
-            <View style={styles.smartApiFormHeader}>
-              <View style={[styles.smartApiIconCircle, { backgroundColor: 'rgba(255,107,0,0.15)' }]}>
-                <Ionicons name="code-slash" size={32} color="#FF6B00" />
-              </View>
-              <Text style={styles.smartApiFormTitle}>Connect Angel One</Text>
-              <Text style={styles.smartApiFormSubtitle}>
-                Enter your Angel One SmartAPI credentials. These are sent securely to our server
-                and used only to fetch your portfolio data.
-              </Text>
-            </View>
-
-            {/* Client ID */}
-            <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>Client ID</Text>
-              <View style={[styles.smartApiInputContainer, smartApiClientId ? styles.smartApiInputFocused : null]}>
-                <Ionicons name="person-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
-                <TextInput
-                  style={styles.smartApiInput}
-                  placeholder="Your Angel One client code"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={smartApiClientId}
-                  onChangeText={setSmartApiClientId}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                />
-              </View>
-            </View>
-
-            {/* Password */}
-            <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>Password</Text>
-              <View style={[styles.smartApiInputContainer, smartApiPassword ? styles.smartApiInputFocused : null]}>
-                <Ionicons name="lock-closed-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
-                <TextInput
-                  style={styles.smartApiInput}
-                  placeholder="Your Angel One trading password"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={smartApiPassword}
-                  onChangeText={setSmartApiPassword}
-                  secureTextEntry
-                  autoCorrect={false}
-                />
-              </View>
-            </View>
-
-            {/* TOTP Secret */}
-            <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>TOTP Secret</Text>
-              <View style={[styles.smartApiInputContainer, smartApiTotp ? styles.smartApiInputFocused : null]}>
-                <Ionicons name="key-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
-                <TextInput
-                  style={styles.smartApiInput}
-                  placeholder="Base32 secret from SmartAPI portal"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={smartApiTotp}
-                  onChangeText={setSmartApiTotp}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                />
-              </View>
-              <Text style={styles.smartApiFieldHint}>
-                Get this from smartapi.angelbroking.com → My Profile → TOTP Secret
-              </Text>
-            </View>
-
-            {/* Connect Button */}
-            <TouchableOpacity
-              style={[
-                styles.smartApiConnectBtn,
-                isConnectingSmartApi && { opacity: 0.7 },
-              ]}
-              onPress={handleSmartApiConnect}
-              disabled={isConnectingSmartApi}
-            >
-              <LinearGradient
-                colors={['#FF6B00', '#CC5500']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.smartApiConnectGradient}
-              >
-                {isConnectingSmartApi ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={styles.smartApiConnectText}>Connect to Angel One</Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-
-            {/* Info Card */}
-            <View style={styles.smartApiInfoCard}>
-              <Ionicons name="information-circle-outline" size={18} color="rgba(255,255,255,0.4)" />
-              <Text style={styles.smartApiInfoText}>
-                Your credentials are used only to authenticate with Angel One SmartAPI and are
-                never stored permanently. Session expires after 30 minutes of inactivity.
-              </Text>
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
 
       {/* ── Session Sync WebView Modal ──────────────────────── */}
       <Modal
@@ -1105,192 +828,5 @@ const createStyles = (_colors: any) =>
       color: 'rgba(255,255,255,0.6)',
       textAlign: 'center',
       paddingHorizontal: 40,
-    },
-
-    // ── Angel Options Modal ────────────────────────────────────
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(7,8,11,0.85)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: SPACING.xl,
-    },
-    angelOptionsContainer: {
-      width: '100%',
-      backgroundColor: '#0D0E12',
-      borderRadius: BORDER_RADIUS.xl,
-      borderWidth: 1,
-      borderColor: GLASS_BORDER,
-      padding: SPACING.xl,
-      maxWidth: 400,
-    },
-    angelOptionsTitle: {
-      ...FONTS.bold,
-      fontSize: FONTS.size.xl,
-      color: '#FFFFFF',
-      textAlign: 'center',
-      marginBottom: 4,
-    },
-    angelOptionsSubtitle: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.5)',
-      textAlign: 'center',
-      marginBottom: SPACING.xl,
-    },
-    angelOptionCard: {
-      borderRadius: BORDER_RADIUS.lg,
-      borderWidth: 1,
-      padding: SPACING.lg,
-      marginBottom: SPACING.md,
-    },
-    angelOptionRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-    },
-    angelOptionIcon: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    angelOptionTitle: {
-      ...FONTS.semiBold,
-      fontSize: FONTS.size.md,
-      color: '#FFFFFF',
-      marginBottom: 2,
-    },
-    angelOptionDesc: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.xs,
-      color: 'rgba(255,255,255,0.5)',
-      lineHeight: 16,
-    },
-    angelOptionBadgeRow: {
-      flexDirection: 'row',
-      marginTop: SPACING.sm,
-      marginLeft: 52,
-    },
-    angelOptionBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: BORDER_RADIUS.full,
-    },
-    angelOptionBadgeText: {
-      fontSize: 10,
-      fontWeight: '700',
-    },
-    angelOptionCancel: {
-      alignItems: 'center',
-      marginTop: SPACING.sm,
-      paddingVertical: SPACING.sm,
-    },
-    angelOptionCancelText: {
-      ...FONTS.medium,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.4)',
-    },
-
-    // ── SmartAPI Form ──────────────────────────────────────────
-    smartApiFormContent: {
-      padding: SPACING.xl,
-      paddingBottom: 60,
-    },
-    smartApiFormHeader: {
-      alignItems: 'center',
-      marginBottom: SPACING.xl,
-      marginTop: SPACING.lg,
-    },
-    smartApiIconCircle: {
-      width: 64,
-      height: 64,
-      borderRadius: 20,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: SPACING.md,
-    },
-    smartApiFormTitle: {
-      ...FONTS.bold,
-      fontSize: FONTS.size.xl,
-      color: '#FFFFFF',
-      marginBottom: 4,
-    },
-    smartApiFormSubtitle: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.5)',
-      textAlign: 'center',
-      lineHeight: 18,
-      paddingHorizontal: SPACING.md,
-    },
-    smartApiFieldGroup: {
-      marginBottom: SPACING.lg,
-    },
-    smartApiFieldLabel: {
-      ...FONTS.medium,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.7)',
-      marginBottom: SPACING.xs,
-    },
-    smartApiInputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: GLASS_WHITE,
-      borderWidth: 1,
-      borderColor: GLASS_BORDER,
-      borderRadius: BORDER_RADIUS.md,
-      paddingHorizontal: SPACING.md,
-      height: 48,
-    },
-    smartApiInputFocused: {
-      borderColor: '#FF6B00',
-      borderWidth: 1.5,
-    },
-    smartApiInput: {
-      flex: 1,
-      color: '#FFFFFF',
-      fontSize: FONTS.size.md,
-      height: 48,
-    },
-    smartApiFieldHint: {
-      ...FONTS.regular,
-      fontSize: 10,
-      color: 'rgba(255,255,255,0.3)',
-      marginTop: 4,
-      paddingLeft: 2,
-    },
-    smartApiConnectBtn: {
-      borderRadius: BORDER_RADIUS.lg,
-      overflow: 'hidden',
-      marginTop: SPACING.sm,
-      marginBottom: SPACING.lg,
-    },
-    smartApiConnectGradient: {
-      paddingVertical: 16,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    smartApiConnectText: {
-      ...FONTS.bold,
-      fontSize: FONTS.size.md,
-      color: '#FFFFFF',
-    },
-    smartApiInfoCard: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: 8,
-      backgroundColor: GLASS_WHITE,
-      borderWidth: 1,
-      borderColor: GLASS_BORDER,
-      borderRadius: BORDER_RADIUS.md,
-      padding: SPACING.md,
-    },
-    smartApiInfoText: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.xs,
-      color: 'rgba(255,255,255,0.4)',
-      flex: 1,
-      lineHeight: 15,
     },
   });
