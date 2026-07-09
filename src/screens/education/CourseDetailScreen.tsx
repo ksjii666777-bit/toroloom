@@ -54,14 +54,17 @@ export default function CourseDetailScreen({ route, navigation }: any) {
     addXp(50); // Reward XP for completing a lesson
   };
 
+  const { certificates } = useEducationStore();
   const nextIncomplete = lessons.find(l => !(lessonProgress[l.id] || l.completed));
+  const allLessonsComplete = !nextIncomplete && completedCount === course.lessons;
+  const certificate = certificates.find(c => c.courseId === courseId);
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Back Button */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
@@ -199,6 +202,21 @@ export default function CourseDetailScreen({ route, navigation }: any) {
               <Ionicons name="play" size={20} color={colors.white} />
               <Text style={styles.continueText}>
                 {completedCount === 0 ? 'Start Course' : 'Continue Learning'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        {/* Certificate Button — shown when all lessons complete */}
+        {allLessonsComplete && (
+          <TouchableOpacity
+            style={[styles.continueBtn, { marginTop: SPACING.sm }]}
+            onPress={() => navigation.navigate('Certificate', { courseId })}
+          >
+            <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
+              <Ionicons name={certificate ? 'ribbon' : 'ribbon-outline'} size={20} color={colors.white} />
+              <Text style={styles.continueText}>
+                {certificate ? 'View Certificate' : '🎓 Get Certificate'}
               </Text>
             </LinearGradient>
           </TouchableOpacity>

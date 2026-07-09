@@ -1,0 +1,7691 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing search 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#0D1117",
+        "flex": 1,
+      },
+      {
+        "paddingTop": 0,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "paddingBottom": 8,
+        "paddingHorizontal": 20,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+          "marginBottom": 12,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#1A1F2E",
+            "borderRadius": 12,
+            "height": 40,
+            "justifyContent": "center",
+            "width": 40,
+          }
+        }
+      >
+        <IonIonicons
+          color="#FFFFFF"
+          name="arrow-back"
+          size={24}
+        />
+      </TouchableOpacity>
+      <View
+        style={
+          {
+            "flex": 1,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 20,
+                "fontWeight": "800",
+              },
+              {
+                "color": "#FFFFFF",
+              },
+            ]
+          }
+        >
+          Live Sentiment Feed
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "fontSize": 11,
+                "fontWeight": "500",
+                "marginTop": 1,
+              },
+              {
+                "color": "#6B728E",
+              },
+            ]
+          }
+        >
+          8
+           events · 
+          5
+           ↑ 
+          3
+           ↓
+        </Text>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 12,
+            "padding": 12,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 8,
+            "marginBottom": 4,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 5,
+            }
+          }
+        >
+          <IonIonicons
+            color="#6B728E"
+            name="pulse"
+            size={14}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 0.3,
+                  "textTransform": "uppercase",
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Frequency
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#8B5CF615",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 9,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#8B5CF6",
+                },
+              ]
+            }
+          >
+            Peak 
+            8
+            /bucket
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#8B5CF615",
+              "borderRadius": 999,
+              "marginLeft": "auto",
+              "paddingHorizontal": 5,
+              "paddingVertical": 1,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 9,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            8
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 4,
+              "marginLeft": 4,
+            }
+          }
+        >
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "#8B5CF6",
+                  "borderColor": "#8B5CF6",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#FFFFFF",
+                    },
+                  ]
+                }
+              >
+                All
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                5m
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                15m
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                1h
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "marginLeft": 6,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "backgroundColor": "#10B981",
+                "borderRadius": 1,
+                "height": 6,
+                "opacity": 0.7,
+                "width": 6,
+              }
+            }
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 8,
+                  "fontWeight": "500",
+                  "marginLeft": 3,
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            Up
+          </Text>
+          <View
+            style={
+              {
+                "width": 8,
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "backgroundColor": "#EF4444",
+                "borderRadius": 1,
+                "height": 6,
+                "opacity": 0.7,
+                "width": 6,
+              }
+            }
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 8,
+                  "fontWeight": "500",
+                  "marginLeft": 3,
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            Dn
+          </Text>
+        </View>
+      </View>
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={112}
+        y2={112}
+      />
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={64}
+        y2={64}
+      />
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={16}
+        y2={16}
+      />
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={115}
+      >
+        0
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={67}
+      >
+        4
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={19}
+      >
+        8
+      </SvgText>
+      <G>
+        <Rect
+          fill="#EF4444"
+          height={36}
+          opacity={0.7}
+          rx={1}
+          width={28.8}
+          x={26}
+          y={76}
+        />
+        <Rect
+          fill="#10B981"
+          height={60}
+          opacity={0.7}
+          rx={1}
+          width={28.8}
+          x={26}
+          y={16}
+        />
+      </G>
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={40.4}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={135.8}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={231.20000000000002}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={326.59999999999997}
+        y={127}
+      >
+        17:29
+      </SvgText>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "marginBottom": 12,
+            "paddingHorizontal": 12,
+            "paddingVertical": 8,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+          },
+        ]
+      }
+    >
+      <IonIonicons
+        color="#6B728E"
+        name="search"
+        size={16}
+      />
+      <TextInput
+        onChangeText={[Function]}
+        placeholder="Search by symbol, name, or message..."
+        placeholderTextColor="#6B728E"
+        ref={
+          {
+            "current": null,
+          }
+        }
+        returnKeyType="search"
+        style={
+          [
+            {
+              "flex": 1,
+              "fontSize": 13,
+              "fontWeight": "500",
+              "marginLeft": 8,
+              "paddingVertical": 2,
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+        value=""
+      />
+    </View>
+    <ScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+      style={
+        {
+          "marginBottom": 8,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#8B5CF620",
+              "borderColor": "#8B5CF6",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#8B5CF6"
+          name="pulse"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#8B5CF6",
+              },
+            ]
+          }
+        >
+          All
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="newspaper"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          News
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="chatbubbles"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Social
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="analytics"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Analyst
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="bulb"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          AI
+        </Text>
+      </TouchableOpacity>
+    </ScrollView>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "gap": 8,
+          "marginBottom": 8,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#8B5CF620",
+              "borderColor": "#8B5CF6",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#8B5CF6"
+          name="swap-vertical"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#8B5CF6",
+              },
+            ]
+          }
+        >
+          All
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="trending-up"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Up
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="trending-down"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Down
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+  <ScrollView
+    contentContainerStyle={
+      {
+        "paddingHorizontal": 20,
+        "paddingTop": 12,
+      }
+    }
+    showsVerticalScrollIndicator={false}
+  >
+    <RefreshControl
+      colors={
+        [
+          "#3B82F6",
+        ]
+      }
+      onRefresh={[Function]}
+      progressBackgroundColor="#161B2A"
+      refreshing={false}
+      tintColor="#3B82F6"
+    />
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              RELIANCE
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#3B82F618",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#3B82F6"
+            name="newspaper"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#3B82F6",
+                },
+              ]
+            }
+          >
+            News
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            55
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#EF4444",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#EF444415",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="trending-down"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              TCS
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#EF4444",
+                  },
+                ]
+              }
+            >
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            TCS sentiment slipping on social chatter
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#10B98118",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="chatbubbles"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Social
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#EF444412",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            Score: 
+            -20
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              HDFCBANK
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#F59E0B18",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#F59E0B"
+            name="analytics"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#F59E0B",
+                },
+              ]
+            }
+          >
+            Analyst
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            30
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#EF4444",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#EF444415",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="trending-down"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              INFY
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#EF4444",
+                  },
+                ]
+              }
+            >
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            INFY showing bearish pressure, down 8pts
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#EF444418",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="bulb"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            AI
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#EF444412",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            Score: 
+            -10
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              ICICIBANK
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#3B82F618",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#3B82F6"
+            name="newspaper"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#3B82F6",
+                },
+              ]
+            }
+          >
+            News
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            40
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              SBIN
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#10B98118",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="chatbubbles"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Social
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            25
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#EF4444",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#EF444415",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="trending-down"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              RELIANCE
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#EF4444",
+                  },
+                ]
+              }
+            >
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#F59E0B18",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#F59E0B"
+            name="analytics"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#F59E0B",
+                },
+              ]
+            }
+          >
+            Analyst
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#EF444412",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            Score: 
+            -15
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              TCS
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#EF444418",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="bulb"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            AI
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            35
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "height": 40,
+        }
+      }
+    />
+  </ScrollView>
+</View>
+`;
+
+exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#0D1117",
+        "flex": 1,
+      },
+      {
+        "paddingTop": 0,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "paddingBottom": 8,
+        "paddingHorizontal": 20,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+          "marginBottom": 12,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#1A1F2E",
+            "borderRadius": 12,
+            "height": 40,
+            "justifyContent": "center",
+            "width": 40,
+          }
+        }
+      >
+        <IonIonicons
+          color="#FFFFFF"
+          name="arrow-back"
+          size={24}
+        />
+      </TouchableOpacity>
+      <View
+        style={
+          {
+            "flex": 1,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 20,
+                "fontWeight": "800",
+              },
+              {
+                "color": "#FFFFFF",
+              },
+            ]
+          }
+        >
+          Live Sentiment Feed
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "fontSize": 11,
+                "fontWeight": "500",
+                "marginTop": 1,
+              },
+              {
+                "color": "#6B728E",
+              },
+            ]
+          }
+        >
+          8
+           events · 
+          5
+           ↑ 
+          3
+           ↓
+        </Text>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 12,
+            "padding": 12,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 8,
+            "marginBottom": 4,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 5,
+            }
+          }
+        >
+          <IonIonicons
+            color="#6B728E"
+            name="pulse"
+            size={14}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 0.3,
+                  "textTransform": "uppercase",
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Frequency
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#8B5CF615",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 9,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#8B5CF6",
+                },
+              ]
+            }
+          >
+            Peak 
+            8
+            /bucket
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#8B5CF615",
+              "borderRadius": 999,
+              "marginLeft": "auto",
+              "paddingHorizontal": 5,
+              "paddingVertical": 1,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 9,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            8
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 4,
+              "marginLeft": 4,
+            }
+          }
+        >
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "#8B5CF6",
+                  "borderColor": "#8B5CF6",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#FFFFFF",
+                    },
+                  ]
+                }
+              >
+                All
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                5m
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                15m
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                1h
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "marginLeft": 6,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "backgroundColor": "#10B981",
+                "borderRadius": 1,
+                "height": 6,
+                "opacity": 0.7,
+                "width": 6,
+              }
+            }
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 8,
+                  "fontWeight": "500",
+                  "marginLeft": 3,
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            Up
+          </Text>
+          <View
+            style={
+              {
+                "width": 8,
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "backgroundColor": "#EF4444",
+                "borderRadius": 1,
+                "height": 6,
+                "opacity": 0.7,
+                "width": 6,
+              }
+            }
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 8,
+                  "fontWeight": "500",
+                  "marginLeft": 3,
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            Dn
+          </Text>
+        </View>
+      </View>
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={112}
+        y2={112}
+      />
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={64}
+        y2={64}
+      />
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={16}
+        y2={16}
+      />
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={115}
+      >
+        0
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={67}
+      >
+        4
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={19}
+      >
+        8
+      </SvgText>
+      <G>
+        <Rect
+          fill="#EF4444"
+          height={36}
+          opacity={0.7}
+          rx={1}
+          width={28.8}
+          x={26}
+          y={76}
+        />
+        <Rect
+          fill="#10B981"
+          height={60}
+          opacity={0.7}
+          rx={1}
+          width={28.8}
+          x={26}
+          y={16}
+        />
+      </G>
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={40.4}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={135.8}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={231.20000000000002}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={326.59999999999997}
+        y={127}
+      >
+        17:29
+      </SvgText>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "marginBottom": 12,
+            "paddingHorizontal": 12,
+            "paddingVertical": 8,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+          },
+        ]
+      }
+    >
+      <IonIonicons
+        color="#6B728E"
+        name="search"
+        size={16}
+      />
+      <TextInput
+        onChangeText={[Function]}
+        placeholder="Search by symbol, name, or message..."
+        placeholderTextColor="#6B728E"
+        ref={
+          {
+            "current": null,
+          }
+        }
+        returnKeyType="search"
+        style={
+          [
+            {
+              "flex": 1,
+              "fontSize": 13,
+              "fontWeight": "500",
+              "marginLeft": 8,
+              "paddingVertical": 2,
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+        value=""
+      />
+    </View>
+    <ScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+      style={
+        {
+          "marginBottom": 8,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#8B5CF620",
+              "borderColor": "#8B5CF6",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#8B5CF6"
+          name="pulse"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#8B5CF6",
+              },
+            ]
+          }
+        >
+          All
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="newspaper"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          News
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="chatbubbles"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Social
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="analytics"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Analyst
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="bulb"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          AI
+        </Text>
+      </TouchableOpacity>
+    </ScrollView>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "gap": 8,
+          "marginBottom": 8,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#8B5CF620",
+              "borderColor": "#8B5CF6",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#8B5CF6"
+          name="swap-vertical"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#8B5CF6",
+              },
+            ]
+          }
+        >
+          All
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="trending-up"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Up
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="trending-down"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Down
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+  <ScrollView
+    contentContainerStyle={
+      {
+        "paddingHorizontal": 20,
+        "paddingTop": 12,
+      }
+    }
+    showsVerticalScrollIndicator={false}
+  >
+    <RefreshControl
+      colors={
+        [
+          "#3B82F6",
+        ]
+      }
+      onRefresh={[Function]}
+      progressBackgroundColor="#161B2A"
+      refreshing={false}
+      tintColor="#3B82F6"
+    />
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              RELIANCE
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#3B82F618",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#3B82F6"
+            name="newspaper"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#3B82F6",
+                },
+              ]
+            }
+          >
+            News
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            55
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#EF4444",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#EF444415",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="trending-down"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              TCS
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#EF4444",
+                  },
+                ]
+              }
+            >
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            TCS sentiment slipping on social chatter
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#10B98118",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="chatbubbles"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Social
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#EF444412",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            Score: 
+            -20
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              HDFCBANK
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#F59E0B18",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#F59E0B"
+            name="analytics"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#F59E0B",
+                },
+              ]
+            }
+          >
+            Analyst
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            30
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#EF4444",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#EF444415",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="trending-down"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              INFY
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#EF4444",
+                  },
+                ]
+              }
+            >
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            INFY showing bearish pressure, down 8pts
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#EF444418",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="bulb"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            AI
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#EF444412",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            Score: 
+            -10
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              ICICIBANK
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#3B82F618",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#3B82F6"
+            name="newspaper"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#3B82F6",
+                },
+              ]
+            }
+          >
+            News
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            40
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              SBIN
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#10B98118",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="chatbubbles"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Social
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            25
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#EF4444",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#EF444415",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="trending-down"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              RELIANCE
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#EF4444",
+                  },
+                ]
+              }
+            >
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#F59E0B18",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#F59E0B"
+            name="analytics"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#F59E0B",
+                },
+              ]
+            }
+          >
+            Analyst
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#EF444412",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            Score: 
+            -15
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#10B981",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#10B98115",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#10B981"
+            name="trending-up"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              TCS
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#10B981",
+                  },
+                ]
+              }
+            >
+              +
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Reliance Industries Ltd. sentiment rising 12pts on news buzz
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#EF444418",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="bulb"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            AI
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#10B98112",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#10B981",
+                },
+              ]
+            }
+          >
+            Score: 
+            +
+            35
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "height": 40,
+        }
+      }
+    />
+  </ScrollView>
+</View>
+`;
+
+exports[`LiveFeedScreen - search snapshots > matches snapshot with search query typed 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#0D1117",
+        "flex": 1,
+      },
+      {
+        "paddingTop": 0,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "paddingBottom": 8,
+        "paddingHorizontal": 20,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+          "marginBottom": 12,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#1A1F2E",
+            "borderRadius": 12,
+            "height": 40,
+            "justifyContent": "center",
+            "width": 40,
+          }
+        }
+      >
+        <IonIonicons
+          color="#FFFFFF"
+          name="arrow-back"
+          size={24}
+        />
+      </TouchableOpacity>
+      <View
+        style={
+          {
+            "flex": 1,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 20,
+                "fontWeight": "800",
+              },
+              {
+                "color": "#FFFFFF",
+              },
+            ]
+          }
+        >
+          Live Sentiment Feed
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "fontSize": 11,
+                "fontWeight": "500",
+                "marginTop": 1,
+              },
+              {
+                "color": "#6B728E",
+              },
+            ]
+          }
+        >
+          1
+           events · 
+          0
+           ↑ 
+          1
+           ↓
+        </Text>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 12,
+            "padding": 12,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 8,
+            "marginBottom": 4,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 5,
+            }
+          }
+        >
+          <IonIonicons
+            color="#6B728E"
+            name="pulse"
+            size={14}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 11,
+                  "fontWeight": "600",
+                  "letterSpacing": 0.3,
+                  "textTransform": "uppercase",
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            Frequency
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#8B5CF615",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 9,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#8B5CF6",
+                },
+              ]
+            }
+          >
+            Peak 
+            8
+            /bucket
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#8B5CF615",
+              "borderRadius": 999,
+              "marginLeft": "auto",
+              "paddingHorizontal": 5,
+              "paddingVertical": 1,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 9,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            8
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 4,
+              "marginLeft": 4,
+            }
+          }
+        >
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "#8B5CF6",
+                  "borderColor": "#8B5CF6",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#FFFFFF",
+                    },
+                  ]
+                }
+              >
+                All
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                5m
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                15m
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={[Function]}
+            onPressIn={[Function]}
+            onPressOut={[Function]}
+            style={
+              [
+                {
+                  "borderRadius": 999,
+                  "borderWidth": 1,
+                  "paddingHorizontal": 6,
+                  "paddingVertical": 2,
+                },
+                {
+                  "backgroundColor": "transparent",
+                  "borderColor": "#2A3042",
+                },
+              ]
+            }
+          >
+            <Animated.View
+              style={
+                {
+                  "transform": [
+                    {
+                      "scale": AnimatedValue {
+                        "_listeners": [],
+                        "_value": 1,
+                      },
+                    },
+                  ],
+                }
+              }
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 9,
+                      "fontWeight": "600",
+                    },
+                    {
+                      "color": "#6B728E",
+                    },
+                  ]
+                }
+              >
+                1h
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "marginLeft": 6,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "backgroundColor": "#10B981",
+                "borderRadius": 1,
+                "height": 6,
+                "opacity": 0.7,
+                "width": 6,
+              }
+            }
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 8,
+                  "fontWeight": "500",
+                  "marginLeft": 3,
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            Up
+          </Text>
+          <View
+            style={
+              {
+                "width": 8,
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "backgroundColor": "#EF4444",
+                "borderRadius": 1,
+                "height": 6,
+                "opacity": 0.7,
+                "width": 6,
+              }
+            }
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 8,
+                  "fontWeight": "500",
+                  "marginLeft": 3,
+                },
+                {
+                  "color": "#6B728E",
+                },
+              ]
+            }
+          >
+            Dn
+          </Text>
+        </View>
+      </View>
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={112}
+        y2={112}
+      />
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={64}
+        y2={64}
+      />
+      <Line
+        strokeDasharray="3,3"
+        strokeWidth={0.5}
+        x1={26}
+        x2={344}
+        y1={16}
+        y2={16}
+      />
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={115}
+      >
+        0
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={67}
+      >
+        4
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={9}
+        textAnchor="end"
+        x={21}
+        y={19}
+      >
+        8
+      </SvgText>
+      <G>
+        <Rect
+          fill="#EF4444"
+          height={36}
+          opacity={0.7}
+          rx={1}
+          width={28.8}
+          x={26}
+          y={76}
+        />
+        <Rect
+          fill="#10B981"
+          height={60}
+          opacity={0.7}
+          rx={1}
+          width={28.8}
+          x={26}
+          y={16}
+        />
+      </G>
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <G />
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={40.4}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={135.8}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={231.20000000000002}
+        y={127}
+      >
+        17:29
+      </SvgText>
+      <SvgText
+        fill="#6B728E"
+        fontFamily="System"
+        fontSize={8}
+        textAnchor="middle"
+        x={326.59999999999997}
+        y={127}
+      >
+        17:29
+      </SvgText>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "marginBottom": 12,
+            "paddingHorizontal": 12,
+            "paddingVertical": 8,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+          },
+        ]
+      }
+    >
+      <IonIonicons
+        color="#6B728E"
+        name="search"
+        size={16}
+      />
+      <TextInput
+        onChangeText={[Function]}
+        placeholder="Search by symbol, name, or message..."
+        placeholderTextColor="#6B728E"
+        ref={
+          {
+            "current": null,
+          }
+        }
+        returnKeyType="search"
+        style={
+          [
+            {
+              "flex": 1,
+              "fontSize": 13,
+              "fontWeight": "500",
+              "marginLeft": 8,
+              "paddingVertical": 2,
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+        value="INFY"
+      />
+      <TouchableOpacity
+        onPress={[Function]}
+        testID="search-clear-btn"
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="close-circle"
+          size={16}
+        />
+      </TouchableOpacity>
+    </View>
+    <ScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+      style={
+        {
+          "marginBottom": 8,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#8B5CF620",
+              "borderColor": "#8B5CF6",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#8B5CF6"
+          name="pulse"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#8B5CF6",
+              },
+            ]
+          }
+        >
+          All
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="newspaper"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          News
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="chatbubbles"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Social
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="analytics"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Analyst
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 999,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "marginRight": 8,
+              "paddingHorizontal": 12,
+              "paddingVertical": 7,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="bulb"
+          size={14}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          AI
+        </Text>
+      </TouchableOpacity>
+    </ScrollView>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "gap": 8,
+          "marginBottom": 8,
+        }
+      }
+    >
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#8B5CF620",
+              "borderColor": "#8B5CF6",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#8B5CF6"
+          name="swap-vertical"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#8B5CF6",
+              },
+            ]
+          }
+        >
+          All
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="trending-up"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Up
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={[Function]}
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 5,
+              "justifyContent": "center",
+              "paddingVertical": 8,
+            },
+            {
+              "backgroundColor": "#1A1F2E",
+              "borderColor": "#2A3042",
+            },
+          ]
+        }
+      >
+        <IonIonicons
+          color="#6B728E"
+          name="trending-down"
+          size={13}
+        />
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "600",
+              },
+              {
+                "color": "#B0B8D1",
+              },
+            ]
+          }
+        >
+          Down
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+  <ScrollView
+    contentContainerStyle={
+      {
+        "paddingHorizontal": 20,
+        "paddingTop": 12,
+      }
+    }
+    showsVerticalScrollIndicator={false}
+  >
+    <RefreshControl
+      colors={
+        [
+          "#3B82F6",
+        ]
+      }
+      onRefresh={[Function]}
+      progressBackgroundColor="#161B2A"
+      refreshing={false}
+      tintColor="#3B82F6"
+    />
+    <View
+      style={
+        [
+          {
+            "borderLeftWidth": 3,
+            "borderRadius": 16,
+            "borderWidth": 1,
+            "marginBottom": 8,
+            "padding": 16,
+          },
+          {
+            "backgroundColor": "#1A1F2E",
+            "borderColor": "#2A3042",
+            "borderLeftColor": "#EF4444",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 10,
+                "height": 36,
+                "justifyContent": "center",
+                "marginTop": 2,
+                "width": 36,
+              },
+              {
+                "backgroundColor": "#EF444415",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="trending-down"
+            size={16}
+          />
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontFamily": "monospace",
+                    "fontSize": 15,
+                    "fontWeight": "800",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              INFY
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "700",
+                  },
+                  {
+                    "color": "#EF4444",
+                  },
+                ]
+              }
+            >
+              12
+              pts
+            </Text>
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 10,
+                    "fontWeight": "500",
+                    "marginLeft": "auto",
+                  },
+                  {
+                    "color": "#6B728E",
+                  },
+                ]
+              }
+            >
+              1m ago
+            </Text>
+          </View>
+          <Text
+            numberOfLines={2}
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "500",
+                  "lineHeight": 18,
+                  "marginTop": 4,
+                },
+                {
+                  "color": "#B0B8D1",
+                },
+              ]
+            }
+          >
+            INFY showing bearish pressure, down 8pts
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "marginTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 999,
+                "flexDirection": "row",
+                "gap": 4,
+                "paddingHorizontal": 8,
+                "paddingVertical": 3,
+              },
+              {
+                "backgroundColor": "#EF444418",
+              },
+            ]
+          }
+        >
+          <IonIonicons
+            color="#EF4444"
+            name="bulb"
+            size={11}
+          />
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            AI
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "borderRadius": 999,
+                "paddingHorizontal": 7,
+                "paddingVertical": 2,
+              },
+              {
+                "backgroundColor": "#EF444412",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                },
+                {
+                  "color": "#EF4444",
+                },
+              ]
+            }
+          >
+            Score: 
+            -10
+          </Text>
+        </View>
+                  
+        <TouchableOpacity
+          activeOpacity={0.8}
+          hitSlop={
+            {
+              "bottom": 6,
+              "left": 6,
+              "right": 6,
+              "top": 6,
+            }
+          }
+          onLongPress={[Function]}
+          onPress={[Function]}
+          onPressIn={[Function]}
+          onPressOut={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "borderRadius": 7,
+              "height": 28,
+              "justifyContent": "center",
+              "width": 28,
+            }
+          }
+        >
+          <Animated.View
+            style={
+              {
+                "transform": [
+                  {
+                    "scale": AnimatedValue {
+                      "_listeners": [],
+                      "_value": 1,
+                    },
+                  },
+                ],
+              }
+            }
+          >
+            <IonIonicons
+              color="#6B728E"
+              name="share-outline"
+              size={14}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "height": 40,
+        }
+      }
+    />
+  </ScrollView>
+</View>
+`;

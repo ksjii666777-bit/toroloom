@@ -61,12 +61,7 @@ const zerodhaPlugin: BrokerPlugin = {
   color: '#2874F0',
   gradient: ['#2874F0', '#1A5FCC'] as const,
   features: ['Kite Connect API', '₹0 Brokerage', 'Trading + Demat'],
-  credentialFields: [
-    { key: 'apiKey', label: 'API Key', type: 'text', required: true, placeholder: 'Enter your Kite API key', authModes: ['credentials'] },
-    { key: 'apiSecret', label: 'API Secret', type: 'password', required: true, placeholder: 'Enter your API secret', authModes: ['credentials'] },
-    { key: 'requestToken', label: 'Request Token', type: 'secret', required: false, placeholder: 'From OAuth redirect URL', authModes: ['oauth'] },
-    { key: 'accessToken', label: 'Access Token', type: 'secret', required: false, placeholder: 'Existing access token', authModes: ['credentials'] },
-  ],
+  credentialFields: [], // Zero-API Gateway — no credentials needed
   factory: () => new ZerodhaBroker(),
   initialize: async (instance, config) => {
     return instance.authenticate(config);
@@ -89,13 +84,7 @@ const angelPlugin: BrokerPlugin = {
   color: '#FF6B00',
   gradient: ['#FF6B00', '#CC5500'] as const,
   features: ['SmartAPI', 'Free Equity Delivery', 'EDIS Support'],
-  credentialFields: [
-    { key: 'apiKey', label: 'API Key', type: 'text', required: true, placeholder: 'Enter your SmartAPI key' },
-    { key: 'clientId', label: 'Client ID', type: 'text', required: true, placeholder: 'Enter your Angel One Client ID' },
-    { key: 'password', label: 'Password', type: 'password', required: false, placeholder: 'Trading password' },
-    { key: 'totp', label: 'TOTP Secret', type: 'totp', required: false, placeholder: 'Base32 TOTP secret' },
-    { key: 'accessToken', label: 'Access Token', type: 'secret', required: false, placeholder: 'Existing JWT token' },
-  ],
+  credentialFields: [], // Zero-API Gateway — no credentials needed
   factory: () => new AngelBroker(),
   initialize: async (instance, config) => {
     return instance.authenticate(config);
@@ -118,10 +107,7 @@ const growwPlugin: BrokerPlugin = {
   color: '#00A86B',
   gradient: ['#00A86B', '#008050'] as const,
   features: ['Trade API', 'Zero Commission', 'Mutual Funds'],
-  credentialFields: [
-    { key: 'apiKey', label: 'API Key', type: 'text', required: true, placeholder: 'Enter your Groww API key' },
-    { key: 'accessToken', label: 'Access Token', type: 'password', required: true, placeholder: 'Enter your access token' },
-  ],
+  credentialFields: [], // Zero-API Gateway — no credentials needed
   factory: () => new GrowwBroker(),
   initialize: async (instance, config) => {
     return instance.authenticate(config);
@@ -144,35 +130,11 @@ export function registerDefaultPlugins(): void {
 
 /**
  * Update plugin default configs from environment variables after env is loaded.
- * Call after env.ts is initialized but before creating any broker.
+ * DEPRECATED: Broker API credentials have been removed per Zero-API Gateway mandate.
+ * All broker connections use WebView session extraction (proxyClient.ts) instead.
+ * This function is kept as a no-op to avoid breaking the startup sequence.
  */
-export function updatePluginEnvConfig(env: any): void {
-  const zerodha = registry.getPlugin('zerodha');
-  if (zerodha) {
-    zerodha.defaultConfig = {
-      apiKey: env.zerodha?.apiKey || '',
-      apiSecret: env.zerodha?.apiSecret || '',
-      accessToken: env.zerodha?.accessToken || '',
-      requestToken: env.zerodha?.requestToken || '',
-    } as any;
-  }
-
-  const angel = registry.getPlugin('angel');
-  if (angel) {
-    angel.defaultConfig = {
-      apiKey: env.angel?.apiKey || '',
-      clientId: env.angel?.clientId || '',
-      accessToken: env.angel?.accessToken || '',
-      password: env.angel?.password || '',
-      totp: env.angel?.totp || '',
-    } as any;
-  }
-
-  const groww = registry.getPlugin('groww');
-  if (groww) {
-    groww.defaultConfig = {
-      apiKey: env.groww?.apiKey || '',
-      accessToken: env.groww?.accessToken || '',
-    } as any;
-  }
+export function updatePluginEnvConfig(_env: any): void {
+  // Intentionally empty — Zero-API Gateway handles all broker auth via
+  // SecureSessionSync WebView extraction. No API keys needed.
 }

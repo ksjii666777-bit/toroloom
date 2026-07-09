@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import VideoLessonPlayer from '../../components/video/VideoLessonPlayer';
 
 const { width } = Dimensions.get('window');
 
@@ -18,15 +19,23 @@ export default function LessonViewScreen({ route, navigation }: any) {
   const { lessonId, courseId } = route.params;
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { currentLesson, fetchLesson, markLessonComplete, lessonProgress } = useEducationStore();
+  const {
+    currentLesson, fetchLesson, markLessonComplete, lessonProgress,
+    videoProgress, videoBookmarks,
+    updateVideoProgress, addVideoBookmark, deleteVideoBookmark,
+  } = useEducationStore();
   const { addXp } = useGamificationStore();
 
   const [showQuiz, setShowQuiz] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [videoCompleted, setVideoCompleted] = useState(false);
 
   const lesson = currentLesson?.id === lessonId ? currentLesson : mockLessons.find(l => l.id === lessonId);
   const isCompleted = lessonProgress[lessonId] || lesson?.completed || false;
+  const hasVideo = !!lesson?.videoUrl;
+  const lessonVideoProgress = videoProgress[lessonId];
+  const lessonBookmarks = videoBookmarks[lessonId] || [];
 
   useEffect(() => {
     if (lessonId) fetchLesson(lessonId);
@@ -38,33 +47,51 @@ export default function LessonViewScreen({ route, navigation }: any) {
   const prevLesson = currentIndex > 0 ? courseLessons[currentIndex - 1] : null;
   const nextLesson = currentIndex < courseLessons.length - 1 ? courseLessons[currentIndex + 1] : null;
 
-  const handleMarkComplete = async () => {
+  const handleMarkComplete = useCallback(async () => {
     await markLessonComplete(lessonId);
     addXp(50);
-  };
+  }, [lessonId, markLessonComplete, addXp]);
 
-  const handleAnswerSelect = (questionId: string, answerIndex: number) => {
+  const handleAnswerSelect = useCallback((questionId: string, answerIndex: number) => {
     if (quizSubmitted) return;
     setSelectedAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
-  };
+  }, [quizSubmitted]);
 
-  const handleQuizSubmit = () => {
+  const handleQuizSubmit = useCallback(() => {
     if (!lesson?.quiz) return;
     setQuizSubmitted(true);
     let score = 0;
     lesson.quiz.questions.forEach(q => {
       if (selectedAnswers[q.id] === q.correctAnswer) score++;
     });
-    const total = lesson.quiz.questions.length;
-    const pct = Math.round((score / total) * 100);
-    // XP reward for passing
+    const pct = Math.round((score / lesson.quiz.questions.length) * 100);
     if (pct >= 60) addXp(30);
-  };
+  }, [lesson, selectedAnswers, addXp]);
 
-  const handleRetryQuiz = () => {
+  const handleRetryQuiz = useCallback(() => {
     setSelectedAnswers({});
     setQuizSubmitted(false);
-  };
+  }, []);
+
+  const handleVideoProgress = useCallback((p: { lastPosition: number; duration: number; watchedPercent: number }) => {
+    updateVideoProgress(lessonId, p);
+  }, [lessonId, updateVideoProgress]);
+
+  const handleVideoComplete = useCallback(() => {
+    setVideoCompleted(true);
+    // Auto-mark complete if video is fully watched
+    if (!isCompleted) {
+      addXp(25);
+    }
+  }, [isCompleted, addXp]);
+
+  const handleAddBookmark = useCallback((time: number, label: string) => {
+    addVideoBookmark(lessonId, time, label);
+  }, [lessonId, addVideoBookmark]);
+
+  const handleDeleteBookmark = useCallback((bookmarkId: string) => {
+    deleteVideoBookmark(lessonId, bookmarkId);
+  }, [lessonId, deleteVideoBookmark]);
 
   if (!lesson) {
     return (
@@ -83,7 +110,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerInfo}>
@@ -101,6 +128,12 @@ export default function LessonViewScreen({ route, navigation }: any) {
         <View style={styles.lessonMeta}>
           <Ionicons name="time-outline" size={14} color={colors.textMuted} />
           <Text style={styles.lessonMetaText}>{lesson.duration}</Text>
+          {hasVideo && (
+            <>
+              <Ionicons name="videocam" size={14} color={colors.primary} />
+              <Text style={styles.lessonMetaText}>Video Lesson</Text>
+            </>
+          )}
           {lesson.quiz && (
             <>
               <Ionicons name="help-circle-outline" size={14} color={colors.textMuted} />
@@ -109,13 +142,35 @@ export default function LessonViewScreen({ route, navigation }: any) {
           )}
         </View>
 
-        {/* Content */}
+        {/* ─── Video Player ─── */}
+        {hasVideo && lesson.videoUrl && (
+          <VideoLessonPlayer
+            videoUrl={lesson.videoUrl}
+            transcript={lesson.transcript}
+            bookmarks={lessonBookmarks}
+            progress={lessonVideoProgress}
+            onAddBookmark={handleAddBookmark}
+            onDeleteBookmark={handleDeleteBookmark}
+            onProgressUpdate={handleVideoProgress}
+            onVideoComplete={handleVideoComplete}
+          />
+        )}
+
+        {/* Video Completion Indicator */}
+        {hasVideo && videoCompleted && !isCompleted && (
+          <View style={styles.videoCompleteBanner}>
+            <Ionicons name="checkmark-circle" size={20} color="#00C853" />
+            <Text style={styles.videoCompleteText}>Video fully watched! +25 XP</Text>
+          </View>
+        )}
+
+        {/* Content (shown below video or as main content) */}
         <Card noPadding style={styles.contentCard}>
           <View style={styles.contentInner}>
             <Text style={styles.contentTitle}>{lesson.title}</Text>
             <Text style={styles.contentBody}>{lesson.content}</Text>
 
-            {/* Sample educational content sections */}
+            {/* Educational content sections */}
             <View style={styles.contentSection}>
               <View style={styles.contentSectionHeader}>
                 <Ionicons name="bulb-outline" size={18} color="#FFC107" />
@@ -367,6 +422,24 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textMuted,
     marginRight: SPACING.sm,
   },
+
+  // ── Video Complete Banner ──
+  videoCompleteBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: '#00C85315',
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.md,
+  },
+  videoCompleteText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: '#00C853',
+  },
+
   contentCard: {
     marginBottom: SPACING.lg,
   },

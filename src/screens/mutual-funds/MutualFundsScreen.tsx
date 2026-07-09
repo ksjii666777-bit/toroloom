@@ -31,12 +31,16 @@ const frequencyOptions: { label: string; value: SIPPlan['frequency'] }[] = [
 export default function MutualFundsScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { funds, sipPlans, fetchFunds, fetchSIPs, investInFund, startSIP } = useMutualFundStore();
+  const { funds, sipPlans, fetchFunds, fetchSIPs, investInFund, startSIP, modifySIP, pauseSIP, resumeSIP, deleteSIP } = useMutualFundStore();
   const [activeTab, setActiveTab] = useState<'funds' | 'sips'>('funds');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [investModal, setInvestModal] = useState<{ fund: MutualFund; type: 'lumpsum' | 'sip' } | null>(null);
   const [amount, setAmount] = useState('');
   const [frequency, setFrequency] = useState<SIPPlan['frequency']>('monthly');
+  const [editSIP, setEditSIP] = useState<{ sip: SIPPlan } | null>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editFrequency, setEditFrequency] = useState<SIPPlan['frequency']>('monthly');
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFunds();
@@ -274,11 +278,36 @@ export default function MutualFundsScreen({ navigation }: any) {
                       </View>
                     </View>
                     <View style={styles.sipActions}>
-                      <TouchableOpacity style={styles.sipActionBtn}>
+                      <TouchableOpacity
+                        style={styles.sipActionBtn}
+                        onPress={() => {
+                          setEditSIP({ sip });
+                          setEditAmount(sip.amount.toString());
+                          setEditFrequency(sip.frequency);
+                        }}
+                      >
                         <Text style={styles.sipActionText}>Edit SIP</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={[styles.sipActionBtn, styles.sipActionDanger]}>
-                        <Text style={[styles.sipActionText, { color: colors.danger }]}>Pause</Text>
+                      {sip.nextDate === 'PAUSED' ? (
+                        <TouchableOpacity
+                          style={[styles.sipActionBtn, { backgroundColor: colors.accent + '20', borderColor: colors.accent + '40' }]}
+                          onPress={() => resumeSIP(sip.id)}
+                        >
+                          <Text style={[styles.sipActionText, { color: colors.accent }]}>Resume</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          style={[styles.sipActionBtn, styles.sipActionDanger]}
+                          onPress={() => pauseSIP(sip.id)}
+                        >
+                          <Text style={[styles.sipActionText, { color: colors.danger }]}>Pause</Text>
+                        </TouchableOpacity>
+                      )}
+                      <TouchableOpacity
+                        style={[styles.sipActionBtn, { backgroundColor: '#FF174410', borderColor: '#FF174420', flex: 0.5 }]}
+                        onPress={() => setConfirmDelete(sip.id)}
+                      >
+                        <Ionicons name="trash-outline" size={18} color={colors.danger} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -380,6 +409,124 @@ export default function MutualFundsScreen({ navigation }: any) {
                 </TouchableOpacity>
               </>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit SIP Modal */}
+      <Modal visible={!!editSIP} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit SIP</Text>
+              <TouchableOpacity onPress={() => { setEditSIP(null); setEditAmount(''); }}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            {editSIP && (
+              <>
+                <View style={styles.modalFundInfo}>
+                  <Text style={styles.modalFundName}>{editSIP.sip.fundName}</Text>
+                  <Text style={styles.modalFundMeta}>Current: {formatCurrency(editSIP.sip.amount)}/{editSIP.sip.frequency}</Text>
+                </View>
+
+                <Text style={styles.modalLabel}>New Amount (₹)</Text>
+                <View style={styles.amountInputRow}>
+                  <Text style={styles.currencySign}>₹</Text>
+                  <TextInput
+                    style={styles.amountInput}
+                    value={editAmount}
+                    onChangeText={setEditAmount}
+                    keyboardType="numeric"
+                    placeholder="Enter amount"
+                    placeholderTextColor={colors.textMuted}
+                  />
+                </View>
+
+                <View style={styles.quickAmounts}>
+                  {[5000, 10000, 25000, 50000].map(amt => (
+                    <TouchableOpacity
+                      key={amt}
+                      style={[styles.quickAmountBtn, parseFloat(editAmount) === amt && styles.quickAmountActive]}
+                      onPress={() => setEditAmount(amt.toString())}
+                    >
+                      <Text style={[styles.quickAmountText, parseFloat(editAmount) === amt && styles.quickAmountTextActive]}>
+                        {formatCurrency(amt, true)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={styles.modalLabel}>Frequency</Text>
+                <View style={styles.frequencyRow}>
+                  {frequencyOptions.map(opt => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[styles.freqBtn, editFrequency === opt.value && styles.freqBtnActive]}
+                      onPress={() => setEditFrequency(opt.value)}
+                    >
+                      <Text style={[styles.freqText, editFrequency === opt.value && styles.freqTextActive]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.investBtn, (!editAmount || parseFloat(editAmount) < 500) && styles.investBtnDisabled]}
+                  onPress={() => {
+                    const amt = parseFloat(editAmount);
+                    if (isNaN(amt) || amt < 500) {
+                      Alert.alert('Invalid Amount', 'Minimum SIP amount is ₹500');
+                      return;
+                    }
+                    modifySIP(editSIP.sip.id, { amount: amt, frequency: editFrequency });
+                    Alert.alert('SIP Updated', `SIP updated to ${formatCurrency(amt)}/${editFrequency}`);
+                    setEditSIP(null);
+                    setEditAmount('');
+                  }}
+                >
+                  <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.investBtnGradient}>
+                    <Text style={styles.investBtnText}>Update SIP</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal visible={!!confirmDelete} transparent animationType="fade">
+        <View style={[styles.modalOverlay, { justifyContent: 'center', alignItems: 'center' }]}>
+          <View style={[styles.modalContent, { borderTopLeftRadius: BORDER_RADIUS.xl, borderTopRightRadius: BORDER_RADIUS.xl, width: '85%', maxWidth: 340 }]}>
+            <View style={{ alignItems: 'center', marginBottom: SPACING.lg }}>
+              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: '#FF174420', justifyContent: 'center', alignItems: 'center', marginBottom: SPACING.md }}>
+                <Ionicons name="warning" size={28} color={colors.danger} />
+              </View>
+              <Text style={[styles.modalTitle, { textAlign: 'center' }]}>Delete SIP?</Text>
+              <Text style={[styles.modalFundMeta, { textAlign: 'center', marginTop: SPACING.sm }]}>
+                This will cancel your SIP. Existing investments will remain.
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: SPACING.md }}>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: SPACING.md, borderRadius: BORDER_RADIUS.md, alignItems: 'center', backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }}
+                onPress={() => setConfirmDelete(null)}
+              >
+                <Text style={[styles.fundActionText, { color: colors.text }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: SPACING.md, borderRadius: BORDER_RADIUS.md, alignItems: 'center', backgroundColor: colors.danger }}
+                onPress={() => {
+                  if (confirmDelete) deleteSIP(confirmDelete);
+                  setConfirmDelete(null);
+                }}
+              >
+                <Text style={styles.fundActionText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

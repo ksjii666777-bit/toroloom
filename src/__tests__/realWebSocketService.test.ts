@@ -350,6 +350,98 @@ describe('RealWebSocketService', () => {
     });
   });
 
+  // ── Error Resilience ────────────────────────────────────────────────────
+
+  describe('error resilience — callback throws', () => {
+    beforeEach(async () => {
+      const connectPromise = ws.connect();
+      MockWebSocket.instances[0].simulateOpen();
+      await connectPromise;
+
+      MockWebSocket.instances[0].simulateMessage({ type: 'connected' });
+      MockWebSocket.instances[0].simulateMessage({
+        type: 'authenticated', userId: 'user_1', positionsCount: 0,
+      });
+
+      // Clear any previous warn calls from the auth flow
+      vi.mocked(log.warn).mockClear();
+    });
+
+    it('handles pnl_update callback that throws without crashing', () => {
+      ws.onPnLUpdateCallback(() => {
+        throw new Error('PnL callback crashed');
+      });
+
+      // Should not throw — the top-level try/catch in onmessage catches it
+      expect(() => {
+        MockWebSocket.instances[0].simulateMessage({
+          type: 'pnl_update',
+          data: { realizedPnL: 1000, unrealizedPnL: 500, totalPnL: 1500 },
+        });
+      }).not.toThrow();
+
+      expect(log.warn).toHaveBeenCalledWith(
+        '[RealWS] Unhandled error in message handler:',
+        'PnL callback crashed',
+      );
+    });
+
+    it('handles tick callback that throws without crashing', () => {
+      const onPrice = vi.fn(() => {
+        throw new Error('Price callback crashed');
+      });
+      ws.subscribe('RELIANCE', onPrice, vi.fn());
+
+      expect(() => {
+        MockWebSocket.instances[0].simulateMessage({
+          type: 'tick',
+          data: { symbol: 'RELIANCE', lastPrice: 2900, change: 10, changePercent: 0.35, timestamp: '2025-06-01T00:00:00Z' },
+        });
+      }).not.toThrow();
+
+      expect(log.warn).toHaveBeenCalledWith(
+        '[RealWS] Unhandled error in message handler:',
+        'Price callback crashed',
+      );
+    });
+
+    it('handles lockdown callback that throws without crashing', () => {
+      ws.onLockdownCallback(() => {
+        throw new Error('Lockdown callback crashed');
+      });
+
+      expect(() => {
+        MockWebSocket.instances[0].simulateMessage({
+          type: 'lockdown',
+          data: { status: 'active', triggeredAt: null, liftsAt: null, triggerLoss: null, breachedLimit: null },
+        });
+      }).not.toThrow();
+
+      expect(log.warn).toHaveBeenCalledWith(
+        '[RealWS] Unhandled error in message handler:',
+        'Lockdown callback crashed',
+      );
+    });
+
+    it('handles cache_invalidate callback that throws without crashing', () => {
+      ws.onCacheInvalidationCallback(() => {
+        throw new Error('Cache invalidation callback crashed');
+      });
+
+      expect(() => {
+        MockWebSocket.instances[0].simulateMessage({
+          type: 'cache_invalidate',
+          data: { entities: [], namespaces: [], timestamp: new Date().toISOString() },
+        });
+      }).not.toThrow();
+
+      expect(log.warn).toHaveBeenCalledWith(
+        '[RealWS] Unhandled error in message handler:',
+        'Cache invalidation callback crashed',
+      );
+    });
+  });
+
   // ── Subscribe/Unsubscribe Edge Cases ──────────────────────────────────
 
   describe('subscribe edge cases', () => {

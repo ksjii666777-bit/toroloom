@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Course, Lesson } from '../types';
+import { Course, Lesson, VideoProgress, VideoBookmark, CourseCertificate } from '../types';
 import { mockCourses, mockLessons } from '../constants/mockData';
 import { educationApi } from '../services/api';
 import { offlineCache } from '../services/offlineCache';
@@ -10,6 +10,14 @@ interface EducationState {
   courses: Course[];
   currentLesson: Lesson | null;
   lessonProgress: Record<string, boolean>;
+  /** Video playback progress per lesson */
+  videoProgress: Record<string, VideoProgress>;
+  /** Video bookmarks per lesson */
+  videoBookmarks: Record<string, VideoBookmark[]>;
+  /** Certificates issued for completed courses */
+  certificates: CourseCertificate[];
+  /** Whether a certificate PDF generation is in progress */
+  isGeneratingCertificate: boolean;
   isLoading: boolean;
   fetchCourses: () => Promise<void>;
   fetchLesson: (lessonId: string) => Promise<void>;
@@ -18,12 +26,30 @@ interface EducationState {
   markLessonComplete: (lessonId: string) => Promise<void>;
   setCurrentLesson: (lesson: Lesson | null) => void;
   scheduleDailyReminder: () => Promise<void>;
+  /** Update video playback progress for a lesson */
+  updateVideoProgress: (lessonId: string, progress: { lastPosition: number; duration: number; watchedPercent: number }) => void;
+  /** Add a bookmark at a specific timestamp in a video */
+  addVideoBookmark: (lessonId: string, time: number, label: string) => void;
+  /** Delete a bookmark */
+  deleteVideoBookmark: (lessonId: string, bookmarkId: string) => void;
+  /** Generate a certificate for a completed course */
+  generateCertificate: (courseId: string) => Promise<CourseCertificate | null>;
+  /** Get certificate for a specific course */
+  getCertificateForCourse: (courseId: string) => CourseCertificate | undefined;
+  /** Check if a course is eligible for a certificate */
+  isCourseComplete: (courseId: string) => boolean;
 }
+
+let bookmarkIdCounter = 0;
 
 export const useEducationStore = create<EducationState>((set, get) => ({
   courses: mockCourses,
   currentLesson: null,
   lessonProgress: {},
+  videoProgress: {},
+  videoBookmarks: {},
+  certificates: [],
+  isGeneratingCertificate: false,
   isLoading: false,
 
   /** Load cached courses at app startup for instant display */
@@ -109,6 +135,53 @@ export const useEducationStore = create<EducationState>((set, get) => ({
 
   setCurrentLesson: (lesson) => set({ currentLesson: lesson }),
 
+  /** Update video playback progress for a lesson */
+  updateVideoProgress: (lessonId, { lastPosition, duration, watchedPercent }) => {
+    set(state => ({
+      videoProgress: {
+        ...state.videoProgress,
+        [lessonId]: {
+          lessonId,
+          lastPosition,
+          duration,
+          watchedPercent,
+          completed: watchedPercent >= 95,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    }));
+  },
+
+  /** Add a bookmark at a specific timestamp */
+  addVideoBookmark: (lessonId, time, label) => {
+    const bookmarkId = `bm_${++bookmarkIdCounter}_${Date.now()}`;
+    set(state => {
+      const existing = state.videoBookmarks[lessonId] || [];
+      return {
+        videoBookmarks: {
+          ...state.videoBookmarks,
+          [lessonId]: [
+            ...existing,
+            { id: bookmarkId, lessonId, time, label, createdAt: new Date().toISOString() },
+          ],
+        },
+      };
+    });
+  },
+
+  /** Delete a bookmark */
+  deleteVideoBookmark: (lessonId, bookmarkId) => {
+    set(state => {
+      const existing = state.videoBookmarks[lessonId] || [];
+      return {
+        videoBookmarks: {
+          ...state.videoBookmarks,
+          [lessonId]: existing.filter(b => b.id !== bookmarkId),
+        },
+      };
+    });
+  },
+
   scheduleDailyReminder: async () => {
     const { useNotificationStore } = await import('./notificationStore');
     useNotificationStore.getState().addNotification({
@@ -119,5 +192,92 @@ export const useEducationStore = create<EducationState>((set, get) => ({
       read: false,
       timestamp: new Date().toISOString(),
     });
+  },
+
+  /** Check if a course has all its lessons completed */
+  isCourseComplete: (courseId) => {
+    const state = get();
+    const courseLessons = mockLessons.filter(l => l.courseId === courseId);
+    if (courseLessons.length === 0) return false;
+    return courseLessons.every(l => state.lessonProgress[l.id] || l.completed);
+  },
+
+  /** Get certificate for a specific course */
+  getCertificateForCourse: (courseId) => {
+    return get().certificates.find(c => c.courseId === courseId);
+  },
+
+  /** Generate a certificate for a completed course */
+  generateCertificate: async (courseId) => {
+    const state = get();
+    const course = state.courses.find(c => c.id === courseId);
+    if (!course) return null;
+
+    // Check if already generated
+    const existing = state.certificates.find(c => c.courseId === courseId);
+    if (existing) return existing;
+
+    // Verify course is complete
+    const courseLessons = mockLessons.filter(l => l.courseId === courseId);
+    const completedCount = courseLessons.filter(l => state.lessonProgress[l.id] || l.completed).length;
+    if (completedCount < course.lessons) return null;
+
+    set({ isGeneratingCertificate: true });
+
+    try {
+      // Calculate quiz performance
+      let totalQuizCorrect = 0;
+      let totalQuizQuestions = 0;
+      for (const lesson of courseLessons) {
+        if (lesson.quiz) {
+          for (const q of lesson.quiz.questions) {
+            totalQuizQuestions++;
+            // In real app, track actual answers; here use lesson.quiz.score as proxy
+          }
+          if (lesson.quiz.score !== undefined) {
+            const correct = Math.round((lesson.quiz.score / 100) * lesson.quiz.questions.length);
+            totalQuizCorrect += correct;
+          }
+        }
+      }
+      const quizPercent = totalQuizQuestions > 0
+        ? Math.round((totalQuizCorrect / totalQuizQuestions) * 100)
+        : undefined;
+
+      const { generateSerialNumber, calculateGrade, generateCertificatePDF } = await import('../utils/certificateGenerator');
+
+      const cert: CourseCertificate = {
+        id: `cert_${courseId}_${Date.now()}`,
+        courseId,
+        courseTitle: course.title,
+        userName: 'Student', // Will be replaced with actual user name
+        completedLessons: completedCount,
+        totalLessons: course.lessons,
+        grade: calculateGrade(quizPercent),
+        quizScore: totalQuizCorrect,
+        quizPercent,
+        issuedAt: new Date().toISOString(),
+        serialNumber: generateSerialNumber(),
+      };
+
+      // Generate PDF in background
+      const pdfUri = await generateCertificatePDF(cert);
+
+      const finalCert: CourseCertificate = {
+        ...cert,
+        pdfUri: pdfUri || undefined,
+      };
+
+      set(state => ({
+        certificates: [...state.certificates, finalCert],
+        isGeneratingCertificate: false,
+      }));
+
+      return finalCert;
+    } catch (error) {
+      console.error('[EducationStore] Certificate generation failed:', error);
+      set({ isGeneratingCertificate: false });
+      return null;
+    }
   },
 }));

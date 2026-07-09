@@ -1,0 +1,80 @@
+# =============================================================================
+# Strategy Builder — E2E Test
+# =============================================================================
+# Tests the Strategy Builder screen:
+#   1. Login
+#   2. Navigate to Strategy Builder
+#   3. Verify pre-built strategies list
+#   4. Select a strategy and view details
+#   5. Verify P&L chart renders
+#   6. Navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Strategy Builder ──────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Strategy Builder"
+    direction: DOWN
+- tapOn:
+    text: "Strategy Builder"
+- waitForAnimationToEnd
+
+# ── 3. Verify Strategy Builder Screen ─────────────────────────────────────
+- assertVisible:
+    text: "Strategy Builder"
+
+# Verify pre-built strategies are listed
+- assertVisible:
+    text: "Pre-built Strategies"
+
+# Verify at least a few strategy cards
+- assertVisible:
+    text: "Long Call"
+- assertVisible:
+    text: "Bull Call Spread"
+- assertVisible:
+    text: "Iron Condor"
+
+# ── 4. Select a strategy to view details ──────────────────────────────────
+- tapOn:
+    text: "Long Call"
+- waitForAnimationToEnd
+
+# Verify strategy detail
+- assertVisible:
+    text: "Buy a call option"
+- assertVisible:
+    text: "Max Profit"
+- assertVisible:
+    text: "Max Loss"
+
+# ── 5. Navigate Back ──────────────────────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Strategy Builder"

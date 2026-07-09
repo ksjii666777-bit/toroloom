@@ -120,11 +120,13 @@ vi.mock('../context/ThemeContext', () => ({
 }));
 
 vi.mock('../store/fnoStore', () => {
-  const mockState = defaultStoreMock;
   const useFnoStore = Object.assign(
-    vi.fn(mockState),
-    { getState: vi.fn(mockState) },
-  );
+    vi.fn((sel?: (state: any) => any) => {
+      const state = defaultStoreMock();
+      return sel ? sel(state) : state;
+    }),
+    { getState: vi.fn(() => defaultStoreMock()) },
+  ) as any;
   return { useFnoStore };
 });
 
@@ -384,7 +386,6 @@ describe('StrategyBuilderScreen — Loading State', () => {
       strategyLegs: [],
     }));
     const { getByText } = renderScreen();
-    const analyzeBtn = getByText('Analyze').parent?.parent;
     // Button should be present and not throw when pressed (disabled)
     expect(getByText('Analyze')).toBeDefined();
   });
@@ -555,7 +556,7 @@ describe('StrategyBuilderScreen — Leg Editing', () => {
   it('calls updateStrategyLeg when lots are changed', async () => {
     const { root } = await renderAndWait();
     // There are 2 legs, both with quantity="1" — find by type then pick first quantity input
-    const textInputs = root.findAllByType('TextInput');
+    const textInputs = root.findAllByType('TextInput' as any);
     const quantityInputs = textInputs.filter((el: any) => el.props.value === '1');
     expect(quantityInputs.length).toBeGreaterThanOrEqual(2);
     fireEvent.changeText(quantityInputs[0], '3');

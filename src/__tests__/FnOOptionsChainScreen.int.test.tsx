@@ -274,10 +274,6 @@ async function renderStrategyAndWait() {
   return result;
 }
 
-function advanceAndRender(ms: number) {
-  act(() => { vi.advanceTimersByTime(ms); });
-}
-
 beforeEach(() => {
   vi.clearAllMocks();
   // Restore default mock for all tests

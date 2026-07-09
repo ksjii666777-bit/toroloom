@@ -151,6 +151,51 @@ export interface Lesson {
   duration: string;
   completed: boolean;
   quiz?: Quiz;
+  /** Optional video URL for interactive video lessons */
+  videoUrl?: string;
+  /** Video thumbnail/placeholder image URL */
+  videoThumbnail?: string;
+  /** Synchronized transcript entries for the video */
+  transcript?: TranscriptEntry[];
+}
+
+/** A single entry in a video transcript, synchronized with playback time */
+export interface TranscriptEntry {
+  /** Start time in seconds */
+  startTime: number;
+  /** End time in seconds */
+  endTime: number;
+  /** Transcript text */
+  text: string;
+  /** Optional speaker name */
+  speaker?: string;
+}
+
+/** Bookmark for a specific timestamp in a video lesson */
+export interface VideoBookmark {
+  id: string;
+  lessonId: string;
+  /** Timestamp in seconds */
+  time: number;
+  /** User's label/note for this bookmark */
+  label: string;
+  /** ISO timestamp when bookmark was created */
+  createdAt: string;
+}
+
+/** Video playback progress for a lesson */
+export interface VideoProgress {
+  lessonId: string;
+  /** Last watched position in seconds */
+  lastPosition: number;
+  /** Total video duration in seconds */
+  duration: number;
+  /** Percentage watched (0-100) */
+  watchedPercent: number;
+  /** Whether the video is fully watched */
+  completed: boolean;
+  /** Last updated ISO timestamp */
+  updatedAt: string;
 }
 
 export interface Quiz {
@@ -308,7 +353,7 @@ export interface OpenOrder {
 // ============ Notifications ============
 export interface AppNotification {
   id: string;
-  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert';
+  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert' | 'sentiment_alert';
   title: string;
   message: string;
   read: boolean;
@@ -418,6 +463,70 @@ export interface SubscriptionPlan {
   includedFeatures?: SubscriptionFeature[];
 }
 
+// ──── Coupon / Discount Code Types ──────────────────────────
+
+export interface CouponCode {
+  code: string;
+  type: 'percentage' | 'fixed' | 'free_trial';
+  value: number;                    // Percentage (10 = 10%) or fixed amount in ₹
+  trialDays?: number;               // For 'free_trial' type, number of trial days
+  minPlanTier?: SubscriptionTier;   // Min tier this coupon applies to
+  maxUses?: number;
+  currentUses?: number;
+  expiresAt?: string;
+  isActive: boolean;
+  description: string;
+}
+
+// ──── Coupon Discount Result ────────────────────────────────
+
+export interface CouponDiscountResult {
+  code: string;
+  valid: boolean;
+  type: 'percentage' | 'fixed' | 'free_trial';
+  discountAmount: number;          // Computed discount in ₹
+  originalPrice: number;
+  finalPrice: number;
+  trialDays?: number;
+  message: string;
+}
+
+// ──── UPI Autopay / Mandate Types ───────────────────────────
+
+export interface UpiMandate {
+  mandateId: string;
+  upiId: string;
+  bankName: string;
+  planId: string;
+  amount: number;
+  billingPeriod: 'monthly' | 'yearly';
+  status: 'active' | 'paused' | 'cancelled' | 'failed';
+  createdAt: string;
+  lastChargedAt?: string;
+  nextChargeDate: string;
+  tpv: 'MANDATE' | 'PIN';         // Transaction payment verification type
+}
+
+// ──── Subscription Payment History ──────────────────────────
+
+export interface SubscriptionPayment {
+  id: string;
+  planId: string;
+  planName: string;
+  tier: SubscriptionTier;
+  amount: number;
+  currency: string;
+  status: 'completed' | 'pending' | 'failed' | 'refunded';
+  method: 'razorpay' | 'upi_autopay' | 'coupon';
+  billingPeriod: 'monthly' | 'yearly';
+  timestamp: string;
+  transactionId: string;
+  receiptUrl?: string;
+  discountApplied?: number;
+  couponCode?: string;
+  invoiceId?: string;
+}
+
 export interface UserSubscription {
   tier: SubscriptionTier;
   planId: string;
@@ -430,6 +539,26 @@ export interface UserSubscription {
   lastPaymentDate?: string;
   // Tenant attribution
   tenantId?: string;
+  
+  // ──── Trial Fields ────────────────────────────────────────
+  trialStartDate?: string;
+  trialEndDate?: string;
+  isTrialUsed?: boolean;    // Whether user has already used a trial
+  
+  // ──── Coupon Fields ───────────────────────────────────────
+  appliedCoupon?: {
+    code: string;
+    type: 'percentage' | 'fixed' | 'free_trial';
+    discountAmount: number;
+    originalPrice: number;
+  };
+  
+  // ──── UPI Autopay Fields ──────────────────────────────────
+  upiMandate?: UpiMandate;
+  isAutoPayEnabled?: boolean;
+
+  // ──── Payment History ─────────────────────────────────────
+  payments?: SubscriptionPayment[];
 }
 
 // ============ Gateway & Session Management ============
@@ -498,6 +627,96 @@ export interface MarketNewsItem {
   publishedAt: string;
   read: boolean;
   bookmarked: boolean;
+}
+
+// ============ IPO Calendar ============
+export interface IPOItem {
+  id: string;
+  companyName: string;
+  logo: string;
+  sector: string;
+  /** Open, Close, Listing dates */
+  openDate: string;
+  closeDate: string;
+  listingDate: string;
+  /** Price band */
+  priceBand: { min: number; max: number };
+  /** Lot size */
+  lotSize: number;
+  /** Minimum investment (1 lot) */
+  minInvestment: number;
+  /** Total issue size in Cr */
+  issueSize: number;
+  /** Fresh issue + OFS split */
+  freshIssue: number;
+  offerForSale: number;
+  /** Total shares offered */
+  totalShares: number;
+  /** Bid data */
+  totalBids: number;
+  totalBidAmount: number;
+  subscriptionStatus: 'upcoming' | 'open' | 'closed' | 'listing_today' | 'listed';
+  /** Subscription multiples */
+  subscriptionQIB: number;
+  subscriptionHNI: number;
+  subscriptionRetail: number;
+  subscriptionTotal: number;
+  /** GMP (Grey Market Premium) */
+  gmp: number;
+  gmpPercent: number;
+  /** Expected listing gain */
+  expectedListingPrice: number;
+  expectedListingGain: number;
+  /** Lead managers */
+  leadManagers: string[];
+  registrar: string;
+  /** Rating */
+  rating: number; // 1-5
+  /** Company financials */
+  revenue: number; // Cr
+  netProfit: number; // Cr
+  peRatio: number;
+  roe: number;
+  /** About */
+  about: string;
+  strengths: string[];
+  risks: string[];
+  /** Application data */
+  applications: number;
+  sharesApplied: number;
+  /** Allotment */
+  allotmentDate?: string;
+  listingPrice?: number;
+  listingGain?: number;
+  isBookmarked: boolean;
+}
+
+// ============ Economic Calendar ============
+export interface EconomicEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  timezone: string;
+  category: 'central_bank' | 'gdp' | 'inflation' | 'employment' | 'trade' | 'fiscal' | 'industry' | 'consumer' | 'housing' | 'other';
+  country: string;
+  countryCode: string;
+  importance: 'high' | 'medium' | 'low';
+  /** Previous value */
+  previous: string;
+  /** Forecast/expected value */
+  forecast: string;
+  /** Actual value (after release) */
+  actual?: string;
+  /** Whether the event has occurred */
+  isCompleted: boolean;
+  /** Impact on markets */
+  impact: 'positive' | 'negative' | 'neutral' | 'unknown';
+  /** Affected assets */
+  affectedAssets: string[];
+  source: string;
+  notes?: string;
 }
 
 // ============ Behavioral Journal ============
@@ -723,7 +942,546 @@ export interface FnOPosition {
   timestamp: string;
 }
 
+// ============ Social Trading ============
+
+export type TraderStrategy =
+  | 'swing_trading'
+  | 'intraday'
+  | 'long_term'
+  | 'options_selling'
+  | 'futures'
+  | 'value_investing'
+  | 'momentum';
+
+export interface TraderProfile {
+  id: string;
+  name: string;
+  avatar?: string;
+  bio: string;
+  strategy: TraderStrategy;
+  experienceYears: number;
+  totalPnl: number;
+  totalPnlPercent: number;
+  monthlyReturn: number;
+  winRate: number;
+  totalTrades: number;
+  followers: number;
+  copyTraders: number;
+  avgHoldingDays: number;
+  maxDrawdown: number;
+  riskScore: 'low' | 'moderate' | 'high';
+  verified: boolean;
+  joinedAt: string;
+  topStocks: string[];
+  badges: string[];
+}
+
+export interface CopiedTrade {
+  id: string;
+  traderId: string;
+  traderName: string;
+  traderAvatar?: string;
+  symbol: string;
+  action: 'buy' | 'sell';
+  quantity: number;
+  price: number;
+  executedAt: string;
+  pnl?: number;
+  pnlPercent?: number;
+  isOpen: boolean;
+  allocationPercent: number; // % of portfolio allocated
+}
+
+export interface CopyTradeRelation {
+  traderId: string;
+  traderName: string;
+  traderAvatar?: string;
+  /** 0-100: % of trader's orders to auto-copy */
+  allocationPercent: number;
+  /** ₹ amount allocated to this copy strategy */
+  investmentAmount: number;
+  /** Total P&L from copies */
+  totalPnl: number;
+  activeTrades: number;
+  startedAt: string;
+  isPaused: boolean;
+}
+
+/**
+ * A public trade displayed on a trader's profile page.
+ * Shows entry/exit, holding period, P&L, and status.
+ */
+export interface TraderPublicTrade {
+  id: string;
+  symbol: string;
+  direction: 'long' | 'short';
+  entryPrice: number;
+  exitPrice: number;
+  quantity: number;
+  pnl: number;
+  pnlPercent: number;
+  holdingPeriod: string;      // e.g. '2h', '3d', '1w'
+  entryDate: string;
+  exitDate: string;
+  isOpen: boolean;
+  setupType?: string;          // e.g. 'breakout', 'pullback'
+  exitReason?: string;         // e.g. 'stop_loss', 'target', 'manual'
+  tags?: string[];
+}
+
+/** Cached PnL data point for trader profile charts */
+export interface TraderPnLPoint {
+  date: string;
+  cumulativePnl: number;
+}
+
+export type LeaderboardSort = 'pnl' | 'winRate' | 'followers' | 'returns' | 'trades';
+export type LeaderboardPeriod = '1W' | '1M' | '3M' | '6M' | '1Y' | 'ALL';
+
+export interface LeaderboardEntry extends TraderProfile {
+  rank: number;
+  change: 'up' | 'down' | 'same';
+  rankChange: number;
+}
+
+// ============ KYC Types ============
+
+export type KycStepId = 'pan' | 'aadhaar' | 'bank' | 'signature' | 'risk';
+export type KycStatus = 'pending' | 'in_progress' | 'verified' | 'rejected';
+
+/** Individual KYC step tracking */
+export interface KycStepStatus {
+  stepId: KycStepId;
+  label: string;
+  status: KycStatus;
+  completedAt?: string;
+  message?: string;
+}
+
+/** PAN verification result */
+export interface PanVerificationResult {
+  panNumber: string;
+  fullName: string;
+  isVerified: boolean;
+  nameMatch?: boolean;        // Whether name matches user profile
+  nameOnPan?: string;         // Name as per PAN database
+  category?: string;          // Individual, Company, etc.
+  status: string;             // VALID, INVALID, NOT_FOUND
+  lastUpdated?: string;
+}
+
+/** Aadhaar eKYC verification flow */
+export interface AadhaarOtpResponse {
+  referenceId: string;
+  message: string;
+  expiresAt: string;
+}
+
+export interface AadhaarVerifyResponse {
+  referenceId: string;
+  isVerified: boolean;
+  lastFourDigits: string;
+  name?: string;              // Masked name from UIDAI
+  yearOfBirth?: string;
+  gender?: string;
+  state?: string;
+  message: string;
+}
+
+/** DigiLocker document fetch */
+export interface DigiLockerAuthUrl {
+  authUrl: string;
+  referenceId: string;
+}
+
+export interface DigiLockerDocument {
+  id: string;
+  name: string;
+  issuerId: string;
+  issuerName: string;
+  documentType: string;
+  issuedAt: string;
+  uri: string;
+}
+
+export interface DigiLockerFetchResponse {
+  referenceId: string;
+  isVerified: boolean;
+  documents: DigiLockerDocument[];
+  message: string;
+}
+
+// ============ Bank Account Linking ============
+
+/** IFSC code verification result */
+export interface IFSCVerificationResult {
+  ifsc: string;
+  bankName: string;
+  branch: string;
+  address: string;
+  city: string;
+  state: string;
+  contact: string;
+  isValid: boolean;
+  micrCode?: string;
+}
+
+/** Bank account holder name validation result */
+export interface AccountVerificationResult {
+  accountNumber: string;
+  ifsc: string;
+  accountHolderName: string;
+  isValid: boolean;
+  bankName: string;
+  message: string;
+  nameMatchScore?: number;
+}
+
+/** Linked bank account stored in user profile */
+export interface LinkedBankAccount {
+  id: string;
+  bankName: string;
+  accountNumber: string;  // Masked: XXXX1234
+  ifsc: string;
+  accountHolderName: string;
+  accountType: 'savings' | 'current' | 'salary' | 'other';
+  isPrimary: boolean;
+  linkedAt: string;
+  verified: boolean;
+}
+
+/** Full KYC state for a user */
+export interface KycState {
+  status: KycStatus;
+  steps: KycStepStatus[];
+  panVerification?: PanVerificationResult;
+  aadhaarVerified?: boolean;
+  digiLockerLinked?: boolean;
+  completedAt?: string;
+  updatedAt?: string;
+}
+
+// ============ IPO Applications ============
+
+export interface IPOApplication {
+  id: string;
+  ipoId: string;
+  companyName: string;
+  logo: string;
+  sector: string;
+  /** Number of lots applied */
+  bidLots: number;
+  /** Total shares = bidLots * lotSize */
+  bidQuantity: number;
+  /** Bid price per share */
+  bidPrice: number;
+  /** Total amount = bidQuantity * bidPrice */
+  totalAmount: number;
+  /** UPI ID used for application */
+  upiId: string;
+  status: 'pending' | 'submitted' | 'pending_allotment' | 'allotted' | 'not_allotted';
+  /** Shares allotted (if status === 'allotted') */
+  sharesAllotted?: number;
+  /** Allotment date */
+  allotmentDate?: string;
+  /** Listing price (if listed) */
+  listingPrice?: number;
+  /** Listing gain % (if listed) */
+  listingGain?: number;
+  /** When the application was submitted */
+  appliedAt: string;
+}
+
+// ============ Certificates ============
+
+export interface CourseCertificate {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  userName: string;
+  /** Number of lessons completed / total lessons */
+  completedLessons: number;
+  totalLessons: number;
+  /** Grade: 'A' (≥90%), 'B' (≥75%), 'C' (≥60%) */
+  grade: 'A' | 'B' | 'C';
+  /** Score earned from quizzes (if applicable) */
+  quizScore?: number;
+  /** Percentage of quiz questions answered correctly */
+  quizPercent?: number;
+  /** ISO timestamp when certificate was issued */
+  issuedAt: string;
+  /** Certificate serial number (unique) */
+  serialNumber: string;
+  /** File URI if PDF has been generated */
+  pdfUri?: string;
+}
+
+// ============ Learning Paths ============
+/** A curated learning path that groups courses into a sequence */
+export interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  /** Icon/emoji for the path card */
+  icon: string;
+  /** Gradient colors for the path card */
+  gradient: [string, string];
+  /** Difficulty level */
+  level: 'beginner' | 'intermediate' | 'advanced';
+  /** Ordered list of course IDs in this path */
+  courseIds: string[];
+  /** Number of users enrolled */
+  enrolledCount: number;
+  /** Estimated total duration */
+  totalDuration: string;
+  /** Number of lessons across all courses */
+  totalLessons: number;
+  /** Target audience description */
+  targetAudience: string;
+  /** Skills you'll gain */
+  skillsGained: string[];
+}
+
+// ============ Financial Glossary ============
+/** A single term in the Financial Glossary */
+export interface GlossaryTerm {
+  id: string;
+  /** The term/word (e.g. "SIP", "Blue Chip", "EBITDA") */
+  term: string;
+  /** Short one-line definition */
+  shortDefinition: string;
+  /** Detailed explanation (2-5 paragraphs) */
+  detailedDefinition: string;
+  /** Category for grouping (e.g. "Equity", "Derivatives", "Mutual Funds", "Tax", "Economy") */
+  category: string;
+  /** Related term IDs for cross-references */
+  relatedTerms?: string[];
+  /** Example usage sentence */
+  example?: string;
+  /** Tags for search */
+  tags?: string[];
+  /** An icon/emoji representing this term */
+  icon?: string;
+}
+
+// ============ Earnings Call Summaries ============
+/** Key financial metrics from an earnings report */
+export interface EarningsMetrics {
+  revenue: number;          // Revenue in Cr
+  revenueGrowth: number;    // YoY growth %
+  netProfit: number;        // Net profit in Cr
+  profitGrowth: number;     // YoY growth %
+  eps: number;              // Earnings per share
+  epsGrowth: number;        // YoY growth %
+  operatingMargin: number;  // Operating margin %
+  netMargin: number;        // Net margin %
+  revenueBeat: number | null;    // % beat vs estimate (+ve = beat)
+  profitBeat: number | null;     // % beat vs estimate (+ve = beat)
+  ebitda: number;           // EBITDA in Cr
+  ebitdaMargin: number;     // EBITDA margin %
+}
+
+/** A single quarter's earnings data point for historical comparison */
+export interface EarningsQuarter {
+  quarter: string;          // e.g. "Q4 FY26"
+  date: string;             // ISO date
+  revenue: number;
+  netProfit: number;
+  eps: number;
+  margin: number;
+}
+
+/** AI-generated earnings call summary */
+export interface EarningsSummary {
+  id: string;
+  symbol: string;
+  companyName: string;
+  quarter: string;            // e.g. "Q4 FY26"
+  fiscalYear: string;         // e.g. "FY26"
+  date: string;               // ISO date of earnings release
+  
+  // Key Metrics
+  metrics: EarningsMetrics;
+  
+  // Peer Comparison
+  peerComparison: {
+    symbol: string;
+    name: string;
+    revenue: number;
+    profit: number;
+    peRatio: number;
+    revenueGrowth: number;
+    profitGrowth: number;
+  }[];
+  
+  // Historical Trends (last 4 quarters)
+  historicalQuarters: EarningsQuarter[];
+  
+  // Management Commentary
+  managementHighlights: string[];
+  
+  // Growth Drivers
+  growthDrivers: string[];
+  
+  // Risks & Concerns
+  riskFactors: string[];
+  
+  // Analyst Sentiment
+  analystConsensus: 'strong_buy' | 'buy' | 'hold' | 'sell' | 'strong_sell';
+  analystTargetPrice: number;
+  analystTargetLow: number;
+  analystTargetHigh: number;
+  
+  // AI Summary
+  executiveSummary: string;
+  keyTakeaways: string[];
+  
+  // Sentiment
+  sentimentScore: number;     // -100 to +100
+  sentimentLabel: 'bullish' | 'bearish' | 'neutral';
+  confidence: number;         // 0-100
+  
+  // Market Reaction
+  marketReaction: {
+    preMarketChange: number;
+    dayChange: number;
+    volumeSurge: number;      // vs 30-day avg
+  };
+  
+  // Metadata
+  source: string;
+  transcriptUrl?: string;
+  presentationUrl?: string;
+}
+
+// ============ Sentiment Analysis ============
+
+/** Source breakdown for sentiment score */
+export interface SentimentSourceBreakdown {
+  newsScore: number;       // -100 to +100 from news articles
+  socialScore: number;      // -100 to +100 from social media
+  analystScore: number;     // -100 to +100 from analyst ratings
+  aiScore: number;          // -100 to +100 from AI analysis
+}
+
+/** A single sentiment data point for a date */
+export interface SentimentDataPoint {
+  date: string;
+  overallScore: number;  // -100 to +100
+  sourceBreakdown: SentimentSourceBreakdown;
+  articleCount: number;
+  mentionCount: number;
+}
+
+/** Recent news article with sentiment for the feed */
+export interface SentimentArticle {
+  id: string;
+  title: string;
+  summary: string;
+  source: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  score: number;         // -100 to +100
+  publishedAt: string;
+  url?: string;
+}
+
+/** Full sentiment state for a stock */
+export interface StockSentiment {
+  symbol: string;
+  name: string;
+  sector: string;
+  currentScore: number;             // -100 to +100 (current aggregated)
+  previousScore: number;            // Score from previous day
+  scoreChange: number;              // Change from previous day
+  label: 'bullish' | 'bearish' | 'neutral';
+  confidence: number;               // 0-100
+  sourceBreakdown: SentimentSourceBreakdown;
+  history: SentimentDataPoint[];    // Last 30 days of sentiment
+  recentArticles: SentimentArticle[];
+  topKeywords: string[];
+  mentionVolume: number;            // Total mentions today
+  mentionChange: number;             // % change in mentions vs yesterday
+}
+
+// ============ Sentiment Alert Rules ============
+
+/** Sensitivity level for sentiment shift detection */
+export type SentimentAlertSensitivity = 'low' | 'medium' | 'high';
+
+/** Direction of sentiment shift to alert on */
+export type SentimentAlertDirection = 'improving' | 'deteriorating' | 'both';
+
+/** A user-configured rule for sentiment shift alerts */
+export interface SentimentAlertRule {
+  id: string;
+  symbol: string;
+  stockName: string;
+  sector: string;
+  /** How sensitive the alert is: low=25pt, medium=15pt, high=10pt shift threshold */
+  sensitivity: SentimentAlertSensitivity;
+  /** Which direction of shift triggers the alert */
+  direction: SentimentAlertDirection;
+  /** Whether this rule has already fired (resets when sentiment data refreshes) */
+  triggered: boolean;
+  /** Whether the rule is active */
+  enabled: boolean;
+  /** ISO timestamp when the rule was created */
+  createdAt: string;
+  /** ISO timestamp when the rule last triggered */
+  lastTriggeredAt?: string;
+}
+
+/** A record of a sentiment alert that was triggered */
+export interface SentimentAlertTrigger {
+  id: string;
+  ruleId: string;
+  symbol: string;
+  stockName: string;
+  /** The shift magnitude at trigger time */
+  magnitude: number;
+  /** Direction of the shift */
+  direction: 'improving' | 'deteriorating';
+  /** The current sentiment score */
+  score: number;
+  /** Previous sentiment score */
+  previousScore: number;
+  /** Human-readable alert message */
+  message: string;
+  /** ISO timestamp when triggered */
+  timestamp: string;
+  /** Whether the user has seen this alert */
+  read: boolean;
+}
+
 // ============ Navigation Types ============
+// ============ 2FA / TOTP Types ============
+
+/** Response from 2FA setup endpoint */
+export interface TwoFactorSetupData {
+  secret: string;
+  otpauthUrl: string;
+  backupCodes: string[];
+}
+
+/** Current 2FA status */
+export interface TwoFactorStatus {
+  enabled: boolean;
+  verified: boolean;
+  setupAt?: string;
+}
+
+/** Backup code with usage status */
+export interface BackupCodeEntry {
+  code: string;
+  used: boolean;
+}
+
+/** Response from backup codes endpoint */
+export interface BackupCodesResponse {
+  codes: BackupCodeEntry[];
+  unusedCount: number;
+}
+
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;

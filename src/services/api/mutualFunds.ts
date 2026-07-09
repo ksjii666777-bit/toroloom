@@ -7,6 +7,12 @@ export interface CreateSIPRequest {
   frequency: SIPPlan['frequency'];
 }
 
+export interface ModifySIPRequest {
+  sipId: string;
+  amount?: number;
+  frequency?: SIPPlan['frequency'];
+}
+
 export const mutualFundApi = {
   getFunds: () => api.get<MutualFund[]>('/mutual-funds'),
 
@@ -17,4 +23,16 @@ export const mutualFundApi = {
 
   createSIP: (data: CreateSIPRequest) =>
     api.post<SIPPlan>('/mutual-funds/sips', data),
+
+  modifySIP: (data: ModifySIPRequest) =>
+    api.put<SIPPlan>('/mutual-funds/sips', data),
+
+  pauseSIP: (sipId: string) =>
+    api.post<{ success: boolean }>('/mutual-funds/sips/pause', { sipId }),
+
+  resumeSIP: (sipId: string) =>
+    api.post<{ success: boolean }>('/mutual-funds/sips/resume', { sipId }),
+
+  deleteSIP: (sipId: string) =>
+    api.post<{ success: boolean }>('/mutual-funds/sips/delete', { sipId }),
 };

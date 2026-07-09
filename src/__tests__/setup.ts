@@ -58,6 +58,7 @@ vi.mock('@react-native-async-storage/async-storage', () => ({
 vi.mock('react-native-reanimated', () => ({
   useSharedValue: (initial: any) => ({ value: initial }),
   useAnimatedStyle: (updater: any) => updater(),
+  useAnimatedProps: (updater: any) => updater(),
   withTiming: (toValue: any, _config: any, callback?: any) => {
     callback?.(true);
     return toValue;
@@ -69,14 +70,23 @@ vi.mock('react-native-reanimated', () => ({
   withSpring: (toValue: any) => toValue,
   withRepeat: (animation: any, _count?: number, _reverse?: boolean) => animation,
   withSequence: (...animations: any[]) => animations[animations.length - 1],
-  FadeInDown: { duration: () => ({}) },
-  FadeInUp: { duration: () => ({}) },
-  BounceIn: { duration: () => ({}) },
+  // Deeply chainable animation entry functions using Proxy
+  // Supports: .delay().duration().springify().damping().stiffness()... etc
+  FadeIn: new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => ({}) }) }) }) }),
+  FadeInDown: new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => ({}) }) }) }) }),
+  FadeInUp: new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => ({}) }) }) }) }),
+  BounceIn: new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => ({}) }) }) }) }),
   runOnJS: (fn: any) => fn,
   useAnimatedScrollHandler: (handler: any) => handler.onScroll || handler,
   Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
   Easing: { in: (e: any) => e, out: (e: any) => e, inOut: (e: any) => e, ease: undefined },
-  default: { View: 'View', Text: 'Text' },
+  default: {
+    View: 'View',
+    Text: 'Text',
+    ScrollView: 'ScrollView',
+    createAnimatedComponent: (Component: any) => Component,
+  },
+  createAnimatedComponent: (Component: any) => Component,
 }));
 
 // ==================== Mock React Native ====================
@@ -182,6 +192,7 @@ vi.mock('react-native-svg', () => {
     Text: 'SvgText',
     TSpan: 'TSpan',
     ClipPath: 'ClipPath',
+    Ellipse: 'Ellipse',
     Polygon: 'Polygon',
     Polyline: 'Polyline',
   };
@@ -403,6 +414,92 @@ vi.mock('expo-file-system', () => ({
   EncodingType: { UTF8: 'utf8' },
 }));
 
+// ==================== Mock expo-modules-core ====================
+// The react-native mock in setup is async (vi.mock factory with await import),
+// which creates a timing hole: any module that synchronously imports
+// expo-modules-core at load time will get the REAL react-native (not our mock)
+// because the async mock hasn't resolved yet. Mocking expo-modules-core
+// directly avoids the sync import of react-native.EventEmitter.
+// ==================== Mock react-native subpath imports ====================
+// Some modules import from react-native subpaths (e.g. react-native/Libraries/...)
+// which bypasses the top-level vi.mock('react-native', ...). These subpath files
+// contain Flow syntax that vitest/rolldown cannot parse.
+vi.mock('react-native/Libraries/Image/resolveAssetSource', () => ({
+  default: (source: any) => (typeof source === 'number' ? { uri: source } : source),
+}));
+
+// ==================== Mock expo-video ====================
+// VideoLessonPlayer imports from expo-video which triggers Flow parsing errors
+vi.mock('expo-video', () => ({
+  useVideoPlayer: () => ({
+    play: vi.fn(),
+    pause: vi.fn(),
+    seekTo: vi.fn(),
+    replay: vi.fn(),
+    playing: false,
+    currentTime: 0,
+    duration: 120,
+    status: 'ready',
+    addListener: vi.fn(() => ({ remove: vi.fn() })),
+    removeListener: vi.fn(),
+  }),
+  VideoView: 'VideoView',
+  VideoPlayer: class {},
+  VideoSource: {},
+  PlayerStatus: { Ready: 'ready', Loading: 'loading', Error: 'error' },
+}));
+
+vi.mock('expo-modules-core', () => {
+  class MockExpoEventEmitter {
+    _listeners: Record<string, Array<(...args: any[]) => void>> = {};
+    addListener(event: string, listener: (...args: any[]) => void) {
+      if (!this._listeners[event]) this._listeners[event] = [];
+      this._listeners[event].push(listener);
+      return { remove: () => this.removeListener(event, listener) };
+    }
+    removeListener(event: string, listener: (...args: any[]) => void) {
+      const arr = this._listeners[event];
+      if (arr) this._listeners[event] = arr.filter(l => l !== listener);
+    }
+    removeAllListeners(event?: string) {
+      if (event) delete this._listeners[event];
+      else this._listeners = {};
+    }
+    emit(event: string, ...args: any[]) {
+      (this._listeners[event] || []).forEach(l => l(...args));
+    }
+    listenerCount(event: string) {
+      return (this._listeners[event] || []).length;
+    }
+  }
+  return {
+    EventEmitter: MockExpoEventEmitter,
+    NativeModulesProxy: {},
+    requireNativeModule: () => ({}),
+    requireNativeViewManager: () => 'View',
+    Platform: { OS: 'ios', Version: 16, select: (specs: any) => specs.ios ?? specs.default },
+    CodedError: class extends Error { constructor(code: string, message: string) { super(message); this.name = 'CodedError'; } },
+    UnavailabilityError: class extends Error { constructor(moduleName: string, propertyName: string) { super(`${moduleName}.${propertyName} is not available`); this.name = 'UnavailabilityError'; } },
+    default: {},
+  };
+});
+
+// ==================== Mock @shopify/react-native-skia ====================
+// SkiaCandlestickChart.tsx uses this for GPU-accelerated canvas. The native
+// module is not available in Node.js test environment. Mock all Skia exports.
+vi.mock('@shopify/react-native-skia', () => ({
+  Canvas: 'SkiaCanvas',
+  Path: 'SkiaPath',
+  Rect: 'SkiaRect',
+  Line: 'SkiaLine',
+  Circle: 'SkiaCircle',
+  Group: 'SkiaGroup',
+  vec: (x: number, y: number) => ({ x, y }),
+  LinearGradient: 'SkiaLinearGradient',
+  Shadow: 'SkiaShadow',
+  BlurMask: 'SkiaBlurMask',
+}));
+
 // ==================== Mock expo-file-system/legacy ====================
 // reportExport.ts imports from 'expo-file-system/legacy'. vitest's mock of the
 // root module does NOT cover subpath imports. Without this mock, the real module
@@ -416,6 +513,25 @@ vi.mock('expo-file-system/legacy', () => ({
   moveAsync: vi.fn(() => Promise.resolve()),
   writeAsStringAsync: vi.fn(() => Promise.resolve()),
   EncodingType: { UTF8: 'utf8' },
+}));
+
+// ==================== Mock expo-localization (safety net) ====================
+// i18n/index.ts no longer uses expo-localization (uses React Native I18nManager
+// instead), but keep this mock in case any other module transitively imports it.
+vi.mock('expo-localization', () => ({
+  getLocales: () => [{ languageCode: 'en', countryCode: 'US', languageTag: 'en-US' }],
+  getCalendars: () => [{ calendar: 'gregorian', timeZone: 'Asia/Kolkata' }],
+  getTimeZone: () => 'Asia/Kolkata',
+  default: {
+    getLocales: () => [{ languageCode: 'en', countryCode: 'US', languageTag: 'en-US' }],
+    getCalendars: () => [{ calendar: 'gregorian', timeZone: 'Asia/Kolkata' }],
+    getTimeZone: () => 'Asia/Kolkata',
+  },
+}));
+
+// ==================== Mock lottie-react-native ====================
+vi.mock('lottie-react-native', () => ({
+  default: 'LottieView',
 }));
 
 // ==================== Mock react-native-webview ====================

@@ -1,0 +1,82 @@
+# =============================================================================
+# F&O Options Chain — E2E Test
+# =============================================================================
+# Tests the F&O Options Chain screen:
+#   1. Login
+#   2. Navigate to F&O Options Chain
+#   3. Verify options chain renders with strikes and Greeks
+#   4. Switch expiry
+#   5. Navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → F&O Options Chain ─────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "F&O Options Chain"
+    direction: DOWN
+- tapOn:
+    text: "F&O Options Chain"
+- waitForAnimationToEnd
+
+# ── 3. Verify Options Chain Screen ─────────────────────────────────────────
+- assertVisible:
+    text: "Options Chain"
+
+# Verify underlying selector
+- assertVisible:
+    text: "NIFTY"
+
+# Verify key columns/headers
+- assertVisible:
+    text: "Strike"
+- assertVisible:
+    text: "CE"
+- assertVisible:
+    text: "PE"
+
+# Verify data rows are visible
+- assertVisible:
+    text: "OI"
+- assertVisible:
+    text: "IV"
+
+# ── 4. Switch symbol ──────────────────────────────────────────────────────
+- tapOn:
+    text: "NIFTY"
+- waitForAnimationToEnd
+- tapOn:
+    text: "BANKNIFTY"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "BANKNIFTY"
+
+# ── 5. Navigate Back ──────────────────────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"

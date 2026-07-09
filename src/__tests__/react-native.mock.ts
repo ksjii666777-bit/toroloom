@@ -166,6 +166,29 @@ export const PixelRatio = {
   startDetecting: () => {},
 };
 
+// ── Easing ————————————————————————————————————————————————————
+export const Easing = {
+  step0: (t: number) => t <= 0 ? 0 : 1,
+  step1: (t: number) => t >= 1 ? 1 : 0,
+  linear: (t: number) => t,
+  ease: (t: number) => t,
+  quad: (t: number) => t * t,
+  cubic: (t: number) => t * t * t,
+  poly: (n: number) => (t: number) => Math.pow(t, n),
+  sin: (t: number) => 1 - Math.cos((t * Math.PI) / 2),
+  circle: (t: number) => 1 - Math.sqrt(1 - t * t),
+  exp: (t: number) => Math.pow(2, 10 * (t - 1)),
+  elastic: (bounciness: number) => (t: number) => t,
+  back: (overshoot: number) => (t: number) => t,
+  bounce: (t: number) => t,
+  bezier: (x1: number, y1: number, x2: number, y2: number) => (t: number) => t,
+  in: (easing: (t: number) => number) => (t: number) => easing(t),
+  out: (easing: (t: number) => number) => (t: number) => 1 - easing(1 - t),
+  inOut: (easing: (t: number) => number) => (t: number) => t < 0.5
+    ? easing(t * 2) / 2
+    : 1 - easing((1 - t) * 2) / 2,
+};
+
 // ── LayoutAnimation ———————————————————————————————————————————
 export const LayoutAnimation = {
   configureNext: () => {},
@@ -254,6 +277,14 @@ export const NativeModules = {
   },
 };
 
+// ── findNodeHandle ————————————————————————————————————————
+export const findNodeHandle = (componentOrHandle: any): number | null => {
+  if (componentOrHandle && typeof componentOrHandle === 'object' && '_nativeTag' in componentOrHandle) {
+    return componentOrHandle._nativeTag;
+  }
+  return componentOrHandle || null;
+};
+
 // ── Utility exports ———————————————————————————————————————————
 export const I18nManager = {
   allowRTL: false,
@@ -336,6 +367,7 @@ const ReactNative = {
   Animated,
   PixelRatio,
   LayoutAnimation,
+  Easing,
   PlatformColor,
   DynamicColorIOS,
   processColor,
@@ -349,6 +381,7 @@ const ReactNative = {
   InteractionManager,
   EventEmitter,
   TurboModuleRegistry,
+  findNodeHandle,
 };
 
 export default ReactNative;

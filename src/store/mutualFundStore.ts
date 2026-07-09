@@ -12,6 +12,10 @@ interface MutualFundState {
   fetchSIPs: () => Promise<void>;
   investInFund: (fundId: string, amount: number) => Promise<void>;
   startSIP: (fundId: string, amount: number, frequency: SIPPlan['frequency']) => Promise<void>;
+  modifySIP: (sipId: string, updates: { amount?: number; frequency?: SIPPlan['frequency'] }) => Promise<void>;
+  pauseSIP: (sipId: string) => Promise<void>;
+  resumeSIP: (sipId: string) => Promise<void>;
+  deleteSIP: (sipId: string) => Promise<void>;
 }
 
 export const useMutualFundStore = create<MutualFundState>((set) => ({
@@ -69,6 +73,67 @@ export const useMutualFundStore = create<MutualFundState>((set) => ({
         currentValue: amount,
         returns: 0,
       }],
+    }));
+  },
+
+  modifySIP: async (sipId, updates) => {
+    try {
+      const updated = await mutualFundApi.modifySIP({ sipId, ...updates });
+      set(state => ({
+        sipPlans: state.sipPlans.map(s => s.id === sipId ? updated : s),
+      }));
+      return;
+    } catch {
+      // Backend unavailable — update locally
+    }
+
+    set(state => ({
+      sipPlans: state.sipPlans.map(s =>
+        s.id === sipId
+          ? { ...s, ...updates, id: s.id, fundId: s.fundId, fundName: s.fundName }
+          : s
+      ),
+    }));
+  },
+
+  pauseSIP: async (sipId) => {
+    try {
+      await mutualFundApi.pauseSIP(sipId);
+    } catch {
+      // Backend unavailable — update locally
+    }
+
+    set(state => ({
+      sipPlans: state.sipPlans.map(s =>
+        s.id === sipId ? { ...s, nextDate: 'PAUSED' } : s
+      ),
+    }));
+  },
+
+  resumeSIP: async (sipId) => {
+    try {
+      await mutualFundApi.resumeSIP(sipId);
+    } catch {
+      // Backend unavailable — update locally
+    }
+
+    const nextMonth = new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
+    set(state => ({
+      sipPlans: state.sipPlans.map(s =>
+        s.id === sipId ? { ...s, nextDate: nextMonth } : s
+      ),
+    }));
+  },
+
+  deleteSIP: async (sipId) => {
+    try {
+      await mutualFundApi.deleteSIP(sipId);
+    } catch {
+      // Backend unavailable — update locally
+    }
+
+    set(state => ({
+      sipPlans: state.sipPlans.filter(s => s.id !== sipId),
     }));
   },
 }));

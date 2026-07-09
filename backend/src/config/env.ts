@@ -64,26 +64,20 @@ export const env = {
   /** MongoDB database name. */
   mongodbDbName: process.env.MONGODB_DB_NAME || '',
 
-  // ──── Broker Credentials ─────────────────────────────────────────────
-  zerodha: {
-    apiKey: process.env.ZERODHA_API_KEY || '',
-    apiSecret: process.env.ZERODHA_API_SECRET || '',
-    accessToken: process.env.ZERODHA_ACCESS_TOKEN || '',
-    requestToken: process.env.ZERODHA_REQUEST_TOKEN || '',
-  },
-
-  angel: {
-    clientId: process.env.ANGEL_CLIENT_ID || '',
-    apiKey: process.env.ANGEL_API_KEY || '',
-    accessToken: process.env.ANGEL_ACCESS_TOKEN || '',
-    password: process.env.ANGEL_PASSWORD || '',
-    totp: process.env.ANGEL_TOTP || '',
-  },
-
-  groww: {
-    apiKey: process.env.GROWW_API_KEY || '',
-    accessToken: process.env.GROWW_ACCESS_TOKEN || '',
-  },
+  // ──── Broker Credentials — REMOVED per Zero-API Gateway mandate ────
+  // All broker connections are handled via WebView session extraction
+  // (SecureSessionSync → sessionStorage → proxyClient). No developer
+  // API keys, API secrets, trading passwords, or TOTP secrets are
+  // stored or managed by the platform backend.
+  //
+  // The BROKER env var (below) selects only the data mode:
+  //   'mock'     → simulated data (default)
+  //   'zerodha'  → Zerodha backend plugin (legacy)
+  //   'angel'    → Angel One backend plugin (legacy)
+  //   'groww'    → Groww backend plugin (legacy)
+  //
+  // For production, frontend proxyClient.ts handles all broker data
+  // requests using encrypted session tokens stored in device keychain.
 
   // ──── AI Configuration ──────────────────────────────────────────────
   aiProvider: (process.env.AI_PROVIDER || 'openrouter') as 'openrouter' | 'google',

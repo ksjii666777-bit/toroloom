@@ -1,24 +1,31 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
-import { useAuthStore } from '../../store/authStore';
+import { useAuthStore, useKycStore } from '../../store';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-
 Dimensions.get('window');
 
 const kycSteps = [
-  { key: 'pan', label: 'PAN Verification', icon: 'card-outline', done: true },
-  { key: 'aadhaar', label: 'Aadhaar Verification', icon: 'finger-print-outline', done: true },
-  { key: 'bank', label: 'Bank Linking', icon: 'business-outline', done: true },
-  { key: 'signature', label: 'Digital Signature', icon: 'create-outline', done: true },
-  { key: 'risk', label: 'Risk Assessment', icon: 'shield-checkmark-outline', done: true },
+  { key: 'pan', label: 'PAN Verification', icon: 'card-outline', done: false },
+  { key: 'aadhaar', label: 'Aadhaar Verification', icon: 'finger-print-outline', done: false },
+  { key: 'digilocker', label: 'DigiLocker', icon: 'cloud-done-outline', done: false },
+  { key: 'bank', label: 'Bank Linking', icon: 'business-outline', done: false },
+  { key: 'complete', label: 'Complete KYC', icon: 'shield-checkmark-outline', done: false },
 ];
+
+// Step screen mapping
+const KYC_SCREENS: Record<string, string> = {
+  pan: 'PanVerification',
+  aadhaar: 'AadhaarVerification',
+  digilocker: 'DigiLocker',
+};
 
 export default function ProfileScreen({ navigation }: any) {
   const { colors } = useTheme();
@@ -26,6 +33,65 @@ export default function ProfileScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
   const { userLevel } = useGamificationStore();
   const [activeTab, setActiveTab] = useState<'profile' | 'kyc'>('profile');
+
+  // ─── Persisted KYC Store ────────────────────────────────────────────
+  const {
+    completedSteps, initialized: kycInitialized,
+    loadKycState, markStepCompleted,
+  } = useKycStore();
+
+  // Hydrate KYC state from AsyncStorage on mount
+  useEffect(() => {
+    if (!kycInitialized) {
+      loadKycState();
+    }
+  }, [kycInitialized, loadKycState]);
+
+  // Compute display state from store
+  const kycStepsDisplay = useMemo(() =>
+    kycSteps.map(step => ({
+      ...step,
+      done: completedSteps[step.key as keyof typeof completedSteps] || false,
+    })),
+  [completedSteps]);
+
+  // Count completed steps from store
+  const completedStepsCount = Object.values(completedSteps).filter(Boolean).length;
+
+  // Navigation handler for each KYC step
+  const handleKycStepPress = useCallback((stepKey: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    if (stepKey === 'complete') {
+      const haptic = completedStepsCount >= 4
+        ? Haptics.NotificationFeedbackType.Success
+        : Haptics.NotificationFeedbackType.Warning;
+      Haptics.notificationAsync(haptic);
+      return;
+    }
+
+    if (stepKey === 'bank') {
+      navigation.navigate('BankLinking', {
+        onVerified: () => {
+          markStepCompleted('bank');
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        },
+      });
+      return;
+    }
+
+    const screen = KYC_SCREENS[stepKey];
+    if (screen) {
+      navigation.navigate(screen, {
+        onVerified: () => {
+          // Persist to AsyncStorage via store
+          markStepCompleted(stepKey as 'pan' | 'aadhaar' | 'digilocker' | 'bank');
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        },
+      });
+    }
+  }, [navigation, completedStepsCount, markStepCompleted]);
+
 
   const accountDetails = [
     { label: 'Account Type', value: 'Individual (Non-DP)' },
@@ -89,8 +155,8 @@ export default function ProfileScreen({ navigation }: any) {
             { icon: 'arrow-up-circle', label: 'Withdraw', color: '#FF1744', gradient: GRADIENTS.danger },
             { icon: 'swap-horizontal', label: 'Transfer', color: '#6C63FF', gradient: GRADIENTS.primary },
             { icon: 'qr-code', label: 'UPI Settings', color: '#00D2FF', gradient: GRADIENTS.accent },
-          ].map((action, i) => (
-            <TouchableOpacity key={i} style={styles.quickAction}>
+          ].map((action, idx) => (
+            <TouchableOpacity key={idx} style={styles.quickAction}>
               <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
                 <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={24} color={colors.white} />
               </LinearGradient>
@@ -122,8 +188,8 @@ export default function ProfileScreen({ navigation }: any) {
             {/* Account Details */}
             <Card title="Account Details" subtitle="Your trading account information">
               <View style={styles.detailsList}>
-                {accountDetails.map((item, i) => (
-                  <View key={i} style={styles.detailRow}>
+                {accountDetails.map((item, _i) => (
+                  <View key={item.label} style={styles.detailRow}>
                     <Text style={styles.detailLabel}>{item.label}</Text>
                     <Text style={styles.detailValue}>{item.value}</Text>
                   </View>
@@ -172,28 +238,75 @@ export default function ProfileScreen({ navigation }: any) {
             {/* KYC Status */}
             <Card title="KYC Status" subtitle="Complete your verification" style={{ marginBottom: SPACING.md }}>
               <View style={styles.kycHeader}>
-                <View style={[styles.kycStatusBadge, { backgroundColor: '#00C85320' }]}>
-                  <Ionicons name="checkmark-circle" size={20} color="#00C853" />
-                  <Text style={styles.kycStatusText}>KYC Verified</Text>
+                <View style={[styles.kycStatusBadge, {
+                  backgroundColor: completedStepsCount >= 4 ? '#00C85320' : colors.bgInput,
+                }]}>
+                  <Ionicons
+                    name={completedStepsCount >= 4 ? 'checkmark-circle' : 'time-outline'}
+                    size={20}
+                    color={completedStepsCount >= 4 ? '#00C853' : colors.textMuted}
+                  />
+                  <Text style={[styles.kycStatusText, {
+                    color: completedStepsCount >= 4 ? '#00C853' : colors.textMuted,
+                  }]}>
+                    {completedStepsCount >= 4 ? 'KYC Verified' : `${completedStepsCount}/4 Steps Complete`}
+                  </Text>
                 </View>
               </View>
+              {/* Progress Bar */}
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: `${(completedStepsCount / 4) * 100}%` }]} />
+              </View>
               <View style={styles.kycSteps}>
-                {kycSteps.map((step, i) => (
-                  <View key={step.key} style={styles.kycStepRow}>
-                    <View style={[styles.kycStepIcon, step.done && { backgroundColor: '#00C85320' }]}>
+                {kycStepsDisplay.map((step) => (
+                  <TouchableOpacity
+                    key={step.key}
+                    style={styles.kycStepRow}
+                    onPress={() => handleKycStepPress(step.key)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[
+                      styles.kycStepIcon,
+                      step.done ? { backgroundColor: '#00C85320' }
+                        : step.key === 'complete' && completedStepsCount >= 4
+                          ? { backgroundColor: colors.primary + '20' }
+                          : { backgroundColor: colors.bgInput },
+                    ]}>
                       <Ionicons
-                        name={step.done ? 'checkmark-circle' : (step.icon as keyof typeof Ionicons.glyphMap)}
+                        name={step.done ? 'checkmark-circle'
+                          : (step.key === 'complete' && completedStepsCount >= 4)
+                            ? 'checkmark-circle'
+                            : step.icon as keyof typeof Ionicons.glyphMap}
                         size={20}
-                        color={step.done ? '#00C853' : colors.textMuted}
+                        color={step.done ? '#00C853'
+                          : (step.key === 'complete' && completedStepsCount >= 4)
+                            ? colors.primary
+                            : colors.textMuted}
                       />
                     </View>
-                    <Text style={[styles.kycStepLabel, step.done && { color: colors.text }]}>
+                    <Text style={[
+                      styles.kycStepLabel,
+                      (step.done || (step.key === 'complete' && completedStepsCount >= 4))
+                        ? { color: colors.text }
+                        : {},
+                    ]}>
                       {step.label}
                     </Text>
-                    {i < kycSteps.length - 1 && <View style={styles.kycStepLine} />}
-                  </View>
+                    {step.done && (
+                      <Ionicons name="checkmark" size={16} color={colors.success} />
+                    )}
+                    {!step.done && step.key !== 'complete' && (
+                      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                    )}
+                  </TouchableOpacity>
                 ))}
               </View>
+              {/* Helper text */}
+              {completedStepsCount < 4 && (
+                <Text style={styles.kycHelperText}>
+                  Tap on a step to start verification. Complete all 4 steps to finish KYC.
+                </Text>
+              )}
             </Card>
 
             {/* Linked Bank Accounts */}
@@ -218,7 +331,14 @@ export default function ProfileScreen({ navigation }: any) {
                   {i < bankDetails.length - 1 && <View style={styles.menuDivider} />}
                 </View>
               ))}
-              <TouchableOpacity style={styles.addBankBtn}>
+              <TouchableOpacity
+                style={styles.addBankBtn}
+                onPress={() => navigation.navigate('BankLinking', {
+                  onVerified: () => {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  },
+                })}
+              >
                 <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
                 <Text style={styles.addBankText}>Add Bank Account</Text>
               </TouchableOpacity>
@@ -458,6 +578,18 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: FONTS.size.sm,
     color: '#00C853',
   },
+  progressBar: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.bgInput,
+    marginBottom: SPACING.lg,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: colors.success,
+  },
   kycSteps: {
     gap: 0,
   },
@@ -479,6 +611,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.regular,
     fontSize: FONTS.size.sm,
     color: colors.textMuted,
+    flex: 1,
+  },
+  kycHelperText: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textMuted,
+    marginTop: SPACING.md,
+    textAlign: 'center',
   },
   kycStepLine: {
     position: 'absolute',

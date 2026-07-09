@@ -1,0 +1,90 @@
+# =============================================================================
+# AI Insights Flow — Market Analysis
+# =============================================================================
+# Tests AI insights screen with market overview and stock analysis cards:
+#   1. Login with test credentials
+#   2. Navigate: More → AI Insights
+#   3. Verify header + AI Market Overview card
+#   4. Verify stock analysis cards with symbol, sentiment, confidence
+#   5. Scroll to see all insights
+#   6. Navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → AI Insights ──────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "AI Insights"
+    direction: DOWN
+- tapOn:
+    text: "AI Insights"
+- waitForAnimationToEnd
+
+# ── 3. Verify Header ───────────────────────────────────────────────────────
+- assertVisible:
+    text: "AI Insights"
+- assertVisible:
+    text: "Powered by advanced market analysis"
+
+# ── 4. Verify AI Market Overview Card ──────────────────────────────────────
+- assertVisible:
+    text: "AI Market Overview"
+- assertVisible:
+    text: "bullish"
+- assertVisible:
+    text: "bearish"
+- assertVisible:
+    text: "neutral"
+- assertVisible:
+    text: "Always do your own research"
+
+# ── 5. Verify Stock Analysis Section ───────────────────────────────────────
+- assertVisible:
+    text: "Stock Analysis"
+
+# Scroll down to see all insight cards
+- scroll:
+    direction: DOWN
+- waitForAnimationToEnd
+
+# Each insight card shows symbol, sentiment, confidence, and target levels
+- assertVisible:
+    text: "Confidence"
+- assertVisible:
+    text: "Target 1"
+    optional: true
+
+- scroll:
+    direction: DOWN
+- waitForAnimationToEnd
+
+# ── 6. Navigate back ───────────────────────────────────────────────────────
+# The screen has no visible back button; use Android back key
+- pressKey: BACK
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "More"

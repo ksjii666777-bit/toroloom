@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import ToroloomLogo from '../../components/ui/ToroloomLogo';
 import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
+import { useT } from '../../hooks/useT';
 
 interface LoginScreenProps {
   navigation: any;
@@ -16,6 +17,7 @@ interface LoginScreenProps {
 export default function LoginScreen({ navigation }: LoginScreenProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { t } = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,13 +25,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      setError('Please enter email and password');
+      setError(t('errors.fieldRequired'));
       return;
     }
     setError('');
     const success = await login(email, password);
     if (!success) {
-      setError('Invalid credentials. Try again.');
+      setError(t('auth.invalidCredentials'));
     }
   };
 
@@ -54,16 +56,16 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           >
             <ToroloomLogo size={44} />
           </LinearGradient>
-          <Text style={styles.appName}>Toroloom</Text>
-          <Text style={styles.tagline}>Intelligence Meets Execution</Text>
+          <Text style={styles.appName}>{t('app.name')}</Text>
+          <Text style={styles.tagline}>{t('app.tagline')}</Text>
         </View>
 
         {/* Login Form */}
         <View
           style={styles.formSection}
         >
-          <Text style={styles.welcomeBack}>Welcome Back! 👋</Text>
-          <Text style={styles.subtitle}>Log in to your account</Text>
+          <Text style={styles.welcomeBack}>{t('auth.welcomeBack')}</Text>
+          <Text style={styles.subtitle}>{t('auth.loginSubtitle')}</Text>
 
           {error ? (
             <View style={styles.errorBox}>
@@ -73,8 +75,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           ) : null}
 
           <Input
-            label="Email"
-            placeholder="Enter your email"
+            label={t('auth.email')}
+            placeholder={t('auth.emailPlaceholder')}
             value={email}
             onChangeText={setEmail}
             icon="mail-outline"
@@ -85,8 +87,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           />
 
           <Input
-            label="Password"
-            placeholder="Enter your password"
+            label={t('auth.password')}
+            placeholder={t('auth.passwordPlaceholder')}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -97,11 +99,11 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           />
 
           <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotText}>Forgot Password?</Text>
+            <Text style={styles.forgotText}>{t('auth.forgotPassword')}</Text>
           </TouchableOpacity>
 
           <Button
-            title="Log In"
+            title={t('auth.login')}
             onPress={handleLogin}
             loading={isLoading}
             size="large"
@@ -110,7 +112,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           {/* Social Login */}
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or continue with</Text>
+            <Text style={styles.dividerText}>{t('auth.orContinueWith')}</Text>
             <View style={styles.dividerLine} />
           </View>
 
@@ -129,9 +131,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
         {/* Sign Up Link */}
         <View style={styles.signupSection}>
-          <Text style={styles.noAccount}>Don't have an account? </Text>
+          <Text style={styles.noAccount}>{t('auth.noAccount')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-            <Text style={styles.signupLink}>Sign Up</Text>
+            <Text style={styles.signupLink}>{t('auth.signup')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

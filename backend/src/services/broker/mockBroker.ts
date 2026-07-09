@@ -7,6 +7,7 @@ import {
   EDISTranStatusRequest, EDISTranStatusResponse,
   BrokerageEstimateRequest, BrokerageEstimateResponse,
 } from './interface';
+import { generateMultiTimeframeOHLC } from '../../data/mockOHLC';
 
 // ============ In-Memory Mock Data ============
 
@@ -33,35 +34,6 @@ const mockStocks: StockInfo[] = [
 ];
 
 // ============ Helpers ============
-
-function generateOHLC(basePrice: number, days: number): OHLCData[] {
-  const data: OHLCData[] = [];
-  let price = basePrice;
-  const today = new Date();
-
-  for (let i = days; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    if (date.getDay() === 0 || date.getDay() === 6) continue;
-
-    const change = (Math.random() - 0.47) * price * 0.025;
-    const open = price;
-    const close = Math.max(open + change, open * 0.85);
-    const high = Math.max(open, close) * (1 + Math.random() * 0.02);
-    const low = Math.min(open, close) * (1 - Math.random() * 0.02);
-    price = close;
-
-    data.push({
-      date: date.toISOString().split('T')[0],
-      open: Math.round(open * 100) / 100,
-      high: Math.round(high * 100) / 100,
-      low: Math.round(low * 100) / 100,
-      close: Math.round(close * 100) / 100,
-      volume: Math.floor(Math.random() * 20000000) + 5000000,
-    });
-  }
-  return data;
-}
 
 function generateQuote(stock: StockInfo): MarketQuote {
   const variation = stock.price * (Math.random() - 0.5) * 0.004;
@@ -208,12 +180,31 @@ export class MockBroker implements IBroker {
     return map;
   }
 
-  async getOHLC(symbol: string, _interval: string, days: number): Promise<OHLCData[]> {
+  async getOHLC(symbol: string, interval: string, days: number): Promise<OHLCData[]> {
     await this.delay(400);
     const stock = mockStocks.find(s => s.symbol === symbol);
     if (!stock) throw new Error(`Stock not found: ${symbol}`);
-    const actualDays = Math.min(Math.max(days, 1), 730);
-    return generateOHLC(stock.price, actualDays);
+
+    // Map common interval aliases
+    const normalizedInterval = interval
+      .replace(/^1d$/i, '1d')
+      .replace(/^day$/i, '1d')
+      .replace(/^daily$/i, '1d')
+      .replace(/^1w$/i, '1w')
+      .replace(/^week$/i, '1w')
+      .replace(/^weekly$/i, '1w')
+      .replace(/^1m$/i, '1m')
+      .replace(/^month$/i, '1m')
+      .replace(/^monthly$/i, '1m')
+      .replace(/^1h$/i, '1h')
+      .replace(/^hour$/i, '1h')
+      .replace(/^hourly$/i, '1h')
+      .replace(/^1min$/i, '1min')
+      .replace(/^5min$/i, '5min')
+      .replace(/^15min$/i, '15min')
+      .replace(/^30min$/i, '30min');
+
+    return generateMultiTimeframeOHLC(stock.price, normalizedInterval, days);
   }
 
   async searchStocks(query: string): Promise<StockInfo[]> {

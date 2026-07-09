@@ -92,11 +92,11 @@ describe('Notification Service — setupChannels', () => {
     expect(Notifications.setNotificationChannelAsync).not.toHaveBeenCalled();
   });
 
-  it('creates all 5 Android channels on Android', async () => {
+  it('creates all 6 Android channels on Android', async () => {
     vi.spyOn(Platform, 'OS', 'get').mockReturnValue('android');
     await setupChannels();
 
-    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledTimes(5);
+    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledTimes(6);
     expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledWith(
       'price_alerts',
       expect.objectContaining({ id: 'price_alerts' }),
@@ -117,6 +117,20 @@ describe('Notification Service — setupChannels', () => {
       'portfolio_alerts',
       expect.objectContaining({ id: 'portfolio_alerts' }),
     );
+    expect(Notifications.setNotificationChannelAsync).toHaveBeenCalledWith(
+      'sentiment_alerts',
+      expect.objectContaining({ id: 'sentiment_alerts' }),
+    );
+  });
+
+  it('CHANNELS constant has the expected structure including sentiment_alerts', () => {
+    expect(CHANNELS.PRICE_ALERTS.id).toBe('price_alerts');
+    expect(CHANNELS.TRADE_CONFIRMATIONS.id).toBe('trade_confirmations');
+    expect(CHANNELS.EDUCATIONAL.id).toBe('educational_reminders');
+    expect(CHANNELS.SYSTEM.id).toBe('system_notifications');
+    expect(CHANNELS.PORTFOLIO_ALERTS.id).toBe('portfolio_alerts');
+    expect(CHANNELS.SENTIMENT_ALERTS.id).toBe('sentiment_alerts');
+    expect(CHANNELS.SENTIMENT_ALERTS.importance).toBeDefined();
   });
 
   it('CHANNELS constant has the expected structure', () => {

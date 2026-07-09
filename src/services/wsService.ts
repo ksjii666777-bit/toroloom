@@ -51,6 +51,15 @@ export type LockdownCallback = (data: {
   breachedLimit: 'daily_loss' | 'daily_loss_percent' | null;
 }) => void;
 
+export type CacheInvalidationCallback = (data: {
+  /** The entities that changed on the server */
+  entities: { entityType: string; entityId: string }[];
+  /** Cache namespace hints for batch clearing */
+  namespaces: string[];
+  /** When the invalidation was triggered */
+  timestamp: string;
+}) => void;
+
 // ── Interface ────────────────────────────────────────────────────────────────
 
 export interface WebSocketService {
@@ -75,6 +84,9 @@ export interface WebSocketService {
 
   /** Register a lockdown event callback (trigger / lift). */
   onLockdownCallback(cb: LockdownCallback): void;
+
+  /** Register a cache invalidation callback (push-based invalidation). */
+  onCacheInvalidationCallback(cb: CacheInvalidationCallback): void;
 
   /** Set the daily loss limit used for lockdown simulation. */
   setLossLimit(limit: number): void;

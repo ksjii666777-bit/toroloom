@@ -120,12 +120,70 @@ const brokerReconnectsCounter = new Counter({
   labelNames: ['broker'] as const,
 });
 
+// ──── Cache Metrics ────────────────────────────────────────────────────────
+
+/**
+ * Cache hit rate by analytics endpoint.
+ * Incremented when a cache-aside lookup returns a cached value (L2 hit).
+ */
+const cacheHitsCounter = new Counter({
+  name: 'toroloom_cache_hits_total',
+  help: 'Total number of Redis cache hits by analytics endpoint.',
+  labelNames: ['endpoint'] as const,
+});
+
+/**
+ * Cache miss rate by analytics endpoint.
+ * Incremented when cache-aside returns null and the compute function runs.
+ */
+const cacheMissesCounter = new Counter({
+  name: 'toroloom_cache_misses_total',
+  help: 'Total number of Redis cache misses by analytics endpoint (computation triggered).',
+  labelNames: ['endpoint'] as const,
+});
+
+/**
+ * Histogram of cache-aside lookup latency (Redis GET + JSON.parse).
+ * Enables PromQL: histogram_quantile(0.99, rate(toroloom_cache_lookup_seconds[5m])).
+ */
+const cacheLookupHistogram = new Histogram({
+  name: 'toroloom_cache_lookup_seconds',
+  help: 'Time spent in cache-aside Redis lookup (GET + JSON.parse) by endpoint.',
+  buckets: [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5],
+  labelNames: ['endpoint'] as const,
+});
+
+/**
+ * Histogram of computation time when cache misses (broker/DB fallback).
+ * Helps distinguish penalty of a miss vs. fast cache hit.
+ */
+const cacheComputeSecondsHistogram = new Histogram({
+  name: 'toroloom_cache_compute_seconds',
+  help: 'Time spent computing analytics on cache miss (broker API + aggregation) by endpoint.',
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+  labelNames: ['endpoint'] as const,
+});
+
 // ──── Rate Limit Metrics ─────────────────────────────────────────────────
 
 /** Cumulative count of WebSocket messages rejected by rate limiter. */
 const rateLimitedCounter = new Counter({
   name: 'toroloom_ws_rate_limited_total',
   help: 'Total number of WebSocket messages rate-limited (rejected).',
+});
+
+// ──── Sync Bridge Metrics ─────────────────────────────────────────────────
+
+/** Cumulative count of ws.send() failures in the sync invalidation bridge. */
+const syncBridgeSendFailuresCounter = new Counter({
+  name: 'toroloom_sync_bridge_send_failures_total',
+  help: 'Total number of WebSocket send failures in the sync invalidation bridge.',
+});
+
+/** Cumulative count of circuit-breaker trips in the sync invalidation bridge. */
+const syncBridgeCircuitBreakerTripsCounter = new Counter({
+  name: 'toroloom_sync_bridge_circuit_breaker_trips_total',
+  help: 'Total number of times the sync invalidation bridge circuit breaker has tripped (10+ consecutive send failures).',
 });
 
 /** Number of connections currently in an active rate-limited state. */
@@ -293,6 +351,48 @@ export function incrementRateLimited(): void {
 /** Update active rate limiter gauge to the current count. */
 export function setActiveRateLimiters(count: number): void {
   activeRateLimitersGauge.set(count);
+}
+
+// ──── Sync Bridge Metrics Functions ────────────────────────────────────────
+
+/** Increment the sync bridge send-failure counter. */
+export function incrementSyncBridgeSendFailure(): void {
+  syncBridgeSendFailuresCounter.inc();
+}
+
+/** Increment the sync bridge circuit-breaker trip counter. */
+export function incrementSyncBridgeCircuitBreakerTrip(): void {
+  syncBridgeCircuitBreakerTripsCounter.inc();
+}
+
+// ──── Cache Metrics Functions ──────────────────────────────────────────────
+
+/** Increment the cache hit counter for an analytics endpoint. */
+export function incrementCacheHit(endpoint: string): void {
+  cacheHitsCounter.inc({ endpoint });
+}
+
+/** Increment the cache miss counter for an analytics endpoint. */
+export function incrementCacheMiss(endpoint: string): void {
+  cacheMissesCounter.inc({ endpoint });
+}
+
+/**
+ * Observe cache lookup latency (Redis GET + JSON.parse).
+ * @param endpoint — analytics endpoint name (e.g. 'win-loss', 'pnl')
+ * @param durationMs — elapsed time in milliseconds
+ */
+export function observeCacheLookup(endpoint: string, durationMs: number): void {
+  cacheLookupHistogram.observe({ endpoint }, durationMs / 1000);
+}
+
+/**
+ * Observe computation time on cache miss (broker API + aggregation).
+ * @param endpoint — analytics endpoint name
+ * @param durationMs — elapsed time in milliseconds
+ */
+export function observeCacheCompute(endpoint: string, durationMs: number): void {
+  cacheComputeSecondsHistogram.observe({ endpoint }, durationMs / 1000);
 }
 
 // ──── Registry Access ──────────────────────────────────────────────────────

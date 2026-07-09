@@ -149,7 +149,7 @@ describe('SignupScreen — Loaded Content', () => {
   it('renders without error state initially', () => {
     const { queryByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
     advanceAndRender(500);
-    expect(queryByText('Please fill in all fields')).toBeNull();
+    expect(queryByText('This field is required')).toBeNull();
     expect(queryByText('Passwords do not match')).toBeNull();
     expect(queryByText('Password must be at least 6 characters')).toBeNull();
   });
@@ -172,7 +172,7 @@ describe('SignupScreen — Validation & Error States', () => {
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('Create Account')); });
     advanceAndRender(100);
-    expect(getByText('Please fill in all fields')).toBeDefined();
+    expect(getByText('This field is required')).toBeDefined();
   });
 });
 

@@ -21,6 +21,8 @@ const NOTIFICATION_ICONS: Record<string, { icon: string; color: string }> = {
   educational: { icon: 'school', color: '#6C63FF' },
   news: { icon: 'newspaper', color: '#00D2FF' },
   system: { icon: 'settings', color: '#6E6E9A' },
+  portfolio_alert: { icon: 'pie-chart', color: '#FF6D00' },
+  sentiment_alert: { icon: 'pulse', color: '#8B5CF6' },
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -29,6 +31,8 @@ const TYPE_LABELS: Record<string, string> = {
   educational: 'Learning',
   news: 'News',
   system: 'System',
+  portfolio_alert: 'Portfolio Alert',
+  sentiment_alert: 'Sentiment Alert',
 };
 
 export default function NotificationsScreen({ navigation }: any) {

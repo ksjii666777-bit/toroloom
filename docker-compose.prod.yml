@@ -171,7 +171,7 @@ services:
   # this service is skipped automatically (required: false).
   #
   pgbouncer:
-    image: bitnami/pgbouncer:1.23
+    image: edoburu/pgbouncer:v1.25.2-p0
     container_name: toroloom-pgbouncer
     restart: unless-stopped
     # Not exposed to the internet.  The backend connects via Docker DNS.
@@ -180,25 +180,31 @@ services:
     networks:
       - toroloom-net
     environment:
-      PGBOUNCER_PORT: '6432'
-      PGBOUNCER_DATABASE: '*'
-      POSTGRESQL_HOST: postgres
-      POSTGRESQL_PORT: '5432'
-      POSTGRESQL_USERNAME: toroloom
-      POSTGRESQL_PASSWORD: '${POSTGRES_PASSWORD:-toroloom_prod}'
-      POSTGRESQL_DATABASE: toroloom
-      PGBOUNCER_POOL_MODE: transaction
-      PGBOUNCER_DEFAULT_POOL_SIZE: '20'
-      PGBOUNCER_MAX_CLIENT_CONN: '200'
-      PGBOUNCER_CLIENT_IDLE_TIMEOUT: '120'
-      PGBOUNCER_QUERY_TIMEOUT: '30'
-      PGBOUNCER_AUTH_TYPE: trust
+      # ── PostgreSQL connection (internal Docker network) ──
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      DB_USER: toroloom
+      DB_PASSWORD: '${POSTGRES_PASSWORD:-toroloom_prod}'
+      DB_NAME: toroloom
+
+      # ── Pool tuning ──
+      POOL_MODE: transaction
+      DEFAULT_POOL_SIZE: '20'
+      MAX_CLIENT_CONN: '200'
+      RESERVE_POOL_SIZE: '3'
+      QUERY_TIMEOUT: '30'
+
+      # ── Auth ──
+      AUTH_TYPE: trust
+
+      # ── Listen ──
+      LISTEN_PORT: '6432'
     depends_on:
       postgres:
         condition: service_healthy
         required: false
     healthcheck:
-      test: ['CMD', '/opt/bitnami/scripts/pgbouncer/healthcheck.sh']
+      test: ['CMD-SHELL', 'pg_isready -h localhost -p 6432 -U toroloom -d toroloom']
       interval: 10s
       timeout: 5s
       retries: 5

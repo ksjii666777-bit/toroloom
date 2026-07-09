@@ -1,0 +1,80 @@
+# =============================================================================
+# Calculators — E2E Test
+# =============================================================================
+# Tests the financial calculators:
+#   1. Login
+#   2. Navigate: More → Calculators
+#   3. Test SIP Calculator
+#   4. Test Lumpsum Calculator
+#   5. Navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Calculators ───────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "SIP Calculator"
+    direction: DOWN
+
+# ── 3. SIP Calculator ─────────────────────────────────────────────────────
+- tapOn:
+    text: "SIP Calculator"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "SIP Calculator"
+
+# Enter monthly investment
+- tapOn:
+    text: "Monthly Investment"
+- inputText: "5000"
+
+# Enter expected return
+- tapOn:
+    text: "Expected Return"
+- inputText: "12"
+
+# Enter time period
+- tapOn:
+    text: "Time Period"
+- inputText: "10"
+
+# Calculate
+- tapOn:
+    text: "Calculate"
+- waitForAnimationToEnd
+
+# Verify result is shown
+- assertVisible:
+    text: "Invested Amount"
+- assertVisible:
+    text: "Total Value"
+
+# ── 4. Go back ────────────────────────────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"

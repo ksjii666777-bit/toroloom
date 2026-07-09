@@ -10,6 +10,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useCommunityStore } from '../store/communityStore';
 
+vi.mock('../services/offlineCache', () => ({
+  offlineCache: {
+    save: vi.fn().mockResolvedValue(undefined),
+    load: vi.fn().mockResolvedValue(null),
+    remove: vi.fn().mockResolvedValue(undefined),
+    clearAll: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 // Mock the community API module so every call rejects, forcing the store into
 // its fallback / catch behaviour.
 vi.mock('../services/api/community', () => ({
@@ -27,6 +36,10 @@ describe('CommunityStore — Initial State', () => {
       isLoading: false,
       totalPages: 1,
       currentPage: 1,
+      likedPostIds: [],
+      bookmarkedPostIds: [],
+      comments: {},
+      feedSort: 'hot',
     });
   });
 
@@ -44,8 +57,13 @@ describe('CommunityStore — fetchPosts (API failure fallback)', () => {
     useCommunityStore.setState({
       posts: [],
       isLoading: false,
+      isRefreshing: false,
       totalPages: 1,
       currentPage: 1,
+      likedPostIds: [],
+      bookmarkedPostIds: [],
+      comments: {},
+      feedSort: 'hot',
     });
   });
 
@@ -94,8 +112,13 @@ describe('CommunityStore — addPost', () => {
     useCommunityStore.setState({
       posts: [],
       isLoading: false,
+      isRefreshing: false,
       totalPages: 1,
       currentPage: 1,
+      likedPostIds: [],
+      bookmarkedPostIds: [],
+      comments: {},
+      feedSort: 'hot',
     });
   });
 
@@ -150,8 +173,13 @@ describe('CommunityStore — likePost', () => {
     useCommunityStore.setState({
       posts: basePosts,
       isLoading: false,
+      isRefreshing: false,
       totalPages: 1,
       currentPage: 1,
+      likedPostIds: [],
+      bookmarkedPostIds: [],
+      comments: {},
+      feedSort: 'hot',
     });
   });
 
@@ -176,11 +204,14 @@ describe('CommunityStore — likePost', () => {
     expect(useCommunityStore.getState().posts).toHaveLength(2);
   });
 
-  it('can like the same post multiple times', async () => {
+  it('toggles like state correctly — increment on like, decrement on unlike', async () => {
+    // Toggle: 5 → 6 (like), 6 → 5 (unlike), 5 → 6 (like) = 6
     await useCommunityStore.getState().likePost('p1');
     await useCommunityStore.getState().likePost('p1');
     await useCommunityStore.getState().likePost('p1');
     const state = useCommunityStore.getState();
-    expect(state.posts.find(p => p.id === 'p1')?.likes).toBe(8); // 5 + 3
+    expect(state.posts.find(p => p.id === 'p1')?.likes).toBe(6);
+    // Should now be liked
+    expect(state.likedPostIds).toContain('p1');
   });
 });

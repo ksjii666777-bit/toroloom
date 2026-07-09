@@ -64,6 +64,11 @@ vi.mock('../store/educationStore', () => ({
     fetchLesson: mockFetchLesson,
     markLessonComplete: mockMarkLessonComplete,
     lessonProgress: {},
+    videoProgress: {},
+    videoBookmarks: {},
+    updateVideoProgress: vi.fn(),
+    addVideoBookmark: vi.fn(),
+    deleteVideoBookmark: vi.fn(),
   })),
 }));
 

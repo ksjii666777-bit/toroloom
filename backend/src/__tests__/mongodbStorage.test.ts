@@ -218,6 +218,12 @@ describe('MongoDBStorage', () => {
       mockClientInstance.connect.mockRejectedValue(new Error('MongoDB down'));
 
       const connectPromise = storage.connect();
+      // Attach a catch handler BEFORE advancing time to prevent unhandled
+      // rejection.  connectPromise rejects during advanceTimersByTimeAsync
+      // (when the retry loop exhausts), but expect().rejects attaches its
+      // catch handler after that await, creating a window where the
+      // rejection is unhandled.
+      connectPromise.catch(() => {});
       // Advance past all 5 backoff delays (500+1000+2000+4000+8000=15500ms)
       await vi.advanceTimersByTimeAsync(16000);
 

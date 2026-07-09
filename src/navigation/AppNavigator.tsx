@@ -26,7 +26,14 @@ import MoreScreen from '../screens/tabs/MoreScreen';
 import StockDetailScreen from '../screens/stock/StockDetailScreen';
 import LearnScreen from '../screens/tabs/LearnScreen';
 import CommunityScreen from '../screens/community/CommunityScreen';
+import PostDetailScreen from '../screens/community/PostDetailScreen';
 import AIInsightsScreen from '../screens/ai/AIInsightsScreen';
+import AIChatScreen from '../screens/ai/AIChatScreen';
+import AITradeAssistantScreen from '../screens/ai/AITradeAssistantScreen';
+import EarningsCallScreen from '../screens/ai/EarningsCallScreen';
+import SentimentAnalysisScreen from '../screens/ai/SentimentAnalysisScreen';
+import SentimentAlertScreen from '../screens/ai/SentimentAlertScreen';
+import LiveFeedScreen from '../screens/ai/LiveFeedScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 
 // New Screens
@@ -35,6 +42,10 @@ import MutualFundsScreen from '../screens/mutual-funds/MutualFundsScreen';
 import RiskSettingsScreen from '../screens/settings/RiskSettingsScreen';
 import CourseDetailScreen from '../screens/education/CourseDetailScreen';
 import LessonViewScreen from '../screens/education/LessonViewScreen';
+import GlossaryScreen from '../screens/education/GlossaryScreen';
+import CertificateScreen from '../screens/education/CertificateScreen';
+import LearningPathsScreen from '../screens/education/LearningPathsScreen';
+import LearningPathDetailScreen from '../screens/education/LearningPathDetailScreen';
 import TradeHistoryScreen from '../screens/trade/TradeHistoryScreen';
 import PlaceOrderScreen from '../screens/trade/PlaceOrderScreen';
 import OpenOrdersScreen from '../screens/trade/OpenOrdersScreen';
@@ -44,6 +55,7 @@ import AchievementsScreen from '../screens/achievements/AchievementsScreen';
 import NotificationPreferencesScreen from '../screens/settings/NotificationPreferencesScreen';
 import PortfolioAlertsScreen from '../screens/settings/PortfolioAlertsScreen';
 import SubscriptionScreen from '../screens/settings/SubscriptionScreen';
+import PaymentHistoryScreen from '../screens/payments/PaymentHistoryScreen';
 import AddFundsScreen from '../screens/funds/AddFundsScreen';
 import WithdrawScreen from '../screens/funds/WithdrawScreen';
 import TransactionHistoryScreen from '../screens/funds/TransactionHistoryScreen';
@@ -55,10 +67,16 @@ import ConnectBrokerView from '../screens/broker/ConnectBrokerView';
 import TenantConfigScreen from '../screens/settings/TenantConfigScreen';
 import VoiceSettingsScreen from '../screens/settings/VoiceSettingsScreen';
 import SecuritySettingsScreen from '../screens/settings/SecuritySettingsScreen';
+import TwoFactorSetupScreen from '../screens/settings/TwoFactorSetupScreen';
 import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
 import NewsFeedScreen from '../screens/news/NewsFeedScreen';
+import IPOCalendarScreen from '../screens/news/IPOCalendarScreen';
+import IPODashboardScreen from '../screens/ipos/IPODashboardScreen';
+import EconomicCalendarScreen from '../screens/news/EconomicCalendarScreen';
 import ChatRoomListScreen from '../screens/chat/ChatRoomListScreen';
 import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
+import SocialTradingScreen from '../screens/social/SocialTradingScreen';
+import TraderProfileScreen from '../screens/social/TraderProfileScreen';
 import BehavioralJournalScreen from '../screens/journal/BehavioralJournalScreen';
 import ContractNoteUploadScreen from '../screens/reports/ContractNoteUploadScreen';
 import FnOOptionsChainScreen from '../screens/trade/FnOOptionsChainScreen';
@@ -70,9 +88,21 @@ import LumpsumCalculator from '../screens/calculators/LumpsumCalculator';
 import EMICalculator from '../screens/calculators/EMICalculator';
 import TaxCalculator from '../screens/calculators/TaxCalculator';
 import AvatarWidget from '../components/AvatarWidget';
+
+// KYC Screens
+import PanVerificationScreen from '../screens/kyc/PanVerificationScreen';
+import AadhaarVerificationScreen from '../screens/kyc/AadhaarVerificationScreen';
+import DigiLockerScreen from '../screens/kyc/DigiLockerScreen';
+import BankLinkingScreen from '../screens/kyc/BankLinkingScreen';
 import IronLockOverlay from '../components/IronLockOverlay';
 import UpgradePromptModal from '../components/UpgradePromptModal';
 import OfflineBanner from '../components/ui/OfflineBanner';
+import SyncStatusIndicator from '../components/ui/SyncStatusIndicator';
+import SyncConflictModal from '../components/ui/SyncConflictModal';
+import { useBackgroundSync } from '../hooks/useBackgroundSync';
+import { startCacheWarming } from '../services/cacheWarmingService';
+import { useCacheInvalidation } from '../hooks/useCacheInvalidation';
+import { offlineCache } from '../services/offlineCache';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -214,12 +244,45 @@ function MainTabs() {
       <AvatarWidget />
       <IronLockOverlay />
       <UpgradePromptModal />
+      <SyncStatusIndicator />
       <OfflineBanner />
+      <SyncConflictModal />
     </>
   );
 }
 
 export default function AppNavigator() {
+  // Start background sync listener for offline mutation queue
+  useBackgroundSync();
+
+  // Start cache warming (background pre-fetch of stale caches)
+  useEffect(() => {
+    startCacheWarming();
+  }, []);
+
+  // Push-based cache invalidation via WebSocket
+  useCacheInvalidation();
+
+  // Periodic cache analytics logger (every 30 minutes)
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const cacheAnalytics = offlineCache.getAnalytics();
+      const storageStats = await offlineCache.getStorageStats();
+      analytics.logEvent('cache_analytics', {
+        totalCacheHits: cacheAnalytics.hits,
+        totalCacheMisses: cacheAnalytics.misses,
+        staleHits: cacheAnalytics.staleHits,
+        totalSaves: cacheAnalytics.saves,
+        compressionRatio: cacheAnalytics.compressionRatio,
+        totalBytesSaved: cacheAnalytics.totalBytesSaved,
+        totalBytesUsed: storageStats.totalBytes,
+        warmingRuns: 0,
+        namespacesWarmed: 0,
+      }).catch(() => {});
+    }, 30 * 60 * 1000); // 30 min
+    return () => clearInterval(interval);
+  }, []);
+
   const { isLoggedIn, user } = useAuthStore();
   const hasCompletedOnboarding = useOnboardingStore(s => s.hasCompletedOnboarding);
   const onboardingInitialized = useOnboardingStore(s => s.initialized);
@@ -346,13 +409,25 @@ export default function AppNavigator() {
             <Stack.Screen name="StockDetail" component={StockDetailScreen} />
             <Stack.Screen name="StockScreener" component={StockScreenerScreen} />
             <Stack.Screen name="NewsFeed" component={NewsFeedScreen} />
+            <Stack.Screen name="IPOCalendar" component={IPOCalendarScreen} />
+            <Stack.Screen name="IPODashboard" component={IPODashboardScreen} />
+            <Stack.Screen name="EconomicCalendar" component={EconomicCalendarScreen} />
             <Stack.Screen name="ChatList" component={ChatRoomListScreen} />
             <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
             <Stack.Screen name="BehavioralJournal" component={BehavioralJournalScreen} />
             <Stack.Screen name="ContractNoteParser" component={ContractNoteUploadScreen} />
             <Stack.Screen name="Learn" component={LearnScreen} />
+            <Stack.Screen name="SocialTrading" component={SocialTradingScreen} />
+            <Stack.Screen name="TraderProfile" component={TraderProfileScreen} />
             <Stack.Screen name="Community" component={CommunityScreen} />
+            <Stack.Screen name="CommunityPost" component={PostDetailScreen} />
             <Stack.Screen name="AIInsights" component={AIInsightsScreen} />
+            <Stack.Screen name="AIChat" component={AIChatScreen} />
+            <Stack.Screen name="AITradeAssistant" component={AITradeAssistantScreen} />
+            <Stack.Screen name="EarningsCall" component={EarningsCallScreen} />
+            <Stack.Screen name="SentimentAnalysis" component={SentimentAnalysisScreen} />
+            <Stack.Screen name="SentimentAlert" component={SentimentAlertScreen} />
+            <Stack.Screen name="LiveFeed" component={LiveFeedScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="MutualFunds" component={MutualFundsScreen} />
             <Stack.Screen name="SIPs" component={MutualFundsScreen} />
@@ -366,9 +441,14 @@ export default function AppNavigator() {
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
             <Stack.Screen name="LessonView" component={LessonViewScreen} />
+            <Stack.Screen name="Glossary" component={GlossaryScreen} />
+            <Stack.Screen name="LearningPaths" component={LearningPathsScreen} />
+            <Stack.Screen name="LearningPathDetail" component={LearningPathDetailScreen} />
+            <Stack.Screen name="Certificate" component={CertificateScreen} />
             <Stack.Screen name="NotificationPreferences" component={NotificationPreferencesScreen} />
             <Stack.Screen name="PortfolioAlerts" component={PortfolioAlertsScreen} />
             <Stack.Screen name="Subscription" component={SubscriptionScreen} />
+            <Stack.Screen name="PaymentHistory" component={PaymentHistoryScreen} />
             <Stack.Screen name="AddFunds" component={AddFundsScreen} />
             <Stack.Screen name="Withdraw" component={WithdrawScreen} />
             <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
@@ -379,12 +459,17 @@ export default function AppNavigator() {
             <Stack.Screen name="TenantConfig" component={TenantConfigScreen} />
             <Stack.Screen name="VoiceSettings" component={VoiceSettingsScreen} />
             <Stack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
+            <Stack.Screen name="TwoFactorSetup" component={TwoFactorSetupScreen} />
             <Stack.Screen name="FnOOptionsChain" component={FnOOptionsChainScreen} />
             <Stack.Screen name="StrategyBuilder" component={StrategyBuilderScreen} />
             <Stack.Screen name="SIPCalculator" component={SIPCalculator} />
             <Stack.Screen name="LumpsumCalculator" component={LumpsumCalculator} />
             <Stack.Screen name="EMICalculator" component={EMICalculator} />
             <Stack.Screen name="TaxCalculator" component={TaxCalculator} />
+            <Stack.Screen name="PanVerification" component={PanVerificationScreen} />
+            <Stack.Screen name="AadhaarVerification" component={AadhaarVerificationScreen} />
+            <Stack.Screen name="DigiLocker" component={DigiLockerScreen} />
+            <Stack.Screen name="BankLinking" component={BankLinkingScreen} />
           </>
         )}
       </Stack.Navigator>

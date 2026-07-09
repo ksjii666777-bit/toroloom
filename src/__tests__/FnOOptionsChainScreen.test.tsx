@@ -178,11 +178,15 @@ vi.mock('../context/ThemeContext', () => ({
 }));
 
 vi.mock('../store/fnoStore', () => {
-  const mockStoreState = defaultStoreMock;
+  // Use any cast to avoid TS2345 when vi.mocked(useFnoStore).mockImplementation()
+  // passes a function that doesn't match the store hook's selector signature
   const useFnoStore = Object.assign(
-    vi.fn(mockStoreState),
-    { getState: vi.fn(mockStoreState) },
-  );
+    vi.fn((sel?: (state: any) => any) => {
+      const state = defaultStoreMock();
+      return sel ? sel(state) : state;
+    }),
+    { getState: vi.fn(() => defaultStoreMock()) },
+  ) as any;
   return { useFnoStore };
 });
 
@@ -198,7 +202,7 @@ function renderScreen() {
 }
 
 function renderWithView(view: 'option-chain' | 'futures' | 'positions') {
-  vi.mocked(useFnoStore).mockImplementation(() => defaultStoreMock(view));
+  (useFnoStore as any).mockImplementation(() => defaultStoreMock(view));
   const result = render(<FnOOptionsChainScreen navigation={navMock} />);
   return result;
 }
@@ -354,7 +358,7 @@ describe('FnOOptionsChainScreen — Option Chain Rows', () => {
 
 describe('FnOOptionsChainScreen — Futures View', () => {
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders futures data with contract symbols', () => {
@@ -366,7 +370,7 @@ describe('FnOOptionsChainScreen — Futures View', () => {
 
 describe('FnOOptionsChainScreen — Positions View', () => {
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders position cards with LONG/SHORT badges', () => {
@@ -398,7 +402,7 @@ describe('FnOOptionsChainScreen — Positions View', () => {
 
 describe('FnOOptionsChainScreen — Loading State', () => {
   beforeEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock(),
       optionChain: null,
       chainLoading: true,
@@ -406,7 +410,7 @@ describe('FnOOptionsChainScreen — Loading State', () => {
   });
 
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders skeleton blocks during chain loading', () => {
@@ -417,7 +421,7 @@ describe('FnOOptionsChainScreen — Loading State', () => {
 
 describe('FnOOptionsChainScreen — Empty State', () => {
   beforeEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock(),
       optionChain: null,
       spotPrices: {},
@@ -425,7 +429,7 @@ describe('FnOOptionsChainScreen — Empty State', () => {
   });
 
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders empty state message when no chain data', () => {
@@ -442,7 +446,7 @@ describe('FnOOptionsChainScreen — Empty State', () => {
 
 describe('FnOOptionsChainScreen — Greeks Toggle', () => {
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('shows Greeks (δ,γ,θ,IV) after toggling the calculator button', () => {
@@ -499,7 +503,7 @@ describe('FnOOptionsChainScreen — Greeks Toggle', () => {
 
 describe('FnOOptionsChainScreen — Futures Loading', () => {
   beforeEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock('futures'),
       futures: [],
       futuresLoading: true,
@@ -507,7 +511,7 @@ describe('FnOOptionsChainScreen — Futures Loading', () => {
   });
 
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders skeleton blocks during futures loading', () => {
@@ -518,7 +522,7 @@ describe('FnOOptionsChainScreen — Futures Loading', () => {
 
 describe('FnOOptionsChainScreen — Futures Empty', () => {
   beforeEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock('futures'),
       futures: [],
       futuresLoading: false,
@@ -526,7 +530,7 @@ describe('FnOOptionsChainScreen — Futures Empty', () => {
   });
 
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders empty state when no futures contracts', () => {
@@ -537,7 +541,7 @@ describe('FnOOptionsChainScreen — Futures Empty', () => {
 
 describe('FnOOptionsChainScreen — Positions Loading', () => {
   beforeEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock('positions'),
       positions: [],
       positionsLoading: true,
@@ -545,7 +549,7 @@ describe('FnOOptionsChainScreen — Positions Loading', () => {
   });
 
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders skeleton blocks during positions loading', () => {
@@ -556,7 +560,7 @@ describe('FnOOptionsChainScreen — Positions Loading', () => {
 
 describe('FnOOptionsChainScreen — Positions Empty', () => {
   beforeEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock('positions'),
       positions: [],
       positionsLoading: false,
@@ -564,7 +568,7 @@ describe('FnOOptionsChainScreen — Positions Empty', () => {
   });
 
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders empty state when no f&o positions', () => {
@@ -583,11 +587,11 @@ describe('FnOOptionsChainScreen — ATM Strike Highlighting', () => {
   };
 
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders ATM badge for at-the-money strike', () => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock(),
       optionChain: mockOptionChainWithATM,
     }));
@@ -616,11 +620,11 @@ describe('FnOOptionsChainScreen — FUTURE Type Positions', () => {
   ];
 
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('renders FUTURE position without showing CE/PE type suffix', () => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock('positions'),
       positions: mockPositionsWithFuture,
     }));
@@ -633,11 +637,11 @@ describe('FnOOptionsChainScreen — FUTURE Type Positions', () => {
 
 describe('FnOOptionsChainScreen — ChainSide Views', () => {
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
   });
 
   it('hides CALLS header when chainSide is PE', () => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock(),
       chainSide: 'PE' as const,
     }));
@@ -647,7 +651,7 @@ describe('FnOOptionsChainScreen — ChainSide Views', () => {
   });
 
   it('hides PUTS header when chainSide is CE', () => {
-    vi.mocked(useFnoStore).mockImplementation(() => ({
+    (useFnoStore as any).mockImplementation(() => ({
       ...defaultStoreMock(),
       chainSide: 'CE' as const,
     }));
@@ -659,7 +663,7 @@ describe('FnOOptionsChainScreen — ChainSide Views', () => {
 
 describe('FnOOptionsChainScreen — Position Card Navigation', () => {
   afterEach(() => {
-    vi.mocked(useFnoStore).mockImplementation(defaultStoreMock);
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
     mockNavigate.mockClear();
   });
 

@@ -3,6 +3,7 @@ import { Stock, MarketIndex } from '../types';
 import { mockIndices, mockStocks } from '../constants/mockData';
 import { marketApi } from '../services/api';
 import { offlineCache } from '../services/offlineCache';
+import { registerCacheWarming } from '../services/cacheWarmingService';
 import { analytics } from '../services/analytics';
 import { log } from '../utils/logger';
 import { sendPriceAlert } from '../services/notificationService';
@@ -18,6 +19,10 @@ export interface ScreenerFilters {
   sector: string;
   dayChangeMin: number;
   dayChangeMax: number;
+  // ── New filters ──
+  volumeMin: number;
+  near52WHigh: boolean;  // Within 5% of 52-week high
+  near52WLow: boolean;   // Within 5% of 52-week low
 }
 
 export const DEFAULT_SCREENER_FILTERS: ScreenerFilters = {
@@ -30,6 +35,9 @@ export const DEFAULT_SCREENER_FILTERS: ScreenerFilters = {
   sector: 'All',
   dayChangeMin: -100,
   dayChangeMax: 100,
+  volumeMin: 0,
+  near52WHigh: false,
+  near52WLow: false,
 };
 
 // Helper to determine market cap category from marketCap string
@@ -46,6 +54,21 @@ export function getMarketCapCategory(marketCap: string): 'large' | 'mid' | 'smal
     return 'mid';
   }
   return 'small';
+}
+
+// Parse volume string like "12.5M" or "8.2M" to numeric value
+export function parseVolume(volume: string): number {
+  const cleaned = volume.replace(/[,\s]/g, '');
+  if (cleaned.endsWith('M') || cleaned.endsWith('m')) {
+    return parseFloat(cleaned) * 1000000;
+  }
+  if (cleaned.endsWith('K') || cleaned.endsWith('k')) {
+    return parseFloat(cleaned) * 1000;
+  }
+  if (cleaned.endsWith('B') || cleaned.endsWith('b')) {
+    return parseFloat(cleaned) * 1000000000;
+  }
+  return parseFloat(cleaned) || 0;
 }
 
 // Parse market cap string to numeric value for filtering
@@ -207,6 +230,21 @@ export const useMarketStore = create<MarketState>((set, get) => ({
         const cat = getMarketCapCategory(s.marketCap);
         if (cat !== f.marketCapCategory) return false;
       }
+      // Volume filter
+      if (f.volumeMin > 0) {
+        const vol = parseVolume(s.volume);
+        if (vol < f.volumeMin) return false;
+      }
+      // Near 52-week high
+      if (f.near52WHigh) {
+        const distFromHigh = ((s.high52 - s.price) / s.high52) * 100;
+        if (distFromHigh > 5) return false; // More than 5% away from 52W high
+      }
+      // Near 52-week low
+      if (f.near52WLow) {
+        const distFromLow = ((s.price - s.low52) / s.low52) * 100;
+        if (distFromLow > 5) return false; // More than 5% away from 52W low
+      }
       return true;
     });
     set({ screenerResults: results, isScreenerVisible: false });
@@ -220,3 +258,6 @@ export const useMarketStore = create<MarketState>((set, get) => ({
     set(state => ({ isScreenerVisible: !state.isScreenerVisible }));
   },
 }));
+
+// Register for cache warming (priority 1 — high volatility, user always sees)
+registerCacheWarming('market', () => useMarketStore.getState().refreshMarket(), 1);

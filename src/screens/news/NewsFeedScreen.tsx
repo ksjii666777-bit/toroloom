@@ -503,7 +503,7 @@ const detailStyles = StyleSheet.create({
 });
 
 // ─── Main Screen ──────────────────────────────────────────
-export default function NewsFeedScreen({ _navigation }: any) {
+export default function NewsFeedScreen({ navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
@@ -730,12 +730,23 @@ export default function NewsFeedScreen({ _navigation }: any) {
             />
           ))}
         </ScrollView>
-      </View>      {/* Trending Symbols */}
+      </View>        {/* Trending Symbols + Sentiment Analysis */}
         {trendingSymbols.length > 0 && !showSearch && (
           <View style={feedStyles.trendingSection}>
             <View style={feedStyles.trendingHeader}>
               <Ionicons name="trending-up" size={14} color={colors.textMuted} />
               <Text style={[feedStyles.trendingLabel, { color: colors.textMuted }]}>Trending</Text>
+              <View style={{ flex: 1 }} />
+              <AnimatedPressable
+                onPress={() => navigation.navigate('SentimentAnalysis')}
+                haptic="light"
+                scaleTo={0.92}
+              >
+                <View style={[feedStyles.sentimentBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
+                  <Ionicons name="pulse" size={14} color={colors.primary} />
+                  <Text style={[feedStyles.sentimentBtnText, { color: colors.primary }]}>Sentiment</Text>
+                </View>
+              </AnimatedPressable>
             </View>
             <View style={feedStyles.trendingRow}>
               {trendingSymbols.map(sym => (
@@ -996,6 +1007,19 @@ const feedStyles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  sentimentBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+  },
+  sentimentBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   trendingRow: {
     flexDirection: 'row',

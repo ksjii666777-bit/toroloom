@@ -23,25 +23,23 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   Modal,
   TouchableOpacity,
   Animated,
   Dimensions,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
+import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SecureSessionSync from '../../components/gateway/SecureSessionSync';
-import { storeBrokerSession, clearBrokerSession, hasValidSession, parseSessionPayload } from '../../services/gateway/sessionStorage';
+import { clearBrokerSession, hasValidSession } from '../../services/gateway/sessionStorage';
 import { getBrokerHoldings } from '../../services/gateway/proxyClient';
 import type { SessionPayload } from '../../types';
 
@@ -113,23 +111,15 @@ export default function ConnectBrokerView({ navigation }: any) {
   const [connectedBroker, setConnectedBroker] = useState<string | null>(null);
   const [connectedLabel, setConnectedLabel] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isConnecting, setIsConnecting] = useState(false);
   const [isTestingProxy, setIsTestingProxy] = useState(false);
 
   // Modal states
   const [selectedBroker, setSelectedBroker] = useState<BrokerMeta | null>(null);
-  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [showSessionSync, setShowSessionSync] = useState(false);
   const [sessionSyncUrl, setSessionSyncUrl] = useState('');
 
-  // Credential form
-  const [credentials, setCredentials] = useState({
-    apiKey: '', apiSecret: '', accessToken: '',
-    clientId: '', password: '', totp: '',
-  });
-
-  // Focus state for TextInputs
-  const [focusedField, setFocusedField] = useState<string | null>(null);
+  // Credential form state removed — Zero-API Gateway only (see SECURE-SESSION-SYNC.md)
+  // All broker connections are handled exclusively via SecureSessionSync WebView extraction.
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -167,21 +157,14 @@ export default function ConnectBrokerView({ navigation }: any) {
     }
   };
 
-  // ── Open Credentials Modal ──────────────────────────────────
-  const openCredentialsModal = useCallback((broker: BrokerMeta) => {
-    setSelectedBroker(broker);
-    setCredentials({ apiKey: '', apiSecret: '', accessToken: '', clientId: '', password: '', totp: '' });
-    setFocusedField(null);
-    setShowCredentialsModal(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  }, []);
+  // Credentials modal removed per MANDATE 1 — Zero-API Hybrid Gateway only
 
   // ── Show Connected Success Overlay ──────────────────────────
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showConnectedSuccess = useCallback(() => {
     setShowSuccess(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    notificationAsync(NotificationFeedbackType.Success);
     if (successTimerRef.current) clearTimeout(successTimerRef.current);
     successTimerRef.current = setTimeout(() => {
       setShowSuccess(false);
@@ -195,52 +178,13 @@ export default function ConnectBrokerView({ navigation }: any) {
     };
   }, []);
 
-  // ── Connect via Manual Credentials ──────────────────────────
-  const handleConnect = useCallback(async () => {
-    if (!selectedBroker) return;
-
-    setIsConnecting(true);
-
-    try {
-      const brokerSession: any = {
-        brokerType: selectedBroker.type,
-        cookies: '',
-        capturedAt: new Date().toISOString(),
-      };
-
-      if (selectedBroker.type === 'zerodha') {
-        brokerSession.enctoken = credentials.apiKey;
-        brokerSession.accessToken = credentials.apiSecret;
-      } else if (selectedBroker.type === 'angel') {
-        brokerSession.jwt = credentials.apiKey;
-        brokerSession.accessToken = credentials.apiKey;
-        brokerSession.userId = credentials.clientId;
-      } else if (selectedBroker.type === 'groww') {
-        brokerSession.accessToken = credentials.accessToken || credentials.apiKey;
-      }
-
-      const stored = await storeBrokerSession(selectedBroker.type, brokerSession);
-
-      if (stored) {
-        setShowCredentialsModal(false);
-        setConnectedBroker(selectedBroker.type);
-        setConnectedLabel(selectedBroker.label);
-        showConnectedSuccess();
-      } else {
-        Alert.alert('Storage Error', 'Failed to securely store credentials.');
-      }
-    } catch (err: any) {
-      Alert.alert('Connection Failed', err.message || 'Failed to connect. Please try again.');
-    } finally {
-      setIsConnecting(false);
-    }
-  }, [selectedBroker, credentials, showConnectedSuccess]);
+  // Manual credential connection removed per MANDATE 1 — Zero-API Gateway only
 
   // ── Open Session Sync (Zero-API Gateway) ────────────────────
   const openSessionSync = useCallback(
     (broker: BrokerMeta) => {
       setSelectedBroker(broker);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      triggerHaptic(ImpactFeedbackStyle.Medium);
 
       // Map broker to their production login URL for session extraction
       const loginUrls: Record<string, string> = {
@@ -255,11 +199,11 @@ export default function ConnectBrokerView({ navigation }: any) {
         // Small delay so the state updates before SecureSessionSync mounts
         setTimeout(() => setShowSessionSync(true), 100);
       } else {
-        // Fallback to credentials modal
-        openCredentialsModal(broker);
+        // Fallback removed — Zero-API Gateway handles all brokers
+        Alert.alert('Unavailable', `${broker.label} connection is not yet available via Zero-API Gateway.`);
       }
     },
-    [openCredentialsModal],
+    [],
   );
 
   // ── Handle Session Captured ─────────────────────────────────
@@ -267,21 +211,12 @@ export default function ConnectBrokerView({ navigation }: any) {
     async (payload: SessionPayload) => {
       setShowSessionSync(false);
 
-      const session = parseSessionPayload(payload);
-      const stored = await storeBrokerSession(payload.brokerType, session);
-
-      if (stored) {
-        setConnectedBroker(payload.brokerType);
-        setConnectedLabel(
-          BROKERS.find((b) => b.type === payload.brokerType)?.label || null,
-        );
-        showConnectedSuccess();
-      } else {
-        Alert.alert(
-          'Storage Error',
-          'Failed to securely store session credentials. Please try again.',
-        );
-      }
+      // Session captured via SecureSessionSync — Zero-API Gateway
+      setConnectedBroker(payload.brokerType);
+      setConnectedLabel(
+        BROKERS.find((b) => b.type === payload.brokerType)?.label || null,
+      );
+      showConnectedSuccess();
     },
     [showConnectedSuccess],
   );
@@ -331,7 +266,7 @@ export default function ConnectBrokerView({ navigation }: any) {
               await clearBrokerSession(brokerType);
               setConnectedBroker(null);
               setConnectedLabel(null);
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+              notificationAsync(NotificationFeedbackType.Warning);
             },
           },
         ],
@@ -546,180 +481,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         <View style={{ height: 60 }} />
       </ScrollView>
 
-      {/* ── Credentials Modal ──────────────────────────── */}
-      <Modal
-        visible={showCredentialsModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowCredentialsModal(false)}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.modalOverlay}
-        >
-          <View style={styles.modalContent}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <View style={[styles.modalIconCircle, { backgroundColor: (selectedBroker?.color || '#3B82F6') + '20' }]}>
-                <Ionicons name="key" size={20} color={selectedBroker?.color || '#3B82F6'} />
-              </View>
-              <View style={styles.modalHeaderText}>
-                <Text style={styles.modalTitle}>Connect {selectedBroker?.label}</Text>
-                <Text style={styles.modalSubtitle}>Enter credentials manually</Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowCredentialsModal(false)}>
-                <Ionicons name="close" size={22} color="rgba(255,255,255,0.5)" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Form Fields */}
-            <ScrollView style={styles.modalForm} showsVerticalScrollIndicator={false}>
-              {/* API Key (all brokers) */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>API Key</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    { borderColor: focusedField === 'apiKey' ? NEON_CYAN : GLASS_BORDER },
-                  ]}
-                  placeholder="Enter your API key"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={credentials.apiKey}
-                  onChangeText={t => setCredentials(p => ({ ...p, apiKey: t }))}
-                  onFocus={() => setFocusedField('apiKey')}
-                  onBlur={() => setFocusedField(null)}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
-
-              {/* API Secret (Zerodha only) */}
-              {selectedBroker?.type === 'zerodha' && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>API Secret</Text>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      { borderColor: focusedField === 'apiSecret' ? NEON_CYAN : GLASS_BORDER },
-                    ]}
-                    placeholder="Enter your API secret"
-                    placeholderTextColor="rgba(255,255,255,0.3)"
-                    value={credentials.apiSecret}
-                    onChangeText={t => setCredentials(p => ({ ...p, apiSecret: t }))}
-                    onFocus={() => setFocusedField('apiSecret')}
-                    onBlur={() => setFocusedField(null)}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry
-                  />
-                </View>
-              )}
-
-              {/* Client ID + Password + TOTP (Angel One only) */}
-              {selectedBroker?.type === 'angel' && (
-                <>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Client ID</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        { borderColor: focusedField === 'clientId' ? NEON_CYAN : GLASS_BORDER },
-                      ]}
-                      placeholder="Enter your Angel One Client ID"
-                      placeholderTextColor="rgba(255,255,255,0.3)"
-                      value={credentials.clientId}
-                      onChangeText={t => setCredentials(p => ({ ...p, clientId: t }))}
-                      onFocus={() => setFocusedField('clientId')}
-                      onBlur={() => setFocusedField(null)}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Password</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        { borderColor: focusedField === 'password' ? NEON_CYAN : GLASS_BORDER },
-                      ]}
-                      placeholder="Trading password"
-                      placeholderTextColor="rgba(255,255,255,0.3)"
-                      value={credentials.password}
-                      onChangeText={t => setCredentials(p => ({ ...p, password: t }))}
-                      onFocus={() => setFocusedField('password')}
-                      onBlur={() => setFocusedField(null)}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      secureTextEntry
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>TOTP Secret (optional)</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        { borderColor: focusedField === 'totp' ? NEON_CYAN : GLASS_BORDER },
-                      ]}
-                      placeholder="2FA TOTP secret for auto-login"
-                      placeholderTextColor="rgba(255,255,255,0.3)"
-                      value={credentials.totp}
-                      onChangeText={t => setCredentials(p => ({ ...p, totp: t }))}
-                      onFocus={() => setFocusedField('totp')}
-                      onBlur={() => setFocusedField(null)}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
-                  </View>
-                </>
-              )}
-
-              {/* Access Token (Groww only) */}
-              {selectedBroker?.type === 'groww' && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Access Token</Text>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      { borderColor: focusedField === 'accessToken' ? NEON_CYAN : GLASS_BORDER },
-                    ]}
-                    placeholder="Enter your Groww access token"
-                    placeholderTextColor="rgba(255,255,255,0.3)"
-                    value={credentials.accessToken}
-                    onChangeText={t => setCredentials(p => ({ ...p, accessToken: t }))}
-                    onFocus={() => setFocusedField('accessToken')}
-                    onBlur={() => setFocusedField(null)}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry
-                  />
-                </View>
-              )}
-
-              {/* Amber Gradient CTA Button */}
-              <TouchableOpacity
-                onPress={handleConnect}
-                activeOpacity={0.85}
-                disabled={isConnecting}
-              >
-                <LinearGradient
-                  colors={['#FF8C00', '#D2691E']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.connectBtn}
-                >
-                  {isConnecting ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                  ) : (
-                    <Text style={styles.connectBtnText}>
-                      Connect to {selectedBroker?.label}
-                    </Text>
-                  )}
-                </LinearGradient>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      {/* Credentials Modal REMOVED — Zero-API Gateway only (Mandate 1 compliant) */}
 
       {/* ── Session Sync WebView Modal ──────────────────────── */}
       <Modal
@@ -1046,86 +808,6 @@ const createStyles = (_colors: any) =>
     webViewTitle: {
       ...FONTS.semiBold,
       fontSize: FONTS.size.lg,
-      color: '#FFFFFF',
-    },
-
-    // ── Credentials Modal ──────────────────────────────────────
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(7,8,11,0.85)',
-      justifyContent: 'flex-end',
-    },
-    modalContent: {
-      backgroundColor: MIDNIGHT_BG,
-      borderTopLeftRadius: BORDER_RADIUS.xxl,
-      borderTopRightRadius: BORDER_RADIUS.xxl,
-      padding: SPACING.xl,
-      maxHeight: '85%',
-      borderWidth: 1,
-      borderColor: GLASS_BORDER,
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: SPACING.xl,
-    },
-    modalIconCircle: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalHeaderText: {
-      flex: 1,
-      marginLeft: SPACING.md,
-    },
-    modalTitle: {
-      ...FONTS.bold,
-      fontSize: FONTS.size.lg,
-      color: '#FFFFFF',
-    },
-    modalSubtitle: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.4)',
-      marginTop: 2,
-    },
-    modalForm: {
-      maxHeight: 420,
-    },
-    inputGroup: {
-      marginBottom: SPACING.lg,
-    },
-    inputLabel: {
-      ...FONTS.medium,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.6)',
-      marginBottom: SPACING.sm,
-    },
-    input: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.md,
-      color: '#FFFFFF',
-      backgroundColor: 'rgba(255,255,255,0.04)',
-      borderWidth: 1,
-      borderRadius: BORDER_RADIUS.md,
-      paddingHorizontal: SPACING.lg,
-      paddingVertical: SPACING.md,
-    },
-    connectBtn: {
-      paddingVertical: SPACING.lg,
-      borderRadius: BORDER_RADIUS.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: SPACING.sm,
-      marginBottom: SPACING.xl,
-      minHeight: 50,
-      overflow: 'hidden',
-    },
-    connectBtnText: {
-      ...FONTS.semiBold,
-      fontSize: FONTS.size.md,
       color: '#FFFFFF',
     },
 

@@ -132,7 +132,7 @@ vi.mock('../screens/journal/BehavioralJournalScreen', () => ({
 vi.mock('../screens/settings/SubscriptionScreen', () => ({
   default: NullComponent,
 }));
-vi.mock('../screens/broker/BrokerConnectScreen', () => ({
+vi.mock('../screens/broker/ConnectBrokerView', () => ({
   default: NullComponent,
 }));
 vi.mock('../screens/settings/TenantConfigScreen', () => ({
@@ -144,6 +144,36 @@ vi.mock('../screens/settings/VoiceSettingsScreen', () => ({
 vi.mock('../screens/stock/StockScreenerScreen', () => ({
   default: NullComponent,
 }));
+
+// ==================== Mock remaining AppNavigator screens ====================
+vi.mock('../screens/community/PostDetailScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/ai/AIChatScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/education/GlossaryScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/education/CertificateScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/PortfolioAlertsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/payments/PaymentHistoryScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/SecuritySettingsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/TwoFactorSetupScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/trade/FnOOptionsChainScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/trade/StrategyBuilderScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/calculators/SIPCalculator', () => ({ default: NullComponent }));
+vi.mock('../screens/calculators/LumpsumCalculator', () => ({ default: NullComponent }));
+vi.mock('../screens/calculators/EMICalculator', () => ({ default: NullComponent }));
+vi.mock('../screens/calculators/TaxCalculator', () => ({ default: NullComponent }));
+vi.mock('../screens/kyc/PanVerificationScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/kyc/AadhaarVerificationScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/kyc/DigiLockerScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/kyc/BankLinkingScreen', () => ({ default: NullComponent }));
+
+// ==================== Mock MainTabs sub-components ====================
+// MainTabs renders these directly; they pull in stores that can cause
+// infinite re-render loops if not properly mocked.
+vi.mock('../components/AvatarWidget', () => ({ default: NullComponent }));
+vi.mock('../components/IronLockOverlay', () => ({ default: NullComponent }));
+vi.mock('../components/UpgradePromptModal', () => ({ default: NullComponent }));
+vi.mock('../components/ui/OfflineBanner', () => ({ default: NullComponent }));
+vi.mock('../components/ui/SyncStatusIndicator', () => ({ default: NullComponent }));
+vi.mock('../components/ui/SyncConflictModal', () => ({ default: NullComponent }));
 
 /* ------------------------------------------------------------------ */
 /*  Mock navigation libraries                                          */
@@ -160,7 +190,14 @@ vi.mock('@react-navigation/native-stack', () => ({
     Screen: (props: any) => (
       <>
         {props.name}
-        {props.component ? React.createElement(props.component) : null}
+        {props.component
+          ? React.createElement(props.component, {
+              // Pass default route / navigation so unmocked screens don't crash
+              // (e.g. route.params access would throw with undefined route)
+              route: { params: {} },
+              navigation: { navigate: vi.fn(), goBack: vi.fn() },
+            })
+          : null}
       </>
     ),
   }),
@@ -207,6 +244,62 @@ vi.mock('../store/authStore', () => mockAuthStore);
 vi.mock('../store/riskStore', () => mockRiskStore);
 vi.mock('../store/onboardingStore', () => mockOnboardingStore);
 vi.mock('../context/ThemeContext', () => mockTheme);
+
+/* ------------------------------------------------------------------ */
+/*  Mock libraries used by unmocked screens                            */
+/* ------------------------------------------------------------------ */
+
+// Some screens (e.g. ContractNoteUploadScreen) import react-native-qrcode-svg
+// which vitest can't parse. Mock it to prevent module parse errors.
+vi.mock('react-native-qrcode-svg', () => ({
+  default: 'QRCode',
+}));
+
+/* ------------------------------------------------------------------ */
+/*  Mock hooks and services used by AppNavigator                       */
+/* ------------------------------------------------------------------ */
+
+vi.mock('../hooks/useBackgroundSync', () => ({
+  useBackgroundSync: () => {},
+}));
+
+vi.mock('../hooks/useCacheInvalidation', () => ({
+  useCacheInvalidation: () => {},
+}));
+
+vi.mock('../services/cacheWarmingService', () => ({
+  startCacheWarming: () => {},
+  registerCacheWarming: () => {},
+  unregisterCacheWarming: () => {},
+  stopCacheWarming: () => {},
+}));
+
+vi.mock('../services/offlineCache', () => ({
+  offlineCache: {
+    load: () => Promise.resolve(null),
+    save: () => Promise.resolve(),
+    remove: () => Promise.resolve(),
+    getDiagnosticEntry: () => Promise.resolve(null),
+    getAnalytics: () => ({
+      hits: 0, misses: 0, staleHits: 0, saves: 0,
+      compressionRatio: 0, totalBytesSaved: 0,
+    }),
+    getStorageStats: () => Promise.resolve({ totalBytes: 0 }),
+  },
+}));
+
+vi.mock('../utils/logger', () => ({
+  log: {
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+  },
+}));
+
+// Mock wsRegistry so that useCacheInvalidation doesn't crash
+vi.mock('../services/wsRegistry', () => ({
+  getActiveWS: () => null,
+}));
 
 /* ------------------------------------------------------------------ */
 /*  Mock expo vector icons (used by TabIcon)                           */

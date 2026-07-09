@@ -680,6 +680,7 @@ describe('RiskStore — WebSocket Listeners', () => {
     getCurrentPrice: vi.fn(() => 0),
     getCachedCandles: vi.fn(() => []),
     getIsAuthenticated: vi.fn(() => true),
+    onCacheInvalidationCallback: vi.fn(),
   };
 
   beforeEach(() => {

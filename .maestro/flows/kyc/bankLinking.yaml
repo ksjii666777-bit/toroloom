@@ -1,0 +1,150 @@
+# =============================================================================
+# Bank Account Linking Flow — KYC
+# =============================================================================
+# Tests 3-step bank linking flow:
+#   1. Login with test credentials
+#   2. Navigate: More → Profile → KYC → Link Bank Account
+#   3. Step 1: Enter IFSC → Verify IFSC → confirm bank info
+#   4. Step 2: Enter account number + holder name → Verify Account
+#   5. Step 3: Select account type → Set primary → Link → verify success
+#   6. Navigate: Done → back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Profile ──────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Profile"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Profile"
+
+# ── 3. Navigate to KYC section ────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "KYC Verification"
+    direction: DOWN
+- tapOn:
+    text: "KYC Verification"
+- waitForAnimationToEnd
+
+# ── 4. Navigate to Link Bank Account ──────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "Link Bank Account"
+    direction: DOWN
+- tapOn:
+    text: "Link Bank Account"
+- waitForAnimationToEnd
+
+# ── 5. Verify Bank Linking Screen ─────────────────────────────────────────
+- assertVisible:
+    text: "Link Bank Account"
+- assertVisible:
+    text: "Step 1 of 3 — IFSC"
+- assertVisible:
+    text: "Enter IFSC Code"
+- assertVisible:
+    text: "Format:"
+
+# ── 6. Step 1: Enter IFSC and Verify ──────────────────────────────────────
+- tapOn:
+    text: "HDFC0001234"
+- inputText: "HDFC0001234"
+- waitForAnimationToEnd
+
+# Verify the checkmark indicator appears
+- tapOn:
+    text: "Verify IFSC"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# ── 7. Verify IFSC Result → Step 2 ────────────────────────────────────────
+- assertVisible:
+    text: "Step 2 of 3 — Account Details"
+- assertVisible:
+    text: "HDFC Bank"
+- assertVisible:
+    text: "Andheri West"
+- assertVisible:
+    text: "IFSC: HDFC0001234"
+- assertVisible:
+    text: "Account Number"
+
+# ── 8. Step 2: Enter Account Number + Holder Name ─────────────────────────
+- tapOn:
+    text: "Enter account number"
+- inputText: "123456789012"
+- hideKeyboard
+
+- tapOn:
+    text: "As per bank records"
+- inputText: "RAHUL SHARMA"
+- hideKeyboard
+
+# Tap Verify Account
+- tapOn:
+    text: "Verify Account"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# ── 9. Verify Account Verification → Step 3 ───────────────────────────────
+- assertVisible:
+    text: "Account Verified"
+- assertVisible:
+    text: "Account holder name matches bank records"
+- assertVisible:
+    text: "Account Type"
+
+# ── 10. Step 3: Select Account Type + Primary + Link ──────────────────────
+# Savings is already selected by default, just proceed
+- tapOn:
+    text: "Set as Primary Account"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Link Bank Account"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# ── 11. Verify Account Linked Successfully ────────────────────────────────
+- assertVisible:
+    text: "Account Linked"
+- assertVisible:
+    text: "HDFC Bank"
+- assertVisible:
+    text: "Savings"
+- assertVisible:
+    text: "Primary Account"
+- assertVisible:
+    text: "Manage Linked Banks"
+
+# ── 12. Tap Done and navigate back ────────────────────────────────────────
+- tapOn:
+    text: "Done"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "KYC Verification"

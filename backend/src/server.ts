@@ -13,6 +13,7 @@ import { getStorage, getStorageIfInitialized } from './services/storage';
 import { auditTrail } from './services/auditTrail';
 import { riskEngine } from './services/riskEngine';
 import { configureBrokerPersistence, loadBrokerStateFromStorage } from './services/broker';
+import { configureKycPersistence } from './services/kyc';
 import { configureNotificationPersistence } from './services/notifications';
 import { configureCommunityPersistence } from './services/community';
 import { configurePortfolioAlertStorage, configureBadgeCountPersistence } from './services/portfolioAlerts';
@@ -42,6 +43,12 @@ import subscriptionRoutes, { webhookRouter, configureSubscriptionPersistence, se
 import pushNotificationsRoutes from './routes/pushNotifications';
 import contractNoteRoutes from './routes/contractNote';
 import fnoRoutes from './routes/fno';
+import socialRoutes from './routes/social';
+import kycRoutes from './routes/kyc';
+import twoFactorRoutes from './routes/twoFactor';
+import analyticsRoutes from './routes/analytics';
+import syncRoutes from './services/syncService';
+import { setWSS, getFailureCount, SEND_FAILURE_THRESHOLD } from './services/syncInvalidationBridge';
 
 // ============ Sentry Initialization ============
 
@@ -101,12 +108,19 @@ app.get('/health', async (_req, res) => {
     try { storageHealthy = await storage.isHealthy(); } catch { /* not healthy */ }
   }
 
+  const syncBridgeFailures = getFailureCount();
+
   res.json({
     status: storageHealthy ? 'ok' : 'degraded',
     broker: env.broker,
     dataSource: env.dataSource,
     storageBackend: env.storageBackend,
     storageHealthy,
+    syncBridge: {
+      consecutiveSendFailures: syncBridgeFailures,
+      circuitOpen: syncBridgeFailures >= SEND_FAILURE_THRESHOLD,
+      failureThreshold: SEND_FAILURE_THRESHOLD,
+    },
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
@@ -146,6 +160,21 @@ app.use('/api/contract-note', writeLimiter, authMiddleware, requireSubscription(
 // ── F&O — 100 req / min (data reads), 50 req / min (writes) ────────────
 app.use('/api/fno', readLimiter, fnoRoutes);
 
+// ── Social — 200 req / min (rates apply in production) ────────────────────
+app.use('/api/social', readLimiter, authMiddleware, requireSubscription('elite'), socialRoutes);
+
+// ── KYC — 50 req / min (writes), auth required ────────────────────────
+app.use('/api/kyc', writeLimiter, authMiddleware, kycRoutes);
+
+// ── 2FA — auth required, moderate rate ──────────────────────────────────
+app.use('/api/auth/2fa', writeLimiter, authMiddleware, twoFactorRoutes);
+
+// ── Sync — 100 req / min — delta sync + conflict detection ──────────────────
+app.use('/api/sync', writeLimiter, authMiddleware, syncRoutes);
+
+// ── Analytics — 200 req / min — Redis-cached endpoints ─────────────────────
+app.use('/api/analytics', readLimiter, authMiddleware, requireSubscription('pro'), analyticsRoutes);
+
 // ── Admin — 20 req / min ─────────────────────────────────────────────
 app.use('/metrics', adminLimiter, metricsRoutes);
 
@@ -162,6 +191,10 @@ app.use(errorHandler);
 // ============ WebSocket ============
 
 const wss = setupWebSocket(server);
+
+// Wire the sync invalidation bridge so data mutations push
+// cache_invalidate events to connected WebSocket clients.
+setWSS(wss);
 
 // ============ Storage Initialization ============
 
@@ -192,6 +225,9 @@ async function initializeStorage(): Promise<void> {
 
     // Wire storage into the Badge Count service for persistence
     configureBadgeCountPersistence(storage);
+
+    // Wire storage into the KYC service for persistence
+    await configureKycPersistence(storage);
 
     // Wire storage into the Subscription service for persistence
     configureSubscriptionPersistence(storage);

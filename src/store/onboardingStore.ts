@@ -58,6 +58,16 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     highlight: 'more',
   },
   {
+    id: 'broker',
+    title: 'Connect Your Broker',
+    subtitle: 'Zero-API gateway',
+    description:
+      'Link your Zerodha, Angel One, or Groww account in seconds. Secure session extraction via WebView — no API keys, no passwords stored on our servers. Just seamless, encrypted sync.',
+    icon: 'git-network',
+    gradient: ['#2874F0', '#1A5FCC'] as [string, string],
+    highlight: 'none',
+  },
+  {
     id: 'learn',
     title: 'Learn & Grow',
     subtitle: 'Become a better investor',

@@ -1,0 +1,121 @@
+# =============================================================================
+# Stock Detail Screen Flow — Market Data
+# =============================================================================
+# Tests stock detail view with chart, stats, sector context, and AI insight:
+#   1. Login with test credentials
+#   2. Navigate: Home → Markets tab
+#   3. Tap first stock card to open Stock Detail
+#   4. Verify stock info: symbol, name, price, change badge
+#   5. Verify key stats grid: Open, Day High, Day Low, Volume, Market Cap, P/E
+#   6. Scroll down → verify About Company, Sector Context, Peer Comparison
+#   7. Verify AI Insight card
+#   8. Navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate to Markets tab ─────────────────────────────────────────────
+- tapOn: "Markets"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Markets"
+
+# ── 3. Tap the first visible stock card ─────────────────────────────────────
+# Stock cards show symbol (e.g. "RELIANCE", "TCS") as the primary text
+- tapOn:
+    text: "RELIANCE"
+    index: 0
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# If RELIANCE not found, try the first stock listed
+- runFlow:
+    when:
+      notVisible: "RELIANCE"
+    commands:
+      - tapOn:
+          index: 0
+          text: ".+"
+      - waitForAnimationToEnd:
+          timeout: 5000
+
+# ── 4. Verify Stock Detail Screen Elements ─────────────────────────────────
+- assertVisible:
+    text: "About Company"
+- assertVisible:
+    text: "Open"
+- assertVisible:
+    text: "Day High"
+- assertVisible:
+    text: "Day Low"
+- assertVisible:
+    text: "Volume"
+- assertVisible:
+    text: "Market Cap"
+- assertVisible:
+    text: "P/E Ratio"
+
+# Verify price display
+- assertVisible:
+    text: "LTP"
+
+# ── 5. Scroll to verify Sector Context and Peer Comparison ─────────────────
+- scroll:
+    direction: DOWN
+- waitForAnimationToEnd
+
+# Verify sector context section
+- assertVisible:
+    text: "Sector Context"
+    optional: true
+
+- scroll:
+    direction: DOWN
+- waitForAnimationToEnd
+
+# Verify Peer Comparison section
+- assertVisible:
+    text: "Peer Comparison"
+    optional: true
+
+# ── 6. Verify AI Analysis section ──────────────────────────────────────────
+- scroll:
+    direction: DOWN
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "AI Analysis"
+    optional: true
+
+# ── 7. Scroll back to top and go back ──────────────────────────────────────
+- scroll:
+    direction: UP
+- waitForAnimationToEnd
+
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Markets"

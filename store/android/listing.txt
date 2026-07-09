@@ -1,0 +1,77 @@
+# ============================================================================
+# Google Play Store Listing — Toroloom
+# ============================================================================
+# Copy this content into the Google Play Console.
+# ============================================================================
+
+## Title (50 char max)
+Toroloom: AI Trading & Investment
+
+## Short Description (80 char max)
+AI-powered F&O trading with options chain, Greeks, social copy trading & KYC.
+
+## Full Description (4000 char max)
+Toroloom is a next-generation trading and investment platform powered by artificial intelligence. Built for Indian traders and investors, Toroloom combines advanced analytics with an intuitive mobile experience.
+
+KEY FEATURES:
+
+📈 F&O Options Chain
+- Real-time NIFTY & BANKNIFTY options chain with full Greeks (Delta, Gamma, Theta, Vega, Rho)
+- Black-Scholes pricing, implied volatility, and OI analysis
+- Max Pain and PCR indicators
+- Multi-leg strategy builder with P&L charts
+
+🤖 AI-Powered Insights
+- Cognitive trade analysis and personalized insights
+- Win/loss ratio, P&L aggregation, sector concentration
+- Monthly returns and tax summaries
+
+📊 Portfolio & Analytics
+- Real-time portfolio tracking with P&L charts
+- Holdings, positions, and trade history
+- Advanced analytics: Sharpe ratio, profit factor, broker drag
+- Capital gains tax summary (STCG + LTCG)
+
+👥 Social Trading
+- Leaderboard of top traders
+- Copy trading with allocation management
+- Follow traders and track their performance
+
+🔐 Secure & Compliant
+- KYC verification (PAN, Aadhaar, DigiLocker, Bank)
+- Biometric authentication (Face ID / Fingerprint)
+- Two-factor authentication (TOTP)
+- Iron Lock™ — risk management with automatic lockdown
+- End-to-end encrypted broker session sync
+
+🏦 Broker Integration
+- Zero-API Gateway for secure broker connection
+- Support for Zerodha, Angel One, Groww
+- WebView-based session extraction (no API keys required)
+- Mock broker for paper trading
+
+📚 Education & Tools
+- Interactive learning hub with courses
+- Financial calculators (SIP, Lumpsum, EMI, Tax)
+- Stock screener with technical indicators
+- News feed and market analysis
+
+💰 Payments & Subscriptions
+- Razorpay integration for seamless payments
+- Free, Pro, and Elite subscription tiers
+- UPI, net banking, and card support
+
+DISCLAIMER: Investment in securities market are subject to market risk. Read all the related documents carefully before investing. This is not a SEBI-registered advisory service.
+
+## Keywords
+trading, stocks, F&O, options, futures, NIFTY, BANKNIFTY, investing, portfolio, stock market, Indian stock market, AI trading, Zerodha, Angel One, Groww, copy trading, KYC, PAN verification
+
+## Category
+Finance
+
+## Content Rating
+Everyone (with in-app purchases)
+
+## Contact Details
+Email: support@toroloom.com
+Website: https://toroloom.com

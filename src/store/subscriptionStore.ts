@@ -32,6 +32,10 @@ import {
   DEFAULT_FEATURE_MATRIX,
   TenantConfig,
   PaywallOverride,
+  CouponCode,
+  CouponDiscountResult,
+  SubscriptionPayment,
+  UpiMandate,
 } from '../types';
 import * as Haptics from 'expo-haptics';
 import { Alert } from 'react-native';
@@ -42,6 +46,62 @@ import { paymentsApi } from '../services/api/payments';
 const STORAGE_KEY_SUBSCRIPTION = 'toroloom_subscription';
 const STORAGE_KEY_TENANT = 'toroloom_active_tenant';
 
+// ============ Predefined Coupon Codes (mock) ============
+
+const MOCK_COUPONS: CouponCode[] = [
+  {
+    code: 'SAVE20',
+    type: 'percentage',
+    value: 20,
+    minPlanTier: 'pro',
+    maxUses: 1000,
+    currentUses: 42,
+    expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    isActive: true,
+    description: '20% off any Pro or Elite plan',
+  },
+  {
+    code: 'ELITE100',
+    type: 'fixed',
+    value: 100,
+    minPlanTier: 'elite',
+    maxUses: 500,
+    currentUses: 12,
+    expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+    isActive: true,
+    description: '₹100 off Elite plan monthly billing',
+  },
+  {
+    code: 'TRYPRO',
+    type: 'free_trial',
+    value: 0,
+    trialDays: 7,
+    minPlanTier: 'pro',
+    maxUses: 50,
+    currentUses: 5,
+    expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+    isActive: true,
+    description: '7-day free trial of Pro plan',
+  },
+  {
+    code: 'WELCOME10',
+    type: 'percentage',
+    value: 10,
+    maxUses: 5000,
+    currentUses: 234,
+    expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    isActive: true,
+    description: '10% off your first subscription',
+  },
+];
+
+// ============ Trial Config ============
+
+const TRIAL_CONFIG = {
+  proTrialDays: 7,
+  eliteTrialDays: 3,
+};
+
 // ============ Default Subscription ============
 
 const DEFAULT_SUBSCRIPTION: UserSubscription = {
@@ -51,6 +111,7 @@ const DEFAULT_SUBSCRIPTION: UserSubscription = {
   startDate: new Date().toISOString(),
   endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
   autoRenew: false,
+  payments: [],
 };
 
 // ============ Subscription Plans ============
@@ -192,6 +253,21 @@ interface SubscriptionState {
   isLoading: boolean;
   initialized: boolean;
 
+  // ──── Coupon State ────────────────────────────────────────
+  couponInput: string;
+  couponResult: CouponDiscountResult | null;
+  isApplyingCoupon: boolean;
+
+  // ──── Trial State ────────────────────────────────────────
+  trialDaysRemaining: number | null;
+
+  // ──── UPI Autopay State ──────────────────────────────────
+  upiMandates: UpiMandate[];
+  isSettingUpAutopay: boolean;
+
+  // ──── Payment History State ──────────────────────────────
+  paymentHistory: SubscriptionPayment[];
+
   // ──── Computed / Derived ─────────────────────────────────
   /** The effective feature matrix after applying tenant overrides */
   getEffectiveFeatureMatrix: () => ReturnType<typeof buildEffectiveMatrix>;
@@ -201,6 +277,18 @@ interface SubscriptionState {
   getFeaturesForTier: (tier: SubscriptionTier) => SubscriptionFeature[];
   /** Get the effective price for a plan (factoring tenant overrides) */
   getPlanPrice: (planId: string) => { monthly: number; yearly: number };
+  /** Get the effective price after coupon discount */
+  getDiscountedPrice: (planId: string, billingPeriod?: 'monthly' | 'yearly') => { original: number; discount: number; final: number };
+  /** Check if user is in trial period */
+  isInTrial: () => boolean;
+  /** Get trial end date as Date or null */
+  getTrialEndDate: () => Date | null;
+  /** Get remaining trial days */
+  getTrialDaysRemaining: () => number;
+  /** Check if user has trial available for a plan */
+  hasTrialAvailable: (planTier: SubscriptionTier) => boolean;
+  /** Get all available coupon codes (mock) */
+  getAvailableCoupons: () => CouponCode[];
 
   // ──── Actions ────────────────────────────────────────────
   loadSubscription: () => Promise<void>;
@@ -210,6 +298,43 @@ interface SubscriptionState {
   initiateUpgrade: (plan: SubscriptionPlan, billingPeriod?: 'monthly' | 'yearly') => Promise<void>;
   cancelSubscription: () => Promise<void>;
   downgradeToFree: () => Promise<void>;
+
+  // ──── Coupon Actions ─────────────────────────────────────
+  setCouponInput: (code: string) => void;
+  applyCoupon: (planTier: SubscriptionTier, price: number) => Promise<void>;
+  removeCoupon: () => void;
+
+  // ──── Trial Actions ──────────────────────────────────────
+  startTrial: (planTier: SubscriptionTier) => Promise<void>;
+  endTrial: () => Promise<void>;
+  refreshTrialStatus: () => void;
+
+  // ──── UPI Autopay Actions ────────────────────────────────
+  setUpAutopay: (upiId: string, planId: string, amount: number, billingPeriod: 'monthly' | 'yearly') => Promise<void>;
+  cancelAutopay: (mandateId: string) => Promise<void>;
+  pauseAutopay: (mandateId: string) => Promise<void>;
+  resumeAutopay: (mandateId: string) => Promise<void>;
+
+  // ──── Payment History Actions ────────────────────────────
+  addPaymentToHistory: (payment: SubscriptionPayment) => void;
+  getPaymentHistory: () => SubscriptionPayment[];
+}
+
+// ============ Helpers ============
+
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function daysBetween(a: Date, b: Date): number {
+  const diff = startOfDay(b).getTime() - startOfDay(a).getTime();
+  return Math.max(0, Math.floor(diff / 86400000));
 }
 
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
@@ -217,6 +342,21 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   tenantConfig: null,
   isLoading: false,
   initialized: false,
+
+  // ──── Coupon State ─────────────────────────────────────────
+  couponInput: '',
+  couponResult: null,
+  isApplyingCoupon: false,
+
+  // ──── Trial State ─────────────────────────────────────────
+  trialDaysRemaining: null,
+
+  // ──── UPI Autopay State ───────────────────────────────────
+  upiMandates: [],
+  isSettingUpAutopay: false,
+
+  // ──── Payment History State ───────────────────────────────
+  paymentHistory: [],
 
   // ──── Computed ─────────────────────────────────────────────
 
@@ -420,5 +560,372 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     } catch {
       set({ isLoading: false });
     }
+  },
+
+  // ──── Coupon Computed ───────────────────────────────────────
+
+  getDiscountedPrice: (planId: string, billingPeriod: 'monthly' | 'yearly' = 'monthly') => {
+    const { couponResult, tenantConfig } = get();
+    const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
+    if (!plan) return { original: 0, discount: 0, final: 0 };
+
+    const effectivePrice = getEffectivePrice(plan, tenantConfig ?? undefined);
+    const original = billingPeriod === 'yearly' ? effectivePrice.yearly : effectivePrice.monthly;
+
+    if (!couponResult || !couponResult.valid) {
+      return { original, discount: 0, final: original };
+    }
+
+    const discount = couponResult.discountAmount;
+    const final = Math.max(0, original - discount);
+    return { original, discount, final };
+  },
+
+  isInTrial: () => {
+    const { subscription } = get();
+    return subscription.status === 'trial' && !!subscription.trialEndDate;
+  },
+
+  getTrialEndDate: () => {
+    const { subscription } = get();
+    if (!subscription.trialEndDate) return null;
+    try {
+      return new Date(subscription.trialEndDate);
+    } catch {
+      return null;
+    }
+  },
+
+  getTrialDaysRemaining: () => {
+    const { subscription } = get();
+    if (!subscription.trialEndDate) return 0;
+    try {
+      const now = new Date();
+      const end = new Date(subscription.trialEndDate);
+      return daysBetween(now, end);
+    } catch {
+      return 0;
+    }
+  },
+
+  hasTrialAvailable: (planTier: SubscriptionTier) => {
+    const { subscription } = get();
+    // Trial not available if already used or currently active
+    if (subscription.isTrialUsed) return false;
+    if (subscription.status === 'trial') return false;
+    // Only paid plans get trials
+    if (planTier === 'free') return false;
+    // Must be on free tier to start a trial
+    if (subscription.tier !== 'free') return false;
+    return true;
+  },
+
+  getAvailableCoupons: () => {
+    return MOCK_COUPONS.filter(c => c.isActive);
+  },
+
+  // ──── Coupon Actions ────────────────────────────────────────
+
+  setCouponInput: (code: string) => {
+    set({ couponInput: code.toUpperCase().trim() });
+  },
+
+  applyCoupon: async (planTier: SubscriptionTier, price: number) => {
+    const { couponInput } = get();
+    if (!couponInput) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      set({ couponResult: null });
+      return;
+    }
+
+    set({ isApplyingCoupon: true });
+
+    // Simulate network delay
+    await new Promise(r => setTimeout(r, 600));
+
+    const coupon = MOCK_COUPONS.find(
+      c => c.code === couponInput && c.isActive
+    );
+
+    if (!coupon) {
+      set({
+        isApplyingCoupon: false,
+        couponResult: {
+          code: couponInput,
+          valid: false,
+          type: 'percentage',
+          discountAmount: 0,
+          originalPrice: price,
+          finalPrice: price,
+          message: 'Invalid or expired coupon code.',
+        },
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+
+    // Check expiry
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      set({
+        isApplyingCoupon: false,
+        couponResult: {
+          code: couponInput,
+          valid: false,
+          type: coupon.type,
+          discountAmount: 0,
+          originalPrice: price,
+          finalPrice: price,
+          message: 'This coupon has expired.',
+        },
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+
+    // Check max uses
+    if (coupon.maxUses && coupon.currentUses && coupon.currentUses >= coupon.maxUses) {
+      set({
+        isApplyingCoupon: false,
+        couponResult: {
+          code: couponInput,
+          valid: false,
+          type: coupon.type,
+          discountAmount: 0,
+          originalPrice: price,
+          finalPrice: price,
+          message: 'This coupon has reached its usage limit.',
+        },
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+
+    // Check min plan tier
+    if (coupon.minPlanTier) {
+      const TIER_RANK: Record<SubscriptionTier, number> = { free: 0, pro: 1, elite: 2 };
+      if (TIER_RANK[planTier] < TIER_RANK[coupon.minPlanTier]) {
+        set({
+          isApplyingCoupon: false,
+          couponResult: {
+            code: couponInput,
+            valid: false,
+            type: coupon.type,
+            discountAmount: 0,
+            originalPrice: price,
+            finalPrice: price,
+            message: `This coupon requires at least the ${coupon.minPlanTier} plan.`,
+          },
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+      }
+    }
+
+    // Calculate discount
+    let discountAmount = 0;
+    if (coupon.type === 'percentage') {
+      discountAmount = Math.round(price * (coupon.value / 100));
+    } else if (coupon.type === 'fixed') {
+      discountAmount = Math.min(coupon.value, price);
+    }
+
+    const finalPrice = Math.max(0, price - discountAmount);
+
+    set({
+      isApplyingCoupon: false,
+      couponResult: {
+        code: coupon.code,
+        valid: true,
+        type: coupon.type,
+        discountAmount,
+        originalPrice: price,
+        finalPrice,
+        trialDays: coupon.trialDays,
+        message: coupon.type === 'free_trial'
+          ? `${coupon.trialDays}-day free trial applied!`
+          : `Coupon applied! You save ₹${discountAmount.toLocaleString('en-IN')}`,
+      },
+    });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  },
+
+  removeCoupon: () => {
+    set({ couponInput: '', couponResult: null });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  },
+
+  // ──── Trial Actions ─────────────────────────────────────────
+
+  startTrial: async (planTier: SubscriptionTier) => {
+    set({ isLoading: true });
+
+    const now = new Date();
+    const trialDays = planTier === 'elite' ? TRIAL_CONFIG.eliteTrialDays : TRIAL_CONFIG.proTrialDays;
+    const trialEnd = new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000);
+
+    const plan = SUBSCRIPTION_PLANS.find(p => p.tier === planTier);
+    if (!plan) {
+      set({ isLoading: false });
+      return;
+    }
+
+    // Simulate network delay
+    await new Promise(r => setTimeout(r, 500));
+
+    const updatedSubscription: UserSubscription = {
+      ...get().subscription,
+      tier: planTier,
+      planId: plan.id,
+      status: 'trial',
+      startDate: now.toISOString(),
+      endDate: trialEnd.toISOString(),
+      trialStartDate: now.toISOString(),
+      trialEndDate: trialEnd.toISOString(),
+      isTrialUsed: true,
+      autoRenew: false,
+    };
+
+    await AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(updatedSubscription));
+    set({ subscription: updatedSubscription, isLoading: false });
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert(
+      'Trial Started! 🎉',
+      `You have ${trialDays} days to explore ${plan.name} features free. Your trial ends on ${trialEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}.`,
+      [{ text: 'Start Exploring' }]
+    );
+  },
+
+  endTrial: async () => {
+    const updatedSubscription: UserSubscription = {
+      ...get().subscription,
+      tier: 'free',
+      planId: 'plan_free',
+      status: 'expired',
+      isTrialUsed: true,
+      trialEndDate: new Date().toISOString(),
+      autoRenew: false,
+    };
+
+    await AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(updatedSubscription));
+    set({ subscription: updatedSubscription });
+  },
+
+  refreshTrialStatus: () => {
+    const { subscription } = get();
+    if (subscription.status !== 'trial' || !subscription.trialEndDate) {
+      set({ trialDaysRemaining: null });
+      return;
+    }
+
+    const remaining = daysBetween(new Date(), new Date(subscription.trialEndDate));
+    set({ trialDaysRemaining: remaining });
+
+    // Auto-end trial if expired
+    if (remaining <= 0) {
+      get().endTrial();
+    }
+  },
+
+  // ──── UPI Autopay Actions ───────────────────────────────────
+
+  setUpAutopay: async (upiId: string, planId: string, amount: number, billingPeriod: 'monthly' | 'yearly') => {
+    set({ isSettingUpAutopay: true });
+
+    // Simulate API call
+    await new Promise(r => setTimeout(r, 800));
+
+    const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
+    const mandate: UpiMandate = {
+      mandateId: `mand_${generateId()}`,
+      upiId,
+      bankName: 'ICICI Bank',
+      planId,
+      amount,
+      billingPeriod,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      nextChargeDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      tpv: 'PIN',
+    };
+
+    const updatedSubscription: UserSubscription = {
+      ...get().subscription,
+      isAutoPayEnabled: true,
+      upiMandate: mandate,
+    };
+
+    await AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(updatedSubscription));
+
+    set({
+      subscription: updatedSubscription,
+      upiMandates: [...get().upiMandates, mandate],
+      isSettingUpAutopay: false,
+    });
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert(
+      'UPI AutoPay Enabled ✅',
+      `Recurring payments of ₹${amount.toLocaleString('en-IN')}/${billingPeriod === 'yearly' ? 'yr' : 'mo'} will be charged from ${upiId}.`,
+      [{ text: 'Done' }]
+    );
+  },
+
+  cancelAutopay: async (mandateId: string) => {
+    await new Promise(r => setTimeout(r, 300));
+
+    const updatedMandates = get().upiMandates.map(m =>
+      m.mandateId === mandateId ? { ...m, status: 'cancelled' as const } : m
+    );
+
+    const updatedSubscription: UserSubscription = {
+      ...get().subscription,
+      isAutoPayEnabled: false,
+      upiMandate: undefined,
+    };
+
+    await AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(updatedSubscription));
+
+    set({ upiMandates: updatedMandates, subscription: updatedSubscription });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+  },
+
+  pauseAutopay: async (mandateId: string) => {
+    await new Promise(r => setTimeout(r, 300));
+    const updatedMandates = get().upiMandates.map(m =>
+      m.mandateId === mandateId ? { ...m, status: 'paused' as const } : m
+    );
+    set({ upiMandates: updatedMandates });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  },
+
+  resumeAutopay: async (mandateId: string) => {
+    await new Promise(r => setTimeout(r, 300));
+    const updatedMandates = get().upiMandates.map(m =>
+      m.mandateId === mandateId ? { ...m, status: 'active' as const } : m
+    );
+    set({ upiMandates: updatedMandates });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  },
+
+  // ──── Payment History Actions ───────────────────────────────
+
+  addPaymentToHistory: (payment: SubscriptionPayment) => {
+    const history = get().paymentHistory;
+    const updatedHistory = [payment, ...history];
+    set({ paymentHistory: updatedHistory });
+
+    // Also add to subscription.payments
+    const updatedSubscription: UserSubscription = {
+      ...get().subscription,
+      payments: updatedHistory,
+    };
+    set({ subscription: updatedSubscription });
+  },
+
+  getPaymentHistory: () => {
+    return get().paymentHistory.length > 0
+      ? get().paymentHistory
+      : (get().subscription.payments || []);
   },
 }));

@@ -82,6 +82,7 @@ vi.mock('../store/onboardingStore', () => ({
     { id: 'portfolio', title: 'Your Portfolio at a Glance', subtitle: 'Real-time tracking', description: 'desc', icon: 'pie-chart', gradient: ['#10B981', '#047857'], highlight: 'portfolio' },
     { id: 'markets', title: 'Live Market Data', subtitle: 'Stay informed', description: 'desc', icon: 'trending-up', gradient: ['#3B82F6', '#6366F1'], highlight: 'markets' },
     { id: 'trading', title: 'Smart Trading', subtitle: 'Execute with confidence', description: 'desc', icon: 'flash', gradient: ['#F59E0B', '#D97706'], highlight: 'more' },
+    { id: 'broker', title: 'Connect Your Broker', subtitle: 'Zero-API gateway', description: 'desc', icon: 'git-network', gradient: ['#2874F0', '#1A5FCC'], highlight: 'none' },
     { id: 'learn', title: 'Learn & Grow', subtitle: 'Become a better investor', description: 'desc', icon: 'school', gradient: ['#8B5CF6', '#6D28D9'], highlight: 'more' },
   ],
 }));
@@ -177,12 +178,12 @@ describe('OnboardingScreen — Referral Variant Auto-Scroll', () => {
     expect(mockSetCurrentStep).toHaveBeenCalledWith(1);
   });
 
-  it('renders 4 progress dots instead of 5 for referral variant', () => {
+  it('renders 5 progress dots instead of 6 for referral variant', () => {
     const { getAllByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
 
-    // "STEP 1 OF 4" confirms 4 steps are visible
-    expect(getAllByText(/STEP \d OF 4/).length).toBeGreaterThan(0);
+    // "STEP 1 OF 5" confirms 5 steps are visible (welcome skipped)
+    expect(getAllByText(/STEP \d OF 5/).length).toBeGreaterThan(0);
   });
 
   it('does not render the Welcome step for referral variant', () => {
@@ -233,11 +234,11 @@ describe('OnboardingScreen — Default Variant (No Referral)', () => {
     expect(mockSetCurrentStep).not.toHaveBeenCalled();
   });
 
-  it('renders 5 progress dots for default variant', () => {
+  it('renders 6 progress dots for default variant', () => {
     const { getAllByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
 
-    expect(getAllByText(/STEP \d OF 5/).length).toBeGreaterThan(0);
+    expect(getAllByText(/STEP \d OF 6/).length).toBeGreaterThan(0);
   });
 
   it('renders the Welcome step for default variant', () => {

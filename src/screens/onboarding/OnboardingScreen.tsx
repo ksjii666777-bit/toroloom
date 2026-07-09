@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Dimensions,
-  TouchableOpacity,
+  View, Text, StyleSheet, Dimensions,
+  TouchableOpacity, ActivityIndicator, ScrollView,
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, useAnimatedScrollHandler,
@@ -16,6 +16,8 @@ import { useOnboardingStore, ONBOARDING_STEPS } from '../../store/onboardingStor
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { analytics } from '../../services/analytics';
 import * as Haptics from 'expo-haptics';
+import { renderIllustration } from '../../components/onboarding/OnboardingIllustrations';
+import OnboardingLottie from '../../components/onboarding/OnboardingLottie';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width - SPACING.xl * 2;
@@ -24,6 +26,12 @@ const CARD_GAP = SPACING.md;
 // ────────────────────────────────────────────────────────
 // Interactive Demo Data
 // ────────────────────────────────────────────────────────
+
+const MOCK_BROKERS = [
+  { id: 'zerodha', label: 'Zerodha', tagline: "India's biggest stock broker", icon: 'Z', color: '#2874F0', gradient: ['#2874F0', '#1A5FCC'] as const },
+  { id: 'angel', label: 'Angel One', tagline: "India's largest retail broking house", icon: 'A', color: '#FF6B00', gradient: ['#FF6B00', '#CC5500'] as const },
+  { id: 'groww', label: 'Groww', tagline: 'Simple, modern investing platform', icon: 'G', color: '#00A86B', gradient: ['#00A86B', '#008050'] as const },
+];
 
 const MOCK_SECTORS = [
   { name: 'Tech', value: 45, color: '#3B82F6', icon: 'hardware-chip' },
@@ -388,6 +396,99 @@ function MockTradePanel({
   );
 }
 
+function MiniBrokerConnect({
+  onInteract,
+  interacted,
+}: {
+  onInteract: () => void;
+  interacted: boolean;
+}) {
+  const [connectedBroker, setConnectedBroker] = useState<string | null>(null);
+  const [connectingBroker, setConnectingBroker] = useState<string | null>(null);
+
+  const handleConnect = async (brokerId: string) => {
+    if (connectedBroker) return;
+    onInteract();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setConnectingBroker(brokerId);
+
+    // Simulate connection delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setConnectedBroker(brokerId);
+    setConnectingBroker(null);
+  };
+
+  return (
+    <View style={demoStyles.brokerContainer}>
+      <Text style={demoStyles.pieTitle}>Tap to Connect Your Broker</Text>
+
+      <View style={demoStyles.brokerRow}>
+        {MOCK_BROKERS.map((broker) => {
+          const isConnected = connectedBroker === broker.id;
+          const isConnecting = connectingBroker === broker.id;
+          return (
+            <TouchableOpacity
+              key={broker.id}
+              activeOpacity={0.8}
+              disabled={isConnected || isConnecting}
+              onPress={() => handleConnect(broker.id)}
+              style={[demoStyles.brokerMiniCard, { width: (CARD_WIDTH - 48) / 3 - 4 }]}
+            >
+              <LinearGradient
+                colors={broker.gradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1.2 }}
+                style={demoStyles.brokerMiniGradient}
+              >
+                {/* Icon circle */}
+                <View style={[demoStyles.brokerMiniIcon, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                  {isConnecting ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : isConnected ? (
+                    <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
+                  ) : (
+                    <Text style={demoStyles.brokerMiniIconText}>{broker.icon}</Text>
+                  )}
+                </View>
+                <Text style={demoStyles.brokerMiniLabel}>{broker.label}</Text>
+
+                {/* Connected badge */}
+                {isConnected && (
+                  <Animated.View entering={BounceIn.duration(300)} style={demoStyles.brokerMiniConnected}>
+                    <Ionicons name="checkmark-circle" size={14} color="#FFFFFF" />
+                    <Text style={demoStyles.brokerMiniConnectedText}>Connected</Text>
+                  </Animated.View>
+                )}
+                {!isConnected && !isConnecting && (
+                  <View style={demoStyles.brokerMiniSyncBadge}>
+                    <Ionicons name="wifi" size={8} color="rgba(255,255,255,0.6)" />
+                    <Text style={demoStyles.brokerMiniSyncText}>Sync</Text>
+                  </View>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* Status message */}
+      {!connectedBroker && !interacted && (
+        <Text style={demoStyles.pieHint}>👆 Tap any broker to connect</Text>
+      )}
+      {connectedBroker && (
+        <Animated.View entering={BounceIn.duration(400)} style={demoStyles.brokerSuccessRow}>
+          <Ionicons name="shield-checkmark" size={16} color="#00E676" />
+          <Text style={demoStyles.brokerSuccessText}>
+            {MOCK_BROKERS.find(b => b.id === connectedBroker)?.label} connected! Secure session established.
+          </Text>
+        </Animated.View>
+      )}
+    </View>
+  );
+}
+
 function InteractiveBadges({
   onInteract,
 }: {
@@ -556,6 +657,9 @@ export default function OnboardingScreen({ _navigation }: any) {
     referralSource, interactedSteps, markStepInteracted,
   } = useOnboardingStore();
 
+  // Toggle between SVG illustrations and Lottie animations
+  const [useLottie, setUseLottie] = useState(false);
+
   // Referral variant: skip welcome step, start at portfolio
   const startStep = referralSource ? 1 : 0;
   const visibleSteps = referralSource
@@ -597,8 +701,8 @@ export default function OnboardingScreen({ _navigation }: any) {
   const bottomStyle = useAnimatedStyle(() => ({ opacity: bottomProgress.value }));
 
   // ── Card entrance animations ──
-  const cardScales = Array.from({ length: 5 }, () => useSharedValue(0.9));
-  const cardOpacities = Array.from({ length: 5 }, () => useSharedValue(0));
+  const cardScales = Array.from({ length: visibleSteps.length }, () => useSharedValue(0.9));
+  const cardOpacities = Array.from({ length: visibleSteps.length }, () => useSharedValue(0));
 
   const cardStyles = cardScales.map((_, i) =>
     useAnimatedStyle(() => ({
@@ -696,22 +800,95 @@ export default function OnboardingScreen({ _navigation }: any) {
 
   // ── Render the interactive demo for a given step ──
   const renderInteractiveDemo = (stepId: string) => {
+    // Determine which step gradient to use
+    const step = visibleSteps.find(s => s.id === stepId) || visibleSteps[0];
+    const gradient = step?.gradient || ['#3B82F6', '#1D4ED8'];
+
+    // When Lottie mode is on, render Lottie animations instead of SVG background + interactive component
+    if (useLottie) {
+      return (
+        <View style={demoStyles.illustrationWrapper}>
+          <OnboardingLottie
+            stepId={stepId}
+            autoPlay
+            loop
+            speed={0.8}
+          />
+          <TouchableOpacity
+            style={demoStyles.lottieInteractBtn}
+            onPress={() => {
+              markStepInteracted(stepId);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+            activeOpacity={0.8}
+          >
+            <Text style={demoStyles.lottieInteractText}>
+              {interactedSteps[stepId] ? '✓ Interacted' : '👆 Tap to explore'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // Default: SVG illustration background + interactive component
     switch (stepId) {
       case 'welcome':
         return (
-          <RocketAnimation
-            onInteract={() => markStepInteracted(stepId)}
-            interacted={!!interactedSteps[stepId]}
-          />
+          <View style={demoStyles.illustrationWrapper}>
+            <View style={demoStyles.illustrationBg} pointerEvents="none">
+              {renderIllustration({ stepId, gradient })}
+            </View>
+            <RocketAnimation
+              onInteract={() => markStepInteracted(stepId)}
+              interacted={!!interactedSteps[stepId]}
+            />
+          </View>
         );
       case 'portfolio':
-        return <MiniPieChart onInteract={() => markStepInteracted(stepId)} />;
+        return (
+          <View style={demoStyles.illustrationWrapper}>
+            <View style={demoStyles.illustrationBg} pointerEvents="none">
+              {renderIllustration({ stepId, gradient })}
+            </View>
+            <MiniPieChart onInteract={() => markStepInteracted(stepId)} />
+          </View>
+        );
       case 'markets':
-        return <MiniCandlestickChart onInteract={() => markStepInteracted(stepId)} />;
+        return (
+          <View style={demoStyles.illustrationWrapper}>
+            <View style={demoStyles.illustrationBg} pointerEvents="none">
+              {renderIllustration({ stepId, gradient })}
+            </View>
+            <MiniCandlestickChart onInteract={() => markStepInteracted(stepId)} />
+          </View>
+        );
       case 'trading':
-        return <MockTradePanel onInteract={() => markStepInteracted(stepId)} />;
+        return (
+          <View style={demoStyles.illustrationWrapper}>
+            <View style={demoStyles.illustrationBg} pointerEvents="none">
+              {renderIllustration({ stepId, gradient })}
+            </View>
+            <MockTradePanel onInteract={() => markStepInteracted(stepId)} />
+          </View>
+        );
+      case 'broker':
+        return (
+          <View style={demoStyles.illustrationWrapper}>
+            <View style={demoStyles.illustrationBg} pointerEvents="none">
+              {renderIllustration({ stepId, gradient })}
+            </View>
+            <MiniBrokerConnect onInteract={() => markStepInteracted(stepId)} interacted={!!interactedSteps[stepId]} />
+          </View>
+        );
       case 'learn':
-        return <InteractiveBadges onInteract={() => markStepInteracted(stepId)} />;
+        return (
+          <View style={demoStyles.illustrationWrapper}>
+            <View style={demoStyles.illustrationBg} pointerEvents="none">
+              {renderIllustration({ stepId, gradient })}
+            </View>
+            <InteractiveBadges onInteract={() => markStepInteracted(stepId)} />
+          </View>
+        );
       default:
         return null;
     }
@@ -724,6 +901,7 @@ export default function OnboardingScreen({ _navigation }: any) {
       case 'portfolio': return 220;
       case 'markets': return 240;
       case 'trading': return 280;
+      case 'broker': return 230;
       case 'learn': return 220;
       default: return 180;
     }
@@ -731,7 +909,7 @@ export default function OnboardingScreen({ _navigation }: any) {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Top Bar — Skip + Page Indicator */}
+      {/* Top Bar — Skip + Page Indicator + Lottie Toggle */}
       <Animated.View style={[styles.topBar, contentStyle]}>
         <TouchableOpacity onPress={handleSkip} style={styles.skipBtn}>
           <Text style={styles.skipText}>Skip</Text>
@@ -755,7 +933,26 @@ export default function OnboardingScreen({ _navigation }: any) {
           ))}
         </View>
 
-        <View style={{ width: 60 }} />
+        {/* Lottie toggle */}
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setUseLottie(prev => !prev);
+          }}
+          style={[
+            styles.lottieToggle,
+            useLottie && styles.lottieToggleActive,
+          ]}
+        >
+          <Ionicons
+            name={useLottie ? 'film' : 'code-slash'}
+            size={14}
+            color={useLottie ? '#00E676' : '#9CA3AF'}
+          />
+          <Text style={[styles.lottieToggleText, useLottie && styles.lottieToggleTextActive]}>
+            {useLottie ? 'Lottie' : 'SVG'}
+          </Text>
+        </TouchableOpacity>
       </Animated.View>
 
       {/* Scrollable Cards */}
@@ -763,7 +960,7 @@ export default function OnboardingScreen({ _navigation }: any) {
         {/* Parallax background accent */}
         <Animated.View style={[styles.parallaxBg, parallaxStyle]} pointerEvents="none" />
 
-        <ScrollView
+        <Animated.ScrollView
           ref={scrollRef}
           horizontal
           pagingEnabled
@@ -832,9 +1029,9 @@ export default function OnboardingScreen({ _navigation }: any) {
                   </View>
                 </View>
               </Animated.View>
-            );
-          })}
-        </ScrollView>
+            );          })
+        }
+        </Animated.ScrollView>
       </Animated.View>
 
       {/* Bottom Section — Navigation Buttons + Progress Bar */}
@@ -1317,6 +1514,126 @@ const demoStyles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     textAlign: 'center',
   },
+
+  // ── Broker Connect ──
+  brokerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  brokerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  brokerMiniCard: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    aspectRatio: 0.8,
+  },
+  brokerMiniGradient: {
+    flex: 1,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+  },
+  brokerMiniIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  brokerMiniIconText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Inter-Bold',
+  },
+  brokerMiniLabel: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+  },
+  brokerMiniConnected: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    backgroundColor: 'rgba(16,185,129,0.25)',
+    borderRadius: 8,
+  },
+  brokerMiniConnectedText: {
+    color: '#FFFFFF',
+    fontSize: 8,
+    fontFamily: 'Inter-Medium',
+  },
+  brokerMiniSyncBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  brokerMiniSyncText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 8,
+    fontFamily: 'Inter-Regular',
+  },
+  brokerSuccessRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(0,230,118,0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,230,118,0.2)',
+  },
+  brokerSuccessText: {
+    color: '#00E676',
+    fontSize: 11,
+    fontFamily: 'Inter-Medium',
+  },
+
+  // ── Lottie interact button ──
+  lottieInteractBtn: {
+    position: 'absolute',
+    bottom: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  lottieInteractText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontFamily: 'Inter-Medium',
+  },
+
+  // ── Illustration Layout ──
+  illustrationWrapper: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  illustrationBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    opacity: 0.35,
+  },
 });
 
 // ────────────────────────────────────────────────────────
@@ -1499,5 +1816,30 @@ const styles = StyleSheet.create({
     ...FONTS.bold,
     fontSize: FONTS.size.lg,
     color: '#FFFFFF',
+  },
+
+  // ── Lottie Toggle Button ──
+  lottieToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: BORDER_RADIUS.full,
+    backgroundColor: '#1F2937',
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  lottieToggleActive: {
+    backgroundColor: 'rgba(0,230,118,0.1)',
+    borderColor: 'rgba(0,230,118,0.3)',
+  },
+  lottieToggleText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.xs,
+    color: '#9CA3AF',
+  },
+  lottieToggleTextActive: {
+    color: '#00E676',
   },
 });

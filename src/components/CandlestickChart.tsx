@@ -1,12 +1,23 @@
 import React, { useMemo, useCallback, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder, LayoutChangeEvent } from 'react-native';
-import Svg, { Path, Line, Rect, G, Text as SvgText, Circle } from 'react-native-svg';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder } from 'react-native';
+import Svg, { Path, Line, Rect, G, Text as SvgText, Circle, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { formatCurrency, formatCompactNumber } from '../utils/formatters';
 import { useChartCrosshair } from './ChartCrosshairContext';
 import TechnicalIndicators, { IndicatorType } from './TechnicalIndicators';
+import DrawingTools, { type DrawingAnnotation, type DrawingToolType } from './chart/DrawingTools';
+import { getPatternColor, type DetectedPattern } from './chart/patternDetection';
+// SkiaCandlestickChart is loaded dynamically below (via require) to avoid
+// triggering TurboModuleRegistry.getEnforcing('RNSkiaModule') at bundle load
+// time in environments where the native Skia module isn't available (e.g. Expo Go).
 import type { StockHistoryPoint } from '../types';
+
+// ============================================================================
+// Renderer Type
+// ============================================================================
+
+export type ChartRenderer = 'svg' | 'skia';
 
 // ============================================================================
 // Constants
@@ -16,7 +27,9 @@ const CANDLE_WIDTH = 0.6;
 const CANDLE_MIN_WIDTH = 2;
 const MIN_VISIBLE_CANDLES = 10;
 const MAX_ZOOM = 1;
-const PINCH_THRESHOLD = 10; // minimum distance change to trigger zoom
+const PINCH_THRESHOLD = 10;
+
+export type ChartType = 'candlestick' | 'line' | 'area' | 'heikin_ashi';
 
 // ============================================================================
 // Props
@@ -34,17 +47,74 @@ interface CandlestickChartProps {
   showMA?: boolean;
   loading?: boolean;
 
-  // ── New: Technical indicator toggles ──
+  // ── Chart type ──
+  chartType?: ChartType;
+  onChartTypeChange?: (type: ChartType) => void;
+
+  // ── Technical indicator toggles ──
   showRSI?: boolean;
   showMACD?: boolean;
   showBollinger?: boolean;
   onIndicatorToggle?: (type: IndicatorType) => void;
 
-  // ── New: Zoom/pan control (optional, for reset via parent) ──
+  // ── Drawing tools ──
+  enableDrawing?: boolean;
+  drawings?: DrawingAnnotation[];
+  onDrawingsChange?: (drawings: DrawingAnnotation[]) => void;
+  activeDrawTool?: DrawingToolType;
+  onDrawToolChange?: (tool: DrawingToolType) => void;
+  /** Fullscreen mode — larger annotation input */
+  isFullscreen?: boolean;
+  /** Next drawing color override */
+  nextDrawingColor?: string;
+
+  // ── Pattern detection ──
+  showPatterns?: boolean;
+  patterns?: DetectedPattern[];
+
+  // ── Zoom/pan control ──
   zoomLevel?: number;
   onZoomChange?: (level: number) => void;
   scrollOffset?: number;
   onScrollChange?: (offset: number) => void;
+
+  // ── Renderer selection ──
+  /** 'skia' (default, GPU-accelerated via @shopify/react-native-skia) or 'svg' (react-native-svg fallback) */
+  renderer?: ChartRenderer;
+}
+
+// ============================================================================
+// Heikin-Ashi calculation
+// ============================================================================
+
+function computeHeikinAshi(data: StockHistoryPoint[]): StockHistoryPoint[] {
+  if (data.length === 0) return [];
+  const ha: StockHistoryPoint[] = [];
+  ha.push({
+    date: data[0].date,
+    open: data[0].open,
+    high: data[0].high,
+    low: data[0].low,
+    close: data[0].close,
+    volume: data[0].volume,
+  });
+  for (let i = 1; i < data.length; i++) {
+    const prev = ha[i - 1];
+    const curr = data[i];
+    const haClose = (curr.open + curr.high + curr.low + curr.close) / 4;
+    const haOpen = (prev.open + prev.close) / 2;
+    const haHigh = Math.max(curr.high, haOpen, haClose);
+    const haLow = Math.min(curr.low, haOpen, haClose);
+    ha.push({
+      date: curr.date,
+      open: Math.round(haOpen * 100) / 100,
+      high: Math.round(haHigh * 100) / 100,
+      low: Math.round(haLow * 100) / 100,
+      close: Math.round(haClose * 100) / 100,
+      volume: curr.volume,
+    });
+  }
+  return ha;
 }
 
 // ============================================================================
@@ -61,22 +131,49 @@ export default function CandlestickChart({
   showVolume = true,
   showMA = false,
   loading = false,
-
+  chartType = 'candlestick',
+  onChartTypeChange,
   showRSI = false,
   showMACD = false,
   showBollinger = false,
   onIndicatorToggle,
-
+  enableDrawing = false,
+  drawings = [],
+  onDrawingsChange,
+  activeDrawTool = 'none' as DrawingToolType,
+  onDrawToolChange,
+  isFullscreen = false,
+  nextDrawingColor,
+  showPatterns = false,
+  patterns = [],
   zoomLevel: externalZoom,
   onZoomChange,
   scrollOffset: externalScroll,
   onScrollChange,
+  renderer = 'svg',
 }: CandlestickChartProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { focusedIndex, setFocusedIndex } = useChartCrosshair();
 
-  // ── Zoom / Pan state (controlled or local) ──
+  // ── Chart type state ──
+  const [localChartType, setLocalChartType] = useState<ChartType>('candlestick');
+  const activeChartType = onChartTypeChange ? chartType : localChartType;
+  const setChartType = useCallback((t: ChartType) => {
+    if (onChartTypeChange) onChartTypeChange(t);
+    else setLocalChartType(t);
+  }, [onChartTypeChange]);
+
+  // ── Show chart type menu ──
+  const [showTypeMenu, setShowTypeMenu] = useState(false);
+
+  // ── Apply Heikin-Ashi if selected ──
+  const processedData = useMemo(() => {
+    if (activeChartType === 'heikin_ashi') return computeHeikinAshi(data);
+    return data;
+  }, [data, activeChartType]);
+
+  // ── Zoom / Pan state ──
   const [localZoom, setLocalZoom] = useState(0);
   const [localScroll, setLocalScroll] = useState(0);
 
@@ -107,10 +204,9 @@ export default function CandlestickChart({
 
   // ── Compute visible data slice ──
   const { visibleData, visibleStartIndex } = useMemo(() => {
-    if (!data || data.length === 0) return { visibleData: data || [], visibleStartIndex: 0 };
+    if (!processedData || processedData.length === 0) return { visibleData: processedData || [], visibleStartIndex: 0 };
 
-    const totalLen = data.length;
-    // zoomLevel 0 → all visible, 1 → only MIN_VISIBLE_CANDLES / total visible
+    const totalLen = processedData.length;
     const visibleCount = Math.max(
       MIN_VISIBLE_CANDLES,
       Math.round(totalLen * (1 - zoomLevel * 0.85)),
@@ -118,10 +214,10 @@ export default function CandlestickChart({
     const maxStart = totalLen - visibleCount;
     const startIndex = Math.round(scrollOffset * maxStart);
     return {
-      visibleData: data.slice(startIndex, startIndex + visibleCount),
+      visibleData: processedData.slice(startIndex, startIndex + visibleCount),
       visibleStartIndex: startIndex,
     };
-  }, [data, zoomLevel, scrollOffset]);
+  }, [processedData, zoomLevel, scrollOffset]);
 
   const padding = { top: 16, right: 16, bottom: showVolume ? 80 : 32, left: 60 };
   const chartWidth = width - padding.left - padding.right;
@@ -129,7 +225,7 @@ export default function CandlestickChart({
   const volumeHeight = showVolume ? 40 : 0;
 
   // ── Compute price range from visible data ──
-  const { maxPrice, priceRange } = useMemo(() => {
+  const { minPrice, maxPrice, priceRange } = useMemo(() => {
     if (!visibleData || visibleData.length === 0) return { minPrice: 0, maxPrice: 0, priceRange: 1 };
     let mn = Infinity, mx = -Infinity;
     for (const d of visibleData) {
@@ -152,12 +248,11 @@ export default function CandlestickChart({
 
   // ── MA(20) and MA(50) on visible data ──
   const maData = useMemo(() => {
-    if (!showMA || !visibleData) return null;
+    if (!showMA || !visibleData || !processedData) return null;
     const ma20: (number | null)[] = [];
     const ma50: (number | null)[] = [];
-    // Include some data before visible window for accurate MA values
     const extendedStart = Math.max(0, visibleStartIndex - 50);
-    const extendedData = data!.slice(extendedStart, visibleStartIndex + visibleData.length);
+    const extendedData = processedData!.slice(extendedStart, visibleStartIndex + visibleData.length);
     const localOffset = visibleStartIndex - extendedStart;
 
     for (let i = 0; i < visibleData.length; i++) {
@@ -178,15 +273,14 @@ export default function CandlestickChart({
       }
     }
     return { ma20, ma50 };
-  }, [visibleData, visibleStartIndex, data, showMA]);
+  }, [visibleData, visibleStartIndex, processedData, showMA]);
 
-  // ── Layout calculations for visible data ──
+  // ── Layout calculations ──
   const candleWidth = visibleData.length > 0
     ? Math.max((chartWidth / visibleData.length) * CANDLE_WIDTH, CANDLE_MIN_WIDTH)
     : 0;
   const candleSpacing = visibleData.length > 0 ? chartWidth / visibleData.length : 0;
 
-  // getX/getY for visible data (local index 0 = first visible candle)
   const getX = useCallback((localIndex: number) => padding.left + localIndex * candleSpacing, [padding.left, candleSpacing]);
   const getY = useCallback((price: number) => padding.top + ((maxPrice - price) / priceRange) * chartHeight, [padding.top, maxPrice, priceRange, chartHeight]);
   const getVolumeY = useCallback((vol: number) => {
@@ -202,40 +296,38 @@ export default function CandlestickChart({
     return Math.max(0, Math.min(visibleData.length - 1, index));
   }, [visibleData, padding.left, candleSpacing]);
 
-  // ── Global index (full dataset) from local index ──
+  // ── Global index from local index ──
   const localToGlobalIndex = useCallback((localIdx: number) => {
     return visibleStartIndex + localIdx;
   }, [visibleStartIndex]);
 
-  // ── Update crosshair from screen x ──
+  // ── Update crosshair ──
   const updateCrosshair = useCallback((screenX: number) => {
     const localIdx = touchToLocalIndex(screenX);
     if (localIdx === null || !visibleData) return;
     setFocusedIndex(localToGlobalIndex(localIdx));
   }, [touchToLocalIndex, visibleData, setFocusedIndex, localToGlobalIndex]);
 
-  // ── PanResponder: handles crosshair, pan, and pinch-to-zoom ──
+  // ── PanResponder ──
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (_, gs) => Math.abs(gs.dx) > 3 || Math.abs(gs.dy) > 3,
     onPanResponderGrant: (e) => {
       const touches = e.nativeEvent.touches;
       if (touches && touches.length >= 2) {
-        // Pinch start
         const dx = touches[1].pageX - touches[0].pageX;
         const dy = touches[1].pageY - touches[0].pageY;
         pinchRef.current.initialDist = Math.sqrt(dx * dx + dy * dy);
         pinchRef.current.initialZoom = zoomLevel;
         panRef.current.moved = true;
       } else {
-        // Single touch start
         panRef.current.startX = e.nativeEvent.locationX;
         panRef.current.startScroll = scrollOffset;
         panRef.current.isTap = true;
         panRef.current.moved = false;
       }
     },
-    onPanResponderMove: (e, gs) => {
+    onPanResponderMove: (e, _gs) => {
       const touches = e.nativeEvent.touches;
       if (touches && touches.length >= 2) {
         panRef.current.moved = true;
@@ -252,15 +344,10 @@ export default function CandlestickChart({
       } else {
         panRef.current.moved = true;
         if (zoomLevel > 0) {
-          // Pan mode: single finger scroll when zoomed
-          const pixelsPerUnit = chartWidth / (zoomLevel * 0.85);
-          const dxPixels = gs.dx - (panRef.current.startX - e.nativeEvent.locationX);
-          // Recalculate from grant position
           const panDelta = (e.nativeEvent.locationX - panRef.current.startX) / (chartWidth || 1);
           const newScroll = Math.max(0, Math.min(1, panRef.current.startScroll - panDelta));
           setScroll(newScroll);
         } else {
-          // Crosshair mode
           const x = e.nativeEvent.locationX;
           updateCrosshair(x);
         }
@@ -268,11 +355,8 @@ export default function CandlestickChart({
     },
     onPanResponderRelease: (e) => {
       if (!panRef.current.moved) {
-        // Tap — update crosshair
         const x = e.nativeEvent.locationX;
         updateCrosshair(x);
-
-        // Double-tap detection for reset
         const now = Date.now();
         if (now - lastTapRef.current < 300 && zoomLevel > 0) {
           resetZoom();
@@ -282,7 +366,7 @@ export default function CandlestickChart({
     },
   }), [updateCrosshair, zoomLevel, scrollOffset, setZoom, setScroll, chartWidth, width, resetZoom]);
 
-  // ── Crosshair (global index → visible local index) ──
+  // ── Crosshair ──
   const crosshairLocalIndex = useMemo(() => {
     if (focusedIndex === null || !visibleData) return null;
     const local = focusedIndex - visibleStartIndex;
@@ -313,22 +397,41 @@ export default function CandlestickChart({
   // ── X-axis labels ──
   const xLabels = useMemo(() => {
     if (!visibleData || visibleData.length === 0) return [];
+    // Detect intraday: most data points share the same date
+    const firstDate = new Date(visibleData[0].date);
+    const lastDate = new Date(visibleData[visibleData.length - 1].date);
+    const isIntraday = firstDate.toDateString() === lastDate.toDateString();
+
     const count = Math.min(6, visibleData.length);
     const step = Math.max(1, Math.floor(visibleData.length / (count - 1)));
     const labels: { index: number; label: string }[] = [];
     for (let i = 0; i < visibleData.length; i += step) {
       const date = new Date(visibleData[i].date);
-      labels.push({ index: i, label: `${date.getDate()}/${date.getMonth() + 1}` });
+      if (isIntraday) {
+        // Show HH:MM for intraday
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        labels.push({ index: i, label: `${hh}:${mm}` });
+      } else {
+        // Show DD/MM for daily data
+        labels.push({ index: i, label: `${date.getDate()}/${date.getMonth() + 1}` });
+      }
     }
     const last = visibleData.length - 1;
     if (labels[labels.length - 1]?.index !== last) {
       const date = new Date(visibleData[last].date);
-      labels.push({ index: last, label: `${date.getDate()}/${date.getMonth() + 1}` });
+      if (isIntraday) {
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        labels.push({ index: last, label: `${hh}:${mm}` });
+      } else {
+        labels.push({ index: last, label: `${date.getDate()}/${date.getMonth() + 1}` });
+      }
     }
     return labels;
   }, [visibleData]);
 
-  // ── Active indicators for TechnicalIndicators ──
+  // ── Active indicators ──
   const activeIndicators = useMemo(() => {
     const inds: IndicatorType[] = [];
     if (showRSI) inds.push('rsi');
@@ -337,8 +440,35 @@ export default function CandlestickChart({
     return inds;
   }, [showRSI, showMACD, showBollinger]);
 
-  // ── Zoom indicator text ──
   const zoomPercent = Math.round(zoomLevel * 100);
+
+  // ── Build line path for line/area chart ──
+  const linePath = useMemo(() => {
+    if (!visibleData || visibleData.length === 0 || (activeChartType !== 'line' && activeChartType !== 'area')) return '';
+    let path = '';
+    for (let i = 0; i < visibleData.length; i++) {
+      const x = getX(i);
+      const y = getY(visibleData[i].close);
+      path += path ? ` L ${x} ${y}` : `M ${x} ${y}`;
+    }
+    return path;
+  }, [visibleData, activeChartType, getX, getY]);
+
+  // ── Build area fill path ──
+  const areaPath = useMemo(() => {
+    if (!visibleData || visibleData.length === 0 || activeChartType !== 'area') return '';
+    const bottomY = getY(minPrice);
+    const lastIdx = visibleData.length - 1;
+    return `${linePath} L ${getX(lastIdx)} ${bottomY} L ${getX(0)} ${bottomY} Z`;
+  }, [visibleData, activeChartType, linePath, minPrice, getX, getY]);
+
+  // ── Chart types ──
+  const chartTypes: { key: ChartType; label: string; icon: string }[] = [
+    { key: 'candlestick', label: 'Candle', icon: '📊' },
+    { key: 'line', label: 'Line', icon: '📈' },
+    { key: 'area', label: 'Area', icon: '📉' },
+    { key: 'heikin_ashi', label: 'HA', icon: '🕯️' },
+  ];
 
   // ════════════════════════════════════════════════════════════
   // Render
@@ -364,6 +494,166 @@ export default function CandlestickChart({
     );
   }
 
+  // ── Skia renderer path (GPU-accelerated) ──
+  // NOTE: SkiaCandlestickChart is loaded via dynamic require() so that
+  // @shopify/react-native-skia's native module (RNSkiaModule) is never
+  // loaded at bundle evaluation time. If the native module is missing
+  // (e.g. in Expo Go), the try-catch silently falls back to SVG.
+  if (renderer === 'skia') {
+    try {
+      const SkiaChart = require('./chart/SkiaCandlestickChart').default;
+      return (
+        <View style={[styles.container, { width }]}>
+          {/* ── Top bar: Chart type toggle + Zoom badge ── */}
+          <View style={styles.topBar}>
+            <TouchableOpacity
+              style={styles.chartTypeBtn}
+              onPress={() => setShowTypeMenu(prev => !prev)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.chartTypeBtnText}>
+                {chartTypes.find(t => t.key === activeChartType)?.icon}{' '}
+                {chartTypes.find(t => t.key === activeChartType)?.label}
+              </Text>
+              <Text style={styles.chartTypeArrow}>{showTypeMenu ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+
+            {zoomLevel > 0 && (
+              <View style={styles.zoomBadge}>
+                <Text style={styles.zoomBadgeText}>{zoomPercent}%</Text>
+              </View>
+            )}
+          </View>
+
+          {/* ── Chart type dropdown menu ── */}
+          {showTypeMenu && (
+            <View style={styles.typeMenu}>
+              {chartTypes.map(ct => (
+                <TouchableOpacity
+                  key={ct.key}
+                  style={[styles.typeMenuItem, activeChartType === ct.key && styles.typeMenuItemActive]}
+                  onPress={() => { setChartType(ct.key); setShowTypeMenu(false); }}
+                >
+                  <Text style={[styles.typeMenuItemText, activeChartType === ct.key && styles.typeMenuItemTextActive]}>
+                    {ct.icon} {ct.label}
+                  </Text>
+                  {activeChartType === ct.key && (
+                    <Text style={styles.typeMenuCheck}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* ── Skia Canvas ── */}
+          <SkiaChart
+            data={data}
+            height={height}
+            width={width}
+            showVolume={showVolume}
+            showMA={showMA}
+            chartType={activeChartType}
+            zoomLevel={zoomLevel}
+            scrollOffset={scrollOffset}
+            patterns={patterns}
+            visibleStartIndex={visibleStartIndex}
+            padding={padding}
+            chartHeight={chartHeight}
+            showPatterns={showPatterns}
+          />
+
+          {/* Drawing Tools Overlay */}
+          {enableDrawing && (
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 5 }}>
+              <DrawingTools
+                chartWidth={chartWidth}
+                chartHeight={chartHeight}
+                chartPadding={padding}
+                dataLength={visibleData.length}
+                visibleStartIndex={visibleStartIndex}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                priceRange={priceRange}
+                drawings={drawings}
+                onDrawingsChange={(d) => onDrawingsChange?.(d)}
+                activeTool={activeDrawTool}
+                onToolChange={(t) => onDrawToolChange?.(t)}
+                enabled={enableDrawing && activeDrawTool !== 'none'}
+                isFullscreen={isFullscreen}
+                nextDrawingColor={nextDrawingColor}
+              />
+            </View>
+          )}
+
+          {/* ── Zoom controls ── */}
+          <View style={styles.zoomControl}>
+            <TouchableOpacity
+              style={styles.zoomBtn}
+              onPress={() => setZoom(Math.max(0, zoomLevel - 0.15))}
+              activeOpacity={0.6}
+            >
+              <Text style={styles.zoomBtnText}>−</Text>
+            </TouchableOpacity>
+            <View style={styles.zoomTrack}>
+              <View
+                style={[styles.zoomFill, { width: `${zoomPercent}%`, backgroundColor: colors.primary }]}
+              />
+              <TouchableOpacity
+                style={[styles.zoomThumb, { left: `${zoomPercent}%` }]}
+                activeOpacity={0.8}
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.zoomBtn}
+              onPress={() => setZoom(Math.min(MAX_ZOOM, zoomLevel + 0.15))}
+              activeOpacity={0.6}
+            >
+              <Text style={styles.zoomBtnText}>+</Text>
+            </TouchableOpacity>
+            {zoomLevel > 0 && (
+              <TouchableOpacity style={styles.zoomResetBtn} onPress={resetZoom} activeOpacity={0.6}>
+                <Text style={styles.zoomResetText}>Reset</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* ── Timeframe selector ── */}
+          <View style={styles.timeframes}>
+            {timeframes.map((tf) => (
+              <TouchableOpacity
+                key={tf}
+                style={[styles.timeframeBtn, activeTimeframe === tf && styles.timeframeActive]}
+                onPress={() => {
+                  setFocusedIndex(null);
+                  resetZoom();
+                  onTimeframeChange?.(tf);
+                }}
+              >
+                <Text style={[styles.timeframeText, activeTimeframe === tf && styles.timeframeTextActive]}>
+                  {tf}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* ── Technical Indicators panels ── */}
+          {activeIndicators.length > 0 && (
+            <TechnicalIndicators
+              data={data}
+              width={width - SPACING.md * 2}
+              indicators={activeIndicators}
+              onIndicatorToggle={onIndicatorToggle}
+              compact
+            />
+          )}
+        </View>
+      );
+    } catch {
+      console.warn('[CandlestickChart] Skia native module unavailable, using SVG fallback');
+    }
+  }
+
+  // ── SVG renderer path (default JSX) ──
   return (
     <View style={[styles.container, { width }]}>
       {/* ── Crosshair tooltip ── */}
@@ -385,18 +675,47 @@ export default function CandlestickChart({
         </View>
       )}
 
-      {/* ── Zoom indicator ── */}
-      {zoomLevel > 0 && (
-        <View style={styles.zoomBadge}>
-          <Text style={styles.zoomBadgeText}>{zoomPercent}%</Text>
-        </View>
-      )}
-
-      {/* ── Reset zoom button ── */}
-      {zoomLevel > 0 && (
-        <TouchableOpacity style={styles.resetZoomBtn} onPress={resetZoom} activeOpacity={0.7}>
-          <Text style={styles.resetZoomText}>Reset</Text>
+      {/* ── Top bar: Chart type toggle + Zoom badge ── */}
+      <View style={styles.topBar}>
+        {/* Chart type selector */}
+        <TouchableOpacity
+          style={styles.chartTypeBtn}
+          onPress={() => setShowTypeMenu(prev => !prev)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.chartTypeBtnText}>
+            {chartTypes.find(t => t.key === activeChartType)?.icon}{' '}
+            {chartTypes.find(t => t.key === activeChartType)?.label}
+          </Text>
+          <Text style={styles.chartTypeArrow}>{showTypeMenu ? '▲' : '▼'}</Text>
         </TouchableOpacity>
+
+        {/* Zoom badge */}
+        {zoomLevel > 0 && (
+          <View style={styles.zoomBadge}>
+            <Text style={styles.zoomBadgeText}>{zoomPercent}%</Text>
+          </View>
+        )}
+      </View>
+
+      {/* ── Chart type dropdown menu ── */}
+      {showTypeMenu && (
+        <View style={styles.typeMenu}>
+          {chartTypes.map(ct => (
+            <TouchableOpacity
+              key={ct.key}
+              style={[styles.typeMenuItem, activeChartType === ct.key && styles.typeMenuItemActive]}
+              onPress={() => { setChartType(ct.key); setShowTypeMenu(false); }}
+            >
+              <Text style={[styles.typeMenuItemText, activeChartType === ct.key && styles.typeMenuItemTextActive]}>
+                {ct.icon} {ct.label}
+              </Text>
+              {activeChartType === ct.key && (
+                <Text style={styles.typeMenuCheck}>✓</Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
       )}
 
       {/* ── SVG Chart ── */}
@@ -445,7 +764,20 @@ export default function CandlestickChart({
           </SvgText>
         ))}
 
-        {/* Moving Averages (behind candles) */}
+        {/* ── Area fill (behind line) ── */}
+        {activeChartType === 'area' && areaPath && (
+          <Defs>
+            <SvgLinearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor={colors.primary} stopOpacity="0.25" />
+              <Stop offset="100%" stopColor={colors.primary} stopOpacity="0.02" />
+            </SvgLinearGradient>
+          </Defs>
+        )}
+        {activeChartType === 'area' && areaPath && (
+          <Path d={areaPath} fill="url(#areaGrad)" />
+        )}
+
+        {/* Moving Averages */}
         {showMA && maData && (
           <>
             {(() => {
@@ -477,28 +809,34 @@ export default function CandlestickChart({
           </>
         )}
 
-        {/* Candlesticks */}
-        {visibleData.map((point, i) => {
-          const x = getX(i) - candleWidth / 2;
-          const candleX = getX(i);
-          const open = point.open;
-          const close = point.close;
-          const isBullish = close >= open;
-          const color = isBullish ? colors.marketUp : colors.marketDown;
+        {/* ── Line chart mode ── */}
+        {activeChartType === 'line' && linePath && (
+          <Path d={linePath} stroke={colors.primary} strokeWidth={2} fill="none" />
+        )}
 
-          const yTop = getY(Math.max(open, close));
-          const yBottom = getY(Math.min(open, close));
-          const yHigh = getY(point.high);
-          const yLow = getY(point.low);
-          const bodyHeight = Math.max(yBottom - yTop, 1);
+        {/* ── Candlesticks (candlestick or heikin_ashi) ── */}
+        {(activeChartType === 'candlestick' || activeChartType === 'heikin_ashi') && (
+          visibleData.map((point, i) => {
+            const x = getX(i) - candleWidth / 2;
+            const candleX = getX(i);
+            const open = point.open;
+            const close = point.close;
+            const isBullish = close >= open;
+            const color = isBullish ? colors.marketUp : colors.marketDown;
+            const yTop = getY(Math.max(open, close));
+            const yBottom = getY(Math.min(open, close));
+            const yHigh = getY(point.high);
+            const yLow = getY(point.low);
+            const bodyHeight = Math.max(yBottom - yTop, 1);
 
-          return (
-            <G key={`candle-${i}`}>
-              <Line x1={candleX} y1={yHigh} x2={candleX} y2={yLow} stroke={color} strokeWidth={1.2} />
-              <Rect x={x} y={yTop} width={candleWidth} height={bodyHeight} fill={color} rx={0.5} />
-            </G>
-          );
-        })}
+            return (
+              <G key={`candle-${i}`}>
+                <Line x1={candleX} y1={yHigh} x2={candleX} y2={yLow} stroke={color} strokeWidth={1.2} />
+                <Rect x={x} y={yTop} width={candleWidth} height={bodyHeight} fill={color} rx={0.5} />
+              </G>
+            );
+          })
+        )}
 
         {/* Volume bars */}
         {showVolume && visibleData.map((point, i) => {
@@ -571,7 +909,94 @@ export default function CandlestickChart({
           </>
         )}
 
-        {/* Touch overlay with PanResponder */}
+        {/* Pattern Detection Overlay */}
+        {showPatterns && patterns.length > 0 && patterns.map(pattern => {
+          const pColor = getPatternColor(pattern.type);
+          const patternStartX = padding.left + (pattern.startIndex - visibleStartIndex) * candleSpacing;
+          const patternEndX = padding.left + (pattern.endIndex - visibleStartIndex) * candleSpacing;
+
+          // Render neckline for H&S patterns
+          const necklineEl = pattern.necklinePrice ? (
+            <Line
+              key={`${pattern.type}-${pattern.startIndex}-neck`}
+              x1={patternStartX}
+              y1={getY(pattern.necklinePrice)}
+              x2={patternEndX}
+              y2={getY(pattern.necklinePrice)}
+              stroke={pColor}
+              strokeWidth={1.5}
+              strokeDasharray="6,4"
+              opacity={0.7}
+            />
+          ) : null;
+
+          // Render key levels
+          const levelDots = pattern.levels.map((level, li) => {
+            const lx = padding.left + (level.x - visibleStartIndex) * candleSpacing;
+            const ly = getY(level.price);
+            return (
+              <G key={`${pattern.type}-${pattern.startIndex}-lvl-${li}`}>
+                <Circle cx={lx} cy={ly} r={5} fill={pColor} stroke="#fff" strokeWidth={1.5} opacity={0.9} />
+                {level.label && (
+                  <SvgText
+                    x={lx + 8}
+                    y={ly + 4}
+                    fill={pColor}
+                    fontSize={10}
+                    fontFamily="System"
+                    fontWeight="700"
+                  >
+                    {level.label}
+                  </SvgText>
+                )}
+              </G>
+            );
+          });
+
+          // Pattern highlight region
+          const highlightEl = (
+            <Rect
+              x={patternStartX}
+              y={padding.top}
+              width={Math.max(patternEndX - patternStartX, 0)}
+              height={chartHeight}
+              fill={pColor}
+              opacity={0.06}
+            />
+          );
+
+          return (
+            <G key={`pattern-${pattern.type}-${pattern.startIndex}`}>
+              {highlightEl}
+              {necklineEl}
+              {levelDots}
+              {/* Pattern label badge */}
+              <G>
+                <Rect
+                  x={patternStartX}
+                  y={padding.top - 4}
+                  width={pattern.label.length * 9 + 14}
+                  height={20}
+                  rx={4}
+                  fill={pColor}
+                  opacity={0.85}
+                />
+                <SvgText
+                  x={patternStartX + 7}
+                  y={padding.top + 10}
+                  fill="#fff"
+                  fontSize={9}
+                  fontFamily="System"
+                  fontWeight="700"
+                >
+                  {pattern.label} {pattern.confidence}%
+                </SvgText>
+              </G>
+            </G>
+          );
+        })}
+
+        {/* Touch overlay */}
         <Rect
           x={padding.left}
           y={padding.top}
@@ -581,6 +1006,60 @@ export default function CandlestickChart({
           {...panResponder.panHandlers}
         />
       </Svg>
+
+      {/* Drawing Tools Overlay */}
+      {enableDrawing && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 5 }}>
+          <DrawingTools
+            chartWidth={chartWidth}
+            chartHeight={chartHeight}
+            chartPadding={padding}
+            dataLength={visibleData.length}
+            visibleStartIndex={visibleStartIndex}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            priceRange={priceRange}
+            drawings={drawings}
+            onDrawingsChange={(d) => onDrawingsChange?.(d)}
+            activeTool={activeDrawTool}
+            onToolChange={(t) => onDrawToolChange?.(t)}              enabled={enableDrawing && activeDrawTool !== 'none'}
+              isFullscreen={isFullscreen}
+              nextDrawingColor={nextDrawingColor}
+            />
+          </View>
+        )}
+
+        {/* ── Zoom slider ── */}
+        <View style={styles.zoomControl}>
+          <TouchableOpacity
+          style={styles.zoomBtn}
+          onPress={() => setZoom(Math.max(0, zoomLevel - 0.15))}
+          activeOpacity={0.6}
+        >
+          <Text style={styles.zoomBtnText}>−</Text>
+        </TouchableOpacity>
+        <View style={styles.zoomTrack}>
+          <View
+            style={[styles.zoomFill, { width: `${zoomPercent}%`, backgroundColor: colors.primary }]}
+          />
+          <TouchableOpacity
+            style={[styles.zoomThumb, { left: `${zoomPercent}%` }]}
+            activeOpacity={0.8}
+          />
+        </View>
+        <TouchableOpacity
+          style={styles.zoomBtn}
+          onPress={() => setZoom(Math.min(MAX_ZOOM, zoomLevel + 0.15))}
+          activeOpacity={0.6}
+        >
+          <Text style={styles.zoomBtnText}>+</Text>
+        </TouchableOpacity>
+        {zoomLevel > 0 && (
+          <TouchableOpacity style={styles.zoomResetBtn} onPress={resetZoom} activeOpacity={0.6}>
+            <Text style={styles.zoomResetText}>Reset</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {/* ── Timeframe selector ── */}
       <View style={styles.timeframes}>
@@ -642,7 +1121,7 @@ const createStyles = (colors: any) =>
     },
     crosshairInfo: {
       position: 'absolute',
-      top: SPACING.xs,
+      top: 40,
       zIndex: 10,
       backgroundColor: colors.bgCardLight,
       borderRadius: BORDER_RADIUS.md,
@@ -676,16 +1155,80 @@ const createStyles = (colors: any) =>
       fontFamily: 'System',
       marginTop: 2,
     },
+    // ── Top bar ──
+    topBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.xs,
+    },
+    chartTypeBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: colors.bgCardLight,
+      borderRadius: BORDER_RADIUS.sm,
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    chartTypeBtnText: {
+      color: colors.textSecondary,
+      fontSize: FONTS.size.xs,
+      fontFamily: 'System',
+      fontWeight: '600',
+    },
+    chartTypeArrow: {
+      color: colors.textMuted,
+      fontSize: 8,
+    },
+    // ── Type menu dropdown ──
+    typeMenu: {
+      position: 'absolute',
+      top: 36,
+      left: SPACING.md,
+      zIndex: 20,
+      backgroundColor: colors.bgCard,
+      borderRadius: BORDER_RADIUS.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: SPACING.xs,
+      ...SHADOWS.medium,
+    },
+    typeMenuItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.sm,
+      borderRadius: BORDER_RADIUS.sm,
+      minWidth: 120,
+    },
+    typeMenuItemActive: {
+      backgroundColor: colors.primary + '15',
+    },
+    typeMenuItemText: {
+      color: colors.text,
+      fontSize: FONTS.size.sm,
+      fontFamily: 'System',
+      fontWeight: '500',
+    },
+    typeMenuItemTextActive: {
+      color: colors.primary,
+      fontWeight: '700',
+    },
+    typeMenuCheck: {
+      color: colors.primary,
+      fontSize: FONTS.size.sm,
+      fontWeight: '700',
+    },
     // ── Zoom controls ──
     zoomBadge: {
-      position: 'absolute',
-      top: SPACING.sm,
-      right: SPACING.sm,
       backgroundColor: colors.primary + '30',
       borderRadius: BORDER_RADIUS.sm,
       paddingHorizontal: SPACING.sm,
       paddingVertical: 2,
-      zIndex: 10,
     },
     zoomBadgeText: {
       color: colors.primary,
@@ -693,19 +1236,62 @@ const createStyles = (colors: any) =>
       fontFamily: 'System',
       fontWeight: '700',
     },
-    resetZoomBtn: {
-      position: 'absolute',
-      bottom: 100,
-      right: SPACING.sm,
-      backgroundColor: colors.bgCardLight,
+    zoomControl: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      marginTop: SPACING.sm,
+      paddingTop: SPACING.sm,
+      borderTopWidth: 1,
+      borderTopColor: colors.borderLight,
+    },
+    zoomBtn: {
+      width: 28,
+      height: 28,
       borderRadius: BORDER_RADIUS.full,
-      paddingHorizontal: SPACING.md,
-      paddingVertical: SPACING.xs,
+      backgroundColor: colors.bgCardLight,
       borderWidth: 1,
       borderColor: colors.border,
-      zIndex: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
-    resetZoomText: {
+    zoomBtnText: {
+      color: colors.textSecondary,
+      fontSize: FONTS.size.md,
+      fontWeight: '700',
+    },
+    zoomTrack: {
+      flex: 1,
+      height: 4,
+      backgroundColor: colors.bgInput,
+      borderRadius: 2,
+      position: 'relative',
+      justifyContent: 'center',
+    },
+    zoomFill: {
+      height: '100%',
+      borderRadius: 2,
+    },
+    zoomThumb: {
+      position: 'absolute',
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: colors.primary,
+      borderWidth: 2,
+      borderColor: colors.bg,
+      marginLeft: -8,
+      ...SHADOWS.small,
+    },
+    zoomResetBtn: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: BORDER_RADIUS.sm,
+      backgroundColor: colors.bgCardLight,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    zoomResetText: {
       color: colors.textSecondary,
       fontSize: FONTS.size.xs,
       fontFamily: 'System',
@@ -738,5 +1324,4 @@ const createStyles = (colors: any) =>
       color: colors.primary,
       fontWeight: '700',
     },
-
   });

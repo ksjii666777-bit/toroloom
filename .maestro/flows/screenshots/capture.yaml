@@ -1,0 +1,310 @@
+# =============================================================================
+# App Store Screenshots — Maestro Capture Flow
+# =============================================================================
+# Run this flow to capture screenshots of all key Toroloom screens for
+# App Store and Google Play Store listings.
+#
+# Usage:
+#   maestro test .maestro/flows/screenshots/capture.yaml --app-id host.exp.exponent
+#
+# Output: screenshots saved to .maestro/screenshots/ directory.
+#         Use scripts/capture-screenshots.sh to automate the full pipeline
+#         including organizing into store/screenshots/ by device and platform.
+#
+# Screenshots captured (in order):
+#   1. Login Screen
+#   2. Signup Screen
+#   3. Home Screen (Portfolio Summary + Quick Actions)
+#   4. Markets Screen
+#   5. Stock Detail Screen
+#   6. Options Chain (F&O)
+#   7. Strategy Builder
+#   8. Portfolio Screen
+#   9. Watchlist Screen
+#  10. AI Insights
+#  11. Learn/Education Screen
+#  12. KYC - PAN Verification
+#  13. Subscription Screen
+#  14. More Screen (Menu)
+# =============================================================================
+
+appId: host.exp.exponent
+---
+# Launch the app (ensure it's running before capturing)
+- launchApp:
+    appId: host.exp.exponent
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 1. Login Screen
+# ═══════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: "Welcome Back!"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: "01-Login"
+
+# Fill in credentials for subsequent screens
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# Navigate to Home tab
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 2. Home Screen — Portfolio Dashboard
+# ═══════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: "Good Morning,"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "02-Home-Screen"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 3. Markets Screen
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "Markets"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Markets"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "03-Markets"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 4. Stock Detail Screen (tap first stock)
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn:
+    text: "RELIANCE"
+    index: 0
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# If RELIANCE not found, try first stock card
+- runFlow:
+    when:
+      notVisible: "About"
+    commands:
+      - tapOn:
+          index: 0
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible:
+    text: "About Company"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "04-Stock-Detail"
+
+# Go back
+- tapOn:
+    accessibilityLabel: "Go back"
+    optional: true
+- pressKey: BACK
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 5. Portfolio Screen
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "Portfolio"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Portfolio"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "05-Portfolio"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 6. Watchlist Screen
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "Watchlist"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Watchlist"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "06-Watchlist"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 7. More Screen (Menu Hub)
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "More"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "More"
+- takeScreenshot: "07-More-Menu"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 8. F&O Options Chain
+# ═══════════════════════════════════════════════════════════════════════════
+- scrollUntilVisible:
+    element:
+      text: "F&O Options Chain"
+    direction: DOWN
+- tapOn:
+    text: "F&O Options Chain"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Options Chain"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "08-Options-Chain"
+
+# Go back
+- tapOn:
+    accessibilityLabel: "Go back"
+    optional: true
+- pressKey: BACK
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 9. Strategy Builder
+# ═══════════════════════════════════════════════════════════════════════════
+- scrollUntilVisible:
+    element:
+      text: "Strategy Builder"
+    direction: DOWN
+- tapOn:
+    text: "Strategy Builder"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Strategy Builder"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "09-Strategy-Builder"
+
+# Go back
+- tapOn:
+    accessibilityLabel: "Go back"
+    optional: true
+- pressKey: BACK
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 10. AI Insights
+# ═══════════════════════════════════════════════════════════════════════════
+- scrollUntilVisible:
+    element:
+      text: "AI Insights"
+    direction: DOWN
+- tapOn:
+    text: "AI Insights"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "AI Insights"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "10-AI-Insights"
+
+# Go back
+- tapOn:
+    accessibilityLabel: "Go back"
+    optional: true
+- pressKey: BACK
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 11. KYC — PAN Verification
+# ═══════════════════════════════════════════════════════════════════════════
+- scrollUntilVisible:
+    element:
+      text: "KYC Verification"
+    direction: DOWN
+- tapOn:
+    text: "KYC Verification"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "KYC"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "11-KYC"
+
+# Go back
+- tapOn:
+    accessibilityLabel: "Go back"
+    optional: true
+- pressKey: BACK
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 12. Subscription / Upgrade Screen
+# ═══════════════════════════════════════════════════════════════════════════
+- scrollUntilVisible:
+    element:
+      text: "Upgrade Plan"
+    direction: DOWN
+    optional: true
+- tapOn:
+    text: "Upgrade Plan"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: "12-Subscription"
+- waitForAnimationToEnd
+
+# Go back
+- tapOn:
+    accessibilityLabel: "Go back"
+    optional: true
+- pressKey: BACK
+- waitForAnimationToEnd
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 13. Education / Learn Screen
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+- tapOn: "Learn"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Learning Hub"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "13-Learning-Hub"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 14. Calculators (SIP)
+# ═══════════════════════════════════════════════════════════════════════════
+- tapOn: "More"
+- waitForAnimationToEnd:
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      text: "SIP Calculator"
+    direction: DOWN
+- tapOn:
+    text: "SIP Calculator"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "SIP Calculator"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: "14-SIP-Calculator"
+
+# ── Done. All screenshots captured. ──────────────────────────────────────

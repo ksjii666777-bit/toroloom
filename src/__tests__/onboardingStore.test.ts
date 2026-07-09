@@ -53,8 +53,8 @@ describe('OnboardingStore — Initial State', () => {
 // ==================== ONBOARDING_STEPS Constant ====================
 
 describe('OnboardingStore — ONBOARDING_STEPS', () => {
-  it('has exactly 5 steps', () => {
-    expect(ONBOARDING_STEPS).toHaveLength(5);
+  it('has exactly 6 steps', () => {
+    expect(ONBOARDING_STEPS).toHaveLength(6);
   });
 
   it('each step has required fields', () => {
@@ -105,8 +105,9 @@ describe('OnboardingStore — setCurrentStep', () => {
   });
 
   it('can step to the last valid index', () => {
-    useOnboardingStore.getState().setCurrentStep(4);
-    expect(useOnboardingStore.getState().currentStep).toBe(4);
+    const maxIndex = ONBOARDING_STEPS.length - 1;
+    useOnboardingStore.getState().setCurrentStep(maxIndex);
+    expect(useOnboardingStore.getState().currentStep).toBe(maxIndex);
   });
 });
 

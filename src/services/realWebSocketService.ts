@@ -27,6 +27,7 @@ import type {
   ConnectionCallback,
   PnLUpdateCallback,
   LockdownCallback,
+  CacheInvalidationCallback,
 } from './wsService';
 import type { StockHistoryPoint } from '../types';
 
@@ -62,6 +63,7 @@ export class RealWebSocketService implements WebSocketService {
   private onConnectionChange: ConnectionCallback | null = null;
   private onPnLUpdate: PnLUpdateCallback | null = null;
   private onLockdown: LockdownCallback | null = null;
+  private onCacheInvalidation: CacheInvalidationCallback | null = null;
 
   /** Daily loss limit (not used by real WS — the backend enforces it). */
   private lossLimitOverride: number | null = null;
@@ -109,7 +111,13 @@ export class RealWebSocketService implements WebSocketService {
         resolve();
       };
 
-      ws.onmessage = (event) => this.handleMessage(event.data);
+      ws.onmessage = (event) => {
+        try {
+          this.handleMessage(event.data);
+        } catch (err) {
+          log.warn('[RealWS] Unhandled error in message handler:', (err as Error).message);
+        }
+      };
 
       ws.onclose = () => {
         this.isConnected = false;
@@ -169,6 +177,12 @@ export class RealWebSocketService implements WebSocketService {
       // ── P&L Update (from riskEngine bridge) ────────────────
       case 'pnl_update': {
         this.onPnLUpdate?.(msg.data);
+        break;
+      }
+
+      // ── Cache Invalidation ────────────────────────────────
+      case 'cache_invalidate': {
+        this.onCacheInvalidation?.(msg.data);
         break;
       }
 
@@ -351,6 +365,10 @@ export class RealWebSocketService implements WebSocketService {
 
   onLockdownCallback(cb: LockdownCallback): void {
     this.onLockdown = cb;
+  }
+
+  onCacheInvalidationCallback(cb: CacheInvalidationCallback): void {
+    this.onCacheInvalidation = cb;
   }
 
   setLossLimit(limit: number): void {

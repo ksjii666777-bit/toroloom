@@ -166,7 +166,7 @@ describe('LoginScreen — Loaded Content', () => {
   it('renders without error state initially', () => {
     const { queryByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
     advanceAndRender(500);
-    expect(queryByText('Please enter email and password')).toBeNull();
+    expect(queryByText('This field is required')).toBeNull();
     expect(queryByText('Invalid credentials. Try again.')).toBeNull();
   });
 });
@@ -187,7 +187,7 @@ describe('LoginScreen — Validation & Error States', () => {
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('Log In')); });
     advanceAndRender(100);
-    expect(getByText('Please enter email and password')).toBeDefined();
+    expect(getByText('This field is required')).toBeDefined();
   });
 
   it('shows error when login returns false (invalid credentials)', async () => {
@@ -205,7 +205,7 @@ describe('LoginScreen — Validation & Error States', () => {
     // shows "Please enter email and password" before calling login().
     act(() => { fireEvent.press(getByText('Log In')); });
     advanceAndRender(100);
-    expect(getByText('Please enter email and password')).toBeDefined();
+    expect(getByText('This field is required')).toBeDefined();
     expect(mockLogin).not.toHaveBeenCalled();
   });
 

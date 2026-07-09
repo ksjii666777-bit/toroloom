@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
 import { useGamificationStore } from '../../store/gamificationStore';
@@ -33,13 +33,18 @@ const menuItems = [
     { icon: 'chatbubbles', label: 'Community', color: '#6C63FF', screen: 'Community' },
     { icon: 'chatbox-ellipses', label: 'Messages', color: '#10B981', screen: 'ChatList' },
     { icon: 'bulb', label: 'AI Insights', color: '#FFC107', screen: 'AIInsights' },
+    { icon: 'chatbubble-ellipses', label: 'AI Assistant', color: '#3B82F6', screen: 'AIChat' },
     { icon: 'newspaper', label: 'Market News', color: '#00D2FF', screen: 'NewsFeed' },
+    { icon: 'rocket', label: 'IPO Calendar', color: '#FF6B6B', screen: 'IPOCalendar' },
+    { icon: 'calendar', label: 'Economic Calendar', color: '#00D2FF', screen: 'EconomicCalendar' },
+    { icon: 'book', label: 'Financial Glossary', color: '#06B6D4', screen: 'Glossary' },
     { icon: 'journal', label: 'Trading Journal', color: '#8B5CF6', screen: 'BehavioralJournal' },
     { icon: 'trophy', label: 'Achievements', color: '#FF6B6B', screen: 'Achievements' },
   ]},
   { section: 'Account', items: [
     { icon: 'person', label: 'Profile & KYC', color: '#00D2FF', screen: 'Profile' },
     { icon: 'diamond', label: 'Go Premium', color: '#10B981', screen: 'Subscription' },
+    { icon: 'receipt', label: 'Payment History', color: '#6C63FF', screen: 'PaymentHistory' },
     { icon: 'notifications', label: 'Notifications', color: '#FF6B6B', screen: 'Notifications' },
     { icon: 'notifications', label: 'Portfolio Alerts', color: '#FFC107', screen: 'PortfolioAlerts' },
     { icon: 'settings', label: 'Risk Settings', color: '#6E6E9A', screen: 'Settings' },
@@ -252,7 +257,7 @@ export default function MoreScreen({ navigation }: any) {
                             {
                               text: 'Start Tour',
                               onPress: () => {
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                triggerHaptic(ImpactFeedbackStyle.Medium);
                                 resetOnboarding();
                               },
                             },

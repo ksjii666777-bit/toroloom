@@ -185,7 +185,6 @@ describe('Behavioral Journal Store', () => {
 
     it('should recalculate metrics after adding entry', () => {
       const store = useBehaviorJournalStore.getState();
-      const prevWinRate = store.allMetrics.winRate;
 
       store.addEntry({
         date: new Date().toISOString(),

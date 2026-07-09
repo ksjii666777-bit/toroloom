@@ -18,7 +18,7 @@ import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton, SkeletonCard } from '../../components/ui/SkeletonLoader';
-import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
+import { triggerHaptic } from '../../utils/haptics';
 
 const { width } = Dimensions.get('window');
 
@@ -214,7 +214,7 @@ export default function WatchlistScreen({ navigation }: any) {
   }, [watchlistStocks, sortBy, sortDir, activeSector, activeMarketCap, activeTopMovers, performanceView]);
 
   const setPerformance = useCallback((view: 'all' | 'gainers' | 'losers') => {
-    impactAsync(ImpactFeedbackStyle.Light).catch(() => {});
+    triggerHaptic();
     if (view === performanceView) {
       // Tapping the same button resets to 'all'
       setPerformanceView('all');
@@ -542,6 +542,13 @@ export default function WatchlistScreen({ navigation }: any) {
                   {losersCount}
                 </Text>
               </TouchableOpacity>
+              {/* Sentiment Analysis Button */}
+              <AnimatedPressable onPress={() => navigation.navigate('SentimentAnalysis')} haptic="light" scaleTo={0.92}>
+                <View style={[styles.sortBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Ionicons name="pulse" size={18} color={colors.primary} />
+                </View>
+              </AnimatedPressable>
+
               {/* Sort Menu Button */}
               <AnimatedPressable onPress={() => setShowSortMenu(true)} haptic="light" scaleTo={0.92}>
                 <View style={[styles.sortBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>

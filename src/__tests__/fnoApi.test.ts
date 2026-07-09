@@ -48,7 +48,7 @@ describe('fnoApi — getExpiries', () => {
         { id: 'w1', date: '2026-07-02T00:00:00.000Z', type: 'weekly', daysToExpiry: 5, isMonthly: false },
       ],
     };
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string) => {
       capturedUrl = url;
       return { ok: true, status: 200, json: () => Promise.resolve(mockResponse) };
     });
@@ -73,8 +73,8 @@ describe('fnoApi — getExpiries', () => {
 
   it('attaches auth token', async () => {
     let capturedHeaders: Record<string, string> = {};
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
-      capturedHeaders = opts.headers;
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts) => {
+      capturedHeaders = (opts as any).headers;
       return { ok: true, status: 200, json: () => Promise.resolve({ symbol: 'NIFTY', expiries: [] }) };
     });
 
@@ -245,10 +245,10 @@ describe('fnoApi — placeOrder', () => {
       success: true, orderId: 'FNO_123', message: 'Order placed', type: 'CE', action: 'buy',
       symbol: 'NIFTY', strike: 23500, quantity: 1, lotSize: 50, price: 185, timestamp: new Date().toISOString(), status: 'confirmed',
     };
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts) => {
       capturedUrl = url;
-      capturedMethod = opts.method;
-      capturedBody = opts.body;
+      capturedMethod = (opts as any).method;
+      capturedBody = (opts as any).body;
       return { ok: true, status: 200, json: () => Promise.resolve(mockResult) };
     });
 
@@ -308,9 +308,9 @@ describe('fnoApi — analyzeStrategy', () => {
       breakevenPoints: [23685], isBullish: true, isBearish: false, isNeutral: false, totalLegs: 1,
       pnlChart: [{ underlyingPrice: 22000, pnl: -5000, legPnls: [-5000] }],
     };
-    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts: any) => {
+    (globalThis.fetch as Mock).mockImplementation(async (url: string, opts) => {
       capturedUrl = url;
-      capturedBody = opts.body;
+      capturedBody = (opts as any).body;
       return { ok: true, status: 200, json: () => Promise.resolve(mockResult) };
     });
 

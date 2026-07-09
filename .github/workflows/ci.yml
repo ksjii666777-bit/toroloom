@@ -195,6 +195,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate import paths (vi.mock paths must resolve to real files)
+        run: node scripts/validate-imports.mjs
+
       # Vitest globals (`vi`, `describe`, `it`, `expect`) are made available
       # to TypeScript via src/vitest.d.ts  —  no separate test tsconfig needed.
       - name: TypeScript compilation check
@@ -466,20 +469,23 @@ jobs:
   # For testing against dev builds locally, use:
   #   npx expo run:android && maestro test .maestro/flows
   #
-  # ── DISABLED: E2E — Maestro (Android) ──────────────────────────────────
-  # GitHub Actions free runners lack nested virtualization (KVM/haxm),
-  # causing the Android emulator to time out during boot (44+ min on a
-  # 30-min timeout). Run these flows locally on a real device or local
-  # emulator.
+  # ── E2E — Maestro (Android) ─────────────────────────────────────────────
+  # Uses macos-13 (Intel) runner for native HAXM hardware acceleration.
+  # macOS GitHub runners support Android emulator acceleration via
+  # Hypervisor.framework (Apple Silicon) or HAXM (Intel). macos-13 is
+  # used here for maximum x86_64 emulator compatibility.
   #
-  # Re-enable by removing the `if: false` line below.
+  # If the job consistently fails due to emulator timeout, consider:
+  #   1. Using Maestro Cloud (https://maestro.mobile.dev/cloud)
+  #   2. Running on a self-hosted runner with KVM support
+  #   3. Switching to a real-device testing service (BrowserStack, etc.)
   # ───────────────────────────────────────────────────────────────────────
   e2e:
-    if: false
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     name: E2E — Maestro (Android)
-    runs-on: macos-14
-    timeout-minutes: 45
-    continue-on-error: true   # Emulator startup can be flaky; don't block CI
+    runs-on: macos-13
+    timeout-minutes: 60
+    continue-on-error: true
     strategy:
       fail-fast: false
 
@@ -525,17 +531,17 @@ jobs:
             # Services compatibility — stick with google_apis for safety.
             target: google_apis
             # x86_64 with google_apis is the most reliably compatible
-            # combination across all macOS runner variants (Intel + Apple
-            # Silicon). arm64-v8a can cause "adb: device not found" errors
-            # on some runner instances due to AVD corruption across retries.
+            # combination on Intel macOS runners (macos-13) with HAXM
+            # acceleration. arm64-v8a can cause "adb: device not found"
+            # errors on some runner instances due to AVD corruption.
             arch: x86_64
             avd-name: Pixel_6_Pro
-            emulator-boot-timeout: 1800
-            # Allocate enough memory/cores so the emulator doesn't OOM on
-            # resource-constrained cloud runners (macos-14 has ~14 GB RAM).
-            # The -no-snapshot flag forces a cold boot every time, which
-            # is slower but avoids stale snapshot corruption across retries.
-            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -memory 2048 -cores 4
+            emulator-boot-timeout: 900
+            # GPU mode swiftshader_indirect for headless CI (no display).
+            # -no-snapshot forces a cold boot every time to avoid stale
+            # snapshot corruption across retries. -accel on enables HAXM
+            # on Intel macOS runners for native virtualization speed.
+            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
             disable-animations: true
             script: |
               # ── 1. Wait for device to appear ──

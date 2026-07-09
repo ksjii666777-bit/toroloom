@@ -62,6 +62,15 @@ vi.mock('../store/gamificationStore', () => ({
   })),
 }));
 
+vi.mock('../store/kycStore', () => ({
+  useKycStore: vi.fn(() => ({
+    completedSteps: { pan: true, aadhaar: true, digilocker: true, bank: true },
+    initialized: true,
+    loadKycState: vi.fn(),
+    markStepCompleted: vi.fn(),
+  })),
+}));
+
 // ==================== Imports ====================
 
 import ProfileScreen from '../screens/profile/ProfileScreen';
@@ -233,9 +242,9 @@ describe('ProfileScreen — KYC Tab', () => {
     act(() => { fireEvent.press(getByText('KYC & Banks')); });
     expect(getByText('PAN Verification')).toBeDefined();
     expect(getByText('Aadhaar Verification')).toBeDefined();
+    expect(getByText('DigiLocker')).toBeDefined();
     expect(getByText('Bank Linking')).toBeDefined();
-    expect(getByText('Digital Signature')).toBeDefined();
-    expect(getByText('Risk Assessment')).toBeDefined();
+    expect(getByText('Complete KYC')).toBeDefined();
   });
 
   it('renders linked bank accounts in KYC tab', () => {

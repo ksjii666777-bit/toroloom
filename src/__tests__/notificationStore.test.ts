@@ -50,6 +50,7 @@ const defaultPrefs: NotificationPreferences = {
   tradeConfirmations: true,
   educationalReminders: true,
   systemUpdates: true,
+  sentimentAlerts: true,
   soundEnabled: true,
   vibrationEnabled: true,
   quietHoursStart: null,

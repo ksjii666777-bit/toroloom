@@ -63,6 +63,7 @@ vi.mock('../store/educationStore', () => ({
     fetchLesson: mockFetchLesson,
     markLessonComplete: mockMarkLessonComplete,
     lessonProgress: {},
+    certificates: [],
   })),
 }));
 
@@ -71,6 +72,66 @@ vi.mock('../store/gamificationStore', () => ({
     addXp: mockAddXp,
   })),
 }));
+
+// ==================== Mock mockData ====================
+// The real mockData module imports from courseContent.ts (200K+ chars, 90+ lessons)
+// which can cause vitest parsing issues. Mock a minimal subset used by the tests.
+
+vi.mock('../../constants/mockData', () => {
+  const mockCourse = {
+    id: 'c1',
+    title: 'Stock Market Basics',
+    description: 'Everything you need to know to start investing in the stock market.',
+    thumbnail: '📈',
+    duration: '5 hours',
+    lessons: 8,
+    progress: 75,
+    level: 'beginner' as const,
+    category: 'Fundamentals',
+    rating: 4.8,
+    enrolledCount: 24500,
+  };
+
+  const mockLessonData = [
+    {
+      id: 'l1', courseId: 'c1', title: 'What is the Stock Market?',
+      content: 'Lesson 1 content', duration: '20 min', completed: true,
+    },
+    {
+      id: 'l2', courseId: 'c1', title: 'Key Market Participants',
+      content: 'Lesson 2 content', duration: '20 min', completed: true,
+    },
+    {
+      id: 'l3', courseId: 'c1', title: 'Understanding Stock Exchanges',
+      content: 'Lesson 3 content', duration: '25 min', completed: true,
+    },
+    {
+      id: 'l4', courseId: 'c1', title: 'How to Read Stock Prices',
+      content: 'Lesson 4 content', duration: '25 min', completed: true,
+    },
+    {
+      id: 'l5', courseId: 'c1', title: 'Order Types Explained',
+      content: 'Lesson 5 content', duration: '25 min', completed: true,
+    },
+    {
+      id: 'l6', courseId: 'c1', title: 'Demat & Trading Accounts',
+      content: 'Lesson 6 content', duration: '20 min', completed: false,
+    },
+    {
+      id: 'l7', courseId: 'c1', title: 'Taxation of Stock Market Income',
+      content: 'Lesson 7 content', duration: '20 min', completed: false,
+    },
+    {
+      id: 'l8', courseId: 'c1', title: 'Building Your First Portfolio',
+      content: 'Lesson 8 content', duration: '25 min', completed: false,
+    },
+  ];
+
+  return {
+    mockCourses: [mockCourse],
+    mockLessons: mockLessonData,
+  };
+});
 
 // ==================== Imports ====================
 

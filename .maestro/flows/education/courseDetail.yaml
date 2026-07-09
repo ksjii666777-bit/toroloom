@@ -1,0 +1,127 @@
+# =============================================================================
+# Education / Learning Flow — Course Detail & Lesson View
+# =============================================================================
+# Tests the Education (Learn) screen:
+#   1. Login with test credentials
+#   2. Navigate to Learn tab
+#   3. Verify Learn screen renders with "Learning Hub" header
+#   4. Tap on the first course in "All Courses" section
+#   5. Verify Course Detail screen with hero, progress, lessons
+#   6. Tap on the first lesson in the lessons list
+#   7. Verify Lesson View screen with content, takeaways, quiz
+#   8. Navigate back to Course Detail
+#   9. Navigate back to Learn screen
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate to Learn Tab ──────────────────────────────────────────────
+- tapOn: "Learn"
+- waitForAnimationToEnd
+
+# ── 3. Verify Learn Screen ────────────────────────────────────────────────
+- assertVisible:
+    text: "Learning Hub"
+- assertVisible:
+    text: "Master the markets, one lesson at a time"
+
+# Verify "All Courses" section exists
+- assertVisible:
+    text: "All Courses"
+
+# Scroll down to see course cards
+- scroll:
+    direction: DOWN
+
+# ── 4. Tap on First Visible Course ─────────────────────────────────────────
+# Tap on the first course card's level badge (e.g., "Beginner")
+- tapOn:
+    text: "Beginner"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ── 5. Verify Course Detail Screen ─────────────────────────────────────────
+# Verify hero section with course title
+- assertVisible:
+    text: "Course Progress"
+- assertVisible:
+    text: "Completed"
+- assertVisible:
+    text: "Remaining"
+- assertVisible:
+    text: "Duration"
+
+# Verify "About this Course" card
+- assertVisible:
+    text: "About this Course"
+
+# Verify lessons section
+- assertVisible:
+    text: "Lessons"
+
+# ── 6. Scroll to lessons and tap first lesson ──────────────────────────────
+- scroll:
+    direction: DOWN
+- waitForAnimationToEnd
+
+# Tap on the first lesson number (identified by "01")
+- tapOn:
+    text: "01"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ── 7. Verify Lesson View Screen ──────────────────────────────────────────
+# Verify lesson header shows position
+- assertVisible:
+    text: "Lesson 1 of"
+
+# Verify lesson content sections
+- assertVisible:
+    text: "Key Takeaways"
+- assertVisible:
+    text: "Summary"
+
+# Scroll down to see more content
+- scroll:
+    direction: DOWN
+
+# Verify "Mark as Complete" button exists
+- assertVisible:
+    text: "Mark as Complete"
+
+# ── 8. Navigate Back to Course Detail ──────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+# Verify back on Course Detail screen
+- assertVisible:
+    text: "Course Progress"
+
+# ── 9. Navigate Back to Learn Screen ──────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Learning Hub"

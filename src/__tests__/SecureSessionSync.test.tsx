@@ -25,14 +25,14 @@ vi.mock('react-native-webview', () => ({
   },
 }));
 
-vi.mock('../../services/gateway/brokerLoginConfig', () => ({
+vi.mock('../services/gateway/brokerLoginConfig', () => ({
   getBrokerDashboardPatterns: vi.fn().mockReturnValue(['dashboard', 'portfolio']),
   getBrokerTokenParams: vi.fn().mockReturnValue(['access_token=', 'enctoken=']),
   getBrokerMfaPatterns: vi.fn().mockReturnValue(['otp', 'mfa', 'totp']),
   getBrokerExtractionStrategy: vi.fn().mockReturnValue('cookie_session'),
 }));
 
-vi.mock('../../utils/logger', () => ({
+vi.mock('../utils/logger', () => ({
   log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 

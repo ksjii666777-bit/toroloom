@@ -45,12 +45,19 @@ beforeEach(() => {
       { id: 't1', topic: 'Nifty 50', posts: 234 },
       { id: 't2', topic: 'Budget 2024', posts: 189 },
     ],
+    likedPostIds: [],
+    bookmarkedPostIds: [],
+    feedSort: 'latest',
+    isRefreshing: false,
     loading: false,
     error: null,
     addPost: mockAddPost,
     likePost: mockLikePost,
+    bookmarkPost: vi.fn(),
     fetchTrendingTopics: mockFetchTrending,
     fetchPosts: vi.fn(),
+    setFeedSort: vi.fn(),
+    refreshPosts: vi.fn(),
   };
 });
 

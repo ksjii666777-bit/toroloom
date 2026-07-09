@@ -1,0 +1,88 @@
+# =============================================================================
+# News Feed Flow — Market News & Article Detail
+# =============================================================================
+# Tests the News Feed screen:
+#   1. Login with test credentials
+#   2. Navigate: More → Market News
+#   3. Verify News Feed screen renders with "Market News" header
+#   4. Verify category chips visible
+#   5. Filter by a category (e.g., "Corporate")
+#   6. Reset to "All" category
+#   7. Verify articles are shown
+#   8. Navigate back to More screen
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Market News ───────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Market News"
+    direction: DOWN
+- tapOn:
+    text: "Market News"
+- waitForAnimationToEnd
+
+# ── 3. Verify News Feed Screen ────────────────────────────────────────────
+- assertVisible:
+    text: "Market News"
+
+# Verify article count text (e.g., "X articles")
+- assertVisible:
+    text: "articles"
+
+# ── 4. Verify Category Chips ──────────────────────────────────────────────
+- assertVisible:
+    text: "All"
+- assertVisible:
+    text: "Markets"
+- assertVisible:
+    text: "Corporate"
+
+# ── 5. Filter by Corporate Category ───────────────────────────────────────
+- tapOn:
+    text: "Corporate"
+- waitForAnimationToEnd
+
+# Verify filter applied (Corporate category should remain visible)
+- assertVisible:
+    text: "Corporate"
+
+# ── 6. Reset to All Categories ─────────────────────────────────────────────
+- tapOn:
+    text: "All"
+- waitForAnimationToEnd
+
+# Verify showing all articles again
+- assertVisible:
+    text: "Showing"
+
+# ── 7. Navigate Back to More Screen ───────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "More"

@@ -3,6 +3,7 @@ import { Stock, Watchlist } from '../types';
 import { mockWatchlists } from '../constants/mockData';
 import { watchlistApi } from '../services/api';
 import { offlineCache } from '../services/offlineCache';
+import { registerCacheWarming } from '../services/cacheWarmingService';
 import { log } from '../utils/logger';
 import { offlineMutationQueue } from '../services/offlineMutationQueue';
 
@@ -188,3 +189,6 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     }
   },
 }));
+
+// Register for cache warming (priority 3 — semi-volatile)
+registerCacheWarming('watchlist', () => useWatchlistStore.getState().fetchWatchlists(), 3);

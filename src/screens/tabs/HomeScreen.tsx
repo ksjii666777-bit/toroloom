@@ -1,5 +1,10 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, TextInput, Modal, LayoutAnimation, Platform, UIManager } from 'react-native';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, Easing, interpolate } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -19,6 +24,11 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
 import { mockNews } from '../../constants/mockData';
+import { getMockAlertRules, getMockAlertTriggers, createDefaultRule } from '../../services/ai/sentimentAlertService';
+import { mockSentimentData } from '../../constants/mockData';
+import type { SentimentAlertRule, SentimentAlertSensitivity, SentimentAlertDirection } from '../../types';
+import { generateInitialFeedEvents, generateRandomFeedEvent, formatFeedTimestamp, getSourceIcon } from '../../services/ai/sentimentLiveFeed';
+import type { LiveFeedEvent } from '../../services/ai/sentimentLiveFeed';
 
 export default function HomeScreen({ navigation }: any) {
   const { colors } = useTheme();
@@ -32,7 +42,6 @@ export default function HomeScreen({ navigation }: any) {
 
   const totalInvested = holdings.reduce((sum, h) => sum + h.totalInvested, 0);
   const currentValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
-  const totalPnl = currentValue - totalInvested;
   const unreadCount = notifications.filter(n => !n.read).length;
 
   // ── Dynamic greeting ────────────────────────────────────────
@@ -63,6 +72,8 @@ export default function HomeScreen({ navigation }: any) {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<TextInput>(null);
+  const [showQuickAlert, setShowQuickAlert] = useState(false);
+  const [sentimentCollapsed, setSentimentCollapsed] = useState(false);
 
   // Count-up animation via setInterval (works with fake timers in tests)
   const [displayProgress, setDisplayProgress] = useState(1);
@@ -130,9 +141,34 @@ export default function HomeScreen({ navigation }: any) {
   }, [searchQuery, stocks]);
 
   // ── Latest news headlines ─────────────────────────────────────
+  const alertRules = useMemo(() => getMockAlertRules(), []);
+  const alertTriggers = useMemo(() => getMockAlertTriggers(), []);
+  const activeAlertCount = useMemo(() => alertRules.filter(r => r.enabled).length, [alertRules]);
+  const unreadAlertCount = useMemo(() => alertTriggers.filter(t => !t.read).length, [alertTriggers]);
+  const latestAlert = useMemo(() => alertTriggers
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0], [alertTriggers]);
+
+  // ── Live Feed ──────────────────────────────────────────────
+  const [feedEvents, setFeedEvents] = useState<LiveFeedEvent[]>([]);
+  const feedCounterRef = useRef(0);
+
+  useEffect(() => {
+    setFeedEvents(generateInitialFeedEvents(6));
+    feedCounterRef.current = 6;
+
+    // Simulate new events arriving every 4-7 seconds
+    const interval = setInterval(() => {
+      feedCounterRef.current += 1;
+      const newEvent = generateRandomFeedEvent(feedCounterRef.current);
+      setFeedEvents(prev => [newEvent, ...prev].slice(0, 10));
+    }, 4000 + Math.floor(Math.random() * 3000));
+
+    return () => clearInterval(interval);
+  }, []);
+
   const latestNews = useMemo(() => mockNews.slice(0, 4), []);
 
-  const sectionCount = 12;
+  const sectionCount = 14;
   const { animatedStyles: sectionStyles } = useStaggeredAnimation(sectionCount, {
     initialDelay: 200,
     staggerDelay: 120,
@@ -491,8 +527,203 @@ export default function HomeScreen({ navigation }: any) {
           </ReanimatedAnimated.View>
         )}
 
-        {/* Level & XP */}
+        {/* Live Sentiment Feed */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[5]]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Live Sentiment Feed ⚡</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('SentimentAnalysis')}>
+              <Text style={styles.seeAll}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={[styles.liveFeedContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            {feedEvents.length === 0 ? (
+              <View style={styles.liveFeedEmpty}>
+                <Ionicons name="pulse-outline" size={24} color={colors.textMuted} />
+                <Text style={[styles.liveFeedEmptyText, { color: colors.textMuted }]}>Waiting for signals...</Text>
+              </View>
+            ) : (
+              feedEvents.map((event, i) => {
+                const dirColor = event.direction === 'improving' ? '#10B981' : '#EF4444';
+                const srcIcon = getSourceIcon(event.source);
+                const isNew = i === 0 && feedEvents.length > 0;
+                return (
+                  <TouchableOpacity
+                    key={event.id}
+                    style={[
+                      styles.liveFeedItem,
+                      i < feedEvents.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider },
+                      isNew && { backgroundColor: dirColor + '06' },
+                    ]}
+                    onPress={() => navigation.navigate('LiveFeed')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.liveFeedLeft}>
+                      <View style={[styles.liveFeedDirIcon, { backgroundColor: dirColor + '15' }]}>
+                        <Ionicons
+                          name={event.direction === 'improving' ? 'trending-up' : 'trending-down'}
+                          size={14}
+                          color={dirColor}
+                        />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <View style={styles.liveFeedTopRow}>
+                          <Text style={[styles.liveFeedSymbol, { color: colors.text }]}>
+                            {event.symbol}
+                          </Text>
+                          <Text style={[styles.liveFeedMagnitude, { color: dirColor }]}>
+                            {event.direction === 'improving' ? '+' : ''}{event.magnitude}pts
+                          </Text>
+                          <Text style={[styles.liveFeedTime, { color: colors.textMuted }]}>
+                            {formatFeedTimestamp(event.timestamp)}
+                          </Text>
+                        </View>
+                        <Text style={[styles.liveFeedMessage, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {event.message}
+                        </Text>
+                        <View style={styles.liveFeedSourceRow}>
+                          <Ionicons name={srcIcon as any} size={10} color={colors.textMuted} />
+                          <Text style={[styles.liveFeedSource, { color: colors.textMuted }]}>
+                            {event.source}
+                          </Text>
+                          <View style={[styles.liveFeedScoreChip, { backgroundColor: dirColor + '12' }]}>
+                            <Text style={[styles.liveFeedScoreText, { color: dirColor }]}>
+                              Score: {event.score > 0 ? '+' : ''}{event.score}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </View>
+        </ReanimatedAnimated.View>
+
+        {/* Sentiment Alert Summary — Collapsible */}
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[6]]}>
+          <View style={[styles.sentimentAlertCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            {/* Header — tap to collapse/expand */}
+            <TouchableOpacity
+              style={styles.sentimentAlertHeader}
+              onPress={() => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setSentimentCollapsed(prev => !prev);
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={styles.sentimentAlertLeft}>
+                <View style={[styles.sentimentAlertIcon, { backgroundColor: '#8B5CF620' }]}>
+                  <Ionicons name="pulse" size={18} color="#8B5CF6" />
+                </View>
+                <View>
+                  <Text style={[styles.sentimentAlertTitle, { color: colors.text }]}>Sentiment Alerts</Text>
+                  <Text style={[styles.sentimentAlertSubtitle, { color: colors.textMuted }]}>
+                    {activeAlertCount} active rule{activeAlertCount !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.sentimentAlertRight}>
+                {unreadAlertCount > 0 && (
+                  <View style={[styles.sentimentAlertBadge, { backgroundColor: '#8B5CF6' }]}>
+                    <Text style={styles.sentimentAlertBadgeText}>{unreadAlertCount}</Text>
+                  </View>
+                )}
+                <Ionicons
+                  name={sentimentCollapsed ? 'chevron-down' : 'chevron-up'}
+                  size={18}
+                  color={colors.textMuted}
+                />
+              </View>
+            </TouchableOpacity>
+
+            {/* Expandable content */}
+            {!sentimentCollapsed && (
+              <>
+                {latestAlert && (
+                  <>
+                    <View style={[styles.sentimentDivider, { backgroundColor: colors.divider }]} />
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('SentimentAlert')}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.sentimentAlertBody}>
+                        <View style={styles.sentimentAlertDirection}>
+                          <Ionicons
+                            name={latestAlert.direction === 'improving' ? 'trending-up' : 'trending-down'}
+                            size={14}
+                            color={latestAlert.direction === 'improving' ? '#10B981' : '#EF4444'}
+                          />
+                          <Text style={[styles.sentimentAlertSymbol, { color: colors.text }]}>
+                            {latestAlert.symbol}
+                          </Text>
+                          <Text style={[styles.sentimentAlertStrength, {
+                            color: latestAlert.direction === 'improving' ? '#10B981' : '#EF4444',
+                          }]}>
+                            {latestAlert.direction === 'improving' ? '+' : ''}{Math.round(latestAlert.magnitude)}pts
+                          </Text>
+                        </View>
+                        <Text style={[styles.sentimentAlertMessage, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {latestAlert.message}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </>
+                )}
+
+                {/* Quick Add Button Row */}
+                <View style={[styles.sentimentDivider, { backgroundColor: colors.divider }]} />
+                <View style={styles.sentimentAlertActionsRow}>
+                  <TouchableOpacity
+                    style={styles.sentimentQuickAddRow}
+                    onPress={() => setShowQuickAlert(true)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.sentimentQuickAddIcon, { backgroundColor: '#8B5CF620' }]}>
+                      <Ionicons name="add" size={16} color="#8B5CF6" />
+                    </View>
+                    <Text style={[styles.sentimentQuickAddText, { color: colors.primary }]}>Quick Add</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.sentimentViewAllRow}
+                    onPress={() => navigation.navigate('SentimentAlert')}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.sentimentViewAllText, { color: colors.textMuted }]}>View All</Text>
+                    <Ionicons name="arrow-forward" size={14} color={colors.textMuted} />
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </ReanimatedAnimated.View>
+
+        {/* Quick Add Modal */}
+        <Modal visible={showQuickAlert} transparent animationType="slide" onRequestClose={() => setShowQuickAlert(false)}>
+          <View style={styles.qamOverlay}>
+            <View style={[styles.qamContent, { backgroundColor: colors.bgSecondary }]}>
+              <View style={styles.qamHeader}>
+                <Text style={[styles.qamTitle, { color: colors.text }]}>Quick Add Alert Rule</Text>
+                <TouchableOpacity onPress={() => setShowQuickAlert(false)}>
+                  <Ionicons name="close" size={22} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              <QuickAddAlertForm
+                colors={colors}
+                styles={styles}
+                onAdd={(rule) => {
+                  setShowQuickAlert(false);
+                  navigation.navigate('SentimentAlert');
+                }}
+                onClose={() => setShowQuickAlert(false)}
+              />
+            </View>
+          </View>
+        </Modal>
+
+        {/* Level & XP */}
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[7]]}>
           <Card animated animationDelay={400}>
             <View style={styles.levelRow}>
               <View style={styles.levelInfo}>
@@ -520,7 +751,7 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Top Holdings */}
         {topHoldings.length > 0 && (
-          <ReanimatedAnimated.View style={[styles.section, sectionStyles[6]]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[8]]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Top Holdings 📊</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Portfolio')}>
@@ -562,7 +793,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
 
         {/* Top Gainers */}
-        <ReanimatedAnimated.View style={[styles.section, sectionStyles[7]]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[9]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Gainers 🔥</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -579,7 +810,7 @@ export default function HomeScreen({ navigation }: any) {
         </ReanimatedAnimated.View>
 
         {/* Top Losers */}
-        <ReanimatedAnimated.View style={[styles.section, sectionStyles[8]]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[10]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top Losers 📉</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
@@ -597,7 +828,7 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Recent Trades */}
         {recentTrades.length > 0 && (
-          <ReanimatedAnimated.View style={[styles.section, sectionStyles[9]]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[11]]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Recent Activity 📋</Text>
               <TouchableOpacity onPress={() => navigation.navigate('TradeHistory')}>
@@ -630,7 +861,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
 
         {/* Watchlist Preview */}
-        <ReanimatedAnimated.View style={[styles.section, sectionStyles[10]]}>
+        <ReanimatedAnimated.View style={[styles.section, sectionStyles[12]]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Watchlist ⭐</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Watchlist')}>
@@ -650,7 +881,7 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Market News */}
         {latestNews.length > 0 && (
-          <ReanimatedAnimated.View style={[styles.section, sectionStyles[11]]}>
+          <ReanimatedAnimated.View style={[styles.section, sectionStyles[13]]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Market News 📰</Text>
               <TouchableOpacity onPress={() => navigation.navigate('NewsFeed')}>
@@ -689,6 +920,130 @@ export default function HomeScreen({ navigation }: any) {
         <View style={{ height: 100 }} />
       </ScrollView>
     </View>
+  );
+}
+
+// ─── Quick Add Alert Form Component ─────────────────────────
+
+function QuickAddAlertForm({
+  colors,
+  styles,
+  onAdd,
+  onClose,
+}: {
+  colors: any;
+  styles: any;
+  onAdd: (rule: SentimentAlertRule) => void;
+  onClose: () => void;
+}) {
+  const [selectedSymbol, setSelectedSymbol] = useState<string>('RELIANCE');
+  const [sensitivity, setSensitivity] = useState<SentimentAlertSensitivity>('medium');
+  const [direction, setDirection] = useState<SentimentAlertDirection>('both');
+
+  const availableStocks = useMemo(() =>
+    mockSentimentData.map(s => ({ symbol: s.symbol, name: s.name, sector: s.sector })),
+    [],
+  );
+
+  const handleAdd = useCallback(() => {
+    const stock = availableStocks.find(s => s.symbol === selectedSymbol);
+    if (!stock) return;
+    const rule = createDefaultRule(stock.symbol, stock.name, stock.sector);
+    rule.sensitivity = sensitivity;
+    rule.direction = direction;
+    onAdd(rule);
+  }, [selectedSymbol, sensitivity, direction, availableStocks, onAdd]);
+
+  const sensOptions: { key: SentimentAlertSensitivity; label: string; desc: string; color: string }[] = [
+    { key: 'low', label: 'Low', desc: '25pt+', color: '#10B981' },
+    { key: 'medium', label: 'Med', desc: '15pt+', color: '#F59E0B' },
+    { key: 'high', label: 'High', desc: '10pt+', color: '#EF4444' },
+  ];
+
+  const dirOptions: { key: SentimentAlertDirection; label: string; icon: string }[] = [
+    { key: 'improving', label: 'Up', icon: 'trending-up' },
+    { key: 'deteriorating', label: 'Down', icon: 'trending-down' },
+    { key: 'both', label: 'Both', icon: 'swap-vertical' },
+  ];
+
+  return (
+    <>
+      {/* Stock Picker */}
+      <Text style={[styles.qamLabel, { color: colors.textSecondary }]}>Stock</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.qamStockRow}>
+        {availableStocks.map(s => {
+          const isActive = s.symbol === selectedSymbol;
+          return (
+            <TouchableOpacity
+              key={s.symbol}
+              onPress={() => setSelectedSymbol(s.symbol)}
+              style={[styles.qamChip, {
+                backgroundColor: isActive ? '#8B5CF6' : colors.bgCardLight,
+                borderColor: isActive ? '#8B5CF6' : colors.border,
+              }]}
+            >
+              <Text style={[styles.qamChipText, { color: isActive ? '#FFF' : colors.textSecondary }]}>
+                {s.symbol}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* Sensitivity */}
+      <Text style={[styles.qamLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Sensitivity</Text>
+      <View style={styles.qamOptRow}>
+        {sensOptions.map(opt => {
+          const isActive = sensitivity === opt.key;
+          return (
+            <TouchableOpacity
+              key={opt.key}
+              onPress={() => setSensitivity(opt.key)}
+              style={[styles.qamOpt, {
+                backgroundColor: isActive ? opt.color + '20' : colors.bgCard,
+                borderColor: isActive ? opt.color : colors.border,
+              }]}
+            >
+              <Text style={[styles.qamOptLabel, { color: isActive ? opt.color : colors.text }]}>{opt.label}</Text>
+              <Text style={[styles.qamOptDesc, { color: isActive ? opt.color + 'CC' : colors.textMuted }]}>{opt.desc}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* Direction */}
+      <Text style={[styles.qamLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Direction</Text>
+      <View style={styles.qamOptRow}>
+        {dirOptions.map(opt => {
+          const isActive = direction === opt.key;
+          const activeColor = opt.key === 'improving' ? '#10B981' : opt.key === 'deteriorating' ? '#EF4444' : '#8B5CF6';
+          return (
+            <TouchableOpacity
+              key={opt.key}
+              onPress={() => setDirection(opt.key)}
+              style={[styles.qamOpt, {
+                backgroundColor: isActive ? activeColor + '20' : colors.bgCard,
+                borderColor: isActive ? activeColor : colors.border,
+              }]}
+            >
+              <Ionicons name={opt.icon as any} size={16} color={isActive ? activeColor : colors.textMuted} />
+              <Text style={[styles.qamOptLabel, { color: isActive ? activeColor : colors.text }]}>{opt.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* Action Buttons */}
+      <View style={styles.qamActions}>
+        <TouchableOpacity style={[styles.qamCancelBtn, { borderColor: colors.border }]} onPress={onClose}>
+          <Text style={[styles.qamCancelText, { color: colors.textMuted }]}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.qamAddBtn} onPress={handleAdd}>
+          <Ionicons name="add-circle" size={18} color="#FFF" />
+          <Text style={styles.qamAddText}>Add Rule</Text>
+        </TouchableOpacity>
+      </View>
+    </>
   );
 }
 
@@ -1243,6 +1598,288 @@ const createStyles = (colors: any) => StyleSheet.create({
   holdingPnlText: {
     ...FONTS.semiBold,
     fontSize: 10,
+  },
+
+  // ── Live Sentiment Feed ──
+  liveFeedContainer: {
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  liveFeedEmpty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: 32,
+  },
+  liveFeedEmptyText: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+  },
+  liveFeedItem: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+  },
+  liveFeedLeft: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  liveFeedDirIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  liveFeedTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  liveFeedSymbol: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+    fontFamily: 'monospace',
+  },
+  liveFeedMagnitude: {
+    ...FONTS.semiBold,
+    fontSize: 11,
+  },
+  liveFeedTime: {
+    ...FONTS.regular,
+    fontSize: 10,
+    marginLeft: 'auto',
+  },
+  liveFeedMessage: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    lineHeight: 15,
+    marginTop: 2,
+  },
+  liveFeedSourceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  liveFeedSource: {
+    ...FONTS.regular,
+    fontSize: 9,
+    textTransform: 'capitalize',
+  },
+  liveFeedScoreChip: {
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  liveFeedScoreText: {
+    fontSize: 9,
+    fontWeight: '700',
+  },
+
+  // ── Quick Add Modal ──
+  qamOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  qamContent: {
+    borderTopLeftRadius: BORDER_RADIUS.xl,
+    borderTopRightRadius: BORDER_RADIUS.xl,
+    padding: SPACING.xl,
+    paddingBottom: 40,
+  },
+  qamHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  qamTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  qamLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: SPACING.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  qamStockRow: {
+    marginBottom: SPACING.sm,
+  },
+  qamChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    marginRight: 8,
+  },
+  qamChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  qamOptRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  qamOpt: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    gap: 3,
+  },
+  qamOptLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  qamOptDesc: {
+    fontSize: 9,
+    fontWeight: '500',
+  },
+  qamActions: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginTop: SPACING.xl,
+  },
+  qamCancelBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+  },
+  qamCancelText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  qamAddBtn: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: '#8B5CF6',
+  },
+  qamAddText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFF',
+  },
+
+  // ── Sentiment Alert Card ──
+  sentimentAlertCard: {
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+  },
+  sentimentAlertHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sentimentAlertLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  sentimentAlertIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sentimentAlertTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+  },
+  sentimentAlertSubtitle: {
+    ...FONTS.regular,
+    fontSize: 11,
+    marginTop: 1,
+  },
+  sentimentAlertRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  sentimentAlertBadge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 5,
+  },
+  sentimentAlertBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFF',
+  },
+  sentimentDivider: {
+    height: 1,
+    marginVertical: SPACING.md,
+  },
+  sentimentAlertBody: {
+    gap: 4,
+  },
+  sentimentAlertDirection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  sentimentAlertSymbol: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+    fontFamily: 'monospace',
+  },
+  sentimentAlertStrength: {
+    ...FONTS.semiBold,
+    fontSize: 11,
+  },
+  sentimentAlertMessage: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    lineHeight: 16,
+  },
+  sentimentAlertActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: SPACING.sm,
+  },
+  sentimentQuickAddRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  sentimentQuickAddIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sentimentQuickAddText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  sentimentViewAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  sentimentViewAllText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 
   // ── Recent Trades ──

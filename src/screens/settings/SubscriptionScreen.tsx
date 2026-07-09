@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Alert} from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay } from 'react-native-reanimated';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, TextInput, TouchableOpacity} from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withSequence } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -19,7 +19,10 @@ const CARD_WIDTH = (width - SPACING.xl * 2 - CARD_GAP * 2) / 3;
 export default function SubscriptionScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { subscription, isLoading, initiateUpgrade, cancelSubscription } = useSubscriptionStore();
+  const { subscription, isLoading, initiateUpgrade, cancelSubscription, isInTrial,
+    trialDaysRemaining, hasTrialAvailable, couponInput, couponResult, isApplyingCoupon,
+    setCouponInput, applyCoupon, removeCoupon, getDiscountedPrice,
+    setUpAutopay, cancelAutopay, startTrial, refreshTrialStatus } = useSubscriptionStore();
   const getPlanPrice = useSubscriptionStore(s => s.getPlanPrice);
   const getFeaturesForTier = useSubscriptionStore(s => s.getFeaturesForTier);
   const getEffectiveFeatureMatrix = useSubscriptionStore(s => s.getEffectiveFeatureMatrix);
@@ -27,12 +30,25 @@ export default function SubscriptionScreen({ navigation }: any) {
   const tenantConfig = useSubscriptionStore(s => s.tenantConfig);
   const [isYearly, setIsYearly] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState(subscription.planId);
+  const [couponCode, setCouponCode] = useState('');
+  const [showCouponInput, setShowCouponInput] = useState(false);
+  const [showAutopayModal, setShowAutopayModal] = useState(false);
+
+  // Refresh trial status on mount
+  useEffect(() => {
+    refreshTrialStatus();
+    const interval = setInterval(refreshTrialStatus, 60000); // every minute
+    return () => clearInterval(interval);
+  }, []);
+
+  const trialActive = isInTrial();
 
   // Animated values for plan cards staggered entrance
   const cardAnim0 = useSharedValue(0);
   const cardAnim1 = useSharedValue(0);
   const cardAnim2 = useSharedValue(0);
   const cardAnims = [cardAnim0, cardAnim1, cardAnim2];
+  const couponErrorShake = useSharedValue(0);
 
   const cardStyle0 = useAnimatedStyle(() => ({
     transform: [{ scale: cardAnim0.value }],
@@ -45,10 +61,23 @@ export default function SubscriptionScreen({ navigation }: any) {
   }));
   const cardStyles = [cardStyle0, cardStyle1, cardStyle2];
 
+  const couponShakeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: couponErrorShake.value }],
+  }));
+
   useEffect(() => {
     cardAnims.forEach((anim, i) => {
       anim.value = withDelay(i * 150, withSpring(1, { stiffness: 120, damping: 12 }));
     });
+  }, []);
+
+  const showCouponError = useCallback(() => {
+    couponErrorShake.value = withSequence(
+      withSpring(-10, { damping: 2 }),
+      withSpring(10, { damping: 2 }),
+      withSpring(-10, { damping: 2 }),
+      withSpring(0, { damping: 8 }),
+    );
   }, []);
 
 
@@ -58,6 +87,25 @@ export default function SubscriptionScreen({ navigation }: any) {
     setSelectedPlanId(planId);
   }, []);
 
+  const handleApplyCoupon = useCallback(async () => {
+    const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
+    if (!plan || plan.tier === 'free') return;
+    const price = getPlanPrice(plan.id);
+    const displayPrice = isYearly ? price.yearly : price.monthly;
+    await applyCoupon(plan.tier, displayPrice);
+    if (!useSubscriptionStore.getState().couponResult?.valid) {
+      showCouponError();
+    }
+  }, [selectedPlanId, isYearly, applyCoupon, getPlanPrice, showCouponError]);
+
+  const handleStartTrial = useCallback(async () => {
+    const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
+    if (!plan || plan.tier === 'free') return;
+    if (!hasTrialAvailable(plan.tier)) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await startTrial(plan.tier);
+  }, [selectedPlanId, hasTrialAvailable, startTrial]);
+
   const handleUpgrade = useCallback(async () => {
     const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
     if (!plan || plan.tier === 'free') return;
@@ -65,25 +113,26 @@ export default function SubscriptionScreen({ navigation }: any) {
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    const planPrice = getPlanPrice(plan.id);
+    const discounted = getDiscountedPrice(plan.id, isYearly ? 'yearly' : 'monthly');
+    const displayPrice = discounted.final;
 
     Alert.alert(
       `Upgrade to ${plan.name}`,
-      isYearly
-        ? `You'll be charged ₹${planPrice.yearly.toLocaleString('en-IN')}/year. Cancel anytime.`
-        : `You'll be charged ₹${planPrice.monthly.toLocaleString('en-IN')}/month. Cancel anytime.`,
+      (couponResult?.valid
+        ? `Original: ₹${discounted.original.toLocaleString('en-IN')}/mo\nDiscount: -₹${discounted.discount.toLocaleString('en-IN')}/mo\n`
+        : '') +
+      `You'll be charged ₹${displayPrice.toLocaleString('en-IN')}${isYearly ? '/yr' : '/mo'}. Cancel anytime.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: `Upgrade — ₹${isYearly ? planPrice.yearly.toLocaleString('en-IN') + '/yr' : planPrice.monthly.toLocaleString('en-IN') + '/mo'}`,
+          text: `Upgrade — ₹${displayPrice.toLocaleString('en-IN')}${isYearly ? '/yr' : '/mo'}`,
           onPress: async () => {
-            // Store billing preference
-            await initiateUpgrade(plan);
+            await initiateUpgrade(plan, isYearly ? 'yearly' : 'monthly');
           },
         },
       ]
     );
-  }, [selectedPlanId, subscription.tier, isYearly, initiateUpgrade, getPlanPrice]);
+  }, [selectedPlanId, subscription.tier, isYearly, initiateUpgrade, getDiscountedPrice, couponResult]);
 
   const handleCancel = useCallback(() => {
     Alert.alert(
@@ -102,6 +151,44 @@ export default function SubscriptionScreen({ navigation }: any) {
       ]
     );
   }, [cancelSubscription]);
+
+  const handleAutopayToggle = useCallback(() => {
+    if (subscription.isAutoPayEnabled && subscription.upiMandate) {
+      Alert.alert(
+        'Disable UPI AutoPay',
+        'Recurring payments will be stopped. Your current benefits remain active until the end of the billing period.',
+        [
+          { text: 'Keep AutoPay', style: 'cancel' },
+          {
+            text: 'Disable',
+            style: 'destructive',
+            onPress: async () => {
+              if (subscription.upiMandate) {
+                await cancelAutopay(subscription.upiMandate.mandateId);
+              }
+            },
+          },
+        ]
+      );
+    } else {
+      setShowAutopayModal(true);
+    }
+  }, [subscription.isAutoPayEnabled, cancelAutopay, subscription.upiMandate?.mandateId]);
+
+  const handleSetupAutopay = useCallback(async (upiId: string) => {
+    const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
+    if (!plan || plan.tier === 'free') return;
+    const price = getPlanPrice(plan.id);
+    const amount = isYearly ? price.yearly : price.monthly;
+    await setUpAutopay(upiId, plan.id, amount, isYearly ? 'yearly' : 'monthly');
+    setShowAutopayModal(false);
+    setCouponCode('');
+  }, [selectedPlanId, isYearly, getPlanPrice, setUpAutopay]);
+
+  const handleRemoveCoupon = useCallback(() => {
+    removeCoupon();
+    setCouponCode('');
+  }, [removeCoupon]);
 
   const currentPlan = SUBSCRIPTION_PLANS.find(p => p.id === subscription.planId);
   const isPaidUser = subscription.tier !== 'free';
@@ -146,8 +233,41 @@ export default function SubscriptionScreen({ navigation }: any) {
           </LinearGradient>
         </View>
 
+        {/* Trial Banner */}
+        {trialActive && trialDaysRemaining !== null && (
+          <View style={styles.trialBanner}>
+            <LinearGradient colors={['rgba(255,171,64,0.15)', 'rgba(255,143,0,0.08)']} style={styles.trialBannerGradient}>
+              <View style={styles.trialRow}>
+                <View style={styles.trialIconWrap}>
+                  <Ionicons name="timer-outline" size={24} color={colors.warning} />
+                </View>
+                <View style={styles.trialInfo}>
+                  <Text style={styles.trialTitle}>
+                    {trialDaysRemaining > 0
+                      ? `${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left in trial`
+                      : 'Trial ended'}
+                  </Text>
+                  <Text style={styles.trialSubtitle}>
+                    {trialDaysRemaining > 0
+                      ? `Your ${currentPlan?.name} trial ends on ${subscription.trialEndDate ? new Date(subscription.trialEndDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}`
+                      : 'Subscribe now to keep premium features'}
+                  </Text>
+                </View>
+                {trialDaysRemaining <= 3 && trialDaysRemaining > 0 && (
+                  <View style={styles.trialBadgeUrgent}>
+                    <Text style={styles.trialBadgeUrgentText}>ENDING SOON</Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.trialProgressBar}>
+                <View style={[styles.trialProgressFill, { width: `${Math.min(100, Math.max(5, (trialDaysRemaining / 7) * 100))}%` }]} />
+              </View>
+            </LinearGradient>
+          </View>
+        )}
+
         {/* Billing Toggle */}
-        {!isPaidUser && (
+        {!isPaidUser && !trialActive && (
           <View style={styles.billingToggle}>
             <AnimatedPressable
               onPress={() => { setIsYearly(false); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
@@ -167,6 +287,70 @@ export default function SubscriptionScreen({ navigation }: any) {
                 <Text style={[styles.billingText, isYearly && styles.billingTextActive]}>Yearly</Text>
               </View>
             </AnimatedPressable>
+          </View>
+        )}
+
+        {/* Coupon Section */}
+        {!isPaidUser && !trialActive && selectedPlanId !== 'plan_free' && (
+          <View style={styles.couponSection}>
+            {!showCouponInput && !couponResult ? (
+              <AnimatedPressable onPress={() => setShowCouponInput(true)} haptic="light" scaleTo={0.97}>
+                <View style={styles.couponToggle}>
+                  <Ionicons name="pricetag-outline" size={16} color={colors.primary} />
+                  <Text style={styles.couponToggleText}>Have a coupon code?</Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                </View>
+              </AnimatedPressable>
+            ) : couponResult && couponResult.valid ? (
+              <Animated.View style={styles.couponApplied}>
+                <View style={styles.couponAppliedRow}>
+                  <View style={styles.couponAppliedLeft}>
+                    <Ionicons name="checkmark-circle" size={20} color={colors.marketUp} />
+                    <View>
+                      <Text style={styles.couponAppliedCode}>{couponResult.code}</Text>
+                      <Text style={styles.couponAppliedDesc}>
+                        {couponResult.type === 'free_trial'
+                          ? `${couponResult.trialDays}-day free trial`
+                          : `₹${couponResult.discountAmount.toLocaleString('en-IN')} off`}
+                      </Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity onPress={handleRemoveCoupon} style={styles.couponRemoveBtn}>
+                    <Ionicons name="close-circle" size={22} color={colors.textMuted} />
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
+            ) : (
+              <Animated.View style={[styles.couponInputRow, couponShakeStyle]}>
+                <TextInput
+                  style={styles.couponInput}
+                  value={couponCode}
+                  onChangeText={(v) => { setCouponCode(v.toUpperCase()); setCouponInput(v); }}
+                  placeholder="Enter coupon code"
+                  placeholderTextColor={colors.textMuted}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                />
+                <AnimatedPressable
+                  onPress={handleApplyCoupon}
+                  haptic="medium"
+                  scaleTo={0.95}
+                  disabled={isApplyingCoupon || !couponCode}
+                >
+                  <LinearGradient
+                    colors={GRADIENTS.primary}
+                    style={[styles.couponApplyBtn, isApplyingCoupon && { opacity: 0.7 }]}
+                  >
+                    <Text style={styles.couponApplyText}>
+                      {isApplyingCoupon ? '...' : 'Apply'}
+                    </Text>
+                  </LinearGradient>
+                </AnimatedPressable>
+              </Animated.View>
+            )}
+            {couponResult && !couponResult.valid && couponResult.code && (
+              <Text style={styles.couponError}>{couponResult.message}</Text>
+            )}
           </View>
         )}
 
@@ -313,8 +497,32 @@ export default function SubscriptionScreen({ navigation }: any) {
           </Card>
         )}
 
+        {/* Trial CTA Button */}
+        {!isPaidUser && hasTrialAvailable(SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId)?.tier || 'pro') && selectedPlanId !== 'plan_free' && (
+          <View style={styles.trialCtaSection}>
+            <AnimatedPressable
+              onPress={handleStartTrial}
+              haptic="medium"
+              scaleTo={0.97}
+            >
+              <LinearGradient
+                colors={['rgba(255,171,64,0.2)', 'rgba(255,143,0,0.1)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.trialCtaBtn}
+              >
+                <Ionicons name="timer-outline" size={20} color={colors.warning} />
+                <Text style={styles.trialCtaBtnText}>
+                  Start Free Trial — 7 Days Free
+                </Text>
+              </LinearGradient>
+            </AnimatedPressable>
+            <Text style={styles.trialCtaSubtext}>No charges. Cancel anytime.</Text>
+          </View>
+        )}
+
         {/* CTA Button */}
-        {!isPaidUser && (
+        {!isPaidUser && !trialActive && (
           <View style={styles.ctaSection}>
             <AnimatedPressable
               onPress={handleUpgrade}
@@ -350,6 +558,122 @@ export default function SubscriptionScreen({ navigation }: any) {
             <Text style={styles.secureText}>
               <Ionicons name="lock-closed" size={12} color={colors.textMuted} /> Secure payment via Razorpay
             </Text>
+          </View>
+        )}
+
+        {/* UPI AutoPay Section (paid users) */}
+        {isPaidUser && (
+          <Card style={styles.autopayCard}>
+            <View style={styles.autopayHeader}>
+              <Ionicons name="qr-code" size={22} color={colors.primary} />
+              <Text style={styles.autopayTitle}>UPI AutoPay</Text>
+            </View>
+            <Text style={styles.autopayDesc}>
+              Set up recurring payments via UPI so your subscription never lapses.
+            </Text>
+            <View style={styles.autopayStatus}>
+              {subscription.isAutoPayEnabled && subscription.upiMandate ? (
+                <>
+                  <View style={styles.autopayStatusRow}>
+                    <Ionicons name="checkmark-circle" size={18} color={colors.marketUp} />
+                    <Text style={styles.autopayStatusText}>
+                      AutoPay active — {subscription.upiMandate.upiId}
+                    </Text>
+                  </View>
+                  {subscription.upiMandate.nextChargeDate && (
+                    <Text style={styles.autopayNextDate}>
+                      Next charge: {new Date(subscription.upiMandate.nextChargeDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <View style={styles.autopayStatusRow}>
+                  <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+                  <Text style={[styles.autopayStatusText, { color: colors.textMuted }]}>AutoPay not set up</Text>
+                </View>
+              )}
+            </View>
+            <AnimatedPressable
+              onPress={handleAutopayToggle}
+              haptic="light"
+              scaleTo={0.97}
+            >                <View style={[styles.autopayBtn, subscription.isAutoPayEnabled && styles.autopayBtnDanger]}>
+                <Ionicons
+                  name={subscription.isAutoPayEnabled ? 'pause-circle' : 'qr-code'}
+                  size={18}
+                  color={subscription.isAutoPayEnabled ? colors.danger : colors.primary}
+                />
+                <Text style={[styles.autopayBtnText, subscription.isAutoPayEnabled && { color: colors.danger }]}>
+                  {subscription.isAutoPayEnabled ? 'Disable AutoPay' : 'Set Up AutoPay'}
+                </Text>
+              </View>
+            </AnimatedPressable>
+          </Card>
+        )}
+
+        {/* Payment History Link */}
+        <AnimatedPressable
+          onPress={() => navigation.navigate('PaymentHistory')}
+          haptic="light"
+          scaleTo={0.97}
+        >
+          <Card style={styles.paymentHistoryCard}>
+            <View style={styles.paymentHistoryRow}>
+              <View style={styles.paymentHistoryLeft}>
+                <Ionicons name="receipt-outline" size={22} color={colors.primary} />
+                <View>
+                  <Text style={styles.paymentHistoryTitle}>Payment History</Text>
+                  <Text style={styles.paymentHistorySubtitle}>
+                    {(subscription.payments?.length || 0) > 0
+                      ? `${subscription.payments?.length} payment${subscription.payments?.length !== 1 ? 's' : ''} recorded`
+                      : 'View all subscription transactions'}
+                  </Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </View>
+          </Card>
+        </AnimatedPressable>
+
+        {/* UPI AutoPay Setup Modal */}
+        {showAutopayModal && (
+          <View style={styles.autopayModalOverlay}>
+            <View style={[styles.autopayModal, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+              <Text style={styles.autopayModalTitle}>Set Up UPI AutoPay</Text>
+              <Text style={styles.autopayModalDesc}>
+                Enable recurring payments via UPI. You'll be prompted to authenticate via your UPI app.
+              </Text>
+              <View style={styles.autopayModalOptions}>
+                {[{ id: 'rahul@hdfc', label: 'HDFC Bank' }, { id: 'rahul@paytm', label: 'Paytm' }, { id: 'rahul@icici', label: 'ICICI Bank' }].map((opt) => (
+                  <AnimatedPressable
+                    key={opt.id}
+                    onPress={() => handleSetupAutopay(opt.id)}
+                    haptic="light"
+                    scaleTo={0.97}
+                  >
+                    <View style={[styles.autopayOption, { borderColor: colors.border }]}>
+                      <View style={styles.autopayOptionLeft}>
+                        <View style={[styles.autopayOptionIcon, { backgroundColor: colors.primary + '20' }]}>
+                          <Ionicons name="qr-code" size={20} color={colors.primary} />
+                        </View>
+                        <View>
+                          <Text style={styles.autopayOptionLabel}>{opt.id}</Text>
+                          <Text style={styles.autopayOptionSub}>{opt.label}</Text>
+                        </View>
+                      </View>
+                      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                    </View>
+                  </AnimatedPressable>
+                ))}
+              </View>
+              <AnimatedPressable
+                onPress={() => setShowAutopayModal(false)}
+                haptic="light"
+                scaleTo={0.97}
+              >
+                <Text style={styles.autopayModalCancel}>Cancel</Text>
+              </AnimatedPressable>
+            </View>
           </View>
         )}
 
@@ -734,6 +1058,356 @@ const createStyles = (colors: any) => StyleSheet.create({
   compareIcon: {
     width: 40,
     textAlign: 'center',
+  },
+
+  // ── Trial Banner ──
+  trialBanner: {
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+    borderRadius: BORDER_RADIUS.xl,
+    overflow: 'hidden',
+  },
+  trialBannerGradient: {
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.xl,
+    borderWidth: 1,
+    borderColor: colors.warning + '30',
+  },
+  trialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  trialIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: colors.warning + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  trialInfo: {
+    flex: 1,
+  },
+  trialTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    color: colors.text,
+  },
+  trialSubtitle: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  trialBadgeUrgent: {
+    backgroundColor: colors.danger + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  trialBadgeUrgentText: {
+    ...FONTS.bold,
+    fontSize: 8,
+    color: colors.danger,
+    letterSpacing: 0.5,
+  },
+  trialProgressBar: {
+    marginTop: SPACING.md,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    overflow: 'hidden',
+  },
+  trialProgressFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: colors.warning,
+  },
+
+  // ── Trial CTA ──
+  trialCtaSection: {
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+  },
+  trialCtaBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: colors.warning + '40',
+  },
+  trialCtaBtnText: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    color: colors.warning,
+  },
+  trialCtaSubtext: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+
+  // ── Coupon ──
+  couponSection: {
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+  },
+  couponToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: colors.bgCard,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: 'dashed' as const,
+  },
+  couponToggleText: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.primary,
+    flex: 1,
+  },
+  couponInputRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    alignItems: 'center',
+  },
+  couponInput: {
+    flex: 1,
+    backgroundColor: colors.bgInput,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 12,
+    ...FONTS.mono,
+    fontSize: FONTS.size.md,
+    color: colors.text,
+    letterSpacing: 2,
+  },
+  couponApplyBtn: {
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: 12,
+    borderRadius: BORDER_RADIUS.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  couponApplyText: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+    color: colors.white,
+  },
+  couponApplied: {
+    backgroundColor: colors.marketUp + '10',
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: colors.marketUp + '30',
+    padding: SPACING.md,
+  },
+  couponAppliedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  couponAppliedLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  couponAppliedCode: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.md,
+    color: colors.marketUp,
+    letterSpacing: 1,
+  },
+  couponAppliedDesc: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.marketUp,
+    marginTop: 1,
+  },
+  couponRemoveBtn: {
+    padding: 4,
+  },
+  couponError: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.danger,
+    marginTop: SPACING.sm,
+    textAlign: 'center',
+  },
+
+  // ── UPI AutoPay ──
+  autopayCard: {
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.xl,
+  },
+  autopayHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  autopayTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.lg,
+    color: colors.text,
+  },
+  autopayDesc: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textMuted,
+    lineHeight: 16,
+    marginBottom: SPACING.md,
+  },
+  autopayStatus: {
+    marginBottom: SPACING.md,
+  },
+  autopayStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  autopayStatusText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.marketUp,
+  },
+  autopayNextDate: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textMuted,
+    marginTop: 4,
+    marginLeft: 26,
+  },
+  autopayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
+  },
+  autopayBtnDanger: {
+    borderColor: colors.danger + '30',
+    backgroundColor: colors.danger + '10',
+  },
+  autopayBtnText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.primary,
+  },
+
+  // ── AutoPay Modal ──
+  autopayModalOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+    zIndex: 100,
+  },
+  autopayModal: {
+    borderTopLeftRadius: BORDER_RADIUS.xl,
+    borderTopRightRadius: BORDER_RADIUS.xl,
+    padding: SPACING.xl,
+    paddingBottom: 40,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+  },
+  autopayModalTitle: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.xl,
+    color: colors.text,
+    marginBottom: SPACING.sm,
+  },
+  autopayModalDesc: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.textSecondary,
+    lineHeight: 20,
+    marginBottom: SPACING.xl,
+  },
+  autopayModalOptions: {
+    gap: SPACING.sm,
+    marginBottom: SPACING.xl,
+  },
+  autopayOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+  },
+  autopayOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  autopayOptionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  autopayOptionLabel: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.text,
+  },
+  autopayOptionSub: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textMuted,
+    marginTop: 1,
+  },
+  autopayModalCancel: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.md,
+    color: colors.textMuted,
+    textAlign: 'center',
+    paddingVertical: SPACING.md,
+  },
+
+  // ── Payment History Link Card ──
+  paymentHistoryCard: {
+    marginHorizontal: SPACING.xl,
+    marginBottom: SPACING.xl,
+  },
+  paymentHistoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  paymentHistoryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  paymentHistoryTitle: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.md,
+    color: colors.text,
+  },
+  paymentHistorySubtitle: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textMuted,
+    marginTop: 1,
   },
 
   // ── Payment Info ──

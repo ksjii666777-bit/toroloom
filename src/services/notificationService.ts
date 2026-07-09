@@ -243,6 +243,12 @@ const CHANNELS = {
     description: 'Real-time portfolio P&L, holding movement, and drawdown alerts',
     get importance() { return getImportanceValue('HIGH'); },
   },
+  SENTIMENT_ALERTS: {
+    id: 'sentiment_alerts',
+    name: 'Sentiment Alerts',
+    description: 'Real-time sentiment shift alerts for your watchlist stocks',
+    get importance() { return getImportanceValue('HIGH'); },
+  },
 };
 
 async function setupChannels(): Promise<void> {
@@ -254,6 +260,7 @@ async function setupChannels(): Promise<void> {
       await N.setNotificationChannelAsync(CHANNELS.EDUCATIONAL.id, CHANNELS.EDUCATIONAL);
       await N.setNotificationChannelAsync(CHANNELS.SYSTEM.id, CHANNELS.SYSTEM);
       await N.setNotificationChannelAsync(CHANNELS.PORTFOLIO_ALERTS.id, CHANNELS.PORTFOLIO_ALERTS);
+      await N.setNotificationChannelAsync(CHANNELS.SENTIMENT_ALERTS.id, CHANNELS.SENTIMENT_ALERTS);
     }
   }
 }
@@ -368,6 +375,7 @@ function getChannelForType(type: AppNotification['type']): string | undefined {
     case 'trade': return CHANNELS.TRADE_CONFIRMATIONS.id;
     case 'educational': return CHANNELS.EDUCATIONAL.id;
     case 'portfolio_alert': return CHANNELS.PORTFOLIO_ALERTS.id;
+    case 'sentiment_alert': return CHANNELS.SENTIMENT_ALERTS.id;
     case 'system':
     case 'news':
       return CHANNELS.SYSTEM.id;
@@ -383,6 +391,8 @@ export function getScreenForType(type: AppNotification['type']): string {
     case 'educational': return 'Learn';
     case 'system': return 'Profile';
     case 'news': return 'Home';
+    case 'portfolio_alert': return 'Portfolio';
+    case 'sentiment_alert': return 'SentimentAnalysis';
     default: return 'Home';
   }
 }
@@ -647,6 +657,24 @@ export async function updateAppIconBadge(count: number): Promise<void> {
  */
 export async function clearAppIconBadge(): Promise<void> {
   await updateAppIconBadge(0);
+}
+
+// ─── Sentiment Alert Convenience Scheduler ────────────────
+
+export async function sendSentimentAlert(
+  title: string,
+  message: string,
+  data?: any,
+): Promise<string | undefined> {
+  return sendLocalNotification({
+    id: `sa_${Date.now()}`,
+    type: 'sentiment_alert',
+    title,
+    message,
+    read: false,
+    timestamp: new Date().toISOString(),
+    data,
+  });
 }
 
 export { CHANNELS, setupChannels, BACKGROUND_FETCH_TASK };

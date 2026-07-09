@@ -90,6 +90,15 @@ const { mockFnoApi } = vi.hoisted(() => {
   };
 });
 
+vi.mock('../services/offlineCache', () => ({
+  offlineCache: {
+    save: vi.fn().mockResolvedValue(undefined),
+    load: vi.fn().mockResolvedValue(null),
+    remove: vi.fn().mockResolvedValue(undefined),
+    clearAll: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 vi.mock('../services/api/fno', () => ({
   fnoApi: mockFnoApi,
 }));

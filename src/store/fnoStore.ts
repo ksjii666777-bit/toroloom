@@ -6,9 +6,11 @@ import type {
   FutureContract,
   FnOPosition,
   StrategyLeg,
-  StrategyPnLPoint,
 } from '../types';
 import { fnoApi, StrategyAnalyzeResult, PrebuiltStrategy } from '../services/api/fno';
+import { offlineCache } from '../services/offlineCache';
+import { registerCacheWarming } from '../services/cacheWarmingService';
+import { log } from '../utils/logger';
 
 export type FnOView = 'option-chain' | 'futures' | 'positions';
 export type ChainSide = 'CE' | 'PE' | 'both';
@@ -57,6 +59,9 @@ interface FnoState {
   fetchFutures: (symbol: string) => Promise<void>;
   fetchPositions: () => Promise<void>;
   fetchSpotPrices: () => Promise<void>;
+
+  /** Load cached FnO data at app startup for instant display */
+  loadCachedFno: () => Promise<void>;
 
   // Strategy builder
   addStrategyLeg: (leg: StrategyLeg) => void;
@@ -124,8 +129,28 @@ export const useFnoStore = create<FnoState>((set, get) => ({
         set({ selectedExpiry: data.expiries[0] });
         get().fetchOptionChain(symbol, data.expiries[0].date);
       }
+      // Cache expiries after successful fetch
+      const state = get();
+      await offlineCache.save('fno', {
+        expiries: state.expiries,
+        optionChain: state.optionChain,
+        futures: state.futures,
+        positions: state.positions,
+        spotPrices: state.spotPrices,
+      });
     } catch {
-      // Silently fail - app works with mock data
+      // Backend unavailable — try stale cache
+      const cached = await offlineCache.load<{
+        expiries: FnOExpiry[];
+        optionChain: OptionChain | null;
+        futures: FutureContract[];
+        positions: FnOPosition[];
+        spotPrices: Record<string, number>;
+      }>('fno');
+      if (cached) {
+        set({ expiries: cached.data.expiries });
+        log.info('[FnO] Serving stale cached expiries');
+      }
     }
   },
 
@@ -134,7 +159,29 @@ export const useFnoStore = create<FnoState>((set, get) => ({
     try {
       const chain = await fnoApi.getOptionChain(symbol, expiry);
       set({ optionChain: chain, chainLoading: false });
+      // Cache after successful fetch
+      const state = get();
+      await offlineCache.save('fno', {
+        expiries: state.expiries,
+        optionChain: state.optionChain,
+        futures: state.futures,
+        positions: state.positions,
+        spotPrices: state.spotPrices,
+      });
     } catch {
+      // Backend unavailable — try stale cache
+      const cached = await offlineCache.load<{
+        expiries: FnOExpiry[];
+        optionChain: OptionChain | null;
+        futures: FutureContract[];
+        positions: FnOPosition[];
+        spotPrices: Record<string, number>;
+      }>('fno');
+      if (cached && cached.data.optionChain) {
+        set({ optionChain: cached.data.optionChain, chainLoading: false });
+        log.info('[FnO] Serving stale cached option chain');
+        return;
+      }
       set({ chainLoading: false });
     }
   },
@@ -144,7 +191,29 @@ export const useFnoStore = create<FnoState>((set, get) => ({
     try {
       const data = await fnoApi.getFutures(symbol);
       set({ futures: data.futures, futuresLoading: false });
+      // Cache after successful fetch
+      const state = get();
+      await offlineCache.save('fno', {
+        expiries: state.expiries,
+        optionChain: state.optionChain,
+        futures: state.futures,
+        positions: state.positions,
+        spotPrices: state.spotPrices,
+      });
     } catch {
+      // Backend unavailable — try stale cache
+      const cached = await offlineCache.load<{
+        expiries: FnOExpiry[];
+        optionChain: OptionChain | null;
+        futures: FutureContract[];
+        positions: FnOPosition[];
+        spotPrices: Record<string, number>;
+      }>('fno');
+      if (cached && cached.data.futures.length > 0) {
+        set({ futures: cached.data.futures, futuresLoading: false });
+        log.info('[FnO] Serving stale cached futures');
+        return;
+      }
       set({ futuresLoading: false });
     }
   },
@@ -154,7 +223,29 @@ export const useFnoStore = create<FnoState>((set, get) => ({
     try {
       const positions = await fnoApi.getPositions();
       set({ positions, positionsLoading: false });
+      // Cache after successful fetch
+      const state = get();
+      await offlineCache.save('fno', {
+        expiries: state.expiries,
+        optionChain: state.optionChain,
+        futures: state.futures,
+        positions: state.positions,
+        spotPrices: state.spotPrices,
+      });
     } catch {
+      // Backend unavailable — try stale cache
+      const cached = await offlineCache.load<{
+        expiries: FnOExpiry[];
+        optionChain: OptionChain | null;
+        futures: FutureContract[];
+        positions: FnOPosition[];
+        spotPrices: Record<string, number>;
+      }>('fno');
+      if (cached && cached.data.positions.length > 0) {
+        set({ positions: cached.data.positions, positionsLoading: false });
+        log.info('[FnO] Serving stale cached positions');
+        return;
+      }
       set({ positionsLoading: false });
     }
   },
@@ -164,7 +255,29 @@ export const useFnoStore = create<FnoState>((set, get) => ({
     try {
       const prices = await fnoApi.getSpotPrices();
       set({ spotPrices: prices, spotPricesLoading: false });
+      // Cache after successful fetch
+      const state = get();
+      await offlineCache.save('fno', {
+        expiries: state.expiries,
+        optionChain: state.optionChain,
+        futures: state.futures,
+        positions: state.positions,
+        spotPrices: state.spotPrices,
+      });
     } catch {
+      // Backend unavailable — try stale cache
+      const cached = await offlineCache.load<{
+        expiries: FnOExpiry[];
+        optionChain: OptionChain | null;
+        futures: FutureContract[];
+        positions: FnOPosition[];
+        spotPrices: Record<string, number>;
+      }>('fno');
+      if (cached && Object.keys(cached.data.spotPrices).length > 0) {
+        set({ spotPrices: cached.data.spotPrices, spotPricesLoading: false });
+        log.info('[FnO] Serving stale cached spot prices');
+        return;
+      }
       set({ spotPricesLoading: false });
     }
   },
@@ -232,6 +345,25 @@ export const useFnoStore = create<FnoState>((set, get) => ({
 
   setOrderQuantity: (qty: number) => {
     set({ orderQuantity: Math.max(1, qty) });
+  },
+
+  loadCachedFno: async () => {
+    const cached = await offlineCache.load<{
+      expiries: FnOExpiry[];
+      optionChain: OptionChain | null;
+      futures: FutureContract[];
+      positions: FnOPosition[];
+      spotPrices: Record<string, number>;
+    }>('fno');
+    if (cached) {
+      set({
+        expiries: cached.data.expiries,
+        optionChain: cached.data.optionChain,
+        futures: cached.data.futures,
+        positions: cached.data.positions,
+        spotPrices: cached.data.spotPrices,
+      });
+    }
   },
 
   placeOrder: async () => {

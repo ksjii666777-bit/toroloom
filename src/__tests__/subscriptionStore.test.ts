@@ -19,7 +19,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../store/subscriptionStore';
-import type { SubscriptionFeature, SubscriptionTier, TenantConfig } from '../types';
+import type { SubscriptionFeature, TenantConfig } from '../types';
 
 // ─── Mock AsyncStorage ──────────────────────────────────────────────────────
 const mockAsyncStorage: Record<string, string> = {};

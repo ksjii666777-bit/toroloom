@@ -2,7 +2,7 @@ import { mockStocks } from '../constants/mockData';
 import { useAuthStore } from '../store/authStore';
 import { usePortfolioStore } from '../store/portfolioStore';
 import { log } from '../utils/logger';
-import type { WebSocketService, PriceUpdateCallback, CandleUpdateCallback, ConnectionCallback, PnLUpdateCallback, LockdownCallback } from './wsService';
+import type { WebSocketService, PriceUpdateCallback, CandleUpdateCallback, ConnectionCallback, PnLUpdateCallback, LockdownCallback, CacheInvalidationCallback } from './wsService';
 import type { StockHistoryPoint } from '../types';
 
 interface Subscription {
@@ -26,6 +26,7 @@ class MockWebSocketService implements WebSocketService {
   // ── Risk Event Callbacks (registered by riskStore.listenToWS()) ──
   private onPnLUpdate: PnLUpdateCallback | null = null;
   private onLockdown: LockdownCallback | null = null;
+  private onCacheInvalidation: CacheInvalidationCallback | null = null;
 
   /** Daily loss limit in Rupees used to simulate lockdown detection */
   lossLimitOverride: number | null = null;
@@ -118,6 +119,10 @@ class MockWebSocketService implements WebSocketService {
    */
   onLockdownCallback(cb: LockdownCallback): void {
     this.onLockdown = cb;
+  }
+
+  onCacheInvalidationCallback(cb: CacheInvalidationCallback): void {
+    this.onCacheInvalidation = cb;
   }
 
   /**

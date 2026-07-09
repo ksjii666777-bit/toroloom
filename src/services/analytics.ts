@@ -68,6 +68,17 @@ export interface AnalyticsEvents {
     mutationsSynced: number;
     storesRefreshed: boolean;
   };
+  cache_analytics: {
+    totalCacheHits: number;
+    totalCacheMisses: number;
+    staleHits: number;
+    totalSaves: number;
+    compressionRatio: number;
+    totalBytesSaved: number;
+    totalBytesUsed: number;
+    warmingRuns: number;
+    namespacesWarmed: number;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEvents;

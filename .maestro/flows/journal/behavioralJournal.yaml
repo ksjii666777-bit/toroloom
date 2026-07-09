@@ -1,0 +1,105 @@
+# =============================================================================
+# Behavioural Journal Flow — Trading Psychology
+# =============================================================================
+# Tests the behavioural journal with dashboard, entries, and reports:
+#   1. Login with test credentials
+#   2. Navigate: More → Behavioural Journal
+#   3. Verify Dashboard tab: metrics (Win Rate, Profit Factor), streaks,
+#      Emotional Breakdown, Most Common Mistakes, Improvement Tip
+#   4. Switch to Entries tab → verify period filter
+#   5. Switch to Reports tab → verify report cards
+#   6. Navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Behavioural Journal ─────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Behavioural Journal"
+    direction: DOWN
+- tapOn:
+    text: "Behavioural Journal"
+- waitForAnimationToEnd
+
+# ── 3. Verify Header ───────────────────────────────────────────────────────
+- assertVisible:
+    text: "Behavioural Journal"
+- assertVisible:
+    text: "Track your trading psychology"
+
+# ── 4. Verify Tab Bar ──────────────────────────────────────────────────────
+- assertVisible:
+    text: "Dashboard"
+- assertVisible:
+    text: "Entries"
+- assertVisible:
+    text: "Reports"
+
+# ── 5. Verify Dashboard Metrics ────────────────────────────────────────────
+- assertVisible:
+    text: "Performance Overview"
+- assertVisible:
+    text: "Win Rate"
+- assertVisible:
+    text: "Profit Factor"
+- assertVisible:
+    text: "Plan Compliance"
+- assertVisible:
+    text: "Emotional State Breakdown"
+- assertVisible:
+    text: "Most Common Mistakes"
+
+# ── 6. Switch to Entries Tab ───────────────────────────────────────────────
+- tapOn:
+    text: "Entries"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "All Time"
+- assertVisible:
+    text: "This Week"
+- assertVisible:
+    text: "This Month"
+
+# ── 7. Switch to Reports Tab ───────────────────────────────────────────────
+- tapOn:
+    text: "Reports"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "No reports yet"
+    optional: true
+- assertVisible:
+    text: "Add journal entries"
+    optional: true
+
+# ── 8. Navigate back ───────────────────────────────────────────────────────
+# The screen has no back button; use Android back key
+- pressKey: BACK
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "More"

@@ -25,20 +25,15 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useFnoStore, ChainSide } from '../../store/fnoStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatCompactNumber } from '../../utils/formatters';
-import Card from '../../components/ui/Card';
-import Badge from '../../components/ui/Badge';
-import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
-import type { OptionContract, FutureContract, FnOPosition, OptionChainRow } from '../../types';
+import type { FutureContract, FnOPosition, OptionChainRow } from '../../types';
 
-const { width } = Dimensions.get('window');
-const COL_WIDTH = (width - SPACING.xl * 2 - SPACING.md * 3) / 3;
+const _width = Dimensions.get('window');
 
 const POPULAR_SYMBOLS = ['NIFTY', 'BANKNIFTY', 'RELIANCE', 'HDFCBANK', 'INFY', 'TCS', 'SBIN', 'TATAMOTORS'];
 
@@ -79,10 +74,10 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
   } = useFnoStore();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [showSymbolPicker, setShowSymbolPicker] = useState(false);
-  const [showExpiryPicker, setShowExpiryPicker] = useState(false);
+  const [, setShowSymbolPicker] = useState(false);
+  const [, setShowExpiryPicker] = useState(false);
   const [showGreeks, setShowGreeks] = useState(false);
-  const [highlightATM, setHighlightATM] = useState(true);
+  const [highlightATM] = useState(true);
 
   useEffect(() => {
     fetchExpiries(selectedSymbol);
@@ -112,18 +107,6 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
   }, [setSelectedExpiry]);
 
   const spotPrice = (optionChain?.spotPrice || spotPrices[selectedSymbol] || 0);
-  const underlyingPrice = (optionChain?.underlyingPrice || spotPrice);
-
-  // Compute ATM strike
-  const atmStrike = useMemo(() => {
-    if (optionChain && optionChain.rows.length > 0) {
-      const sorted = [...optionChain.rows].sort(
-        (a, b) => Math.abs(a.strike - spotPrice) - Math.abs(b.strike - spotPrice),
-      );
-      return sorted[0]?.strike || 0;
-    }
-    return 0;
-  }, [optionChain, spotPrice]);
 
   const isPositive = optionChain ? optionChain.pcr < 1 : true;
 
@@ -491,7 +474,6 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
   // === Order Modal ===
   const renderOrderModal = () => {
     if (!showOrderModal || !selectedContract) return null;
-    const totalCost = selectedContract.ltp * orderQuantity * 1; // * lotSize
     const lotSize = selectedSymbol === 'BANKNIFTY' ? 25 : selectedSymbol === 'NIFTY' ? 50 : 1000;
     const totalPremium = selectedContract.ltp * orderQuantity * lotSize;
 

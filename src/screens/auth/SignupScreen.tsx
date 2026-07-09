@@ -7,6 +7,7 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
+import { useT } from '../../hooks/useT';
 
 interface SignupScreenProps {
   navigation: any;
@@ -16,6 +17,7 @@ interface SignupScreenProps {
 export default function SignupScreen({ navigation, route }: SignupScreenProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { t } = useT();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -29,15 +31,15 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
 
   const handleSignup = async () => {
     if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
-      setError('Please fill in all fields');
+      setError(t('errors.fieldRequired'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordsDoNotMatch'));
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t('auth.passwordMinLength'));
       return;
     }
     setError('');
@@ -65,8 +67,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Start your investment journey today</Text>
+          <Text style={styles.title}>{t('auth.createAccount')}</Text>
+          <Text style={styles.subtitle}>{t('auth.signupSubtitle')}</Text>
         </View>
 
         {/* Referral badge — shown when arriving via deep link with ?ref= */}
@@ -91,8 +93,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
           )}
 
           <Input
-            label="Full Name"
-            placeholder="Enter your full name"
+            label={t('auth.fullName')}
+            placeholder={t('auth.fullNamePlaceholder')}
             value={name}
             onChangeText={setName}
             icon="person-outline"
@@ -102,8 +104,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
           />
 
           <Input
-            label="Email"
-            placeholder="Enter your email"
+            label={t('auth.email')}
+            placeholder={t('auth.emailPlaceholder')}
             value={email}
             onChangeText={setEmail}
             icon="mail-outline"
@@ -114,8 +116,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
           />
 
           <Input
-            label="Phone"
-            placeholder="Enter your phone number"
+            label={t('auth.phone')}
+            placeholder={t('auth.phonePlaceholder')}
             value={phone}
             onChangeText={setPhone}
             icon="call-outline"
@@ -125,8 +127,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
           />
 
           <Input
-            label="Password"
-            placeholder="Create a strong password"
+            label={t('auth.password')}
+            placeholder={t('auth.passwordStrength')}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -136,8 +138,8 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
           />
 
           <Input
-            label="Confirm Password"
-            placeholder="Re-enter your password"
+            label={t('auth.confirmPassword')}
+            placeholder={t('auth.confirmPasswordPlaceholder')}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
@@ -151,14 +153,15 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
           <View style={styles.termsContainer}>
             <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
             <Text style={styles.termsText}>
-              By signing up, you agree to our{' '}
-              <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
-              <Text style={styles.termsLink}>Privacy Policy</Text>
+              {t('auth.termsAndPrivacy', {
+                terms: t('auth.termsOfService'),
+                privacy: t('auth.privacyPolicy'),
+              })}
             </Text>
           </View>
 
           <Button
-            title="Create Account"
+            title={t('auth.createAccount')}
             onPress={handleSignup}
             loading={isLoading}
             size="large"
@@ -167,9 +170,9 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
 
         {/* Login Link */}
         <View style={styles.loginSection}>
-          <Text style={styles.hasAccount}>Already have an account? </Text>
+          <Text style={styles.hasAccount}>{t('auth.hasAccount')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginLink}>Log In</Text>
+            <Text style={styles.loginLink}>{t('auth.login')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

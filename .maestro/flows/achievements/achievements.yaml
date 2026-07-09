@@ -1,0 +1,116 @@
+# =============================================================================
+# Achievements & Gamification Flow
+# =============================================================================
+# Tests achievements screen with level card, badges grid, and badge detail:
+#   1. Login with test credentials
+#   2. Navigate: More → Achievements
+#   3. Verify header: title + subtitle (unlocked/total count)
+#   4. Verify Level Card: level number, title, XP progress bar
+#   5. Verify Stats Grid: Total Badges, Unlocked, Locked, Completion
+#   6. Verify Badges Grid: badge cards with icons + names
+#   7. Tap a badge → verify modal with name, description, status
+#   8. Dismiss modal → navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Achievements ──────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Achievements"
+    direction: DOWN
+- tapOn:
+    text: "Achievements"
+- waitForAnimationToEnd
+
+# ── 3. Verify Header ───────────────────────────────────────────────────────
+- assertVisible:
+    text: "Achievements"
+- assertVisible:
+    text: "badges unlocked"
+
+# ── 4. Verify Level Card ───────────────────────────────────────────────────
+- assertVisible:
+    text: "Total XP"
+
+# ── 5. Verify Stats Grid ───────────────────────────────────────────────────
+- assertVisible:
+    text: "Total Badges"
+- assertVisible:
+    text: "Unlocked"
+- assertVisible:
+    text: "Locked"
+- assertVisible:
+    text: "Completion"
+
+# ── 6. Verify Tab Toggle ───────────────────────────────────────────────────
+- assertVisible:
+    text: "All Badges"
+- assertVisible:
+    text: "Unlocked"
+
+# ── 7. Verify Badges Grid ──────────────────────────────────────────────────
+# Badge cards should be visible with names
+- assertVisible:
+    text: "First Trade"
+    optional: true
+- assertVisible:
+    text: "Learning Streak"
+    optional: true
+
+# ── 8. Tap first unlocked badge → verify detail modal ──────────────────────
+- tapOn:
+    text: "First Trade"
+    optional: true
+- waitForAnimationToEnd
+
+# Verify modal content
+- assertVisible:
+    text: "Requirement"
+    optional: true
+- assertVisible:
+    text: "Status"
+    optional: true
+- assertVisible:
+    text: "Got it!"
+    optional: true
+
+# ── 9. Dismiss modal ──────────────────────────────────────────────────────
+- tapOn:
+    text: "Got it!"
+    optional: true
+- waitForAnimationToEnd
+
+# ── 10. Verify Upcoming Challenges ─────────────────────────────────────────
+- assertVisible:
+    text: "Upcoming Challenges"
+
+# ── 11. Navigate back ──────────────────────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "More"

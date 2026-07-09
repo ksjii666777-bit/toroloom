@@ -492,8 +492,12 @@ export default function StockScreenerScreen({ navigation }: any) {
   const [dayChangeMaxStr, setDayChangeMaxStr] = useState(String(screenerFilters.dayChangeMax === 100 ? '' : screenerFilters.dayChangeMax || ''));
 
   // Active preset tracking
+    // Active preset tracking
   const [activePricePreset, setActivePricePreset] = useState<number | null>(null);
   const [activePePreset, setActivePePreset] = useState<number | null>(null);
+  const [volumeMinStr, setVolumeMinStr] = useState(String(screenerFilters.volumeMin || ''));
+  const [near52WHigh, setNear52WHigh] = useState(screenerFilters.near52WHigh);
+  const [near52WLow, setNear52WLow] = useState(screenerFilters.near52WLow);
 
   // ── Sort state ──
   const [sortBy, setSortBy] = useState<string>('symbol');
@@ -546,7 +550,10 @@ export default function StockScreenerScreen({ navigation }: any) {
     sector: screenerFilters.sector,
     dayChangeMin: parseFloat(dayChangeMinStr) || -100,
     dayChangeMax: parseFloat(dayChangeMaxStr) || 100,
-  }), [priceMinStr, priceMaxStr, peMinStr, peMaxStr, dividendStr, dayChangeMinStr, dayChangeMaxStr, screenerFilters.sector, screenerFilters.marketCapCategory]);
+    volumeMin: parseFloat(volumeMinStr) || 0,
+    near52WHigh,
+    near52WLow,
+  }), [priceMinStr, priceMaxStr, peMinStr, peMaxStr, dividendStr, dayChangeMinStr, dayChangeMaxStr, screenerFilters.sector, screenerFilters.marketCapCategory, volumeMinStr, near52WHigh, near52WLow]);
 
   const openSaveModal = useCallback(() => {
     setPresetNameInput('');
@@ -587,6 +594,9 @@ export default function StockScreenerScreen({ navigation }: any) {
     setDayChangeMaxStr(f.dayChangeMax >= 100 ? '' : String(f.dayChangeMax || ''));
     setActivePricePreset(null);
     setActivePePreset(null);
+    setVolumeMinStr(String(f.volumeMin || ''));
+    setNear52WHigh(f.near52WHigh);
+    setNear52WLow(f.near52WLow);
     setScreenerFilters({
       sector: f.sector,
       marketCapCategory: f.marketCapCategory,
@@ -597,6 +607,9 @@ export default function StockScreenerScreen({ navigation }: any) {
       dividendMin: f.dividendMin,
       dayChangeMin: f.dayChangeMin,
       dayChangeMax: f.dayChangeMax,
+      volumeMin: f.volumeMin,
+      near52WHigh: f.near52WHigh,
+      near52WLow: f.near52WLow,
     });
   }, [setScreenerFilters]);
 
@@ -692,10 +705,13 @@ export default function StockScreenerScreen({ navigation }: any) {
       dividendMin: parseFloat(dividendStr) || 0,
       dayChangeMin: parseFloat(dayChangeMinStr) || -100,
       dayChangeMax: parseFloat(dayChangeMaxStr) || 100,
+      volumeMin: parseFloat(volumeMinStr) || 0,
+      near52WHigh,
+      near52WLow,
     });
     applyScreener();
     Keyboard.dismiss();
-  }, [priceMinStr, priceMaxStr, peMinStr, peMaxStr, dividendStr, dayChangeMinStr, dayChangeMaxStr, setScreenerFilters, applyScreener]);
+  }, [priceMinStr, priceMaxStr, peMinStr, peMaxStr, dividendStr, dayChangeMinStr, dayChangeMaxStr, volumeMinStr, near52WHigh, near52WLow, setScreenerFilters, applyScreener]);
 
   const handleClearAll = useCallback(() => {
     setPriceMinStr('');
@@ -707,6 +723,9 @@ export default function StockScreenerScreen({ navigation }: any) {
     setDayChangeMaxStr('');
     setActivePricePreset(null);
     setActivePePreset(null);
+    setVolumeMinStr('');
+    setNear52WHigh(false);
+    setNear52WLow(false);
     resetScreenerFilters();
   }, [resetScreenerFilters]);
 
@@ -776,8 +795,11 @@ export default function StockScreenerScreen({ navigation }: any) {
     if (screenerFilters.sector !== 'All') count++;
     if (screenerFilters.marketCapCategory !== 'all') count++;
     if (parseFloat(dayChangeMinStr) > -100 || parseFloat(dayChangeMaxStr) < 100) count++;
+    if (parseFloat(volumeMinStr) > 0) count++;
+    if (near52WHigh) count++;
+    if (near52WLow) count++;
     return count;
-  }, [priceMinStr, priceMaxStr, peMinStr, peMaxStr, dividendStr, screenerFilters.sector, screenerFilters.marketCapCategory, dayChangeMinStr, dayChangeMaxStr]);
+  }, [priceMinStr, priceMaxStr, peMinStr, peMaxStr, dividendStr, screenerFilters.sector, screenerFilters.marketCapCategory, dayChangeMinStr, dayChangeMaxStr, volumeMinStr, near52WHigh, near52WLow]);
 
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -906,6 +928,67 @@ export default function StockScreenerScreen({ navigation }: any) {
               selectedValue={screenerFilters.marketCapCategory}
               onSelect={(val) => setScreenerFilters({ marketCapCategory: val as 'small' | 'mid' | 'large' | 'all' })}
             />
+          </FilterSection>
+          {/* Volume Filter */}
+          <FilterSection title="Volume" icon="stats-chart-outline" color="#06B6D4">
+            <RangeInput
+              label="Minimum Volume"
+              minValue={volumeMinStr}
+              maxValue={volumeMinStr}
+              onMinChange={setVolumeMinStr}
+              onMaxChange={setVolumeMinStr}
+              placeholder="0 (e.g. 5M = 5 million)"
+            />
+          </FilterSection>
+
+          {/* 52-Week High/Low */}
+          <FilterSection title="52-Week Range" icon="flag-outline" color="#8B5CF6">
+            <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
+              <TouchableOpacity              style={[
+                  sChip.chip,
+                  { backgroundColor: colors.bgCard, borderColor: colors.border },
+                  near52WHigh && { backgroundColor: colors.marketUp + '20', borderColor: colors.marketUp },
+                ]}
+                onPress={() => setNear52WHigh(!near52WHigh)}
+              >
+                <Ionicons
+                  name="trending-up"
+                  size={14}
+                  color={near52WHigh ? colors.marketUp : colors.textMuted}
+                />
+                <Text style={[
+                  { color: colors.textSecondary },
+                  near52WHigh && { color: colors.marketUp },
+                ]}>
+                  Near 52W High
+                </Text>
+                {near52WHigh && (
+                  <Ionicons name="checkmark-circle" size={14} color={colors.marketUp} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity              style={[
+                  sChip.chip,
+                  { backgroundColor: colors.bgCard, borderColor: colors.border },
+                  near52WLow && { backgroundColor: colors.marketDown + '20', borderColor: colors.marketDown },
+                ]}
+                onPress={() => setNear52WLow(!near52WLow)}
+              >
+                <Ionicons
+                  name="trending-down"
+                  size={14}
+                  color={near52WLow ? colors.marketDown : colors.textMuted}
+                />
+                <Text style={[
+                  { color: colors.textSecondary },
+                  near52WLow && { color: colors.marketDown },
+                ]}>
+                  Near 52W Low
+                </Text>
+                {near52WLow && (
+                  <Ionicons name="checkmark-circle" size={14} color={colors.marketDown} />
+                )}
+              </TouchableOpacity>
+            </View>
           </FilterSection>
         </View>
 

@@ -21,32 +21,50 @@ services:
   # Pool mode: transaction — safe for REST + WebSocket workloads.
   # Config: backend/pgbouncer/pgbouncer.ini
   #
+  # ──── PgBouncer Connection Pooler — edoburu/pgbouncer ─────────────────
+  # Replaced bitnami/pgbouncer:1.23 (deprecated/removed from Docker Hub)
+  # with edoburu/pgbouncer which is actively maintained.
+  #
+  # Config via env vars:
+  #   DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME  → PostgreSQL target
+  #   POOL_MODE, DEFAULT_POOL_SIZE, MAX_CLIENT_CONN    → Pool tuning
+  #   AUTH_TYPE                                         → trust for Docker network
+  #
   pgbouncer:
-    image: bitnami/pgbouncer:1.23
+    image: edoburu/pgbouncer:v1.25.2-p0
     container_name: toroloom-pgbouncer
     restart: unless-stopped
     ports:
       - '6432:6432'
+    volumes:
+      # Mount local pgbouncer.ini for full config control
+      - ./backend/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./backend/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
     environment:
-      # Bitnami image uses these env vars to auto-generate pgbouncer.ini
-      PGBOUNCER_PORT: '6432'
-      PGBOUNCER_DATABASE: '*'                        # Accept all DB names
-      POSTGRESQL_HOST: postgres
-      POSTGRESQL_PORT: '5432'
-      POSTGRESQL_USERNAME: toroloom
-      POSTGRESQL_PASSWORD: toroloom_dev
-      POSTGRESQL_DATABASE: toroloom
-      PGBOUNCER_POOL_MODE: transaction
-      PGBOUNCER_DEFAULT_POOL_SIZE: '20'
-      PGBOUNCER_MAX_CLIENT_CONN: '200'
-      PGBOUNCER_CLIENT_IDLE_TIMEOUT: '120'
-      PGBOUNCER_QUERY_TIMEOUT: '30'
-      PGBOUNCER_AUTH_TYPE: trust
+      # ── PostgreSQL connection (internal Docker network) ──
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      DB_USER: toroloom
+      DB_PASSWORD: toroloom_dev
+      DB_NAME: toroloom
+
+      # ── Pool tuning ──
+      POOL_MODE: transaction
+      DEFAULT_POOL_SIZE: '20'
+      MAX_CLIENT_CONN: '200'
+      RESERVE_POOL_SIZE: '3'
+      QUERY_TIMEOUT: '30'
+
+      # ── Auth ──
+      AUTH_TYPE: trust
+
+      # ── Listen ──
+      LISTEN_PORT: '6432'
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', '/opt/bitnami/scripts/pgbouncer/healthcheck.sh']
+      test: ['CMD-SHELL', 'pg_isready -h localhost -p 6432 -U toroloom -d toroloom']
       interval: 5s
       timeout: 5s
       retries: 10

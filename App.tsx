@@ -5,9 +5,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import './src/i18n'; // Initialize i18n
 import { setupChannels } from './src/services/notificationService';
 import { configureApi } from './src/services/api';
-import { useAuthStore, useRiskStore, useSubscriptionStore, useOnboardingStore, usePortfolioStore, useWatchlistStore, useMarketStore, useEducationStore } from './src/store';
+import { useAuthStore, useRiskStore, useSubscriptionStore, useOnboardingStore, usePortfolioStore, useWatchlistStore, useMarketStore, useEducationStore, useFnoStore, useCommunityStore, useAIStore } from './src/store';
 import { useUpgradePromptStore } from './src/store/subscriptionUIStore';
 import { onPaymentRequired } from './src/services/api/client';
 import Sentry, { isSentryEnabled } from './src/services/sentry';
@@ -20,9 +21,9 @@ import { seedAllBrokerSessions, seedE2EBrokerSession } from './src/services/gate
 // notificationService uses lazy imports internally, so this won't crash if native modules aren't available
 setupChannels().catch(() => {});
 
-// Configure API client to read auth token from store + point to Render backend
+// Configure API client to read auth token from store + point to Railway backend
 configureApi({
-  baseUrl: 'https://toroloom-backend.onrender.com/api',
+  baseUrl: 'https://toroloom-production.up.railway.app/api',
   getToken: () => useAuthStore.getState().token,
 });
 
@@ -88,6 +89,9 @@ function AppContent() {
   useEffect(() => {
     useMarketStore.getState().loadCachedMarket();
     useEducationStore.getState().loadCachedCourses();
+    useFnoStore.getState().loadCachedFno();
+    useCommunityStore.getState().loadCachedCommunity();
+    useAIStore.getState().loadCachedInsights();
 
     if (isLoggedIn) {
       usePortfolioStore.getState().loadCachedPortfolio();

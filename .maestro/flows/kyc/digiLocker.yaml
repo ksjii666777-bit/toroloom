@@ -1,0 +1,109 @@
+# =============================================================================
+# DigiLocker Verification Flow — KYC
+# =============================================================================
+# Tests DigiLocker document fetch flow:
+#   1. Login with test credentials
+#   2. Navigate: More → Profile → KYC → DigiLocker
+#   3. Verify info screen with document types + benefits
+#   4. Tap "Connect DigiLocker" → handle consent alert
+#   5. Verify documents are fetched and displayed
+#   6. Tap "Complete Verification" → navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Profile ──────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Profile"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Profile"
+
+# ── 3. Navigate to KYC section ────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "KYC Verification"
+    direction: DOWN
+- tapOn:
+    text: "KYC Verification"
+- waitForAnimationToEnd
+
+# ── 4. Navigate to DigiLocker ─────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "DigiLocker"
+    direction: DOWN
+- tapOn:
+    text: "DigiLocker"
+- waitForAnimationToEnd
+
+# ── 5. Verify DigiLocker screen ───────────────────────────────────────────
+- assertVisible:
+    text: "DigiLocker"
+- assertVisible:
+    text: "Verify via DigiLocker"
+- assertVisible:
+    text: "Aadhaar Card"
+- assertVisible:
+    text: "PAN Card"
+- assertVisible:
+    text: "Driving License"
+- assertVisible:
+    text: "Benefits"
+- assertVisible:
+    text: "Instant document verification"
+
+# ── 6. Tap Connect DigiLocker ─────────────────────────────────────────────
+- assertVisible:
+    text: "Connect DigiLocker"
+- tapOn:
+    text: "Connect DigiLocker"
+- waitForAnimationToEnd
+
+# ── 7. Handle consent alert ───────────────────────────────────────────────
+# The alert shows "DigiLocker Consent" title with Authorize/Cancel options
+- assertVisible:
+    text: "DigiLocker Consent"
+- tapOn:
+    text: "Authorize"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# ── 8. Verify documents fetched ───────────────────────────────────────────
+- assertVisible:
+    text: "Documents Fetched"
+- assertVisible:
+    text: "Complete Verification"
+- assertVisible:
+    text: "Verified"
+
+# ── 9. Tap Complete Verification ──────────────────────────────────────────
+- tapOn:
+    text: "Complete Verification"
+- waitForAnimationToEnd
+
+# ── 10. Verify back on KYC screen ─────────────────────────────────────────
+- assertVisible:
+    text: "KYC Verification"

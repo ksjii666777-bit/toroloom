@@ -23,6 +23,7 @@ import type {
   ConnectionCallback,
   PnLUpdateCallback,
   LockdownCallback,
+  CacheInvalidationCallback,
   WebSocketService,
 } from '../services/wsService';
 
@@ -276,6 +277,9 @@ function createMinimalWSImpl(): WebSocketService {
       // No-op
     },
     onLockdownCallback(_cb: LockdownCallback): void {
+      // No-op
+    },
+    onCacheInvalidationCallback(_cb: CacheInvalidationCallback): void {
       // No-op
     },
     setLossLimit(_limit: number): void {

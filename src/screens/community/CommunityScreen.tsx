@@ -1,49 +1,271 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions } from 'react-native';
+/**
+ * ============================================================================
+ * Toroloom — Community Screen
+ * ============================================================================
+ *
+ * Community feed with:
+ *   - Feed tabs: Hot / New / Top
+ *   - Post cards with animated like, bookmark, share
+ *   - Verified badges on trusted users
+ *   - User avatar → Profile navigation
+ *   - Pull to refresh
+ *   - Create post with tags
+ *   - Trending topics
+ * ============================================================================
+ */
 
+import React, { useMemo, useState, useCallback } from 'react';
+import {
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
+  Dimensions, RefreshControl,
+} from 'react-native';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withSpring, withSequence,
+  withTiming, BounceIn,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useCommunityStore } from '../../store/communityStore';
-import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
+import { useCommunityStore, FeedSort } from '../../store/communityStore';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { formatTimeAgo } from '../../utils/formatters';
+import { triggerHaptic } from '../../utils/haptics';
+import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
+import { showShareSheet, ShareContent } from '../../utils/share';
 
-Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const trendingTags = ['RELIANCE', 'Nifty', 'SIP', 'Budget2025', 'TCS', 'IPO', 'Dividend', 'Crypto'];
 
-export default function CommunityScreen({ _navigation }: any) {
+const FEED_TABS: { key: FeedSort; label: string; icon: string }[] = [
+  { key: 'hot', label: 'Hot', icon: 'flame' },
+  { key: 'new', label: 'New', icon: 'time' },
+  { key: 'top', label: 'Top', icon: 'trending-up' },
+];
+
+// Verified users (would come from backend)
+const VERIFIED_USERS = ['Priya Patel', 'Arun Kumar', 'Vikram Reddy'];
+
+// ─── Animated Like Button ───────────────────────────────────────────────────
+
+function LikeButton({
+  isLiked, count, onPress, styles,
+}: {
+  isLiked: boolean; count: number; onPress: () => void;
+  styles: any;
+}) {
+  const scale = useSharedValue(1);
+  const color = isLiked ? '#FF3B30' : '#9CA3AF';
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePress = useCallback(() => {
+    scale.value = withSequence(
+      withSpring(1.4, { stiffness: 200, damping: 10 }),
+      withSpring(1, { stiffness: 150, damping: 12 }),
+    );
+    triggerHaptic();
+    onPress();
+  }, [onPress]);
+
+  return (
+    <TouchableOpacity style={styles.postAction} onPress={handlePress} activeOpacity={0.7}>
+      <Animated.View style={animatedStyle}>
+        <Ionicons
+          name={isLiked ? 'heart' : 'heart-outline'}
+          size={18}
+          color={color}
+        />
+      </Animated.View>
+      <Text style={[styles.actionText, isLiked && { color: '#FF3B30' }]}>{count}</Text>
+    </TouchableOpacity>
+  );
+}
+
+// ─── Post Card ──────────────────────────────────────────────────────────────
+
+function PostCard({
+  post,
+  isLiked,
+  isBookmarked,
+  onLike,
+  onBookmark,
+  onUserPress,
+  onPostPress,
+  onShare,
+  colors,
+  styles,
+}: {
+  post: any;
+  isLiked: boolean;
+  isBookmarked: boolean;
+  onLike: () => void;
+  onBookmark: () => void;
+  onUserPress: () => void;
+  onPostPress: () => void;
+  onShare: () => void;
+  colors: any;
+  styles: any;
+}) {
+  const isVerified = VERIFIED_USERS.includes(post.userName);
+
+  return (
+    <TouchableOpacity
+      style={styles.postCard}
+      onPress={onPostPress}
+      activeOpacity={0.7}
+    >
+      {/* Header: Avatar + Name + Verified Badge + Timestamp */}
+      <View style={styles.postHeader}>
+        <TouchableOpacity onPress={onUserPress} activeOpacity={0.7}>
+          <View style={[styles.postAvatar, { backgroundColor: colors.primary + '30' }]}>
+            <Text style={styles.avatarText}>{post.userName[0]}</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.postUser} onPress={onUserPress} activeOpacity={0.7}>
+          <View style={styles.userNameRow}>
+            <Text style={styles.userName}>{post.userName}</Text>
+            {isVerified && (
+              <View style={styles.verifiedBadge}>
+                <Ionicons name="checkmark-circle" size={12} color="#00E676" />
+              </View>
+            )}
+          </View>
+          <Text style={styles.postTime}>{formatTimeAgo(post.timestamp)}</Text>
+        </TouchableOpacity>
+        {/* Bookmark */}
+        <TouchableOpacity
+          style={styles.bookmarkBtn}
+          onPress={onBookmark}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons
+            name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+            size={18}
+            color={isBookmarked ? '#FFAB40' : colors.textMuted}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* Content */}
+      <Text style={styles.postContent}>{post.content}</Text>
+
+      {/* Tags */}
+      {post.tags.length > 0 && (
+        <View style={styles.postTags}>
+          {post.tags.map((tag: string) => (
+            <Badge key={tag} label={tag} variant="primary" size="medium" />
+          ))}
+        </View>
+      )}
+
+      {/* Actions */}
+      <View style={styles.postActions}>
+        <LikeButton isLiked={isLiked} count={post.likes} onPress={onLike} styles={styles} />
+
+        <TouchableOpacity style={styles.postAction} onPress={onPostPress} activeOpacity={0.7}>
+          <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
+          <Text style={styles.actionText}>{post.comments}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.postAction} onPress={onShare} activeOpacity={0.7}>
+          <Ionicons name="share-outline" size={18} color={colors.textMuted} />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// ─── Main Community Screen ─────────────────────────────────────────────────
+
+export default function CommunityScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { posts, likePost, addPost } = useCommunityStore();
+
+  const {
+    posts, feedSort, bookmarkedPostIds, likedPostIds, isRefreshing,
+    setFeedSort, likePost, bookmarkPost, addPost, refreshPosts,
+  } = useCommunityStore();
+
   const [showPostInput, setShowPostInput] = useState(false);
   const [postContent, setPostContent] = useState('');
 
-  const handlePost = () => {
+  // ── Handlers ──────────────────────────────────────────────────────────
+
+  const handlePost = useCallback(() => {
     if (postContent.trim()) {
       addPost(postContent.trim(), []);
       setPostContent('');
       setShowPostInput(false);
+      notificationAsync(NotificationFeedbackType.Success);
     }
-  };
+  }, [postContent, addPost]);
 
+  const handleLike = useCallback((postId: string) => {
+    likePost(postId);
+  }, [likePost]);
+
+  const handleBookmark = useCallback((postId: string) => {
+    bookmarkPost(postId);
+    triggerHaptic();
+  }, [bookmarkPost]);
+
+  const handleShare = useCallback(async (post: any) => {
+    const shareContent: ShareContent = {
+      title: 'Toroloom Community Post',
+      message: post.content,
+      authorName: post.userName,
+    };
+    showShareSheet(shareContent);
+  }, []);
+
+  const handleUserPress = useCallback((userId: string, userName: string) => {
+    // Navigate to profile or social trader profile
+    navigation.navigate('TraderProfile', { traderId: userId });
+  }, [navigation]);
+
+  const handlePostPress = useCallback((postId: string) => {
+    navigation.navigate('CommunityPost', { postId });
+  }, [navigation]);
+
+  // ── Render ────────────────────────────────────────────────────────────
   return (
     <View style={styles.container}>
-      {/* Fixed Header */}
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Community</Text>
-          <TouchableOpacity style={styles.newPostBtn} onPress={() => setShowPostInput(!showPostInput)}>
+          <TouchableOpacity
+            style={styles.newPostBtn}
+            onPress={() => {
+              setShowPostInput(!showPostInput);
+              triggerHaptic();
+            }}
+          >
             <Ionicons name="create-outline" size={22} color={colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={refreshPosts}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.bgSecondary}
+          />
+        }
+      >
         {/* Create Post Input */}
         {showPostInput && (
-          <View style={styles.createPost}>
+          <Animated.View entering={BounceIn.duration(300)} style={styles.createPost}>
             <TextInput
               style={styles.postInput}
               placeholder="Share your thoughts with the community..."
@@ -62,12 +284,45 @@ export default function CommunityScreen({ _navigation }: any) {
                 ))}
               </View>
               <View style={styles.createPostBtns}>
-                <Button title="Cancel" variant="ghost" size="small" onPress={() => { setShowPostInput(false); setPostContent(''); }} />
-                <Button title="Post" size="small" onPress={handlePost} disabled={!postContent.trim()} />
+                <Button
+                  title="Cancel"
+                  variant="ghost"
+                  size="small"
+                  onPress={() => { setShowPostInput(false); setPostContent(''); }}
+                />
+                <Button
+                  title="Post"
+                  size="small"
+                  onPress={handlePost}
+                  disabled={!postContent.trim()}
+                />
               </View>
             </View>
-          </View>
+          </Animated.View>
         )}
+
+        {/* Feed Tabs */}
+        <View style={styles.feedTabs}>
+          {FEED_TABS.map(tab => (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.feedTab, feedSort === tab.key && styles.feedTabActive]}
+              onPress={() => {
+                triggerHaptic();
+                setFeedSort(tab.key);
+              }}
+            >
+              <Ionicons
+                name={tab.icon as any}
+                size={14}
+                color={feedSort === tab.key ? colors.primary : colors.textMuted}
+              />
+              <Text style={[styles.feedTabText, feedSort === tab.key && styles.feedTabTextActive]}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         {/* Trending Tags */}
         <View style={styles.trendingSection}>
@@ -86,38 +341,19 @@ export default function CommunityScreen({ _navigation }: any) {
 
         {/* Posts */}
         {posts.map(post => (
-          <TouchableOpacity key={post.id} style={styles.postCard}>
-            <View style={styles.postHeader}>
-              <View style={styles.postAvatar}>
-                <Text style={styles.avatarText}>{post.userName[0]}</Text>
-              </View>
-              <View style={styles.postUser}>
-                <Text style={styles.userName}>{post.userName}</Text>
-                <Text style={styles.postTime}>{formatTimeAgo(post.timestamp)}</Text>
-              </View>
-            </View>
-            <Text style={styles.postContent}>{post.content}</Text>
-            {post.tags.length > 0 && (
-              <View style={styles.postTags}>
-                {post.tags.map(tag => (
-                  <Badge key={tag} label={tag} variant="primary" size="medium" />
-                ))}
-              </View>
-            )}
-            <View style={styles.postActions}>
-              <TouchableOpacity style={styles.postAction} onPress={() => likePost(post.id)}>
-                <Ionicons name="heart-outline" size={18} color={colors.textMuted} />
-                <Text style={styles.actionText}>{post.likes}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.postAction}>
-                <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
-                <Text style={styles.actionText}>{post.comments}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.postAction}>
-                <Ionicons name="share-outline" size={18} color={colors.textMuted} />
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+          <PostCard
+            key={post.id}
+            post={post}
+            isLiked={likedPostIds.includes(post.id)}
+            isBookmarked={bookmarkedPostIds.includes(post.id)}
+            onLike={() => handleLike(post.id)}
+            onBookmark={() => handleBookmark(post.id)}
+            onUserPress={() => handleUserPress(post.userId, post.userName)}
+            onPostPress={() => handlePostPress(post.id)}
+            onShare={() => handleShare(post)}
+            colors={colors}
+            styles={styles}
+          />
         ))}
 
         <View style={{ height: 100 }} />
@@ -125,6 +361,8 @@ export default function CommunityScreen({ _navigation }: any) {
     </View>
   );
 }
+
+// ─── Styles ─────────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
@@ -203,6 +441,35 @@ const createStyles = (colors: any) =>
       justifyContent: 'flex-end',
       gap: SPACING.sm,
     },
+    feedTabs: {
+      flexDirection: 'row',
+      marginHorizontal: SPACING.xl,
+      marginBottom: SPACING.lg,
+      backgroundColor: colors.bgInput,
+      borderRadius: BORDER_RADIUS.md,
+      padding: 3,
+    },
+    feedTab: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 5,
+      paddingVertical: SPACING.sm,
+      borderRadius: BORDER_RADIUS.sm,
+    },
+    feedTabActive: {
+      backgroundColor: colors.bgCard,
+    },
+    feedTabText: {
+      ...FONTS.medium,
+      fontSize: FONTS.size.sm,
+      color: colors.textMuted,
+    },
+    feedTabTextActive: {
+      color: colors.primary,
+      ...FONTS.semiBold,
+    },
     trendingSection: {
       paddingHorizontal: SPACING.xl,
       marginBottom: SPACING.lg,
@@ -263,15 +530,35 @@ const createStyles = (colors: any) =>
     postUser: {
       flex: 1,
     },
+    userNameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
     userName: {
       ...FONTS.semiBold,
       fontSize: FONTS.size.md,
       color: colors.text,
     },
+    verifiedBadge: {
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: '#00E67620',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     postTime: {
       ...FONTS.regular,
       fontSize: FONTS.size.xs,
       color: colors.textMuted,
+    },
+    bookmarkBtn: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     postContent: {
       ...FONTS.regular,

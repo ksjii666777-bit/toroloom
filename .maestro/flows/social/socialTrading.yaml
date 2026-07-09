@@ -1,0 +1,113 @@
+# =============================================================================
+# Social Trading Flow — Leaderboard & Trader Profile
+# =============================================================================
+# Tests the Social Trading screen:
+#   1. Login with test credentials
+#   2. Navigate: More → Social Trading
+#   3. Verify Social Trading screen renders with 3 tabs
+#   4. View Leaderboard tab with sort chips and period chips
+#   5. Change sort option (Returns → Win Rate)
+#   6. Change period (1W → 1M)
+#   7. Navigate to Copy Trading tab
+#   8. Verify empty state
+#   9. Navigate to Search tab
+#   10. Navigate back to More screen
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Social Trading ────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Social Trading"
+    direction: DOWN
+- tapOn:
+    text: "Social Trading"
+- waitForAnimationToEnd
+
+# ── 3. Verify Social Trading Screen ────────────────────────────────────────
+- assertVisible:
+    text: "Social Trading"
+
+# Verify 3 tabs
+- assertVisible:
+    text: "Leaderboard"
+- assertVisible:
+    text: "Copy Trading"
+- assertVisible:
+    text: "Search"
+
+# ── 4. Verify Leaderboard Sort & Period Chips ─────────────────────────────
+# Sort chips
+- assertVisible:
+    text: "P&L"
+- assertVisible:
+    text: "Returns"
+- assertVisible:
+    text: "Win Rate"
+
+# Period chips
+- assertVisible:
+    text: "1W"
+- assertVisible:
+    text: "1M"
+- assertVisible:
+    text: "All"
+
+# ── 5. Change Sort Option ──────────────────────────────────────────────────
+- tapOn:
+    text: "Win Rate"
+- waitForAnimationToEnd
+
+# ── 6. Change Period ──────────────────────────────────────────────────────
+- tapOn:
+    text: "1M"
+- waitForAnimationToEnd
+
+# ── 7. Navigate to Copy Trading Tab ────────────────────────────────────────
+- tapOn:
+    text: "Copy Trading"
+- waitForAnimationToEnd
+
+# Verify Copy Trading empty state
+- assertVisible:
+    text: "No Copy Trading Yet"
+
+# ── 8. Navigate to Search Tab ─────────────────────────────────────────────
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+
+# Verify Search screen
+- assertVisible:
+    text: "Discover Top Traders"
+
+# ── 9. Navigate Back to More Screen ──────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "More"

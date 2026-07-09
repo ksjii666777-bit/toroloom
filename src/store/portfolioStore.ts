@@ -3,6 +3,7 @@ import { Stock, Holding, Trade, OpenOrder } from '../types';
 import { mockHoldings, mockTrades, mockOpenOrders } from '../constants/mockData';
 import { api, portfolioApi } from '../services/api';
 import { offlineCache } from '../services/offlineCache';
+import { registerCacheWarming } from '../services/cacheWarmingService';
 import { useAuthStore } from './authStore';
 import { sendTradeConfirmation } from '../services/notificationService';
 import { log } from '../utils/logger';

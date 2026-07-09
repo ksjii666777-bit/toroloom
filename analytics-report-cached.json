@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-06-29T11:59:36.725Z",
+  "target": "http://localhost:3458",
+  "cacheEnabled": true,
+  "config": "PG + Redis (warmed)",
+  "phases": [
+    {
+      "label": "100 conns",
+      "requestsTotal": 45427,
+      "duration": 20.07,
+      "throughputAvg": 2263.4280019930243,
+      "latencyMs": {
+        "min": 1,
+        "p50": 22,
+        "p75": 34,
+        "p90": 46,
+        "p99": 95,
+        "max": 196
+      },
+      "errors": 0,
+      "timeouts": 0,
+      "non2xx": 45327,
+      "throughputMB": 19.387386322021484
+    },
+    {
+      "label": "500 conns",
+      "requestsTotal": 43720,
+      "duration": 20.48,
+      "throughputAvg": 2134.765625,
+      "latencyMs": {
+        "min": 1,
+        "p50": 116,
+        "p75": 175,
+        "p90": 227,
+        "p99": 1227,
+        "max": 1481
+      },
+      "errors": 0,
+      "timeouts": 0,
+      "non2xx": 43720,
+      "throughputMB": 18.63750457763672
+    },
+    {
+      "label": "1,000 conns",
+      "requestsTotal": 39279,
+      "duration": 20.84,
+      "throughputAvg": 1884.7888675623801,
+      "latencyMs": {
+        "min": 1,
+        "p50": 260,
+        "p75": 390,
+        "p90": 882,
+        "p99": 2697,
+        "max": 3084
+      },
+      "errors": 0,
+      "timeouts": 0,
+      "non2xx": 39279,
+      "throughputMB": 16.708582878112793
+    }
+  ]
+}

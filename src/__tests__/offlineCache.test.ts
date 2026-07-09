@@ -64,7 +64,7 @@ vi.mock('@react-native-async-storage/async-storage', () => ({
 // ──── Helpers ─────────────────────────────────────────────────────────────
 
 /** Build a cache entry that looks like it was saved `ageMs` milliseconds ago. */
-function makeEntry(data: any, ageMs: number, version: number = 1) {
+function makeEntry(data: any, ageMs: number, version: number = 2) {
   const now = Date.now();
   return {
     data,
@@ -113,15 +113,15 @@ describe('offlineCache.save', () => {
     expect(raw).toBeDefined();
     const parsed = JSON.parse(raw!);
     expect(parsed.data).toEqual(['AAPL', 'GOOG']);
-    expect(parsed.version).toBe(1);
+    expect(parsed.version).toBeGreaterThanOrEqual(2);
     expect(parsed.fetchedAt).toBeDefined();
     expect(parsed.fetchedAtMs).toBeGreaterThan(0);
   });
 
-  it('sets version to CURRENT_CACHE_VERSION (1)', async () => {
+  it('sets version to current cache version', async () => {
     await offlineCache.save('portfolio', { x: 1 });
     const parsed = JSON.parse(STORE.get('toroloom_cache:portfolio')!);
-    expect(parsed.version).toBe(1);
+    expect(parsed.version).toBeGreaterThanOrEqual(2);
   });
 
   it('sets fetchedAtMs close to now', async () => {
@@ -255,9 +255,10 @@ describe('offlineCache.load — default TTL (5 min)', () => {
     expect(result).toBeNull();
   });
 
-  it('returns fresh data just inside the TTL boundary', async () => {
+  it('returns fresh data just inside the namespace TTL boundary', async () => {
     // Use a 50ms margin to avoid flakiness from Date.now() drift
-    seedEntry('portfolio', makeEntry({ value: 500 }, FIVE_MIN_MS - 50));
+    // portfolio TTL is 2 minutes (120000ms)
+    seedEntry('portfolio', makeEntry({ value: 500 }, 120_000 - 50));
     const result = await offlineCache.load('portfolio');
     expect(result!.source).toBe('fresh');
   });
@@ -571,9 +572,9 @@ describe('offlineCache — Edge Cases', () => {
     expect(result).toBeNull();
   });
 
-  it('version 2 entries are discarded (current is 1)', async () => {
-    seedEntry('v2', makeEntry({ value: 100 }, 1000, 2));
-    const result = await offlineCache.load('v2');
+  it('version 1 entries are discarded (current is 2+)', async () => {
+    seedEntry('v1', makeEntry({ value: 100 }, 1000, 1));
+    const result = await offlineCache.load('v1');
     expect(result).toBeNull();
   });
 

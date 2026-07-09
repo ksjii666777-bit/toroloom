@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 20.0.0"
+    "version": ">= 20.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -13,7 +14,8 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://toroloom-backend.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api",
+        "APP_VARIANT": "development"
       }
     },
     "development-simulator": {
@@ -27,7 +29,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://toroloom-backend.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api",
+        "APP_VARIANT": "development"
       }
     },
     "preview": {
@@ -35,17 +38,46 @@
       "android": {
         "buildType": "apk"
       },
+      "ios": {
+        "simulator": true
+      },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://toroloom-backend.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api",
+        "APP_VARIANT": "preview"
       }
     },
     "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "image": "latest"
+      },
+      "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://toroloom-backend.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api",
+        "APP_VARIANT": "production"
+      },
+      "channel": "production"
+    },
+    "production-simulator": {
+      "extends": "production",
+      "ios": {
+        "simulator": true
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "placeholder@example.com",
+        "ascAppId": "0000000000",
+        "appleTeamId": "XXXXXXXXXX"
+      },
+      "android": {
+        "track": "production",
+        "releaseStatus": "completed"
+      }
+    }
   }
 }

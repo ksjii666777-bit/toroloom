@@ -20,32 +20,24 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  RefreshControl,
   TextInput,
-  Alert,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useFnoStore } from '../../store/fnoStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
 import type { StrategyLeg } from '../../types';
 import { fnoApi, PrebuiltStrategy } from '../../services/api/fno';
 
-const { width } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_HEIGHT = 200;
-const CHART_WIDTH = width - SPACING.xl * 4;
+const CHART_WIDTH = SCREEN_WIDTH - SPACING.xl * 4;
 
-const COLORS_RISK: Record<string, [string, string]> = {
-  low: ['#00C85380', '#00C85320'],
-  moderate: ['#FFC10780', '#FFC10720'],
-  high: ['#FF525280', '#FF525220'],
-};
+
 
 const STRATEGY_TYPE_COLORS: Record<string, string> = {
   CE: '#00C853',
@@ -53,7 +45,7 @@ const STRATEGY_TYPE_COLORS: Record<string, string> = {
   FUTURE: '#3B82F6',
 };
 
-export default function StrategyBuilderScreen({ navigation, route }: any) {
+export default function StrategyBuilderScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -71,14 +63,13 @@ export default function StrategyBuilderScreen({ navigation, route }: any) {
     analyzeStrategy,
     fetchSpotPrices,
     selectedSymbol,
-    setSelectedSymbol,
   } = useFnoStore();
 
   const [prebuiltStrategies, setPrebuiltStrategies] = useState<PrebuiltStrategy[]>([]);
   const [selectedPrebuilt, setSelectedPrebuilt] = useState<PrebuiltStrategy | null>(null);
   const [showPrebuilt, setShowPrebuilt] = useState(true);
   const [spotPrice, setSpotPrice] = useState(23456.80);
-  const [editingLegId, setEditingLegId] = useState<string | null>(null);
+  const [, setEditingLegId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSpotPrices();
@@ -195,24 +186,16 @@ export default function StrategyBuilderScreen({ navigation, route }: any) {
 
           {/* P&L Line */}
           {(() => {
-            const points = pnlChart.map((p, i) => {
-              const x = (i / (pnlChart.length - 1)) * CHART_WIDTH;
-              const y = ((maxPnl - p.pnl) / range) * CHART_HEIGHT;
-              return `${x},${y}`;
-            }).join(' ');
-
             return (
               <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-                {/* Area fill */}
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
                 {/* Points */}
-                {pnlChart.filter((_, i) => i % 5 === 0).map((p, i) => {
-                  const idx = i * 5;
-                  const x = (idx / (pnlChart.length - 1)) * CHART_WIDTH;
+                {pnlChart.filter((_, idx) => idx % 5 === 0).map((p, idx) => {
+                  const chartIdx = idx * 5;
+                  const x = (chartIdx / (pnlChart.length - 1)) * CHART_WIDTH;
                   const y = ((maxPnl - p.pnl) / range) * CHART_HEIGHT;
                   return (
                     <View
-                      key={i}
+                      key={idx}
                       style={[styles.chartPoint, {
                         left: x - 3,
                         top: y - 3,
@@ -245,7 +228,7 @@ export default function StrategyBuilderScreen({ navigation, route }: any) {
   const renderStrategyResult = () => {
     if (!strategyResult) return null;
 
-    const isProfitOverall = strategyResult.maxProfit >= Math.abs(strategyResult.maxLoss);
+  
     const riskLabel = strategyResult.maxLoss < 0
       ? Math.abs(strategyResult.maxLossPercent).toFixed(1)
       : 'Limited';
@@ -314,7 +297,7 @@ export default function StrategyBuilderScreen({ navigation, route }: any) {
   };
 
   const renderLegEditor = (leg: StrategyLeg) => {
-    const isEditing = editingLegId === leg.id;
+  
     return (
       <View key={leg.id} style={[styles.legCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
         {/* Leg Header */}

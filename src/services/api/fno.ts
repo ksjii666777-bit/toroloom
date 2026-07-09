@@ -3,7 +3,6 @@ import type {
   OptionChain,
   FnOExpiry,
   FutureContract,
-  FnOStrategy,
   FnOPosition,
   StrategyPnLPoint,
 } from '../../types';

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { getActiveWS } from '../services/wsRegistry';
-import { generateStockHistory } from '../constants/mockData';
+import { generateStockHistory, generateIntradayData } from '../constants/mockData';
 import type { StockHistoryPoint } from '../types';
 
 interface RealtimePriceState {
@@ -26,6 +26,20 @@ export function useRealtimePrice(stockId: string, basePrice: number) {
 
   // Generate initial historical data based on timeframe
   const loadHistory = useCallback((timeframe: string) => {
+    // ── Intraday timeframes (end with 'm') ──
+    if (timeframe.endsWith('m')) {
+      const minutes = parseInt(timeframe, 10);
+      if (!isNaN(minutes) && minutes > 0) {
+        const candleData = generateIntradayData(minutes);
+        setState(prev => ({
+          ...prev,
+          candleHistory: candleData,
+        }));
+        return;
+      }
+    }
+
+    // ── Daily / multi-day timeframes ──
     let days: number;
     switch (timeframe) {
       case '1D': days = 1; break;
@@ -36,7 +50,6 @@ export function useRealtimePrice(stockId: string, basePrice: number) {
       default: days = 365;
     }
 
-    // Use generateStockHistory but only take the period we need
     const fullHistory = generateStockHistory();
     const candleData = fullHistory.slice(-days);
     

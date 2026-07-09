@@ -33,6 +33,12 @@ import {
   setActiveRateLimiters,
   recalculateSymbolSubscriptions,
   observeTickLatency,
+  incrementCacheHit,
+  incrementCacheMiss,
+  observeCacheLookup,
+  observeCacheCompute,
+  incrementSyncBridgeSendFailure,
+  incrementSyncBridgeCircuitBreakerTrip,
 } from '../services/metrics';
 
 // ──── Helpers ───────────────────────────────────────────────────────────────
@@ -766,7 +772,200 @@ describe('Tick Latency Metrics', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Integrated State — Broker + Rate Limit + Subscriptions
+// Cache Metrics
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Cache Metrics', () => {
+  beforeEach(() => {
+    getMetricsRegistry().resetMetrics();
+  });
+
+  it('should increment cache hit counter per endpoint', async () => {
+    incrementCacheHit('win-loss');
+    incrementCacheHit('win-loss');
+    incrementCacheHit('pnl');
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const hitLabels = parsed.get('toroloom_cache_hits_total') as Map<string, string>;
+    expect(hitLabels.get('endpoint="win-loss"')).toBe('2');
+    expect(hitLabels.get('endpoint="pnl"')).toBe('1');
+  });
+
+  it('should increment cache miss counter per endpoint', async () => {
+    incrementCacheMiss('win-loss');
+    incrementCacheMiss('sector-concentration');
+    incrementCacheMiss('sector-concentration');
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const missLabels = parsed.get('toroloom_cache_misses_total') as Map<string, string>;
+    expect(missLabels.get('endpoint="win-loss"')).toBe('1');
+    expect(missLabels.get('endpoint="sector-concentration"')).toBe('2');
+  });
+
+  it('should observe cache lookup latency histogram', async () => {
+    observeCacheLookup('win-loss', 5); // 5ms → 0.005s
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const histCount = parsed.get('toroloom_cache_lookup_seconds_count') as Map<string, string>;
+    expect(histCount.get('endpoint="win-loss"')).toBe('1');
+  });
+
+  it('should accumulate lookup latency observations', async () => {
+    observeCacheLookup('win-loss', 3);
+    observeCacheLookup('win-loss', 7);
+    observeCacheLookup('pnl', 2);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const histCount = parsed.get('toroloom_cache_lookup_seconds_count') as Map<string, string>;
+    expect(histCount.get('endpoint="win-loss"')).toBe('2');
+    expect(histCount.get('endpoint="pnl"')).toBe('1');
+  });
+
+  it('should observe cache compute latency histogram', async () => {
+    observeCacheCompute('sector-concentration', 1500); // 1500ms → 1.5s
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const histCount = parsed.get('toroloom_cache_compute_seconds_count') as Map<string, string>;
+    expect(histCount.get('endpoint="sector-concentration"')).toBe('1');
+  });
+
+  it('should accumulate compute latency observations', async () => {
+    observeCacheCompute('win-loss', 200);
+    observeCacheCompute('win-loss', 300);
+    observeCacheCompute('pnl', 150);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    const histCount = parsed.get('toroloom_cache_compute_seconds_count') as Map<string, string>;
+    expect(histCount.get('endpoint="win-loss"')).toBe('2');
+    expect(histCount.get('endpoint="pnl"')).toBe('1');
+  });
+
+  it('should track distinct endpoints independently', async () => {
+    incrementCacheHit('win-loss');
+    incrementCacheMiss('pnl');
+    observeCacheLookup('win-loss', 5);
+    observeCacheCompute('pnl', 200);
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    // Verify hit counter for win-loss
+    const hitLabels = parsed.get('toroloom_cache_hits_total') as Map<string, string>;
+    expect(hitLabels.get('endpoint="win-loss"')).toBe('1');
+
+    // Verify miss counter for pnl
+    const missLabels = parsed.get('toroloom_cache_misses_total') as Map<string, string>;
+    expect(missLabels.get('endpoint="pnl"')).toBe('1');
+
+    // Verify lookup histogram count
+    const lookupLabels = parsed.get('toroloom_cache_lookup_seconds_count') as Map<string, string>;
+    expect(lookupLabels.get('endpoint="win-loss"')).toBe('1');
+
+    // Verify compute histogram count
+    const computeLabels = parsed.get('toroloom_cache_compute_seconds_count') as Map<string, string>;
+    expect(computeLabels.get('endpoint="pnl"')).toBe('1');
+  });
+
+  it('should include HELP and TYPE lines for all cache metrics', async () => {
+    incrementCacheHit('win-loss');
+    observeCacheLookup('win-loss', 1);
+
+    const { body } = await fetchMetrics(baseUrl);
+
+    const expected: { name: string; type: string }[] = [
+      { name: 'toroloom_cache_hits_total', type: 'counter' },
+      { name: 'toroloom_cache_misses_total', type: 'counter' },
+      { name: 'toroloom_cache_lookup_seconds', type: 'histogram' },
+      { name: 'toroloom_cache_compute_seconds', type: 'histogram' },
+    ];
+
+    for (const { name, type } of expected) {
+      expect(body).toContain(`# HELP ${name}`);
+      expect(body).toContain(`# TYPE ${name} ${type}`);
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Sync Bridge Metrics
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Sync Bridge Metrics', () => {
+  beforeEach(() => {
+    getMetricsRegistry().resetMetrics();
+  });
+
+  it('should increment send-failure counter', async () => {
+    incrementSyncBridgeSendFailure();
+    incrementSyncBridgeSendFailure();
+    incrementSyncBridgeSendFailure();
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    expect(parsed.get('toroloom_sync_bridge_send_failures_total')).toBe('3');
+  });
+
+  it('should increment circuit-breaker trip counter', async () => {
+    incrementSyncBridgeCircuitBreakerTrip();
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    expect(parsed.get('toroloom_sync_bridge_circuit_breaker_trips_total')).toBe('1');
+  });
+
+  it('should accumulate circuit-breaker trips across multiple calls', async () => {
+    incrementSyncBridgeCircuitBreakerTrip();
+    incrementSyncBridgeCircuitBreakerTrip();
+    incrementSyncBridgeCircuitBreakerTrip();
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    expect(parsed.get('toroloom_sync_bridge_circuit_breaker_trips_total')).toBe('3');
+  });
+
+  it('should start at zero after registry reset', async () => {
+    incrementSyncBridgeSendFailure();
+    incrementSyncBridgeCircuitBreakerTrip();
+    getMetricsRegistry().resetMetrics();
+
+    // After reset, increment and verify it starts from 1
+    incrementSyncBridgeSendFailure();
+
+    const { body } = await fetchMetrics(baseUrl);
+    const parsed = parseMetrics(body);
+
+    expect(parsed.get('toroloom_sync_bridge_send_failures_total')).toBe('1');
+  });
+
+  it('should include HELP and TYPE lines for sync bridge metrics', async () => {
+    incrementSyncBridgeSendFailure();
+
+    const { body } = await fetchMetrics(baseUrl);
+
+    expect(body).toContain('# HELP toroloom_sync_bridge_send_failures_total');
+    expect(body).toContain('# TYPE toroloom_sync_bridge_send_failures_total counter');
+    expect(body).toContain('# HELP toroloom_sync_bridge_circuit_breaker_trips_total');
+    expect(body).toContain('# TYPE toroloom_sync_bridge_circuit_breaker_trips_total counter');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Integrated State — Broker + Rate Limit + Subscriptions + Cache
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('Integrated Metrics State', () => {

@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic } from '../utils/haptics';
 import { create } from 'zustand';
 import { AppNotification, Holding } from '../types';
 import { mockNotifications } from '../constants/mockData';
@@ -12,6 +12,7 @@ export interface NotificationPreferences {
   tradeConfirmations: boolean;
   educationalReminders: boolean;
   systemUpdates: boolean;
+  sentimentAlerts: boolean;
   soundEnabled: boolean;
   vibrationEnabled: boolean;
   quietHoursStart: string | null;
@@ -24,6 +25,7 @@ const defaultPreferences: NotificationPreferences = {
   tradeConfirmations: true,
   educationalReminders: true,
   systemUpdates: true,
+  sentimentAlerts: true,
   soundEnabled: true,
   vibrationEnabled: true,
   quietHoursStart: null,
@@ -508,7 +510,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
           }));
           updateAppIconBadge(newBadgeCount);
           // Haptic feedback for new alert badge
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+          triggerHaptic();
         } else {
           set(state => ({
             notifications: [notif, ...state.notifications],
@@ -661,6 +663,7 @@ function getPreferenceKeyForType(type: AppNotification['type']): keyof Notificat
     case 'price_alert': return 'priceAlerts';
     case 'trade': return 'tradeConfirmations';
     case 'educational': return 'educationalReminders';
+    case 'sentiment_alert': return 'sentimentAlerts';
     case 'system':
     case 'news':
       return 'systemUpdates';

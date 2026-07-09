@@ -131,6 +131,12 @@ describe('PostgreSQLStorage', () => {
       mockPoolInstance.connect.mockRejectedValue(new Error('DB down'));
 
       const connectPromise = storage.connect();
+      // Attach a catch handler BEFORE advancing time to prevent unhandled
+      // rejection.  connectPromise rejects during advanceTimersByTimeAsync
+      // (when the retry loop exhausts), but expect().rejects attaches its
+      // catch handler after that await, creating a window where the
+      // rejection is unhandled.
+      connectPromise.catch(() => {});
       await vi.advanceTimersByTimeAsync(16000);
 
       await expect(connectPromise).rejects.toThrow(

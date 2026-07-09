@@ -23,11 +23,12 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useBiometricStore } from '../../store/biometricStore';
 import { biometricAuth } from '../../services/biometricService';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 
 
@@ -40,7 +41,6 @@ export default function SecuritySettingsScreen({ navigation }: any) {
     requireForTrades,
     toggleBiometric,
     toggleRequireForTrades,
-    setBiometric,
   } = useBiometricStore();
 
   const [biometricAvailable, setBiometricAvailable] = useState(false);
@@ -77,7 +77,7 @@ export default function SecuritySettingsScreen({ navigation }: any) {
       }
 
       // Verify with biometric before enabling
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      triggerHaptic(ImpactFeedbackStyle.Medium);
       const result = await biometricAuth.authenticate(
         `Enable ${biometricLabel} to unlock Toroloom`,
         true,
@@ -89,17 +89,17 @@ export default function SecuritySettingsScreen({ navigation }: any) {
       }
     }
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic();
     toggleBiometric();
   };
 
   const handleTradeToggle = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic();
     toggleRequireForTrades();
   };
 
   const handleTestBiometric = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic(ImpactFeedbackStyle.Medium);
     const result = await biometricAuth.authenticate(
       `Verify your identity with ${biometricLabel}`,
       true,
@@ -307,6 +307,37 @@ export default function SecuritySettingsScreen({ navigation }: any) {
           </View>
         </Card>
 
+        {/* Two-Factor Authentication Section */}
+        <Card
+          title="Two-Factor Authentication"
+          subtitle="Add an extra layer of security"
+          style={{ marginTop: SPACING.md }}
+        >
+          <AnimatedPressable
+            onPress={() => navigation.navigate('TwoFactorSetup')}
+            haptic="medium"
+            scaleTo={0.97}
+          >
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.manageIconBox, { backgroundColor: colors.primary + '20' }]}>
+                  <Ionicons name="shield-checkmark" size={22} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>
+                    Two-Factor Authentication
+                  </Text>
+                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                    TOTP-based 2FA via authenticator app
+                  </Text>
+                </View>
+              </View>
+              <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </View>
+          </AnimatedPressable>
+        </Card>
+
         <View style={{ height: 100 }} />
       </ScrollView>
     </View>
@@ -445,6 +476,20 @@ const createStyles = (colors: any) =>
       ...FONTS.regular,
       fontSize: FONTS.size.xs,
       flex: 1,
+    },
+
+    // 2FA card styles
+    manageIconBox: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      justifyContent: 'center' as const,
+      alignItems: 'center' as const,
+    },
+    statusDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
     },
 
     // Info

@@ -1,0 +1,124 @@
+# =============================================================================
+# Two-Factor Authentication Setup Flow — Security Settings
+# =============================================================================
+# Tests full 2FA setup flow:
+#   1. Login with test credentials
+#   2. Navigate: More → Security → Two-Factor Auth
+#   3. View the setup info with benefits
+#   4. Tap "Set Up Two-Factor Auth" → generate QR + secret
+#   5. Enter mock 6-digit code → "Verify & Enable 2FA"
+#   6. View backup codes → tap "I've Saved My Backup Codes"
+#   7. Tap "Done" → navigate back
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Settings ──────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Security"
+    direction: DOWN
+- tapOn:
+    text: "Security"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Security Settings"
+
+# ── 3. Navigate to Two-Factor Auth ─────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "Two-Factor Auth"
+    direction: DOWN
+- tapOn:
+    text: "Two-Factor Auth"
+- waitForAnimationToEnd
+
+# ── 4. Verify 2FA Setup Screen Info ────────────────────────────────────────
+- assertVisible:
+    text: "Two-Factor Auth"
+- assertVisible:
+    text: "Two-Factor Authentication"
+- assertVisible:
+    text: "Add an extra layer of security"
+- assertVisible:
+    text: "Protects against unauthorized access"
+
+# ── 5. Tap Set Up Two-Factor Auth ──────────────────────────────────────────
+- assertVisible:
+    text: "Set Up Two-Factor Auth"
+- tapOn:
+    text: "Set Up Two-Factor Auth"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# ── 6. Verify QR + Code Input ──────────────────────────────────────────────
+- assertVisible:
+    text: "Scan with Authenticator App"
+- assertVisible:
+    text: "Can't scan? Enter key manually"
+
+# The 6-digit code input should be visible
+- assertVisible:
+    text: "Enter the 6-digit code from your authenticator app"
+
+# ── 7. Enter mock verification code ────────────────────────────────────────
+# Tap the first OTP box to focus the hidden input, then type the code
+- tapOn:
+    id: "otp-input"
+- inputText: "123456"
+- waitForAnimationToEnd
+
+# ── 8. Verify all 6 digits show in OTP boxes ────────────────────────────────
+- assertVisible:
+    text: "6/6 digits entered"
+- assertVisible:
+    text: "Verify & Enable 2FA"
+- tapOn:
+    text: "Verify & Enable 2FA"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# ── 9. Verify Backup Codes Screen ──────────────────────────────────────────
+- assertVisible:
+    text: "2FA Enabled"
+- assertVisible:
+    text: "Backup Codes"
+- assertVisible:
+    text: "Save these one-time recovery codes"
+- assertVisible:
+    text: "I've Saved My Backup Codes"
+
+# ── 10. Confirm Backup Codes Saved ─────────────────────────────────────────
+- tapOn:
+    text: "I've Saved My Backup Codes"
+- waitForAnimationToEnd
+
+# ── 11. Tap Done to go back ────────────────────────────────────────────────
+- tapOn:
+    text: "Done"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Security Settings"

@@ -1,76 +1,56 @@
 /**
  * ============================================================================
- * Toroloom Broker Link Routes — Per-User Broker Credential Management
+ * Toroloom Broker Link Routes — Zero-API Session-Based Broker Connection
  * ============================================================================
  *
  * Enables frontend users to connect/disconnect their own broker accounts
- * without modifying the global .env configuration. Each user can link
- * one broker at a time.
+ * using session-based Zero-API Gateway credentials (tokens, cookies)
+ * extracted via WebView — no developer API keys required.
  *
  * Endpoints:
  *   GET    /api/broker-link/status     — Current user's broker connection status
- *   POST   /api/broker-link/connect    — Store broker credentials for the user
+ *   POST   /api/broker-link/connect    — Store session credentials for the user
  *   POST   /api/broker-link/disconnect — Remove broker link for the user
  *   GET    /api/broker-link/oauth-url   — Get OAuth URL for broker (Zerodha)
  *
  * Auth: Required (authMiddleware)
  *
- * Storage:
- *   Uses in-memory Map keyed by userId. In production, this should be
- *   persisted to the database via the storage service.
+ * Architecture:
+ *   - No apiKey/apiSecret/tradingPassword/totp fields stored
+ *   - Only session tokens, access tokens, and encrypted cookies from WebView
+ *   - Zero-API Hybrid Gateway: credentials extracted via SecureSessionSync WebView
  *
  * ============================================================================
  */
 
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
-import { env } from '../config/env';
 import { registry } from '../services/broker/registry';
 
 const router = Router();
 router.use(authMiddleware);
 
-interface KiteConnectInstance {
-  generateSession(requestToken: string, apiSecret: string): Promise<{ access_token: string }>;
-}
-
-interface KiteConnectConstructor {
-  new(config: { api_key: string }): KiteConnectInstance;
-}
-
-// Lazy-loaded KiteConnect SDK (only loaded for Zerodha OAuth flow)
-function getKiteConnect(): KiteConnectConstructor | null {
-  try {
-    return require('kiteconnect').KiteConnect;
-  } catch {
-    return null;
-  }
-}
-
 // ──── Types ────────────────────────────────────────────────────────────────
 
-interface BrokerLink {
-  brokerType: 'angel' | 'zerodha' | 'groww';
+interface BrokerLinkSession {
+  brokerType: 'angel' | 'zerodha' | 'groww' | 'dhan' | 'upstox' | 'fivepaisa';
   connected: boolean;
   connectedAt: string | null;
-  // Store encrypted credentials (in production, use proper encryption)
+  // Zero-API session credentials — extracted via WebView, no developer keys
   credentials: {
-    apiKey?: string;
-    apiSecret?: string;
     accessToken?: string;
+    sessionToken?: string;
     clientId?: string;
-    password?: string;
-    totp?: string;
+    encryptedCookies?: string;  // Serialized cookies from WebView extraction
   };
   label: string;
 }
 
 // In-memory store — replace with database in production
-const brokerLinks = new Map<string, BrokerLink>();
+const brokerLinks = new Map<string, BrokerLinkSession>();
 
 /**
  * Build available brokers list dynamically from the registry.
- * Returns the same shape as the old BROKER_META for backward compatibility.
  */
 function getAvailableBrokers(): Array<{ type: string; label: string; icon: string; color: string; hasOAuth: boolean; hasZeroApi: boolean; requiresConfig: boolean }> {
   return registry.getAllMeta().map(meta => ({
@@ -90,7 +70,6 @@ function getAvailableBrokers(): Array<{ type: string; label: string; icon: strin
  * GET /api/broker-link/status
  *
  * Returns the current broker connection status for the authenticated user.
- * If the user has not linked a broker, returns null.
  */
 router.get('/status', (req: Request, res: Response) => {
   const userId = req.user!.userId;
@@ -119,20 +98,28 @@ router.get('/status', (req: Request, res: Response) => {
 /**
  * POST /api/broker-link/connect
  *
- * Store broker credentials for the user. Validates required fields
- * based on broker type.
+ * Store Zero-API session credentials for the user.
+ * Accepts only session-based credentials (no developer API keys).
  *
  * Body: {
  *   brokerType: 'angel' | 'zerodha' | 'groww',
- *   credentials: { ... }
+ *   credentials: {
+ *     accessToken?: string,
+ *     sessionToken?: string,
+ *     clientId?: string,
+ *     encryptedCookies?: string
+ *   }
  * }
  */
 router.post('/connect', async (req: Request, res: Response) => {
   const userId = req.user!.userId;
   const { brokerType, credentials } = req.body;
 
-  if (!brokerType || !['angel', 'zerodha', 'groww'].includes(brokerType)) {
-    res.status(400).json({ error: 'brokerType must be one of: angel, zerodha, groww' });
+  const validBrokers = registry.getAllMeta().map(m => m.type);
+  if (!brokerType || !validBrokers.includes(brokerType)) {
+    res.status(400).json({
+      error: `brokerType must be one of: ${validBrokers.join(', ')}`,
+    });
     return;
   }
 
@@ -141,82 +128,39 @@ router.post('/connect', async (req: Request, res: Response) => {
     return;
   }
 
-  // Validate required fields per broker
-  // For OAuth flow (zerodha with request_token), apiKey can be empty
-  const isOAuthFlow = brokerType === 'zerodha' && credentials.apiSecret && !credentials.apiKey;
-  const missingFields: string[] = [];
-  switch (brokerType) {
-    case 'zerodha':
-      if (!isOAuthFlow && !credentials.apiKey) missingFields.push('apiKey');
-      if (!credentials.apiSecret) missingFields.push('apiSecret');
-      break;
-    case 'angel':
-      if (!credentials.apiKey) missingFields.push('apiKey');
-      if (!credentials.clientId) missingFields.push('clientId');
-      break;
-    case 'groww':
-      if (!credentials.apiKey) missingFields.push('apiKey');
-      if (!credentials.accessToken) missingFields.push('accessToken');
-      break;
-  }
-
-  if (missingFields.length > 0) {
+  // Zero-API: Only session tokens allowed — reject if apiKey or apiSecret sent
+  if (credentials.apiKey || credentials.apiSecret || credentials.tradingPassword || credentials.totp) {
     res.status(400).json({
-      error: `Missing required fields for ${brokerType}: ${missingFields.join(', ')}`,
+      error: 'Developer API keys are not supported. Use Zero-API session credentials (accessToken, sessionToken, encryptedCookies) extracted via WebView.',
     });
     return;
   }
 
-  let resolvedAccessToken = credentials.accessToken;
-  let resolvedApiSecret = credentials.apiSecret;
-  let exchangeErrorMessage: string | undefined;
-
-  // ── Zerodha OAuth: exchange request_token → access_token ─────────
-  if (isOAuthFlow && brokerType === 'zerodha') {
-    const apiKey = env.zerodha.apiKey;
-    const apiSecret = env.zerodha.apiSecret;
-    const requestToken = credentials.apiSecret;
-
-    if (apiKey && apiSecret && requestToken) {
-      const KiteConnectClass = getKiteConnect();
-      if (KiteConnectClass) {
-        try {
-          const kite = new KiteConnectClass({ api_key: apiKey });
-          const session = await kite.generateSession(requestToken, apiSecret);
-          resolvedAccessToken = session.access_token;
-          resolvedApiSecret = apiSecret; // Keep the real apiSecret, not the request_token
-          console.log(`[BrokerLink] Zerodha OAuth: exchanged request_token → access_token for user ${userId}`);
-        } catch (exchangeError: unknown) {
-          console.warn(`[BrokerLink] Kite Connect token exchange failed: ${(exchangeError as Error).message}`);
-          resolvedAccessToken = '';
-          exchangeErrorMessage = (exchangeError as Error).message;
-        }
-      }
-    } else {
-      console.warn(`[BrokerLink] Zerodha OAuth exchange skipped: ZERODHA_API_KEY or ZERODHA_API_SECRET not configured`);
-      exchangeErrorMessage = 'Zerodha API credentials not configured on server';
-    }
+  // Require at least one session credential
+  if (!credentials.accessToken && !credentials.sessionToken && !credentials.encryptedCookies) {
+    res.status(400).json({
+      error: 'At least one session credential required: accessToken, sessionToken, or encryptedCookies',
+    });
+    return;
   }
 
   // Store the link
-  const link: BrokerLink = {
-    brokerType: brokerType as BrokerLink['brokerType'],
+  const link: BrokerLinkSession = {
+    brokerType,
     connected: true,
     connectedAt: new Date().toISOString(),
     credentials: {
-      apiKey: credentials.apiKey,
-      apiSecret: resolvedApiSecret,
-      accessToken: resolvedAccessToken || credentials.accessToken,
+      accessToken: credentials.accessToken,
+      sessionToken: credentials.sessionToken,
       clientId: credentials.clientId,
-      password: credentials.password,
-      totp: credentials.totp,
+      encryptedCookies: credentials.encryptedCookies,
     },
     label: registry.getPlugin(brokerType)?.label || brokerType,
   };
 
   brokerLinks.set(userId, link);
 
-  console.log(`[BrokerLink] User ${userId} connected to ${link.label}`);
+  console.log(`[BrokerLink] User ${userId} connected to ${link.label} (Zero-API)`);
 
   res.json({
     success: true,
@@ -224,15 +168,12 @@ router.post('/connect', async (req: Request, res: Response) => {
     brokerType: link.brokerType,
     label: link.label,
     connectedAt: link.connectedAt,
-    hasAccessToken: !!resolvedAccessToken,
-    ...(exchangeErrorMessage ? { exchangeError: exchangeErrorMessage } : {}),
+    hasSessionCredentials: true,
   });
 });
 
 /**
  * POST /api/broker-link/disconnect
- *
- * Remove the broker link for the authenticated user.
  */
 router.post('/disconnect', (req: Request, res: Response) => {
   const userId = req.user!.userId;
@@ -256,10 +197,9 @@ router.post('/disconnect', (req: Request, res: Response) => {
 /**
  * GET /api/broker-link/oauth-url
  *
- * Returns the OAuth URL for the specified broker.
- * Currently only Zerodha supports OAuth.
- *
- * Query: ?brokerType=zerodha
+ * Returns the OAuth URL for Zerodha.
+ * In Zero-API mode, returns a config URL guiding the user through
+ * the WebView-based session extraction process instead.
  */
 router.get('/oauth-url', (req: Request, res: Response) => {
   const { brokerType } = req.query;
@@ -269,24 +209,16 @@ router.get('/oauth-url', (req: Request, res: Response) => {
     return;
   }
 
-  const apiKey = env.zerodha.apiKey || req.user?.userId;
-  if (!apiKey) {
-    res.status(400).json({
-      error: 'Zerodha API key not configured. Please set ZERODHA_API_KEY in your .env file.',
-    });
-    return;
-  }
-
-  // Zerodha Kite Connect OAuth URL
-  // In production, the redirect_uri should point to your backend callback endpoint
-  const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/broker/zerodha/callback`;
-  const oauthUrl = `https://kite.trade/connect/login?api_key=${apiKey}&v=3`;
-
+  // Zero-API: Instead of server-side API key, return a redirect URL
+  // that launches the WebView session extraction flow.
+  // The frontend should open SecureSessionSync WebView for Zerodha login.
   res.json({
-    oauthUrl,
-    redirectUri,
+    oauthUrl: null, // No server-side OAuth URL — use WebView session extraction
+    redirectUri: null,
     brokerType: 'zerodha',
     label: 'Zerodha',
+    zeroApiMode: true,
+    message: 'Zerodha uses Zero-API Gateway. Launch SecureSessionSync WebView to extract session credentials.',
   });
 });
 

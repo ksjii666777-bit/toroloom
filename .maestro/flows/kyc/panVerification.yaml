@@ -1,0 +1,83 @@
+# =============================================================================
+# PAN Verification Flow — KYC
+# =============================================================================
+# Tests PAN verification flow:
+#   1. Login with test credentials
+#   2. Navigate: More → Profile → Verify PAN
+#   3. Enter a valid PAN number
+#   4. Verify PAN verification success
+#   5. Test invalid PAN validation
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Profile ──────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Profile"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Profile"
+
+# ── 3. Navigate to KYC section ────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      text: "KYC Verification"
+    direction: DOWN
+- tapOn:
+    text: "KYC Verification"
+- waitForAnimationToEnd
+
+# ── 4. Verify PAN screen ──────────────────────────────────────────────────
+- assertVisible:
+    text: "PAN Verification"
+- assertVisible:
+    text: "Verify your PAN to start trading"
+- assertVisible:
+    text: "Enter PAN Number"
+
+# ── 5. Enter valid PAN and submit ─────────────────────────────────────────
+- tapOn:
+    text: "Enter your 10-digit PAN"
+- inputText: "ABCDE1234F"
+- hideKeyboard
+- tapOn:
+    text: "Verify PAN"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# ── 6. Verify success ─────────────────────────────────────────────────────
+- assertVisible:
+    text: "PAN Verified"
+- assertVisible:
+    text: "ABCDE1234F"
+- assertVisible:
+    text: "Verified"
+
+# ── 7. Navigate Back ──────────────────────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "KYC Verification"

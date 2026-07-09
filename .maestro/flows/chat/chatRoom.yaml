@@ -1,0 +1,100 @@
+# =============================================================================
+# Chat Room Flow — Messages & Chat
+# =============================================================================
+# Tests the Chat (Messages) feature:
+#   1. Login with test credentials
+#   2. Navigate: More → Messages
+#   3. Verify Chat Room List screen with "Messages" header
+#   4. Tap on the first visible conversation/room
+#   5. Verify Chat Room screen with messages
+#   6. Type and send a message
+#   7. Verify message appears in the chat
+#   8. Navigate back to Messages list
+#   9. Navigate back to More screen
+# =============================================================================
+
+appId: com.anonymous.Toroloom
+---
+# ── 1. Login ───────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome Back!"
+- tapOn:
+    text: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    text: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "Log In"
+- waitForAnimationToEnd:
+    timeout: 30000
+- tapOn: "Home"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    text: "Good Morning,"
+
+# ── 2. Navigate: More → Messages ──────────────────────────────────────────
+- tapOn: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Messages"
+    direction: DOWN
+- tapOn:
+    text: "Messages"
+- waitForAnimationToEnd
+
+# ── 3. Verify Chat Room List Screen ────────────────────────────────────────
+- assertVisible:
+    text: "Messages"
+
+# Verify subtitle with conversation count
+- assertVisible:
+    text: "conversations"
+
+# ── 4. Tap on First Room Card ──────────────────────────────────────────────
+# Tap on the first room name (e.g., "General" or first in the list)
+- tapOn:
+    text: "General"
+- waitForAnimationToEnd
+
+# ── 5. Verify Chat Room Screen ────────────────────────────────────────────
+# Verify room name visible in header
+- assertVisible:
+    text: "online"
+
+# ── 6. Type and Send a Message ────────────────────────────────────────────
+# Tap the text input field
+- tapOn:
+    text: "Type a message..."
+- inputText: "Hello team! Testing chat from E2E."
+
+# Tap the send button using its testID
+- tapOn:
+    id: "sendMessageBtn"
+- waitForAnimationToEnd
+
+# ── 7. Verify Message Appears ─────────────────────────────────────────────
+- assertVisible:
+    text: "Hello team! Testing chat from E2E."
+
+# ── 8. Navigate Back to Messages List ──────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+# Verify back on Messages list
+- assertVisible:
+    text: "Messages"
+- assertVisible:
+    text: "conversations"
+
+# ── 9. Navigate Back to More Screen ───────────────────────────────────────
+- tapOn:
+    accessibilityLabel: "Go back"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "More"

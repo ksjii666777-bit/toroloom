@@ -7,33 +7,21 @@
  * offline. When connectivity is restored, the queue replays mutations in
  * order so the backend gets synced.
  *
- * Supported mutation types:
- *   - BUY_STOCK     → Place buy order for a stock
- *   - SELL_STOCK    → Place sell order for a holding
- *   - ADD_TO_WATCHLIST    → Add stock to a watchlist
- *   - REMOVE_FROM_WATCHLIST → Remove stock from a watchlist
- *   - CREATE_WATCHLIST    → Create a new watchlist
- *   - DELETE_WATCHLIST    → Delete a watchlist
- *   - MODIFY_ORDER  → Modify an open order
- *   - CANCEL_ORDER  → Cancel an open order
- *
- * Queue lifecycle:
- *   1. Mutation attempted → backend unreachable → enqueue to AsyncStorage
- *   2. Connectivity restored → processAll() replays in FIFO order
- *   3. On success → dequeue (remove from storage)
- *   4. On permanent failure → mark as failed (keep in queue for retry)
+ * Syncing strategies:
+ *   1. processAll() — Individual API calls per mutation (legacy, backward compat)
+ *   2. processViaSyncApi() — Batched via POST /api/sync (delta sync + conflict detection)
  *
  * Usage:
  *   import { offlineMutationQueue } from '../services/offlineMutationQueue';
  *   await offlineMutationQueue.enqueue({ type: 'BUY_STOCK', payload: { ... } });
- *   const pending = await offlineMutationQueue.getCount();
- *   const results = await offlineMutationQueue.processAll();
+ *   const results = await offlineMutationQueue.processViaSyncApi();
  *
  * ============================================================================
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from './api/client';
+import { syncClient, type SyncMutation } from './syncClient';
 import { log } from '../utils/logger';
 
 // ──── Types ────────────────────────────────────────────────────────────────
@@ -59,6 +47,10 @@ export interface QueuedMutation {
   retryCount: number;
   /** Last error message (if any) */
   lastError?: string;
+  /** Client-side version stamp for conflict detection (null if new) */
+  clientVersion?: number | null;
+  /** Entity type for conflict detection */
+  entityType?: string;
 }
 
 export interface SyncResult {
@@ -77,6 +69,36 @@ const MAX_RETRIES = 5;
 
 function generateId(): string {
   return `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+// ──── Entity Type Mapping ──────────────────────────────────────────────────
+
+function getEntityType(mutationType: string): string {
+  switch (mutationType) {
+    case 'BUY_STOCK':
+    case 'SELL_STOCK':
+      return 'position';
+    case 'ADD_TO_WATCHLIST':
+    case 'REMOVE_FROM_WATCHLIST':
+      return 'watchlist_stock';
+    case 'CREATE_WATCHLIST':
+    case 'DELETE_WATCHLIST':
+      return 'watchlist';
+    case 'MODIFY_ORDER':
+    case 'CANCEL_ORDER':
+      return 'order';
+    default:
+      return 'unknown';
+  }
+}
+
+function getEntityId(mutation: QueuedMutation): string | null {
+  const payload = mutation.payload;
+  if (payload.orderId) return payload.orderId as string;
+  if (payload.watchlistId && mutation.type === 'DELETE_WATCHLIST') return payload.watchlistId as string;
+  if (payload.watchlistId && mutation.type === 'ADD_TO_WATCHLIST') return `${payload.watchlistId}:${payload.symbol}`;
+  if (payload.watchlistId && mutation.type === 'REMOVE_FROM_WATCHLIST') return `${payload.watchlistId}:${payload.symbol}`;
+  return null;
 }
 
 // ──── Queue Operations ─────────────────────────────────────────────────────
@@ -198,6 +220,7 @@ export const offlineMutationQueue = {
       payload,
       enqueuedAt: new Date().toISOString(),
       retryCount: 0,
+      entityType: getEntityType(type),
     };
     queue.push(mutation);
     await writeQueue(queue);
@@ -220,13 +243,124 @@ export const offlineMutationQueue = {
   },
 
   /**
-   * Process all pending mutations in FIFO order.
+   * Process all pending mutations via the sync API (POST /api/sync).
+   *
+   * Uses the delta sync client which batches mutations, detects conflicts
+   * server-side, and returns delta changes. This is the preferred sync
+   * method as it supports conflict detection and minimal data transfer.
+   *
+   * Falls back to individual API calls (processAll) if the sync API is
+   * unreachable (network error) to maintain backward compatibility.
+   *
+   * Returns an array of SyncResult (success/failure per mutation).
+   */
+  async processViaSyncApi(): Promise<SyncResult[]> {
+    const queue = await readQueue();
+    if (queue.length === 0) return [];
+
+    // 1. Convert to SyncMutation format for the sync client
+    const syncMutations: SyncMutation[] = queue.map((m) => ({
+      mutationId: m.id,
+      type: m.type,
+      entityType: m.entityType || getEntityType(m.type),
+      entityId: getEntityId(m),
+      payload: m.payload,
+      clientVersion: m.clientVersion ?? null,
+      enqueuedAt: m.enqueuedAt,
+    }));
+
+    // 2. Send via sync API
+    let result;
+    try {
+      result = await syncClient.syncMutations(syncMutations);
+    } catch (err: any) {
+      // Sync API unreachable — fall back to individual API calls
+      log.info('[MutationQueue] Sync API unreachable, falling back to processAll');
+      return this.processAll();
+    }
+
+    // 3. Process results
+    const results: SyncResult[] = [];
+    const remaining: QueuedMutation[] = [];
+
+    for (const mutation of queue) {
+      const applied = result.applied.find((a) => a.mutationId === mutation.id);
+      const conflict = result.conflicts.find((c) => c.mutationId === mutation.id);
+      const failed = result.failed.find((f) => f.mutationId === mutation.id);
+
+      if (applied) {
+        // Success — remove from queue
+        results.push({ success: true, mutationId: mutation.id, type: mutation.type });
+      } else if (conflict) {
+        // Conflict — keep for retry up to MAX_RETRIES
+        mutation.retryCount += 1;
+        mutation.lastError = conflict.error;
+
+        if (mutation.retryCount >= MAX_RETRIES) {
+          results.push({
+            success: false,
+            mutationId: mutation.id,
+            type: mutation.type,
+            error: `Max retries (${MAX_RETRIES}) exceeded for conflict: ${conflict.error}`,
+          });
+        } else {
+          remaining.push(mutation);
+          results.push({
+            success: false,
+            mutationId: mutation.id,
+            type: mutation.type,
+            error: conflict.error,
+          });
+        }
+      } else if (failed) {
+        // Failed — retry or skip based on retry count
+        mutation.retryCount += 1;
+        mutation.lastError = failed.error;
+
+        if (mutation.retryCount >= MAX_RETRIES) {
+          results.push({
+            success: false,
+            mutationId: mutation.id,
+            type: mutation.type,
+            error: `Max retries (${MAX_RETRIES}) exceeded: ${failed.error}`,
+          });
+        } else {
+          remaining.push(mutation);
+          results.push({
+            success: false,
+            mutationId: mutation.id,
+            type: mutation.type,
+            error: failed.error,
+          });
+        }
+      } else {
+        // Unknown — keep for retry
+        remaining.push(mutation);
+        results.push({
+          success: false,
+          mutationId: mutation.id,
+          type: mutation.type,
+          error: 'Unknown sync result',
+        });
+      }
+    }
+
+    await writeQueue(remaining);
+    this._notifyListeners(results);
+    return results;
+  },
+
+  /**
+   * Process all pending mutations in FIFO order via individual API calls.
+   * Original method kept for backward compatibility.
+   *
    * Returns an array of results (success/failure per mutation).
    *
    * - Successful mutations are removed from the queue.
    * - Failed mutations (network error) stay in the queue for retry.
    * - Permanently failed mutations (4xx) are removed with an error status.
-   */ async processAll(): Promise<SyncResult[]> {
+   */
+  async processAll(): Promise<SyncResult[]> {
     const queue = await readQueue();
     if (queue.length === 0) return [];
 

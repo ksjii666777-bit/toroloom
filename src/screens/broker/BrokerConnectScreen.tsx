@@ -28,7 +28,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
+import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { api } from '../../services/api';
@@ -202,7 +203,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
   const showConnectedSuccess = useCallback(() => {
     setShowSuccess(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    notificationAsync(NotificationFeedbackType.Success);
 
     // Clear any previous success timer
     if (successTimerRef.current) {
@@ -230,13 +231,13 @@ export default function BrokerConnectScreen({ navigation }: any) {
     setSelectedBroker(broker);
     setCredentials({ apiKey: '', apiSecret: '', accessToken: '', clientId: '', password: '', totp: '' });
     setShowCredentialsModal(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic(ImpactFeedbackStyle.Medium);
   }, []);
 
   // ── Open OAuth WebView (Zerodha) ───────────────────────────
   const openOAuthWebView = useCallback(async (broker: BrokerMeta) => {
     setSelectedBroker(broker);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic(ImpactFeedbackStyle.Medium);
 
     try {
       const data = await api.get<any>(`/broker-link/oauth-url?brokerType=${broker.type}`);
@@ -320,7 +321,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
           onPress: async () => {
             try {
               await api.post('/broker-link/disconnect');
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+              notificationAsync(NotificationFeedbackType.Warning);
               loadStatus();
             } catch (err: any) {
               Alert.alert('Error', err.message || 'Failed to disconnect');

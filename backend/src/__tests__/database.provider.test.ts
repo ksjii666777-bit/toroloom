@@ -77,6 +77,8 @@ describe('DatabaseProvider — getDb (writer pool)', () => {
     vi.resetModules();
     mockControl.instances.length = 0;
     mockPoolConstructorArgs.length = 0;
+    // Ensure real timers — prevents fake-timer leakage from other test files
+    vi.useRealTimers();
     // Reset connect to default (success)
     mockControl.poolConnect.mockResolvedValue({ release: vi.fn() });
     vi.stubEnv('NODE_ENV', 'test');
@@ -84,6 +86,7 @@ describe('DatabaseProvider — getDb (writer pool)', () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.useRealTimers();
   });
 
   // ─────────────────────────────────────────────────────────────────────
@@ -112,6 +115,7 @@ describe('DatabaseProvider — getDb (writer pool)', () => {
 
   describe('when connection succeeds', () => {
     beforeEach(() => {
+      vi.useRealTimers();
       vi.stubEnv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/testdb');
     });
 
@@ -161,6 +165,7 @@ describe('DatabaseProvider — getDb (writer pool)', () => {
 
   describe('retry logic on connection failure', () => {
     beforeEach(() => {
+      vi.useRealTimers();
       vi.stubEnv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/testdb');
     });
 
@@ -251,11 +256,13 @@ describe('DatabaseProvider — getReader (reader pool)', () => {
     vi.resetModules();
     mockControl.instances.length = 0;
     mockControl.poolConnect.mockResolvedValue({ release: vi.fn() });
+    vi.useRealTimers();
     vi.stubEnv('NODE_ENV', 'test');
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.useRealTimers();
   });
 
   describe('when DATABASE_URL_READER is not set', () => {
@@ -328,11 +335,13 @@ describe('DatabaseProvider — query / queryReader', () => {
     vi.resetModules();
     mockControl.instances.length = 0;
     mockControl.poolConnect.mockResolvedValue({ release: vi.fn() });
+    vi.useRealTimers();
     vi.stubEnv('NODE_ENV', 'test');
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.useRealTimers();
   });
 
   describe('query', () => {
@@ -396,11 +405,13 @@ describe('DatabaseProvider — getDiagnostics', () => {
     vi.resetModules();
     mockControl.instances.length = 0;
     mockControl.poolConnect.mockResolvedValue({ release: vi.fn() });
+    vi.useRealTimers();
     vi.stubEnv('NODE_ENV', 'test');
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.useRealTimers();
   });
 
   it('should report not configured when DATABASE_URL is missing', async () => {
@@ -459,12 +470,14 @@ describe('DatabaseProvider — shutdownDb', () => {
     vi.resetModules();
     mockControl.instances.length = 0;
     mockControl.poolConnect.mockResolvedValue({ release: vi.fn() });
+    vi.useRealTimers();
     vi.stubEnv('NODE_ENV', 'test');
     vi.stubEnv('DATABASE_URL', 'postgresql://user:pass@host:5432/testdb');
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.useRealTimers();
   });
 
   it('should shut down writer pool gracefully', async () => {

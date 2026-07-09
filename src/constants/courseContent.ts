@@ -2,7 +2,7 @@ import { Course, Lesson } from '../types';
 
 // =============================================================================
 // TOROLOOM — Real Educational Content
-// 6 courses, 40+ lessons with detailed content, quizzes, and key takeaways
+// 14 courses, 90+ lessons with detailed content, quizzes, and key takeaways
 // =============================================================================
 
 export const realCourses: Course[] = [
@@ -84,6 +84,118 @@ export const realCourses: Course[] = [
     rating: 4.8,
     enrolledCount: 12400,
   },
+  // ─── New Course 7: Personal Finance 101 ───
+  {
+    id: 'c7',
+    title: 'Personal Finance 101',
+    description: 'Master your personal finances — from budgeting and saving to tax planning and retirement. Build a solid financial foundation for life.',
+    thumbnail: '🏦',
+    duration: '4 hours',
+    lessons: 6,
+    progress: 0,
+    level: 'beginner',
+    category: 'Investing',
+    rating: 4.7,
+    enrolledCount: 19800,
+  },
+  // ─── New Course 8: Trading Psychology Mastery ───
+  {
+    id: 'c8',
+    title: 'Trading Psychology Mastery',
+    description: 'Understand the psychological traps that destroy traders and learn mental frameworks used by top performers. Master fear, greed, and discipline.',
+    thumbnail: '🧘',
+    duration: '5 hours',
+    lessons: 6,
+    progress: 0,
+    level: 'intermediate',
+    category: 'Psychology',
+    rating: 4.9,
+    enrolledCount: 11200,
+  },
+  // ─── New Course 9: Portfolio Management & Asset Allocation ───
+  {
+    id: 'c9',
+    title: 'Portfolio Management & Asset Allocation',
+    description: 'Learn professional portfolio management techniques including modern portfolio theory, asset allocation strategies, and rebalancing methods used by wealth managers.',
+    thumbnail: '📊',
+    duration: '6 hours',
+    lessons: 6,
+    progress: 0,
+    level: 'advanced',
+    category: 'Investing',
+    rating: 4.8,
+    enrolledCount: 8900,
+  },
+  // ─── New Course 10: Introduction to Derivatives ───
+  {
+    id: 'c10',
+    title: 'Introduction to Derivatives',
+    description: 'A comprehensive introduction to futures, options, swaps, and other derivative instruments. Understand leverage, hedging, and speculation.',
+    thumbnail: '📐',
+    duration: '5 hours',
+    lessons: 6,
+    progress: 0,
+    level: 'intermediate',
+    category: 'Derivatives',
+    rating: 4.6,
+    enrolledCount: 14500,
+  },
+  // ─── New Course 11: Behavioral Finance ───
+  {
+    id: 'c11',
+    title: 'Behavioral Finance',
+    description: 'Explore how psychology and cognitive biases affect financial decisions. Learn to recognize and overcome common mental traps in investing.',
+    thumbnail: '🧠',
+    duration: '4 hours',
+    lessons: 6,
+    progress: 0,
+    level: 'intermediate',
+    category: 'Psychology',
+    rating: 4.7,
+    enrolledCount: 7600,
+  },
+  // ─── New Course 12: IPO & FPO Investing ───
+  {
+    id: 'c12',
+    title: 'IPO & FPO Investing',
+    description: 'Complete guide to investing in Initial Public Offerings and Follow-on Public Offers. Learn to analyze IPO prospects, GMP, and listing strategies.',
+    thumbnail: '🚀',
+    duration: '4 hours',
+    lessons: 6,
+    progress: 0,
+    level: 'beginner',
+    category: 'Investing',
+    rating: 4.5,
+    enrolledCount: 16300,
+  },
+  // ─── New Course 13: Advanced Options Strategies ───
+  {
+    id: 'c13',
+    title: 'Advanced Options Strategies',
+    description: 'Master complex options strategies including spreads, combinations, and volatility trading. Learn how professional firms trade options for consistent returns.',
+    thumbnail: '🎯',
+    duration: '8 hours',
+    lessons: 6,
+    progress: 0,
+    level: 'advanced',
+    category: 'Derivatives',
+    rating: 4.9,
+    enrolledCount: 5400,
+  },
+  // ─── New Course 14: Tax Planning for Investors ───
+  {
+    id: 'c14',
+    title: 'Tax Planning for Investors',
+    description: 'Optimize your tax liability through smart investment decisions. Learn about capital gains, tax harvesting, Section 80C, and advanced tax strategies.',
+    thumbnail: '📋',
+    duration: '4 hours',
+    lessons: 6,
+    progress: 0,
+    level: 'intermediate',
+    category: 'Fundamentals',
+    rating: 4.6,
+    enrolledCount: 12100,
+  },
 ];
 
 export const realLessons: Lesson[] = [
@@ -92,6 +204,22 @@ export const realLessons: Lesson[] = [
     id: 'l1',
     courseId: 'c1',
     title: 'What is the Stock Market?',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    videoThumbnail: '📈',
+    transcript: [
+      { startTime: 0, endTime: 5, text: 'Welcome to the Stock Market Basics course.', speaker: 'Instructor' },
+      { startTime: 5, endTime: 10, text: 'The stock market is a marketplace where buyers and sellers trade shares of publicly listed companies.', speaker: 'Instructor' },
+      { startTime: 10, endTime: 15, text: 'When you buy a stock, you are buying a small piece of ownership in that company.', speaker: 'Instructor' },
+      { startTime: 15, endTime: 20, text: 'This ownership entitles you to a portion of the company assets and profits.', speaker: 'Instructor' },
+      { startTime: 20, endTime: 25, text: 'The concept of stock markets dates back to the 1600s.', speaker: 'Instructor' },
+      { startTime: 25, endTime: 30, text: 'The Dutch East India Company was the first to issue shares to fund their voyages.', speaker: 'Instructor' },
+      { startTime: 30, endTime: 35, text: 'Today, stock markets exist in virtually every country around the world.', speaker: 'Instructor' },
+      { startTime: 35, endTime: 40, text: 'The largest are the NYSE, Nasdaq, and in India, the NSE and BSE.', speaker: 'Instructor' },
+      { startTime: 40, endTime: 45, text: 'Why do companies list on stock markets?', speaker: 'Instructor' },
+      { startTime: 45, endTime: 50, text: 'The primary reason is to raise capital for growth and expansion.', speaker: 'Instructor' },
+      { startTime: 50, endTime: 55, text: 'By selling shares through an IPO, companies access funds from thousands of investors.', speaker: 'Instructor' },
+      { startTime: 55, endTime: 60, text: 'Let us now look at how you can start your investment journey.', speaker: 'Instructor' },
+    ],
     content: `The stock market is a marketplace where buyers and sellers trade shares of publicly listed companies. When you buy a stock, you are buying a small piece of ownership in that company. This ownership entitles you to a portion of the company's assets and profits.
 
 The concept of stock markets dates back to the 1600s when the Dutch East India Company issued shares to fund voyages. Today, stock markets exist in virtually every country, with the largest being the New York Stock Exchange (NYSE), Nasdaq, and in India, the National Stock Exchange (NSE) and Bombay Stock Exchange (BSE).
@@ -2541,4 +2669,669 @@ A successful trader is not someone who never loses — it is someone who manages
       ],
     },
   },
+
+// ═══════════════════════════════════════════════════════════════════════
+  // COURSE 7: Personal Finance 101 (6 lessons — l45–l50)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'l45',
+    courseId: 'c7',
+    title: 'Budgeting & Expense Tracking',
+    content: `Budgeting is the foundation of personal finance. Without knowing where your money goes, you cannot build wealth effectively.\n\nThe 50/30/20 Rule — The most popular budgeting framework:\n• 50% of income goes to Needs — Rent, groceries, utilities, insurance, minimum loan payments\n• 30% goes to Wants — Dining out, entertainment, shopping, travel\n• 20% goes to Savings & Investments — Emergency fund, retirement, stocks, mutual funds\n\nTracking Expenses — Use apps or spreadsheets to track every expense for 30 days. Categorize them (Food, Transport, Entertainment, etc.) and identify patterns. Most people are surprised to discover how much they spend on non-essentials.\n\nZero-Based Budgeting — Assign every rupee of income a job. Income − Expenses = 0 at the end of the month. Every rupee is allocated to a specific category — savings, bills, investments, or discretionary spending.\n\nEmergency Fund — Before investing, build an emergency fund covering 3–6 months of expenses. Keep this in a liquid fund or high-interest savings account. This fund protects you from having to sell investments during a market downturn.\n\nDebt Management — High-interest debt (credit cards, personal loans) destroys wealth. Prioritize paying off debt with interest rates above 12% before investing aggressively. The debt avalanche method (pay highest interest first) saves the most money.`,
+    duration: '20 min',
+    completed: false,
+    quiz: {
+      id: 'q17',
+      title: 'Budgeting Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q17_1', question: 'What percentage of income should go to savings according to the 50/30/20 rule?', options: ['10%', '20%', '30%', '40%'], correctAnswer: 1, explanation: 'The 50/30/20 rule allocates 20% of income to savings and investments.' },
+        { id: 'q17_2', question: 'How many months of expenses should an emergency fund cover?', options: ['1-2 months', '3-6 months', '6-12 months', '12-18 months'], correctAnswer: 1, explanation: 'Financial experts recommend 3-6 months of living expenses in your emergency fund.' },
+      ],
+    },
+  },
+  {
+    id: 'l46',
+    courseId: 'c7',
+    title: 'Understanding Credit Score',
+    content: `Your credit score (CIBIL score in India) is a three-digit number that determines your creditworthiness. It affects your ability to get loans, credit cards, and even rent apartments.\n\nCIBIL Score Range:\n• 750–900: Excellent — Best loan terms and lowest interest rates\n• 650–749: Good — Most loans approved at competitive rates\n• 550–649: Fair — Higher interest rates, stricter terms\n• Below 550: Poor — Loan applications likely rejected\n\nHow Credit Score is Calculated:\n• Payment History (35%) — Do you pay bills on time? Late payments hurt your score\n• Credit Utilization (30%) — How much of your available credit are you using? Keep below 30%\n• Credit History Length (15%) — Longer history = better score\n• New Credit Inquiries (10%) — Too many loan applications in short period = negative\n• Credit Mix (10%) — Having different types of credit (home loan, credit card, personal loan) helps\n\nHow to Improve Your Credit Score:\n1. Pay all bills on time — Set up auto-pay for minimum amounts\n2. Keep credit utilization below 30% — If your limit is ₹1L, don't carry a balance above ₹30K\n3. Don't close old credit cards — They help your credit history length\n4. Limit new credit applications — Each application causes a small, temporary dip\n5. Check your credit report annually — Report errors to the credit bureau for correction\n\nCommon Myths:\n• Checking your own score reduces it — False, soft inquiries don't affect your score\n• You need to carry a balance to build credit — False, paying in full each month is best\n• Closing a card removes its history — False, closed cards stay on your report for 7 years`,
+    duration: '20 min',
+    completed: false,
+  },
+  {
+    id: 'l47',
+    courseId: 'c7',
+    title: 'Insurance Planning',
+    content: `Insurance is a crucial but often overlooked part of personal finance. It protects you and your family from financial catastrophe.\n\nTypes of Insurance:\n\nTerm Life Insurance — Pure protection cover. If you pass away, your family receives the sum assured. This is the most cost-effective form of life insurance. A rule of thumb: cover 10–15x your annual income.\n\nHealth Insurance — Medical costs are rising at 15% annually. A good health insurance policy covers hospitalization, pre-existing conditions (after waiting period), and critical illnesses. Aim for a cover of at least ₹5–10 lakhs.\n\n• Individual vs Family Floater — Family floater covers all members under one sum. Works well for couples or small families.\n• Top-up Plans — Buy a base plan (₹5L) + a super top-up (₹25L) for cost-effective high coverage.\n\nDisability Insurance — If you become disabled and cannot work, this replaces your income. Often underappreciated but extremely important.\n\nTerm Insurance vs ULIP:\n• Term Insurance: Pure protection, low premium, high cover. The best option for most people.\n• ULIP: Combines insurance with investment. Higher fees, lower cover. Generally not recommended — buy term insurance + invest separately.\n\nCommon Mistakes:\n• Buying insurance as an investment product — Insurance and investing should be separate\n• Underinsuring — Having too little cover defeats the purpose\n• Not disclosing pre-existing conditions — Leads to claim rejection\n• Lapsing policies — Letting policies lapse due to non-payment of premiums`,
+    duration: '20 min',
+    completed: false,
+    quiz: {
+      id: 'q18',
+      title: 'Insurance Planning Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q18_1', question: 'What is the recommended life insurance cover as a multiple of annual income?', options: ['2-3x', '5-7x', '10-15x', '20-25x'], correctAnswer: 2, explanation: 'Financial advisors recommend life insurance cover of 10-15 times your annual income to adequately protect your family.' },
+        { id: 'q18_2', question: 'Why are ULIPs generally not recommended?', options: ['They provide no insurance cover', 'They have high fees and low returns compared to term + separate investing', 'They are not regulated', 'They require a medical exam'], correctAnswer: 1, explanation: 'ULIPs combine insurance with investment but typically have high fees and underperform the strategy of buying term insurance and investing separately.' },
+      ],
+    },
+  },
+  {
+    id: 'l48',
+    courseId: 'c7',
+    title: 'Retirement Planning',
+    content: `Retirement planning is about ensuring you have enough money to maintain your lifestyle when you stop working. The earlier you start, the easier it is.\n\nThe Power of Starting Early — A 25-year-old investing ₹10,000/month at 12% returns will have ₹3.52 crores at age 60. If they start at 35, the same investment yields only ₹1.12 crores. The 10-year delay costs 68% of the final corpus!\n\nRetirement Accounts in India:\n• Employee Provident Fund (EPF) — Mandatory for salaried employees. Employee contributes 12% of basic salary, employer matches 12%. Currently earns ~8.15% interest tax-free.\n• National Pension System (NPS) — Voluntary retirement account with tax benefits. Invests in equity, corporate bonds, and government securities. 60% can be withdrawn at maturity (tax-free), 40% must buy annuity.\n• Public Provident Fund (PPF) — 15-year lock-in, currently 7.1% interest, tax-free returns. Maximum investment ₹1.5L/year.\n• Voluntary Provident Fund (VPF) — Additional contributions above the 12% EPF requirement. Same interest rate and tax benefits.\n\nHow Much Do You Need? — The 4% Rule suggests that if you withdraw 4% of your retirement corpus annually, your money will last 30+ years. So if you need ₹50,000/month (₹6L/year), you need a corpus of ₹6L / 0.04 = ₹1.5 crores.\n\nInflation Adjustment — Assume 6% inflation. If you need ₹50,000/month today, you will need ₹1.6L/month in 20 years. Always inflation-adjust your retirement calculations.\n\nSteps to Retirement Planning:\n1. Calculate your target corpus using a retirement calculator\n2. Determine required monthly investment using SIP calculator\n3. Choose appropriate asset allocation (equity-heavy when young, shift to debt as you near retirement)\n4. Automate your investments — set up auto-debit from your bank account\n5. Review and rebalance annually`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l49',
+    courseId: 'c7',
+    title: 'Tax Saving Investments',
+    content: `Section 80C of the Income Tax Act allows deductions of up to ₹1.5 lakh per year on specified investments and expenses. Smart tax planning can significantly reduce your tax liability.\n\nPopular 80C Options:\n\nEmployee Provident Fund (EPF) — Already deducted from salary. Very safe, decent returns (~8%). Included in 80C automatically.\n\nPublic Provident Fund (PPF) — 15-year lock-in, government-backed. Interest rate revised quarterly. Currently ~7.1%. Interest is tax-free.\n\nEquity Linked Savings Scheme (ELSS) — Mutual fund with 3-year lock-in. Highest return potential among 80C options. Tax-free gains (LTCG up to ₹1L/year). Shortest lock-in period.\n\nNational Savings Certificate (NSC) — 5-year fixed deposit with Post Office. ~7.7% interest but taxable. Very safe.\n\nLife Insurance Premiums — Premiums paid for term insurance qualify for 80C deduction.\n\nTax-Saving Fixed Deposits — 5-year lock-in with banks. Interest is taxable. Lower returns than ELSS typically.\n\nOther Tax Deductions:\n• Section 80D — Health insurance premiums. Up to ₹25,000 for self/family, ₹50,000 for senior citizens. Additional ₹25,000 for parents.\n• Section 24(b) — Home loan interest. Up to ₹2 lakh on self-occupied property.\n• Section 80E — Education loan interest. No upper limit, available for 8 years.\n• Section 80G — Donations to approved charities. 50% or 100% deduction depending on the charity.\n• Section 80TTA — Savings account interest. Up to ₹10,000 deduction.\n\nNew vs Old Tax Regime — Under the new regime (FY25-26), lower tax rates but most deductions (80C, 80D) are not available. Compare which regime benefits you more:\n• Old regime: More deductions, higher rates. Better for people with home loans, insurance, heavy 80C investments.\n• New regime: Lower rates, fewer deductions. Better for people with minimal investments and deductions.`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q19',
+      title: 'Tax Saving Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q19_1', question: 'What is the maximum deduction allowed under Section 80C?', options: ['₹1 lakh', '₹1.5 lakh', '₹2 lakh', '₹2.5 lakh'], correctAnswer: 1, explanation: 'Section 80C allows tax deductions of up to ₹1.5 lakh per financial year on specified investments and expenses.' },
+        { id: 'q19_2', question: 'Which 80C investment has the shortest lock-in period?', options: ['PPF (15 years)', 'NSC (5 years)', 'ELSS (3 years)', 'Tax-saving FD (5 years)'], correctAnswer: 2, explanation: 'ELSS (Equity Linked Savings Scheme) mutual funds have the shortest lock-in period of just 3 years among 80C options.' },
+      ],
+    },
+  },
+  {
+    id: 'l50',
+    courseId: 'c7',
+    title: 'Building Generational Wealth',
+    content: `Generational wealth is about creating assets that benefit not just you, but your children and grandchildren. It requires discipline, patience, and a long-term perspective.\n\nKey Principles:\n\n1. Live Below Your Means — The simplest wealth-building strategy. Earn more than you spend and invest the difference. Warren Buffett still lives in the house he bought in 1958.\n\n2. Invest Early and Consistently — Time is the single most powerful factor in wealth creation. A small amount invested consistently over 30–40 years grows exponentially.\n\n3. Own Productive Assets — True wealth comes from owning assets that produce value: businesses, stocks, real estate, intellectual property. Avoid assets that only consume money (luxury cars, expensive gadgets).\n\n4. Use Compounding — Reinvest all returns. Let your money work for you. At 12% returns, your money doubles every 6 years. Over 30 years, ₹1 invested grows to ₹30.\n\n5. Diversify — Don't put all your eggs in one basket. Spread investments across equities, debt, real estate, gold, and other asset classes.\n\n6. Minimize Taxes — Optimize your tax strategy legally. Use 80C, 80D, and other deductions. Hold investments long-term for lower tax rates.\n\nTeaching Financial Literacy to Children:\n• Give them an allowance and teach them to budget\n• Open a minor savings account and teach them about interest\n• Show them how a SIP works with small amounts\n• Involve them in family financial discussions (age-appropriate)\n• Lead by example — children learn from watching their parents`,
+    duration: '25 min',
+    completed: false,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COURSE 8: Trading Psychology Mastery (6 lessons — l51–l56)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'l51',
+    courseId: 'c8',
+    title: 'The Psychology of Winning Traders',
+    content: `The difference between successful and unsuccessful traders is rarely their strategy — it is their psychology. Studies show that trading psychology accounts for 80% of trading success, while strategy accounts for only 20%.\n\nTraits of Winning Traders:\n1. Discipline — They follow their system even when it is uncomfortable. They do not deviate from their rules based on emotions.\n2. Patience — They wait for high-probability setups. They do not force trades when the market is not presenting opportunities.\n3. Emotional Detachment — They treat trading as a business, not a gamble. They do not get euphoric after wins or depressed after losses.\n4. Acceptance of Uncertainty — No trade is guaranteed. They accept that losses are part of the business.\n5. Continuous Learning — They treat every trade (win or lose) as a learning opportunity.\n6. Process-Oriented — They focus on executing their process correctly, not on the outcome of any single trade.\n\nThe Trader\'s Mindset:\n• Think in probabilities — A good trade can lose money. A bad trade can make money. The quality of your decision-making determines long-term success.\n• Focus on risk first — Before thinking about how much you can make, decide how much you are willing to lose.\n• Keep a trading journal — Write down every trade, including your emotional state, reasoning, and lessons learned.\n• Review regularly — Analyze your journal to identify patterns: Do you break rules after losses? Do you get overconfident after wins?`,
+    duration: '20 min',
+    completed: false,
+    quiz: {
+      id: 'q20',
+      title: 'Trader Psychology Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q20_1', question: 'What percentage of trading success is attributed to psychology?', options: ['20%', '50%', '80%', '100%'], correctAnswer: 2, explanation: 'Studies indicate that psychology accounts for approximately 80% of trading success, with strategy accounting for only 20%.' },
+        { id: 'q20_2', question: 'What does "thinking in probabilities" mean in trading?', options: ['Always predicting the market direction', 'Accepting that no trade is guaranteed and focusing on having an edge over many trades', 'Using probability theory to calculate exact price targets', 'Making random trades and hoping for the best'], correctAnswer: 1, explanation: 'Thinking in probabilities means accepting that any single trade can lose money, but over many trades, your edge will produce positive results.' },
+      ],
+    },
+  },
+  {
+    id: 'l52',
+    courseId: 'c8',
+    title: 'Fear & Greed in Markets',
+    content: `Fear and greed are the two primary emotions that drive market cycles. Understanding them is essential for maintaining rationality.\n\nThe Market Cycle of Emotions:\n1. Optimism — Market starts rising. You feel hopeful.\n2. Excitement — Prices continue rising. You feel confident.\n3. Thrill — The rally accelerates. You feel euphoric.\n4. Euphoria — Everyone is buying. Greed peaks. This is usually the top.\n5. Anxiety — Prices start falling. You hope it is a temporary dip.\n6. Denial — You refuse to believe the trend has changed.\n7. Fear — Decline accelerates. You start worrying about losses.\n8. Desperation — You cannot take the pain anymore.\n9. Panic — You sell at the worst possible time. This is usually the bottom.\n10. Capitulation — You swear off investing forever.\n11. Despondency — You feel hopeless about markets.\n12. Depression — Market has been down for a while. You have lost interest.\n13. Hope — Market starts recovering. You are skeptical.\n14. Optimism — The cycle begins again.\n\nHow Greed Destroys Traders:\n• Overtrading — Taking too many trades because you want more profits\n• Increasing position size — Adding to winning trades until one loss wipes out months of gains\n• Chasing momentum — Buying after a huge rally because FOMO (Fear Of Missing Out)\n• Holding too long — Not taking profits because you want the absolute top\n• Leverage abuse — Using too much margin to amplify returns, magnifying losses\n\nHow Fear Destroys Traders:\n• Missing opportunities — Not taking good trades because of fear of loss\n• Cutting winners short — Exiting profitable trades too early because of fear of reversal\n• Not pulling the trigger — Analysis paralysis prevents taking action\n• Hesitation — Delaying entry until the move has already happened`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l53',
+    courseId: 'c8',
+    title: 'Cognitive Biases in Trading',
+    content: `Cognitive biases are systematic patterns of thinking that deviate from rational judgment. Recognizing and countering these biases is crucial for trading success.\n\nConfirmation Bias — Seeking information that confirms your existing beliefs while ignoring contradictory evidence.\n• Example: You buy a stock and then only read bullish analyses while ignoring bearish signals.\n• Solution: Actively seek contrary opinions. Before entering a trade, write down why the trade could fail.\n\nAnchoring Bias — Relying too heavily on the first piece of information encountered (the "anchor").\n• Example: You anchor on the price you bought a stock at and refuse to sell below that price.\n• Solution: Focus on current market conditions, not your purchase price. A stock does not know you own it.\n\nRecency Bias — Giving more weight to recent events than to historical patterns.\n• Example: After a few winning trades, you believe you have become invincible — right before a big loss.\n• Solution: Track your performance over 100+ trades. Do not let short-term streaks affect your confidence.\n\nHindsight Bias — Believing after an event that you "knew it all along."\n• Example: After a market crash, you think you knew it was going to happen — but you did not act on that "knowledge."\n• Solution: Record your predictions and reasoning before events, not after. Review your journal honestly.\n\nLoss Aversion — The pain of a loss is psychologically twice as powerful as the pleasure of an equivalent gain.\n• Example: You hold a losing position far too long because closing it feels like admitting failure.\n• Solution: Separate your ego from your trades. A stop-loss is just good business, not failure.\n\nOverconfidence Bias — Overestimating your knowledge, skill, or control over outcomes.\n• Example: After a few successful trades, you increase position sizes and take more risk.\n• Solution: Track your actual win rate and risk-adjusted returns. Compare your performance against a simple buy-and-hold benchmark.\n\nGambler\'s Fallacy — Believing that past events affect future probabilities in independent events.\n• Example: "The market has gone down for 5 days straight, so it must go up tomorrow."\n• Solution: Markets are not a roulette wheel. Trends can persist. Use technical analysis to identify trend changes, not arbitrary counts.\n\nSunk Cost Fallacy — Continuing to invest in a losing position because of the time, money, or effort already invested.\n• Example: Averaging down on a stock that keeps falling because you have already lost so much.\n• Solution: Judge each additional investment on its own merits. Ask: "If I did not already own this, would I buy it today?"`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q21',
+      title: 'Cognitive Biases Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q21_1', question: 'Which bias causes traders to seek information that confirms their existing beliefs?', options: ['Anchoring Bias', 'Confirmation Bias', 'Recency Bias', 'Loss Aversion'], correctAnswer: 1, explanation: 'Confirmation bias is the tendency to seek, interpret, and remember information that confirms your existing beliefs while ignoring contradictory evidence.' },
+        { id: 'q21_2', question: 'How much more powerful is the pain of loss compared to the pleasure of gain?', options: ['Equal', 'Twice as powerful', 'Three times as powerful', 'Five times as powerful'], correctAnswer: 1, explanation: 'Loss aversion research shows the pain of a loss is psychologically about twice as powerful as the pleasure of an equivalent gain.' },
+      ],
+    },
+  },
+  {
+    id: 'l54',
+    courseId: 'c8',
+    title: 'Building Trading Discipline',
+    content: `Discipline is the single most important trait for trading success. It is the ability to follow your rules consistently, especially when emotions are running high.\n\nWhat is Trading Discipline?\n• Following your entry rules — Even when you are excited about a stock that does not meet your criteria\n• Following your exit rules — Taking profits and cutting losses as planned, not based on hope or fear\n• Following your risk management rules — Never risking more than your predetermined maximum\n• Having patience — Waiting for high-probability setups instead of taking every trade\n• Staying focused — Not getting distracted by news, tips, or social media noise\n\nHow to Build Discipline:\n\n1. Create a Trading Plan — Write down every rule of your trading system. Your plan should cover:\n   • What markets/stocks to trade\n   • Entry conditions (specific technical or fundamental criteria)\n   • Exit conditions (profit targets, stop losses, time-based exits)\n   • Position sizing rules\n   • Maximum daily/weekly loss limits\n   • When NOT to trade (news events, after 3 losing trades in a row, etc.)\n\n2. Use Checklists — Before every trade, run through a checklist. Do not enter if any item is unchecked. This forces you to think systematically rather than emotionally.\n\n3. Implement Hard Stops — Use broker-level stop-loss orders that cannot be cancelled. This removes the temptation to "give the trade a little more room."\n\n4. Limit Your Screen Time — Watching charts all day leads to overtrading. Set specific times to check positions and execute trades.\n\n5. Have a Trading Routine — A consistent pre-market, during-market, and post-market routine keeps you grounded and focused.`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l55',
+    courseId: 'c8',
+    title: 'Recovering from Trading Losses',
+    content: `Every trader experiences losses. The difference between successful and unsuccessful traders is how they respond to losses.\n\nThe Stages of Trading Loss:\n1. Denial — "This is just a temporary setback. The market will turn around."\n2. Anger — "The market is rigged! Why did this happen to me?"\n3. Bargaining — "If I can just get back to breakeven, I will never trade again."\n4. Depression — "I am a terrible trader. I will never succeed at this."\n5. Acceptance — "Losses are part of trading. I will learn from this and come back stronger."\n\nThe most dangerous stage is between denial and acceptance — this is where revenge trading happens.\n\nRevenge Trading — The most destructive behavior after a loss:\n• You try to "get even" by taking bigger, riskier trades\n• You abandon your rules and system\n• You double down to recover losses quickly\n• This usually leads to even larger losses\n\nThe Loss Recovery Process:\n\nStep 1: Stop Trading — After a significant loss, step away from the market for at least 24–48 hours. Your judgment is compromised by emotion.\n\nStep 2: Analyze Objectively — Review the losing trade in your journal. Was it a mistake (rule violation) or just a normal loss (system loss)?\n• Rule violation: Identify why you broke the rule and how to prevent it\n• System loss: This is normal. The system does not win every trade\n\nStep 3: Reduce Position Size — After a loss, reduce your position size by 50%. This rebuilds confidence without risking significant capital.\n\nStep 4: Focus on Process — Judge your success by how well you follow your rules, not by P&L. A properly executed losing trade is better than a lucky winning trade.\n\nStep 5: Gradually Return to Normal — After 10–20 properly executed trades with reduced size, return to your normal position sizing.`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q22',
+      title: 'Loss Recovery Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q22_1', question: 'What is revenge trading?', options: ['Trading with a larger account', 'Trying to recover losses by taking bigger, riskier trades without following rules', 'Trading against the market trend', 'Closing all positions and taking a break'], correctAnswer: 1, explanation: 'Revenge trading is the dangerous behavior of trying to recover losses quickly by taking larger, riskier trades — usually abandoning your rules in the process.' },
+        { id: 'q22_2', question: 'What should you do after a significant trading loss?', options: ['Immediately double your position to recover faster', 'Take a 24-48 hour break from trading', 'Ignore it and keep trading', 'Blame the market for your loss'], correctAnswer: 1, explanation: 'After a significant loss, step away from the market for 24-48 hours to let emotions settle before analyzing what went wrong.' },
+      ],
+    },
+  },
+  {
+    id: 'l56',
+    courseId: 'c8',
+    title: 'Creating Your Trading Routine',
+    content: `A structured daily routine helps you stay disciplined, focused, and emotionally balanced. Great traders do not wing it — they have systems for everything.\n\nPre-Market Routine (30–60 minutes before market opens):\n\n1. Review Global Markets — Check US market close, Asian market open, crude oil, dollar index, and gold. These set the context for the Indian market.\n\n2. Check Economic Calendar — Are there any important data releases today (RBI policy, CPI, GDP, etc.)? Avoid trading during high-impact events if you are a new trader.\n\n3. Review Your Positions — Check open positions, upcoming earnings, corporate actions, and news for stocks you hold.\n\n4. Identify Key Levels — Mark support/resistance levels for your watchlist stocks using daily and weekly charts.\n\n5. Plan Your Trades — Write down specific stocks and setups you will watch. Define entry, stop-loss, and target prices.\n\n6. Set Alerts — Place price alerts at your identified levels so you do not have to stare at charts all day.\n\nDuring Market Hours:\n\n1. Execute Your Plan — Take trades that meet your criteria. Do not chase. If you miss a move, let it go.\n\n2. Manage Open Positions — Adjust stops if needed (trailing), take partial profits at targets.\n\n3. Journal Every Trade — Record entry, exit, emotions, and lessons. Update your spreadsheet with trade data.\n\n4. Take Breaks — Step away for 5 minutes every hour. Stretch, hydrate, breathe.\n\n5. Limit Distractions — Turn off news alerts, social media, and chat rooms while trading.\n\nPost-Market Routine (15–30 minutes after close):\n\n1. Review Today\'s Performance — Did you follow your plan? What did you do well? What could you improve?\n\n2. Update Your Journal — Complete entries for all trades. Tag rule violations and emotional states.\n\n3. Analyze Key Charts — Check daily closes for your watchlist. Note any significant technical developments.\n\n4. Prepare for Tomorrow — Identify potential setups for the next day.\n\n5. Practice Gratitude — Write down one thing you learned today, regardless of P&L.`,
+    duration: '30 min',
+    completed: false,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COURSE 9: Portfolio Management & Asset Allocation (6 lessons — l57–l62)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'l57',
+    courseId: 'c9',
+    title: 'Modern Portfolio Theory',
+    content: `Modern Portfolio Theory (MPT), developed by Harry Markowitz in 1952, revolutionized investing by showing that diversification is not just about reducing risk — it can actually improve returns for a given level of risk.\n\nCore Concept — MPT demonstrates that by combining assets that do not move in perfect correlation with each other, you can create a portfolio that has lower risk than any individual asset while maintaining similar returns.\n\nKey MPT Concepts:\n\nExpected Return — The weighted average return of all assets in the portfolio, based on their expected returns and allocation percentages.\n\nRisk (Standard Deviation) — The volatility of the portfolio. MPT measures risk as the standard deviation of returns.\n\nCorrelation — How assets move relative to each other:\n• Correlation = +1: Assets move in perfect lockstep (no diversification benefit)\n• Correlation = 0: Assets have no relationship (maximum diversification benefit)\n• Correlation = -1: Assets move in opposite directions (theoretical ideal)\n\nIn practice, most stocks have correlations of 0.3–0.7 with each other. Combining stocks with bonds (correlation ~0.2) provides strong diversification.\n\nThe Efficient Frontier:\n• A curve showing the optimal portfolios that offer the highest expected return for each level of risk\n• Portfolios on the curve are "efficient" — you cannot get higher returns without taking more risk\n• Portfolios below the curve are "inefficient" — you could get better returns at the same risk\n• The "optimal" portfolio is where the Capital Market Line touches the Efficient Frontier`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q23',
+      title: 'Modern Portfolio Theory Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q23_1', question: 'What does the Efficient Frontier represent?', options: ['The maximum possible returns', 'Optimal portfolios offering the highest return for each risk level', 'The safest possible portfolio', 'Portfolios with zero risk'], correctAnswer: 1, explanation: 'The Efficient Frontier shows portfolios that offer the highest expected return for each level of risk. Portfolios on this curve are "efficient."' },
+        { id: 'q23_2', question: 'What correlation coefficient provides the greatest diversification benefit?', options: ['+1', '0.5', '0', '-1'], correctAnswer: 3, explanation: 'A correlation of -1 provides the maximum diversification benefit because assets move in opposite directions, perfectly offsetting each other\'s volatility.' },
+      ],
+    },
+  },
+  {
+    id: 'l58',
+    courseId: 'c9',
+    title: 'Asset Allocation Strategies',
+    content: `Asset allocation is the most important decision in portfolio management — studies show it determines over 90% of portfolio returns and volatility.\n\nStrategic Asset Allocation — Setting target allocations based on your goals, time horizon, and risk tolerance, then periodically rebalancing back to targets.\n\nCommon Strategic Models:\n\nConservative Portfolio (30% Equity, 70% Debt):\n• Suitable for retirees or investors with < 3-year horizon\n• Expected returns: 6–8% annually\n• Maximum drawdown: ~10%\n• Focus: Capital preservation, regular income\n\nModerate Portfolio (60% Equity, 40% Debt):\n• Suitable for mid-career professionals with 5–10 year horizon\n• Expected returns: 9–12% annually\n• Maximum drawdown: ~25%\n• Focus: Growth with stability\n\nAggressive Portfolio (80% Equity, 15% Debt, 5% Gold):\n• Suitable for young investors with 10+ year horizon\n• Expected returns: 12–15% annually\n• Maximum drawdown: ~40%\n• Focus: Maximum long-term growth`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l59',
+    courseId: 'c9',
+    title: 'Risk Management Frameworks',
+    content: `Professional portfolio managers use sophisticated risk management frameworks to protect capital and optimize risk-adjusted returns.\n\nValue at Risk (VaR) — The maximum loss expected over a specific time period at a given confidence level.\n• Example: "Daily VaR of ₹50,000 at 95% confidence" means there is a 5% chance of losing more than ₹50,000 in a single day\n• Limitations: Does not tell you how much you could lose beyond VaR (the tail risk)\n\nConditional VaR (CVaR / Expected Shortfall) — The average loss beyond the VaR threshold. More useful than VaR because it quantifies tail risk.\n\nDrawdown Analysis — Measuring peak-to-trough decline:\n• Maximum Drawdown: The largest peak-to-trough decline in portfolio value\n• Average Drawdown: The average of all drawdowns in a period\n• Drawdown Duration: How long it takes to recover from peak to previous high`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q24',
+      title: 'Risk Management Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q24_1', question: 'What does Value at Risk (VaR) measure?', options: ['The average return of a portfolio', 'The maximum expected loss at a given confidence level over a specific time period', 'The total portfolio value', 'The correlation between assets'], correctAnswer: 1, explanation: 'VaR measures the maximum loss expected over a specific time period at a given confidence level.' },
+        { id: 'q24_2', question: 'What is the recommended maximum allocation for a single stock in a diversified portfolio?', options: ['15-20%', '10-15%', '5-10%', '20-25%'], correctAnswer: 2, explanation: 'Most financial advisors recommend limiting any single stock to 5-10% of your portfolio to avoid concentration risk.' },
+      ],
+    },
+  },
+  {
+    id: 'l60',
+    courseId: 'c9',
+    title: 'Portfolio Performance Measurement',
+    content: `How do you know if your portfolio is performing well? Raw returns are not enough — you need to measure risk-adjusted returns and compare against appropriate benchmarks.\n\nKey Performance Metrics:\n\nTotal Return — The percentage change in portfolio value including dividends and interest. The simplest but most basic measure.\n\nAnnualized Return — The geometric average return per year. This accounts for compounding and is the most meaningful return measure for multi-year periods.\n\nBenchmark Comparison — Compare your returns against an appropriate benchmark:\n• For an Indian equity portfolio: Nifty 50 or BSE 500\n• For a balanced portfolio: 60% Nifty + 40% CRISIL Bond Index\n• For a debt portfolio: CRISIL Liquid Fund Index\n\nAlpha — The excess return of your portfolio over the benchmark, adjusted for risk. Positive alpha means you are adding value beyond market returns.\n\nSharpe Ratio — Risk-adjusted return measure:\n• Sharpe = (Portfolio Return − Risk-Free Rate) / Portfolio Standard Deviation\n• Higher is better. Above 1 is good, above 2 is excellent`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l61',
+    courseId: 'c9',
+    title: 'Behavioral Portfolio Construction',
+    content: `Traditional portfolio theory assumes investors are rational. Behavioral portfolio construction acknowledges that real investors have emotions, biases, and goals that traditional models do not capture.\n\nGoals-Based Investing — Instead of one optimized portfolio, create separate portfolios for different financial goals:\n• Safety Portfolio (Short-term goals) — Emergency fund, next year\'s vacation, down payment for house. Invest in liquid funds, FDs, savings accounts.\n• Income Portfolio (Medium-term goals) — Children\'s education, home renovation. Invest in balanced funds, short-term bonds, dividend stocks.\n• Growth Portfolio (Long-term goals) — Retirement, wealth creation. Invest in equities, index funds, real estate.\n\nMental Accounting — People treat money differently depending on where it comes from and what it is meant for. A tax refund is spent differently than a salary bonus.\n\nHome Bias — The tendency to invest disproportionately in domestic stocks. Indian investors often have 100% of their equity portfolio in Indian stocks when some international diversification would reduce risk.`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l62',
+    courseId: 'c9',
+    title: 'Rebalancing & Tax Harvesting',
+    content: `Rebalancing and tax harvesting are two advanced portfolio management techniques that can add significant value over time.\n\nWhy Rebalance?\n• Over time, your portfolio drifts from its target allocation as some assets outperform others\n• After a strong stock market rally, your equity allocation might be 75% instead of the target 60%\n• Rebalancing brings you back to target risk levels\n\nRebalancing Methods:\n\n1. Calendar Rebalancing — Rebalance every 6 or 12 months regardless of drift. Simple, predictable, low transaction costs.\n\n2. Threshold Rebalancing — Rebalance when any asset class exceeds a threshold (e.g., 5% absolute or 20% relative deviation from target). More responsive but requires monitoring.`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q25',
+      title: 'Rebalancing & Tax Harvesting Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q25_1', question: 'What is the primary benefit of portfolio rebalancing?', options: ['Maximizing short-term returns', 'Selling high and buying low to maintain target risk levels', 'Minimizing transaction costs', 'Avoiding dividend taxes'], correctAnswer: 1, explanation: 'Rebalancing forces you to sell assets that have become overvalued and buy those that have become undervalued, maintaining your target risk levels.' },
+        { id: 'q25_2', question: 'In India, can unused long-term capital losses be carried forward?', options: ['No, losses expire at year-end', 'Yes, for up to 8 assessment years', 'Yes, indefinitely', 'Only short-term losses can be carried forward'], correctAnswer: 1, explanation: 'In India, unused capital losses can be carried forward for up to 8 assessment years.' },
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COURSE 10: Introduction to Derivatives (6 lessons — l63–l68)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'l63',
+    courseId: 'c10',
+    title: 'What are Derivatives?',
+    content: `Derivatives are financial instruments whose value is derived from an underlying asset. They are powerful tools for hedging, speculation, and risk management.\n\nWhat Makes a Derivative? — The value of a derivative contract depends on the price movement of something else — a stock, index, commodity, currency, or even interest rate.\n\nTypes of Derivatives:\n\n1. Forwards — Customized contracts between two parties to buy/sell an asset at a future date at a predetermined price. Over-the-counter (OTC), not standardized, counterparty risk exists.`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q26',
+      title: 'Derivatives Basics Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q26_1', question: 'What is a derivative?', options: ['A direct investment in a company', 'A financial instrument whose value is derived from an underlying asset', 'A type of savings account', 'A government bond'], correctAnswer: 1, explanation: 'A derivative is a financial instrument whose value is derived from the price movement of an underlying asset.' },
+        { id: 'q26_2', question: 'What is the key difference between futures and forwards?', options: ['Futures have higher returns', 'Futures are standardized and exchange-traded; forwards are customized OTC contracts', 'Forwards have no expiry', 'Futures are only for commodities'], correctAnswer: 1, explanation: 'Futures are standardized contracts traded on exchanges, while forwards are customized OTC agreements.' },
+      ],
+    },
+  },
+  {
+    id: 'l64',
+    courseId: 'c10',
+    title: 'Futures Trading',
+    content: `Futures contracts are exchange-traded agreements to buy or sell an asset at a predetermined price on a future date.\n\nHow Futures Work:\n• Buyer agrees to buy the asset at expiry at the agreed price\n• Seller agrees to deliver the asset at expiry at the agreed price\n• Most futures positions are closed before expiry (squaring off) rather than settled physically\n\nKey Terminology:\n\nContract Size — The quantity of the underlying asset per contract. For Nifty 50 futures, one contract is 50 units of Nifty.\n\nExpiry — The last trading day of the contract. In India, futures expire on the last Thursday of the month.`,
+    duration: '30 min',
+    completed: false,
+  },
+  {
+    id: 'l65',
+    courseId: 'c10',
+    title: 'Options Strategies for Beginners',
+    content: `Options offer more flexibility than futures because the buyer has limited risk. Here are the foundational options strategies every trader should know.\n\nLong Call — Buy a call option when you expect the price to rise significantly.\n• Maximum Loss: Premium paid\n• Maximum Profit: Unlimited (theoretically)\n• Breakeven: Strike + Premium\n• Best when: Expected sharp move up, high volatility`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q27',
+      title: 'Options Strategies Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q27_1', question: 'What is the maximum loss on a long call option?', options: ['Unlimited', 'The premium paid', 'The strike price', 'The margin required'], correctAnswer: 1, explanation: 'The maximum loss on a long call is limited to the premium paid.' },
+        { id: 'q27_2', question: 'What is a bull call spread?', options: ['Buying two call options at the same strike', 'Buying a lower strike call and selling a higher strike call', 'Selling a call option against owned stock', 'Buying a call and a put at the same strike'], correctAnswer: 1, explanation: 'A bull call spread involves buying a lower strike call and selling a higher strike call.' },
+      ],
+    },
+  },
+  {
+    id: 'l66',
+    courseId: 'c10',
+    title: 'Understanding Margin & Leverage',
+    content: `Margin and leverage are powerful tools that amplify both gains and losses. Understanding them is essential before trading derivatives.\n\nWhat is Margin? — Margin is the amount of money you need to deposit with your broker to open and maintain a leveraged position.\n\nTypes of Margin:\n\nInitial Margin (IM) — The minimum deposit required to open a position.\nExposure Margin — Additional margin collected to cover extreme price movements.`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l67',
+    courseId: 'c10',
+    title: 'Hedging with Derivatives',
+    content: `Hedging is the primary reason derivatives were created — to transfer risk from those who want to avoid it to those who are willing to take it.\n\nWhat is Hedging? — Hedging is taking an offsetting position in derivatives to reduce the risk of adverse price movements in an existing investment.\n\nHedging a Stock Portfolio with Index Futures:\n• If you have a diversified equity portfolio and expect a short-term market decline, short Nifty futures`,
+    duration: '30 min',
+    completed: false,
+  },
+  {
+    id: 'l68',
+    courseId: 'c10',
+    title: 'Derivatives Trading Regulations in India',
+    content: `SEBI has established comprehensive regulations for derivatives trading to protect investors and maintain market integrity.\n\nWho Can Trade Derivatives in India?\n• Individual investors with a valid trading and Demat account\n• Requires a higher risk categorization\n• Additional KYC requirements for derivatives trading`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q28',
+      title: 'Derivatives Regulations Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q28_1', question: 'When must derivatives margin be collected by the broker?', options: ['By 3:30 PM', 'By 9:15 AM', 'By noon', 'By market close'], correctAnswer: 1, explanation: 'SEBI mandates Peak Margin collection before 9:15 AM for derivatives positions.' },
+        { id: 'q28_2', question: 'How is F&O trading income taxed for regular traders?', options: ['As long-term capital gains', 'As non-speculative business income at slab rates', 'Flat 15%', 'Exempt from tax'], correctAnswer: 1, explanation: 'Regular F&O trading income is treated as non-speculative business income.' },
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COURSE 11: Behavioral Finance (6 lessons — l69–l74)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'l69',
+    courseId: 'c11',
+    title: 'Introduction to Behavioral Finance',
+    content: `Behavioral finance bridges the gap between economics and psychology. It explains why investors often make irrational decisions.\n\nTraditional vs Behavioral Finance:\n\nTraditional Finance Assumes:\n• Markets are efficient\n• Investors are rational utility-maximizers\n• People have perfect self-control`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q29',
+      title: 'Behavioral Finance Intro Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q29_1', question: 'How much more does a loss hurt compared to an equivalent gain according to Prospect Theory?', options: ['Equal', 'About 1.5x more', 'About 2.5x more', 'About 4x more'], correctAnswer: 2, explanation: 'Losses hurt approximately 2.5 times more than equivalent gains feel good.' },
+        { id: 'q29_2', question: 'Which system of thinking should investors use?', options: ['System 1 (fast, intuitive)', 'System 2 (slow, analytical)', 'Both equally', 'Neither'], correctAnswer: 1, explanation: 'Trading decisions require System 2 thinking — slow, deliberate, and analytical.' },
+      ],
+    },
+  },
+  {
+    id: 'l70',
+    courseId: 'c11',
+    title: 'Market Bubbles & Crashes',
+    content: `Throughout history, markets have experienced recurring cycles of euphoria and panic driven by collective investor psychology.\n\nAnatomy of a Bubble:\n1. Displacement — A new technology captures investors' imagination\n2. Boom — Prices start rising\n3. Euphoria — The public piles in\n4. Distress — Smart money sells`,
+    duration: '30 min',
+    completed: false,
+  },
+  {
+    id: 'l71',
+    courseId: 'c11',
+    title: 'Herding Behavior in Markets',
+    content: `Herding is the tendency of individuals to mimic the actions of a larger group. In financial markets, herding can lead to bubbles and crashes.\n\nWhy Do People Herd?\n\n1. Information Cascade — People assume the crowd knows something they don't\n2. Social Pressure — It is uncomfortable to go against the crowd\n3. Career Risk — Fund managers herd because it is safer to be wrong with the crowd`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q30',
+      title: 'Herding Behavior Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q30_1', question: 'Why do fund managers often herd?', options: ['They lack analytical skills', 'It is safer to be wrong with the crowd (career risk)', 'They cannot make independent decisions', 'Regulations force them'], correctAnswer: 1, explanation: 'Fund managers herd because of career risk — safer to be wrong with the crowd.' },
+        { id: 'q30_2', question: 'What does Buffett advise?', options: ['Follow the crowd', 'Be fearful when others are greedy and greedy when others are fearful', 'Never invest during downturns', 'Only buy when everyone is buying'], correctAnswer: 1, explanation: 'Be fearful when others are greedy and greedy when others are fearful.' },
+      ],
+    },
+  },
+  {
+    id: 'l72',
+    courseId: 'c11',
+    title: 'Mental Accounting & Framing Effects',
+    content: `Mental accounting and framing effects show that the way we categorize and present financial information dramatically affects our decisions.\n\nMental Accounting — People treat money differently depending on its source, intended use, or the mental "account" they assign it to.`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l73',
+    courseId: 'c11',
+    title: 'Nudging & Choice Architecture',
+    content: `Choice architecture is the design of how choices are presented to people. Nudges are small changes that can significantly improve financial decisions.\n\nDefault Options — The single most powerful nudge:\n• When employees are automatically enrolled in a 401(k), participation exceeds 90%\n• When they must opt-in, participation drops below 50%`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l74',
+    courseId: 'c11',
+    title: 'Applied Behavioral Strategies',
+    content: `Knowing about biases is not enough — you need practical strategies to overcome them.\n\nThe Investment Policy Statement (IPS) — Your most powerful behavioral tool:\nAn IPS spells out your goals, asset allocation, and rules. When markets are volatile, your IPS keeps you grounded.`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q31',
+      title: 'Applied Behavioral Finance Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q31_1', question: 'What is an Investment Policy Statement (IPS)?', options: ['A broker\'s terms', 'A written document outlining your investment goals and rules', 'A regulation', 'A mutual fund document'], correctAnswer: 1, explanation: 'An IPS is a personal document that spells out your investment goals, strategy, and rules.' },
+        { id: 'q31_2', question: 'What does "circle of competence" mean?', options: ['Invest locally', 'Only invest in businesses you understand', 'Invest only in well-known companies', 'Limit to one sector'], correctAnswer: 1, explanation: 'The circle of competence means sticking to investments you truly understand.' },
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COURSE 12: IPO & FPO Investing (6 lessons — l75–l80)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'l75',
+    courseId: 'c12',
+    title: 'IPO Basics & Process',
+    content: `An Initial Public Offering (IPO) is when a private company lists its shares on a stock exchange for the first time.\n\nWhy Companies Go Public:\n1. Raise Capital\n2. Liquidity for Existing Shareholders\n3. Brand Visibility\n4. Currency for Acquisitions`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q32',
+      title: 'IPO Basics Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q32_1', question: 'What does IPO stand for?', options: ['Internal Public Option', 'Initial Public Offering', 'Investment Portfolio Objective', 'Institutional Purchase Order'], correctAnswer: 1, explanation: 'IPO stands for Initial Public Offering.' },
+        { id: 'q32_2', question: 'Max retail investment in IPO?', options: ['₹1L', '₹2L', '₹5L', '₹10L'], correctAnswer: 1, explanation: 'Retail investors can invest up to ₹2L in an IPO.' },
+      ],
+    },
+  },
+  {
+    id: 'l76',
+    courseId: 'c12',
+    title: 'Analyzing IPO Prospects',
+    content: `Before applying for an IPO, analyze the company thoroughly. A systematic framework for evaluating IPO prospects.\n\n1. Read the DRHP — Contains all information: business model, financials, risks.\n2. Assess Business Quality — Competitive advantage, scalability.\n3. Evaluate Financial Health — Revenue growth, profitability, debt.`,
+    duration: '30 min',
+    completed: false,
+  },
+  {
+    id: 'l77',
+    courseId: 'c12',
+    title: 'IPO Application Process',
+    content: `Applying for an IPO in India is now completely digital. Step-by-step guide to the application process.\n\nRequired Infrastructure:\n1. Demat Account\n2. Trading Account\n3. Bank Account\n4. UPI ID\n5. PAN Card\n\nThrough UPI: Log in to broker app, enter bid details, approve mandate.`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l78',
+    courseId: 'c12',
+    title: 'Listing Day Strategies',
+    content: `Listing day is when IPO shares begin trading. Your strategy should be decided BEFORE the listing.\n\nStrong Listing (>20% up) — Book profits if listing gains were the goal. Be cautious of overpricing.\nModerate Listing (0-20% up) — Hold if strong fundamentals, book partial profits.\nFlat or Weak Listing — Don't panic. Assess fundamentals.`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l79',
+    courseId: 'c12',
+    title: 'FPO & OFS Investing',
+    content: `Follow-on Public Offers (FPO) and Offer for Sale (OFS) are ways that already-public companies raise capital or allow exit.\n\nDilutive FPO — Company issues new shares\nNon-Dilutive FPO / OFS — Existing shareholders sell\nRights Issue — Existing shareholders get first right to buy`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q33',
+      title: 'FPO & OFS Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q33_1', question: 'Difference between dilutive FPO and OFS?', options: ['No difference', 'Dilutive FPO issues new shares; OFS is existing shareholders selling', 'OFS only for government', 'Dilutive FPO only for loss-making companies'], correctAnswer: 1, explanation: 'In dilutive FPO, company issues new shares. In OFS, existing shareholders sell.' },
+        { id: 'q33_2', question: 'What is a rights issue?', options: ['A bonus share', 'Existing holders get first right to buy new shares at discount', 'Government regulation', 'Right to sell back to company'], correctAnswer: 1, explanation: 'A rights issue gives existing holders the right to buy new shares at a discount.' },
+      ],
+    },
+  },
+  {
+    id: 'l80',
+    courseId: 'c12',
+    title: 'Building an IPO/FPO Portfolio',
+    content: `A systematic approach to IPO and FPO investing can generate attractive returns while managing risk.\n\nIPO Investing Approaches:\n1. Listing Gains — Apply for all, sell on listing day\n2. Selective Long-Term — Apply only for quality, hold long\n3. Hybrid — Sell 75% on listing, hold 25%`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q34',
+      title: 'IPO Portfolio Strategy Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q34_1', question: 'Recommended portfolio allocation to IPOs?', options: ['50-60%', '30-40%', '10-20%', '<5%'], correctAnswer: 2, explanation: 'Allocate 10-20% of portfolio to IPO/FPO investments.' },
+        { id: 'q34_2', question: 'Recommended strategy for retail investors?', options: ['Hold forever', 'Sell 100% on listing', 'Sell 75%, hold 25% (hybrid)', 'Never invest in IPOs'], correctAnswer: 2, explanation: 'The hybrid strategy of selling 75% on listing and holding 25% is recommended for most.' },
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COURSE 13: Advanced Options Strategies (6 lessons — l81–l86)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'l81',
+    courseId: 'c13',
+    title: 'Advanced Spread Strategies',
+    content: `Advanced spreads allow you to create precise risk-reward profiles for any market view.\n\nVertical Spreads — Buy and sell same type, same expiry, different strikes.\n• Bull Call Spread (Debit)\n• Bear Put Spread (Debit)\n• Bull Put Spread (Credit)\n• Bear Call Spread (Credit)`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q35',
+      title: 'Advanced Spreads Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q35_1', question: 'What is a credit spread?', options: ['Pay net premium', 'Receive net premium upfront', 'No cost', 'Only uses puts'], correctAnswer: 1, explanation: 'A credit spread is where you receive a net premium (credit) upfront.' },
+        { id: 'q35_2', question: 'Max profit of bull call spread?', options: ['Unlimited', 'Strike diff minus net debit', 'Premium received', 'Width of spread'], correctAnswer: 1, explanation: 'Max profit = Strike difference − net debit paid.' },
+      ],
+    },
+  },
+  {
+    id: 'l82',
+    courseId: 'c13',
+    title: 'Volatility Trading Strategies',
+    content: `Volatility trading is about profiting from changes in implied volatility rather than direction.\n\nUnderstanding Implied Volatility:\n• High IV = Options are expensive (fear)\n• Low IV = Options are cheap (complacency)\n• IV is mean-reverting`,
+    duration: '30 min',
+    completed: false,
+  },
+  {
+    id: 'l83',
+    courseId: 'c13',
+    title: 'Delta Neutral Trading',
+    content: `Delta neutral trading involves structuring positions with near-zero delta — no directional bias.\n\nProfits come from time decay, volatility changes, or gamma scalping.\n\nHow to Create Delta Neutral Positions:\n1. Short Straddle/Strangle\n2. Iron Condor`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q36',
+      title: 'Delta Neutral Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q36_1', question: 'What does delta neutral mean?', options: ['Zero gamma', 'Position has no directional bias (delta ≈ 0)', 'No volatility exposure', 'No time decay'], correctAnswer: 1, explanation: 'Delta neutral means the overall position delta is near zero.' },
+        { id: 'q36_2', question: 'What is gamma scalping?', options: ['Closing at a loss', 'Profiting from gamma by adjusting a delta neutral position', 'Selling options', 'Buying ATM options'], correctAnswer: 1, explanation: 'Gamma scalping is profiting from gamma by dynamically adjusting a delta neutral position.' },
+      ],
+    },
+  },
+  {
+    id: 'l84',
+    courseId: 'c13',
+    title: 'Earnings & Event Trading',
+    content: `Earnings announcements and major events create opportunities for options traders.\n\nHow Earnings Affect Options:\n• IV rises before earnings (options become expensive)\n• After earnings, IV collapses (volatility crush)\n• The actual move is usually smaller than IV suggested`,
+    duration: '30 min',
+    completed: false,
+  },
+  {
+    id: 'l85',
+    courseId: 'c13',
+    title: 'Portfolio Hedging with Options',
+    content: `Professional portfolio managers use sophisticated hedging strategies to protect portfolios.\n\nHedging Tools:\n• Index Put Options — Most common\n• Cost: 0.5-2% of portfolio value per year\n\nHedging Strategies:\n1. Static Hedge — Buy puts and hold to expiry\n2. Rolling Hedge — Continuously roll puts`,
+    duration: '30 min',
+    completed: false,
+  },
+  {
+    id: 'l86',
+    courseId: 'c13',
+    title: 'Advanced Risk Management for Option Sellers',
+    content: `Option selling can generate consistent income but carries significant risks.\n\nThe Option Seller\'s Edge:\n• Theta decay works in your favor\n• IV is usually higher than realized volatility\n• ~80% of options expire worthless`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q37',
+      title: 'Option Seller Risk Mgmt Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q37_1', question: 'What % of options expire worthless?', options: ['50%', '60%', '~80%', '95%'], correctAnswer: 2, explanation: 'Approximately 80% of options expire worthless.' },
+        { id: 'q37_2', question: 'Recommended profit target to close option sells?', options: ['10%', '25%', '50% of max', 'Hold to expiry'], correctAnswer: 2, explanation: 'Closing at 50% of max profit frees capital and captures most time decay.' },
+      ],
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COURSE 14: Tax Planning for Investors (6 lessons — l87–l92)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'l87',
+    courseId: 'c14',
+    title: 'Capital Gains Taxation',
+    content: `Understanding capital gains taxation is essential for every investor.\n\nTypes of Capital Assets:\n• Equity — Listed shares, equity mutual funds\n• Debt — Bonds, debt funds, FDs\n• Real Estate — Land, buildings\n\nSTCG on equity: 15% (< 12 months)\nLTCG on equity: 10% on gains > ₹1L (> 12 months)`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q38',
+      title: 'Capital Gains Tax Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q38_1', question: 'LTCG rate on equity held >12 months?', options: ['15% on all', '10% on gains > ₹1L', 'Exempt', '20% with indexation'], correctAnswer: 1, explanation: 'LTCG on equity is 10% on gains exceeding ₹1L.' },
+        { id: 'q38_2', question: 'What is tax harvesting?', options: ['Avoiding taxes illegally', 'Booking profits up to exemption limit to reset cost basis', 'Tax deduction strategy', 'Selling before year-end'], correctAnswer: 1, explanation: 'Tax harvesting involves booking profits up to the ₹1L exemption limit.' },
+      ],
+    },
+  },
+  {
+    id: 'l88',
+    courseId: 'c14',
+    title: 'Dividend & Interest Taxation',
+    content: `Passive income from dividends and interest is taxed differently from capital gains.\n\nDividend Taxation:\n• Added to total income, taxed as per slab\n• TDS at 10% on dividends > ₹5,000\n\nInterest Taxation:\n• Savings account: Taxable, deduction up to ₹10K (80TTA)\n• FDs: Fully taxable, TDS at 10% if interest > ₹40K`,
+    duration: '20 min',
+    completed: false,
+  },
+  {
+    id: 'l89',
+    courseId: 'c14',
+    title: 'Tax-Efficient Investing Strategies',
+    content: `Structuring investments tax-efficiently can significantly improve post-tax returns.\n\nAsset Location Strategy:\n• Equity in taxable accounts (LTCG at 10%)\n• Debt in retirement accounts (EPF, PPF, NPS)\n• Gold via SGBs (tax-free on maturity)`,
+    duration: '25 min',
+    completed: false,
+    quiz: {
+      id: 'q39',
+      title: 'Tax-Efficient Investing Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q39_1', question: 'Most tax-efficient gold investment?', options: ['Physical gold', 'Gold ETFs', 'SGBs', 'Gold stocks'], correctAnswer: 2, explanation: 'SGBs are most tax-efficient with no capital gains tax on maturity.' },
+        { id: 'q39_2', question: 'What is asset location?', options: ['Physical location of assets', 'Placing different assets in optimal account types for tax efficiency', 'Real estate strategy', 'International diversification'], correctAnswer: 1, explanation: 'Asset location places tax-inefficient investments in tax-advantaged accounts.' },
+      ],
+    },
+  },
+  {
+    id: 'l90',
+    courseId: 'c14',
+    title: 'Real Estate Taxation',
+    content: `Real estate transactions have complex tax implications.\n\nPurchase Stage:\n• Stamp duty and registration: 5-7% of property value\n• GST on under-construction: 5% or 12%\n\nHolding Stage:\n• Rental income: Taxed as per slab with 30% standard deduction`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l91',
+    courseId: 'c14',
+    title: 'International Investing & Taxation',
+    content: `International investing offers diversification benefits with additional tax considerations.\n\nWays to Invest:\n1. International Mutual Funds\n2. Direct US Stock Purchase\n3. ADRs/GDRs\n\nUS Dividend TDS: 15-25% (DTAA benefit)\nCapital gains: Taxed in India at standard rates`,
+    duration: '25 min',
+    completed: false,
+  },
+  {
+    id: 'l92',
+    courseId: 'c14',
+    title: 'Tax Compliance & Filing',
+    content: `Proper tax compliance is essential for every investor.\n\nKey ITR Forms:\n• ITR-1: Salaried with no capital gains\n• ITR-2: Capital gains, foreign assets\n• ITR-3: F&O trading income (business)\n\nAdvanced Tax: Pay in installments if tax > ₹10K`,
+    duration: '30 min',
+    completed: false,
+    quiz: {
+      id: 'q40',
+      title: 'Tax Compliance Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q40_1', question: 'Which ITR for F&O trading?', options: ['ITR-1', 'ITR-2', 'ITR-3', 'ITR-4'], correctAnswer: 2, explanation: 'ITR-3 is for F&O trading income as business income.' },
+        { id: 'q40_2', question: 'Deadline to file for carrying forward losses?', options: ['March 31', 'July 31 (due date)', 'Dec 31', 'No deadline'], correctAnswer: 1, explanation: 'File before July 31 to carry forward losses.' },
+      ],
+    },
+  },
 ];
+

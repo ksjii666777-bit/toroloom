@@ -219,7 +219,7 @@ export default function ChatRoomScreen({ route, navigation }: any) {
       {/* Header */}
       <View style={[chatStyles.header, { paddingTop: insets.top + 8, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
         <View style={chatStyles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityLabel="Go back">
             <Ionicons name="chevron-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={chatStyles.headerInfo}>
@@ -299,6 +299,7 @@ export default function ChatRoomScreen({ route, navigation }: any) {
               onPress={handleSend}
               disabled={!inputText.trim()}
               style={[chatStyles.sendBtn, { backgroundColor: inputText.trim() ? colors.primary : colors.bgCard }]}
+              testID="sendMessageBtn"
             >
               <Ionicons name="send" size={16} color={inputText.trim() ? '#FFFFFF' : colors.textMuted} />
             </TouchableOpacity>
