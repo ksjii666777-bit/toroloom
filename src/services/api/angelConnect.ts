@@ -53,7 +53,7 @@ export const angelConnectApi = {
    */
   async connect(clientId: string, password: string, totp: string): Promise<{ success: boolean; message: string }> {
     const response = await api.post<{ success: boolean; message: string; clientId: string }>(
-      '/api/angel/connect',
+      '/angel/connect',
       { clientId, password, totp },
     );
     return response;
@@ -61,37 +61,37 @@ export const angelConnectApi = {
 
   /** Disconnect the user's Angel One account */
   async disconnect(): Promise<{ success: boolean; message: string }> {
-    const response = await api.post<{ success: boolean; message: string }>('/api/angel/disconnect', {});
+    const response = await api.post<{ success: boolean; message: string }>('/angel/disconnect', {});
     return response;
   },
 
   /** Check Angel One connection status */
   async status(): Promise<AngelStatus> {
-    const response = await api.get<AngelStatus>('/api/angel/status');
+    const response = await api.get<AngelStatus>('/angel/status');
     return response;
   },
 
   /** Fetch holdings for the connected user */
   async holdings(): Promise<{ success: boolean; data: AngelHolding[]; count: number }> {
-    const response = await api.get<{ success: boolean; data: AngelHolding[]; count: number }>('/api/angel/holdings');
+    const response = await api.get<{ success: boolean; data: AngelHolding[]; count: number }>('/angel/holdings');
     return response;
   },
 
   /** Fetch positions for the connected user */
   async positions(): Promise<{ success: boolean; data: AngelPosition[]; count: number }> {
-    const response = await api.get<{ success: boolean; data: AngelPosition[]; count: number }>('/api/angel/positions');
+    const response = await api.get<{ success: boolean; data: AngelPosition[]; count: number }>('/angel/positions');
     return response;
   },
 
   /** Fetch trade history for the connected user */
   async trades(): Promise<{ success: boolean; data: AngelTrade[]; count: number }> {
-    const response = await api.get<{ success: boolean; data: AngelTrade[]; count: number }>('/api/angel/trades');
+    const response = await api.get<{ success: boolean; data: AngelTrade[]; count: number }>('/angel/trades');
     return response;
   },
 
   /** Get a live quote for a symbol */
   async quote(symbol: string): Promise<{ success: boolean; data: any }> {
-    const response = await api.get<{ success: boolean; data: any }>(`/api/angel/quote/${symbol}`);
+    const response = await api.get<{ success: boolean; data: any }>(`/angel/quote/${symbol}`);
     return response;
   },
 };
