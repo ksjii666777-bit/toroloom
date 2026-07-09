@@ -432,6 +432,15 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         </ReanimatedAnimated.View>
 
+        {/* News Loading Skeleton */}
+        {newsLoading && latestNews.length === 0 && (
+          <View style={[styles.newsLoadingContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={[styles.newsLoadingLine, { width: '40%', backgroundColor: colors.bgInput }]} />
+            <View style={[styles.newsLoadingLine, { width: '100%', marginTop: 8, backgroundColor: colors.bgInput }]} />
+            <View style={[styles.newsLoadingLine, { width: '75%', marginTop: 6, backgroundColor: colors.bgInput }]} />
+          </View>
+        )}
+
         {/* Market Indices */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[1]]}>
           <View style={styles.sectionHeader}>
@@ -1935,5 +1944,18 @@ const createStyles = (colors: any) => StyleSheet.create({
   tradeAmount: {
     ...FONTS.semiBold,
     fontSize: FONTS.size.sm,
+  },
+
+  // ── News Loading ──
+  newsLoadingContainer: {
+    marginHorizontal: SPACING.xl,
+    marginTop: SPACING.xl,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+  },
+  newsLoadingLine: {
+    height: 12,
+    borderRadius: BORDER_RADIUS.xs,
   },
 });

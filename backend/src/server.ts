@@ -18,6 +18,9 @@ import { configureNotificationPersistence } from './services/notifications';
 import { configureCommunityPersistence } from './services/community';
 import { configurePortfolioAlertStorage, configureBadgeCountPersistence } from './services/portfolioAlerts';
 
+// Services
+import { configureMarketStack } from './services/marketstack';
+
 // Routes
 import authRoutes from './routes/auth';
 import marketRoutes from './routes/market';
@@ -259,6 +262,9 @@ async function start(): Promise<http.Server> {
   // ── Validate required environment variables ─────────────────────
   // Fails fast in production if JWT_SECRET or DATABASE_URL are missing.
   // Prints warnings in development for missing optional config.
+  // ── Configure external API services ────────────────────────────
+  configureMarketStack({ marketstackKey: env.marketstackKey });
+
   const missingVars = validateRequiredEnv();
   if (missingVars.length > 0) {
     const isProduction = env.nodeEnv === 'production' || !env.isMock;

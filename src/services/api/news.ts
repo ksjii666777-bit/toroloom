@@ -1,1 +1,40 @@
-import { api } from './client';\nimport type { MarketNewsItem } from '../../types';\n\nexport interface NewsApiResponse {\n  articles: MarketNewsItem[];\n  totalResults: number;\n  source: 'newsapi' | 'mock' | 'mock_fallback';\n}\n\nexport const newsApi = {\n  /**\n   * Fetch financial news articles.\n   * @param params.category - Filter by category (markets, economy, corporate, ipo, global, policy)\n   * @param params.q - Search query\n   * @param params.pageSize - Number of results per page (max 100)\n   * @param params.page - Page number\n   */\n  getNews: (params?: {\n    category?: string;\n    q?: string;\n    pageSize?: number;\n    page?: number;\n  }) => {\n    const queryParams = new URLSearchParams();\n    if (params?.category) queryParams.set('category', params.category);\n    if (params?.q) queryParams.set('q', params.q);\n    if (params?.pageSize) queryParams.set('pageSize', params.pageSize.toString());\n    if (params?.page) queryParams.set('page', params.page.toString());\n\n    const query = queryParams.toString();\n    return api.get<NewsApiResponse>(`/news${query ? `?${query}` : ''}`);\n  },\n\n  /**\n   * Fetch top financial headlines.\n   */\n  getTopHeadlines: () =>\n    api.get<NewsApiResponse>('/news/top'),\n\n  /**\n   * Fetch news for a specific stock symbol.\n   */\n  getNewsForSymbol: (symbol: string) =>\n    api.get<NewsApiResponse>(`/news/symbol/${encodeURIComponent(symbol)}`),\n};\n
+import { api } from './client';
+import type { MarketNewsItem } from '../../types';
+
+export interface NewsApiResponse {
+  articles: MarketNewsItem[];
+  totalResults: number;
+  source: 'newsapi' | 'mock' | 'mock_fallback';
+}
+
+export const newsApi = {
+  /**
+   * Fetch financial news articles.
+   */
+  getNews: (params?: {
+    category?: string;
+    q?: string;
+    pageSize?: number;
+    page?: number;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.category) queryParams.set('category', params.category);
+    if (params?.q) queryParams.set('q', params.q);
+    if (params?.pageSize) queryParams.set('pageSize', params.pageSize.toString());
+    if (params?.page) queryParams.set('page', params.page.toString());
+    const query = queryParams.toString();
+    return api.get<NewsApiResponse>('/news' + (query ? '?' + query : ''));
+  },
+
+  /**
+   * Fetch top financial headlines.
+   */
+  getTopHeadlines: () =>
+    api.get<NewsApiResponse>('/news/top'),
+
+  /**
+   * Fetch news for a specific stock symbol.
+   */
+  getNewsForSymbol: (symbol: string) =>
+    api.get<NewsApiResponse>('/news/symbol/' + encodeURIComponent(symbol)),
+};

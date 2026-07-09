@@ -21,6 +21,7 @@ import { SPACING, BORDER_RADIUS} from '../../constants/theme';
 import { MarketNewsItem } from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { newsApi } from '../../services/api';
+import { mockNews } from '../../constants/mockData';
 
 const { width } = Dimensions.get('window');
 
@@ -511,6 +512,22 @@ export default function NewsFeedScreen({ navigation }: any) {
   const [news, setNews] = useState<MarketNewsItem[]>([]);
   const [isLoadingNews, setIsLoadingNews] = useState(true);
 
+  // Loading skeleton while news loads
+  const LoadingSkeleton = () => (
+    <View style={{ paddingHorizontal: 0 }}>
+      {[1, 2, 3, 4].map(i => (
+        <View
+          key={i}
+          style={[feedStyles.skeletonCard, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}
+        >
+          <View style={[feedStyles.skeletonLine, { width: '30%', backgroundColor: colors.bgInput }]} />
+          <View style={[feedStyles.skeletonLine, { width: '90%', marginTop: 8, backgroundColor: colors.bgInput }]} />
+          <View style={[feedStyles.skeletonLine, { width: '70%', marginTop: 6, backgroundColor: colors.bgInput }]} />
+        </View>
+      ))}
+    </View>
+  );
+
   // Fetch news from backend API on mount
   useEffect(() => {
     let mounted = true;
@@ -522,7 +539,10 @@ export default function NewsFeedScreen({ navigation }: any) {
           setNews(result.articles);
         }
       } catch {
-        // API failed — use empty state, error handled gracefully
+        // API failed — fall back to mock data
+        if (mounted) {
+          setNews(mockNews);
+        }
       } finally {
         if (mounted) setIsLoadingNews(false);
       }
@@ -816,7 +836,9 @@ export default function NewsFeedScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={feedStyles.listContainer}
       >
-        {filteredNews.length === 0 ? (
+        {isLoadingNews ? (
+          <LoadingSkeleton />
+        ) : filteredNews.length === 0 ? (
           <View style={feedStyles.emptyState}>
             <Ionicons name="newspaper-outline" size={48} color={colors.textMuted} />
             <Text style={[feedStyles.emptyTitle, { color: colors.textMuted }]}>No articles found</Text>
@@ -1165,5 +1187,17 @@ const feedStyles = StyleSheet.create({
     fontWeight: '400',
     textAlign: 'center',
     paddingHorizontal: 40,
+  },
+
+  // ── Loading Skeleton ──
+  skeletonCard: {
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    marginBottom: SPACING.md,
+  },
+  skeletonLine: {
+    height: 12,
+    borderRadius: BORDER_RADIUS.xs,
   },
 });
