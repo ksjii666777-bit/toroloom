@@ -20,6 +20,7 @@ import { configurePortfolioAlertStorage, configureBadgeCountPersistence } from '
 
 // Services
 import { configureMarketStack } from './services/marketstack';
+import { configureTelegramBot } from './services/telegramBot';
 
 // Routes
 import authRoutes from './routes/auth';
@@ -47,6 +48,7 @@ import pushNotificationsRoutes from './routes/pushNotifications';
 import contractNoteRoutes from './routes/contractNote';
 import fnoRoutes from './routes/fno';
 import newsRoutes from './routes/news';
+import telegramRoutes from './routes/telegram';
 import socialRoutes from './routes/social';
 import kycRoutes from './routes/kyc';
 import twoFactorRoutes from './routes/twoFactor';
@@ -173,9 +175,11 @@ app.use('/api/kyc', writeLimiter, authMiddleware, kycRoutes);
 // ── 2FA — auth required, moderate rate ──────────────────────────────────
 app.use('/api/auth/2fa', writeLimiter, authMiddleware, twoFactorRoutes);
 
-// ── Sync — 100 req / min — delta sync + conflict detection ──────────────────
 // ── News — 100 req / min ──────────────────────────────────────────
 app.use('/api/news', readLimiter, newsRoutes);
+
+// ── Telegram — 50 req / min ────────────────────────────────────────
+app.use('/api/telegram', writeLimiter, telegramRoutes);
 
 app.use('/api/sync', writeLimiter, authMiddleware, syncRoutes);
 
@@ -264,6 +268,7 @@ async function start(): Promise<http.Server> {
   // Prints warnings in development for missing optional config.
   // ── Configure external API services ────────────────────────────
   configureMarketStack({ marketstackKey: env.marketstackKey });
+  configureTelegramBot({ token: env.telegramBotToken });
 
   const missingVars = validateRequiredEnv();
   if (missingVars.length > 0) {

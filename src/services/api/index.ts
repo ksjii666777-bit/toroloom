@@ -12,3 +12,4 @@ export { supportApi } from './support';
 export { paymentsApi } from './payments';
 export { fnoApi } from './fno';
 export { newsApi } from './news';
+export { telegramApi } from './telegram';

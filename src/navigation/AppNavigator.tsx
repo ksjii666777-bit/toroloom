@@ -68,6 +68,7 @@ import TenantConfigScreen from '../screens/settings/TenantConfigScreen';
 import VoiceSettingsScreen from '../screens/settings/VoiceSettingsScreen';
 import SecuritySettingsScreen from '../screens/settings/SecuritySettingsScreen';
 import TwoFactorSetupScreen from '../screens/settings/TwoFactorSetupScreen';
+import TelegramConnectScreen from '../screens/settings/TelegramConnectScreen';
 import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
 import NewsFeedScreen from '../screens/news/NewsFeedScreen';
 import IPOCalendarScreen from '../screens/news/IPOCalendarScreen';
@@ -460,6 +461,7 @@ export default function AppNavigator() {
             <Stack.Screen name="VoiceSettings" component={VoiceSettingsScreen} />
             <Stack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
             <Stack.Screen name="TwoFactorSetup" component={TwoFactorSetupScreen} />
+            <Stack.Screen name="TelegramConnect" component={TelegramConnectScreen} />
             <Stack.Screen name="FnOOptionsChain" component={FnOOptionsChainScreen} />
             <Stack.Screen name="StrategyBuilder" component={StrategyBuilderScreen} />
             <Stack.Screen name="SIPCalculator" component={SIPCalculator} />

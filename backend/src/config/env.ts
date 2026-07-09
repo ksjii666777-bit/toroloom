@@ -97,6 +97,9 @@ export const env = {
   razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
 
   // ──── External API Keys ──────────────────────────────────────────────
+  /** Telegram Bot Token for sending trading alerts to users */
+  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || '',
+
   /** MarketStack API key for real-time stock prices and market data */
   marketstackKey: process.env.MARKETSTACK_KEY || '',
 

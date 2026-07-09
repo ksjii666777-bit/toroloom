@@ -49,6 +49,7 @@ const menuItems = [
     { icon: 'notifications', label: 'Portfolio Alerts', color: '#FFC107', screen: 'PortfolioAlerts' },
     { icon: 'settings', label: 'Risk Settings', color: '#6E6E9A', screen: 'Settings' },
     { icon: 'link', label: 'Connect Broker', color: '#FF6B00', screen: 'BrokerConnect' },
+    { icon: 'paper-plane', label: 'Telegram Alerts', color: '#0088CC', screen: 'TelegramConnect' },
     { icon: 'compass', label: 'Replay Tour', color: '#8B5CF6', screen: '__onboarding' },
     { icon: 'volume-high', label: 'Voice Settings', color: '#00D2FF', screen: 'VoiceSettings' },
     { icon: 'shield-checkmark', label: 'Security', color: '#FF6B6B', screen: 'SecuritySettings' },
