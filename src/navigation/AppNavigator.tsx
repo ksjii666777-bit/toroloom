@@ -54,6 +54,7 @@ import LearningPathsScreen from '../screens/education/LearningPathsScreen';
 import LearningPathDetailScreen from '../screens/education/LearningPathDetailScreen';
 import MyCoursesScreen from '../screens/education/MyCoursesScreen';
 import CreateCourseScreen from '../screens/education/CreateCourseScreen';
+import CommunityCoursesScreen from '../screens/education/CommunityCoursesScreen';
 import TradeHistoryScreen from '../screens/trade/TradeHistoryScreen';
 import PlaceOrderScreen from '../screens/trade/PlaceOrderScreen';
 import OpenOrdersScreen from '../screens/trade/OpenOrdersScreen';
@@ -502,6 +503,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Glossary" component={GlossaryScreen} />
             <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
             <Stack.Screen name="CreateCourse" component={CreateCourseScreen} />
+            <Stack.Screen name="CommunityCourses" component={CommunityCoursesScreen} />
             <Stack.Screen name="LearningPaths" component={LearningPathsScreen} />
             <Stack.Screen name="LearningPathDetail" component={LearningPathDetailScreen} />
             <Stack.Screen name="Certificate" component={CertificateScreen} />

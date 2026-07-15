@@ -76,6 +76,19 @@ interface UserCourseState {
   getPendingCourses: () => UserGeneratedCourse[];
   /** Get all courses that have been reviewed (approved or rejected) */
   getReviewedCourses: () => UserGeneratedCourse[];
+
+  // ── Community Course Enrollment ──
+
+  /** IDs of community courses the current user has enrolled in */
+  enrolledCommunityCourseIds: string[];
+  /** Enroll in a community course */
+  enrollInCommunityCourse: (courseId: string) => void;
+  /** Unenroll from a community course */
+  unenrollFromCommunityCourse: (courseId: string) => void;
+  /** Check if enrolled in a community course */
+  isEnrolledInCommunityCourse: (courseId: string) => boolean;
+  /** Get all published community courses (from all creators) */
+  getCommunityCourses: () => UserGeneratedCourse[];
 }
 
 // ─── Default Draft ─────────────────────────────────────────────
@@ -111,6 +124,7 @@ export const useUserCourseStore = create<UserCourseState>()(
       editingCourse: null,
       loading: false,
       saving: false,
+      enrolledCommunityCourseIds: [],
 
       createDraft: () => {
         const draft = createEmptyDraft();
@@ -474,11 +488,48 @@ export const useUserCourseStore = create<UserCourseState>()(
           (c.publishStatus === 'draft' && !c.submittedForReview && (c.reviewNotes || c.publishedAt))
         );
       },
+
+      // ── Community Course Enrollment ──
+
+      enrollInCommunityCourse: (courseId) => {
+        const already = get().enrolledCommunityCourseIds.includes(courseId);
+        if (already) return;
+        set(state => ({
+          enrolledCommunityCourseIds: [...state.enrolledCommunityCourseIds, courseId],
+          myCourses: state.myCourses.map(c =>
+            c.id === courseId
+              ? { ...c, enrolledCount: c.enrolledCount + 1, updatedAt: new Date().toISOString() }
+              : c
+          ),
+        }));
+        offlineCache.save('userCourses', { courses: get().myCourses }).catch(() => {});
+      },
+
+      unenrollFromCommunityCourse: (courseId) => {
+        set(state => ({
+          enrolledCommunityCourseIds: state.enrolledCommunityCourseIds.filter(id => id !== courseId),
+          myCourses: state.myCourses.map(c =>
+            c.id === courseId
+              ? { ...c, enrolledCount: Math.max(0, c.enrolledCount - 1), updatedAt: new Date().toISOString() }
+              : c
+          ),
+        }));
+        offlineCache.save('userCourses', { courses: get().myCourses }).catch(() => {});
+      },
+
+      isEnrolledInCommunityCourse: (courseId) => {
+        return get().enrolledCommunityCourseIds.includes(courseId);
+      },
+
+      getCommunityCourses: () => {
+        return get().myCourses.filter(c => c.publishStatus === 'published');
+      },
     }),
     {
       name: 'toroloom-user-courses',
       partialize: (state) => ({
         myCourses: state.myCourses,
+        enrolledCommunityCourseIds: state.enrolledCommunityCourseIds,
       }),
     }
   )

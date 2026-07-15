@@ -233,6 +233,58 @@ export default function LearnScreen({ navigation }: any) {
           </AnimatedPressable>
         </View>
 
+        {/* Community Courses */}
+        <View style={{ paddingHorizontal: SPACING.xl, marginBottom: SPACING.lg }}>
+          <AnimatedPressable
+            onPress={() => navigation.navigate('CommunityCourses')}
+            haptic="medium"
+            scaleTo={0.97}
+          >
+            <LinearGradient
+              colors={['#6C63FF', '#3B82F6']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                padding: SPACING.xl,
+                borderRadius: BORDER_RADIUS.lg,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.md }}>
+                <Text style={{ fontSize: 36 }}>🌍</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>
+                    Community Courses
+                  </Text>
+                  <Text style={{ ...FONTS.regular, fontSize: FONTS.size.sm, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
+                    Discover courses by fellow traders
+                  </Text>
+                </View>
+                <Ionicons name="compass-outline" size={28} color="rgba(255,255,255,0.9)" />
+              </View>
+
+              {/* Features row */}
+              <View style={{ flexDirection: 'row', marginTop: SPACING.lg, gap: SPACING.sm }}>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Ionicons name="star" size={18} color="rgba(255,255,255,0.9)" />
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Featured</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Ionicons name="funnel-outline" size={18} color="rgba(255,255,255,0.9)" />
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Filter</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Ionicons name="search-outline" size={18} color="rgba(255,255,255,0.9)" />
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Search</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Ionicons name="people-outline" size={18} color="rgba(255,255,255,0.9)" />
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Enroll</Text>
+                </View>
+              </View>
+            </LinearGradient>
+          </AnimatedPressable>
+        </View>
+
         {/* All Courses */}
         <View style={styles.allCoursesSection}>
           <Text style={styles.sectionTitle}>All Courses</Text>
