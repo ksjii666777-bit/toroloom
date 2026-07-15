@@ -80,6 +80,7 @@ const menuItems = [
     { icon: 'key', label: 'API Keys', color: '#3B82F6', screen: 'ApiKeys' },
     { icon: 'link', label: 'Webhooks', color: '#10B981', screen: 'Webhooks' },
     { icon: 'pricetags', label: 'Coupon Manager', color: '#8B5CF6', screen: 'AdminCouponManager', adminOnly: true as const },
+    { icon: 'school', label: 'Course Reviews', color: '#00C9A7', screen: 'AdminCourseReview', adminOnly: true as const },
   ]},
 ];
 

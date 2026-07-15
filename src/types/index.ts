@@ -1991,6 +1991,8 @@ export interface UserGeneratedCourse {
   submittedForReview: boolean;
   /** Admin review notes (if rejected) */
   reviewNotes?: string;
+  /** Whether the course is featured (admin-curated) */
+  isFeatured?: boolean;
   /** Course lessons (only populated when editing) */
   lessons?: CourseDraftLesson[];
   /** Enrollment & rating */

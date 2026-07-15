@@ -63,6 +63,19 @@ interface UserCourseState {
   getStats: () => CreatorStats;
   /** Load from cache on app start */
   loadFromCache: () => Promise<void>;
+
+  // ── Admin Review Actions ──
+
+  /** Admin: approve a submitted course and publish it */
+  approveCourse: (courseId: string, notes?: string) => void;
+  /** Admin: reject a submitted course with review notes */
+  rejectCourse: (courseId: string, notes: string) => void;
+  /** Admin: toggle featured status on a course */
+  toggleFeatured: (courseId: string) => void;
+  /** Get all courses pending review */
+  getPendingCourses: () => UserGeneratedCourse[];
+  /** Get all courses that have been reviewed (approved or rejected) */
+  getReviewedCourses: () => UserGeneratedCourse[];
 }
 
 // ─── Default Draft ─────────────────────────────────────────────
@@ -399,6 +412,67 @@ export const useUserCourseStore = create<UserCourseState>()(
         } catch (err) {
           log.info('[UserCourseStore] No cached courses found');
         }
+      },
+
+      // ── Admin Review Actions ──
+
+      approveCourse: (courseId, notes) => {
+        const now = new Date().toISOString();
+        set(state => ({
+          myCourses: state.myCourses.map(c =>
+            c.id === courseId
+              ? {
+                  ...c,
+                  publishStatus: 'published',
+                  submittedForReview: false,
+                  reviewNotes: notes || undefined,
+                  publishedAt: now,
+                  updatedAt: now,
+                }
+              : c
+          ),
+        }));
+        offlineCache.save('userCourses', { courses: get().myCourses }).catch(() => {});
+      },
+
+      rejectCourse: (courseId, notes) => {
+        const now = new Date().toISOString();
+        set(state => ({
+          myCourses: state.myCourses.map(c =>
+            c.id === courseId
+              ? {
+                  ...c,
+                  submittedForReview: false,
+                  publishStatus: 'draft',
+                  reviewNotes: notes,
+                  updatedAt: now,
+                }
+              : c
+          ),
+        }));
+        offlineCache.save('userCourses', { courses: get().myCourses }).catch(() => {});
+      },
+
+      toggleFeatured: (courseId) => {
+        set(state => ({
+          myCourses: state.myCourses.map(c =>
+            c.id === courseId
+              ? { ...c, isFeatured: !c.isFeatured, updatedAt: new Date().toISOString() }
+              : c
+          ),
+        }));
+        offlineCache.save('userCourses', { courses: get().myCourses }).catch(() => {});
+      },
+
+      getPendingCourses: () => {
+        return get().myCourses.filter(c => c.submittedForReview && c.publishStatus === 'draft');
+      },
+
+      getReviewedCourses: () => {
+        return get().myCourses.filter(c =>
+          c.publishStatus === 'published' ||
+          (c.publishStatus === 'draft' && !c.submittedForReview && (c.reviewNotes || c.publishedAt))
+        );
       },
     }),
     {

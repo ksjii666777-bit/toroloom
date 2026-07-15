@@ -66,6 +66,7 @@ import SubscriptionScreen from '../screens/settings/SubscriptionScreen';
 import AvailableCouponsScreen from '../screens/settings/AvailableCouponsScreen';
 import CouponHistoryScreen from '../screens/settings/CouponHistoryScreen';
 import AdminCouponManagementScreen from '../screens/settings/AdminCouponManagementScreen';
+import AdminCourseReviewScreen from '../screens/settings/AdminCourseReviewScreen';
 import PaymentHistoryScreen from '../screens/payments/PaymentHistoryScreen';
 import AddFundsScreen from '../screens/funds/AddFundsScreen';
 import WithdrawScreen from '../screens/funds/WithdrawScreen';
@@ -510,6 +511,7 @@ export default function AppNavigator() {
             <Stack.Screen name="AvailableCoupons" component={AvailableCouponsScreen} />
             <Stack.Screen name="CouponHistory" component={CouponHistoryScreen} />
             <Stack.Screen name="AdminCouponManager" component={AdminCouponManagementScreen} />
+            <Stack.Screen name="AdminCourseReview" component={AdminCourseReviewScreen} />
             <Stack.Screen name="PaymentHistory" component={PaymentHistoryScreen} />
             <Stack.Screen name="AddFunds" component={AddFundsScreen} />
             <Stack.Screen name="Withdraw" component={WithdrawScreen} />
