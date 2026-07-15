@@ -6,7 +6,7 @@ const router = Router();
 
 // POST /api/auth/login
 router.post('/login', (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   if (!email || !password) {
     res.status(400).json({ error: 'Email and password are required' });
@@ -14,10 +14,12 @@ router.post('/login', (req: Request, res: Response) => {
   }
 
   // Simulate auth — in production, validate against DB
-  const token = generateToken({ userId: mockUser.id, email });
+  // role can be 'admin' for dev/testing — only works in mock mode
+  const effectiveRole = (role === 'admin' ? 'admin' : 'user') as 'user' | 'admin';
+  const token = generateToken({ userId: mockUser.id, email, role: effectiveRole });
   res.json({
     token,
-    user: mockUser,
+    user: { ...mockUser, role: effectiveRole },
   });
 });
 

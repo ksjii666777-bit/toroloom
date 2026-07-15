@@ -5,6 +5,7 @@ import { env } from '../config/env';
 export interface AuthPayload {
   userId: string;
   email: string;
+  role?: 'user' | 'admin';
 }
 
 declare global {
@@ -16,7 +17,7 @@ declare global {
 }
 
 export function generateToken(payload: AuthPayload): string {
-  return jwt.sign(payload as object, env.jwtSecret, { expiresIn: env.jwtExpiresIn } as jwt.SignOptions);
+  return jwt.sign({ ...payload, role: payload.role || 'user' }, env.jwtSecret, { expiresIn: env.jwtExpiresIn } as jwt.SignOptions);
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
@@ -45,6 +46,19 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction): 
     } catch {
       // Token invalid — continue without auth
     }
+  }
+  next();
+}
+
+/**
+ * Middleware to restrict access to admin users only.
+ * Must be used AFTER authMiddleware (req.user must be populated).
+ * Returns 403 Forbidden if the user's role is not 'admin'.
+ */
+export function adminMiddleware(req: Request, res: Response, next: NextFunction): void {
+  if (req.user?.role !== 'admin') {
+    res.status(403).json({ error: 'Admin access required.' });
+    return;
   }
   next();
 }

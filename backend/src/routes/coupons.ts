@@ -18,7 +18,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, adminMiddleware } from '../middleware/auth';
 import { getStorage, getStorageIfInitialized } from '../services/storage';
 import type { CouponData, CouponUsageData } from '../services/storage/types';
 
@@ -349,7 +349,7 @@ router.post('/apply', authMiddleware, async (req: Request, res: Response) => {
 // ──── GET /api/coupons ──────────────────────────────────────────────────
 // List all coupons (admin only)
 
-router.get('/', authMiddleware, async (req: Request, res: Response) => {
+router.get('/', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
     const store = getStore();
     const coupons = await store.loadAllCoupons();
@@ -361,9 +361,9 @@ router.get('/', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // ──── POST /api/coupons ─────────────────────────────────────────────────
-// Create a new coupon
+// Create a new coupon (admin only)
 
-router.post('/', authMiddleware, async (req: Request, res: Response) => {
+router.post('/', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
     const { code, type, value, trialDays, minPlanTier, maxUses, expiresAt, description } = req.body;
 
@@ -430,9 +430,9 @@ router.get('/:code', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // ──── PUT /api/coupons/:code ────────────────────────────────────────────
-// Update a coupon
+// Update a coupon (admin only)
 
-router.put('/:code', authMiddleware, async (req: Request, res: Response) => {
+router.put('/:code', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
     const store = getStore();
     const code = req.params.code as string;
@@ -467,8 +467,9 @@ router.put('/:code', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // ──── DELETE /api/coupons/:code ─────────────────────────────────────────
+// Delete a coupon (admin only)
 
-router.delete('/:code', authMiddleware, async (req: Request, res: Response) => {
+router.delete('/:code', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
     const store = getStore();
     const code = req.params.code as string;
@@ -488,9 +489,9 @@ router.delete('/:code', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // ──── POST /api/coupons/seed ────────────────────────────────────────────
-// Seed default coupons (dev/admin only)
+// Seed default coupons (admin only)
 
-router.post('/seed', authMiddleware, async (_req: Request, res: Response) => {
+router.post('/seed', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
   try {
     const store = getStore();
     let seededCount = 0;
