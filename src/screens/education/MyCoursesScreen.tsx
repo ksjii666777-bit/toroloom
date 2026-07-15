@@ -183,6 +183,14 @@ export default function MyCoursesScreen({ navigation }: any) {
           </View>
         </AnimatedPressable>
 
+        {/* ── Review Status Section ── */}
+        <ReviewStatusSection
+          courses={myCourses}
+          colors={colors}
+          styles={styles}
+          navigation={navigation}
+        />
+
         {/* Filter Chips */}
         <View style={styles.filterRow}>
           {(['all', 'published', 'draft', 'archived'] as const).map(filter => {
@@ -318,6 +326,142 @@ function CourseCard({
           </AnimatedPressable>
         </View>
       </View>
+    </View>
+  );
+}
+
+// ─── Review Status Section ────────────────────────────────────────────
+
+function ReviewStatusSection({
+  courses, colors, styles, navigation,
+}: {
+  courses: UserGeneratedCourse[];
+  colors: any;
+  styles: any;
+  navigation: any;
+}) {
+  // Derive review status categories
+  const pendingReview = useMemo(() =>
+    courses.filter(c => c.submittedForReview && c.publishStatus === 'draft'),
+  [courses]);
+
+  const approved = useMemo(() =>
+    courses.filter(c => c.publishStatus === 'published'),
+  [courses]);
+
+  const rejected = useMemo(() =>
+    courses.filter(c =>
+      !c.submittedForReview &&
+      c.publishStatus === 'draft' &&
+      c.reviewNotes !== undefined &&
+      c.reviewNotes.length > 0
+    ),
+  [courses]);
+
+  const hasReviewActivity = pendingReview.length > 0 || rejected.length > 0;
+
+  // Don't show the section if nothing noteworthy
+  if (!hasReviewActivity) return null;
+
+  return (
+    <View style={styles.reviewSection}>
+      {/* Header */}
+      <View style={styles.reviewHeader}>
+        <Ionicons name="shield-checkmark" size={18} color={colors.warning} />
+        <Text style={styles.reviewTitle}>Review Status</Text>
+      </View>
+
+      {/* Summary chips row */}
+      <View style={styles.reviewChipsRow}>
+        {pendingReview.length > 0 && (
+          <View style={[styles.reviewChip, { backgroundColor: '#FFC107' + '20', borderColor: '#FFC107' + '50' }]}>
+            <View style={[styles.reviewChipDot, { backgroundColor: '#FFC107' }]} />
+            <Text style={[styles.reviewChipText, { color: '#FFC107' }]}>
+              {pendingReview.length} Pending
+            </Text>
+          </View>
+        )}
+        {approved.length > 0 && (
+          <View style={[styles.reviewChip, { backgroundColor: '#00C853' + '20', borderColor: '#00C853' + '50' }]}>
+            <View style={[styles.reviewChipDot, { backgroundColor: '#00C853' }]} />
+            <Text style={[styles.reviewChipText, { color: '#00C853' }]}>
+              {approved.length} Approved
+            </Text>
+          </View>
+        )}
+        {rejected.length > 0 && (
+          <View style={[styles.reviewChip, { backgroundColor: '#FF5252' + '20', borderColor: '#FF5252' + '50' }]}>
+            <View style={[styles.reviewChipDot, { backgroundColor: '#FF5252' }]} />
+            <Text style={[styles.reviewChipText, { color: '#FF5252' }]}>
+              {rejected.length} Rejected
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Pending Review Courses */}
+      {pendingReview.length > 0 && (
+        <View style={styles.reviewGroup}>
+          <Text style={styles.reviewGroupTitle}>
+            🟡 Pending Review
+          </Text>
+          {pendingReview.map(course => (
+            <View key={course.id} style={[styles.reviewCourseCard, { borderLeftColor: '#FFC107' }]}>
+              <View style={styles.reviewCourseRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.reviewCourseTitle}>{course.title}</Text>
+                  <Text style={styles.reviewCourseMeta}>{course.lessonsCount} lessons</Text>
+                </View>
+                <AnimatedPressable
+                  onPress={() => navigation.navigate('CreateCourse', { courseId: course.id })}
+                  haptic="light"
+                  scaleTo={0.92}
+                >
+                  <View style={[styles.reviewActionBtn, { backgroundColor: '#FFC107' + '20' }]}>
+                    <Ionicons name="eye-outline" size={16} color="#FFC107" />
+                  </View>
+                </AnimatedPressable>
+              </View>
+              <Text style={styles.reviewCourseDate}>Submitted {formatRelativeTime(course.updatedAt)}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Rejected Courses */}
+      {rejected.length > 0 && (
+        <View style={styles.reviewGroup}>
+          <Text style={styles.reviewGroupTitle}>
+            ❌ Rejected — Needs Changes
+          </Text>
+          {rejected.map(course => (
+            <View key={course.id} style={[styles.reviewCourseCard, { borderLeftColor: '#FF5252' }]}>
+              <View style={styles.reviewCourseRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.reviewCourseTitle}>{course.title}</Text>
+                  {course.reviewNotes && (
+                    <View style={styles.reviewNotesBox}>
+                      <Ionicons name="chatbubble-ellipses-outline" size={12} color="#FF5252" />
+                      <Text style={styles.reviewNotesText} numberOfLines={3}>
+                        {course.reviewNotes}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <AnimatedPressable
+                  onPress={() => navigation.navigate('CreateCourse', { courseId: course.id })}
+                  haptic="light"
+                  scaleTo={0.92}
+                >
+                  <View style={[styles.reviewActionBtn, { backgroundColor: '#FF5252' + '20' }]}>
+                    <Ionicons name="create-outline" size={16} color="#FF5252" />
+                  </View>
+                </AnimatedPressable>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -514,6 +658,114 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: SPACING.sm,
   },
   actionBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // ── Review Status Styles ──
+  reviewSection: {
+    backgroundColor: colors.bgCard,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.warning,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  reviewTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.md,
+    color: colors.text,
+  },
+  reviewChipsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+    flexWrap: 'wrap',
+  },
+  reviewChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+  },
+  reviewChipDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  reviewChipText: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.xs,
+  },
+  reviewGroup: {
+    marginBottom: SPACING.sm,
+  },
+  reviewGroupTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.sm,
+    color: colors.text,
+    marginBottom: SPACING.sm,
+  },
+  reviewCourseCard: {
+    backgroundColor: colors.bgSecondary,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+    borderLeftWidth: 3,
+  },
+  reviewCourseRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+  },
+  reviewCourseTitle: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: colors.text,
+  },
+  reviewCourseMeta: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  reviewCourseDate: {
+    ...FONTS.regular,
+    fontSize: 10,
+    color: colors.textMuted,
+    marginTop: 4,
+  },
+  reviewNotesBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 4,
+    marginTop: 4,
+    backgroundColor: '#FF5252' + '10',
+    padding: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  reviewNotesText: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.xs,
+    color: colors.textSecondary,
+    lineHeight: 16,
+    flex: 1,
+  },
+  reviewActionBtn: {
     width: 32,
     height: 32,
     borderRadius: 8,
