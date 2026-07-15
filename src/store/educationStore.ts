@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Course, Lesson, VideoProgress, VideoBookmark, CourseCertificate, QuizResult } from '../types';
 import { mockCourses, mockLessons } from '../constants/mockData';
 import { educationApi } from '../services/api/education';
@@ -52,7 +53,9 @@ interface EducationState {
 
 let bookmarkIdCounter = 0;
 
-export const useEducationStore = create<EducationState>((set, get) => ({
+export const useEducationStore = create<EducationState>()(
+  persist(
+    (set, get) => ({
   courses: mockCourses,
   currentLesson: null,
   lessonProgress: {},
@@ -339,4 +342,16 @@ export const useEducationStore = create<EducationState>((set, get) => ({
       return null;
     }
   },
-}));
+}),
+{
+  name: 'toroloom-education',
+  partialize: (state) => ({
+    lessonProgress: state.lessonProgress,
+    videoProgress: state.videoProgress,
+    videoBookmarks: state.videoBookmarks,
+    quizHistory: state.quizHistory,
+    certificates: state.certificates,
+  }),
+  }
+  )
+);
