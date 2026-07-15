@@ -432,6 +432,7 @@ export const useUserCourseStore = create<UserCourseState>()(
 
       approveCourse: (courseId, notes) => {
         const now = new Date().toISOString();
+        const course = get().myCourses.find(c => c.id === courseId);
         set(state => ({
           myCourses: state.myCourses.map(c =>
             c.id === courseId
@@ -447,10 +448,26 @@ export const useUserCourseStore = create<UserCourseState>()(
           ),
         }));
         offlineCache.save('userCourses', { courses: get().myCourses }).catch(() => {});
+
+        // Send in-app + push notification about the approval
+        if (course) {
+          import('./notificationStore').then(({ useNotificationStore }) => {
+            useNotificationStore.getState().addNotification({
+              id: `cr_app_${Date.now()}`,
+              type: 'course_review',
+              title: '✅ Course Approved!',
+              message: `Your course "${course.title}" has been approved and is now published! 🎉`,
+              read: false,
+              timestamp: new Date().toISOString(),
+              data: { courseId, action: 'approved', courseTitle: course.title },
+            });
+          }).catch(() => {});
+        }
       },
 
       rejectCourse: (courseId, notes) => {
         const now = new Date().toISOString();
+        const course = get().myCourses.find(c => c.id === courseId);
         set(state => ({
           myCourses: state.myCourses.map(c =>
             c.id === courseId
@@ -465,6 +482,21 @@ export const useUserCourseStore = create<UserCourseState>()(
           ),
         }));
         offlineCache.save('userCourses', { courses: get().myCourses }).catch(() => {});
+
+        // Send in-app + push notification about the rejection
+        if (course) {
+          import('./notificationStore').then(({ useNotificationStore }) => {
+            useNotificationStore.getState().addNotification({
+              id: `cr_rej_${Date.now()}`,
+              type: 'course_review',
+              title: '📝 Course Update — Needs Changes',
+              message: `Your course "${course.title}" was not approved. Feedback: ${notes}`,
+              read: false,
+              timestamp: new Date().toISOString(),
+              data: { courseId, action: 'rejected', courseTitle: course.title, reviewNotes: notes },
+            });
+          }).catch(() => {});
+        }
       },
 
       toggleFeatured: (courseId) => {

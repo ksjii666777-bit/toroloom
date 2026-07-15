@@ -249,6 +249,12 @@ const CHANNELS = {
     description: 'Real-time sentiment shift alerts for your watchlist stocks',
     get importance() { return getImportanceValue('HIGH'); },
   },
+  COURSE_REVIEW: {
+    id: 'course_review',
+    name: 'Course Reviews',
+    description: 'Notifications when your submitted course is approved or rejected',
+    get importance() { return getImportanceValue('HIGH'); },
+  },
 };
 
 async function setupChannels(): Promise<void> {
@@ -261,6 +267,7 @@ async function setupChannels(): Promise<void> {
       await N.setNotificationChannelAsync(CHANNELS.SYSTEM.id, CHANNELS.SYSTEM);
       await N.setNotificationChannelAsync(CHANNELS.PORTFOLIO_ALERTS.id, CHANNELS.PORTFOLIO_ALERTS);
       await N.setNotificationChannelAsync(CHANNELS.SENTIMENT_ALERTS.id, CHANNELS.SENTIMENT_ALERTS);
+      await N.setNotificationChannelAsync(CHANNELS.COURSE_REVIEW.id, CHANNELS.COURSE_REVIEW);
     }
   }
 }
@@ -376,6 +383,7 @@ function getChannelForType(type: AppNotification['type']): string | undefined {
     case 'educational': return CHANNELS.EDUCATIONAL.id;
     case 'portfolio_alert': return CHANNELS.PORTFOLIO_ALERTS.id;
     case 'sentiment_alert': return CHANNELS.SENTIMENT_ALERTS.id;
+    case 'course_review': return CHANNELS.COURSE_REVIEW.id;
     case 'system':
     case 'news':
       return CHANNELS.SYSTEM.id;
@@ -393,6 +401,7 @@ export function getScreenForType(type: AppNotification['type']): string {
     case 'news': return 'Home';
     case 'portfolio_alert': return 'Portfolio';
     case 'sentiment_alert': return 'SentimentAnalysis';
+    case 'course_review': return 'MyCourses';
     default: return 'Home';
   }
 }

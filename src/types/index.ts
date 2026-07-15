@@ -408,7 +408,7 @@ export interface OpenOrder {
 // ============ Notifications ============
 export interface AppNotification {
   id: string;
-  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert' | 'sentiment_alert';
+  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert' | 'sentiment_alert' | 'course_review';
   title: string;
   message: string;
   read: boolean;
