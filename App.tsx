@@ -18,9 +18,17 @@ import './src/utils/debugTextError'; // Debug: catches Text error with component
 // notificationService uses lazy imports internally, so this won't crash if native modules aren't available
 setupChannels().catch(() => {});
 
-// Configure API client to read auth token from store + point to Railway backend
+// ── Configure API client ────────────────────────────────────────────
+// The base URL MUST be set via EXPO_PUBLIC_API_URL in your .env or EAS build profile.
+// When selling to a buyer, they change this single env var to their own Railway domain.
+//
+//   .env.local:     EXPO_PUBLIC_API_URL=https://your-domain.up.railway.app/api
+//   eas.json build:  "EXPO_PUBLIC_API_URL": "https://your-domain.up.railway.app/api"
+//
+// ⚠️  No hardcoded fallback! Buyer MUST set EXPO_PUBLIC_API_URL.
+// The configureApi() call below will warn clearly if it's missing.
 configureApi({
-  baseUrl: 'https://toroloom-production.up.railway.app/api',
+  baseUrl: process.env.EXPO_PUBLIC_API_URL || '',
   getToken: () => useAuthStore.getState().token,
 });
 

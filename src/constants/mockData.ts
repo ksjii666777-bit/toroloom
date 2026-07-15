@@ -2730,7 +2730,7 @@ export const mockReferralStats: ReferralStats = {
   totalEarned: 400,
   pendingRewards: 100,
   rewardPerReferral: 100,
-  shareLink: 'https://toroloom.com/signup?ref=RAHUL12',
+  shareLink: 'App soon available on Play Store',
   rewards: mockReferralRewards,
 };
 

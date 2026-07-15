@@ -69,8 +69,8 @@ export default function ReferralScreen({ navigation }: any) {
     try {
       await shareNative({
         title: 'Join me on Toroloom!',
-        message: `Hey! I'm using Toroloom — the ultimate trading & investing app. Use my referral code "${stats.code}" when you sign up and we both get ₹100! 🚀`,
-        url: stats.shareLink,
+        message: `Hey! I'm using Toroloom — the ultimate trading & investing app. Use my referral code "${stats.code}" when you sign up! 🚀\n\nApp soon available on Play Store.`,
+        url: '',
         authorName: user?.name || 'Toroloom User',
       });
     } catch {
@@ -83,8 +83,8 @@ export default function ReferralScreen({ navigation }: any) {
     const stats = referralStats;
     if (!stats) return;
     const sent = await shareWhatsApp({
-      message: `Hey! Join me on Toroloom — the ultimate investing app! 🚀\n\nUse my code "${stats.code}" and we both get ₹100 free!\n\nDownload now:`,
-      url: stats.shareLink,
+      message: `Hey! Join me on Toroloom — the ultimate investing app! 🚀\n\nUse my code "${stats.code}" and we both get ₹100 free!\n\nApp soon available on Play Store.`,
+      url: '',
       authorName: user?.name,
     });
     if (!sent) {
@@ -97,8 +97,8 @@ export default function ReferralScreen({ navigation }: any) {
     const stats = referralStats;
     if (!stats) return;
     const sent = await shareTelegram({
-      message: `Hey! Join me on Toroloom — the ultimate investing app! 🚀\n\nUse my code "${stats.code}" and we both get ₹100 free!`,
-      url: stats.shareLink,
+      message: `Hey! Join me on Toroloom — the ultimate investing app! 🚀\n\nUse my code "${stats.code}" and we both get ₹100 free!\n\nApp soon available on Play Store.`,
+      url: '',
       authorName: user?.name,
     });
     if (!sent) {

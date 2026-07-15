@@ -54,6 +54,6 @@ export const useReferralStore = create<ReferralState>((set, get) => ({
 
   getShareLink: () => {
     const stats = get().referralStats;
-    return stats?.shareLink || 'https://toroloom.com/signup?ref=';
+    return stats?.shareLink || 'App soon available on Play Store';
   },
 }));

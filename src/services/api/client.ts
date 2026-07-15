@@ -6,15 +6,16 @@
  * Lightweight fetch wrapper used by all stores to talk to the backend.
  * Attaches the auth token automatically and normalises error responses.
  *
- * ACQUISITION COMPLIANCE:
- *   The base URL MUST be set via configureApi() before any API calls.
- *   No hardcoded default — the acquiring organization must explicitly
- *   configure the backend endpoint for their environment.
+ * ACQUISITION COMPLIANCE (White-Label Ready):
+ *   The base URL MUST come from the EXPO_PUBLIC_API_URL environment variable.
+ *   NO hardcoded default — the acquiring organization/configures their
+ *   backend endpoint via .env or EAS Build secrets.
  *
- *   Configure during app initialization:
+ *   Configure during app initialization (App.tsx):
  *     import { configureApi } from './services/api/client';
  *     configureApi({
- *       baseUrl: process.env.EXPO_PUBLIC_API_URL || 'https://api.toroloom.app/api',
+ *       // READ FROM ENV — never hardcode!
+ *       baseUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api',
  *       getToken: () => authStore.getState().token,
  *     });
  *
