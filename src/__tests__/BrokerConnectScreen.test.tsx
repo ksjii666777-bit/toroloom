@@ -26,11 +26,18 @@ const mockGoBack = vi.fn();
 // Mock API
 const mockApiGet = vi.fn();
 const mockApiPost = vi.fn();
+const mockSnapTradeStatus = vi.hoisted(() => vi.fn(() => Promise.resolve({ connected: false })));
 
 vi.mock('../services/api', () => ({
   api: {
     get: (...args: any[]) => mockApiGet(...args),
     post: (...args: any[]) => mockApiPost(...args),
+  },
+  snapTradeApi: {
+    status: mockSnapTradeStatus,
+    register: vi.fn(() => Promise.resolve({ success: true })),
+    getConnectLink: vi.fn(() => Promise.resolve({ oauthUrl: '' })),
+    disconnect: vi.fn(() => Promise.resolve()),
   },
 }));
 
@@ -124,12 +131,15 @@ describe('BrokerConnectScreen — Loading State', () => {
     mockGoBack.mockClear();
     mockApiGet.mockReset();
     mockApiPost.mockReset();
-    // Keep loading — don't resolve the API call
+    // Keep loading — don't resolve any API call
+    mockSnapTradeStatus.mockImplementation(() => new Promise(() => {}));
     mockApiGet.mockImplementationOnce(() => new Promise(() => {}));
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    // Restore snapTradeStatus default
+    mockSnapTradeStatus.mockImplementation(() => Promise.resolve({ connected: false }));
   });
 
   it('renders loading indicator while fetching status', async () => {
@@ -137,7 +147,7 @@ describe('BrokerConnectScreen — Loading State', () => {
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     await advanceAndFlush();
-    expect(getByText('Loading broker status...')).toBeDefined();
+    expect(getByText('Checking connection status...')).toBeDefined();
   });
 
   it('does not render broker cards while loading', async () => {
@@ -178,6 +188,8 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    // Restore snapTradeStatus default
+    mockSnapTradeStatus.mockImplementation(() => Promise.resolve({ connected: false }));
   });
 
   it('renders the header with title and back button', async () => {
@@ -186,7 +198,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
     );
     await advanceAndFlush();
     expect(getByText('Connect Broker')).toBeDefined();
-    expect(getByText('Link your trading account to start trading')).toBeDefined();
+    expect(getByText('1-tap OAuth — no API keys needed')).toBeDefined();
   });
 
   it('renders all three broker cards', async () => {
@@ -259,7 +271,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     await advanceAndFlush();
-    expect(getByText(/Your credentials are encrypted and securely stored/)).toBeDefined();
+    expect(getByText(/SnapTrade provides secure/)).toBeDefined();
   });
 
   it('does NOT render connected banner when disconnected', async () => {
@@ -325,13 +337,13 @@ describe('BrokerConnectScreen — Connected State', () => {
     expect(getByText('Switch to a different broker below')).toBeDefined();
   });
 
-  it('still renders Connect text on non-connected broker cards', async () => {
+  it('still renders OAuth Connect text on non-connected broker cards', async () => {
     const { getByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     await advanceAndFlush();
-    // Zerodha and Groww are not the connected broker (Angel is), so they show Connect
-    expect(getByText('Connect via OAuth')).toBeDefined(); // Zerodha
+    // Non-connected brokers show OAuth Connect badge
+    expect(getByText('OAuth Connect')).toBeDefined();
   });
 });
 

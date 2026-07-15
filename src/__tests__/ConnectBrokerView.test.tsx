@@ -38,6 +38,26 @@ vi.mock('../services/gateway/proxyClient', () => ({
   getBrokerHoldings: (...args: any[]) => mockGetBrokerHoldings(...args),
 }));
 
+// Mock API services used by the component (snapTradeApi, brokerProxyApi, angelConnectApi)
+vi.mock('../services/api', () => ({
+  snapTradeApi: {
+    status: vi.fn(() => Promise.resolve({ connected: false })),
+    register: vi.fn(() => Promise.resolve({ success: true })),
+    getConnectLink: vi.fn(() => Promise.resolve({ oauthUrl: '' })),
+    handleCallback: vi.fn(() => Promise.resolve({ success: true, connection: {} })),
+    disconnect: vi.fn(() => Promise.resolve()),
+  },
+  brokerProxyApi: {
+    getHoldings: vi.fn(() => Promise.resolve({ success: true, data: {} })),
+  },
+  angelConnectApi: {
+    connect: vi.fn(() => Promise.resolve({ success: true })),
+    status: vi.fn(() => Promise.resolve({ connected: false })),
+    holdings: vi.fn(() => Promise.resolve({ success: true, data: [] })),
+    disconnect: vi.fn(() => Promise.resolve()),
+  },
+}));
+
 // Mock SecureSessionSync — renders a simple View
 vi.mock('../components/gateway/SecureSessionSync', () => ({
   default: 'SecureSessionSync',
@@ -88,7 +108,7 @@ describe('ConnectBrokerView — Loading State', () => {
     mockHasValidSession.mockImplementation(() => new Promise(() => {}));
 
     const { getByText } = renderView();
-    expect(getByText('Restoring secure session...')).toBeDefined();
+    expect(getByText('Checking connection status...')).toBeDefined();
   });
 
   it('shows ActivityIndicator while loading', () => {
@@ -113,7 +133,7 @@ describe('ConnectBrokerView — Disconnected State', () => {
   it('renders the subtitle', async () => {
     const { getByText } = renderView();
     await flushPromises();
-    expect(getByText('Zero-API gateway — no API keys required')).toBeDefined();
+    expect(getByText('1-tap OAuth — powered by SnapTrade')).toBeDefined();
   });
 
   it('renders section title', async () => {

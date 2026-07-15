@@ -31,7 +31,7 @@ vi.mock('../constants/mockData', () => ({
   mockStocks: [],
 }));
 
-vi.mock('../services/api', () => ({
+vi.mock('../services/api/market', () => ({
   marketApi: { search: mockSearch, getIndices: mockGetIndices, getStocks: mockGetStocks },
 }));
 
