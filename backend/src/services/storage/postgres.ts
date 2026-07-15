@@ -1011,6 +1011,24 @@ export class PostgreSQLStorage implements StorageEngine {
     return result.rows.length > 0;
   }
 
+  async loadUserCouponUsages(userId: string): Promise<CouponUsageData[]> {
+    if (!this.pool) return [];
+    const result = await this.pool.query(
+      'SELECT * FROM coupon_usage WHERE user_id = $1 ORDER BY used_at DESC',
+      [userId],
+    );
+    return result.rows.map((r: any) => ({
+      id: r.id,
+      code: r.code,
+      userId: r.user_id,
+      planId: r.plan_id,
+      discountAmount: r.discount_amount,
+      originalPrice: r.original_price,
+      finalPrice: r.final_price,
+      usedAt: r.used_at,
+    }));
+  }
+
   private rowToCoupon(row: any): CouponData {
     return {
       code: row.code,

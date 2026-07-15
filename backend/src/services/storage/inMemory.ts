@@ -266,6 +266,12 @@ export class InMemoryStorage implements StorageEngine {
     );
   }
 
+  async loadUserCouponUsages(userId: string): Promise<CouponUsageData[]> {
+    return this.couponUsages
+      .filter(u => u.userId === userId)
+      .sort((a, b) => new Date(b.usedAt).getTime() - new Date(a.usedAt).getTime());
+  }
+
   // ──── Subscriptions ────
   private subscriptions = new Map<string, UserSubscriptionData>();
 

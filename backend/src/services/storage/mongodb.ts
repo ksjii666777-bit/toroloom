@@ -503,6 +503,13 @@ export class MongoDBStorage implements StorageEngine {
     return !!doc;
   }
 
+  async loadUserCouponUsages(userId: string): Promise<CouponUsageData[]> {
+    if (!this.db) return [];
+    const col = this.db.collection<CouponUsageData & { _id?: string }>('coupon_usage');
+    const docs = await col.find({ userId } as any).sort({ usedAt: -1 }).toArray();
+    return docs.map(({ _id, ...data }) => data as CouponUsageData);
+  }
+
   // ──── Badge Counts ────
 
   async loadBadgeCount(userId: string): Promise<number> {

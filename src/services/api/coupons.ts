@@ -133,6 +133,18 @@ export const couponApi = {
   },
 
   /**
+   * Get coupon usage history for the current user.
+   */
+  async getUserUsageHistory(): Promise<CouponUsageDisplay[]> {
+    try {
+      const response: any = await api.get(`${BASE}/usage`);
+      return (response as { usages: CouponUsageDisplay[] }).usages || [];
+    } catch {
+      return [];
+    }
+  },
+
+  /**
    * Seed default coupons (dev only).
    */
   async seedCoupons(): Promise<number> {
@@ -144,3 +156,15 @@ export const couponApi = {
     }
   },
 };
+
+/** Display-friendly coupon usage returned from /usage endpoint */
+export interface CouponUsageDisplay {
+  id: string;
+  code: string;
+  userId: string;
+  planId: string;
+  discountAmount: number;
+  originalPrice: number;
+  finalPrice: number;
+  usedAt: string;
+}

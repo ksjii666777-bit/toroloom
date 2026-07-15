@@ -34,6 +34,7 @@ let _couponStore: {
   incrementCouponUsage(code: string): Promise<void>;
   recordCouponUsage(usage: CouponUsageData): Promise<void>;
   hasUserUsedCoupon(code: string, userId: string): Promise<boolean>;
+  loadUserCouponUsages(userId: string): Promise<CouponUsageData[]>;
 } | null = null;
 
 /**
@@ -78,6 +79,12 @@ class InMemoryCouponStore {
     return this.usages.some(
       u => u.code.toUpperCase() === code.toUpperCase() && u.userId === userId
     );
+  }
+
+  async loadUserCouponUsages(userId: string): Promise<CouponUsageData[]> {
+    return this.usages
+      .filter(u => u.userId === userId)
+      .sort((a, b) => new Date(b.usedAt).getTime() - new Date(a.usedAt).getTime());
   }
 }
 
@@ -163,6 +170,7 @@ export function configureCouponPersistence(storage: {
   incrementCouponUsage(code: string): Promise<void>;
   recordCouponUsage(usage: CouponUsageData): Promise<void>;
   hasUserUsedCoupon(code: string, userId: string): Promise<boolean>;
+  loadUserCouponUsages(userId: string): Promise<CouponUsageData[]>;
 }): void {
   _couponStore = storage;
 }
@@ -343,6 +351,22 @@ router.post('/apply', authMiddleware, async (req: Request, res: Response) => {
   } catch (error: unknown) {
     console.error('[Coupons] /apply error:', error);
     res.status(500).json({ error: 'Failed to apply coupon.' });
+  }
+});
+
+// ──── GET /api/coupons/usage ─────────────────────────────────────────────
+// Get coupon usage history for the current user
+// IMPORTANT: Must be defined BEFORE /:code to avoid Express matching "usage" as :code
+
+router.get('/usage', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const store = getStore();
+    const usages = await store.loadUserCouponUsages(userId);
+    res.json({ usages });
+  } catch (error: unknown) {
+    console.error('[Coupons] GET /usage error:', error);
+    res.status(500).json({ error: 'Failed to load coupon usage history.' });
   }
 });
 

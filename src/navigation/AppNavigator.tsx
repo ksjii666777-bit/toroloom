@@ -64,6 +64,7 @@ import NotificationPreferencesScreen from '../screens/settings/NotificationPrefe
 import PortfolioAlertsScreen from '../screens/settings/PortfolioAlertsScreen';
 import SubscriptionScreen from '../screens/settings/SubscriptionScreen';
 import AvailableCouponsScreen from '../screens/settings/AvailableCouponsScreen';
+import CouponHistoryScreen from '../screens/settings/CouponHistoryScreen';
 import PaymentHistoryScreen from '../screens/payments/PaymentHistoryScreen';
 import AddFundsScreen from '../screens/funds/AddFundsScreen';
 import WithdrawScreen from '../screens/funds/WithdrawScreen';
@@ -506,6 +507,7 @@ export default function AppNavigator() {
             <Stack.Screen name="PortfolioAlerts" component={PortfolioAlertsScreen} />
             <Stack.Screen name="Subscription" component={SubscriptionScreen} />
             <Stack.Screen name="AvailableCoupons" component={AvailableCouponsScreen} />
+            <Stack.Screen name="CouponHistory" component={CouponHistoryScreen} />
             <Stack.Screen name="PaymentHistory" component={PaymentHistoryScreen} />
             <Stack.Screen name="AddFunds" component={AddFundsScreen} />
             <Stack.Screen name="Withdraw" component={WithdrawScreen} />

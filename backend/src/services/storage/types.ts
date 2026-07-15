@@ -298,6 +298,9 @@ export interface StorageEngine {
   /** Check if a user has already used a coupon code. */
   hasUserUsedCoupon(code: string, userId: string): Promise<boolean>;
 
+  /** Load all coupon usages for a user (history). */
+  loadUserCouponUsages(userId: string): Promise<CouponUsageData[]>;
+
   // ──── Lifecycle ────
 
   /** Initialize the storage backend (connect, create tables, etc.). */

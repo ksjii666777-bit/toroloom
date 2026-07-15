@@ -329,6 +329,13 @@ export default function SubscriptionScreen({ navigation }: any) {
                     <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                   </View>
                 </AnimatedPressable>
+                <AnimatedPressable onPress={() => navigation.navigate('CouponHistory')} haptic="light" scaleTo={0.97}>
+                  <View style={[styles.couponToggle, { marginTop: 8, borderColor: colors.textMuted + '20' }]}>
+                    <Ionicons name="receipt-outline" size={16} color={colors.textSecondary} />
+                    <Text style={[styles.couponToggleText, { color: colors.textSecondary }]}>My used coupons</Text>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                  </View>
+                </AnimatedPressable>
               </>
             ) : couponResult && couponResult.valid ? (
               <Animated.View style={styles.couponApplied}>
