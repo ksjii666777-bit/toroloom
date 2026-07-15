@@ -720,6 +720,87 @@ const createFormStyles = (colors: any) =>
   });
 
 // ═══════════════════════════════════════════════════════════════
+//  BAR CHART COMPONENT
+// ═══════════════════════════════════════════════════════════════
+
+function UsageBarChart({
+  data,
+  color,
+  maxValue,
+  height = 100,
+  barWidth = 24,
+  label,
+  formatLabel,
+}: {
+  data: { label: string; value: number }[];
+  color: string;
+  maxValue?: number;
+  height?: number;
+  barWidth?: number;
+  label?: string;
+  formatLabel?: (value: number) => string;
+}) {
+  const { colors } = useTheme();
+  const max = maxValue ?? Math.max(...data.map(d => d.value), 1);
+
+  return (
+    <View style={{ marginHorizontal: SPACING.xl, marginBottom: SPACING.lg }}>
+      {label && (
+        <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.sm, color: colors.text, textTransform: 'uppercase', letterSpacing: 1, marginBottom: SPACING.md }}>
+          {label}
+        </Text>
+      )}
+      <View style={{ backgroundColor: colors.bgCard, borderRadius: BORDER_RADIUS.md, borderWidth: 1, borderColor: colors.border, padding: SPACING.md }}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height }}>
+          {data.map((item, i) => {
+            const barH = Math.max(4, (item.value / max) * (height - 20));
+            return (
+              <Animated.View
+                key={item.label}
+                entering={FadeInDown.delay(i * 60).springify()}
+                style={{ flex: 1, alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}
+              >
+                {/* Value label */}
+                <Text style={{ ...FONTS.medium, fontSize: 9, color: colors.text, marginBottom: 4 }}>
+                  {formatLabel ? formatLabel(item.value) : item.value}
+                </Text>
+                {/* Bar */}
+                <View
+                  style={{
+                    width: '100%',
+                    maxWidth: barWidth,
+                    height: barH,
+                    borderRadius: 4,
+                    backgroundColor: color,
+                    opacity: 0.8 + (item.value / max) * 0.2,
+                    minWidth: 8,
+                  }}
+                />
+                {/* X-axis label */}
+                <Text
+                  style={{
+                    ...FONTS.regular,
+                    fontSize: 8,
+                    color: colors.textMuted,
+                    marginTop: 6,
+                    textAlign: 'center',
+                    transform: [{ rotate: '-45deg' }],
+                    width: 40,
+                  }}
+                  numberOfLines={1}
+                >
+                  {item.label}
+                </Text>
+              </Animated.View>
+            );
+          })}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  USAGE ANALYTICS TAB
 // ═══════════════════════════════════════════════════════════════
 
@@ -804,8 +885,81 @@ function UsageAnalyticsTab({
         </Text>
       </View>
 
+      {/* ─── Usage Over Time Chart ─── */}
+      {(() => {
+        // Group usages by month (last 6 months)
+        const now = new Date();
+        const monthLabels: string[] = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          monthLabels.push(d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' }));
+        }
+        const monthlyCounts: Record<string, number> = {};
+        monthLabels.forEach(m => { monthlyCounts[m] = 0; });
+        for (const usage of usages) {
+          const d = new Date(usage.usedAt);
+          const key = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+          if (monthlyCounts[key] !== undefined) monthlyCounts[key]++;
+        }
+        const monthlyData = monthLabels.map(label => ({ label, value: monthlyCounts[label] || 0 }));
+        return (
+          <UsageBarChart
+            data={monthlyData}
+            color={colors.primary}
+            label="Uses Over Time (Monthly)"
+            formatLabel={(v) => `${v}`}
+          />
+        );
+      })()}
+
+      {/* ─── Per-Coupon Usage Chart ─── */}
+      {(() => {
+        const breakdownData = Object.entries(summary.couponBreakdown)
+          .map(([code, b]) => ({ label: code, value: b.count }))
+          .sort((a, b) => b.value - a.value);
+        const maxCount = breakdownData.length > 0 ? breakdownData[0].value : 1;
+        return (
+          <View style={{ marginHorizontal: SPACING.xl, marginBottom: SPACING.lg }}>
+            <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.sm, color: colors.text, textTransform: 'uppercase', letterSpacing: 1, marginBottom: SPACING.md }}>
+              Per-Coupon Usage
+            </Text>
+            <View style={{ backgroundColor: colors.bgCard, borderRadius: BORDER_RADIUS.md, borderWidth: 1, borderColor: colors.border, padding: SPACING.md }}>
+              {breakdownData.map((item, i) => {
+                const barW = Math.max(4, (item.value / maxCount) * 100);
+                return (
+                  <Animated.View
+                    key={item.label}
+                    entering={FadeInDown.delay(i * 40).springify()}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}
+                  >
+                    <Text style={{ ...FONTS.mono, fontSize: 10, fontWeight: '700', width: 60, color: colors.text, letterSpacing: 1 }}>
+                      {item.label}
+                    </Text>
+                    <View style={{ flex: 1, height: 20, backgroundColor: colors.border, borderRadius: 4, overflow: 'hidden' }}>
+                      <Animated.View
+                        entering={FadeInDown.delay(i * 50).springify()}
+                        style={{
+                          width: `${barW}%`,
+                          height: '100%',
+                          borderRadius: 4,
+                          backgroundColor: '#8B5CF6',
+                          opacity: 0.7 + (item.value / maxCount) * 0.3,
+                        }}
+                      />
+                    </View>
+                    <Text style={{ ...FONTS.medium, fontSize: 10, color: colors.text, width: 30, textAlign: 'right' }}>
+                      {item.value}
+                    </Text>
+                  </Animated.View>
+                );
+              })}
+            </View>
+          </View>
+        );
+      })()}
+
       {/* Per-Coupon Breakdown */}
-      <Text style={[s.listTitle, { color: colors.text, marginTop: 8 }]}>Per-Coupon Breakdown</Text>
+      <Text style={[s.listTitle, { color: colors.text, marginTop: 8 }]}>Per-Coupon Details</Text>
       {breakdownEntries.map(([code, breakdown], i) => (
         <Animated.View
           key={code}
