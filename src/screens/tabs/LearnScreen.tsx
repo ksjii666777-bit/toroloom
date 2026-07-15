@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useEducationStore } from '../../store/educationStore';
+import { mockLearningPaths } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -127,6 +128,110 @@ export default function LearnScreen({ navigation }: any) {
             </ScrollView>
           </View>
         )}
+
+        {/* Learning Paths */}
+        <View style={{ paddingHorizontal: SPACING.xl, marginBottom: SPACING.lg }}>
+          <AnimatedPressable
+            onPress={() => navigation.navigate('LearningPaths')}
+            haptic="medium"
+            scaleTo={0.97}
+          >
+            <LinearGradient
+              colors={['#6C63FF', '#3F3D99']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                padding: SPACING.xl,
+                borderRadius: BORDER_RADIUS.lg,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.md }}>
+                <Text style={{ fontSize: 36 }}>🛤️</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>
+                    Learning Paths
+                  </Text>
+                  <Text style={{ ...FONTS.regular, fontSize: FONTS.size.sm, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
+                    Curated sequences to master the markets
+                  </Text>
+                </View>
+                <Ionicons name="arrow-forward-circle" size={28} color="rgba(255,255,255,0.9)" />
+              </View>
+
+              {/* Stats row */}
+              <View style={{ flexDirection: 'row', marginTop: SPACING.lg, gap: SPACING.sm }}>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{mockLearningPaths.length}</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Paths</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{mockLearningPaths.reduce((s, p) => s + p.courseIds.length, 0)}</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Courses</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{mockLearningPaths.reduce((s, p) => s + p.totalLessons, 0)}</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Lessons</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{(mockLearningPaths.reduce((s, p) => s + p.enrolledCount, 0) / 1000).toFixed(0)}K</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Learners</Text>
+                </View>
+              </View>
+            </LinearGradient>
+          </AnimatedPressable>
+        </View>
+
+        {/* My Courses */}
+        <View style={{ paddingHorizontal: SPACING.xl, marginBottom: SPACING.lg }}>
+          <AnimatedPressable
+            onPress={() => navigation.navigate('MyCourses')}
+            haptic="medium"
+            scaleTo={0.97}
+          >
+            <LinearGradient
+              colors={['#00C9A7', '#009688']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                padding: SPACING.xl,
+                borderRadius: BORDER_RADIUS.lg,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.md }}>
+                <Text style={{ fontSize: 36 }}>📝</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>
+                    My Courses
+                  </Text>
+                  <Text style={{ ...FONTS.regular, fontSize: FONTS.size.sm, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
+                    Create and manage your own courses
+                  </Text>
+                </View>
+                <Ionicons name="add-circle" size={28} color="rgba(255,255,255,0.9)" />
+              </View>
+
+              {/* Features row */}
+              <View style={{ flexDirection: 'row', marginTop: SPACING.lg, gap: SPACING.sm }}>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Ionicons name="create-outline" size={18} color="rgba(255,255,255,0.9)" />
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Create</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Ionicons name="document-text-outline" size={18} color="rgba(255,255,255,0.9)" />
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Lessons</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Ionicons name="help-circle-outline" size={18} color="rgba(255,255,255,0.9)" />
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Quizzes</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
+                  <Ionicons name="globe-outline" size={18} color="rgba(255,255,255,0.9)" />
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Publish</Text>
+                </View>
+              </View>
+            </LinearGradient>
+          </AnimatedPressable>
+        </View>
 
         {/* All Courses */}
         <View style={styles.allCoursesSection}>
