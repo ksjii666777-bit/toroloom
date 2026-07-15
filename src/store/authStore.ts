@@ -11,6 +11,8 @@ interface AuthState {
   token: string | null;
   isLoggedIn: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
+  setIsAdmin: (value: boolean) => void;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (name: string, email: string, phone: string, password: string, referralSource?: string) => Promise<boolean>;
   logout: () => void;
@@ -23,6 +25,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   isLoggedIn: false,
   isLoading: false,
+  isAdmin: false,
+
+  setIsAdmin: (value) => set({ isAdmin: value }),
 
   loadStoredAuth: async () => {
     try {

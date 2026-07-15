@@ -16,6 +16,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -40,6 +41,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuthStore } from '../../store/authStore';
 import { couponApi } from '../../services/api/coupons';
 import type { CouponCode } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -724,6 +726,20 @@ const createFormStyles = (colors: any) =>
 export default function AdminCouponManagementScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const isAdmin = useAuthStore(s => s.isAdmin);
+
+  // ─── Admin guard ───────────────────────────────────────────
+  useFocusEffect(
+    useCallback(() => {
+      if (!isAdmin) {
+        Alert.alert(
+          'Access Denied',
+          'Only administrators can access the Coupon Manager.',
+          [{ text: 'Go Back', onPress: () => navigation.goBack() }],
+        );
+      }
+    }, [isAdmin, navigation]),
+  );
 
   const [coupons, setCoupons] = useState<CouponCode[]>([]);
   const [loading, setLoading] = useState(true);

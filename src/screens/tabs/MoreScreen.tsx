@@ -79,7 +79,7 @@ const menuItems = [
     { icon: 'phone-landscape', label: 'Landscape', color: '#06B6D4', screen: 'LandscapeMode' },
     { icon: 'key', label: 'API Keys', color: '#3B82F6', screen: 'ApiKeys' },
     { icon: 'link', label: 'Webhooks', color: '#10B981', screen: 'Webhooks' },
-    { icon: 'pricetags', label: 'Coupon Manager', color: '#8B5CF6', screen: 'AdminCouponManager' },
+    { icon: 'pricetags', label: 'Coupon Manager', color: '#8B5CF6', screen: 'AdminCouponManager', adminOnly: true as const },
   ]},
 ];
 
@@ -94,7 +94,7 @@ const quickActions = [
 export default function MoreScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAdmin } = useAuthStore();
   const { userLevel, badges } = useGamificationStore();
   const resetOnboarding = useOnboardingStore(s => s.resetOnboarding);
   const unlockedCount = badges.filter(b => b.unlocked).length;
@@ -117,7 +117,16 @@ export default function MoreScreen({ navigation }: any) {
     duration: 400,
   });
 
-  const { animatedStyles: menuSectionStyles } = useStaggeredAnimation(menuItems.length, {
+  // Filter out admin-only items if user is not admin
+  const visibleMenuItems = useMemo(
+    () => menuItems.map(section => ({
+      ...section,
+      items: section.items.filter((item: any) => !(item as any).adminOnly || isAdmin),
+    })).filter(section => section.items.length > 0),
+    [isAdmin],
+  );
+
+  const { animatedStyles: menuSectionStyles } = useStaggeredAnimation(visibleMenuItems.length, {
     initialDelay: 150,
     staggerDelay: 120,
     duration: 450,
@@ -269,7 +278,7 @@ export default function MoreScreen({ navigation }: any) {
         </Card>
 
         {/* Menu Sections */}
-        {menuItems.map((section, idx) => (
+        {visibleMenuItems.map((section, idx) => (
           <Animated.View key={`section_${idx}`} style={[styles.menuCardSection, menuSectionStyles[idx]]}>
             <View style={styles.menuCard}>
               <Text style={styles.menuSectionTitle}>{section.section}</Text>
