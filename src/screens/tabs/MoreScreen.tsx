@@ -79,6 +79,7 @@ const menuItems = [
     { icon: 'phone-landscape', label: 'Landscape', color: '#06B6D4', screen: 'LandscapeMode' },
     { icon: 'key', label: 'API Keys', color: '#3B82F6', screen: 'ApiKeys' },
     { icon: 'link', label: 'Webhooks', color: '#10B981', screen: 'Webhooks' },
+    { icon: 'pricetags', label: 'Coupon Manager', color: '#8B5CF6', screen: 'AdminCouponManager' },
   ]},
 ];
 
