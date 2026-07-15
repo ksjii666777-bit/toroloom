@@ -55,39 +55,107 @@ vi.mock('@react-native-async-storage/async-storage', () => ({
 
 // ==================== Mock react-native-reanimated ====================
 // ThemeProvider uses useSharedValue, useAnimatedStyle, withTiming, runOnJS, Easing
-vi.mock('react-native-reanimated', () => ({
-  useSharedValue: (initial: any) => ({ value: initial }),
-  useAnimatedStyle: (updater: any) => updater(),
-  useAnimatedProps: (updater: any) => updater(),
-  withTiming: (toValue: any, _config: any, callback?: any) => {
-    callback?.(true);
-    return toValue;
-  },
-  useAnimatedReaction: (_prepare: any, _react: any) => {},
-  withDelay: (_delay: number, value: any) => value,
-  interpolate: (_value: number, _inputRange: number[], _outputRange: number[]) => _outputRange[0],
-  interpolateColor: (_value: number, _inputRange: number[], _outputRange: string[]) => _outputRange[0],
-  withSpring: (toValue: any) => toValue,
-  withRepeat: (animation: any, _count?: number, _reverse?: boolean) => animation,
-  withSequence: (...animations: any[]) => animations[animations.length - 1],
-  // Deeply chainable animation entry functions using Proxy
-  // Supports: .delay().duration().springify().damping().stiffness()... etc
-  FadeIn: new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => ({}) }) }) }) }),
-  FadeInDown: new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => ({}) }) }) }) }),
-  FadeInUp: new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => ({}) }) }) }) }),
-  BounceIn: new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => new Proxy({}, { get: () => () => ({}) }) }) }) }),
-  runOnJS: (fn: any) => fn,
-  useAnimatedScrollHandler: (handler: any) => handler.onScroll || handler,
-  Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
-  Easing: { in: (e: any) => e, out: (e: any) => e, inOut: (e: any) => e, ease: undefined },
-  default: {
-    View: 'View',
-    Text: 'Text',
-    ScrollView: 'ScrollView',
+// Uses a Proxy wrapper to dynamically handle any animation entry function
+// (FadeIn, FadeInRight, Layout, LinearTransition, ZoomIn, etc.) without
+// needing explicit entries for each one.
+vi.mock('react-native-reanimated', () => {
+  // Shared mock value for all animation entry functions (deeply chainable)
+  const chainedAnimEntry = new Proxy({}, {
+    get: () => () => new Proxy({}, {
+      get: () => () => new Proxy({}, {
+        get: () => () => new Proxy({}, {
+          get: () => () => ({})
+        })
+      })
+    })
+  });
+
+  // Base mock object with explicitly required exports
+  const baseMock = {
+    useSharedValue: (initial: any) => ({ value: initial }),
+    useAnimatedStyle: (updater: any) => updater(),
+    useAnimatedProps: (updater: any) => updater(),
+    withTiming: (toValue: any, _config: any, callback?: any) => {
+      callback?.(true);
+      return toValue;
+    },
+    useAnimatedReaction: (_prepare: any, _react: any) => {},
+    withDelay: (_delay: number, value: any) => value,
+    interpolate: (_value: number, _inputRange: number[], _outputRange: number[]) => _outputRange[0],
+    interpolateColor: (_value: number, _inputRange: number[], _outputRange: string[]) => _outputRange[0],
+    withSpring: (toValue: any) => toValue,
+    withRepeat: (animation: any, _count?: number, _reverse?: boolean) => animation,
+    withSequence: (...animations: any[]) => animations[animations.length - 1],
+    runOnJS: (fn: any) => fn,
+    useAnimatedScrollHandler: (handler: any) => handler.onScroll || handler,
+    Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
+    Easing: { in: (e: any) => e, out: (e: any) => e, inOut: (e: any) => e, ease: undefined },
+    default: {
+      View: 'View',
+      Text: 'Text',
+      ScrollView: 'ScrollView',
+      createAnimatedComponent: (Component: any) => Component,
+    },
     createAnimatedComponent: (Component: any) => Component,
-  },
-  createAnimatedComponent: (Component: any) => Component,
-}));
+  };
+
+  // Known reanimated animation entry function names (non-exhaustive)
+  // These cover FadeIn*, FadeOut*, SlideIn*, SlideOut*, ZoomIn*, ZoomOut*,
+  // BounceIn*, BounceOut*, FlipIn*, FlipOut*, StretchIn*, StretchOut*,
+  // LightSpeedIn*, LightSpeedOut*, PinwheelIn*, PinwheelOut*, RotateIn*,
+  // RollIn*, RollOut*, Layout, LinearTransition, JumpingTransition, etc.
+  const animEntryNames = new Set<string>([
+    'Layout', 'LinearTransition', 'JumpingTransition', 'SequencedTransition',
+    'FadeIn', 'FadeInDown', 'FadeInUp', 'FadeInLeft', 'FadeInRight',
+    'FadeOut', 'FadeOutDown', 'FadeOutUp', 'FadeOutLeft', 'FadeOutRight',
+    'SlideInDown', 'SlideInUp', 'SlideInLeft', 'SlideInRight',
+    'SlideOutDown', 'SlideOutUp', 'SlideOutLeft', 'SlideOutRight',
+    'ZoomIn', 'ZoomInDown', 'ZoomInUp', 'ZoomInLeft', 'ZoomInRight',
+    'ZoomOut', 'ZoomOutDown', 'ZoomOutUp', 'ZoomOutLeft', 'ZoomOutRight',
+    'BounceIn', 'BounceInDown', 'BounceInUp', 'BounceInLeft', 'BounceInRight',
+    'BounceOut', 'BounceOutDown', 'BounceOutUp', 'BounceOutLeft', 'BounceOutRight',
+    'FlipInXxx', 'FlipInYxx', 'FlipInXxy', 'FlipInYyy',
+    'FlipOutXxx', 'FlipOutYxx', 'FlipOutXxy', 'FlipOutYyy',
+    'StretchInX', 'StretchInY', 'StretchOutX', 'StretchOutY',
+    'LightSpeedInRight', 'LightSpeedInLeft', 'LightSpeedOutRight', 'LightSpeedOutLeft',
+    'PinwheelIn', 'PinwheelOut', 'RotateInDownLeft', 'RotateInDownRight',
+    'RotateInUpLeft', 'RotateInUpRight', 'RotateOutDownLeft', 'RotateOutDownRight',
+    'RotateOutUpLeft', 'RotateOutUpRight', 'RollInLeft', 'RollInRight',
+    'RollOutLeft', 'RollOutRight',
+  ]);
+
+  // Wrap in a Proxy to dynamically serve any animation entry name
+  return new Proxy(baseMock, {
+    get(target, prop) {
+      // If explicitly defined in baseMock, return it
+      if (prop in target) return (target as any)[prop];
+      // If it's a known animation entry name, return the chainable mock
+      if (typeof prop === 'string' && animEntryNames.has(prop)) {
+        return chainedAnimEntry;
+      }
+      return undefined;
+    },
+    has(target, prop) {
+      // Report that known animation entry names exist
+      if (typeof prop === 'string' && animEntryNames.has(prop)) return true;
+      return prop in target;
+    },
+    ownKeys() {
+      // Return both baseMock keys and animation entry names so
+      // vitest's Object.keys() enumeration finds all exports
+      return [...Object.keys(baseMock), ...animEntryNames];
+    },
+    getOwnPropertyDescriptor(_target, prop) {
+      if (typeof prop === 'string' && animEntryNames.has(prop)) {
+        return { configurable: true, enumerable: true, writable: true, value: chainedAnimEntry };
+      }
+      if (prop in baseMock) {
+        return { configurable: true, enumerable: true, writable: true, value: (baseMock as any)[prop] };
+      }
+      return undefined;
+    },
+  });
+});
 
 // ==================== Mock React Native ====================
 // We import the mock from a separate file to avoid vitest trying to parse

@@ -20,7 +20,7 @@
  * ============================================================================
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -107,6 +107,12 @@ export default function UpgradePromptModal() {
 
   // ── Show/Hide Logic ────────────────────────────────────────────────────
 
+  const resetAnimValues = useCallback(() => {
+    backdropOpacity.value = 0;
+    modalScale.value = 0.8;
+    modalTranslateY.value = 60;
+  }, [backdropOpacity, modalScale, modalTranslateY]);
+
   useEffect(() => {
     const wasVisible = prevVisibleRef.current;
     prevVisibleRef.current = visible;
@@ -152,13 +158,7 @@ export default function UpgradePromptModal() {
     return () => {
       glowPulse.value = 0;
     };
-  }, [visible]);
-
-  function resetAnimValues() {
-    backdropOpacity.value = 0;
-    modalScale.value = 0.8;
-    modalTranslateY.value = 60;
-  }
+  }, [visible, backdropOpacity, glowPulse, modalScale, modalTranslateY, resetAnimValues]);
 
   // ── Handlers ────────────────────────────────────────────────────────────
 

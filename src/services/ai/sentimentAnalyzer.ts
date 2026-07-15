@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import type { SentimentSourceBreakdown, SentimentArticle, SentimentDataPoint } from '../../types';
+import type { SentimentSourceBreakdown, SentimentDataPoint} from '../../types';
 
 // ─── Constants ──────────────────────────────────────────────
 

@@ -19,6 +19,7 @@
  */
 
 import TelegramBot from 'node-telegram-bot-api';
+import { saveLink as persistLink, deleteLink as removeLink, loadAllLinks } from './telegramPersistence';
 
 // Logger — uses console directly since no backend logger utility exists
 const log = {
@@ -140,6 +141,11 @@ export function configureTelegramBot(config: TelegramBotConfig): void {
       userLinks.set(pending.userId, link);
       pendingLinks.delete(linkCode);
 
+      // Persist the link to database so it survives server restarts
+      persistLink(pending.userId, { ...link, userId: pending.userId }).catch((err) =>
+        log.warn(`Failed to persist Telegram link for user ${pending.userId}: ${err.message}`),
+      );
+
       await bot!.sendMessage(
         chatId,
         `✅ *Telegram Linked Successfully!* 🎉\n\n` +
@@ -154,6 +160,48 @@ export function configureTelegramBot(config: TelegramBotConfig): void {
       );
 
       log.info(`[TelegramBot] User ${pending.userId} linked to Telegram chat ${chatId} (@${link.username || 'none'})`);
+    });
+
+    // Handle /unlink command — users can unlink directly from Telegram
+    bot.onText(/\/unlink/, async (msg) => {
+      const chatId = msg.chat.id;
+
+      // Find user by chat ID
+      let foundUserId: string | null = null;
+      for (const [uid, link] of userLinks) {
+        if (link.chatId === chatId) {
+          foundUserId = uid;
+          break;
+        }
+      }
+
+      if (!foundUserId) {
+        await bot!.sendMessage(
+          chatId,
+          `❌ *Not linked.*\n\n` +
+          `Your Telegram account is not linked to any Toroloom user.\n` +
+          `Use /start with a link code from the app to connect.`,
+          { parse_mode: 'Markdown' },
+        );
+        return;
+      }
+
+      // Unlink the user
+      userLinks.delete(foundUserId);
+      removeLink(foundUserId).catch((err) =>
+        log.warn(`Failed to remove Telegram link from storage for user ${foundUserId}: ${err.message}`),
+      );
+
+      await bot!.sendMessage(
+        chatId,
+        `🔓 *Telegram Unlinked.*\n\n` +
+        `Your Toroloom account has been disconnected from Telegram.\n` +
+        `You will no longer receive notifications here.\n\n` +
+        `To reconnect, generate a new code from the Toroloom app.`,
+        { parse_mode: 'Markdown' },
+      );
+
+      log.info(`[TelegramBot] User ${foundUserId} unlinked via /unlink command`);
     });
 
     // Handle errors
@@ -348,6 +396,32 @@ export async function sendTestMessage(userId: string): Promise<boolean> {
     `• 📰 Market news & AI insights\n\n` +
     `_Sent via Toroloom Bot_ 🤖`,
   );
+}
+
+/**
+ * Hydrate the in-memory user links cache from persisted storage.
+ * Call this at server startup after configureTelegramPersistence has been wired.
+ * This ensures previously-linked users don't need to re-link after a restart.
+ */
+export async function hydrateUserLinksFromStorage(): Promise<void> {
+  try {
+    const links = await loadAllLinks();
+    let count = 0;
+    for (const link of links) {
+      userLinks.set(link.userId, {
+        chatId: link.chatId,
+        firstName: link.firstName,
+        username: link.username,
+        linkedAt: link.linkedAt,
+      });
+      count++;
+    }
+    if (count > 0) {
+      log.info(`[TelegramBot] Hydrated ${count} user link(s) from storage`);
+    }
+  } catch (err: any) {
+    log.warn(`[TelegramBot] Failed to hydrate links from storage: ${err.message}`);
+  }
 }
 
 /**

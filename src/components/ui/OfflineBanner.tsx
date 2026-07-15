@@ -15,7 +15,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withSpring, withTiming,
 } from 'react-native-reanimated';
@@ -116,7 +116,7 @@ export default function OfflineBanner() {
   // Initialize freshness on mount
   useEffect(() => {
     refreshFreshness();
-  }, []);
+  }, [, refreshFreshness]);
 
   // Register auto-refresh when connectivity is restored
   useEffect(() => {
@@ -247,7 +247,7 @@ export default function OfflineBanner() {
     if (!combinedOffline && pendingCount === 0 && dismissed) {
       setDismissed(false);
     }
-  }, [combinedOffline, pendingCount]);
+  }, [combinedOffline, pendingCount, dismissed]);
 
   const isSnoozed = useCallback(() => {
     if (!dismissed) return false;
@@ -268,7 +268,7 @@ export default function OfflineBanner() {
       translateY.value = withSpring(-80, { stiffness: 120, damping: 14 });
       opacity.value = withTiming(0, { duration: 200 });
     }
-  }, [show]);
+  }, [show, translateY, opacity]);
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -403,10 +403,9 @@ export default function OfflineBanner() {
           ]}
         >
           {/* ── Main Banner Row ── */}
-          <TouchableOpacity
-            activeOpacity={0.7}
+          <Pressable
             onPress={() => setExpanded(prev => !prev)}
-            style={styles.mainRow}
+            style={({ pressed }) => [styles.mainRow, { opacity: pressed ? 0.7 : 1 }]}
           >
             <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
             <View style={styles.textContainer}>
@@ -429,13 +428,13 @@ export default function OfflineBanner() {
               {!syncing && !refreshing && (
                 <>
                   {pendingCount > 0 && (
-                    <TouchableOpacity onPress={handleSync} style={styles.syncBtn} hitSlop={8}>
+                    <Pressable onPress={handleSync} style={styles.syncBtn} hitSlop={8}>
                       <Ionicons name="sync-outline" size={13} color="#0D0D0D" />
-                    </TouchableOpacity>
+                    </Pressable>
                   )}
-                  <TouchableOpacity onPress={handleRefresh} style={styles.refreshBtn} hitSlop={8}>
+                  <Pressable onPress={handleRefresh} style={styles.refreshBtn} hitSlop={8}>
                     <Ionicons name="refresh-outline" size={13} color="#0D0D0D" />
-                  </TouchableOpacity>
+                  </Pressable>
                 </>
               )}
               {(syncing || refreshing) && (
@@ -443,11 +442,11 @@ export default function OfflineBanner() {
                   <ActivityIndicator size="small" color="#0D0D0D" />
                 </View>
               )}
-              <TouchableOpacity onPress={handleDismiss} style={styles.dismissBtn} hitSlop={8}>
+              <Pressable onPress={handleDismiss} style={styles.dismissBtn} hitSlop={8}>
                 <Ionicons name="close" size={14} color="rgba(255,255,255,0.5)" />
-              </TouchableOpacity>
+              </Pressable>
             </View>
-          </TouchableOpacity>
+          </Pressable>
 
           {/* ── Data Freshness Section (expanded) ── */}
           {expanded && (
@@ -486,35 +485,33 @@ export default function OfflineBanner() {
                 <View style={styles.pendingSection}>
                   <View style={styles.freshnessDivider} />
                   <Text style={styles.freshnessTitle}>Pending Sync</Text>
-                  <TouchableOpacity
-                    style={styles.syncAllBtn}
-                    onPress={handleSync}
-                    disabled={syncing}
-                    activeOpacity={0.7}
-                  >
+            <Pressable
+              style={({ pressed }) => [styles.syncAllBtn, pressed && { opacity: 0.7 }]}
+              onPress={handleSync}
+              disabled={syncing}
+            >
                     <Ionicons name="sync-outline" size={14} color="#0D0D0D" />
                     <Text style={styles.syncAllText}>
                       {syncing ? 'Syncing...' : `Sync ${pendingCount} pending`}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               )}
 
               {/* Cache management */}
               <View style={styles.freshnessDivider} />
-              <TouchableOpacity
-                style={styles.cacheRow}
+              <Pressable
+                style={({ pressed }) => [styles.cacheRow, pressed && { opacity: 0.6 }]}
                 onPress={async () => {
                   await offlineCache.clearAll();
                   await refreshFreshness();
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   showToast('Cache cleared', 'info');
                 }}
-                activeOpacity={0.6}
               >
                 <Ionicons name="trash-outline" size={13} color="#EF4444" />
                 <Text style={styles.cacheClearText}>Clear offline cache</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           )}
         </Animated.View>
@@ -535,11 +532,10 @@ export default function OfflineBanner() {
               toast.type === 'error' && styles.toastError,
             ]}
           >
-            <TouchableOpacity
+            <Pressable
               onPress={handleRetry}
               disabled={toast.type !== 'error'}
-              style={styles.toastContent}
-              activeOpacity={0.7}
+              style={({ pressed }) => [styles.toastContent, pressed && { opacity: 0.7 }]}
             >
               <Ionicons
                 name={toast.type === 'success' ? 'checkmark-circle' : toast.type === 'error' ? 'alert-circle' : 'information-circle'}
@@ -558,10 +554,9 @@ export default function OfflineBanner() {
               {toast.type === 'error' && (
                 <Ionicons name="refresh-outline" size={11} color="#EF4444" style={{ marginLeft: 2 }} />
               )}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleToastDismiss} hitSlop={6}>
+            </Pressable>              <Pressable onPress={handleToastDismiss} hitSlop={6}>
               <Ionicons name="close" size={12} color="rgba(255,255,255,0.4)" />
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </Animated.View>
       )}

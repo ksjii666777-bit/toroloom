@@ -33,7 +33,7 @@ export default function Badge({ label, variant = 'primary', size = 'small', anim
     if (animated) {
       scaleAnim.value = withDelay(animationDelay, withSpring(1, { stiffness: 120, damping: 14 }));
     }
-  }, [animated, animationDelay]);
+  }, [animated, animationDelay, scaleAnim]);
 
   return (
     <Animated.View style={[

@@ -15,7 +15,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
+  View, Text, StyleSheet, ScrollView, Pressable, TextInput,
   KeyboardAvoidingView, Platform, RefreshControl, Dimensions,
 } from 'react-native';
 import Animated, {
@@ -58,10 +58,10 @@ function AnimatedLikeButton({
     );
     triggerHaptic();
     onPress();
-  }, [onPress]);
+  }, [onPress, scale]);
 
   return (
-    <TouchableOpacity style={actionBtnStyle} onPress={handlePress} activeOpacity={0.7}>
+    <Pressable style={({pressed}) => [actionBtnStyle, {opacity: pressed ? 0.7 : 1}]} onPress={handlePress}>
       <Animated.View style={animatedStyle}>
         <Ionicons
           name={isLiked ? 'heart' : 'heart-outline'}
@@ -72,7 +72,7 @@ function AnimatedLikeButton({
       <Text style={[actionTextStyle, isLiked && { color: '#FF3B30' }]}>
         {count}
       </Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -91,7 +91,7 @@ function CommentSkeleton() {
     animate();
     const interval = setInterval(animate, 1200);
     return () => clearInterval(interval);
-  }, []);
+  }, [opacity]);
 
   const skeletonStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -181,7 +181,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
       setCommentsLoaded(false);
       fetchComments(postId).finally(() => setCommentsLoaded(true));
     }
-  }, [postId]);
+  }, [postId, fetchComments]);
 
   // ── Handlers ──────────────────────────────────────────────────────────
 
@@ -245,13 +245,13 @@ export default function PostDetailScreen({ navigation, route }: any) {
           <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
             This post may have been deleted or doesn't exist.
           </Text>
-          <TouchableOpacity
+          <Pressable
             style={[styles.goBackBtn, { backgroundColor: colors.primary }]}
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="arrow-back" size={16} color="#FFF" style={{ marginRight: 6 }} />
             <Text style={styles.goBackText}>Go Back</Text>
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
       </View>
     );
@@ -270,13 +270,13 @@ export default function PostDetailScreen({ navigation, route }: any) {
     >
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <View style={[styles.header, { borderBottomColor: colors.divider }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.headerTitle}>Post</Text>
-        <TouchableOpacity onPress={handleShare} style={styles.shareBtn}>
+        <Pressable onPress={handleShare} style={styles.shareBtn}>
           <Ionicons name="share-outline" size={20} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView
@@ -336,16 +336,16 @@ export default function PostDetailScreen({ navigation, route }: any) {
                 actionBtnStyle={styles.actionBtn}
                 actionTextStyle={styles.actionText}
               />
-              <TouchableOpacity style={styles.actionBtn} onPress={handleBookmark}>
+              <Pressable style={styles.actionBtn} onPress={handleBookmark}>
                 <Ionicons
                   name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
                   size={20}
                   color={isBookmarked ? '#FFAB40' : colors.textMuted}
                 />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
+              </Pressable>
+              <Pressable style={styles.actionBtn} onPress={handleShare}>
                 <Ionicons name="share-outline" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </Animated.View>
@@ -389,10 +389,9 @@ export default function PostDetailScreen({ navigation, route }: any) {
                   },
                 ]}
               >
-                <TouchableOpacity
-                  style={styles.commentTouchable}
+                <Pressable
+                  style={({pressed}) => [styles.commentTouchable, {opacity: pressed ? 0.9 : 1}]}
                   onLongPress={() => handleCopyComment(comment.id, comment.content)}
-                  activeOpacity={0.9}
                   delayLongPress={400}
                 >
                   <View style={[styles.commentAvatar, { backgroundColor: colors.primary + '20' }]}>
@@ -424,7 +423,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
                       )}
                     </View>
                   </View>
-                </TouchableOpacity>
+                </Pressable>
               </Animated.View>
             );
           })
@@ -456,7 +455,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
             onChangeText={setCommentText}
             maxLength={MAX_COMMENT_LENGTH}
           />
-          <TouchableOpacity
+          <Pressable
             style={[
               styles.sendBtn,
               {
@@ -475,7 +474,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
             ) : (
               <Ionicons name="send" size={16} color="#FFFFFF" />
             )}
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </KeyboardAvoidingView>

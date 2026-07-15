@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Dimensions, TextInput, ActivityIndicator, LayoutChangeEvent } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Linking, Dimensions, TextInput, ActivityIndicator, LayoutChangeEvent, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -110,9 +110,9 @@ export default function HelpScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={styles.headerContent}>
             <Text style={styles.title}>Help & Support</Text>
             <Text style={styles.subtitle}>We're here to help you</Text>
@@ -133,9 +133,9 @@ export default function HelpScreen({ navigation }: any) {
             returnKeyType="search"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClear}>
+            <Pressable onPress={() => setSearchQuery('')} style={styles.searchClear}>
               <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
 
@@ -143,17 +143,12 @@ export default function HelpScreen({ navigation }: any) {
         <Text style={styles.sectionTitle}>Quick Help</Text>
         <View style={styles.topicsGrid}>
           {quickTopics.map((topic, i) => (
-            <TouchableOpacity
-              key={i}
-              style={styles.topicItem}
-              onPress={() => handleTopicPress(topic)}
-              activeOpacity={0.6}
-            >
+            <Pressable style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
               <View style={[styles.topicIcon, { backgroundColor: topic.color + '20' }]}>
                 <Ionicons name={topic.icon as keyof typeof Ionicons.glyphMap} size={22} color={topic.color} />
               </View>
               <Text style={styles.topicLabel}>{topic.label}</Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
 
@@ -161,10 +156,7 @@ export default function HelpScreen({ navigation }: any) {
         <Text style={styles.sectionTitle}>Contact Us</Text>
         <View style={styles.contactRow}>
           {contactOptions.map((option, i) => (
-            <TouchableOpacity
-              key={i}
-              style={styles.contactCard}
-              onPress={() => handleContact(option)}
+            <Pressable
             >
               <LinearGradient colors={option.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
                 <Ionicons name={option.icon as keyof typeof Ionicons.glyphMap} size={22} color={COLORS.white} />
@@ -172,7 +164,7 @@ export default function HelpScreen({ navigation }: any) {
               <Text style={styles.contactLabel}>{option.label}</Text>
               <Text style={styles.contactDetail}>{option.detail}</Text>
               <Text style={styles.contactHours}>{option.hours}</Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
 
@@ -198,12 +190,7 @@ export default function HelpScreen({ navigation }: any) {
             filteredFaqs.map((faq, i) => {
             const isExpanded = expandedFaq === faq.id;
             return (
-              <TouchableOpacity
-                key={i}
-                style={[styles.faqItem, isExpanded && styles.faqItemExpanded]}
-                onPress={() => toggleFaq(faq.id)}
-                activeOpacity={0.7}
-              >
+              <Pressable style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>
                 <View style={styles.faqQuestionRow}>
                   <Text style={styles.faqQuestion}>{faq.question}</Text>
                   <Ionicons
@@ -217,7 +204,7 @@ export default function HelpScreen({ navigation }: any) {
                     <Text style={styles.faqAnswer}>{faq.answer}</Text>
                   </View>
                 )}
-              </TouchableOpacity>
+              </Pressable>
             );
           })
           ) : (
@@ -245,17 +232,17 @@ export default function HelpScreen({ navigation }: any) {
             </View>
           </View>
           <View style={styles.footerLinks}>
-            <TouchableOpacity style={styles.footerLink}>
+            <Pressable style={styles.footerLink}>
               <Text style={styles.footerLinkText}>Privacy Policy</Text>
-            </TouchableOpacity>
+            </Pressable>
             <View style={styles.footerLinkDot} />
-            <TouchableOpacity style={styles.footerLink}>
+            <Pressable style={styles.footerLink}>
               <Text style={styles.footerLinkText}>Terms of Service</Text>
-            </TouchableOpacity>
+            </Pressable>
             <View style={styles.footerLinkDot} />
-            <TouchableOpacity style={styles.footerLink}>
+            <Pressable style={styles.footerLink}>
               <Text style={styles.footerLinkText}>Licenses</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
           <Text style={styles.copyright}>© 2025 Toroloom. All rights reserved.</Text>
         </View>

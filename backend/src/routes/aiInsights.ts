@@ -9,11 +9,46 @@ import {
   getActiveProviderName,
 } from '../services/ai';
 import type { AIInsight } from '../services/ai';
+import { env } from '../config/env';
 import { insightCache } from '../services/insightCache';
 import { get as cacheGet, set as cacheSet, del as cacheDel, CacheKeys } from '../middleware/cacheService';
 
 const router = Router();
 router.use(authMiddleware);
+
+// GET /api/ai/status — return active AI provider info
+router.get('/status', (_req: Request, res: Response) => {
+  const configured = isAIConfigured();
+  const activeProvider = getActiveProviderName();
+  res.json({
+    configured,
+    activeProvider,
+    availableProviders: [
+      {
+        id: 'openrouter',
+        name: 'OpenRouter',
+        configured: !!env.openRouterApiKey,
+        model: env.openRouterModel,
+        active: env.aiProvider === 'openrouter' || (!env.aiProvider && !!env.openRouterApiKey),
+      },
+      {
+        id: 'google',
+        name: 'Google Gemini',
+        configured: !!env.googleGeminiApiKey,
+        model: env.googleGeminiModel,
+        active: env.aiProvider === 'google',
+      },
+      {
+        id: 'choreo',
+        name: 'Choreo Claude',
+        configured: !!env.choreoClaudeApiKey,
+        model: env.choreoClaudeModel,
+        endpoint: env.choreoClaudeEndpoint,
+        active: env.aiProvider === 'choreo',
+      },
+    ],
+  });
+});
 
 // GET /api/ai/insights
 router.get('/insights', (req: Request, res: Response) => {

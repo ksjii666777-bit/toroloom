@@ -161,7 +161,7 @@ export default function IronLockOverlay() {
       pulseAnim.value = 0;
       glowPulse.value = 0;
     };
-  }, [lockdown.status]);
+  }, [lockdown.status, fadeAnim, glowPulse, pulseAnim, scaleAnim, speak, visible]);
 
   // ── Countdown timer ───────────────────────────────────────
   useEffect(() => {
@@ -190,7 +190,7 @@ export default function IronLockOverlay() {
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, [lockdown.liftsAt]);
+  }, [lockdown.liftsAt, fadeAnim, glowPulse, pulseAnim, scaleAnim, speak, visible]);
 
   if (!visible || (!isLockdown)) return null;
 

@@ -1,21 +1,45 @@
-import React, { createContext, useContext, useMemo, useCallback, useState } from 'react';
+import React, { createContext, useContext, useMemo, useCallback, useState, useEffect } from 'react';
+import { Appearance } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, Easing } from 'react-native-reanimated';
-import { useThemeStore } from '../store/themeStore';
+import { useThemeStore, type ThemeMode, type ThemeOverride } from '../store/themeStore';
 import { COLORS, LIGHT_COLORS, GRADIENTS, SHADOWS as BASE_SHADOWS, ThemeColors } from '../constants/theme';
 
 interface ThemeContextValue {
   isDark: boolean;
   mode: 'dark' | 'light';
+  override: ThemeOverride;
   colors: ThemeColors;
   gradients: typeof GRADIENTS;
   shadows: typeof BASE_SHADOWS;
   toggleTheme: () => void;
+  setOverride: (override: ThemeOverride) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>(null!);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { mode, toggleTheme: storeToggleTheme } = useThemeStore();
+  const { mode, override, toggleTheme: storeToggleTheme, setOverride: storeSetOverride, applySystemScheme } = useThemeStore();
+
+  // Listen for system appearance changes when override === 'system'
+  useEffect(() => {
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      if (colorScheme) {
+        applySystemScheme(colorScheme as ThemeMode);
+      }
+    });
+    return () => subscription.remove();
+  }, [applySystemScheme]);
+
+  // Apply the current system scheme if override is 'system'
+  // Dependencies include override so this re-runs after Zustand persist hydration
+  useEffect(() => {
+    if (override === 'system') {
+      const systemScheme = Appearance.getColorScheme();
+      if (systemScheme) {
+        applySystemScheme(systemScheme as ThemeMode);
+      }
+    }
+  }, [override, applySystemScheme]);
 
   const isDark = mode === 'dark';
   const colors = isDark ? COLORS : LIGHT_COLORS;
@@ -52,7 +76,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         });
       }
     });
-  }, [colors.bg, storeToggleTheme, overlayOpacity]);
+  }, [colors.bg, storeToggleTheme, overlayOpacity, oldBgSV]);
 
   const overlayAnimatedStyle = useAnimatedStyle(() => ({
     position: 'absolute' as const,
@@ -67,11 +91,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<ThemeContextValue>(() => ({
     isDark,
     mode,
+    override,
     colors,
     gradients: GRADIENTS,
     shadows: BASE_SHADOWS,
     toggleTheme,
-  }), [isDark, mode, colors, toggleTheme]);
+    setOverride: storeSetOverride,
+  }), [isDark, mode, override, colors, toggleTheme, storeSetOverride]);
 
   return (
     <ThemeContext.Provider value={value}>

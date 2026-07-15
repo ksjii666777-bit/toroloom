@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable, } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { Stock } from '../../types';
@@ -67,7 +67,7 @@ export default function PeerComparison({
 
       {/* Peer stocks */}
       {peers.map(p => (
-        <TouchableOpacity
+        <Pressable
           key={p.id}
           style={[styles.row, { borderColor: colors.border }]}
           onPress={() => onPeerPress(p.id, p.symbol)}
@@ -83,7 +83,7 @@ export default function PeerComparison({
           <Text style={[styles.cellText, { color: p.changePercent >= 0 ? colors.marketUp : colors.marketDown }]}>
             {p.changePercent >= 0 ? '+' : ''}{p.changePercent.toFixed(2)}%
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       ))}
     </View>
   );

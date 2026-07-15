@@ -44,7 +44,8 @@ import {
   orderPipeline,
   ExecuteOrderParams,
 } from '../services/orderExecution';
-import { OrderActionType, riskEngine } from '../services/riskEngine';
+import { riskEngine } from '../services/riskEngine/RiskEngine';
+import { OrderActionType } from '../services/riskEngine/types';
 import { auditTrail } from '../services/auditTrail';
 
 const router = Router();

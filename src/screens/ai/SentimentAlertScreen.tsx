@@ -13,14 +13,14 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Switch, Modal, Dimensions, Alert,
+  View, Text, StyleSheet, ScrollView,
+  Switch, Modal, Dimensions, Alert, Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, BORDER_RADIUS, FONTS, GRADIENTS } from '../../constants/theme';
+import { SPACING, BORDER_RADIUS, GRADIENTS} from '../../constants/theme';
 import { mockSentimentData } from '../../constants/mockData';
 import {
   getMockAlertRules,
@@ -35,7 +35,7 @@ import { useNotificationStore } from '../../store/notificationStore';
 import type { SentimentAlertRule, SentimentAlertTrigger, SentimentAlertSensitivity, SentimentAlertDirection } from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
 // ─── Sensitivity Config ────────────────────────────────────
 
@@ -90,10 +90,9 @@ function RuleCard({
   const dirOpt = DIRECTION_OPTIONS.find(d => d.key === rule.direction)!;
 
   return (
-    <TouchableOpacity
+    <Pressable
       style={[ruleCardStyles.card, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
       onPress={onPress}
-      activeOpacity={0.7}
     >
       <View style={ruleCardStyles.topRow}>
         <View style={{ flex: 1 }}>
@@ -132,11 +131,11 @@ function RuleCard({
         <Text style={[ruleCardStyles.thresholdLabel, { color: colors.textMuted }]}>
           Threshold: {getSensitivityThreshold(rule.sensitivity)}pt {rule.direction === 'both' ? 'shift' : rule.direction}
         </Text>
-        <TouchableOpacity onPress={onDelete} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <Pressable onPress={onDelete} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Ionicons name="trash-outline" size={16} color={colors.danger || '#EF4444'} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -339,9 +338,9 @@ function AddRuleModal({
         <View style={[modalStyles.content, { backgroundColor: colors.bgSecondary }]}>
           <View style={modalStyles.header}>
             <Text style={[modalStyles.title, { color: colors.text }]}>New Sentiment Alert</Text>
-            <TouchableOpacity onPress={onClose}>
+            <Pressable onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
@@ -351,7 +350,7 @@ function AddRuleModal({
               {availableStocks.map(s => {
                 const isActive = s.symbol === selectedSymbol;
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={s.symbol}
                     onPress={() => setSelectedSymbol(s.symbol)}
                     style={[modalStyles.stockChip, {
@@ -362,7 +361,7 @@ function AddRuleModal({
                     <Text style={[modalStyles.stockChipText, { color: isActive ? '#FFF' : colors.textSecondary }]}>
                       {s.symbol}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })}
             </ScrollView>
@@ -376,7 +375,7 @@ function AddRuleModal({
             </Text>
             <View style={modalStyles.optionsRow}>
               {SENSITIVITY_OPTIONS.map(opt => (
-                <TouchableOpacity
+                <Pressable
                   key={opt.key}
                   onPress={() => setSensitivity(opt.key)}
                   style={[modalStyles.optionCard, {
@@ -387,7 +386,7 @@ function AddRuleModal({
                   <Ionicons name={opt.icon as any} size={20} color={sensitivity === opt.key ? opt.color : colors.textMuted} />
                   <Text style={[modalStyles.optionLabel, { color: sensitivity === opt.key ? opt.color : colors.text }]}>{opt.label}</Text>
                   <Text style={[modalStyles.optionDesc, { color: sensitivity === opt.key ? opt.color + 'CC' : colors.textMuted }]}>{opt.desc}</Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </View>
 
@@ -400,7 +399,7 @@ function AddRuleModal({
                 const isActive = direction === opt.key;
                 const activeColor = opt.key === 'improving' ? '#10B981' : opt.key === 'deteriorating' ? '#EF4444' : '#3B82F6';
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={opt.key}
                     onPress={() => setDirection(opt.key)}
                     style={[modalStyles.optionCard, {
@@ -410,7 +409,7 @@ function AddRuleModal({
                   >
                     <Ionicons name={opt.icon as any} size={20} color={isActive ? activeColor : colors.textMuted} />
                     <Text style={[modalStyles.optionLabel, { color: isActive ? activeColor : colors.text }]}>{opt.label}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })}
             </View>
@@ -629,30 +628,30 @@ export default function SentimentAlertScreen({ navigation }: any) {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Sentiment Alerts</Text>
             <Text style={styles.headerSubtitle}>
               {rules.length} rule{rules.length !== 1 ? 's' : ''} · {unreadTriggerCount > 0 ? `${unreadTriggerCount} new alert${unreadTriggerCount > 1 ? 's' : ''}` : 'No new alerts'}
             </Text>
           </View>
-          <TouchableOpacity onPress={() => setShowAddModal(true)} style={styles.addBtn}>
+          <Pressable onPress={() => setShowAddModal(true)} style={styles.addBtn}>
             <Ionicons name="add" size={24} color={colors.primary} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Tabs */}
         <View style={styles.tabsRow}>
-          <TouchableOpacity
+          <Pressable
             style={[styles.tab, activeTab === 'rules' && styles.tabActive]}
             onPress={() => setActiveTab('rules')}
           >
             <Ionicons name="notifications" size={16} color={activeTab === 'rules' ? colors.primary : colors.textMuted} />
             <Text style={[styles.tabLabel, activeTab === 'rules' && styles.tabLabelActive]}>Rules</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             style={[styles.tab, activeTab === 'history' && styles.tabActive]}
             onPress={() => setActiveTab('history')}
           >
@@ -663,7 +662,7 @@ export default function SentimentAlertScreen({ navigation }: any) {
                 <Text style={styles.badgeCountText}>{unreadTriggerCount}</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -714,17 +713,17 @@ export default function SentimentAlertScreen({ navigation }: any) {
                 Trigger History ({triggers.length})
               </Text>
               {unreadTriggerCount > 0 && (
-                <TouchableOpacity onPress={handleMarkAllRead}>
+                <Pressable onPress={handleMarkAllRead}>
                   <Text style={[styles.markAllRead, { color: colors.primary }]}>Mark all read</Text>
-                </TouchableOpacity>
+                </Pressable>
               )}
             </View>
 
             {triggers.length > 0 ? (
               triggers.map(trigger => (
-                <TouchableOpacity key={trigger.id} onPress={() => markTriggerRead(trigger.id)} activeOpacity={0.9}>
+                <Pressable key={trigger.id} onPress={() => markTriggerRead(trigger.id)} style={({pressed}) => ({opacity: pressed ? 0.9 : 1})}>
                   <TriggerItem trigger={trigger} />
-                </TouchableOpacity>
+                </Pressable>
               ))
             ) : (
               <View style={styles.emptyCard}>

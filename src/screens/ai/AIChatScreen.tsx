@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView,
-  Platform, ActivityIndicator,
+  View, Text, StyleSheet, TextInput, FlatList, KeyboardAvoidingView,
+  Platform, ActivityIndicator, Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useMutualFundStore } from '../../store/mutualFundStore';
 import { useAIStore } from '../../store/aiStore';
+import { aiApi } from '../../services/api/ai';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -234,6 +235,16 @@ export default function AIChatScreen({ navigation }: any) {
   ]);
   const [inputText, setInputText] = useState('');
   const [isThinking, setIsThinking] = useState(false);
+  const [activeProvider, setActiveProvider] = useState<string | null>(null);
+
+  // Fetch active AI provider on mount
+  React.useEffect(() => {
+    aiApi.getStatus().then(s => {
+      setActiveProvider(s.activeProvider);
+    }).catch(() => {
+      // Provider info is non-critical — silently fail
+    });
+  }, []);
 
   const handleSend = useCallback(async (text?: string) => {
     const query = (text || inputText).trim();
@@ -290,7 +301,7 @@ export default function AIChatScreen({ navigation }: any) {
             // Simple markdown-like formatting for bold
             const parts = line.split(/(\*\*[^*]+\*\*)/g);
             return (
-              <Text key={i}>
+              <Text key={`chat_${i}`}>
                 {parts.map((part, j) => {
                   if (part.startsWith('**') && part.endsWith('**')) {
                     return <Text key={j} style={{ fontWeight: '700', color: item.role === 'user' ? colors.white : colors.text }}>{part.slice(2, -2)}</Text>;
@@ -317,19 +328,31 @@ export default function AIChatScreen({ navigation }: any) {
     >
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+        <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
           <Ionicons name="arrow-back" size={20} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <View style={styles.headerCenter}>
           <View style={[styles.headerIcon, { backgroundColor: colors.primary + '20' }]}>
             <Ionicons name="bulb" size={18} color={colors.primary} />
           </View>
           <View>
             <Text style={[styles.headerTitle, { color: colors.text }]}>AI Assistant</Text>
-            <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>Portfolio & Market Q&A</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 1 }}>
+              <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>Portfolio & Market Q&A</Text>
+              {activeProvider && (
+                <View style={[styles.providerBadge, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '25' }]}>
+                  <Text style={[styles.providerBadgeText, { color: colors.primary }]} numberOfLines={1}>
+                    {activeProvider === 'Choreo Claude' ? 'Claude' :
+                     activeProvider === 'Google Gemini' ? 'Gemini' :
+                     activeProvider === 'OpenRouter' ? 'OpenRouter' :
+                     activeProvider}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
-        <TouchableOpacity
+        <Pressable
           style={[styles.backBtn, { backgroundColor: colors.bgCard }]}
           onPress={() => setMessages([{
             id: 'welcome',
@@ -339,7 +362,7 @@ export default function AIChatScreen({ navigation }: any) {
           }])}
         >
           <Ionicons name="refresh" size={18} color={colors.textMuted} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Messages */}
@@ -357,14 +380,14 @@ export default function AIChatScreen({ navigation }: any) {
             {messages.length === 1 && (
               <View style={styles.quickGrid}>
                 {SAMPLE_QUESTIONS.map((q, i) => (
-                  <TouchableOpacity
-                    key={i}
+                  <Pressable
+                    key={`chat_${i}`}
                     style={[styles.quickChip, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
                     onPress={() => handleQuickQuestion(q.query)}
                   >
                     <Text style={styles.quickIcon}>{q.icon}</Text>
                     <Text style={[styles.quickLabel, { color: colors.textSecondary }]}>{q.label}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
             )}
@@ -400,7 +423,7 @@ export default function AIChatScreen({ navigation }: any) {
             maxLength={500}
             blurOnSubmit
           />
-          <TouchableOpacity
+          <Pressable
             style={[styles.sendBtn, { backgroundColor: inputText.trim() ? colors.primary : colors.bgCard }]}
             onPress={() => handleSend()}
             disabled={!inputText.trim() || isThinking}
@@ -410,7 +433,7 @@ export default function AIChatScreen({ navigation }: any) {
               size={18}
               color={inputText.trim() ? colors.white : colors.textMuted}
             />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -461,7 +484,18 @@ const createStyles = (colors: any) =>
     headerSubtitle: {
       fontSize: FONTS.size.xs,
       fontFamily: FONTS.regular.fontFamily,
-      marginTop: 1,
+    },
+    providerBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 1,
+      borderRadius: BORDER_RADIUS.xs,
+      borderWidth: 0.5,
+    },
+    providerBadgeText: {
+      fontSize: 9,
+      fontFamily: FONTS.medium.fontFamily,
+      fontWeight: FONTS.medium.fontWeight,
+      letterSpacing: 0.3,
     },
     messagesList: {
       padding: SPACING.lg,

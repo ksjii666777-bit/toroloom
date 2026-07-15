@@ -4,7 +4,7 @@ import {
   Text,
   TextInput,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -95,16 +95,16 @@ export default function EMICalculator() {
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+        <Pressable onPress={() => navigation.goBack()} style={({ pressed: _pressed }) => [styles.backBtn, { backgroundColor: colors.bgCard }]}>
           <Ionicons name="arrow-back" size={20} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <View style={styles.headerCenter}>
           <Ionicons name="trending-up" size={20} color={colors.warning} />
           <Text style={[styles.headerTitle, { color: colors.text }]}>EMI Calculator</Text>
         </View>
-        <TouchableOpacity onPress={handleClear} style={[styles.clearBtn, { backgroundColor: colors.bgCard }]}>
+        <Pressable onPress={handleClear} style={({ pressed: _pressed }) => [styles.clearBtn, { backgroundColor: colors.bgCard }]}>
           <Ionicons name="refresh" size={18} color={colors.textMuted} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView
@@ -204,7 +204,7 @@ export default function EMICalculator() {
             />
             <View style={styles.presetRow}>
               {[1000000, 3000000, 5000000, 10000000].map((amt) => (
-                <TouchableOpacity
+                <Pressable
                   key={amt}
                   style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: loanAmount === String(amt) ? colors.primary : colors.border }]}
                   onPress={() => setLoanAmount(String(amt))}
@@ -212,7 +212,7 @@ export default function EMICalculator() {
                   <Text style={[styles.presetChipText, { color: loanAmount === String(amt) ? colors.primary : colors.textMuted }]}>
                     {amt >= 10000000 ? `₹${amt/10000000}Cr` : `₹${amt/100000}L`}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </View>
           </View>
@@ -229,13 +229,13 @@ export default function EMICalculator() {
             />
             <View style={styles.presetRow}>
               {[7, 8.5, 9, 10.5].map((r) => (
-                <TouchableOpacity
+                <Pressable
                   key={r}
                   style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: interestRate === String(r) ? colors.primary : colors.border }]}
                   onPress={() => setInterestRate(String(r))}
                 >
                   <Text style={[styles.presetChipText, { color: interestRate === String(r) ? colors.primary : colors.textMuted }]}>{r}%</Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </View>
           </View>
@@ -252,7 +252,7 @@ export default function EMICalculator() {
             />
             <View style={styles.presetRow}>
               {[12, 24, 60, 120].map((m) => (
-                <TouchableOpacity
+                <Pressable
                   key={m}
                   style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: tenureMonths === String(m) ? colors.primary : colors.border }]}
                   onPress={() => setTenureMonths(String(m))}
@@ -260,7 +260,7 @@ export default function EMICalculator() {
                   <Text style={[styles.presetChipText, { color: tenureMonths === String(m) ? colors.primary : colors.textMuted }]}>
                     {m >= 12 ? `${m / 12}Y` : `${m}M`}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </View>
           </View>

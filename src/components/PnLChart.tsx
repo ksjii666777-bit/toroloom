@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Dimensions,
+  Pressable} from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Line, Rect, Text as SvgText, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
@@ -52,7 +53,7 @@ export default function PnLChart({
       fadeAnim.value = withTiming(1, { duration: 400 });
     }
     setPrevDataLength(totalLen);
-  }, [data.length, streamData.length, autoRefresh]);
+  }, [data.length, streamData.length, autoRefresh, fadeAnim, prevDataLength, setPrevDataLength]);
 
   // Merge historical data with stream data (stream overrides for duplicate dates)
   const mergedData = useMemo(() => {
@@ -73,33 +74,27 @@ export default function PnLChart({
     return mergedData.filter(d => new Date(d.date) >= cutoff);
   }, [mergedData, timeframe]);
 
-  if (!filteredData || filteredData.length < 2) {
-    return (
-      <View style={[styles.container, { height }]}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Not enough data for chart</Text>
-        </View>
-      </View>
-    );
-  }
-
+  // ── Compute chart metrics unconditionally (move before early returns) ──
   const padding = { top: 20, right: 16, bottom: 36, left: 60 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
+  // Price stats computed unconditionally
   const prices = filteredData.map(d => d.cumulativePnl);
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
+  const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+  const maxPrice = prices.length > 0 ? Math.max(...prices) : 1;
   const priceRange = (maxPrice - minPrice) || 1;
   const padding2 = priceRange * 0.08;
   const chartMin = minPrice - padding2;
   const chartMax = maxPrice + padding2;
   const chartRange = chartMax - chartMin;
 
-  const getX = (i: number) => padding.left + (i / (filteredData.length - 1)) * chartWidth;
-  const getY = (price: number) => padding.top + ((chartMax - price) / chartRange) * chartHeight;
+  const getX = useCallback((i: number) => padding.left + (i / Math.max(filteredData.length - 1, 1)) * chartWidth,
+    [padding.left, filteredData.length, chartWidth]);
+  const getY = useCallback((price: number) => padding.top + ((chartMax - price) / chartRange) * chartHeight,
+    [padding.top, chartMax, chartRange, chartHeight]);
 
-  // Generate smooth path
+  // Generate smooth path (still wrapped in useMemo but now before early returns)
   const linePath = useMemo(() => {
     if (filteredData.length < 2) return '';
     let path = `M ${getX(0)} ${getY(filteredData[0].cumulativePnl)}`;
@@ -111,16 +106,16 @@ export default function PnLChart({
       path += ` C ${cp1x} ${y1}, ${cp2x} ${y2}, ${x2} ${y2}`;
     }
     return path;
-  }, [filteredData]);
+  }, [filteredData, getX, getY]);
 
   // Generate fill path
   const fillPath = useMemo(() => {
     if (!linePath) return '';
-    const lastX = getX(filteredData.length - 1);
+    const lastX = getX(Math.max(filteredData.length - 1, 0));
     const firstX = getX(0);
     const bottomY = padding.top + chartHeight;
     return `${linePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
-  }, [linePath, filteredData]);
+  }, [linePath, filteredData, getX, chartHeight, padding.top]);
 
   // Y-axis labels
   const yLabels = useMemo(() => {
@@ -149,6 +144,16 @@ export default function PnLChart({
     }
     return labels;
   }, [filteredData]);
+
+  if (!filteredData || filteredData.length < 2) {
+    return (
+      <View style={[styles.container, { height }]}>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Not enough data for chart</Text>
+        </View>
+      </View>
+    );
+  }
 
   const overallPnl = filteredData[filteredData.length - 1].cumulativePnl;
   const isPositive = overallPnl >= 0;
@@ -243,13 +248,13 @@ export default function PnLChart({
           </View>
         )}
         {TIMEFRAMES.map(tf => (
-          <TouchableOpacity
+          <Pressable
             key={tf}
             style={[styles.timeframeBtn, timeframe === tf && styles.timeframeActive]}
             onPress={() => onTimeframeChange?.(tf)}
           >
             <Text style={[styles.timeframeText, timeframe === tf && styles.timeframeTextActive]}>{tf}</Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
     </Animated.View>

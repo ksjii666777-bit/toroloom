@@ -111,7 +111,7 @@ export default function SkiaCandlestickChart({
   scrollOffset = 0,
   showPatterns = false,
   patterns = [],
-  visibleStartIndex: externalStartIndex,
+  visibleStartIndex: _externalStartIndex,
   padding: externalPadding,
   chartHeight: externalChartHeight,
 }: SkiaCandlestickChartProps) {
@@ -270,7 +270,7 @@ export default function SkiaCandlestickChart({
       const open = point.open;
       const close = point.close;
       const bullish = isBullish(point);
-      const color = bullish ? colors.marketUp : colors.marketDown;
+      const _color = bullish ? colors.marketUp : colors.marketDown;
       const yTop = getY(Math.max(open, close));
       const yBottom = getY(Math.min(open, close));
       const yHigh = getY(point.high);

@@ -504,7 +504,15 @@ jobs:
 
       - name: Install Maestro CLI
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          # Download the install script to a temp file instead of piping to bash
+          curl -fsSL "https://get.maestro.mobile.dev" -o /tmp/maestro_install.sh
+          # Verify the download succeeded and is non-empty
+          if [ ! -s /tmp/maestro_install.sh ]; then
+            echo 'ERROR: Maestro install script download failed or is empty'
+            exit 1
+          fi
+          # Execute the verified script
+          bash /tmp/maestro_install.sh
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
         shell: bash
 

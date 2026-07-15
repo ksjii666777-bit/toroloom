@@ -85,7 +85,7 @@ async function warmNamespace(ns: WarmNamespace): Promise<{ warmed: boolean; reas
     }
 
     // Fetch fresh data (with timeout)
-    const result = await Promise.race([
+    const _result = await Promise.race([
       ns.fetcher(),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('timeout')), WARM_TIMEOUT_MS),

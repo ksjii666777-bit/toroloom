@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useAIStore } from '../../store/aiStore';
@@ -55,7 +55,7 @@ export default function AIInsightsScreen({ _navigation }: any) {
         {/* Insights List */}
         <Text style={styles.sectionTitle}>Stock Analysis</Text>
         {insights.map(insight => (
-          <TouchableOpacity key={insight.id} style={styles.insightCard}>
+          <Pressable key={insight.id} style={styles.insightCard}>
             <View style={styles.insightHeader}>
               <View>
                 <Text style={styles.insightSymbol}>{insight.symbol}</Text>
@@ -80,7 +80,7 @@ export default function AIInsightsScreen({ _navigation }: any) {
             {insight.targets.length > 0 && (
               <View style={styles.targetsRow}>
                 {insight.targets.map((t, i) => (
-                  <View key={i} style={styles.targetItem}>
+                  <View key={`insight_${i}`} style={styles.targetItem}>
                     <Text style={styles.targetLabel}>Target {i + 1}</Text>
                     <Text style={styles.targetValue}>{formatCurrency(t.target)}</Text>
                     <View style={styles.targetBar}>
@@ -91,7 +91,7 @@ export default function AIInsightsScreen({ _navigation }: any) {
                 ))}
               </View>
             )}
-          </TouchableOpacity>
+          </Pressable>
         ))}
 
         <View style={{ height: 100 }} />

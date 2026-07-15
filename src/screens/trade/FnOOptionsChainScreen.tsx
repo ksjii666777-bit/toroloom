@@ -19,7 +19,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   Dimensions,
   RefreshControl,
   TextInput,
@@ -83,7 +83,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
     fetchExpiries(selectedSymbol);
     fetchSpotPrices();
     fetchPositions();
-  }, []);
+  }, [fetchExpiries, fetchPositions, fetchSpotPrices, selectedSymbol]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -94,7 +94,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
       fetchPositions(),
     ]);
     setRefreshing(false);
-  }, [selectedSymbol, selectedExpiry]);
+  }, [selectedSymbol, selectedExpiry, fetchExpiries, fetchFutures, fetchOptionChain, fetchPositions]);
 
   const handleSymbolChange = useCallback((symbol: string) => {
     setSelectedSymbol(symbol);
@@ -167,21 +167,20 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
           const isHighlighted = highlightATM && isATM;
 
           return (
-            <TouchableOpacity
+            <Pressable
               key={row.strike}
-              style={[
+              style={({pressed}) => [[
                 styles.chainRow,
                 isHighlighted && {
                   backgroundColor: colors.primary + '10',
                   borderColor: colors.primary + '30',
                   borderWidth: 1,
                 },
-              ]}
-              activeOpacity={0.7}
+              ], {opacity: pressed ? 0.7 : 1}]}
             >
               {/* CE Side */}
               {chainSide !== 'PE' && row.ce && (
-                <TouchableOpacity
+                <Pressable
                   style={styles.contractCell}
                   onPress={() => openOrderModal(row.ce!, 'buy')}
                 >
@@ -212,7 +211,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                       </View>
                     </>
                   )}
-                </TouchableOpacity>
+                </Pressable>
               )}
 
               {/* Strike */}
@@ -233,7 +232,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
 
               {/* PE Side */}
               {chainSide !== 'CE' && row.pe && (
-                <TouchableOpacity
+                <Pressable
                   style={styles.contractCell}
                   onPress={() => openOrderModal(row.pe!, 'buy')}
                 >
@@ -264,9 +263,9 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                       </View>
                     </>
                   )}
-                </TouchableOpacity>
+                </Pressable>
               )}
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </>
@@ -306,16 +305,15 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
         {futures.map((f: FutureContract) => {
           const days = Math.ceil((new Date(f.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
           return (
-            <TouchableOpacity
+            <Pressable
               key={f.symbol}
-              style={[styles.futuresCard, { borderColor: colors.border }]}
+              style={({pressed}) => [[styles.futuresCard, { borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
               onPress={() => {
                 Alert.alert(
                   'Trade Futures',
                   `${f.symbol}\nLTP: ₹${f.price.toFixed(2)} | Lot: ${f.lotSize}\nExpiry: ${new Date(f.expiryDate).toLocaleDateString('en-IN')} (${days}d)`,
                 );
               }}
-              activeOpacity={0.7}
             >
               <View style={styles.futuresLeft}>
                 <Text style={[styles.futuresSymbol, { color: colors.text }]}>
@@ -352,7 +350,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                   {f.basisPercent.toFixed(2)}%
                 </Text>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </>
@@ -389,15 +387,14 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
           const isFuture = pos.type === 'FUTURE';
 
           return (
-            <TouchableOpacity
+            <Pressable
               key={pos.id}
-              style={[styles.positionCard, { borderColor: colors.border }]}
+              style={({pressed}) => [[styles.positionCard, { borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
               onPress={() => navigation.navigate('StrategyBuilder', {
                 symbol: pos.symbol,
                 type: pos.type,
                 strike: pos.strike,
               })}
-              activeOpacity={0.7}
             >
               <View style={styles.positionHeader}>
                 <View style={styles.positionLeft}>
@@ -464,7 +461,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                   </Text>
                 </View>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </>
@@ -482,9 +479,9 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
         <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>Place Order</Text>
-            <TouchableOpacity onPress={closeOrderModal}>
+            <Pressable onPress={closeOrderModal}>
               <Ionicons name="close" size={24} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Contract Info */}
@@ -533,12 +530,12 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
           {/* Quantity Selector */}
           <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>Lots</Text>
           <View style={styles.qtySelector}>
-            <TouchableOpacity
+            <Pressable
               style={[styles.qtyBtn, { borderColor: colors.border }]}
               onPress={() => setOrderQuantity(orderQuantity - 1)}
             >
               <Ionicons name="remove" size={20} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
             <TextInput
               style={[styles.qtyInput, { color: colors.text, borderColor: colors.border }]}
               value={String(orderQuantity)}
@@ -546,12 +543,12 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               keyboardType="number-pad"
               textAlign="center"
             />
-            <TouchableOpacity
+            <Pressable
               style={[styles.qtyBtn, { borderColor: colors.border }]}
               onPress={() => setOrderQuantity(orderQuantity + 1)}
             >
               <Ionicons name="add" size={20} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Total Premium */}
@@ -568,13 +565,13 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
 
           {/* Action Buttons */}
           <View style={styles.modalActions}>
-            <TouchableOpacity
+            <Pressable
               style={[styles.modalActionBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
               onPress={closeOrderModal}
             >
               <Text style={[styles.modalActionText, { color: colors.text }]}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               style={[styles.modalActionBtn, {
                 backgroundColor: orderType === 'buy' ? colors.marketUp : colors.marketDown,
               }]}
@@ -595,7 +592,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               <Text style={[styles.modalActionText, { color: colors.white }]}>
                 {orderType === 'buy' ? 'Buy' : 'Sell'} {orderQuantity} Lot{orderQuantity > 1 ? 's' : ''}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -606,20 +603,20 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={[styles.title, { color: colors.text }]}>F&O Trading</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('StrategyBuilder')} style={styles.strategyBtn}>
+        <Pressable onPress={() => navigation.navigate('StrategyBuilder')} style={styles.strategyBtn}>
           <Ionicons name="git-branch" size={20} color={colors.primary} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Symbol Selector */}
       <View style={styles.symbolRow}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.symbolContent}>
           {POPULAR_SYMBOLS.map(symbol => (
-            <TouchableOpacity
+            <Pressable
               key={symbol}
               style={[
                 styles.symbolChip,
@@ -634,7 +631,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               ]}>
                 {symbol}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </ScrollView>
       </View>
@@ -687,7 +684,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
           { key: 'futures', label: 'Futures', icon: 'trending-up' },
           { key: 'positions', label: 'Positions', icon: 'briefcase' },
         ] as const).map(tab => (
-          <TouchableOpacity
+          <Pressable
             key={tab.key}
             style={[styles.viewTab, view === tab.key && styles.viewTabActive]}
             onPress={() => setView(tab.key)}
@@ -703,7 +700,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
             ]}>
               {tab.label}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
@@ -721,7 +718,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               {expiries.map(exp => {
                 const isSelected = selectedExpiry?.date === exp.date;
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={exp.id}
                     style={[styles.expiryChip, isSelected && styles.expiryChipActive]}
                     onPress={() => handleExpiryChange(exp)}
@@ -738,7 +735,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                       {exp.daysToExpiry}d
                       {exp.isMonthly ? ' (M)' : ''}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })}
             </ScrollView>
@@ -749,7 +746,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
             <View style={styles.chainOptions}>
               <View style={styles.sideTabs}>
                 {(['both', 'CE', 'PE'] as ChainSide[]).map(side => (
-                  <TouchableOpacity
+                  <Pressable
                     key={side}
                     style={[styles.sideTab, chainSide === side && styles.sideTabActive]}
                     onPress={() => setChainSide(side)}
@@ -760,10 +757,10 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                     ]}>
                       {side === 'both' ? 'All' : side}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.greeksToggle, showGreeks && { backgroundColor: colors.primary + '20' }]}
                 onPress={() => setShowGreeks(!showGreeks)}
               >
@@ -772,7 +769,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                   size={16}
                   color={showGreeks ? colors.primary : colors.textMuted}
                 />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           )}
         </View>

@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   Switch,
   Alert,
 } from 'react-native';
@@ -107,7 +107,7 @@ export default function NotificationsScreen({ navigation }: any) {
     const meta = NOTIFICATION_ICONS[notification.type] || NOTIFICATION_ICONS.system;
 
     return (
-      <TouchableOpacity
+      <Pressable
         key={notification.id}
         style={[styles.notifItem, !notification.read && styles.notifUnread]}
         onPress={() => {
@@ -153,7 +153,7 @@ export default function NotificationsScreen({ navigation }: any) {
             {!notification.read && <View style={styles.unreadDot} />}
           </View>
         </View>
-      </TouchableOpacity>
+      </Pressable>
     );
   };
 
@@ -396,9 +396,9 @@ export default function NotificationsScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View>
             <Text style={styles.headerTitle}>Notifications</Text>
             <Text style={styles.headerSubtitle}>
@@ -409,14 +409,14 @@ export default function NotificationsScreen({ navigation }: any) {
           </View>
           <View style={styles.headerActions}>
             {unreadCountLocal > 0 && (
-              <TouchableOpacity onPress={markAllAsRead} style={styles.headerActionBtn}>
+              <Pressable onPress={markAllAsRead} style={styles.headerActionBtn}>
                 <Ionicons name="checkmark-done" size={20} color={colors.primary} />
-              </TouchableOpacity>
+              </Pressable>
             )}
             {notifications.length > 0 && (
-              <TouchableOpacity onPress={handleClearAll} style={styles.headerActionBtn}>
+              <Pressable onPress={handleClearAll} style={styles.headerActionBtn}>
                 <Ionicons name="trash-outline" size={20} color={colors.danger} />
-              </TouchableOpacity>
+              </Pressable>
             )}
           </View>
         </View>
@@ -424,7 +424,7 @@ export default function NotificationsScreen({ navigation }: any) {
         {/* Tab Filters */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll}>
           {tabs.map(tab => (
-            <TouchableOpacity
+            <Pressable
               key={tab.key}
               style={[styles.tab, activeTab === tab.key && styles.tabActive]}
               onPress={() => setActiveTab(tab.key)}
@@ -437,7 +437,7 @@ export default function NotificationsScreen({ navigation }: any) {
               <Text style={[styles.tabLabel, activeTab === tab.key && styles.tabLabelActive]}>
                 {tab.label}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </ScrollView>
       </View>
@@ -455,12 +455,12 @@ export default function NotificationsScreen({ navigation }: any) {
                     {rule.direction === 'above' ? '⬆ Above' : '⬇ Below'} ₹{rule.targetPrice.toFixed(2)}
                   </Text>
                 </View>
-                <TouchableOpacity
+                <Pressable
                   onPress={() => removePriceAlertRule(rule.id)}
                   style={styles.alertRuleRemove}
                 >
                   <Ionicons name="close-circle" size={22} color={colors.textMuted} />
-                </TouchableOpacity>
+                </Pressable>
               </View>
             ))}
           </View>

@@ -46,7 +46,7 @@ export default function Card({
     if (animated) {
       entryProgress.value = withDelay(animationDelay, withSpring(1, { stiffness: 120, damping: 12 }));
     }
-  }, [animated, animationDelay]);
+  }, [animated, animationDelay, entryProgress]);
 
   return (
     <Animated.View

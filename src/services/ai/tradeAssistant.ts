@@ -292,7 +292,7 @@ export function assessTradeRisk(params: {
 
   // 3. Sector concentration
   const sectorTotal = holdings
-    .filter(h => {
+    .filter(_h => {
       // Map stockId to sector — use known stocks
       const s = holdings.find(hh => hh.stockId === stock.id) ? stock.sector : '';
       return s === stock.sector;
@@ -466,7 +466,7 @@ export function suggestTradePlan(params: {
   const profile = RISK_PROFILES[riskTolerance];
 
   // Determine technical levels from 52-week range
-  const range = stock.high52 - stock.low52;
+  const _range = stock.high52 - stock.low52;
 
   // For buy: SL below entry, targets above
   const isBuy = tradeType === 'buy';
@@ -633,12 +633,10 @@ export function analyzePortfolioImpact(params: {
   const currentPortfolioValue = currentHoldingsValue + availableBalance;
 
   // New values after trade
-  let newHoldingValue: number;
   let newBalance: number;
   let newPortfolioValue: number;
 
   if (tradeType === 'buy') {
-    newHoldingValue = currentHoldingsValue + positionCost;
     newBalance = availableBalance - positionCost;
     newPortfolioValue = currentPortfolioValue + positionCost; // adds to portfolio
   } else {
@@ -647,7 +645,6 @@ export function analyzePortfolioImpact(params: {
     const sellingValue = existingHolding
       ? Math.min(positionCost, existingHolding.currentValue)
       : 0;
-    newHoldingValue = currentHoldingsValue - sellingValue;
     newBalance = availableBalance + sellingValue;
     newPortfolioValue = currentPortfolioValue;
   }

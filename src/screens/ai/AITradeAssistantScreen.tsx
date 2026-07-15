@@ -17,8 +17,8 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  Dimensions, Alert,
+  View, Text, StyleSheet, ScrollView, TextInput,
+  Dimensions, Alert, Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -115,7 +115,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
       entryPrice: priceNum,
       riskTolerance,
     });
-  }, [showResults, selectedStock, tradeType, priceNum, riskTolerance]);
+  }, [showResults, selectedStock, tradeType, priceNum, riskTolerance, qtyNum]);
 
   const impactResult = useMemo(() => {
     if (!showResults || !selectedStock || qtyNum <= 0) return null;
@@ -146,9 +146,9 @@ export default function AITradeAssistantScreen({ navigation }: any) {
       <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         style={styles.header}>
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color="#fff" />
-          </TouchableOpacity>
+          </Pressable>
           <Text style={styles.headerTitle}>AI Trade Assistant</Text>
           <View style={{ width: 40 }} />
         </View>
@@ -163,13 +163,13 @@ export default function AITradeAssistantScreen({ navigation }: any) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: SPACING.sm }}>
             {quickStocks.map(sym => (
-              <TouchableOpacity key={sym}
+              <Pressable key={sym}
                 style={[styles.stockChip, selectedSymbol === sym && styles.stockChipActive]}
                 onPress={() => { setSelectedSymbol(sym); setShowResults(false); }}>
                 <Text style={[styles.stockChipText, selectedSymbol === sym && styles.stockChipTextActive]}>
                   {sym}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </ScrollView>
           {selectedStock && (
@@ -191,16 +191,16 @@ export default function AITradeAssistantScreen({ navigation }: any) {
 
           {/* Buy/Sell Toggle */}
           <View style={styles.toggleRow}>
-            <TouchableOpacity style={[styles.toggleBtn, tradeType === 'buy' && styles.toggleBuy]}
+            <Pressable style={[styles.toggleBtn, tradeType === 'buy' && styles.toggleBuy]}
               onPress={() => setTradeType('buy')}>
               <Ionicons name="arrow-down" size={14} color={tradeType === 'buy' ? '#fff' : colors.marketUp} />
               <Text style={[styles.toggleText, tradeType === 'buy' && styles.toggleTextActive]}>Buy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.toggleBtn, tradeType === 'sell' && styles.toggleSell]}
+            </Pressable>
+            <Pressable style={[styles.toggleBtn, tradeType === 'sell' && styles.toggleSell]}
               onPress={() => setTradeType('sell')}>
               <Ionicons name="arrow-up" size={14} color={tradeType === 'sell' ? '#fff' : colors.marketDown} />
               <Text style={[styles.toggleText, tradeType === 'sell' && styles.toggleTextActive]}>Sell</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Quantity */}
@@ -231,13 +231,13 @@ export default function AITradeAssistantScreen({ navigation }: any) {
           <Text style={styles.sectionLabel}>Risk Profile</Text>
           <View style={styles.profileRow}>
             {(['conservative', 'moderate', 'aggressive'] as RiskTolerance[]).map(r => (
-              <TouchableOpacity key={r}
+              <Pressable key={r}
                 style={[styles.profileBtn, riskTolerance === r && styles.profileBtnActive]}
                 onPress={() => setRiskTolerance(r)}>
                 <Text style={[styles.profileLabel, riskTolerance === r && styles.profileLabelActive]}>
                   {r === 'conservative' ? '🛡️ Conservative' : r === 'moderate' ? '⚖️ Moderate' : '🚀 Aggressive'}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
           <View style={[styles.profileDetails, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
@@ -289,7 +289,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
 
                 {/* Risk Factors */}
                 {riskResult.factors.map((f, i) => (
-                  <View key={i} style={[styles.factorRow, { borderBottomColor: colors.divider }]}>
+                  <View key={`assist_${i}`} style={[styles.factorRow, { borderBottomColor: colors.divider }]}>
                     <View style={styles.factorLeft}>
                       <Ionicons name={
                         f.impact === 'positive' ? 'checkmark-circle' :
@@ -314,7 +314,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
                 {riskResult.suggestions.length > 0 && (
                   <View style={styles.suggestionsBox}>
                     {riskResult.suggestions.map((s, i) => (
-                      <Text key={i} style={styles.suggestionText}>💡 {s}</Text>
+                      <Text key={`assist_${i}`} style={styles.suggestionText}>💡 {s}</Text>
                     ))}
                   </View>
                 )}
@@ -356,7 +356,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
                 {sizingResult.alternatives.length > 0 && (
                   <View style={styles.alternativesRow}>
                     {sizingResult.alternatives.map((alt, i) => (
-                      <TouchableOpacity key={i}
+                      <Pressable key={`assist_${i}`}
                         style={[styles.altChip, alt.label === 'Recommended' && styles.altChipActive,
                           { borderColor: colors.border }]}
                         onPress={() => handleUseSuggested(alt.quantity)}>
@@ -366,7 +366,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
                         <Text style={[styles.altQty, alt.label === 'Recommended' && styles.altQtyActive]}>
                           {alt.quantity} shares
                         </Text>
-                      </TouchableOpacity>
+                      </Pressable>
                     ))}
                   </View>
                 )}
@@ -374,7 +374,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
                 {sizingResult.warnings.length > 0 && (
                   <View style={styles.warningsBox}>
                     {sizingResult.warnings.map((w, i) => (
-                      <Text key={i} style={styles.warningText}>⚠️ {w}</Text>
+                      <Text key={`assist_${i}`} style={styles.warningText}>⚠️ {w}</Text>
                     ))}
                   </View>
                 )}
@@ -425,7 +425,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
 
                 {/* Targets */}
                 {tradePlan.targets.map((t, i) => (
-                  <View key={i} style={[styles.planSection, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+                  <View key={`assist_${i}`} style={[styles.planSection, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
                     <View style={styles.planSectionHeader}>
                       <Ionicons name="flag" size={16} color={colors.marketUp} />
                       <Text style={styles.planSectionTitle}>Target {i + 1} ({t.type})</Text>
@@ -519,7 +519,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
                 {impactResult.warnings.length > 0 && (
                   <View style={styles.warningsBox}>
                     {impactResult.warnings.map((w, i) => (
-                      <Text key={i} style={styles.warningText}>⚠️ {w}</Text>
+                      <Text key={`assist_${i}`} style={styles.warningText}>⚠️ {w}</Text>
                     ))}
                   </View>
                 )}

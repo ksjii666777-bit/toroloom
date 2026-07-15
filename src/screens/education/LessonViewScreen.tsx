@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -39,7 +39,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
 
   useEffect(() => {
     if (lessonId) fetchLesson(lessonId);
-  }, [lessonId]);
+  }, [lessonId, fetchLesson]);
 
   // Find next/prev lessons
   const courseLessons = mockLessons.filter(l => l.courseId === courseId);
@@ -110,9 +110,9 @@ export default function LessonViewScreen({ route, navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={styles.headerInfo}>
             <Text style={styles.headerLessonNum}>Lesson {currentIndex + 1} of {courseLessons.length}</Text>
             <Text style={styles.headerTitle} numberOfLines={1}>{lesson.title}</Text>
@@ -182,7 +182,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
                   'Real-world applications and examples',
                   'Practical tips for your trading journey',
                 ].map((item, i) => (
-                  <View key={i} style={styles.takeawayRow}>
+                  <View key={`takeaway_${i}`} style={styles.takeawayRow}>
                     <Ionicons name="checkmark-circle" size={16} color="#00C853" />
                     <Text style={styles.takeawayText}>{item}</Text>
                   </View>
@@ -206,7 +206,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
 
         {/* Quiz Section */}
         {lesson.quiz && !showQuiz && (
-          <TouchableOpacity
+          <Pressable
             style={styles.startQuizBtn}
             onPress={() => setShowQuiz(true)}
           >
@@ -218,7 +218,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
               </View>
               <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
             </LinearGradient>
-          </TouchableOpacity>
+          </Pressable>
         )}
 
         {showQuiz && lesson.quiz && (
@@ -254,7 +254,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
                   }
 
                   return (
-                    <TouchableOpacity
+                    <Pressable
                       key={oIdx}
                       style={[styles.option, { backgroundColor: optBg, borderColor: optBorder }]}
                       onPress={() => handleAnswerSelect(q.id, oIdx)}
@@ -267,7 +267,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
                       {quizSubmitted && isWrong && (
                         <Ionicons name="close-circle" size={18} color="#FF1744" />
                       )}
-                    </TouchableOpacity>
+                    </Pressable>
                   );
                 })}
                 {quizSubmitted && (
@@ -308,7 +308,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
 
         {/* Mark Complete Button */}
         {!isCompleted && (
-          <TouchableOpacity
+          <Pressable
             style={styles.completeBtn}
             onPress={handleMarkComplete}
           >
@@ -316,13 +316,13 @@ export default function LessonViewScreen({ route, navigation }: any) {
               <Ionicons name="checkmark-circle" size={22} color={colors.white} />
               <Text style={styles.completeText}>Mark as Complete</Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </Pressable>
         )}
 
         {/* Navigation */}
         <View style={styles.lessonNav}>
           {prevLesson && (
-            <TouchableOpacity
+            <Pressable
               style={styles.lessonNavBtn}
               onPress={() => {
                 setShowQuiz(false);
@@ -336,10 +336,10 @@ export default function LessonViewScreen({ route, navigation }: any) {
                 <Text style={styles.navLabel}>Previous</Text>
                 <Text style={styles.navLessonTitle} numberOfLines={1}>{prevLesson.title}</Text>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           )}
           {nextLesson && (
-            <TouchableOpacity
+            <Pressable
               style={[styles.lessonNavBtn, styles.lessonNavBtnRight]}
               onPress={() => {
                 setShowQuiz(false);
@@ -353,7 +353,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
                 <Text style={[styles.navLessonTitle, { textAlign: 'right' }]} numberOfLines={1}>{nextLesson.title}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
 

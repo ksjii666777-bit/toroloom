@@ -10,10 +10,19 @@
 
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    plugins: {
+      'react-hooks': reactHooks,
+    },
+    rules: {
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+  },
   {
     ignores: ['node_modules', 'coverage', 'dist', 'backend', 'android', 'ios', '.expo'],
   },

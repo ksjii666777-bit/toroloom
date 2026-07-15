@@ -95,6 +95,26 @@ export const BROKER_LOGIN_CONFIGS: Record<string, BrokerLoginConfig> = {
   // UNITED STATES
   // ═════════════════════════════════════════════════════════════════════════
 
+  'interactive-brokers': {
+    loginUrl: 'https://www.interactivebrokers.com/en/trading/web-portal.php',
+    altLoginUrls: [
+      'https://gdcdyn.interactivebrokers.com/Universal/servlet/Login',
+      'https://www.interactivebrokers.com/en/index.php?f=2222'
+    ],
+    dashboardPatterns: [
+      'interactivebrokers.com/en/accounts',
+      'gdcdyn.interactivebrokers.com',
+      'portal.interactivebrokers.com',
+    ],
+    tokenParams: ['session=', 'token=', 'auth=', 'ssoTicket=', 'cred='],
+    mfaPatterns: ['two-factor', '2fa', 'security-device', 'rsa', 'otp', 'verification'],
+    authModes: ['password', 'biometric'],
+    regions: ['global', 'us', 'europe', 'uk', 'canada', 'australia', 'singapore', 'japan', 'india'],
+    extractionStrategy: 'cookie_session',
+    apiBaseUrl: 'https://api.interactivebrokers.com',
+    userAgentHint: 'desktop',
+  },
+
   robinhood: {
     loginUrl: 'https://robinhood.com/login',
     altLoginUrls: ['https://app.robinhood.com/login'],

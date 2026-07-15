@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { Stock, Holding, Trade, OpenOrder } from '../types';
 import { mockHoldings, mockTrades, mockOpenOrders } from '../constants/mockData';
-import { api, portfolioApi } from '../services/api';
+import { api } from '../services/api/client';
+import { portfolioApi } from '../services/api/portfolio';
 import { offlineCache } from '../services/offlineCache';
-import { registerCacheWarming } from '../services/cacheWarmingService';
+
 import { useAuthStore } from './authStore';
 import { sendTradeConfirmation } from '../services/notificationService';
 import { log } from '../utils/logger';

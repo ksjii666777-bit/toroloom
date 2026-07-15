@@ -60,7 +60,7 @@
  */
 
 import type { Pool, PoolConfig } from 'pg';
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -251,6 +251,31 @@ export class PostgreSQLStorage implements StorageEngine {
         tags JSONB DEFAULT '[]'
       );
       CREATE INDEX IF NOT EXISTS idx_community_timestamp ON community_posts (timestamp DESC);
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS telegram_links (
+        user_id TEXT PRIMARY KEY,
+        chat_id BIGINT NOT NULL,
+        first_name TEXT NOT NULL,
+        username TEXT,
+        linked_at TEXT NOT NULL
+      );
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS snap_trade_connections (
+        user_id TEXT PRIMARY KEY,
+        snap_trade_user_id TEXT NOT NULL,
+        encrypted_user_secret TEXT NOT NULL,
+        authorization_id TEXT NOT NULL DEFAULT '',
+        account_id TEXT NOT NULL DEFAULT '',
+        broker_name TEXT NOT NULL DEFAULT '',
+        broker_slug TEXT NOT NULL DEFAULT '',
+        account_name TEXT NOT NULL DEFAULT '',
+        connected_at TEXT NOT NULL DEFAULT '',
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
     `);
 
     await this.pool.query(`
@@ -462,6 +487,7 @@ export class PostgreSQLStorage implements StorageEngine {
     await this.pool.query('DELETE FROM notifications');
     await this.pool.query('DELETE FROM badge_counts');
     await this.pool.query('DELETE FROM community_posts');
+    await this.pool.query('DELETE FROM telegram_links');
     await this.pool.query('DELETE FROM subscriptions');
   }
 
@@ -623,6 +649,115 @@ export class PostgreSQLStorage implements StorageEngine {
       data: row.data ? parseJSON(row.data) : undefined,
       metadata: row.metadata ? parseJSON(row.metadata) : undefined,
     };
+  }
+
+  // ──── Telegram Links ────
+
+  async loadTelegramLink(userId: string): Promise<TelegramLinkData | null> {
+    if (!this.pool) return null;
+    const result = await this.pool.query(
+      'SELECT * FROM telegram_links WHERE user_id = $1',
+      [userId],
+    );
+    if (result.rows.length === 0) return null;
+    const row = result.rows[0];
+    return {
+      userId: row.user_id,
+      chatId: parseInt(row.chat_id, 10),
+      firstName: row.first_name,
+      username: row.username || undefined,
+      linkedAt: row.linked_at,
+    };
+  }
+
+  async saveTelegramLink(userId: string, link: TelegramLinkData): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO telegram_links (user_id, chat_id, first_name, username, linked_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (user_id) DO UPDATE SET
+         chat_id = EXCLUDED.chat_id,
+         first_name = EXCLUDED.first_name,
+         username = EXCLUDED.username,
+         linked_at = EXCLUDED.linked_at`,
+      [link.userId, link.chatId, link.firstName, link.username || null, link.linkedAt],
+    );
+  }
+
+  async deleteTelegramLink(userId: string): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query('DELETE FROM telegram_links WHERE user_id = $1', [userId]);
+  }
+
+  async loadAllTelegramLinks(): Promise<TelegramLinkData[]> {
+    if (!this.pool) return [];
+    const result = await this.pool.query('SELECT * FROM telegram_links');
+    return result.rows.map((row: any) => ({
+      userId: row.user_id,
+      chatId: parseInt(row.chat_id, 10),
+      firstName: row.first_name,
+      username: row.username || undefined,
+      linkedAt: row.linked_at,
+    }));
+  }
+
+  // ──── SnapTrade Connections ────
+
+  async loadSnapTradeConnection(userId: string): Promise<SnapTradeConnectionData | null> {
+    if (!this.pool) return null;
+    const result = await this.pool.query(
+      'SELECT * FROM snap_trade_connections WHERE user_id = $1',
+      [userId],
+    );
+    if (result.rows.length === 0) return null;
+    const row = result.rows[0];
+    return {
+      snapTradeUserId: row.snap_trade_user_id,
+      encryptedUserSecret: row.encrypted_user_secret,
+      authorizationId: row.authorization_id,
+      accountId: row.account_id,
+      brokerName: row.broker_name,
+      brokerSlug: row.broker_slug,
+      accountName: row.account_name,
+      connectedAt: row.connected_at,
+    };
+  }
+
+  async saveSnapTradeConnection(userId: string, connection: SnapTradeConnectionData): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO snap_trade_connections (user_id, snap_trade_user_id, encrypted_user_secret, authorization_id, account_id, broker_name, broker_slug, account_name, connected_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())
+       ON CONFLICT (user_id) DO UPDATE SET
+         snap_trade_user_id = EXCLUDED.snap_trade_user_id,
+         encrypted_user_secret = EXCLUDED.encrypted_user_secret,
+         authorization_id = EXCLUDED.authorization_id,
+         account_id = EXCLUDED.account_id,
+         broker_name = EXCLUDED.broker_name,
+         broker_slug = EXCLUDED.broker_slug,
+         account_name = EXCLUDED.account_name,
+         connected_at = EXCLUDED.connected_at,
+         updated_at = now()`,
+      [
+        userId,
+        connection.snapTradeUserId,
+        connection.encryptedUserSecret,
+        connection.authorizationId,
+        connection.accountId,
+        connection.brokerName,
+        connection.brokerSlug,
+        connection.accountName,
+        connection.connectedAt,
+      ],
+    );
+  }
+
+  async deleteSnapTradeConnection(userId: string): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      'DELETE FROM snap_trade_connections WHERE user_id = $1',
+      [userId],
+    );
   }
 
   // ──── Subscriptions ────

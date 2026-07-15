@@ -83,7 +83,8 @@
           "icon": "./assets/icon.png",
           "color": "#3B82F6"
         }
-      ]
+      ],
+      "./plugins/withToroloomWidgets"
     ],
 
     "updates": {

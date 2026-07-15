@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { AIInsight } from '../types';
 import { mockAIInsights } from '../constants/mockData';
-import { aiApi } from '../services/api';
+import { aiApi } from '../services/api/ai';
 import { offlineCache } from '../services/offlineCache';
 import { log } from '../utils/logger';
 

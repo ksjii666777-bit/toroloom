@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, TextInput, TouchableOpacity} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, TextInput, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withSequence } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +20,7 @@ export default function SubscriptionScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { subscription, isLoading, initiateUpgrade, cancelSubscription, isInTrial,
-    trialDaysRemaining, hasTrialAvailable, couponInput, couponResult, isApplyingCoupon,
+    trialDaysRemaining, hasTrialAvailable, couponInput: _couponInput, couponResult, isApplyingCoupon,
     setCouponInput, applyCoupon, removeCoupon, getDiscountedPrice,
     setUpAutopay, cancelAutopay, startTrial, refreshTrialStatus } = useSubscriptionStore();
   const getPlanPrice = useSubscriptionStore(s => s.getPlanPrice);
@@ -39,7 +39,7 @@ export default function SubscriptionScreen({ navigation }: any) {
     refreshTrialStatus();
     const interval = setInterval(refreshTrialStatus, 60000); // every minute
     return () => clearInterval(interval);
-  }, []);
+  }, [, refreshTrialStatus]);
 
   const trialActive = isInTrial();
 
@@ -47,7 +47,7 @@ export default function SubscriptionScreen({ navigation }: any) {
   const cardAnim0 = useSharedValue(0);
   const cardAnim1 = useSharedValue(0);
   const cardAnim2 = useSharedValue(0);
-  const cardAnims = [cardAnim0, cardAnim1, cardAnim2];
+  const cardAnims = useMemo(() => [cardAnim0, cardAnim1, cardAnim2], [cardAnim0, cardAnim1, cardAnim2]);
   const couponErrorShake = useSharedValue(0);
 
   const cardStyle0 = useAnimatedStyle(() => ({
@@ -69,7 +69,7 @@ export default function SubscriptionScreen({ navigation }: any) {
     cardAnims.forEach((anim, i) => {
       anim.value = withDelay(i * 150, withSpring(1, { stiffness: 120, damping: 12 }));
     });
-  }, []);
+  }, [cardAnims]);
 
   const showCouponError = useCallback(() => {
     couponErrorShake.value = withSequence(
@@ -78,7 +78,7 @@ export default function SubscriptionScreen({ navigation }: any) {
       withSpring(-10, { damping: 2 }),
       withSpring(0, { damping: 8 }),
     );
-  }, []);
+  }, [couponErrorShake]);
 
 
 
@@ -173,7 +173,7 @@ export default function SubscriptionScreen({ navigation }: any) {
     } else {
       setShowAutopayModal(true);
     }
-  }, [subscription.isAutoPayEnabled, cancelAutopay, subscription.upiMandate?.mandateId]);
+  }, [subscription.isAutoPayEnabled, cancelAutopay, subscription.upiMandate]);
 
   const handleSetupAutopay = useCallback(async (upiId: string) => {
     const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
@@ -315,9 +315,9 @@ export default function SubscriptionScreen({ navigation }: any) {
                       </Text>
                     </View>
                   </View>
-                  <TouchableOpacity onPress={handleRemoveCoupon} style={styles.couponRemoveBtn}>
+                  <Pressable onPress={handleRemoveCoupon} style={styles.couponRemoveBtn}>
                     <Ionicons name="close-circle" size={22} color={colors.textMuted} />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               </Animated.View>
             ) : (

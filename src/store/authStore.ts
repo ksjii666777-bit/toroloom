@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
 import { mockUser } from '../constants/mockData';
-import { authApi } from '../services/api';
+import { authApi } from '../services/api/auth';
 import { analytics } from '../services/analytics';
 import { useOnboardingStore } from './onboardingStore';
 
@@ -100,7 +100,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     await AsyncStorage.multiRemove(['toroloom_token', 'toroloom_user']);
     // Clear offline cache so next user doesn't see stale portfolio/watchlist data
     try {
-      const { usePortfolioStore, useWatchlistStore } = await import('../store');
+      const { usePortfolioStore } = await import('./portfolioStore');
+      const { useWatchlistStore } = await import('./watchlistStore');
       usePortfolioStore.getState().clearCache();
       useWatchlistStore.getState().clearCache();
     } catch { /* best-effort */ }

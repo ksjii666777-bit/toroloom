@@ -1,0 +1,279 @@
+========================================================================
+TOROLOOM - EXHAUSTIVE-DEPS WARNINGS REPORT
+Generated: 2026-07-13 17:12
+Total: 97 warnings in 38 files
+Missing deps: 60 | Unnecessary deps: 37
+========================================================================
+
+========================================================================
+SECTION 1: FILES WITH MULTIPLE WARNINGS (highest impact)
+========================================================================
+
+## 7 warnings  PnLChart.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\components\PnLChart.tsx
+   MISSING (3):
+     L  55 [useEffect]  fadeAnim, prevDataLength  [other, animation]
+     L 106 [useMemo]  getX, getY  [stable-ref]
+     L 115 [useMemo]  chartHeight, padding.top  [member-expr, other]
+   UNNECESSARY (4):
+     L  63 [useMemo]  REMOVE: fadeAnim, prevDataLength
+     L  74 [useMemo]  REMOVE: fadeAnim, prevDataLength
+     L 125 [useMemo]  REMOVE: chartHeight, getX, padding.top
+     L 143 [useMemo]  REMOVE: chartHeight, getX, padding.top
+
+## 7 warnings  SubscriptionScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\settings\SubscriptionScreen.tsx
+   MISSING (3):
+     L  50 [useMemo]  cardAnims, cardAnims  [animation]
+     L  81 [useCallback]  couponErrorShake  [other]
+     L 176 [useCallback]  subscription.upiMandate  [member-expr]
+   UNNECESSARY (4):
+     L  88 [useCallback]  REMOVE: couponErrorShake
+     L  99 [useCallback]  REMOVE: couponErrorShake
+     L 186 [useCallback]  REMOVE: subscription.upiMandate
+     L 191 [useCallback]  REMOVE: subscription.upiMandate
+
+## 6 warnings  StrategyCanvas.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\components\fno\StrategyCanvas.tsx
+   MISSING (1):
+     L 136 [useEffect]  fadeAnim  [animation]
+   UNNECESSARY (5):
+     L 156 [useMemo]  REMOVE: fadeAnim
+     L 167 [useCallback]  REMOVE: fadeAnim
+     L 222 [useMemo]  REMOVE: chartHeight
+     L 230 [useMemo]  REMOVE: chartHeight
+     L 257 [useMemo]  REMOVE: chartHeight
+
+## 6 warnings  OnboardingIllustrations.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\components\onboarding\OnboardingIllustrations.tsx
+   MISSING (6):
+     L 110 [useEffect]  engineGlow, flameH, glowR, starOpacity1, starOpacity2  [other, animation]
+     L 312 [useEffect]  centerGlowO, particle1X, particle1Y, particle2X, particle2Y, ringRotate, segmentOpacity, segmentScale  [other, animation]
+     L 551 [useEffect]  candleOpacities, candleScales, crosshairX, crosshairY, dotGlows, trendDash  [animation, other]
+     L 852 [useEffect]  buyGlow, buyPulse, dot1X, dot2X, flowOffset, sellGlow, sellPulse  [other, animation]
+     L 990 [useEffect]  pulse1, pulse2, pulse3, shieldGlow  [animation]
+     L1106 [useEffect]  glow1, glow2, pageOffset  [other, animation]
+
+## 6 warnings  WatchlistScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\tabs\WatchlistScreen.tsx
+   MISSING (4):
+     L 131 [useMemo]  watchlistStocks, watchlistStocks  [other]
+     L 131 [useMemo]  watchlistStocks, watchlistStocks  [other]
+     L 131 [useMemo]  watchlistStocks, watchlistStocks  [other]
+     L 213 [useMemo]  listSearchQuery, priceRange  [other]
+   UNNECESSARY (2):
+     L 226 [useCallback]  REMOVE: listSearchQuery, priceRange
+     L 234 [useCallback]  REMOVE: listSearchQuery, priceRange
+
+## 4 warnings  AvatarWidget.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\components\AvatarWidget.tsx
+   MISSING (3):
+     L 103 [useCallback]  messageOpacity, slideUp  [animation]
+     L 169 [useEffect]  triggerBanner, voiceSpeak  [other]
+     L 185 [useEffect]  pulseAnim  [animation]
+   UNNECESSARY (1):
+     L 120 [useCallback]  REMOVE: messageOpacity, slideUp
+
+## 4 warnings  PriceTrendChart.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\components\fno\PriceTrendChart.tsx
+   MISSING (2):
+     L 113 [useCallback]  getY, getY  [stable-ref]
+     L 129 [useMemo]  getY  [stable-ref]
+   UNNECESSARY (2):
+     L 157 [useMemo]  REMOVE: getY
+     L 166 [useMemo]  REMOVE: getY
+
+## 4 warnings  StrategyBuilderScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\trade\StrategyBuilderScreen.tsx
+   MISSING (2):
+     L 352 [useCallback]  setSelectedStrategyName  [stable-ref]
+     L 576 [useEffect]  strategyLegs.length  [derived-value]
+   UNNECESSARY (2):
+     L 367 [useCallback]  REMOVE: setSelectedStrategyName
+     L 581 [useCallback]  REMOVE: strategyLegs.length
+
+## 3 warnings  useStaggeredAnimation.ts
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\hooks\useStaggeredAnimation.ts
+   MISSING (3):
+     L 113 [useCallback]  progressValues, progressValues  [other]
+     L 113 [useMemo]  progressValues, progressValues  [other]
+     L 199 [useCallback]  progressValues  [other]
+
+## 3 warnings  AppNavigator.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\navigation\AppNavigator.tsx
+   MISSING (3):
+     L 135 [useEffect]  scaleAnim  [animation]
+     L 144 [useEffect]  badgeScale  [animation]
+     L 311 [useEffect]  user  [other]
+
+## 3 warnings  BrokerConnectScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\broker\BrokerConnectScreen.tsx
+   MISSING (1):
+     L 155 [useEffect]  fadeAnim, glowAnim, slideAnim  [animation]
+   UNNECESSARY (2):
+     L 169 [useCallback]  REMOVE: fadeAnim, glowAnim, slideAnim
+     L 183 [useCallback]  REMOVE: fadeAnim, glowAnim, slideAnim
+
+## 3 warnings  ChatRoomScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\chat\ChatRoomScreen.tsx
+   MISSING (3):
+     L  53 [useEffect]  fadeAnim  [animation]
+     L 168 [useMemo]  roomMessages, roomMessages  [other]
+     L 214 [useEffect]  setTyping  [stable-ref]
+
+## 3 warnings  CertificateScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\education\CertificateScreen.tsx
+   MISSING (1):
+     L  77 [useCallback]  doShare  [other]
+   UNNECESSARY (2):
+     L  94 [useCallback]  REMOVE: doShare
+     L 103 [useMemo]  REMOVE: doShare
+
+## 3 warnings  DigiLockerScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\kyc\DigiLockerScreen.tsx
+   MISSING (1):
+     L  79 [useCallback]  handleFetchDocuments  [stable-ref]
+   UNNECESSARY (2):
+     L 101 [useCallback]  REMOVE: handleFetchDocuments
+     L 108 [useCallback]  REMOVE: handleFetchDocuments
+
+## 3 warnings  OnboardingScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\onboarding\OnboardingScreen.tsx
+   MISSING (3):
+     L 283 [useEffect]  pulseAnim  [animation]
+     L 588 [useEffect]  flameScale, glowOpacity  [animation]
+     L 725 [useEffect]  cardOpacities, cardScales, visibleSteps  [animation, other]
+
+## 3 warnings  ContractNoteUploadScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\reports\ContractNoteUploadScreen.tsx
+   MISSING (1):
+     L  93 [useEffect]  fadeAnim, slideAnim  [animation]
+   UNNECESSARY (2):
+     L 121 [useCallback]  REMOVE: fadeAnim, slideAnim
+     L 160 [useCallback]  REMOVE: fadeAnim, slideAnim
+
+## 3 warnings  FnOOptionsChainScreen.tsx
+   Path: C:\Users\Karan\Desktop\New folder\Toroloom\src\screens\trade\FnOOptionsChainScreen.tsx
+   MISSING (1):
+     L  97 [useCallback]  fetchExpiries, fetchFutures, fetchOptionChain, fetchPositions  [stable-ref]
+   UNNECESSARY (2):
+     L 102 [useCallback]  REMOVE: fetchExpiries, fetchFutures, fetchOptionChain, fetchPositions
+     L 107 [useCallback]  REMOVE: fetchExpiries, fetchFutures, fetchOptionChain, fetchPositions
+
+========================================================================
+SECTION 2: FILES WITH 1-2 WARNINGS
+========================================================================
+
+  MISSING      L  88  BiometricUnlockOverlay.tsx           [animation]           pulseOpacity, pulseScale
+  MISSING      L 173  BiometricUnlockOverlay.tsx           [other]               lock, unlock
+  MISSING      L 114  VideoLessonPlayer.tsx                [member-expr/stable-ref]  onProgressUpdate, onVideoComplete, progress.lastPosition
+  UNNECESSARY  L 118  VideoLessonPlayer.tsx                [member-expr/stable-ref]  onProgressUpdate, onVideoComplete, progress.lastPosition
+  MISSING      L  61  PostDetailScreen.tsx                 [animation]           scale
+  MISSING      L  94  PostDetailScreen.tsx                 [animation]           opacity
+  MISSING      L 631  SocialTradingScreen.tsx              [stable-ref]          navigation
+  UNNECESSARY  L 722  SocialTradingScreen.tsx              [stable-ref]          navigation
+  UNNECESSARY  L  51  HomeScreen.tsx                       [other]               perfStrategies
+  MISSING      L 227  HomeScreen.tsx                       [animation]           glowProgress
+  MISSING      L  34  AppContent.tsx                       [other]               loadOnboarding, loadStoredAuth, loadSubscription
+  MISSING      L 164  IronLockOverlay.tsx                  [other/animation]     fadeAnim, glowPulse, pulseAnim, scaleAnim, speak, visible
+  UNNECESSARY  L 224  TechnicalIndicators.tsx              [other]               width
+  MISSING      L 155  UpgradePromptModal.tsx               [animation]           backdropOpacity, glowPulse, modalScale, modalTranslateY, resetAnimValues
+  MISSING      L 271  OfflineBanner.tsx                    [animation]           opacity, translateY
+  MISSING      L  33  SkeletonLoader.tsx                   [animation]           opacity
+  MISSING      L 130  SyncConflictModal.tsx                [animation]           backdropOpacity, modalScale, modalTranslateY
+  MISSING      L  55  ThemeContext.tsx                     [other]               oldBgSV
+  MISSING      L 201  SplashScreen.tsx                     [other/stable-ref/animation]  brandOpacity, diagnosticOpacity, glowPulse, goldGlowPulse, minDuration, onFinish, progressWidth, scanLineY, shieldOpacity, shieldScale, taglineOpacity, versionOpacity
+  MISSING      L 118  AITradeAssistantScreen.tsx           [other]               qtyNum
+  MISSING      L  72  CommunityScreen.tsx                  [animation]           scale
+  UNNECESSARY  L 787  IPODashboardScreen.tsx               [other]               applications
+  UNNECESSARY  L 215  BehavioralJournalScreen.tsx          [other]               entries
+  MISSING      L 172  NewsFeedScreen.tsx                   [other/animation]     fadeAnim, index, slideAnim
+  MISSING      L 138  TelegramConnectScreen.tsx            [animation]           codeOpacity, codeScale, pulseAnim
+  UNNECESSARY  L 302  StrategyPerformanceScreen.tsx        [other]               executedStrategies
+
+========================================================================
+SECTION 3: EASY FIXES (safe to add - stable refs, setters, animation)
+========================================================================
+
+41 warnings are likely safe to add (stable references, setters, or animation values):
+
+  PnLChart.tsx                        L  55  [other/animation]     fadeAnim, prevDataLength
+  PnLChart.tsx                        L 106  [stable-ref]          getX, getY
+  SubscriptionScreen.tsx              L  50  [animation]           cardAnims, cardAnims
+  StrategyCanvas.tsx                  L 136  [animation]           fadeAnim
+  OnboardingIllustrations.tsx         L 110  [other/animation]     engineGlow, flameH, glowR, starOpacity1, starOpacity2
+  OnboardingIllustrations.tsx         L 312  [other/animation]     centerGlowO, particle1X, particle1Y, particle2X, particle2Y, ringRotate, segmentOpacity, segmentScale
+  OnboardingIllustrations.tsx         L 551  [animation/other]     candleOpacities, candleScales, crosshairX, crosshairY, dotGlows, trendDash
+  OnboardingIllustrations.tsx         L 852  [other/animation]     buyGlow, buyPulse, dot1X, dot2X, flowOffset, sellGlow, sellPulse
+  OnboardingIllustrations.tsx         L 990  [animation]           pulse1, pulse2, pulse3, shieldGlow
+  OnboardingIllustrations.tsx         L1106  [other/animation]     glow1, glow2, pageOffset
+  AvatarWidget.tsx                    L 103  [animation]           messageOpacity, slideUp
+  AvatarWidget.tsx                    L 185  [animation]           pulseAnim
+  PriceTrendChart.tsx                 L 113  [stable-ref]          getY, getY
+  PriceTrendChart.tsx                 L 129  [stable-ref]          getY
+  StrategyBuilderScreen.tsx           L 352  [stable-ref]          setSelectedStrategyName
+  AppNavigator.tsx                    L 135  [animation]           scaleAnim
+  AppNavigator.tsx                    L 144  [animation]           badgeScale
+  BrokerConnectScreen.tsx             L 155  [animation]           fadeAnim, glowAnim, slideAnim
+  ChatRoomScreen.tsx                  L  53  [animation]           fadeAnim
+  ChatRoomScreen.tsx                  L 214  [stable-ref]          setTyping
+  DigiLockerScreen.tsx                L  79  [stable-ref]          handleFetchDocuments
+  OnboardingScreen.tsx                L 283  [animation]           pulseAnim
+  OnboardingScreen.tsx                L 588  [animation]           flameScale, glowOpacity
+  OnboardingScreen.tsx                L 725  [animation/other]     cardOpacities, cardScales, visibleSteps
+  ContractNoteUploadScreen.tsx        L  93  [animation]           fadeAnim, slideAnim
+  FnOOptionsChainScreen.tsx           L  97  [stable-ref]          fetchExpiries, fetchFutures, fetchOptionChain, fetchPositions
+  BiometricUnlockOverlay.tsx          L  88  [animation]           pulseOpacity, pulseScale
+  VideoLessonPlayer.tsx               L 114  [member-expr/stable-ref]  onProgressUpdate, onVideoComplete, progress.lastPosition
+  PostDetailScreen.tsx                L  61  [animation]           scale
+  PostDetailScreen.tsx                L  94  [animation]           opacity
+  ... and 11 more
+
+========================================================================
+SECTION 4: FULL FILE LISTING (sorted by warning count)
+========================================================================
+
+  #  Count  File                                      Missing  Unnecessary
+------------------------------------------------------------------------
+  1      7  PnLChart.tsx                                    3            4
+  2      7  SubscriptionScreen.tsx                          3            4
+  3      6  StrategyCanvas.tsx                              1            5
+  4      6  OnboardingIllustrations.tsx                     6            0
+  5      6  WatchlistScreen.tsx                             4            2
+  6      4  AvatarWidget.tsx                                3            1
+  7      4  PriceTrendChart.tsx                             2            2
+  8      4  StrategyBuilderScreen.tsx                       2            2
+  9      3  useStaggeredAnimation.ts                        3            0
+ 10      3  AppNavigator.tsx                                3            0
+ 11      3  BrokerConnectScreen.tsx                         1            2
+ 12      3  ChatRoomScreen.tsx                              3            0
+ 13      3  CertificateScreen.tsx                           1            2
+ 14      3  DigiLockerScreen.tsx                            1            2
+ 15      3  OnboardingScreen.tsx                            3            0
+ 16      3  ContractNoteUploadScreen.tsx                    1            2
+ 17      3  FnOOptionsChainScreen.tsx                       1            2
+ 18      2  BiometricUnlockOverlay.tsx                      2            0
+ 19      2  VideoLessonPlayer.tsx                           1            1
+ 20      2  PostDetailScreen.tsx                            2            0
+ 21      2  SocialTradingScreen.tsx                         1            1
+ 22      2  HomeScreen.tsx                                  1            1
+ 23      1  AppContent.tsx                                  1            0
+ 24      1  IronLockOverlay.tsx                             1            0
+ 25      1  TechnicalIndicators.tsx                         0            1
+ 26      1  UpgradePromptModal.tsx                          1            0
+ 27      1  OfflineBanner.tsx                               1            0
+ 28      1  SkeletonLoader.tsx                              1            0
+ 29      1  SyncConflictModal.tsx                           1            0
+ 30      1  ThemeContext.tsx                                1            0
+ 31      1  SplashScreen.tsx                                1            0
+ 32      1  AITradeAssistantScreen.tsx                      1            0
+ 33      1  CommunityScreen.tsx                             1            0
+ 34      1  IPODashboardScreen.tsx                          0            1
+ 35      1  BehavioralJournalScreen.tsx                     0            1
+ 36      1  NewsFeedScreen.tsx                              1            0
+ 37      1  TelegramConnectScreen.tsx                       1            0
+ 38      1  StrategyPerformanceScreen.tsx                   0            1
+
+========================================================================
+END OF REPORT
+========================================================================

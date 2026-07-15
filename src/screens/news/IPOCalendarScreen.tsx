@@ -1,47 +1,34 @@
-// ============================================================================
-// Toroloom — IPO Calendar Screen
-// Shows upcoming, open, and recently listed IPOs with subscription data, GMP,
-// price bands, and detailed information for each issue.
-// ============================================================================
-
-import React, { useState, useMemo, useCallback } from 'react';
+/**
+ * Toroloom — IPO Calendar Screen
+ * Shows all IPOs in a timeline/calendar view with upcoming, open, closed, and listed sections.
+ */
+import React, { useMemo, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Modal, Share,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, BORDER_RADIUS } from '../../constants/theme';
-import { mockIPOs } from '../../constants/mockData';
+import { useIPOStore } from '../../store/ipoStore';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { IPOItem } from '../../types';
-import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-type IPOFilter = 'all' | 'open' | 'upcoming' | 'closed' | 'listed';
+const { width } = Dimensions.get('window');
 
-const FILTERS: { key: IPOFilter; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: 'apps' },
-  { key: 'open', label: 'Open', icon: 'pricetag' },
-  { key: 'upcoming', label: 'Upcoming', icon: 'calendar' },
-  { key: 'closed', label: 'Closed', icon: 'lock-closed' },
-  { key: 'listed', label: 'Listed', icon: 'checkmark-circle' },
+type CalendarTab = 'timeline' | 'stats';
+
+const seasonData = [
+  { month: 'May 2026', count: 18, totalRaised: '₹42,500 Cr' },
+  { month: 'Jun 2026', count: 12, totalRaised: '₹28,000 Cr' },
+  { month: 'Jul 2026', count: 8, totalRaised: '₹15,300 Cr' },
 ];
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  open: { label: 'Open Now', color: '#00E676', bgColor: '#00E67620' },
-  upcoming: { label: 'Upcoming', color: '#3B82F6', bgColor: '#3B82F620' },
-  closed: { label: 'Closed', color: '#FFAB40', bgColor: '#FFAB4020' },
-  listing_today: { label: 'Listing Today', color: '#8B5CF6', bgColor: '#8B5CF620' },
-  listed: { label: 'Listed', color: '#64748B', bgColor: '#64748B20' },
-};
-
-// ─── Helper: Format number in Cr/L ────────────────────────
-function formatCr(cr: number): string {
-  if (cr >= 100000) return `${(cr / 100000).toFixed(1)}L Cr`;
-  if (cr >= 1000) return `${(cr / 1000).toFixed(1)}K Cr`;
-  return `${cr.toFixed(0)} Cr`;
-}
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return '—';
@@ -49,515 +36,681 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-// ─── Status Badge ─────────────────────────────────────────
-function IPOStatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.upcoming;
-  return (
-    <View style={[statusBadgeStyles.badge, { backgroundColor: config.bgColor }]}>
-      <View style={[statusBadgeStyles.dot, { backgroundColor: config.color }]} />
-      <Text style={[statusBadgeStyles.label, { color: config.color }]}>{config.label}</Text>
-    </View>
-  );
+function daysUntil(dateStr: string): number {
+  const diff = new Date(dateStr).getTime() - Date.now();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-const statusBadgeStyles = StyleSheet.create({
-  badge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    paddingHorizontal: 10, paddingVertical: 4, borderRadius: BORDER_RADIUS.full,
-  },
-  dot: { width: 6, height: 6, borderRadius: 3 },
-  label: { fontSize: 11, fontWeight: '700' },
-});
-
-// ─── IPO Card ─────────────────────────────────────────────
-function IPOCard({ ipo, onPress, onBookmark, colors }: {
-  ipo: IPOItem; onPress: () => void; onBookmark: () => void; colors: any;
-}) {
-  const isHighSubscription = ipo.subscriptionTotal > 5;
-  const gmpPositive = ipo.gmp > 0;
-
-  return (
-    <AnimatedPressable onPress={onPress} haptic="light" scaleTo={0.98}>
-      <View style={[ipoCardStyles.card, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-        {/* Top Row */}
-        <View style={ipoCardStyles.topRow}>
-          <View style={[ipoCardStyles.logo, { backgroundColor: colors.primary + '20' }]}>
-            <Text style={[ipoCardStyles.logoText, { color: colors.primary }]}>{ipo.logo}</Text>
-          </View>
-          <View style={ipoCardStyles.companyInfo}>
-            <Text style={[ipoCardStyles.companyName, { color: colors.text }]} numberOfLines={1}>{ipo.companyName}</Text>
-            <Text style={[ipoCardStyles.sector, { color: colors.textMuted }]}>{ipo.sector}</Text>
-          </View>
-          <View style={ipoCardStyles.topActions}>
-            <IPOStatusBadge status={ipo.subscriptionStatus} />
-            <TouchableOpacity onPress={onBookmark} hitSlop={8}>
-              <Ionicons
-                name={ipo.isBookmarked ? 'bookmark' : 'bookmark-outline'}
-                size={20}
-                color={ipo.isBookmarked ? colors.warning : colors.textMuted}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Price & GMP Row */}
-        <View style={ipoCardStyles.priceRow}>
-          <View style={ipoCardStyles.priceItem}>
-            <Text style={[ipoCardStyles.priceLabel, { color: colors.textMuted }]}>Price Band</Text>
-            <Text style={[ipoCardStyles.priceValue, { color: colors.text }]}>
-              ₹{ipo.priceBand.min} – ₹{ipo.priceBand.max}
-            </Text>
-          </View>
-          <View style={ipoCardStyles.priceItem}>
-            <Text style={[ipoCardStyles.priceLabel, { color: colors.textMuted }]}>Lot Size</Text>
-            <Text style={[ipoCardStyles.priceValue, { color: colors.text }]}>{ipo.lotSize} shares</Text>
-          </View>
-          <View style={ipoCardStyles.priceItem}>
-            <Text style={[ipoCardStyles.priceLabel, { color: colors.textMuted }]}>Min Invest</Text>
-            <Text style={[ipoCardStyles.priceValue, { color: colors.text }]}>
-              ₹{formatCr(ipo.minInvestment / 10000000)}
-            </Text>
-          </View>
-        </View>
-
-        {/* GMP */}
-        <View style={[ipoCardStyles.gmpRow, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
-          <View style={ipoCardStyles.gmpLeft}>
-            <Text style={[ipoCardStyles.gmpLabel, { color: colors.textMuted }]}>GMP (Grey Market)</Text>
-            <Text style={[ipoCardStyles.gmpValue, { color: gmpPositive ? colors.marketUp : colors.marketDown }]}>
-              {gmpPositive ? '+' : ''}₹{ipo.gmp} ({gmpPositive ? '+' : ''}{ipo.gmpPercent.toFixed(1)}%)
-            </Text>
-          </View>
-          <View style={ipoCardStyles.gmpRight}>
-            <Text style={[ipoCardStyles.gmpLabel, { color: colors.textMuted }]}>Expected Listing</Text>
-            <Text style={[ipoCardStyles.gmpValue, { color: colors.text }]}>
-              ₹{ipo.expectedListingPrice} ({gmpPositive ? '+' : ''}{ipo.expectedListingGain.toFixed(1)}%)
-            </Text>
-          </View>
-        </View>
-
-        {/* Subscription Bar */}
-        {ipo.subscriptionTotal > 0 && (
-          <View style={ipoCardStyles.subRow}>
-            <Text style={[ipoCardStyles.subLabel, { color: colors.textMuted }]}>
-              Subscription: {ipo.subscriptionTotal.toFixed(1)}x
-            </Text>
-            <View style={[ipoCardStyles.subBar, { backgroundColor: colors.bgInput }]}>
-              <View style={[ipoCardStyles.subFill, {
-                width: `${Math.min(ipo.subscriptionTotal * 8, 100)}%`,
-                backgroundColor: isHighSubscription ? colors.marketUp : colors.warning,
-              }]} />
-            </View>
-          </View>
-        )}
-
-        {/* Key Dates */}
-        <View style={ipoCardStyles.datesRow}>
-          <View style={ipoCardStyles.dateItem}>
-            <Ionicons name="calendar-outline" size={12} color={colors.textMuted} />
-            <Text style={[ipoCardStyles.dateLabel, { color: colors.textMuted }]}>Open: {formatDate(ipo.openDate)}</Text>
-          </View>
-          <View style={ipoCardStyles.dateItem}>
-            <Ionicons name="calendar-outline" size={12} color={colors.textMuted} />
-            <Text style={[ipoCardStyles.dateLabel, { color: colors.textMuted }]}>Close: {formatDate(ipo.closeDate)}</Text>
-          </View>
-        </View>
-        <View style={ipoCardStyles.dateItem}>
-          <Ionicons name="flag-outline" size={12} color={colors.textMuted} />
-          <Text style={[ipoCardStyles.dateLabel, { color: colors.textMuted }]}>
-            Listing: {formatDate(ipo.listingDate)}
-          </Text>
-        </View>
-      </View>
-    </AnimatedPressable>
-  );
-}
-
-const ipoCardStyles = StyleSheet.create({
-  card: {
-    padding: SPACING.lg, borderRadius: BORDER_RADIUS.lg, borderWidth: 1,
-    marginBottom: SPACING.md,
-  },
-  topRow: { flexDirection: 'row', marginBottom: SPACING.md },
-  logo: {
-    width: 48, height: 48, borderRadius: BORDER_RADIUS.md,
-    justifyContent: 'center', alignItems: 'center', marginRight: SPACING.md,
-  },
-  logoText: { fontSize: 18, fontWeight: '800' },
-  companyInfo: { flex: 1, justifyContent: 'center' },
-  companyName: { fontSize: 16, fontWeight: '700' },
-  sector: { fontSize: 12, fontWeight: '500', marginTop: 2 },
-  topActions: { alignItems: 'flex-end', gap: 6 },
-  priceRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.md },
-  priceItem: { alignItems: 'center', flex: 1 },
-  priceLabel: { fontSize: 10, fontWeight: '500', marginBottom: 4 },
-  priceValue: { fontSize: 13, fontWeight: '700' },
-  gmpRow: {
-    flexDirection: 'row', borderRadius: BORDER_RADIUS.sm, borderWidth: 1,
-    padding: SPACING.md, marginBottom: SPACING.md,
-  },
-  gmpLeft: { flex: 1 },
-  gmpRight: { flex: 1, alignItems: 'flex-end' },
-  gmpLabel: { fontSize: 10, fontWeight: '500', marginBottom: 2 },
-  gmpValue: { fontSize: 14, fontWeight: '700' },
-  subRow: { marginBottom: SPACING.sm },
-  subLabel: { fontSize: 11, fontWeight: '600', marginBottom: 4 },
-  subBar: { height: 6, borderRadius: 3, overflow: 'hidden' },
-  subFill: { height: '100%', borderRadius: 3 },
-  datesRow: { marginBottom: 4 },
-  dateItem: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
-  dateLabel: { fontSize: 11, fontWeight: '500' },
-});
-
-// ─── IPO Detail Modal ─────────────────────────────────────
-function IPODetailModal({ ipo, visible, onClose, onBookmark, colors }: {
-  ipo: IPOItem | null; visible: boolean; onClose: () => void; onBookmark: () => void; colors: any;
-}) {
+export default function IPOCalendarScreen({ navigation }: any) {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  if (!ipo) return null;
+  const nav = useNavigation();
+  const { ipos } = useIPOStore();
+  const [activeTab, setActiveTab] = useState<CalendarTab>('timeline');
 
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        title: `${ipo.companyName} IPO`,
-        message: `${ipo.companyName} IPO is ${ipo.subscriptionStatus}!\nPrice: ₹${ipo.priceBand.min}-₹${ipo.priceBand.max}\nLot: ${ipo.lotSize} shares\nGMP: ₹${ipo.gmp}\n\nvia Toroloom`,
-      });      } catch {
-        // Share cancelled or failed silently
+  // Group IPOs by status
+  const grouped = useMemo(() => {
+    const groups: Record<string, IPOItem[]> = {
+      open: [],
+      listing_today: [],
+      upcoming: [],
+      closed: [],
+      listed: [],
+    };
+    for (const ipo of ipos) {
+      if (groups[ipo.subscriptionStatus]) {
+        groups[ipo.subscriptionStatus].push(ipo);
+      } else {
+        groups.listed.push(ipo);
       }
-  };
+    }
+    // Sort within each group
+    for (const key of Object.keys(groups)) {
+      groups[key].sort((a, b) => new Date(a.openDate).getTime() - new Date(b.openDate).getTime());
+    }
+    return groups;
+  }, [ipos]);
+
+  const stats = useMemo(() => {
+    const currentMonth = ipos.filter(i => {
+      const d = new Date(i.openDate);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    return {
+      totalIpos: ipos.length,
+      thisMonth: currentMonth.length,
+      totalRaised: ipos.reduce((s, i) => s + i.issueSize, 0),
+      avgGmp: ipos.filter(i => i.gmp > 0).reduce((s, i) => s + i.gmpPercent, 0) / Math.max(ipos.filter(i => i.gmp > 0).length, 1),
+      avgSub: ipos.reduce((s, i) => s + i.subscriptionTotal, 0) / Math.max(ipos.length, 1),
+    };
+  }, [ipos]);
+
+  const timelineSections: { key: string; label: string; icon: string; color: string; bgColor: string }[] = [
+    { key: 'listing_today', label: 'Listing Today', icon: 'rocket', color: '#8B5CF6', bgColor: '#8B5CF615' },
+    { key: 'open', label: 'Open Now', icon: 'pricetag', color: '#00E676', bgColor: '#00E67615' },
+    { key: 'upcoming', label: 'Upcoming', icon: 'calendar', color: '#3B82F6', bgColor: '#3B82F615' },
+    { key: 'closed', label: 'Closed', icon: 'lock-closed', color: '#FFAB40', bgColor: '#FFAB4015' },
+    { key: 'listed', label: 'Listed', icon: 'checkmark-circle', color: '#64748B', bgColor: '#64748B15' },
+  ];
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={[detailStyles.container, { backgroundColor: colors.bg }]}>
-        {/* Header */}
-        <LinearGradient colors={['rgba(59,130,246,0.08)', 'transparent']}
-          style={[detailStyles.header, { paddingTop: insets.top + 12 }]}>
-          <View style={detailStyles.headerRow}>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color={colors.text} />
-            </TouchableOpacity>
-            <View style={detailStyles.headerActions}>
-              <TouchableOpacity onPress={onBookmark}>
-                <Ionicons name={ipo.isBookmarked ? 'bookmark' : 'bookmark-outline'} size={22}
-                  color={ipo.isBookmarked ? colors.warning : colors.textSecondary} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleShare}>
-                <Ionicons name="share-outline" size={22} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </LinearGradient>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
+        <TouchableOpacity onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+          <Ionicons name="arrow-back" size={20} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>IPO Calendar</Text>
+        <TouchableOpacity
+          style={[styles.dashBtn, { backgroundColor: colors.primary + '20' }]}
+          onPress={() => nav.navigate('IPODashboard' as never)}
+        >
+          <Ionicons name="grid-outline" size={16} color={colors.primary} />
+          <Text style={[styles.dashBtnText, { color: colors.primary }]}>Dashboard</Text>
+        </TouchableOpacity>
+      </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={detailStyles.content}>
-          {/* Company Header */}
-          <View style={detailStyles.companyHeader}>
-            <View style={[detailStyles.companyLogo, { backgroundColor: colors.primary + '20' }]}>
-              <Text style={[detailStyles.companyLogoText, { color: colors.primary }]}>{ipo.logo}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[detailStyles.companyName, { color: colors.text }]}>{ipo.companyName}</Text>
-              <Text style={[detailStyles.sector, { color: colors.textSecondary }]}>{ipo.sector}</Text>
-            </View>
-            <IPOStatusBadge status={ipo.subscriptionStatus} />
-          </View>
+      {/* Tab Toggle */}
+      <View style={[styles.tabRow, { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm }]}>
+        <TouchableOpacity
+          style={[styles.tabBtn, activeTab === 'timeline' && { backgroundColor: colors.primary }]}
+          onPress={() => setActiveTab('timeline')}
+        >
+          <Ionicons name="calendar" size={14} color={activeTab === 'timeline' ? '#FFF' : colors.textMuted} />
+          <Text style={[styles.tabText, { color: activeTab === 'timeline' ? '#FFF' : colors.textMuted }]}>Timeline</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabBtn, activeTab === 'stats' && { backgroundColor: colors.primary }]}
+          onPress={() => setActiveTab('stats')}
+        >
+          <Ionicons name="analytics" size={14} color={activeTab === 'stats' ? '#FFF' : colors.textMuted} />
+          <Text style={[styles.tabText, { color: activeTab === 'stats' ? '#FFF' : colors.textMuted }]}>Market Stats</Text>
+        </TouchableOpacity>
+      </View>
 
-          {/* Rating */}
-          <View style={detailStyles.ratingRow}>
-            {[1,2,3,4,5].map(i => (
-              <Ionicons key={i} name={i <= ipo.rating ? 'star' : 'star-outline'} size={16}
-                color={i <= ipo.rating ? '#FFAB40' : colors.textMuted} />
-            ))}
-            <Text style={[detailStyles.ratingText, { color: colors.textMuted }]}>
-              {ipo.rating}/5
-            </Text>
-          </View>
-
-          {/* Key Stats Grid */}
-          <View style={[detailStyles.statsGrid, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
-            {[
-              { label: 'Issue Size', value: `₹${formatCr(ipo.issueSize)}` },
-              { label: 'Fresh Issue', value: `₹${formatCr(ipo.freshIssue)}` },
-              { label: 'OFS', value: `₹${formatCr(ipo.offerForSale)}` },
-              { label: 'Lot Size', value: `${ipo.lotSize} shares` },
-              { label: 'Min Invest', value: `₹${ipo.minInvestment.toLocaleString('en-IN')}` },
-              { label: 'P/E Ratio', value: ipo.peRatio > 0 ? ipo.peRatio.toFixed(1) : 'N/A' },
-              { label: 'Revenue', value: `₹${formatCr(ipo.revenue)}` },
-              { label: 'Net Profit', value: `₹${formatCr(ipo.netProfit)}` },
-              { label: 'ROE', value: `${ipo.roe.toFixed(1)}%` },
-            ].map((stat, i) => (
-              <View key={i} style={detailStyles.statItem}>
-                <Text style={[detailStyles.statLabel, { color: colors.textMuted }]}>{stat.label}</Text>
-                <Text style={[detailStyles.statValue, { color: colors.text }]}>{stat.value}</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+      >
+        {activeTab === 'timeline' ? (
+          /* ══ TIMELINE VIEW ══ */
+          <>
+            {/* Quick overview bar */}
+            <View style={[styles.overviewBar, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <View style={styles.overviewItem}>
+                <Text style={[styles.overviewValue, { color: colors.primary }]}>{ipos.length}</Text>
+                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Total IPOs</Text>
               </View>
-            ))}
-          </View>
-
-          {/* Price Band */}
-          <View style={[detailStyles.priceSection, { borderColor: colors.border }]}>
-            <Text style={[detailStyles.sectionTitle, { color: colors.text }]}>Price Details</Text>
-            <View style={detailStyles.priceRow}>
-              <View style={detailStyles.priceBox}>
-                <Text style={[detailStyles.priceLabel, { color: colors.textMuted }]}>Price Band</Text>
-                <Text style={[detailStyles.priceValue, { color: colors.text }]}>
-                  ₹{ipo.priceBand.min} - ₹{ipo.priceBand.max}
+              <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.overviewItem}>
+                <Text style={[styles.overviewValue, { color: '#00E676' }]}>
+                  {grouped.open.length + grouped.listing_today.length}
                 </Text>
+                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Active</Text>
               </View>
-              <View style={detailStyles.priceBox}>
-                <Text style={[detailStyles.priceLabel, { color: colors.textMuted }]}>GMP</Text>
-                <Text style={[detailStyles.priceValue, { color: ipo.gmp > 0 ? colors.marketUp : colors.marketDown }]}>
-                  ₹{ipo.gmp} ({ipo.gmpPercent.toFixed(1)}%)
-                </Text>
+              <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.overviewItem}>
+                <Text style={[styles.overviewValue, { color: '#3B82F6' }]}>{grouped.upcoming.length}</Text>
+                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Upcoming</Text>
               </View>
-              <View style={detailStyles.priceBox}>
-                <Text style={[detailStyles.priceLabel, { color: colors.textMuted }]}>Expected Listing</Text>
-                <Text style={[detailStyles.priceValue, { color: colors.text }]}>₹{ipo.expectedListingPrice}</Text>
+              <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.overviewItem}>
+                <Text style={[styles.overviewValue, { color: colors.text }]}>{grouped.listed.length}</Text>
+                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Listed</Text>
               </View>
             </View>
-          </View>
 
-          {/* Subscription Data */}
-          {ipo.subscriptionTotal > 0 && (
-            <View style={detailStyles.subSection}>
-              <Text style={[detailStyles.sectionTitle, { color: colors.text }]}>Subscription</Text>
-              {[
-                { label: 'QIB (Institutions)', value: `${ipo.subscriptionQIB.toFixed(1)}x`, color: ipo.subscriptionQIB > 3 ? colors.marketUp : colors.warning },
-                { label: 'HNI (Rich Individuals)', value: `${ipo.subscriptionHNI.toFixed(1)}x`, color: ipo.subscriptionHNI > 5 ? colors.marketUp : colors.warning },
-                { label: 'Retail', value: `${ipo.subscriptionRetail.toFixed(1)}x`, color: ipo.subscriptionRetail > 2 ? colors.marketUp : colors.warning },
-                { label: 'Total', value: `${ipo.subscriptionTotal.toFixed(1)}x`, color: ipo.subscriptionTotal > 5 ? colors.marketUp : colors.warning },
-              ].map((s, i) => (
-                <View key={i} style={[detailStyles.subRow, { borderBottomColor: colors.divider }]}>
-                  <Text style={[detailStyles.subLabel, { color: colors.textSecondary }]}>{s.label}</Text>
-                  <View style={detailStyles.subBarRight}>
-                    <View style={[detailStyles.subBarBg, { backgroundColor: colors.bgInput }]}>
-                      <View style={[detailStyles.subBarFill, {
-                        width: `${Math.min(parseFloat(s.value) * 6, 100)}%`,
-                        backgroundColor: s.color,
-                      }]} />
+            {/* Timeline sections */}
+            {timelineSections.map(section => {
+              const items = grouped[section.key];
+              if (!items || items.length === 0) return null;
+
+              return (
+                <View key={section.key} style={styles.timelineSection}>
+                  {/* Section Header */}
+                  <View style={styles.sectionHeader}>
+                    <View style={[styles.sectionIcon, { backgroundColor: section.bgColor }]}>
+                      <Ionicons name={section.icon as any} size={16} color={section.color} />
                     </View>
-                    <Text style={[detailStyles.subValue, { color: s.color }]}>{s.value}</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{section.label}</Text>
+                    <View style={[styles.sectionCount, { backgroundColor: section.bgColor }]}>
+                      <Text style={[styles.sectionCountText, { color: section.color }]}>{items.length}</Text>
+                    </View>
                   </View>
+
+                  {/* Timeline items */}
+                  <View style={styles.timelineList}>
+                    {items.map((ipo, idx) => {
+                      const daysLeft = ipo.subscriptionStatus === 'upcoming'
+                        ? daysUntil(ipo.openDate)
+                        : ipo.subscriptionStatus === 'open'
+                          ? daysUntil(ipo.closeDate)
+                          : 0;
+                      const isLast = idx === items.length - 1;
+
+                      return (
+                        <TouchableOpacity
+                          key={ipo.id}
+                          style={[styles.timelineItem, { borderLeftColor: section.color }]}
+                          onPress={() => nav.navigate('IPODashboard' as never)}
+                          activeOpacity={0.7}
+                        >
+                          {/* Timeline dot */}
+                          <View style={[styles.timelineDot, { backgroundColor: section.color }]} />
+
+                          {/* Date badge */}
+                          <View style={[styles.dateBadge, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                            <Text style={[styles.dateDay, { color: colors.text }]}>
+                              {new Date(ipo.openDate).getDate()}
+                            </Text>
+                            <Text style={[styles.dateMonth, { color: colors.textMuted }]}>
+                              {new Date(ipo.openDate).toLocaleDateString('en-IN', { month: 'short' })}
+                            </Text>
+                          </View>
+
+                          {/* Content */}
+                          <View style={[styles.timelineContent, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                            <View style={styles.timelineTop}>
+                              <View style={[styles.timelineLogo, { backgroundColor: section.bgColor }]}>
+                                <Text style={[styles.timelineLogoText, { color: section.color }]}>{ipo.logo}</Text>
+                              </View>
+                              <View style={{ flex: 1 }}>
+                                <Text style={[styles.timelineName, { color: colors.text }]} numberOfLines={1}>{ipo.companyName}</Text>
+                                <Text style={[styles.timelineSector, { color: colors.textMuted }]}>{ipo.sector}</Text>
+                              </View>
+                            </View>
+
+                            <View style={styles.timelineInfo}>
+                              <View style={styles.timelineInfoRow}>
+                                <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>Band</Text>
+                                <Text style={[styles.timelineInfoValue, { color: colors.text }]}>
+                                  ₹{ipo.priceBand.min}–{ipo.priceBand.max}
+                                </Text>
+                              </View>
+                              {ipo.gmp > 0 && (
+                                <View style={styles.timelineInfoRow}>
+                                  <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>GMP</Text>
+                                  <Text style={[styles.timelineInfoValue, { color: '#00E676' }]}>
+                                    +₹{ipo.gmp} ({ipo.gmpPercent.toFixed(1)}%)
+                                  </Text>
+                                </View>
+                              )}
+                              <View style={styles.timelineInfoRow}>
+                                <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>Issue</Text>
+                                <Text style={[styles.timelineInfoValue, { color: colors.text }]}>
+                                  ₹{ipo.issueSize.toLocaleString('en-IN')} Cr
+                                </Text>
+                              </View>
+                            </View>
+
+                            {/* Days countdown */}
+                            {daysLeft > 0 && (
+                              <View style={[styles.countdownBadge, { backgroundColor: section.bgColor }]}>
+                                <Ionicons name="time-outline" size={11} color={section.color} />
+                                <Text style={[styles.countdownText, { color: section.color }]}>
+                                  {ipo.subscriptionStatus === 'open'
+                                    ? `${daysLeft}d left`
+                                    : `Opens in ${daysLeft}d`}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+              );
+            })}
+
+            {/* Monthly overview */}
+            <View style={[styles.seasonCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Text style={[styles.seasonTitle, { color: colors.text }]}>Monthly IPO Activity</Text>
+              {seasonData.map((m, i) => (
+                <View key={m.month} style={[styles.seasonRow, i < seasonData.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                  <Text style={[styles.seasonMonth, { color: colors.text }]}>{m.month}</Text>
+                  <View style={styles.seasonBar}>
+                    <View style={[styles.seasonBarFill, {
+                      width: `${(m.count / seasonData[0].count) * 100}%`,
+                      backgroundColor: colors.primary,
+                    }]} />
+                  </View>
+                  <Text style={[styles.seasonCount, { color: colors.text }]}>{m.count}</Text>
+                  <Text style={[styles.seasonRaised, { color: colors.textMuted }]}>{m.totalRaised}</Text>
                 </View>
               ))}
             </View>
-          )}
-
-          {/* Key Dates */}
-          <View style={detailStyles.datesSection}>
-            <Text style={[detailStyles.sectionTitle, { color: colors.text }]}>Key Dates</Text>
-            {[
-              { label: 'Open Date', value: formatDate(ipo.openDate) },
-              { label: 'Close Date', value: formatDate(ipo.closeDate) },
-              { label: 'Allotment Date', value: ipo.allotmentDate ? formatDate(ipo.allotmentDate) : 'TBD' },
-              { label: 'Listing Date', value: formatDate(ipo.listingDate) },
-            ].map((d, i) => (
-              <View key={i} style={[detailStyles.dateRow, { borderBottomColor: colors.divider }]}>
-                <Text style={[detailStyles.dateRowLabel, { color: colors.textSecondary }]}>{d.label}</Text>
-                <Text style={[detailStyles.dateRowValue, { color: colors.text }]}>{d.value}</Text>
+          </>
+        ) : (
+          /* ══ MARKET STATS VIEW ══ */
+          <>
+            {/* Key stats grid */}
+            <View style={styles.statsGrid}>
+              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={[styles.statIcon, { backgroundColor: colors.primary + '20' }]}>
+                  <Ionicons name="rocket" size={20} color={colors.primary} />
+                </View>
+                <Text style={[styles.statValue, { color: colors.text }]}>{stats.totalIpos}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Total IPOs</Text>
               </View>
-            ))}
-          </View>
-
-          {/* About */}
-          <Text style={[detailStyles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>About</Text>
-          <Text style={[detailStyles.aboutText, { color: colors.textSecondary }]}>{ipo.about}</Text>
-
-          {/* Strengths */}
-          <Text style={[detailStyles.subSectionTitle, { color: colors.marketUp, marginTop: SPACING.lg }]}>✓ Strengths</Text>
-          {ipo.strengths.map((s, i) => (
-            <Text key={i} style={[detailStyles.bulletText, { color: colors.textSecondary }]}>  • {s}</Text>
-          ))}
-
-          {/* Risks */}
-          <Text style={[detailStyles.subSectionTitle, { color: colors.marketDown, marginTop: SPACING.md }]}>⚠ Risks</Text>
-          {ipo.risks.map((r, i) => (
-            <Text key={i} style={[detailStyles.bulletText, { color: colors.textSecondary }]}>  • {r}</Text>
-          ))}
-
-          {/* Lead Managers */}
-          <View style={[detailStyles.footerSection, { borderTopColor: colors.divider }]}>
-            <Text style={[detailStyles.footerLabel, { color: colors.textMuted }]}>Lead Managers</Text>
-            <Text style={[detailStyles.footerValue, { color: colors.text }]}>{ipo.leadManagers.join(', ')}</Text>
-            <Text style={[detailStyles.footerLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>Registrar</Text>
-            <Text style={[detailStyles.footerValue, { color: colors.text }]}>{ipo.registrar}</Text>
-          </View>
-
-          <View style={{ height: 60 }} />
-        </ScrollView>
-      </View>
-    </Modal>
-  );
-}
-
-const detailStyles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.md },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerActions: { flexDirection: 'row', gap: SPACING.lg },
-  content: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.huge },
-  companyHeader: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginBottom: SPACING.sm },
-  companyLogo: { width: 56, height: 56, borderRadius: BORDER_RADIUS.lg, justifyContent: 'center', alignItems: 'center' },
-  companyLogoText: { fontSize: 22, fontWeight: '800' },
-  companyName: { fontSize: 22, fontWeight: '800' },
-  sector: { fontSize: 13, fontWeight: '500', marginTop: 2 },
-  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 2, marginBottom: SPACING.lg },
-  ratingText: { fontSize: 12, fontWeight: '600', marginLeft: 6 },
-  statsGrid: {
-    flexDirection: 'row', flexWrap: 'wrap', borderRadius: BORDER_RADIUS.lg,
-    borderWidth: 1, padding: SPACING.md, marginBottom: SPACING.lg,
-  },
-  statItem: { width: '33%', padding: SPACING.sm, alignItems: 'center' },
-  statLabel: { fontSize: 9, fontWeight: '500', marginBottom: 2, textTransform: 'uppercase' },
-  statValue: { fontSize: 13, fontWeight: '700' },
-  priceSection: { borderTopWidth: 1, paddingVertical: SPACING.lg, marginBottom: SPACING.lg },
-  sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: SPACING.md },
-  priceRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  priceBox: { alignItems: 'center', flex: 1 },
-  priceLabel: { fontSize: 10, fontWeight: '500', marginBottom: 4 },
-  priceValue: { fontSize: 15, fontWeight: '700' },
-  subSection: { marginBottom: SPACING.lg },
-  subRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: SPACING.sm, borderBottomWidth: 1,
-  },
-  subLabel: { fontSize: 13, fontWeight: '500', width: 140 },
-  subBarRight: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  subBarBg: { flex: 1, height: 6, borderRadius: 3, overflow: 'hidden' },
-  subBarFill: { height: '100%', borderRadius: 3 },
-  subValue: { fontSize: 13, fontWeight: '700', width: 50, textAlign: 'right' },
-  datesSection: { marginBottom: SPACING.lg },
-  dateRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: SPACING.sm, borderBottomWidth: 1 },
-  dateRowLabel: { fontSize: 13, fontWeight: '500' },
-  dateRowValue: { fontSize: 13, fontWeight: '600' },
-  aboutText: { fontSize: 14, lineHeight: 22, fontWeight: '400' },
-  subSectionTitle: { fontSize: 14, fontWeight: '700', marginBottom: SPACING.sm },
-  bulletText: { fontSize: 13, lineHeight: 20, marginBottom: 2 },
-  footerSection: { borderTopWidth: 1, paddingTop: SPACING.lg, marginTop: SPACING.lg },
-  footerLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
-  footerValue: { fontSize: 13, fontWeight: '500' },
-});
-
-// ─── Main Screen ──────────────────────────────────────────
-export default function IPOCalendarScreen({ _navigation }: any) {
-  const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
-  const [activeFilter, setActiveFilter] = useState<IPOFilter>('all');
-  const [ipos, setIpos] = useState<IPOItem[]>(mockIPOs);
-  const [selectedIPO, setSelectedIPO] = useState<IPOItem | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const filteredIPOs = useMemo(() => {
-    if (activeFilter === 'all') return ipos;
-    return ipos.filter(i => i.subscriptionStatus === activeFilter);
-  }, [ipos, activeFilter]);
-
-  const toggleBookmark = useCallback((ipoId: string) => {
-    setIpos(prev => prev.map(i => i.id === ipoId ? { ...i, isBookmarked: !i.isBookmarked } : i));
-  }, []);
-
-  const openDetail = useCallback((ipo: IPOItem) => {
-    setSelectedIPO(ipo);
-    setModalVisible(true);
-  }, []);
-
-  const counts = useMemo(() => ({
-    all: ipos.length,
-    open: ipos.filter(i => i.subscriptionStatus === 'open').length,
-    upcoming: ipos.filter(i => i.subscriptionStatus === 'upcoming').length,
-    closed: ipos.filter(i => i.subscriptionStatus === 'closed').length,
-    listed: ipos.filter(i => i.subscriptionStatus === 'listed').length,
-  }), [ipos]);
-
-  return (
-    <View style={[screenStyles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[screenStyles.header, { paddingTop: insets.top + 12 }]}>
-        <Text style={[screenStyles.title, { color: colors.text }]}>IPO Calendar</Text>
-        <Text style={[screenStyles.subtitle, { color: colors.textMuted }]}>
-          {counts.open > 0 ? `${counts.open} open · ` : ''}
-          {counts.upcoming} upcoming · {counts.listed} listed
-        </Text>
-
-        {/* Filter chips */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}
-          contentContainerStyle={screenStyles.filterRow}>
-          {FILTERS.map(f => (
-            <TouchableOpacity key={f.key} activeOpacity={0.7}
-              style={[screenStyles.filterChip, {
-                backgroundColor: activeFilter === f.key ? colors.primary : colors.bgCardLight,
-                borderColor: activeFilter === f.key ? colors.primary : colors.border,
-              }]}
-              onPress={() => setActiveFilter(f.key)}>
-              <Ionicons name={f.icon as any} size={14}
-                color={activeFilter === f.key ? '#FFFFFF' : colors.textSecondary} />
-              <Text style={[screenStyles.filterText, {
-                color: activeFilter === f.key ? '#FFFFFF' : colors.textSecondary,
-              }]}>{f.label}</Text>
-              <View style={[screenStyles.filterCount, {
-                backgroundColor: activeFilter === f.key ? 'rgba(255,255,255,0.2)' : colors.bgCard,
-              }]}>
-                <Text style={[screenStyles.filterCountText, {
-                  color: activeFilter === f.key ? '#FFFFFF' : colors.textMuted,
-                }]}>{counts[f.key]}</Text>
+              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={[styles.statIcon, { backgroundColor: '#00E67620' }]}>
+                  <Ionicons name="calendar" size={20} color="#00E676" />
+                </View>
+                <Text style={[styles.statValue, { color: colors.text }]}>{stats.thisMonth}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>This Month</Text>
               </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={[styles.statIcon, { backgroundColor: '#FFC10720' }]}>
+                  <Ionicons name="cash" size={20} color="#FFC107" />
+                </View>
+                <Text style={[styles.statValue, { color: colors.text }]}>
+                  ₹{(stats.totalRaised / 1000).toFixed(1)}K Cr
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Total Raised</Text>
+              </View>
+              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={[styles.statIcon, { backgroundColor: '#00E67620' }]}>
+                  <Ionicons name="trending-up" size={20} color="#00E676" />
+                </View>
+                <Text style={[styles.statValue, { color: colors.text }]}>
+                  {stats.avgGmp.toFixed(1)}%
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Avg GMP</Text>
+              </View>
+            </View>
 
-      {/* IPO List */}
-      {filteredIPOs.length === 0 ? (
-        <View style={screenStyles.emptyState}>
-          <Ionicons name="rocket-outline" size={48} color={colors.textMuted} />
-          <Text style={[screenStyles.emptyText, { color: colors.textMuted }]}>No IPOs found</Text>
-          <Text style={[screenStyles.emptySubtext, { color: colors.textMuted }]}>
-            {activeFilter !== 'all' ? 'No IPOs in this category' : 'Check back later for new IPOs'}
-          </Text>
-        </View>
-      ) : (
-        <ScrollView showsVerticalScrollIndicator={false}
-          contentContainerStyle={screenStyles.listContent}>
-          {/* IPO Count */}
-          <Text style={[screenStyles.countText, { color: colors.textMuted }]}>
-            Showing {filteredIPOs.length} IPO{filteredIPOs.length !== 1 ? 's' : ''}
-          </Text>
+            {/* Performance by status */}
+            {['open', 'upcoming', 'listed'].map(status => {
+              const items = grouped[status];
+              if (!items || items.length === 0) return null;
+              const avgSub = items.reduce((s, i) => s + i.subscriptionTotal, 0) / items.length;
+              const avgGmp = items.filter(i => i.gmp > 0).reduce((s, i) => s + i.gmpPercent, 0) / Math.max(items.filter(i => i.gmp > 0).length, 1);
 
-          {filteredIPOs.map(ipo => (
-            <IPOCard key={ipo.id} ipo={ipo} colors={colors}
-              onPress={() => openDetail(ipo)}
-              onBookmark={() => toggleBookmark(ipo.id)} />
-          ))}
-          <View style={{ height: 100 }} />
-        </ScrollView>
-      )}
+              return (
+                <View key={status} style={[styles.statusCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <View style={styles.statusHeader}>
+                    <StatusDot status={status} />
+                    <Text style={[styles.statusTitle, { color: colors.text }]}>
+                      {status === 'open' ? 'Open IPOs' : status === 'upcoming' ? 'Upcoming IPOs' : 'Listed IPOs'}
+                    </Text>
+                    <Text style={[styles.statusCount, { color: colors.textMuted }]}>{items.length}</Text>
+                  </View>
+                  <View style={styles.statusRow}>
+                    <View style={styles.statusStat}>
+                      <Text style={[styles.statusStatValue, { color: colors.text }]}>{avgSub.toFixed(1)}x</Text>
+                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>Avg Sub</Text>
+                    </View>
+                    <View style={[styles.statusDivider, { backgroundColor: colors.divider }]} />
+                    <View style={styles.statusStat}>
+                      <Text style={[styles.statusStatValue, { color: '#00E676' }]}>
+                        {avgGmp > 0 ? `+${avgGmp.toFixed(1)}%` : '—'}
+                      </Text>
+                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>Avg GMP</Text>
+                    </View>
+                    <View style={[styles.statusDivider, { backgroundColor: colors.divider }]} />
+                    <View style={styles.statusStat}>
+                      <Text style={[styles.statusStatValue, { color: colors.text }]}>
+                        ₹{(items.reduce((s, i) => s + i.issueSize, 0) / items.length / 1000).toFixed(1)}K Cr
+                      </Text>
+                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>Avg Size</Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
 
-      {/* Detail Modal */}
-      <IPODetailModal ipo={selectedIPO} visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onBookmark={() => selectedIPO && toggleBookmark(selectedIPO.id)}
-        colors={colors} />
+            {/* Monthly seasonality chart */}
+            <View style={[styles.seasonCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Text style={[styles.seasonTitle, { color: colors.text }]}>Raised by Month</Text>
+              {seasonData.map((m, i) => (
+                <View key={m.month} style={[styles.seasonRow, i < seasonData.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                  <Text style={[styles.seasonMonth, { color: colors.text }]}>{m.month}</Text>
+                  <View style={styles.seasonBar}>
+                    <LinearGradient
+                      colors={[colors.primary, colors.accent]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={[styles.seasonFillGradient, {
+                        width: `${(m.count / seasonData[0].count) * 100}%`,
+                      }]}
+                    />
+                  </View>
+                  <Text style={[styles.seasonCount, { color: colors.text }]}>{m.count}</Text>
+                  <Text style={[styles.seasonRaised, { color: colors.textMuted }]}>{m.totalRaised}</Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }
 
-const screenStyles = StyleSheet.create({
+function StatusDot({ status }: { status: string }) {
+  const colorMap: Record<string, string> = {
+    open: '#00E676',
+    upcoming: '#3B82F6',
+    closed: '#FFAB40',
+    listed: '#64748B',
+    listing_today: '#8B5CF6',
+  };
+  return <View style={[styles.statusDot, { backgroundColor: colorMap[status] || '#64748B' }]} />;
+}
+
+const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
-  title: { fontSize: 28, fontWeight: '800' },
-  subtitle: { fontSize: 13, fontWeight: '500', marginTop: 2, marginBottom: SPACING.md },
-  filterRow: { gap: 8, paddingBottom: SPACING.md },
-  filterChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: BORDER_RADIUS.full, borderWidth: 1,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
   },
-  filterText: { fontSize: 13, fontWeight: '600' },
-  filterCount: {
-    paddingHorizontal: 6, borderRadius: BORDER_RADIUS.full,
-    minWidth: 20, alignItems: 'center',
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: BORDER_RADIUS.full,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  filterCountText: { fontSize: 11, fontWeight: '700' },
-  listContent: { paddingHorizontal: SPACING.xl, paddingTop: SPACING.sm },
-  countText: { fontSize: 12, fontWeight: '500', marginBottom: SPACING.md },
-  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: SPACING.md },
-  emptyText: { fontSize: 16, fontWeight: '600' },
-  emptySubtext: { fontSize: 13, fontWeight: '400', textAlign: 'center', paddingHorizontal: 40 },
+  headerTitle: {
+    fontSize: FONTS.size.xl,
+    fontFamily: FONTS.semiBold.fontFamily,
+    fontWeight: FONTS.semiBold.fontWeight,
+  },
+  dashBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  dashBtnText: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.semiBold.fontFamily,
+    fontWeight: FONTS.semiBold.fontWeight,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    paddingBottom: SPACING.sm,
+  },
+  tabBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  tabText: { fontSize: 13, fontWeight: '600' },
+  scrollContent: { padding: SPACING.lg, gap: 16 },
+
+  // Overview bar
+  overviewBar: {
+    flexDirection: 'row',
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+  },
+  overviewItem: { flex: 1, alignItems: 'center' },
+  overviewValue: {
+    fontSize: FONTS.size.xl,
+    fontFamily: FONTS.bold.fontFamily,
+    fontWeight: FONTS.bold.fontWeight,
+  },
+  overviewLabel: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.regular.fontFamily,
+    marginTop: 2,
+  },
+  overviewDivider: { width: 1, height: 32, marginHorizontal: 4 },
+
+  // Timeline
+  timelineSection: { marginBottom: SPACING.md },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: BORDER_RADIUS.full,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semiBold.fontFamily,
+    fontWeight: FONTS.semiBold.fontWeight,
+    flex: 1,
+  },
+  sectionCount: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  sectionCountText: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.semiBold.fontFamily,
+    fontWeight: FONTS.semiBold.fontWeight,
+  },
+  timelineList: {
+    paddingLeft: 12,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderLeftWidth: 2,
+    paddingLeft: SPACING.md,
+    paddingBottom: SPACING.md,
+    gap: SPACING.sm,
+    position: 'relative',
+  },
+  timelineDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    position: 'absolute',
+    left: -6,
+    top: 16,
+    zIndex: 1,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  dateBadge: {
+    width: 48,
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderRadius: BORDER_RADIUS.sm,
+    borderWidth: 1,
+    marginTop: 6,
+  },
+  dateDay: {
+    fontSize: FONTS.size.lg,
+    fontFamily: FONTS.bold.fontFamily,
+    fontWeight: FONTS.bold.fontWeight,
+  },
+  dateMonth: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.medium.fontFamily,
+    fontWeight: FONTS.medium.fontWeight,
+  },
+  timelineContent: {
+    flex: 1,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+  },
+  timelineTop: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  timelineLogo: {
+    width: 36,
+    height: 36,
+    borderRadius: BORDER_RADIUS.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineLogoText: { fontSize: 12, fontWeight: '800' },
+  timelineName: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.semiBold.fontFamily,
+    fontWeight: FONTS.semiBold.fontWeight,
+  },
+  timelineSector: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.regular.fontFamily,
+    marginTop: 1,
+  },
+  timelineInfo: { gap: 3 },
+  timelineInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timelineInfoLabel: { fontSize: 10, fontWeight: '500' },
+  timelineInfoValue: { fontSize: 10, fontWeight: '700' },
+  countdownBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.full,
+    marginTop: SPACING.sm,
+  },
+  countdownText: { fontSize: 9, fontWeight: '700' },
+
+  // Seasonality
+  seasonCard: {
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+  },
+  seasonTitle: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semiBold.fontFamily,
+    fontWeight: FONTS.semiBold.fontWeight,
+    marginBottom: SPACING.md,
+  },
+  seasonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.sm,
+  },
+  seasonMonth: {
+    width: 80,
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.medium.fontFamily,
+    fontWeight: FONTS.medium.fontWeight,
+  },
+  seasonBar: {
+    flex: 1,
+    height: 20,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  seasonBarFill: {
+    height: '100%',
+    borderRadius: 10,
+  },
+  seasonFillGradient: {
+    height: '100%',
+    borderRadius: 10,
+  },
+  seasonCount: {
+    width: 30,
+    textAlign: 'right',
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.bold.fontFamily,
+    fontWeight: FONTS.bold.fontWeight,
+  },
+  seasonRaised: {
+    width: 80,
+    textAlign: 'right',
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.regular.fontFamily,
+  },
+
+  // Stats grid
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  statCard: {
+    width: (width - 40 - 12) / 2,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  statIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: BORDER_RADIUS.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: FONTS.size.xl,
+    fontFamily: FONTS.bold.fontFamily,
+    fontWeight: FONTS.bold.fontWeight,
+  },
+  statLabel: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.regular.fontFamily,
+  },
+
+  // Status cards
+  statusCard: {
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+  },
+  statusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  statusTitle: {
+    flex: 1,
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.semiBold.fontFamily,
+    fontWeight: FONTS.semiBold.fontWeight,
+  },
+  statusCount: {
+    fontSize: FONTS.size.sm,
+    fontFamily: FONTS.semiBold.fontFamily,
+    fontWeight: FONTS.semiBold.fontWeight,
+  },
+  statusRow: { flexDirection: 'row', alignItems: 'center' },
+  statusStat: { flex: 1, alignItems: 'center' },
+  statusStatValue: {
+    fontSize: FONTS.size.md,
+    fontFamily: FONTS.bold.fontFamily,
+    fontWeight: FONTS.bold.fontWeight,
+  },
+  statusStatLabel: {
+    fontSize: FONTS.size.xs,
+    fontFamily: FONTS.regular.fontFamily,
+    marginTop: 2,
+  },
+  statusDivider: { width: 1, height: 28 },
 });

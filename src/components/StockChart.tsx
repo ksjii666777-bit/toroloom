@@ -103,7 +103,7 @@ export default function StockChart({
         {/* Y-axis labels */}
         {showAxis && yLabels.map((price, i) => (
           <SvgText
-            key={i}
+            key={`ylabel_${i}`}
             x={2}
             y={getY(price) + 4}
             fill={colors.textMuted}
@@ -117,7 +117,7 @@ export default function StockChart({
         {/* Grid lines */}
         {showAxis && yLabels.map((price, i) => (
           <Line
-            key={`grid-${i}`}
+            key={`grid_${i}`}
             x1={padding.left}
             y1={getY(price)}
             x2={width - padding.right}

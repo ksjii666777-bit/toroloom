@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Stock, Watchlist } from '../types';
 import { mockWatchlists } from '../constants/mockData';
-import { watchlistApi } from '../services/api';
+import { watchlistApi } from '../services/api/watchlist';
 import { offlineCache } from '../services/offlineCache';
 import { registerCacheWarming } from '../services/cacheWarmingService';
 import { log } from '../utils/logger';

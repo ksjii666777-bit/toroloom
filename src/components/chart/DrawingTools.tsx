@@ -5,7 +5,7 @@
 // ============================================================================
 
 import React, { useState, useCallback, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, PanResponder, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Pressable, PanResponder, ScrollView, TextInput } from 'react-native';
 import Svg, { Line, Rect, G, Text as SvgText, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
@@ -128,15 +128,14 @@ function DrawingToolbar({
         {tools.map(tool => {
           const isActive = activeTool === tool.type;
           return (
-            <TouchableOpacity
+            <Pressable
               key={tool.type}
-              style={[
+              style={({pressed}) => [[
                 isFullscreen ? drawingStyles.toolBtnFS : drawingStyles.toolBtn,
                 isActive && { backgroundColor: colors.primary + '25', borderColor: colors.primary },
                 { borderColor: isActive ? colors.primary : colors.border },
-              ]}
+              ], {opacity: pressed ? 0.7 : 1}]}
               onPress={() => onToolChange(isActive ? 'none' : tool.type)}
-              activeOpacity={0.7}
             >
               <Text style={[
                 isFullscreen ? drawingStyles.toolIconFS : drawingStyles.toolIcon,
@@ -146,19 +145,18 @@ function DrawingToolbar({
                 isFullscreen ? drawingStyles.toolLabelFS : drawingStyles.toolLabel,
                 { color: isActive ? colors.primary : colors.textMuted },
               ]}>{tool.label}</Text>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
 
         {/* Color picker toggle */}
         {isFullscreen && (
-          <TouchableOpacity
-            style={[
+          <Pressable
+            style={({pressed}) => [[
               isFullscreen ? drawingStyles.toolBtnFS : drawingStyles.toolBtn,
               { borderColor: showColorPicker ? colors.primary : colors.border },
-            ]}
+            ], {opacity: pressed ? 0.7 : 1}]}
             onPress={() => setShowColorPicker(prev => !prev)}
-            activeOpacity={0.7}
           >
             <View
               style={[
@@ -169,20 +167,19 @@ function DrawingToolbar({
             <Text style={[isFullscreen ? drawingStyles.toolLabelFS : drawingStyles.toolLabel, { color: colors.textMuted }]}>
               {showColorPicker ? '▲' : '▼'}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
 
         {/* Clear button */}
         {drawingCount > 0 && (
-          <TouchableOpacity
-            style={[isFullscreen ? drawingStyles.clearBtnFS : drawingStyles.clearBtn, { backgroundColor: colors.marketDown + '20' }]}
+          <Pressable
+            style={({pressed}) => [[isFullscreen ? drawingStyles.clearBtnFS : drawingStyles.clearBtn, { backgroundColor: colors.marketDown + '20' }], {opacity: pressed ? 0.7 : 1}]}
             onPress={onClearAll}
-            activeOpacity={0.7}
           >
             <Text style={[isFullscreen ? drawingStyles.clearTextFS : drawingStyles.clearText, { color: colors.marketDown }]}>
               Clear ({drawingCount})
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
       </ScrollView>
 
@@ -190,18 +187,17 @@ function DrawingToolbar({
       {isFullscreen && showColorPicker && (
         <View style={[drawingStyles.colorPicker, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
           {DRAWING_COLORS.map((c) => (
-            <TouchableOpacity
+            <Pressable
               key={c}
-              style={[
+              style={({pressed}) => [[
                 drawingStyles.colorSwatch,
                 { backgroundColor: c },
                 (activeColor === c) && drawingStyles.colorSwatchActive,
-              ]}
+              ], {opacity: pressed ? 0.7 : 1}]}
               onPress={() => {
                 onColorChange?.(c);
                 setShowColorPicker(false);
               }}
-              activeOpacity={0.7}
             />
           ))}
         </View>
@@ -1162,48 +1158,44 @@ export default function DrawingTools({
       {/* Undo/redo floating bar — visible when there's history and not in drawing mode */}
       {(canUndo || canRedo) && activeTool === 'none' && !showAnnotationInput && !selectedDrawingId && (
         <View style={[undoStyles.bar, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
-          <TouchableOpacity
-            style={[undoStyles.btn, !canUndo && { opacity: 0.3 }]}
+          <Pressable
+            style={({pressed}) => [[undoStyles.btn, !canUndo && { opacity: 0.3 }], {opacity: pressed ? 0.6 : 1}]}
             onPress={undo}
             disabled={!canUndo}
-            activeOpacity={0.6}
           >
             <Text style={[undoStyles.btnText, { color: colors.text }]}>
               ↩ Undo
             </Text>
-          </TouchableOpacity>
+          </Pressable>
           <View style={[undoStyles.divider, { backgroundColor: colors.border }]} />
-          <TouchableOpacity
-            style={[undoStyles.btn, !canRedo && { opacity: 0.3 }]}
+          <Pressable
+            style={({pressed}) => [[undoStyles.btn, !canRedo && { opacity: 0.3 }], {opacity: pressed ? 0.6 : 1}]}
             onPress={redo}
             disabled={!canRedo}
-            activeOpacity={0.6}
           >
             <Text style={[undoStyles.btnText, { color: colors.text }]}>
               Redo ↪
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
 
       {/* Delete button — shown when a drawing is selected */}
       {selectedDrawingId && (
         <View style={selectStyles.deleteContainer}>
-          <TouchableOpacity
-            style={[selectStyles.deleteBtn, { backgroundColor: colors.marketDown, shadowColor: '#000' }]}
+          <Pressable
+            style={({pressed}) => [[selectStyles.deleteBtn, { backgroundColor: colors.marketDown, shadowColor: '#000' }], {opacity: pressed ? 0.7 : 1}]}
             onPress={deleteSelectedDrawing}
-            activeOpacity={0.7}
           >
             <Text style={selectStyles.deleteIcon}>🗑</Text>
             <Text style={selectStyles.deleteText}>Delete</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[selectStyles.cancelBtn, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}
+          </Pressable>
+          <Pressable
+            style={({pressed}) => [[selectStyles.cancelBtn, { backgroundColor: colors.bgCardLight, borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
             onPress={() => setSelectedDrawingId(null)}
-            activeOpacity={0.7}
           >
             <Text style={[selectStyles.cancelText, { color: colors.textSecondary }]}>✕</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
 
@@ -1231,18 +1223,18 @@ export default function DrawingTools({
               />
             </View>
             <View style={annotationStyles.inputActions}>
-              <TouchableOpacity
+              <Pressable
                 style={[annotationStyles.inputBtn, { backgroundColor: colors.bgCardLight }]}
                 onPress={() => { setShowAnnotationInput(false); setPendingPoint(null); }}
               >
                 <Text style={[annotationStyles.inputBtnText, { color: colors.textSecondary }]}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 style={[annotationStyles.inputBtn, { backgroundColor: colors.primary }]}
                 onPress={() => confirmAnnotation(annotationText)}
               >
                 <Text style={[annotationStyles.inputBtnText, { color: '#fff' }]}>Done</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </View>

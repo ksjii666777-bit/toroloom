@@ -19,6 +19,7 @@ interface KeyStats {
 
 interface KeyStatsGridProps {
   stats: KeyStats;
+  isUSStock?: boolean;
 }
 
 interface StatCardProps {
@@ -41,25 +42,40 @@ function StatCard({ label, value, color }: StatCardProps) {
   );
 }
 
-export default function KeyStatsGrid({ stats }: KeyStatsGridProps) {
+function formatUSCurrency(amount: number, compact: boolean = false): string {
+  if (compact && amount >= 1000) {
+    if (amount >= 1_000_000_000_000) return `$${(amount / 1_000_000_000_000).toFixed(2)}T`;
+    if (amount >= 1_000_000_000) return `$${(amount / 1_000_000_000).toFixed(2)}B`;
+    if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(2)}M`;
+    if (amount >= 1_000) return `$${(amount / 1_000).toFixed(1)}K`;
+  }
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+export default function KeyStatsGrid({ stats, isUSStock = false }: KeyStatsGridProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+  const fmt = isUSStock ? formatUSCurrency : formatCurrency;
 
   const cards: StatCardProps[] = useMemo(() => [
-    { label: 'Open', value: formatCurrency(stats.open, true) },
-    { label: 'Day High', value: formatCurrency(stats.dayHigh, true), color: colors.marketUp },
-    { label: 'Day Low', value: formatCurrency(stats.dayLow, true), color: colors.marketDown },
+    { label: 'Open', value: fmt(stats.open, true) },
+    { label: 'Day High', value: fmt(stats.dayHigh, true), color: colors.marketUp },
+    { label: 'Day Low', value: fmt(stats.dayLow, true), color: colors.marketDown },
     { label: 'Volume', value: stats.volume > 0 ? formatCompactNumber(stats.volume) : 'N/A' },
     { label: 'Market Cap', value: stats.marketCap },
     { label: 'P/E Ratio', value: stats.pe.toFixed(1) },
-    { label: '52W High', value: formatCurrency(stats.high52), color: colors.marketUp },
-    { label: '52W Low', value: formatCurrency(stats.low52), color: colors.marketDown },
-  ], [stats, colors]);
+    { label: '52W High', value: fmt(stats.high52), color: colors.marketUp },
+    { label: '52W Low', value: fmt(stats.low52), color: colors.marketDown },
+  ], [stats, colors, fmt]);
 
   return (
     <View style={styles.grid}>
-      {cards.map((card, i) => (
-        <StatCard key={i} {...card} />
+      {cards.map((card, _i) => (
+        <StatCard key={card.label} {...card} />
       ))}
     </View>
   );

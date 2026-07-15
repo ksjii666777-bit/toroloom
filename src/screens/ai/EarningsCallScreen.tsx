@@ -19,7 +19,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, Pressable,
   Dimensions, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -273,16 +273,16 @@ export default function EarningsCallScreen({ navigation }: any) {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Earnings Call</Text>
             <Text style={styles.headerSubtitle}>AI-powered quarterly summaries</Text>
           </View>
-          <TouchableOpacity onPress={handleShare} style={styles.shareBtn}>
+          <Pressable onPress={handleShare} style={styles.shareBtn}>
             <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Company Picker */}
@@ -294,23 +294,22 @@ export default function EarningsCallScreen({ navigation }: any) {
           {companies.map(c => {
             const isActive = c.symbol === selectedSymbol;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={c.symbol}
                 onPress={() => setSelectedSymbol(c.symbol)}
-                activeOpacity={0.7}
-                style={[
+                style={({pressed}) => [[
                   styles.pickerChip,
                   {
                     backgroundColor: isActive ? colors.primary : colors.bgCardLight,
                     borderColor: isActive ? colors.primary : colors.border,
                   },
-                ]}
+                ], {opacity: pressed ? 0.7 : 1}]}
               >
                 <Text style={[
                   styles.pickerChipText,
                   { color: isActive ? '#FFFFFF' : colors.textSecondary },
                 ]}>{c.symbol}</Text>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </ScrollView>
@@ -423,10 +422,9 @@ export default function EarningsCallScreen({ navigation }: any) {
 
         {/* Key Takeaways */}
         <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <TouchableOpacity
-            style={styles.sectionHeader}
+          <Pressable
+            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
             onPress={() => toggleSection('takeaways')}
-            activeOpacity={0.7}
           >
             <View style={styles.sectionHeaderLeft}>
               <View style={[styles.sectionIcon, { backgroundColor: colors.primary + '20' }]}>
@@ -439,7 +437,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               size={18}
               color={colors.textMuted}
             />
-          </TouchableOpacity>
+          </Pressable>
           {expandedSections.takeaways && (
             <View style={styles.sectionBody}>
               {selectedEarnings.keyTakeaways.map((takeaway, i) => (
@@ -454,10 +452,9 @@ export default function EarningsCallScreen({ navigation }: any) {
 
         {/* Management Highlights */}
         <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <TouchableOpacity
-            style={styles.sectionHeader}
+          <Pressable
+            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
             onPress={() => toggleSection('highlights')}
-            activeOpacity={0.7}
           >
             <View style={styles.sectionHeaderLeft}>
               <View style={[styles.sectionIcon, { backgroundColor: '#8B5CF620' }]}>
@@ -470,7 +467,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               size={18}
               color={colors.textMuted}
             />
-          </TouchableOpacity>
+          </Pressable>
           {expandedSections.highlights && (
             <View style={styles.sectionBody}>
               {selectedEarnings.managementHighlights.map((h, i) => (
@@ -507,10 +504,9 @@ export default function EarningsCallScreen({ navigation }: any) {
 
         {/* Growth Drivers */}
         <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <TouchableOpacity
-            style={styles.sectionHeader}
+          <Pressable
+            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
             onPress={() => toggleSection('drivers')}
-            activeOpacity={0.7}
           >
             <View style={styles.sectionHeaderLeft}>
               <View style={[styles.sectionIcon, { backgroundColor: colors.marketUp + '20' }]}>
@@ -523,7 +519,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               size={18}
               color={colors.textMuted}
             />
-          </TouchableOpacity>
+          </Pressable>
           {expandedSections.drivers && (
             <View style={styles.sectionBody}>
               {selectedEarnings.growthDrivers.map((d, i) => (
@@ -538,10 +534,9 @@ export default function EarningsCallScreen({ navigation }: any) {
 
         {/* Risk Factors */}
         <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <TouchableOpacity
-            style={styles.sectionHeader}
+          <Pressable
+            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
             onPress={() => toggleSection('risks')}
-            activeOpacity={0.7}
           >
             <View style={styles.sectionHeaderLeft}>
               <View style={[styles.sectionIcon, { backgroundColor: colors.marketDown + '20' }]}>
@@ -554,7 +549,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               size={18}
               color={colors.textMuted}
             />
-          </TouchableOpacity>
+          </Pressable>
           {expandedSections.risks && (
             <View style={styles.sectionBody}>
               {selectedEarnings.riskFactors.map((r, i) => (
@@ -569,10 +564,9 @@ export default function EarningsCallScreen({ navigation }: any) {
 
         {/* Peer Comparison */}
         <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <TouchableOpacity
-            style={styles.sectionHeader}
+          <Pressable
+            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
             onPress={() => toggleSection('peerComparison')}
-            activeOpacity={0.7}
           >
             <View style={styles.sectionHeaderLeft}>
               <View style={[styles.sectionIcon, { backgroundColor: '#06B6D420' }]}>
@@ -585,7 +579,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               size={18}
               color={colors.textMuted}
             />
-          </TouchableOpacity>
+          </Pressable>
           {expandedSections.peerComparison && selectedEarnings.peerComparison.length > 0 && (
             <View style={styles.sectionBody}>
               {/* Table Header */}
@@ -633,10 +627,9 @@ export default function EarningsCallScreen({ navigation }: any) {
 
         {/* Historical Quarterly Trends */}
         <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <TouchableOpacity
-            style={styles.sectionHeader}
+          <Pressable
+            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
             onPress={() => toggleSection('history')}
-            activeOpacity={0.7}
           >
             <View style={styles.sectionHeaderLeft}>
               <View style={[styles.sectionIcon, { backgroundColor: colors.warning + '20' }]}>
@@ -649,7 +642,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               size={18}
               color={colors.textMuted}
             />
-          </TouchableOpacity>
+          </Pressable>
           {expandedSections.history && selectedEarnings.historicalQuarters.length > 0 && (
             <View style={styles.sectionBody}>
               {/* Header */}

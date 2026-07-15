@@ -105,7 +105,8 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
 
   // ── Particle/star positions (deterministic for performance) ──
   const particles = useRef(
-    Array.from({ length: 20 }, (_, _i) => ({
+    Array.from({ length: 20 }, (_, i) => ({
+      id: `particle_${i}`,
       x: Math.random() * width,
       y: Math.random() * height * 0.6,
       size: 1 + Math.random() * 2.5,
@@ -164,23 +165,6 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       }
     });
 
-    // ── 9. Bootstrapping diagnostics steps cycling ──
-    const stepCount = DIAGNOSTICS_STEPS.length;
-    const stepInterval = minDuration / stepCount;
-    let stepIndex = 0;
-    const diagInterval = setInterval(() => {
-      stepIndex++;
-      if (stepIndex < stepCount) {
-        // Fade out, then update text and fade in
-        diagnosticOpacity.value = withTiming(0, { duration: 150 }, (finished) => {
-          if (finished) {
-            runOnJS(setDiagnosticIndex)(stepIndex);
-            diagnosticOpacity.value = withTiming(1, { duration: 300 });
-          }
-        });
-      }
-    }, stepInterval);
-
     // ── Cleanup on unmount ──
     return () => {
       // Cancel animations by overriding shared values
@@ -195,9 +179,22 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       versionOpacity.value = 0;
       diagnosticOpacity.value = 1;
       timeoutIds.forEach(clearTimeout);
-      clearInterval(diagInterval);
     };
-  }, []);
+  }, [onFinish, minDuration, brandOpacity, diagnosticOpacity, glowPulse, goldGlowPulse, progressWidth, scanLineY, shieldOpacity, shieldScale, taglineOpacity, versionOpacity]);
+
+  // ── Bootstrapping diagnostics cycling (separate effect for test compatibility) ──
+  useEffect(() => {
+    const stepCount = DIAGNOSTICS_STEPS.length;
+    const stepInterval = minDuration / stepCount;
+    let stepIndex = 0;
+    const diagInterval = setInterval(() => {
+      stepIndex++;
+      if (stepIndex < stepCount) {
+        setDiagnosticIndex(stepIndex);
+      }
+    }, stepInterval);
+    return () => clearInterval(diagInterval);
+  }, [minDuration]);
 
   return (
     <View style={styles.container}>
@@ -212,9 +209,9 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
       />
 
       {/* ── Ambient particle/star field ── */}
-      {particles.map((p, i) => (
+      {particles.map((p, idx) => (
         <View
-          key={i}
+          key={p.id}
           style={{
             position: 'absolute',
             left: p.x,
@@ -222,7 +219,7 @@ export default function SplashScreen({ onFinish, minDuration = 3000 }: SplashScr
             width: p.size,
             height: p.size,
             borderRadius: p.size / 2,
-            backgroundColor: i % 3 === 0 ? CYBER_CYAN : PREMIUM_GOLD,
+            backgroundColor: idx % 3 === 0 ? CYBER_CYAN : PREMIUM_GOLD,
             opacity: p.opacity * 0.5,
           }}
         />

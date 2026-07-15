@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Dimensions,
-  TouchableOpacity, ActivityIndicator, ScrollView,
+  Pressable, ActivityIndicator, ScrollView,
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, useAnimatedScrollHandler,
@@ -88,9 +88,9 @@ function MiniPieChart({
             const isSelected = selectedSector === i;
             const widthPct = (seg.value / total) * 100;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={seg.name}
-                activeOpacity={0.7}
+                
                 onPress={() => {
                   onInteract();
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -116,7 +116,7 @@ function MiniPieChart({
         {MOCK_SECTORS.map((sector, i) => {
           const isSelected = selectedSector === i;
           return (
-            <TouchableOpacity
+            <Pressable
               key={sector.name}
               style={[demoStyles.legendItem, isSelected && demoStyles.legendItemActive]}
               onPress={() => {
@@ -132,7 +132,7 @@ function MiniPieChart({
               <Text style={[demoStyles.legendValue, isSelected && demoStyles.legendValueActive]}>
                 {sector.value}%
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -189,9 +189,9 @@ function MiniCandlestickChart({
             const isSelected = selectedIndex === i;
 
             return (
-              <TouchableOpacity
+              <Pressable
                 key={i}
-                activeOpacity={0.7}
+                
                 onPress={() => {
                   onInteract();
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -227,7 +227,7 @@ function MiniCandlestickChart({
                     },
                   ]}
                 />
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
@@ -280,7 +280,7 @@ function MockTradePanel({
         true,
       );
     }
-  }, [confirmed]);
+  }, [confirmed, pulseAnim]);
 
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseAnim.value }],
@@ -311,7 +311,7 @@ function MockTradePanel({
 
       {/* Buy/Sell Toggle */}
       <View style={demoStyles.tradeToggle}>
-        <TouchableOpacity
+        <Pressable
           style={[demoStyles.tradeToggleBtn, tradeType === 'buy' && demoStyles.tradeToggleBuy]}
           onPress={() => {
             onInteract();
@@ -322,8 +322,8 @@ function MockTradePanel({
         >
           <Ionicons name="trending-up" size={16} color={tradeType === 'buy' ? '#fff' : '#00E676'} />
           <Text style={[demoStyles.tradeToggleText, tradeType === 'buy' && demoStyles.tradeToggleTextActive]}>Buy</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           style={[demoStyles.tradeToggleBtn, tradeType === 'sell' && demoStyles.tradeToggleSell]}
           onPress={() => {
             onInteract();
@@ -334,27 +334,27 @@ function MockTradePanel({
         >
           <Ionicons name="trending-down" size={16} color={tradeType === 'sell' ? '#fff' : '#FF5252'} />
           <Text style={[demoStyles.tradeToggleText, tradeType === 'sell' && demoStyles.tradeToggleTextActive]}>Sell</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Quantity Selector */}
       <View style={demoStyles.qtyRow}>
-        <TouchableOpacity
+        <Pressable
           style={demoStyles.qtyBtn}
           onPress={() => handleQtyChange(-5)}
         >
           <Ionicons name="remove" size={20} color="#9CA3AF" />
-        </TouchableOpacity>
+        </Pressable>
         <View style={demoStyles.qtyValue}>
           <Text style={demoStyles.qtyText}>{quantity}</Text>
           <Text style={demoStyles.qtyLabel}>Qty</Text>
         </View>
-        <TouchableOpacity
+        <Pressable
           style={demoStyles.qtyBtn}
           onPress={() => handleQtyChange(5)}
         >
           <Ionicons name="add" size={20} color="#9CA3AF" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Order Total */}
@@ -368,7 +368,7 @@ function MockTradePanel({
       {/* Confirm Button */}
       {!confirmed ? (
         <Animated.View style={pulseStyle}>
-          <TouchableOpacity
+          <Pressable
             style={[
               demoStyles.confirmBtn,
               { backgroundColor: tradeType === 'buy' ? '#00E676' : '#FF5252' },
@@ -378,7 +378,7 @@ function MockTradePanel({
             <Text style={demoStyles.confirmBtnText}>
               {tradeType === 'buy' ? '📈 Place Buy Order' : '📉 Place Sell Order'}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
       ) : (
         <Animated.View entering={BounceIn.duration(400)} style={demoStyles.confirmedBox}>
@@ -429,9 +429,9 @@ function MiniBrokerConnect({
           const isConnected = connectedBroker === broker.id;
           const isConnecting = connectingBroker === broker.id;
           return (
-            <TouchableOpacity
+            <Pressable
               key={broker.id}
-              activeOpacity={0.8}
+              
               disabled={isConnected || isConnecting}
               onPress={() => handleConnect(broker.id)}
               style={[demoStyles.brokerMiniCard, { width: (CARD_WIDTH - 48) / 3 - 4 }]}
@@ -468,7 +468,7 @@ function MiniBrokerConnect({
                   </View>
                 )}
               </LinearGradient>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -515,9 +515,9 @@ function InteractiveBadges({
         {MOCK_BADGES.map((badge) => {
           const isUnlocked = unlocked[badge.id];
           return (
-            <TouchableOpacity
+            <Pressable
               key={badge.id}
-              activeOpacity={0.7}
+              
               onPress={() => handleBadgeTap(badge.id)}
               style={[
                 demoStyles.badgeCard,
@@ -541,7 +541,7 @@ function InteractiveBadges({
                   <Ionicons name="checkmark" size={10} color="#fff" />
                 </View>
               )}
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -585,7 +585,7 @@ function RocketAnimation({
         true,
       );
     }
-  }, [launched]);
+  }, [launched, glowOpacity, flameScale]);
 
   const handleLaunch = () => {
     if (launched) return;
@@ -614,7 +614,7 @@ function RocketAnimation({
 
   return (
     <View style={demoStyles.rocketContainer}>
-      <TouchableOpacity onPress={handleLaunch} activeOpacity={0.8} disabled={launched}>
+      <Pressable onPress={handleLaunch}  disabled={launched}>
         <Animated.View style={[demoStyles.rocketWrapper, rocketStyle]}>
           {/* Glow */}
           <Animated.View style={[demoStyles.rocketGlow, glowStyle]} />
@@ -630,7 +630,7 @@ function RocketAnimation({
             />
           </Animated.View>
         </Animated.View>
-      </TouchableOpacity>
+      </Pressable>
 
       {!launched && !interacted && (
         <Text style={demoStyles.pieHint}>🚀 Tap to launch!</Text>
@@ -694,7 +694,7 @@ export default function OnboardingScreen({ _navigation }: any) {
     heroProgress.value = withTiming(1, { duration: 500 });
     contentProgress.value = withDelay(500, withTiming(1, { duration: 400 }));
     bottomProgress.value = withDelay(900, withTiming(1, { duration: 300 }));
-  }, []);
+  }, [, bottomProgress, contentProgress, heroProgress]);
 
   const heroStyle = useAnimatedStyle(() => ({ opacity: heroProgress.value }));
   const contentStyle = useAnimatedStyle(() => ({ opacity: contentProgress.value }));
@@ -722,7 +722,7 @@ export default function OnboardingScreen({ _navigation }: any) {
       timeouts.push(id);
     });
     return () => timeouts.forEach(clearTimeout);
-  }, []);
+  }, [cardScales, cardOpacities, visibleSteps]);
 
   // ── Scroll-driven progress bar with parallax ──
   const scrollHandler = useAnimatedScrollHandler({
@@ -814,18 +814,18 @@ export default function OnboardingScreen({ _navigation }: any) {
             loop
             speed={0.8}
           />
-          <TouchableOpacity
+          <Pressable
             style={demoStyles.lottieInteractBtn}
             onPress={() => {
               markStepInteracted(stepId);
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
-            activeOpacity={0.8}
+            
           >
             <Text style={demoStyles.lottieInteractText}>
               {interactedSteps[stepId] ? '✓ Interacted' : '👆 Tap to explore'}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       );
     }
@@ -911,17 +911,17 @@ export default function OnboardingScreen({ _navigation }: any) {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Top Bar — Skip + Page Indicator + Lottie Toggle */}
       <Animated.View style={[styles.topBar, contentStyle]}>
-        <TouchableOpacity onPress={handleSkip} style={styles.skipBtn}>
+        <Pressable onPress={handleSkip} style={styles.skipBtn}>
           <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Progress dots */}
         <View style={styles.dotsRow}>
           {visibleSteps.map((_, i) => (
-            <TouchableOpacity
+            <Pressable
               key={i}
               onPress={() => scrollToStep(i)}
-              activeOpacity={0.7}
+              
             >
               <View
                 style={[
@@ -929,12 +929,12 @@ export default function OnboardingScreen({ _navigation }: any) {
                   i === currentStep && styles.dotActive,
                 ]}
               />
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
 
         {/* Lottie toggle */}
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setUseLottie(prev => !prev);
@@ -952,7 +952,7 @@ export default function OnboardingScreen({ _navigation }: any) {
           <Text style={[styles.lottieToggleText, useLottie && styles.lottieToggleTextActive]}>
             {useLottie ? 'Lottie' : 'SVG'}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </Animated.View>
 
       {/* Scrollable Cards */}
@@ -1051,21 +1051,21 @@ export default function OnboardingScreen({ _navigation }: any) {
         <View style={styles.buttonRow}>
           {/* Previous / Back */}
           {currentStep > 0 ? (
-            <TouchableOpacity
+            <Pressable
               style={styles.backBtn}
               onPress={() => scrollToStep(currentStep - 1)}
             >
               <Ionicons name="arrow-back" size={20} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
           ) : (
             <View style={{ width: 48 }} />
           )}
 
           {/* Main CTA */}
-          <TouchableOpacity
+          <Pressable
             style={styles.ctaBtn}
             onPress={isLastStep ? handleGetStarted : handleNext}
-            activeOpacity={0.85}
+            
           >
             <LinearGradient
               colors={visibleSteps[currentStep]?.gradient || ['#3B82F6', '#1D4ED8']}
@@ -1080,7 +1080,7 @@ export default function OnboardingScreen({ _navigation }: any) {
                 <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
               )}
             </LinearGradient>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </Animated.View>
     </View>

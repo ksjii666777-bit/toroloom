@@ -5,11 +5,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuthStore, useOnboardingStore, useRiskStore, useNotificationStore } from '../store';
+import { useAuthStore } from '../store/authStore';
+import { useOnboardingStore } from '../store/onboardingStore';
+import { useRiskStore } from '../store/riskStore';
+import { useNotificationStore } from '../store/notificationStore';
 import { useTheme } from '../context/ThemeContext';
 
 import { analytics } from '../services/analytics';
 import { authApi } from '../services/api';
+import { useFeatureFlagStore } from '../store/featureFlagStore';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -46,6 +50,8 @@ import GlossaryScreen from '../screens/education/GlossaryScreen';
 import CertificateScreen from '../screens/education/CertificateScreen';
 import LearningPathsScreen from '../screens/education/LearningPathsScreen';
 import LearningPathDetailScreen from '../screens/education/LearningPathDetailScreen';
+import MyCoursesScreen from '../screens/education/MyCoursesScreen';
+import CreateCourseScreen from '../screens/education/CreateCourseScreen';
 import TradeHistoryScreen from '../screens/trade/TradeHistoryScreen';
 import PlaceOrderScreen from '../screens/trade/PlaceOrderScreen';
 import OpenOrdersScreen from '../screens/trade/OpenOrdersScreen';
@@ -66,13 +72,37 @@ import OnboardingScreen from '../screens/onboarding/OnboardingScreen';
 import ConnectBrokerView from '../screens/broker/ConnectBrokerView';
 import TenantConfigScreen from '../screens/settings/TenantConfigScreen';
 import VoiceSettingsScreen from '../screens/settings/VoiceSettingsScreen';
+import WidgetSettingsScreen from '../screens/settings/WidgetSettingsScreen';
+import ReferralScreen from '../screens/referral/ReferralScreen';
+import FeatureFlagsScreen from '../screens/settings/FeatureFlagsScreen';
+import ABTestRunnerScreen from '../screens/settings/ABTestRunnerScreen';
+import MonteCarloSimulationScreen from '../screens/analytics/MonteCarloSimulationScreen';
+import CorrelationMatrixScreen from '../screens/analytics/CorrelationMatrixScreen';
+import FactorAnalysisScreen from '../screens/analytics/FactorAnalysisScreen';
+import PortfolioRebalancingScreen from '../screens/analytics/PortfolioRebalancingScreen';
 import SecuritySettingsScreen from '../screens/settings/SecuritySettingsScreen';
+import SecurityAuditLogScreen from '../screens/settings/SecurityAuditLogScreen';
+import ApiKeyManagementScreen from '../screens/settings/ApiKeyManagementScreen';
+import WebhookManagementScreen from '../screens/settings/WebhookManagementScreen';
 import TwoFactorSetupScreen from '../screens/settings/TwoFactorSetupScreen';
 import TelegramConnectScreen from '../screens/settings/TelegramConnectScreen';
+import AISettingsScreen from '../screens/settings/AISettingsScreen';
+import DarkModeSettingsScreen from '../screens/settings/DarkModeSettingsScreen';
+import AccessibilitySettingsScreen from '../screens/settings/AccessibilitySettingsScreen';
+import LandscapeSettingsScreen from '../screens/settings/LandscapeSettingsScreen';
+import CDNOptimizationScreen from '../screens/settings/CDNOptimizationScreen';
 import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
+import USStockDetailScreen from '../screens/stock/USStockDetailScreen';
+import USMarketsScreen from '../screens/markets/USMarketsScreen';
+import BondDashboardScreen from '../screens/markets/BondDashboardScreen';
+import CurrencyMarketsScreen from '../screens/markets/CurrencyMarketsScreen';
+import TaxHarvestingCalendarScreen from '../screens/analytics/TaxHarvestingCalendarScreen';
+import CommodityMarketsScreen from '../screens/markets/CommodityMarketsScreen';
+import FuturesCurveScreen from '../screens/markets/FuturesCurveScreen';
 import NewsFeedScreen from '../screens/news/NewsFeedScreen';
 import IPOCalendarScreen from '../screens/news/IPOCalendarScreen';
 import IPODashboardScreen from '../screens/ipos/IPODashboardScreen';
+import DividendTrackerScreen from '../screens/analytics/DividendTrackerScreen';
 import EconomicCalendarScreen from '../screens/news/EconomicCalendarScreen';
 import ChatRoomListScreen from '../screens/chat/ChatRoomListScreen';
 import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
@@ -80,11 +110,16 @@ import SocialTradingScreen from '../screens/social/SocialTradingScreen';
 import TraderProfileScreen from '../screens/social/TraderProfileScreen';
 import BehavioralJournalScreen from '../screens/journal/BehavioralJournalScreen';
 import ContractNoteUploadScreen from '../screens/reports/ContractNoteUploadScreen';
+import PollsScreen from '../screens/social/PollsScreen';
+import CreatePollScreen from '../screens/social/CreatePollScreen';
+import RevenueDashboardScreen from '../screens/social/RevenueDashboardScreen';
 import FnOOptionsChainScreen from '../screens/trade/FnOOptionsChainScreen';
 import StrategyBuilderScreen from '../screens/trade/StrategyBuilderScreen';
+import StrategyPerformanceScreen from '../screens/trade/StrategyPerformanceScreen';
 
 // Calculator Screens
 import SIPCalculator from '../screens/calculators/SIPCalculator';
+import StepUpSipScreen from '../screens/calculators/StepUpSipScreen';
 import LumpsumCalculator from '../screens/calculators/LumpsumCalculator';
 import EMICalculator from '../screens/calculators/EMICalculator';
 import TaxCalculator from '../screens/calculators/TaxCalculator';
@@ -104,6 +139,7 @@ import { useBackgroundSync } from '../hooks/useBackgroundSync';
 import { startCacheWarming } from '../services/cacheWarmingService';
 import { useCacheInvalidation } from '../hooks/useCacheInvalidation';
 import { offlineCache } from '../services/offlineCache';
+import { startWidgetAutoUpdate } from '../services/widgetService';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -123,7 +159,7 @@ function TabIcon({ name, focused, color, badgeCount }: { name: string; focused: 
 
   React.useEffect(() => {
     scaleAnim.value = withSpring(focused ? 1 : 0.85, { stiffness: 120, damping: 12 });
-  }, [focused]);
+  }, [focused, scaleAnim]);
 
   // Pulse badge when count increases
   React.useEffect(() => {
@@ -132,7 +168,7 @@ function TabIcon({ name, focused, color, badgeCount }: { name: string; focused: 
       badgeScale.value = withSpring(1, { stiffness: 80, damping: 14 });
     }
     prevBadgeCount.current = badgeCount;
-  }, [badgeCount]);
+  }, [badgeCount, badgeScale]);
 
   return (
     <Animated.View style={[tabStyles.iconContainer, iconStyle]}>
@@ -259,6 +295,7 @@ export default function AppNavigator() {
   // Start cache warming (background pre-fetch of stale caches)
   useEffect(() => {
     startCacheWarming();
+    startWidgetAutoUpdate();
   }, []);
 
   // Push-based cache invalidation via WebSocket
@@ -295,8 +332,10 @@ export default function AppNavigator() {
     if (user) {
       analytics.setUserId(user.id);
       analytics.setUserProperty('kyc_status', user.kycStatus);
+      // Initialize feature flags with user ID for rollout bucketing
+      useFeatureFlagStore.getState().initialize(user.id);
     }
-  }, [user?.id, user?.kycStatus]);
+  }, [user]);
 
   // Handle deep links for logged-in users (Signup screen isn't rendered)
   useEffect(() => {
@@ -339,7 +378,7 @@ export default function AppNavigator() {
     });
 
     return () => subscription.remove();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, user]);
 
   // Deep linking configuration for handling external URLs
   const linking = {
@@ -347,6 +386,7 @@ export default function AppNavigator() {
     config: {
       screens: {
         Signup: 'signup',
+        BrokerConnect: 'broker-connect',
       },
     },
   };
@@ -417,7 +457,17 @@ export default function AppNavigator() {
             <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
             <Stack.Screen name="BehavioralJournal" component={BehavioralJournalScreen} />
             <Stack.Screen name="ContractNoteParser" component={ContractNoteUploadScreen} />
+            <Stack.Screen name="USMarkets" component={USMarketsScreen} />
+            <Stack.Screen name="BondDashboard" component={BondDashboardScreen} />
+            <Stack.Screen name="CurrencyMarkets" component={CurrencyMarketsScreen} />
+            <Stack.Screen name="TaxHarvesting" component={TaxHarvestingCalendarScreen} />
+            <Stack.Screen name="CommodityMarkets" component={CommodityMarketsScreen} />
+            <Stack.Screen name="FuturesCurve" component={FuturesCurveScreen} />
+            <Stack.Screen name="USStockDetail" component={USStockDetailScreen} />
             <Stack.Screen name="Learn" component={LearnScreen} />
+            <Stack.Screen name="Polls" component={PollsScreen} />
+            <Stack.Screen name="CreatePoll" component={CreatePollScreen} />
+            <Stack.Screen name="RevenueDashboard" component={RevenueDashboardScreen} />
             <Stack.Screen name="SocialTrading" component={SocialTradingScreen} />
             <Stack.Screen name="TraderProfile" component={TraderProfileScreen} />
             <Stack.Screen name="Community" component={CommunityScreen} />
@@ -443,6 +493,8 @@ export default function AppNavigator() {
             <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
             <Stack.Screen name="LessonView" component={LessonViewScreen} />
             <Stack.Screen name="Glossary" component={GlossaryScreen} />
+            <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
+            <Stack.Screen name="CreateCourse" component={CreateCourseScreen} />
             <Stack.Screen name="LearningPaths" component={LearningPathsScreen} />
             <Stack.Screen name="LearningPathDetail" component={LearningPathDetailScreen} />
             <Stack.Screen name="Certificate" component={CertificateScreen} />
@@ -457,14 +509,33 @@ export default function AppNavigator() {
             <Stack.Screen name="UPI" component={UPIScreen} />
             <Stack.Screen name="FundsDashboard" component={FundsDashboardScreen} />
             <Stack.Screen name="BrokerConnect" component={ConnectBrokerView} />
+            <Stack.Screen name="WidgetSettings" component={WidgetSettingsScreen} />
+            <Stack.Screen name="Referral" component={ReferralScreen} />
             <Stack.Screen name="TenantConfig" component={TenantConfigScreen} />
             <Stack.Screen name="VoiceSettings" component={VoiceSettingsScreen} />
             <Stack.Screen name="SecuritySettings" component={SecuritySettingsScreen} />
+            <Stack.Screen name="SecurityAuditLog" component={SecurityAuditLogScreen} />
+            <Stack.Screen name="ApiKeys" component={ApiKeyManagementScreen} />
+            <Stack.Screen name="Webhooks" component={WebhookManagementScreen} />
             <Stack.Screen name="TwoFactorSetup" component={TwoFactorSetupScreen} />
+            <Stack.Screen name="FeatureFlags" component={FeatureFlagsScreen} />
+            <Stack.Screen name="ABTestRunner" component={ABTestRunnerScreen} />
+            <Stack.Screen name="MonteCarlo" component={MonteCarloSimulationScreen} />
+            <Stack.Screen name="PortfolioRebalancing" component={PortfolioRebalancingScreen} />
+            <Stack.Screen name="DividendTracker" component={DividendTrackerScreen} />
+            <Stack.Screen name="CorrelationMatrix" component={CorrelationMatrixScreen} />
+            <Stack.Screen name="FactorAnalysis" component={FactorAnalysisScreen} />
             <Stack.Screen name="TelegramConnect" component={TelegramConnectScreen} />
+            <Stack.Screen name="AISettings" component={AISettingsScreen} />
+            <Stack.Screen name="DarkMode" component={DarkModeSettingsScreen} />
+            <Stack.Screen name="Accessibility" component={AccessibilitySettingsScreen} />
+            <Stack.Screen name="LandscapeMode" component={LandscapeSettingsScreen} />
+            <Stack.Screen name="CDNOptimization" component={CDNOptimizationScreen} />
             <Stack.Screen name="FnOOptionsChain" component={FnOOptionsChainScreen} />
             <Stack.Screen name="StrategyBuilder" component={StrategyBuilderScreen} />
+            <Stack.Screen name="StrategyPerformance" component={StrategyPerformanceScreen} />
             <Stack.Screen name="SIPCalculator" component={SIPCalculator} />
+            <Stack.Screen name="StepUpSip" component={StepUpSipScreen} />
             <Stack.Screen name="LumpsumCalculator" component={LumpsumCalculator} />
             <Stack.Screen name="EMICalculator" component={EMICalculator} />
             <Stack.Screen name="TaxCalculator" component={TaxCalculator} />

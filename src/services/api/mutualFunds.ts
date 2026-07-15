@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { MutualFund, SIPPlan } from '../../types';
+import type { MutualFund, SIPPlan, StepUpConfig } from '../../types';
 
 export interface CreateSIPRequest {
   fundId: string;
@@ -11,6 +11,16 @@ export interface ModifySIPRequest {
   sipId: string;
   amount?: number;
   frequency?: SIPPlan['frequency'];
+}
+
+export interface EnableStepUpRequest {
+  percent: number;
+  frequency: StepUpConfig['frequency'];
+}
+
+export interface ModifyStepUpRequest {
+  percent?: number;
+  frequency?: StepUpConfig['frequency'];
 }
 
 export const mutualFundApi = {
@@ -35,4 +45,15 @@ export const mutualFundApi = {
 
   deleteSIP: (sipId: string) =>
     api.post<{ success: boolean }>('/mutual-funds/sips/delete', { sipId }),
+
+  // ── Step-Up SIP ──
+
+  enableStepUp: (sipId: string, data: EnableStepUpRequest) =>
+    api.post<SIPPlan>('/mutual-funds/sips/step-up/enable', { sipId, ...data }),
+
+  modifyStepUp: (sipId: string, data: ModifyStepUpRequest) =>
+    api.put<SIPPlan>('/mutual-funds/sips/step-up', { sipId, ...data }),
+
+  disableStepUp: (sipId: string) =>
+    api.post<{ success: boolean }>('/mutual-funds/sips/step-up/disable', { sipId }),
 };

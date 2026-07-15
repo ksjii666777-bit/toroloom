@@ -32,7 +32,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           {
@@ -50,7 +50,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           name="arrow-back"
           size={24}
         />
-      </TouchableOpacity>
+      </Pressable>
       <View
         style={
           {
@@ -223,8 +223,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             }
           }
         >
-          <TouchableOpacity
-            activeOpacity={0.8}
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -273,9 +272,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
                 All
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -324,9 +322,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
                 5m
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -375,9 +372,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
                 15m
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -426,7 +422,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
                 1h
               </Text>
             </Animated.View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <View
           style={
@@ -684,7 +680,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -725,8 +721,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         >
           All
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -767,8 +763,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         >
           News
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -809,8 +805,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         >
           Social
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -851,8 +847,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         >
           Analyst
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -893,7 +889,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         >
           AI
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     </ScrollView>
     <View
       style={
@@ -904,7 +900,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -945,8 +941,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         >
           All
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -987,8 +983,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         >
           Up
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -1029,7 +1025,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         >
           Down
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   </View>
   <ScrollView
@@ -1270,8 +1266,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -1314,7 +1309,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -1533,8 +1528,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -1577,7 +1571,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -1798,8 +1792,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -1842,7 +1835,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -2061,8 +2054,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -2105,7 +2097,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -2326,8 +2318,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -2370,7 +2361,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -2591,8 +2582,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -2635,7 +2625,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -2854,8 +2844,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -2898,7 +2887,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -3119,8 +3108,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -3163,7 +3151,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -3209,7 +3197,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           {
@@ -3227,7 +3215,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           name="arrow-back"
           size={24}
         />
-      </TouchableOpacity>
+      </Pressable>
       <View
         style={
           {
@@ -3400,8 +3388,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             }
           }
         >
-          <TouchableOpacity
-            activeOpacity={0.8}
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -3450,9 +3437,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
                 All
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -3501,9 +3487,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
                 5m
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -3552,9 +3537,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
                 15m
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -3603,7 +3587,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
                 1h
               </Text>
             </Animated.View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <View
           style={
@@ -3861,7 +3845,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -3902,8 +3886,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         >
           All
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -3944,8 +3928,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         >
           News
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -3986,8 +3970,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         >
           Social
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -4028,8 +4012,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         >
           Analyst
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -4070,7 +4054,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         >
           AI
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     </ScrollView>
     <View
       style={
@@ -4081,7 +4065,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -4122,8 +4106,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         >
           All
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -4164,8 +4148,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         >
           Up
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -4206,7 +4190,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         >
           Down
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   </View>
   <ScrollView
@@ -4447,8 +4431,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -4491,7 +4474,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -4710,8 +4693,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -4754,7 +4736,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -4975,8 +4957,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -5019,7 +5000,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -5238,8 +5219,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -5282,7 +5262,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -5503,8 +5483,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -5547,7 +5526,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -5768,8 +5747,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -5812,7 +5790,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -6031,8 +6009,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -6075,7 +6052,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -6296,8 +6273,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -6340,7 +6316,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View
@@ -6386,7 +6362,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           {
@@ -6404,7 +6380,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
           name="arrow-back"
           size={24}
         />
-      </TouchableOpacity>
+      </Pressable>
       <View
         style={
           {
@@ -6577,8 +6553,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
             }
           }
         >
-          <TouchableOpacity
-            activeOpacity={0.8}
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -6627,9 +6602,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
                 All
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -6678,9 +6652,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
                 5m
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -6729,9 +6702,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
                 15m
               </Text>
             </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
+          </Pressable>
+          <Pressable
             onPress={[Function]}
             onPressIn={[Function]}
             onPressOut={[Function]}
@@ -6780,7 +6752,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
                 1h
               </Text>
             </Animated.View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <View
           style={
@@ -7028,7 +7000,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         }
         value="INFY"
       />
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         testID="search-clear-btn"
       >
@@ -7037,7 +7009,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
           name="close-circle"
           size={16}
         />
-      </TouchableOpacity>
+      </Pressable>
     </View>
     <ScrollView
       horizontal={true}
@@ -7048,7 +7020,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -7089,8 +7061,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         >
           All
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -7131,8 +7103,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         >
           News
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -7173,8 +7145,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         >
           Social
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -7215,8 +7187,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         >
           Analyst
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -7257,7 +7229,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         >
           AI
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     </ScrollView>
     <View
       style={
@@ -7268,7 +7240,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         }
       }
     >
-      <TouchableOpacity
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -7309,8 +7281,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         >
           All
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -7351,8 +7323,8 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         >
           Up
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+      </Pressable>
+      <Pressable
         onPress={[Function]}
         style={
           [
@@ -7393,7 +7365,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         >
           Down
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   </View>
   <ScrollView
@@ -7632,8 +7604,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
           </Text>
         </View>
                   
-        <TouchableOpacity
-          activeOpacity={0.8}
+        <Pressable
           hitSlop={
             {
               "bottom": 6,
@@ -7676,7 +7647,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
               size={14}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
     <View

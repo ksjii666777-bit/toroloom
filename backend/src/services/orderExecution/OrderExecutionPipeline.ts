@@ -32,7 +32,8 @@
  * No order can bypass this pipeline — it's the single path to the broker.
  */
 
-import { riskEngine, RiskEvaluation, RiskDecision, OrderActionType, OrderRiskContext } from '../riskEngine';
+import { riskEngine } from '../riskEngine/RiskEngine';
+import { RiskEvaluation, RiskDecision, OrderActionType, OrderRiskContext } from '../riskEngine/types';
 import { hookRegistry, PreOrderContext, PostOrderContext, OrderErrorContext } from '../../middleware/customHooks/OrderHookTypes';
 import { getBroker } from '../broker';
 import { getCircuitBreaker } from '../circuitBreaker';

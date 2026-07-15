@@ -16,7 +16,7 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
+  View, Text, StyleSheet, ScrollView, Pressable, TextInput,
   Dimensions, RefreshControl,
 } from 'react-native';
 import Animated, {
@@ -69,10 +69,10 @@ function LikeButton({
     );
     triggerHaptic();
     onPress();
-  }, [onPress]);
+  }, [onPress, scale]);
 
   return (
-    <TouchableOpacity style={styles.postAction} onPress={handlePress} activeOpacity={0.7}>
+    <Pressable style={({pressed}) => [styles.postAction, {opacity: pressed ? 0.7 : 1}]} onPress={handlePress}>
       <Animated.View style={animatedStyle}>
         <Ionicons
           name={isLiked ? 'heart' : 'heart-outline'}
@@ -81,7 +81,7 @@ function LikeButton({
         />
       </Animated.View>
       <Text style={[styles.actionText, isLiked && { color: '#FF3B30' }]}>{count}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -113,19 +113,18 @@ function PostCard({
   const isVerified = VERIFIED_USERS.includes(post.userName);
 
   return (
-    <TouchableOpacity
-      style={styles.postCard}
+    <Pressable
+      style={({pressed}) => [styles.postCard, {opacity: pressed ? 0.7 : 1}]}
       onPress={onPostPress}
-      activeOpacity={0.7}
     >
       {/* Header: Avatar + Name + Verified Badge + Timestamp */}
       <View style={styles.postHeader}>
-        <TouchableOpacity onPress={onUserPress} activeOpacity={0.7}>
+        <Pressable onPress={onUserPress} style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>
           <View style={[styles.postAvatar, { backgroundColor: colors.primary + '30' }]}>
             <Text style={styles.avatarText}>{post.userName[0]}</Text>
           </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.postUser} onPress={onUserPress} activeOpacity={0.7}>
+        </Pressable>
+        <Pressable style={({pressed}) => [styles.postUser, {opacity: pressed ? 0.7 : 1}]} onPress={onUserPress}>
           <View style={styles.userNameRow}>
             <Text style={styles.userName}>{post.userName}</Text>
             {isVerified && (
@@ -135,9 +134,9 @@ function PostCard({
             )}
           </View>
           <Text style={styles.postTime}>{formatTimeAgo(post.timestamp)}</Text>
-        </TouchableOpacity>
+        </Pressable>
         {/* Bookmark */}
-        <TouchableOpacity
+        <Pressable
           style={styles.bookmarkBtn}
           onPress={onBookmark}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -147,7 +146,7 @@ function PostCard({
             size={18}
             color={isBookmarked ? '#FFAB40' : colors.textMuted}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Content */}
@@ -166,16 +165,16 @@ function PostCard({
       <View style={styles.postActions}>
         <LikeButton isLiked={isLiked} count={post.likes} onPress={onLike} styles={styles} />
 
-        <TouchableOpacity style={styles.postAction} onPress={onPostPress} activeOpacity={0.7}>
+        <Pressable style={({pressed}) => [styles.postAction, {opacity: pressed ? 0.7 : 1}]} onPress={onPostPress}>
           <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
           <Text style={styles.actionText}>{post.comments}</Text>
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity style={styles.postAction} onPress={onShare} activeOpacity={0.7}>
+        <Pressable style={({pressed}) => [styles.postAction, {opacity: pressed ? 0.7 : 1}]} onPress={onShare}>
           <Ionicons name="share-outline" size={18} color={colors.textMuted} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -238,7 +237,7 @@ export default function CommunityScreen({ navigation }: any) {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Community</Text>
-          <TouchableOpacity
+          <Pressable
             style={styles.newPostBtn}
             onPress={() => {
               setShowPostInput(!showPostInput);
@@ -246,7 +245,7 @@ export default function CommunityScreen({ navigation }: any) {
             }}
           >
             <Ionicons name="create-outline" size={22} color={colors.primary} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -278,9 +277,9 @@ export default function CommunityScreen({ navigation }: any) {
             <View style={styles.createPostActions}>
               <View style={styles.tagRow}>
                 {['Stocks', 'Analysis', 'Question', 'Tips'].map(tag => (
-                  <TouchableOpacity key={tag} style={styles.tagChip}>
+                  <Pressable key={tag} style={styles.tagChip}>
                     <Text style={styles.tagChipText}>{tag}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
               <View style={styles.createPostBtns}>
@@ -304,7 +303,7 @@ export default function CommunityScreen({ navigation }: any) {
         {/* Feed Tabs */}
         <View style={styles.feedTabs}>
           {FEED_TABS.map(tab => (
-            <TouchableOpacity
+            <Pressable
               key={tab.key}
               style={[styles.feedTab, feedSort === tab.key && styles.feedTabActive]}
               onPress={() => {
@@ -320,7 +319,7 @@ export default function CommunityScreen({ navigation }: any) {
               <Text style={[styles.feedTabText, feedSort === tab.key && styles.feedTabTextActive]}>
                 {tab.label}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
 
@@ -332,9 +331,9 @@ export default function CommunityScreen({ navigation }: any) {
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {trendingTags.map(tag => (
-              <TouchableOpacity key={tag} style={styles.trendingTag}>
+              <Pressable key={tag} style={styles.trendingTag}>
                 <Text style={styles.trendingTagText}>#{tag}</Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </ScrollView>
         </View>

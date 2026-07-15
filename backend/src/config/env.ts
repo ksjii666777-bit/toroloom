@@ -91,6 +91,12 @@ export const env = {
   choreoClaudeEndpoint: process.env.CHOREO_CLAUDE_ENDPOINT || 'https://eg-e521a28e-6678-46f8-806b-9f325829eaaa-dev.e1-us-east-azure.bijiraapis.dev/default/anthropic-claude-api/v1.0',
   choreoClaudeModel: process.env.CHOREO_CLAUDE_MODEL || 'claude-sonnet-4-20250514',
 
+  // ──── SnapTrade (Unified Broker OAuth) ────────────────────────────────
+  /** SnapTrade Client ID from https://snaptrade.com/dashboard */
+  snapTradeClientId: process.env.SNAPTRADE_CLIENT_ID || '',
+  /** SnapTrade Consumer Key from https://snaptrade.com/dashboard */
+  snapTradeConsumerKey: process.env.SNAPTRADE_CONSUMER_KEY || '',
+
   // ──── Payments ───────────────────────────────────────────────────────
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
@@ -109,12 +115,25 @@ export const env = {
   /** NewsAPI.org key for financial news articles */
   newsApiKey: process.env.NEWSAPI_KEY || '',
 
+  /** Encryption key for SnapTrade userSecrets (must be set in production) */
+  snapTradeEncryptionKey: process.env.SNAPTRADE_ENCRYPTION_KEY || '',
+
   // ──── Error Tracking ─────────────────────────────────────────────────
   sentryDsn: process.env.SENTRY_DSN || '',
 
   // ──── Redis ──────────────────────────────────────────────────────────
   /** REDIS_URL or RAILWAY_REDIS_URL (auto-injected by Railway Redis plugin) */
   redisUrl: process.env.REDIS_URL || process.env.RAILWAY_REDIS_URL || '',
+
+  // ──── Cache Configuration ────────────────────────────────────────────
+  /** TTL in seconds for backtest historical data cache (default: 3600 = 1 hour) */
+  backtestCacheTtl: parseInt(process.env.BACKTEST_CACHE_TTL || '3600', 10),
+
+  /** TTL in seconds for market data cache (default: 600 = 10 min) */
+  marketDataCacheTtl: parseInt(process.env.MARKET_DATA_CACHE_TTL || '600', 10),
+
+  /** Max cache entries before eviction (to prevent memory leaks) */
+  cacheMaxEntries: parseInt(process.env.CACHE_MAX_ENTRIES || '200', 10),
 
   // ──── Feature Flags ──────────────────────────────────────────────────
   /** Enable subscription feature gating middleware globally */

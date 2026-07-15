@@ -4,10 +4,10 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Switch,
   Alert,
   Dimensions,
+  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -77,9 +77,9 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
       {/* Header */}
       <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={styles.headerInfo}>
             <Text style={styles.title}>Notification Preferences</Text>
             <Text style={styles.subtitle}>Control how and when you get notified</Text>
@@ -135,23 +135,15 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
               </View>
             </View>
             <View style={styles.thresholdControls}>
-              <TouchableOpacity
-                style={styles.thresholdBtn}
-                onPress={() => adjustThreshold(-0.5)}
-                activeOpacity={0.6}
-              >
+              <Pressable style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
                 <Ionicons name="remove" size={22} color={colors.primary} />
-              </TouchableOpacity>
+              </Pressable>
               <View style={styles.thresholdValueWrap}>
                 <Text style={styles.thresholdValue}>{preferences.priceAlertThreshold}%</Text>
               </View>
-              <TouchableOpacity
-                style={styles.thresholdBtn}
-                onPress={() => adjustThreshold(0.5)}
-                activeOpacity={0.6}
-              >
+              <Pressable style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
                 <Ionicons name="add" size={22} color={colors.primary} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
             <View style={styles.thresholdRange}>
               <Text style={styles.thresholdRangeText}>0.5%</Text>
@@ -203,20 +195,20 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
                 <View style={styles.quietTimeRow}>
                   <View style={styles.quietTimeBlock}>
                     <Text style={styles.quietTimeLabel}>From</Text>
-                    <TouchableOpacity style={styles.quietTimePicker}>
+                    <Pressable style={styles.quietTimePicker}>
                       <Text style={styles.quietTimeValue}>{preferences.quietHoursStart || '10:00 PM'}</Text>
                       <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                   <View style={styles.quietTimeArrow}>
                     <Ionicons name="arrow-forward" size={18} color={colors.textMuted} />
                   </View>
                   <View style={styles.quietTimeBlock}>
                     <Text style={styles.quietTimeLabel}>To</Text>
-                    <TouchableOpacity style={styles.quietTimePicker}>
+                    <Pressable style={styles.quietTimePicker}>
                       <Text style={styles.quietTimeValue}>{preferences.quietHoursEnd || '7:00 AM'}</Text>
                       <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                 </View>
               </>
@@ -244,10 +236,10 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
         </View>
 
         {/* Reset Button */}
-        <TouchableOpacity style={styles.resetBtn} onPress={handleReset} activeOpacity={0.7}>
+        <Pressable style={({pressed}) => [styles.resetBtn, {opacity: pressed ? 0.7 : 1}]} onPress={handleReset}>
           <Ionicons name="refresh" size={18} color={colors.danger} />
           <Text style={styles.resetText}>Reset to Defaults</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         <View style={{ height: 60 }} />
       </ScrollView>

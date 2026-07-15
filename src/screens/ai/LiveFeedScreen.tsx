@@ -15,14 +15,14 @@
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  RefreshControl, TextInput, Dimensions,
+  View, Text, StyleSheet, ScrollView,
+  RefreshControl, TextInput, Dimensions, Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
+import { SPACING, BORDER_RADIUS} from '../../constants/theme';
 import Svg, { Line, Rect, G, Text as SvgText } from 'react-native-svg';
 import {
   generateInitialFeedEvents,
@@ -615,9 +615,9 @@ export default function LiveFeedScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => { triggerHaptic(); navigation.goBack(); }} style={styles.backBtn}>
+          <Pressable onPress={() => { triggerHaptic(); navigation.goBack(); }} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>Live Sentiment Feed</Text>
             <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
@@ -642,9 +642,9 @@ export default function LiveFeedScreen({ navigation }: any) {
             returnKeyType="search"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity testID="search-clear-btn" onPress={() => { triggerHaptic(); setSearchQuery(''); searchInputRef.current?.blur(); }}>
+            <Pressable testID="search-clear-btn" onPress={() => { triggerHaptic(); setSearchQuery(''); searchInputRef.current?.blur(); }}>
               <Ionicons name="close-circle" size={16} color={colors.textMuted} />
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
 
@@ -653,7 +653,7 @@ export default function LiveFeedScreen({ navigation }: any) {
           {SOURCE_FILTERS.map(f => {
             const isActive = sourceFilter === f.key;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={f.key}
                 style={[styles.filterChip, {
                   backgroundColor: isActive ? f.color + '20' : colors.bgCard,
@@ -675,7 +675,7 @@ export default function LiveFeedScreen({ navigation }: any) {
                     </Text>
                   </View>
                 )}
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </ScrollView>
@@ -685,7 +685,7 @@ export default function LiveFeedScreen({ navigation }: any) {
           {DIRECTION_FILTERS.map(f => {
             const isActive = directionFilter === f.key;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={f.key}
                 style={[styles.dirChip, {
                   backgroundColor: isActive ? f.color + '20' : colors.bgCard,
@@ -700,7 +700,7 @@ export default function LiveFeedScreen({ navigation }: any) {
                 <Text style={[styles.dirChipText, { color: isActive ? f.color : colors.textSecondary }]}>
                   {f.label}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>

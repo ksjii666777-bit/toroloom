@@ -1,97 +1,38 @@
 /**
  * ============================================================================
- * Toroloom — Angel One SmartAPI Connection API Client
+ * Toroloom — Angel One SmartAPI (REMOVED — replaced by SnapTrade)
  * ============================================================================
  *
- * Frontend client for per-user Angel One SmartAPI integration.
- * Users connect their Angel One account via official SmartAPI.
+ * This file has been replaced by src/services/api/snaptrade.ts.
+ *
+ * SnapTrade provides unified OAuth-based broker connection for 20+ brokers
+ * including Angel One, Zerodha, Dhan, Upstox, Groww, and more.
+ *
+ * Migration:
+ *   ❌ Old: await angelConnectApi.connect(clientId, password, totp)
+ *   ✅ New: await snapTradeApi.register()
+ *           await snapTradeApi.getConnectLink()  → open OAuth URL
+ *           await snapTradeApi.handleCallback(authorizationId)
+ *           await snapTradeApi.getHoldings()
+ *
  * ============================================================================
  */
-
-import { api } from './client';
-
-export interface AngelStatus {
-  connected: boolean;
-  clientId?: string;
-  connectedAt?: string;
-}
-
-export interface AngelHolding {
-  symbol: string;
-  quantity: number;
-  buyPrice: number;
-  currentPrice: number;
-  pnl: number;
-  pnlPercent: number;
-}
-
-export interface AngelPosition {
-  symbol: string;
-  quantity: number;
-  buyPrice: number;
-  currentPrice: number;
-  pnl: number;
-  pnlPercent: number;
-}
-
-export interface AngelTrade {
-  id: string;
-  symbol: string;
-  type: 'buy' | 'sell';
-  quantity: number;
-  price: number;
-  total: number;
-  timestamp: string;
-}
-
+/**
+ * Stub angelConnectApi for backward compatibility.
+ * New integrations should use snapTradeApi from ./snaptrade.ts instead.
+ */
 export const angelConnectApi = {
-  /**
-   * Connect the user's Angel One account.
-   * @param clientId - Angel One trading account code
-   * @param password - Angel One trading password
-   * @param totp - Base32 TOTP secret from SmartAPI portal
-   */
-  async connect(clientId: string, password: string, totp: string): Promise<{ success: boolean; message: string }> {
-    const response = await api.post<{ success: boolean; message: string; clientId: string }>(
-      '/angel/connect',
-      { clientId, password, totp },
-    );
-    return response;
+  connect: async (_clientId: string, _password: string, _totp: string): Promise<{ success: boolean; message: string }> => {
+    return { success: false, message: 'Angel One SmartAPI is deprecated. Use SnapTrade OAuth instead.' };
   },
-
-  /** Disconnect the user's Angel One account */
-  async disconnect(): Promise<{ success: boolean; message: string }> {
-    const response = await api.post<{ success: boolean; message: string }>('/angel/disconnect', {});
-    return response;
+  status: async (): Promise<{ connected: boolean }> => {
+    return { connected: false };
   },
-
-  /** Check Angel One connection status */
-  async status(): Promise<AngelStatus> {
-    const response = await api.get<AngelStatus>('/angel/status');
-    return response;
+  holdings: async (): Promise<{ success: boolean; data: any[] }> => {
+    return { success: false, data: [] };
   },
-
-  /** Fetch holdings for the connected user */
-  async holdings(): Promise<{ success: boolean; data: AngelHolding[]; count: number }> {
-    const response = await api.get<{ success: boolean; data: AngelHolding[]; count: number }>('/angel/holdings');
-    return response;
-  },
-
-  /** Fetch positions for the connected user */
-  async positions(): Promise<{ success: boolean; data: AngelPosition[]; count: number }> {
-    const response = await api.get<{ success: boolean; data: AngelPosition[]; count: number }>('/angel/positions');
-    return response;
-  },
-
-  /** Fetch trade history for the connected user */
-  async trades(): Promise<{ success: boolean; data: AngelTrade[]; count: number }> {
-    const response = await api.get<{ success: boolean; data: AngelTrade[]; count: number }>('/angel/trades');
-    return response;
-  },
-
-  /** Get a live quote for a symbol */
-  async quote(symbol: string): Promise<{ success: boolean; data: any }> {
-    const response = await api.get<{ success: boolean; data: any }>(`/angel/quote/${symbol}`);
-    return response;
+  disconnect: async (): Promise<void> => {
+    // no-op
   },
 };
+

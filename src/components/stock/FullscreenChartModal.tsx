@@ -19,11 +19,11 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
   StatusBar,
   Animated,
   Easing,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -188,9 +188,9 @@ export default function FullscreenChartModal({
       {/* ── Fullscreen Header ── */}
       <View style={[styles.header, { paddingTop: headerPaddingTop }]}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity onPress={handleClose} style={styles.closeBtn} activeOpacity={0.7}>
+          <Pressable onPress={handleClose} style={({pressed}) => [styles.closeBtn, {opacity: pressed ? 0.7 : 1}]}>
             <Ionicons name="close" size={isLandscape ? 20 : 24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={styles.stockInfo}>
             <Text style={[styles.symbol, isLandscape && { fontSize: FONTS.size.md }]}>
               {symbol}

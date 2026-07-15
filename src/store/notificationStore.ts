@@ -2,7 +2,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { create } from 'zustand';
 import { AppNotification, Holding } from '../types';
 import { mockNotifications } from '../constants/mockData';
-import { notificationApi } from '../services/api';
+import { notificationApi } from '../services/api/notifications';
 import { sendLocalNotification, cancelNotification, cancelAllNotifications, sendPortfolioAlert, updateAppIconBadge } from '../services/notificationService';
 
 // ============ Notification Preferences ============

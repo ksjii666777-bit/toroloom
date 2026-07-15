@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Pressable, PanResponder } from 'react-native';
 import Svg, { Path, Line, Rect, G, Text as SvgText, Circle, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
@@ -506,17 +506,16 @@ export default function CandlestickChart({
         <View style={[styles.container, { width }]}>
           {/* ── Top bar: Chart type toggle + Zoom badge ── */}
           <View style={styles.topBar}>
-            <TouchableOpacity
-              style={styles.chartTypeBtn}
+            <Pressable
+              style={({pressed}) => [styles.chartTypeBtn, {opacity: pressed ? 0.7 : 1}]}
               onPress={() => setShowTypeMenu(prev => !prev)}
-              activeOpacity={0.7}
             >
               <Text style={styles.chartTypeBtnText}>
                 {chartTypes.find(t => t.key === activeChartType)?.icon}{' '}
                 {chartTypes.find(t => t.key === activeChartType)?.label}
               </Text>
               <Text style={styles.chartTypeArrow}>{showTypeMenu ? '▲' : '▼'}</Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {zoomLevel > 0 && (
               <View style={styles.zoomBadge}>
@@ -529,7 +528,7 @@ export default function CandlestickChart({
           {showTypeMenu && (
             <View style={styles.typeMenu}>
               {chartTypes.map(ct => (
-                <TouchableOpacity
+                <Pressable
                   key={ct.key}
                   style={[styles.typeMenuItem, activeChartType === ct.key && styles.typeMenuItemActive]}
                   onPress={() => { setChartType(ct.key); setShowTypeMenu(false); }}
@@ -540,7 +539,7 @@ export default function CandlestickChart({
                   {activeChartType === ct.key && (
                     <Text style={styles.typeMenuCheck}>✓</Text>
                   )}
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </View>
           )}
@@ -587,40 +586,37 @@ export default function CandlestickChart({
 
           {/* ── Zoom controls ── */}
           <View style={styles.zoomControl}>
-            <TouchableOpacity
-              style={styles.zoomBtn}
+            <Pressable
+              style={({pressed}) => [styles.zoomBtn, {opacity: pressed ? 0.6 : 1}]}
               onPress={() => setZoom(Math.max(0, zoomLevel - 0.15))}
-              activeOpacity={0.6}
             >
               <Text style={styles.zoomBtnText}>−</Text>
-            </TouchableOpacity>
+            </Pressable>
             <View style={styles.zoomTrack}>
               <View
                 style={[styles.zoomFill, { width: `${zoomPercent}%`, backgroundColor: colors.primary }]}
               />
-              <TouchableOpacity
-                style={[styles.zoomThumb, { left: `${zoomPercent}%` }]}
-                activeOpacity={0.8}
+              <Pressable
+                style={({pressed}) => [[styles.zoomThumb, { left: `${zoomPercent}%` }], {opacity: pressed ? 0.8 : 1}]}
               />
             </View>
-            <TouchableOpacity
-              style={styles.zoomBtn}
+            <Pressable
+              style={({pressed}) => [styles.zoomBtn, {opacity: pressed ? 0.6 : 1}]}
               onPress={() => setZoom(Math.min(MAX_ZOOM, zoomLevel + 0.15))}
-              activeOpacity={0.6}
             >
               <Text style={styles.zoomBtnText}>+</Text>
-            </TouchableOpacity>
+            </Pressable>
             {zoomLevel > 0 && (
-              <TouchableOpacity style={styles.zoomResetBtn} onPress={resetZoom} activeOpacity={0.6}>
+              <Pressable style={({pressed}) => [styles.zoomResetBtn, {opacity: pressed ? 0.6 : 1}]} onPress={resetZoom}>
                 <Text style={styles.zoomResetText}>Reset</Text>
-              </TouchableOpacity>
+              </Pressable>
             )}
           </View>
 
           {/* ── Timeframe selector ── */}
           <View style={styles.timeframes}>
             {timeframes.map((tf) => (
-              <TouchableOpacity
+              <Pressable
                 key={tf}
                 style={[styles.timeframeBtn, activeTimeframe === tf && styles.timeframeActive]}
                 onPress={() => {
@@ -632,7 +628,7 @@ export default function CandlestickChart({
                 <Text style={[styles.timeframeText, activeTimeframe === tf && styles.timeframeTextActive]}>
                   {tf}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
 
@@ -678,17 +674,16 @@ export default function CandlestickChart({
       {/* ── Top bar: Chart type toggle + Zoom badge ── */}
       <View style={styles.topBar}>
         {/* Chart type selector */}
-        <TouchableOpacity
-          style={styles.chartTypeBtn}
+        <Pressable
+          style={({pressed}) => [styles.chartTypeBtn, {opacity: pressed ? 0.7 : 1}]}
           onPress={() => setShowTypeMenu(prev => !prev)}
-          activeOpacity={0.7}
         >
           <Text style={styles.chartTypeBtnText}>
             {chartTypes.find(t => t.key === activeChartType)?.icon}{' '}
             {chartTypes.find(t => t.key === activeChartType)?.label}
           </Text>
           <Text style={styles.chartTypeArrow}>{showTypeMenu ? '▲' : '▼'}</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Zoom badge */}
         {zoomLevel > 0 && (
@@ -702,7 +697,7 @@ export default function CandlestickChart({
       {showTypeMenu && (
         <View style={styles.typeMenu}>
           {chartTypes.map(ct => (
-            <TouchableOpacity
+            <Pressable
               key={ct.key}
               style={[styles.typeMenuItem, activeChartType === ct.key && styles.typeMenuItemActive]}
               onPress={() => { setChartType(ct.key); setShowTypeMenu(false); }}
@@ -713,7 +708,7 @@ export default function CandlestickChart({
               {activeChartType === ct.key && (
                 <Text style={styles.typeMenuCheck}>✓</Text>
               )}
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
@@ -1031,40 +1026,37 @@ export default function CandlestickChart({
 
         {/* ── Zoom slider ── */}
         <View style={styles.zoomControl}>
-          <TouchableOpacity
-          style={styles.zoomBtn}
+          <Pressable
+          style={({pressed}) => [styles.zoomBtn, {opacity: pressed ? 0.6 : 1}]}
           onPress={() => setZoom(Math.max(0, zoomLevel - 0.15))}
-          activeOpacity={0.6}
         >
           <Text style={styles.zoomBtnText}>−</Text>
-        </TouchableOpacity>
+        </Pressable>
         <View style={styles.zoomTrack}>
           <View
             style={[styles.zoomFill, { width: `${zoomPercent}%`, backgroundColor: colors.primary }]}
           />
-          <TouchableOpacity
-            style={[styles.zoomThumb, { left: `${zoomPercent}%` }]}
-            activeOpacity={0.8}
+          <Pressable
+            style={({pressed}) => [[styles.zoomThumb, { left: `${zoomPercent}%` }], {opacity: pressed ? 0.8 : 1}]}
           />
         </View>
-        <TouchableOpacity
-          style={styles.zoomBtn}
+        <Pressable
+          style={({pressed}) => [styles.zoomBtn, {opacity: pressed ? 0.6 : 1}]}
           onPress={() => setZoom(Math.min(MAX_ZOOM, zoomLevel + 0.15))}
-          activeOpacity={0.6}
         >
           <Text style={styles.zoomBtnText}>+</Text>
-        </TouchableOpacity>
+        </Pressable>
         {zoomLevel > 0 && (
-          <TouchableOpacity style={styles.zoomResetBtn} onPress={resetZoom} activeOpacity={0.6}>
+          <Pressable style={({pressed}) => [styles.zoomResetBtn, {opacity: pressed ? 0.6 : 1}]} onPress={resetZoom}>
             <Text style={styles.zoomResetText}>Reset</Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
 
       {/* ── Timeframe selector ── */}
       <View style={styles.timeframes}>
         {timeframes.map((tf) => (
-          <TouchableOpacity
+          <Pressable
             key={tf}
             style={[styles.timeframeBtn, activeTimeframe === tf && styles.timeframeActive]}
             onPress={() => {
@@ -1076,7 +1068,7 @@ export default function CandlestickChart({
             <Text style={[styles.timeframeText, activeTimeframe === tf && styles.timeframeTextActive]}>
               {tf}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 

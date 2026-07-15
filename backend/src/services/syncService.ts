@@ -294,6 +294,7 @@ export async function processSyncRequest(
 
   for (const [, record] of _entityStore) {
     if (record.userId !== userId) continue;
+    if (record.deleted) continue;
     const updatedMs = new Date(record.updatedAt).getTime();
     if (updatedMs > sinceTimestamp) {
       delta.push({

@@ -37,8 +37,8 @@
 
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
-import { riskEngine, LockdownStatus } from '../services/riskEngine';
-
+import { riskEngine } from '../services/riskEngine/RiskEngine';
+import { LockdownStatus } from '../services/riskEngine/types';
 const router = Router();
 router.use(authMiddleware);
 

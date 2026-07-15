@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable, } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { IndicatorType } from '../TechnicalIndicators';
@@ -57,17 +57,16 @@ export default function ChartControls({
 
   return (
     <View style={styles.container}>
-      {controls.map((c, i) => (
-        <TouchableOpacity
-          key={i}
-          style={[styles.btn, c.active && styles.btnActive]}
+      {controls.map((c, _i) => (
+        <Pressable
+          key={c.label}
+          style={({pressed}) => [[styles.btn, c.active && styles.btnActive], {opacity: pressed ? 0.7 : 1}]}
           onPress={c.onPress}
-          activeOpacity={0.7}
         >
           <Text style={[styles.btnText, c.active && styles.btnTextActive]}>
             {c.label}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       ))}
     </View>
   );

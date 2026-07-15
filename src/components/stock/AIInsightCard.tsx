@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -81,7 +81,7 @@ export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsight
           <Text style={styles.targetsLabel}>Target Levels</Text>
           <View style={styles.targetsRow}>
             {insight.targets.map((t, i) => (
-              <View key={i} style={[styles.targetItem, { backgroundColor: colors.bgCardLight }]}>
+              <View key={t.target} style={[styles.targetItem, { backgroundColor: colors.bgCardLight }]}>
                 <Text style={styles.targetProb}>{t.probability}%</Text>
                 <Text style={styles.targetValue}>{formatCurrency(t.target)}</Text>
                 <View style={[styles.probBar, { backgroundColor: colors.bgInput }]}>
@@ -99,10 +99,10 @@ export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsight
 
       {/* CTA */}
       {onViewFullAnalysis && (
-        <TouchableOpacity style={[styles.cta, { borderColor: colors.border }]} onPress={onViewFullAnalysis}>
+        <Pressable style={[styles.cta, { borderColor: colors.border }]} onPress={onViewFullAnalysis}>
           <Text style={[styles.ctaText, { color: colors.primary }]}>View Full Analysis</Text>
           <Ionicons name="arrow-forward" size={16} color={colors.primary} />
-        </TouchableOpacity>
+        </Pressable>
       )}
     </View>
   );

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, PanResponder, Pressable } from 'react-native';
 import Svg, { Path, Line, Rect, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -221,7 +221,7 @@ function useCrosshairTouch(dataLength: number, width: number, onIndexChange: (in
       const index = Math.round((relativeX / chartW) * (dataLength - 1));
       onIndexChange(Math.max(0, Math.min(dataLength - 1, index)));
     },
-  }), [dataLength, width, onIndexChange, pad.left, chartW]);
+  }), [dataLength, onIndexChange, pad.left, chartW]);
 
   return panResponder;
 }
@@ -267,6 +267,8 @@ const RSIPanel = React.memo(({
     rsiPath += rsiPath ? ` L ${x} ${y}` : `M ${x} ${y}`;
   }
 
+  const touchPan = useCrosshairTouch(rsi.length, width, setFocusedIndex);
+
   const lastRSI = validPoints[validPoints.length - 1];
   const isOverbought = lastRSI > 70;
   const isOversold = lastRSI < 30;
@@ -274,8 +276,6 @@ const RSIPanel = React.memo(({
   // Crosshair value
   const crosshairRSI = focusedIndex !== null && rsi[focusedIndex] !== null
     ? rsi[focusedIndex] : null;
-
-  const touchPan = useCrosshairTouch(rsi.length, width, setFocusedIndex);
 
   return (
     <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
@@ -384,14 +384,14 @@ const MACDPanel = React.memo(({
     signalPath += signalPath ? ` L ${x} ${y}` : `M ${x} ${y}`;
   }
 
+  const touchPan = useCrosshairTouch(macd.length, width, setFocusedIndex);
+
   const lastMACD = macd.filter((v): v is number => v !== null).pop() || 0;
   const lastSignal = signal.filter((v): v is number => v !== null).pop() || 0;
 
   // Crosshair values
   const crosshairMACD = focusedIndex !== null && macd[focusedIndex] !== null ? macd[focusedIndex] : null;
   const crosshairSignal = focusedIndex !== null && signal[focusedIndex] !== null ? signal[focusedIndex] : null;
-
-  const touchPan = useCrosshairTouch(macd.length, width, setFocusedIndex);
 
   return (
     <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
@@ -536,14 +536,14 @@ const BollingerPanel = React.memo(({
     fillPath = `${fillPath}${revPath} Z`;
   }
 
+  const touchPan = useCrosshairTouch(upper.length, width, setFocusedIndex);
+
   const lastUpperVal = upper.filter((v): v is number => v !== null).pop() || 0;
   const lastLowerVal = lower.filter((v): v is number => v !== null).pop() || 0;
 
   // Crosshair values
   const crosshairUpper = focusedIndex !== null && upper[focusedIndex] !== null ? upper[focusedIndex] : null;
   const crosshairLower = focusedIndex !== null && lower[focusedIndex] !== null ? lower[focusedIndex] : null;
-
-  const touchPan = useCrosshairTouch(upper.length, width, setFocusedIndex);
 
   return (
     <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
@@ -675,7 +675,7 @@ export default function TechnicalIndicators({
         {(['rsi', 'macd', 'bollinger'] as IndicatorType[]).map(type => {
           const isActive = activeIndicators.includes(type);
           return (
-            <TouchableOpacity
+            <Pressable
               key={type}
               style={[
                 indicatorStyles.toggleChip,
@@ -691,7 +691,7 @@ export default function TechnicalIndicators({
               ]}>
                 {type === 'rsi' ? 'RSI' : type === 'macd' ? 'MACD' : 'Bollinger'}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>

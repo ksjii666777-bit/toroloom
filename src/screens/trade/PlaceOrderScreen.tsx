@@ -4,12 +4,11 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   TextInput,
   Dimensions,
   Alert,
   Keyboard,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -242,8 +241,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
   );
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
+    <Pressable onPress={Keyboard.dismiss} accessible={false} style={styles.container}>
       {/* Header */}
       <LinearGradient
         colors={tradeType === 'buy' ? GRADIENTS.primary : GRADIENTS.secondary}
@@ -252,9 +250,9 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         style={styles.header}
       >
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} testID="backBtn">
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} testID="backBtn">
             <Ionicons name="close" size={24} color={colors.white} />
-          </TouchableOpacity>
+          </Pressable>
           <Text style={styles.headerTitle} testID="headerTitle">
             {tradeType === 'buy' ? 'Buy' : 'Sell'} Securities
           </Text>
@@ -294,7 +292,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
       >
         {/* Buy/Sell Toggle */}
         <View style={styles.toggleContainer}>
-          <TouchableOpacity
+          <Pressable
             testID="buyToggle"
             style={[styles.toggleBtn, tradeType === 'buy' && styles.toggleBuyActive]}
             onPress={() => setTradeType('buy')}
@@ -307,8 +305,8 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
             <Text style={[styles.toggleText, tradeType === 'buy' && styles.toggleTextActive]}>
               Buy
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             testID="sellToggle"
             style={[styles.toggleBtn, tradeType === 'sell' && styles.toggleSellActive]}
             onPress={() => setTradeType('sell')}
@@ -321,7 +319,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
             <Text style={[styles.toggleText, tradeType === 'sell' && styles.toggleTextActive]}>
               Sell
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Order Type Selector */}
@@ -333,7 +331,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
             contentContainerStyle={{ gap: SPACING.sm }}
           >
             {ORDER_TYPES.map(ot => (
-              <TouchableOpacity
+              <Pressable
                 key={ot}
                 testID={`orderType_${ot}`}
                 style={[styles.chip, orderType === ot && styles.chipActive]}
@@ -342,7 +340,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
                 <Text style={[styles.chipText, orderType === ot && styles.chipTextActive]}>
                   {ot}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </ScrollView>
           <Text style={styles.chipDescription}>{ORDER_TYPE_DESCRIPTIONS[orderType]}</Text>
@@ -357,7 +355,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
             contentContainerStyle={{ gap: SPACING.sm }}
           >
             {PRODUCT_TYPES.map(pt => (
-              <TouchableOpacity
+              <Pressable
                 key={pt}
                 testID={`productType_${pt}`}
                 style={[styles.chip, productType === pt && styles.chipActive]}
@@ -366,7 +364,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
                 <Text style={[styles.chipText, productType === pt && styles.chipTextActive]}>
                   {pt}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </ScrollView>
           <Text style={styles.chipDescription}>{PRODUCT_DESCRIPTIONS[productType]}</Text>
@@ -384,12 +382,12 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
           </Text>
 
           <View style={styles.qtyInputRow}>
-            <TouchableOpacity
+            <Pressable
               style={styles.qtyAdjustBtn}
               onPress={() => adjustQty(-10)}
             >
               <Ionicons name="remove" size={20} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
             <TextInput
               style={styles.qtyInput}
               value={quantity}
@@ -398,12 +396,12 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
               placeholder="0"
               placeholderTextColor={colors.textMuted}
             />
-            <TouchableOpacity
+            <Pressable
               style={styles.qtyAdjustBtn}
               onPress={() => adjustQty(10)}
             >
               <Ionicons name="add" size={20} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Quick quantity presets */}
@@ -413,7 +411,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
                 ? (tradeType === 'sell' ? qtyNum === ownedQuantity : parseInt(quantity) === Math.floor(availableBalance / displayPrice))
                 : parseInt(quantity) === (qty as number);
               return (
-              <TouchableOpacity
+              <Pressable
                 key={String(qty)}
                 testID={`quickQty_${qty}`}
                 style={[styles.quickQtyBtn, isActive && styles.quickQtyBtnActive]}
@@ -422,7 +420,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
                   <Text style={[styles.quickQtyText, isActive && styles.quickQtyTextActive]}>
                     {qty === 'Max' ? 'Max' : qty}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
       </View>
@@ -569,8 +567,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
           </Animated.View>
         </View>
       )}
-    </View>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 }
 

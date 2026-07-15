@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable, } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -9,34 +9,39 @@ interface BottomActionBarProps {
   displayPrice: number;
   onBuy: () => void;
   onSell: () => void;
+  isUSStock?: boolean;
 }
 
-export default function BottomActionBar({ displayPrice, onBuy, onSell }: BottomActionBarProps) {
+export default function BottomActionBar({ displayPrice, onBuy, onSell, isUSStock = false }: BottomActionBarProps) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+
+  const formattedPrice = isUSStock
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(displayPrice)
+    : formatCurrency(displayPrice);
 
   return (
     <LinearGradient colors={[hexToRgba(colors.bg, 0), colors.bg]} style={styles.container}>
       <View style={styles.row}>
         <View style={styles.priceInfo}>
           <Text style={styles.ltpLabel}>LTP</Text>
-          <Text style={styles.ltpValue}>{formatCurrency(displayPrice)}</Text>
+          <Text style={styles.ltpValue}>{formattedPrice}</Text>
         </View>
         <View style={styles.actions}>
-          <TouchableOpacity
+          <Pressable
             style={[styles.tradeBtn, styles.sellBtn, { backgroundColor: colors.bgCard, borderColor: colors.marketDown }]}
             onPress={onSell}
           >
             <Text style={[styles.tradeBtnText, { color: colors.white }]}>Sell</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             style={[styles.tradeBtn, { padding: 0, overflow: 'hidden' }]}
             onPress={onBuy}
           >
             <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.buyGrad}>
               <Text style={[styles.tradeBtnText, { color: colors.white }]}>Buy</Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </LinearGradient>

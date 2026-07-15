@@ -3,7 +3,7 @@
 // Enhanced sharing with copy link, WhatsApp, Twitter, and native share sheet
 // =============================================================================
 
-import { Share, Platform, Alert } from 'react-native';
+import { Share, Alert} from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { Linking } from 'react-native';

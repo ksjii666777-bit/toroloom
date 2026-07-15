@@ -13,9 +13,127 @@
 
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
+import { env } from '../config/env';
+import { getBroker } from '../services/broker';
 
 const router = Router();
 router.use(authMiddleware);
+
+// ──── Historical Data Cache (Configurable, MemoryCache + Redis) ───────────
+
+import { MemoryCache } from '../services/cache';
+import * as cacheService from '../middleware/cacheService';
+
+interface HistoricalDataPoint {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+/** In-memory cache for historical data (always available) */
+const historicalMemoryCache = new MemoryCache(env.backtestCacheTtl * 1000);
+
+/** Cache namespace prefix for Redis keys */
+const HISTORICAL_CACHE_PREFIX = 'backtest:historical:';
+
+/** Max entries in memory cache before eviction */
+const CACHE_MAX_ENTRIES = env.cacheMaxEntries;
+
+async function getCachedHistoricalData(symbol: string, days: number): Promise<HistoricalDataPoint[] | null> {
+  const key = `${symbol}:${days}`;
+
+  // 1. Try Redis first (production-grade, across restarts/pods)
+  if (env.hasRedis) {
+    try {
+      const redisVal = await cacheService.get(`${HISTORICAL_CACHE_PREFIX}${key}`);
+      if (redisVal) {
+        const parsed = JSON.parse(redisVal) as HistoricalDataPoint[];
+        // Also seed memory cache for faster subsequent access
+        // Delete first to bump key to newest position (LRU-friendly eviction)
+        historicalMemoryCache.delete(key);
+        historicalMemoryCache.set(key, parsed);
+        return parsed;
+      }
+    } catch {
+      // Redis unavailable — fall through to memory cache
+    }
+  }
+
+  // 2. Fall back to memory cache (fast, process-local)
+  const memCached = historicalMemoryCache.get<HistoricalDataPoint[]>(key);
+  if (memCached) return memCached;
+
+  return null;
+}
+
+async function setCachedHistoricalData(symbol: string, days: number, data: HistoricalDataPoint[]): Promise<void> {
+  const key = `${symbol}:${days}`;
+  const ttlSec = env.backtestCacheTtl;
+
+  // 1. Set in memory cache
+  historicalMemoryCache.set(key, data, ttlSec * 1000);
+
+  // 2. Set in Redis (if available) — fire-and-forget
+  if (env.hasRedis) {
+    try {
+      await cacheService.set(`${HISTORICAL_CACHE_PREFIX}${key}`, JSON.stringify(data), ttlSec);
+    } catch {
+      // Redis write failure is non-critical
+    }
+  }
+
+  // 3. Evict oldest if cache exceeds max entries
+  const stats = historicalMemoryCache.stats();
+  if (stats.size > CACHE_MAX_ENTRIES) {
+    // Remove oldest 25% of entries
+    const keysToRemove = stats.keys.slice(0, Math.floor(CACHE_MAX_ENTRIES * 0.25));
+    for (const oldKey of keysToRemove) {
+      historicalMemoryCache.delete(oldKey);
+    }
+  }
+}
+
+// ──── Mock Historical Data Generator (Fallback) ──────────────────────────
+
+function generateMockHistoricalData(basePrice: number, days: number): HistoricalDataPoint[] {
+  const data: HistoricalDataPoint[] = [];
+  let price = basePrice;
+  const today = new Date();
+  const dailyVol = basePrice * 0.012; // ~1.2% daily vol ≈ 19% annualized
+
+  for (let i = days; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    // Skip weekends
+    if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+    // Random walk with slight mean reversion
+    const momentum = (Math.random() - 0.48) * 0.3;
+    const noise = (Math.random() - 0.5) * dailyVol;
+    const change = price * momentum + noise;
+    price = Math.max(price + change, basePrice * 0.5);
+
+    const open = price - change * 0.3;
+    const close = price;
+    const spread = Math.abs(close - open);
+    const high = Math.max(open, close) + spread * (0.2 + Math.random() * 0.5);
+    const low = Math.min(open, close) - spread * (0.2 + Math.random() * 0.5);
+
+    data.push({
+      date: date.toISOString().split('T')[0],
+      open: Math.round(open * 100) / 100,
+      high: Math.round(high * 100) / 100,
+      low: Math.round(low * 100) / 100,
+      close: Math.round(close * 100) / 100,
+      volume: Math.floor(Math.random() * 20000000) + 5000000,
+    });
+  }
+
+  return data;
+}
 
 // ──── Mock F&O Data Generator ─────────────────────────────────────────────
 
@@ -377,6 +495,8 @@ function generateFuturesChain(symbol: string, spotPrice: number, expiries: FnOEx
   });
 }
 
+import { scanMarket } from '../services/optionsScanner';
+
 // ──── Validation Helpers ───────────────────────────────────────────────────
 
 const VALID_FNO_TYPES = ['CE', 'PE', 'FUTURE'] as const;
@@ -530,6 +650,76 @@ router.get('/market-status', (_req: Request, res: Response) => {
   }
 });
 
+// GET /api/fno/historical-data — Fetch historical price data for backtesting
+router.get('/historical-data', async (req: Request, res: Response) => {
+  try {
+    const symbol = (req.query.symbol as string) || 'NIFTY';
+    const days = parseInt((req.query.days as string) || '365', 10);
+
+    if (days < 5 || days > 3650 || !isFinite(days)) {
+      res.status(400).json({ error: 'days must be between 5 and 3650' });
+      return;
+    }
+
+    // 1. Check cache first
+    const cached = await getCachedHistoricalData(symbol, days);
+    if (cached) {
+      res.json({ symbol, days, data: cached, source: 'cache' });
+      return;
+    }
+
+    // Spot price lookup for mock data generation
+    const spotPriceMap: Record<string, number> = {
+      NIFTY: 23456.80,
+      BANKNIFTY: 49234.10,
+      RELIANCE: 2890.50,
+      HDFCBANK: 1678.90,
+      INFY: 1567.80,
+      TCS: 3890.00,
+      SBIN: 789.50,
+      TATAMOTORS: 945.20,
+      BAJFINANCE: 6789.00,
+      ITC: 478.90,
+      SENSEX: 81234.50,
+      MIDCPNIFTY: 15670.30,
+    };
+    const spotPrice = spotPriceMap[symbol] || 1000;
+
+    // 2. Try real broker if available (non-mock mode)
+    if (!env.isMock) {
+      try {
+        const broker = await getBroker();
+        if (broker?.isConnected?.() && typeof broker.getOHLC === 'function') {
+          const ohlcData = await broker.getOHLC(symbol, '1d', days);
+          if (Array.isArray(ohlcData) && ohlcData.length > 0) {
+            const mapped: HistoricalDataPoint[] = ohlcData.map(candle => ({
+              date: new Date(candle.date).toISOString().split('T')[0],
+              open: Math.round(candle.open * 100) / 100,
+              high: Math.round(candle.high * 100) / 100,
+              low: Math.round(candle.low * 100) / 100,
+              close: Math.round(candle.close * 100) / 100,
+              volume: Math.round(candle.volume || 0),
+            }));
+
+            setCachedHistoricalData(symbol, days, mapped);
+            res.json({ symbol, days, data: mapped, source: 'broker' });
+            return;
+          }
+        }
+      } catch {
+        // Broker unavailable — fall through to mock data
+      }
+    }
+
+    // 3. Fallback: generate mock historical data
+    const data = generateMockHistoricalData(spotPrice, days);
+    setCachedHistoricalData(symbol, days, data);
+    res.json({ symbol, days, data, source: 'mock' });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch historical data' });
+  }
+});
+
 // POST /api/fno/place-order — Place F&O order
 router.post('/place-order', (req: Request, res: Response) => {
   try {
@@ -621,6 +811,139 @@ router.post('/place-order', (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     res.status(500).json({ error: (error as Error).message || 'Failed to place F&O order' });
+  }
+});
+
+// POST /api/fno/strategy/execute — Execute a multi-leg strategy (all legs to broker)
+router.post('/strategy/execute', async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId || 'default_user';
+    const { legs, spotPrice, symbol: strategySymbol, productType = 'NRML', orderType = 'MARKET' } = req.body;
+
+    if (!legs || !Array.isArray(legs) || legs.length < 1) {
+      res.status(400).json({ error: 'At least one leg is required' });
+      return;
+    }
+
+    // ── Validate each leg ────────────────────────────────────────────
+    for (let i = 0; i < legs.length; i++) {
+      const leg = legs[i];
+      if (!leg || typeof leg !== 'object') {
+        res.status(400).json({ error: `Leg at index ${i} must be an object` });
+        return;
+      }
+      const { type, action, strike, premium, quantity } = leg;
+      if (!type || !isValidFnoType(type)) {
+        res.status(400).json({ error: `Leg ${i}: invalid type "${type}"` });
+        return;
+      }
+      if (!action || !isValidAction(action)) {
+        res.status(400).json({ error: `Leg ${i}: invalid action "${action}"` });
+        return;
+      }
+      if (strike === undefined || strike === null || !isValidNumber(strike) || strike < 0) {
+        res.status(400).json({ error: `Leg ${i}: strike must be a non-negative number` });
+        return;
+      }
+      if (premium === undefined || premium === null || !isValidNumber(premium)) {
+        res.status(400).json({ error: `Leg ${i}: premium must be a number` });
+        return;
+      }
+      if (quantity === undefined || quantity === null || !isValidNumber(quantity) || !Number.isInteger(quantity) || quantity < 1) {
+        res.status(400).json({ error: `Leg ${i}: quantity must be a positive integer` });
+        return;
+      }
+    }
+
+    const symbol = strategySymbol || 'NIFTY';
+
+    // ── Execute each leg via broker ───────────────────────────────────
+    const executionResults: {
+      legIndex: number;
+      legLabel: string;
+      success: boolean;
+      orderId?: string;
+      message: string;
+      status?: string;
+      totalQuantity?: number;
+      totalValue?: number;
+    }[] = [];
+
+    for (let i = 0; i < legs.length; i++) {
+      const leg = legs[i];
+      const { type, action, strike, premium, quantity } = leg;
+
+      const transactionType = action === 'buy' ? 'BUY' : 'SELL';
+      const legLabel = `${action === 'buy' ? '▲' : '▼'}${type} ${strike}`;
+
+      try {
+        if (!env.isMock) {
+          // Try real broker
+          const broker = await getBroker();
+          const orderPayload = {
+            symbol: type === 'FUTURE' ? symbol : `${symbol}${new Date().getTime()}`,
+            exchange: 'NFO' as const,
+            transactionType: transactionType as 'BUY' | 'SELL',
+            quantity: quantity * (leg.lotSize || 50),
+            price: premium,
+            productType: (productType || 'NRML') as 'CNC' | 'MIS' | 'NRML',
+            orderType: (orderType || 'MARKET') as 'LIMIT' | 'MARKET' | 'SL' | 'SLM',
+          };
+          const brokerResult = await broker.placeOrder(orderPayload);
+          executionResults.push({
+            legIndex: i,
+            legLabel,
+            success: brokerResult.status !== 'rejected',
+            orderId: brokerResult.id,
+            message: brokerResult.message,
+            status: brokerResult.status,
+            totalQuantity: quantity * (leg.lotSize || 50),
+            totalValue: premium * quantity * (leg.lotSize || 50),
+          });
+        } else {
+          // Mock execution
+          const lotSize = leg.lotSize || 50;
+          const totalQuantity = quantity * lotSize;
+          const totalValue = premium * totalQuantity;
+          const orderId = `FNO_${Date.now()}_${Math.random().toString(36).slice(2, 8).toUpperCase()}_L${i}`;
+          executionResults.push({
+            legIndex: i,
+            legLabel,
+            success: true,
+            orderId,
+            message: `${action.toUpperCase()} ${type} ${strike}: ${quantity} lot(s) @ ₹${premium}`,
+            status: 'confirmed',
+            totalQuantity,
+            totalValue,
+          });
+        }
+      } catch (error: any) {
+        executionResults.push({
+          legIndex: i,
+          legLabel,
+          success: false,
+          message: `Execution failed: ${error.message}`,
+          status: 'rejected',
+        });
+      }
+    }
+
+    // ── Summary ────────────────────────────────────────────────────────
+    const successful = executionResults.filter(r => r.success).length;
+    const failed = executionResults.filter(r => !r.success).length;
+    const totalValue = executionResults.reduce((s, r) => s + (r.totalValue || 0), 0);
+
+    res.json({
+      strategyName: req.body.name || 'Custom Strategy',
+      totalLegs: legs.length,
+      successful,
+      failed,
+      totalValue,
+      legs: executionResults,
+      executedAt: new Date().toISOString(),
+    });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to execute strategy' });
   }
 });
 
@@ -761,6 +1084,54 @@ router.post('/strategy/analyze', (req: Request, res: Response) => {
   }
 });
 
+// GET /api/fno/scanner?symbol=NIFTY&expiry=<ISO_DATE>
+router.get('/scanner', (req: Request, res: Response) => {
+  try {
+    const symbol = (req.query.symbol as string) || 'NIFTY';
+    const expiry = (req.query.expiry as string);
+
+    // Spot price lookup
+    const spotPriceMap: Record<string, number> = {
+      NIFTY: 23456.80,
+      BANKNIFTY: 49234.10,
+      RELIANCE: 2890.50,
+      HDFCBANK: 1678.90,
+      INFY: 1567.80,
+      TCS: 3890.00,
+      SBIN: 789.50,
+      TATAMOTORS: 945.20,
+      BAJFINANCE: 6789.00,
+      ITC: 478.90,
+    };
+    const spotPrice = spotPriceMap[symbol] || 1000;
+
+    // Validate expiry if provided — must happen before fallback generation
+    if (expiry && !isValidDateString(expiry)) {
+      res.status(400).json({
+        error: 'Invalid expiry date format. Use ISO 8601 date string (e.g. 2026-07-02T00:00:00.000Z)',
+      });
+      return;
+    }
+
+    // Resolve expiry
+    let targetExpiry = expiry;
+    if (!targetExpiry) {
+      const expiries = generateExpiries();
+      targetExpiry = expiries[0]?.date || getWeeklyExpiry().toISOString();
+    }
+
+    // Generate the option chain
+    const chain = generateOptionChain(symbol, targetExpiry, spotPrice);
+
+    // Run the scanner
+    const result = scanMarket(chain, symbol);
+
+    res.json(result);
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to scan options market' });
+  }
+});
+
 // GET /api/fno/prebuilt-strategies
 router.get('/prebuilt-strategies', (_req: Request, res: Response) => {
   try {
@@ -875,6 +1246,281 @@ router.get('/prebuilt-strategies', (_req: Request, res: Response) => {
     res.json(strategies);
   } catch (error: unknown) {
     res.status(500).json({ error: (error as Error).message || 'Failed to fetch prebuilt strategies' });
+  }
+});
+
+// ──── Strategy Persistence (In-Memory Storage) ─────────────────────────────
+
+interface PersistedStrategy {
+  id: string;
+  name: string;
+  description: string;
+  symbol?: string;
+  createdAt: string;
+  updatedAt: string;
+  spotPrice: number;
+  legs: {
+    type: string;
+    action: string;
+    strike: number;
+    premium: number;
+    quantity: number;
+    lotSize: number;
+    expiry: string;
+  }[];
+  backtestSnapshot?: {
+    winRate: number;
+    sharpeRatio: number;
+    maxDrawdownPercent: number;
+    profitFactor: number;
+    totalPnl: number;
+  };
+  isShared: boolean;
+  shareId?: string;
+  tags?: string[];
+  userId: string;
+}
+
+const strategyStore: PersistedStrategy[] = [];
+
+function generateStrategyId(): string {
+  return `strat_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+// GET /api/fno/strategies — List all saved strategies for current user
+router.get('/strategies', (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId || 'default_user';
+    const strategies = strategyStore
+      .filter(s => s.userId === userId)
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    res.json(strategies);
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch saved strategies' });
+  }
+});
+
+// POST /api/fno/strategies — Save a new strategy
+router.post('/strategies', (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId || 'default_user';
+    const { name, description, symbol, spotPrice, legs, backtestSnapshot, tags } = req.body;
+
+    if (!name || typeof name !== 'string') {
+      res.status(400).json({ error: 'name is required' });
+      return;
+    }
+    if (!legs || !Array.isArray(legs) || legs.length === 0) {
+      res.status(400).json({ error: 'At least one leg is required' });
+      return;
+    }
+    if (!isValidNumber(spotPrice) || spotPrice <= 0) {
+      res.status(400).json({ error: 'spotPrice must be a positive number' });
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const strategy: PersistedStrategy = {
+      id: generateStrategyId(),
+      name,
+      description: description || '',
+      symbol: symbol || 'NIFTY',
+      createdAt: now,
+      updatedAt: now,
+      spotPrice,
+      legs,
+      backtestSnapshot,
+      isShared: false,
+      tags: Array.isArray(tags) ? tags : [],
+      userId,
+    };
+
+    strategyStore.push(strategy);
+    res.status(201).json(strategy);
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to save strategy' });
+  }
+});
+
+// PUT /api/fno/strategies/:id — Update an existing strategy
+router.put('/strategies/:id', (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId || 'default_user';
+    const { id } = req.params;
+    const index = strategyStore.findIndex(s => s.id === id && s.userId === userId);
+
+    if (index === -1) {
+      res.status(404).json({ error: 'Strategy not found' });
+      return;
+    }
+
+    const updates = req.body;
+
+    // Validate legs if provided
+    if (updates.legs !== undefined) {
+      if (!Array.isArray(updates.legs) || updates.legs.length === 0) {
+        res.status(400).json({ error: 'At least one leg is required' });
+        return;
+      }
+
+      for (let i = 0; i < updates.legs.length; i++) {
+        const leg = updates.legs[i];
+
+        if (!leg || typeof leg !== 'object') {
+          res.status(400).json({ error: `Leg at index ${i} must be an object` });
+          return;
+        }
+
+        const { type, strike, action, premium, quantity } = leg;
+
+        if (!type || !isValidFnoType(type)) {
+          res.status(400).json({
+            error: `Leg ${i}: invalid type "${type}". Must be one of: ${VALID_FNO_TYPES.join(', ')}`,
+          });
+          return;
+        }
+
+        if (!action || !isValidAction(action)) {
+          res.status(400).json({
+            error: `Leg ${i}: invalid action "${action}". Must be one of: ${VALID_ACTIONS.join(', ')}`,
+          });
+          return;
+        }
+
+        if (strike === undefined || strike === null || !isValidNumber(strike) || strike < 0) {
+          res.status(400).json({
+            error: `Leg ${i}: strike must be a non-negative number`,
+          });
+          return;
+        }
+
+        if (premium === undefined || premium === null || !isValidNumber(premium)) {
+          res.status(400).json({
+            error: `Leg ${i}: premium must be a number`,
+          });
+          return;
+        }
+
+        if (quantity === undefined || quantity === null || !isValidNumber(quantity) || !Number.isInteger(quantity) || quantity < 1) {
+          res.status(400).json({
+            error: `Leg ${i}: quantity must be a positive integer`,
+          });
+          return;
+        }
+      }
+    }
+
+    strategyStore[index] = {
+      ...strategyStore[index],
+      ...updates,
+      id,
+      userId,
+      updatedAt: new Date().toISOString(),
+    };
+
+    res.json(strategyStore[index]);
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to update strategy' });
+  }
+});
+
+// GET /api/fno/strategies/shared/:shareId — Load a shared strategy by share ID (must be BEFORE :id)
+router.get('/strategies/shared/:shareId', (req: Request, res: Response) => {
+  try {
+    const { shareId } = req.params;
+    const strategy = strategyStore.find(s => s.shareId === shareId && s.isShared);
+
+    if (!strategy) {
+      res.status(404).json({ error: 'Shared strategy not found or has been unshared' });
+      return;
+    }
+
+    const { userId, ...publicStrategy } = strategy;
+    res.json(publicStrategy);
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to load shared strategy' });
+  }
+});
+
+// GET /api/fno/strategies/:id — Get a single strategy by ID
+router.get('/strategies/:id', (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId || 'default_user';
+    const { id } = req.params;
+    const strategy = strategyStore.find(s => s.id === id && s.userId === userId);
+
+    if (!strategy) {
+      res.status(404).json({ error: 'Strategy not found' });
+      return;
+    }
+
+    res.json(strategy);
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch strategy' });
+  }
+});
+
+// DELETE /api/fno/strategies/:id — Delete a saved strategy
+router.delete('/strategies/:id', (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId || 'default_user';
+    const { id } = req.params;
+    const index = strategyStore.findIndex(s => s.id === id && s.userId === userId);
+
+    if (index === -1) {
+      res.status(404).json({ error: 'Strategy not found' });
+      return;
+    }
+
+    strategyStore.splice(index, 1);
+    res.json({ success: true });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to delete strategy' });
+  }
+});
+
+// POST /api/fno/strategies/:id/share — Share a strategy publicly
+router.post('/strategies/:id/share', (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId || 'default_user';
+    const { id } = req.params;
+    const strategy = strategyStore.find(s => s.id === id && s.userId === userId);
+
+    if (!strategy) {
+      res.status(404).json({ error: 'Strategy not found' });
+      return;
+    }
+
+    if (!strategy.shareId) {
+      strategy.shareId = `share_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    }
+    strategy.isShared = true;
+    strategy.updatedAt = new Date().toISOString();
+
+    const shareUrl = `https://toroloom.app/strategies/shared/${strategy.shareId}`;
+    res.json({ shareId: strategy.shareId, shareUrl });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to share strategy' });
+  }
+});
+
+// POST /api/fno/strategies/:id/unshare — Unshare a strategy
+router.post('/strategies/:id/unshare', (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId || 'default_user';
+    const { id } = req.params;
+    const strategy = strategyStore.find(s => s.id === id && s.userId === userId);
+
+    if (!strategy) {
+      res.status(404).json({ error: 'Strategy not found' });
+      return;
+    }
+
+    strategy.isShared = false;
+    strategy.updatedAt = new Date().toISOString();
+    res.json({ success: true });
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to unshare strategy' });
   }
 });
 

@@ -15,8 +15,8 @@
 
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
-import { riskEngine, OrderActionType, RiskLimits } from '../services/riskEngine';
-
+import { riskEngine } from '../services/riskEngine/RiskEngine';
+import { OrderActionType, RiskLimits } from '../services/riskEngine/types';
 const router = Router();
 
 // All risk routes require authentication

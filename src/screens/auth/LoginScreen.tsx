@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -98,9 +98,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             onSubmitEditing={handleLogin}
           />
 
-          <TouchableOpacity style={styles.forgotPassword}>
+          <Pressable style={styles.forgotPassword}>
             <Text style={styles.forgotText}>{t('auth.forgotPassword')}</Text>
-          </TouchableOpacity>
+          </Pressable>
 
           <Button
             title={t('auth.login')}
@@ -117,24 +117,24 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           </View>
 
           <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialBtn}>
+            <Pressable style={styles.socialBtn}>
               <Ionicons name="logo-google" size={24} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialBtn}>
+            </Pressable>
+            <Pressable style={styles.socialBtn}>
               <Ionicons name="logo-apple" size={24} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialBtn}>
+            </Pressable>
+            <Pressable style={styles.socialBtn}>
               <Ionicons name="logo-facebook" size={24} color={colors.text} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
 
         {/* Sign Up Link */}
         <View style={styles.signupSection}>
           <Text style={styles.noAccount}>{t('auth.noAccount')}</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+          <Pressable onPress={() => navigation.navigate('Signup')}>
             <Text style={styles.signupLink}>{t('auth.signup')}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

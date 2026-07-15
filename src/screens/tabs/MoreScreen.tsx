@@ -27,10 +27,24 @@ const menuItems = [
     { icon: 'document-text', label: 'Trade History', color: '#FFC107', screen: 'TradeHistory' },
     { icon: 'clipboard', label: 'Open Orders', color: '#FF9800', screen: 'OpenOrders' },
     { icon: 'analytics', label: 'Reports', color: '#FF6B6B', screen: 'Reports' },
+    { icon: 'flask', label: 'Monte Carlo', color: '#6C63FF', screen: 'MonteCarlo' },
+    { icon: 'grid', label: 'Correlation', color: '#8B5CF6', screen: 'CorrelationMatrix' },
+    { icon: 'shuffle', label: 'Rebalance', color: '#FF6B00', screen: 'PortfolioRebalancing' },
+    { icon: 'analytics', label: 'Factor Analysis', color: '#FFC107', screen: 'FactorAnalysis' },
+    { icon: 'trending-up', label: 'Strategy Perf.', color: '#00C853', screen: 'StrategyPerformance' },
+    { icon: 'globe', label: 'US Markets', color: '#3B82F6', screen: 'USMarkets' },
+    { icon: 'pricetags', label: 'Bonds', color: '#00E676', screen: 'BondDashboard' },
+    { icon: 'cash', label: 'Currency', color: '#0052CC', screen: 'CurrencyMarkets' },
+    { icon: 'leaf', label: 'Tax Harvesting', color: '#00E676', screen: 'TaxHarvesting' },
+    { icon: 'cash', label: 'Dividends', color: '#00E676', screen: 'DividendTracker' },
+    { icon: 'flame', label: 'Commodities', color: '#FF6B00', screen: 'CommodityMarkets' },
+    { icon: 'pulse', label: 'Futures Curve', color: '#6C63FF', screen: 'FuturesCurve' },
   ]},
   { section: 'Learn & Grow', items: [
     { icon: 'school', label: 'Courses', color: '#00C853', screen: 'Learn' },
     { icon: 'chatbubbles', label: 'Community', color: '#6C63FF', screen: 'Community' },
+    { icon: 'wallet', label: 'Revenue', color: '#FFC107', screen: 'RevenueDashboard' },
+    { icon: 'bar-chart', label: 'Community Polls', color: '#8B5CF6', screen: 'Polls' },
     { icon: 'chatbox-ellipses', label: 'Messages', color: '#10B981', screen: 'ChatList' },
     { icon: 'bulb', label: 'AI Insights', color: '#FFC107', screen: 'AIInsights' },
     { icon: 'chatbubble-ellipses', label: 'AI Assistant', color: '#3B82F6', screen: 'AIChat' },
@@ -43,18 +57,28 @@ const menuItems = [
   ]},
   { section: 'Account', items: [
     { icon: 'person', label: 'Profile & KYC', color: '#00D2FF', screen: 'Profile' },
+    { icon: 'gift', label: 'Refer & Earn', color: '#6C63FF', screen: 'Referral' },
     { icon: 'diamond', label: 'Go Premium', color: '#10B981', screen: 'Subscription' },
     { icon: 'receipt', label: 'Payment History', color: '#6C63FF', screen: 'PaymentHistory' },
     { icon: 'notifications', label: 'Notifications', color: '#FF6B6B', screen: 'Notifications' },
     { icon: 'notifications', label: 'Portfolio Alerts', color: '#FFC107', screen: 'PortfolioAlerts' },
     { icon: 'settings', label: 'Risk Settings', color: '#6E6E9A', screen: 'Settings' },
+    { icon: 'grid', label: 'Home Widget', color: '#3B82F6', screen: 'WidgetSettings' },
     { icon: 'link', label: 'Connect Broker', color: '#FF6B00', screen: 'BrokerConnect' },
     { icon: 'paper-plane', label: 'Telegram Alerts', color: '#0088CC', screen: 'TelegramConnect' },
     { icon: 'compass', label: 'Replay Tour', color: '#8B5CF6', screen: '__onboarding' },
     { icon: 'volume-high', label: 'Voice Settings', color: '#00D2FF', screen: 'VoiceSettings' },
+    { icon: 'brain', label: 'AI Settings', color: '#8B5CF6', screen: 'AISettings' },
     { icon: 'shield-checkmark', label: 'Security', color: '#FF6B6B', screen: 'SecuritySettings' },
     { icon: 'help-circle', label: 'Help & Support', color: '#00C853', screen: 'Help' },
     { icon: 'settings', label: 'Tenant Config', color: '#8B5CF6', screen: 'TenantConfig' },
+    { icon: 'flask', label: 'Feature Flags', color: '#8B5CF6', screen: 'FeatureFlags' },
+    { icon: 'flask', label: 'A/B Tests', color: '#FF6B6B', screen: 'ABTestRunner' },
+    { icon: 'accessibility', label: 'Accessibility', color: '#8B5CF6', screen: 'Accessibility' },
+    { icon: 'image', label: 'Image Opt.', color: '#8B5CF6', screen: 'CDNOptimization' },
+    { icon: 'phone-landscape', label: 'Landscape', color: '#06B6D4', screen: 'LandscapeMode' },
+    { icon: 'key', label: 'API Keys', color: '#3B82F6', screen: 'ApiKeys' },
+    { icon: 'link', label: 'Webhooks', color: '#10B981', screen: 'Webhooks' },
   ]},
 ];
 
@@ -63,6 +87,7 @@ const quickActions = [
   { icon: 'arrow-up-circle', label: 'Withdraw', gradient: GRADIENTS.danger },
   { icon: 'swap-horizontal', label: 'Transfer', gradient: GRADIENTS.primary },
   { icon: 'qr-code', label: 'UPI', gradient: GRADIENTS.accent },
+  { icon: 'moon', label: 'Dark Mode', gradient: ['#3B82F6', '#1D4ED8'] as const, screen: 'DarkMode' },
 ];
 
 export default function MoreScreen({ navigation }: any) {
@@ -116,6 +141,9 @@ export default function MoreScreen({ navigation }: any) {
         break;        case 'UPI':
           navigation.navigate('UPI');
           break;
+        case 'Dark Mode':
+          navigation.navigate('DarkMode');
+          break;
         default:
           Alert.alert(
             label,
@@ -138,7 +166,7 @@ export default function MoreScreen({ navigation }: any) {
             <SkeletonBlock width="100%" height={56} borderRadius={BORDER_RADIUS.md} />
             <View style={{ height: SPACING.xl }} />
             {[1, 2, 3].map(i => (
-              <View key={i}>
+              <View key={`skel_more_${i}`}>
                 <SkeletonBlock width="25%" height={12} />
                 <View style={{ height: SPACING.md }} />
                 <View style={{ flexDirection: 'row', gap: SPACING.md }}>
@@ -206,7 +234,7 @@ export default function MoreScreen({ navigation }: any) {
         {/* Quick Actions — Glass Pillars */}
         <View style={styles.quickActionsRow}>
           {quickActions.map((action, i) => (
-            <Animated.View key={i} style={qaStyles[i]}>
+            <Animated.View key={`qa_${i}`} style={qaStyles[i]}>
               <AnimatedPressable onPress={() => handleQuickAction(action.label)} haptic="light" scaleTo={0.92}>
                 <View style={styles.qaCard}>
                   <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={action.gradient[0]} />
@@ -241,13 +269,13 @@ export default function MoreScreen({ navigation }: any) {
 
         {/* Menu Sections */}
         {menuItems.map((section, idx) => (
-          <Animated.View key={idx} style={[styles.menuCardSection, menuSectionStyles[idx]]}>
+          <Animated.View key={`section_${idx}`} style={[styles.menuCardSection, menuSectionStyles[idx]]}>
             <View style={styles.menuCard}>
               <Text style={styles.menuSectionTitle}>{section.section}</Text>
               <View style={styles.menuGrid}>
                 {section.items.map((item, i) => (
                   <AnimatedPressable
-                    key={i}
+                    key={`mi_${i}`}
                     onPress={() => {
                       if (item.screen === '__onboarding') {
                         Alert.alert(

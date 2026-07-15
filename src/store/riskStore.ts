@@ -20,7 +20,7 @@
 
 import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
-import { api } from '../services/api';
+import { api } from '../services/api/client';
 import { getActiveWS } from '../services/wsRegistry';
 import { usePortfolioStore } from './portfolioStore';
 import { log } from '../utils/logger';

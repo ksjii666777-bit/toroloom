@@ -24,7 +24,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   AppState,
   Platform,
 } from 'react-native';
@@ -85,7 +85,7 @@ export default function BiometricUnlockOverlay() {
       pulseScale.value = withTiming(1);
       pulseOpacity.value = withTiming(1);
     }
-  }, [visible, isAuthenticating]);
+  }, [visible, isAuthenticating, pulseScale, pulseOpacity]);
 
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseScale.value }],
@@ -170,7 +170,7 @@ export default function BiometricUnlockOverlay() {
     }
 
     return () => subscription.remove();
-  }, [enabled, isUnlocked, biometricLabel]);
+  }, [enabled, isUnlocked, biometricLabel, lock, unlock]);
 
   if (!visible || !enabled) return null;
 
@@ -203,10 +203,10 @@ export default function BiometricUnlockOverlay() {
 
         {/* Biometric Icon (pulsing) */}
         <Animated.View style={[styles.biometricContainer, pulseStyle]}>
-          <TouchableOpacity
+          <Pressable
             onPress={attemptAuth}
             disabled={isAuthenticating}
-            activeOpacity={0.7}
+            style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}
           >
             <View style={styles.biometricIconWrap}>
               <Ionicons
@@ -215,7 +215,7 @@ export default function BiometricUnlockOverlay() {
                 color={colors.primary}
               />
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
 
         <Text style={styles.promptText}>
@@ -242,17 +242,17 @@ export default function BiometricUnlockOverlay() {
         {/* Retry / Use Passcode buttons */}
         <View style={styles.buttonRow}>
           {error && (
-            <TouchableOpacity
+            <Pressable
               style={[styles.actionBtn, { backgroundColor: colors.primary }]}
               onPress={attemptAuth}
               disabled={isAuthenticating}
             >
               <Ionicons name="refresh" size={18} color={colors.white} />
               <Text style={styles.actionBtnText}>Retry</Text>
-            </TouchableOpacity>
+            </Pressable>
           )}
 
-          <TouchableOpacity
+          <Pressable
             style={[styles.actionBtn, { backgroundColor: colors.bgCard }]}
             onPress={attemptAuth}
           >
@@ -260,7 +260,7 @@ export default function BiometricUnlockOverlay() {
             <Text style={[styles.actionBtnText, { color: colors.text }]}>
               Use Passcode
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {Platform.OS === 'ios' && (

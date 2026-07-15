@@ -4,12 +4,12 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Switch,
   Alert,
   Dimensions,
   Modal,
   TextInput,
+  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -356,10 +356,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
             <View style={styles.alertBody}>
               {/* Stock info & change button for holding-specific alerts */}
               {isHoldingKind && (
-                <TouchableOpacity
-                  style={styles.stockSelector}
-                  onPress={() => openStockPicker(rule.kind, rule.id)}
-                >
+                <Pressable onPress={() => openStockPicker(rule.kind, rule.id)}>
                   <View style={styles.stockBadgeRow}>
                     {rule.symbols?.length ? (
                       rule.symbols.length <= 3
@@ -388,18 +385,15 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                     )}
                   </View>
                   <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-                </TouchableOpacity>
+                </Pressable>
               )}
 
               <View style={styles.thresholdRow}>
                 <Text style={styles.thresholdLabel}>Threshold</Text>
                 <View style={styles.thresholdControls}>
-                  <TouchableOpacity
-                    style={styles.thresholdBtn}
-                    onPress={() => handleAdjustThreshold(rule.id, -config.step, rule.kind)}
-                  >
-                    <Ionicons name="remove" size={18} color={colors.primary} />
-                  </TouchableOpacity>
+                <Pressable onPress={() => handleAdjustThreshold(rule.id, -config.step, rule.kind)}>
+                  <Ionicons name="remove" size={18} color={colors.primary} />
+                </Pressable>
                   <View style={styles.thresholdValueWrap}>
                     <Text style={[styles.thresholdValue, { color: config.color }]}>
                       {config.kind === 'portfolio_pnl_abs'
@@ -407,20 +401,14 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                         : `${rule.threshold}${config.unit}`}
                     </Text>
                   </View>
-                  <TouchableOpacity
-                    style={styles.thresholdBtn}
-                    onPress={() => handleAdjustThreshold(rule.id, config.step, rule.kind)}
-                  >
+                  <Pressable onPress={() => handleAdjustThreshold(rule.id, config.step, rule.kind)}>
                     <Ionicons name="add" size={18} color={colors.primary} />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               </View>
             </View>
             <View style={styles.cardActions}>
-              <TouchableOpacity
-                style={styles.badgeBtn}
-                onPress={() => updatePortfolioAlertRule(rule.id, { badge: !rule.badge })}
-              >
+    <Pressable onPress={() => updatePortfolioAlertRule(rule.id, { badge: !rule.badge })}>
                 <Ionicons
                   name={rule.badge ? 'shield-checkmark' : 'shield-outline'}
                   size={14}
@@ -429,21 +417,15 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                 <Text style={[styles.badgeText, { color: rule.badge ? '#6C63FF' : colors.textMuted }]}>
                   Badge
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.testBtn}
-                onPress={() => handleTestAlert(rule)}
-              >
+              </Pressable>
+    <Pressable onPress={() => handleTestAlert(rule)}>
                 <Ionicons name="flask-outline" size={14} color={colors.primary} />
                 <Text style={styles.testText}>Test Alert</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.removeBtn}
-                onPress={() => handleRemoveRule(rule.id, config.label)}
-              >
+              </Pressable>
+    <Pressable onPress={() => handleRemoveRule(rule.id, rule.label)}>
                 <Ionicons name="trash-outline" size={14} color={colors.danger} />
                 <Text style={styles.removeText}>Remove</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </>
         )}
@@ -460,9 +442,9 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
       {/* Header */}
       <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={styles.headerInfo}>
             <Text style={styles.title}>Portfolio Alerts</Text>
             <Text style={styles.subtitle}>Real-time P&L and holding movement alerts</Text>
@@ -494,12 +476,8 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
             {ALERT_KINDS.map((config) => {
               const exists = portfolioAlertRules.some(r => r.kind === config.kind && r.enabled);
               return (
-                <TouchableOpacity
-                  key={config.kind}
-                  style={[styles.addCard, exists && styles.addCardDisabled]}
-                  onPress={() => handleAddRule(config.kind)}
+                <Pressable
                   disabled={exists}
-                  activeOpacity={exists ? 1 : 0.7}
                 >
                   <View style={[styles.addCardIcon, { backgroundColor: config.color + '20' }]}>
                     <Ionicons name={config.icon as keyof typeof Ionicons.glyphMap} size={24} color={exists ? colors.textMuted : config.color} />
@@ -514,7 +492,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                       <Text style={styles.addedBadgeText}>Active</Text>
                     </View>
                   )}
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
           </View>
@@ -535,10 +513,10 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
               <Text style={styles.sectionTitle}>
                 Trigger History ({alertTriggerHistory.length})
               </Text>
-              <TouchableOpacity onPress={clearAlertTriggerHistory} style={styles.historyClearBtn}>
+              <Pressable onPress={clearAlertTriggerHistory} style={styles.historyClearBtn}>
                 <Ionicons name="trash-outline" size={14} color={colors.danger} />
                 <Text style={styles.historyClearText}>Clear</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
             {alertTriggerHistory.slice(0, 50).map((entry, i) => {
               const config = ALERT_KINDS.find(c => c.kind === entry.kind);
@@ -603,11 +581,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
         {/* ── Quiet Hours ──────────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quiet Hours</Text>
-          <TouchableOpacity
-            style={styles.quietHoursCard}
-            onPress={() => navigation.navigate('NotificationPreferences')}
-            activeOpacity={0.7}
-          >
+          <Pressable style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>
             <View style={[styles.quietHoursIcon, {
               backgroundColor: isInQuietHours(preferences)
                 ? '#6C63FF20'
@@ -632,7 +606,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* ── Quick-Add Defaults ──────────────────────── */}
@@ -645,27 +619,15 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                 <Text style={styles.quickAddDesc}>Default % for long-press day gain alert</Text>
               </View>
               <View style={styles.quickAddControls}>
-                <TouchableOpacity
-                  style={styles.quickAddBtn}
-                  onPress={() => {
-                    const next = Math.max(2, quickAddDayGainThreshold - 1);
-                    setQuickAddThreshold('day_gain', next);
-                  }}
-                >
+                <Pressable onPress={() => { const next = Math.max(2, quickAddDayGainThreshold - 1); setQuickAddThreshold('day_gain', next); }}>
                   <Ionicons name="remove" size={16} color={colors.primary} />
-                </TouchableOpacity>
+                </Pressable>
                 <View style={styles.quickAddValueWrap}>
                   <Text style={[styles.quickAddValue, { color: '#FFC107' }]}>{quickAddDayGainThreshold}%</Text>
                 </View>
-                <TouchableOpacity
-                  style={styles.quickAddBtn}
-                  onPress={() => {
-                    const next = Math.min(50, quickAddDayGainThreshold + 1);
-                    setQuickAddThreshold('day_gain', next);
-                  }}
-                >
+                <Pressable onPress={() => { const next = Math.min(50, quickAddDayGainThreshold + 1); setQuickAddThreshold('day_gain', next); }}>
                   <Ionicons name="add" size={16} color={colors.primary} />
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
             <View style={styles.quickAddDivider} />
@@ -675,27 +637,15 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                 <Text style={styles.quickAddDesc}>Default % for long-press P&L alert</Text>
               </View>
               <View style={styles.quickAddControls}>
-                <TouchableOpacity
-                  style={styles.quickAddBtn}
-                  onPress={() => {
-                    const next = Math.max(5, quickAddPnLThreshold - 5);
-                    setQuickAddThreshold('pnl', next);
-                  }}
-                >
+                <Pressable onPress={() => { const next = Math.max(5, quickAddPnLThreshold - 5); setQuickAddThreshold('pnl', next); }}>
                   <Ionicons name="remove" size={16} color={colors.primary} />
-                </TouchableOpacity>
+                </Pressable>
                 <View style={styles.quickAddValueWrap}>
                   <Text style={[styles.quickAddValue, { color: '#00C853' }]}>{quickAddPnLThreshold}%</Text>
                 </View>
-                <TouchableOpacity
-                  style={styles.quickAddBtn}
-                  onPress={() => {
-                    const next = Math.min(100, quickAddPnLThreshold + 5);
-                    setQuickAddThreshold('pnl', next);
-                  }}
-                >
+                <Pressable onPress={() => { const next = Math.min(100, quickAddPnLThreshold + 5); setQuickAddThreshold('pnl', next); }}>
                   <Ionicons name="add" size={16} color={colors.primary} />
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
           </View>
@@ -721,8 +671,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                 </Text>
               </View>
               <View style={styles.modalHeaderActions}>
-                <TouchableOpacity
-                  style={styles.modalActionBtn}
+                <Pressable
                   onPress={() => {
                     // Select all selectable (non-already-alerted) holdings
                     const activeKind = pendingKind
@@ -741,22 +690,17 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                         .map(h => h.stockId)
                     );
                   }}
-                  activeOpacity={0.7}
                 >
                   <Ionicons name="checkbox-outline" size={16} color={colors.primary} />
                   <Text style={styles.modalActionText}>All</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalActionBtn}
-                  onPress={() => setSelectedStockIds([])}
-                  activeOpacity={0.7}
-                >
+                </Pressable>
+                <Pressable onPress={() => setSelectedStockIds([])}>
                   <Ionicons name="remove-circle-outline" size={16} color={colors.textMuted} />
                   <Text style={[styles.modalActionText, { color: colors.textMuted }]}>None</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setStockPickerVisible(false)}>
+                </Pressable>
+                <Pressable onPress={() => setStockPickerVisible(false)}>
                   <Ionicons name="close" size={24} color={colors.text} />
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
 
@@ -773,9 +717,9 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                 autoCorrect={false}
               />
               {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchClearBtn}>
+                <Pressable onPress={() => setSearchQuery('')} style={styles.searchClearBtn}>
                   <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-                </TouchableOpacity>
+                </Pressable>
               )}
             </View>
 
@@ -806,126 +750,47 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                 }
 
                 // Compute which stockIds already have active alerts of the current kind
-                // Compute which stockIds already have active alerts of the current kind
-                const activeKind = pendingKind
-                  || (stockPickerForRule
-                    ? portfolioAlertRules.find(r => r.id === stockPickerForRule)?.kind
-                    : null);
-                const alertedStockIds = new Set<string>();
+                const activeKind = pendingKind || (stockPickerForRule
+                  ? portfolioAlertRules.find(r => r.id === stockPickerForRule)?.kind
+                  : null);
+                const alertedIds = new Set<string>();
                 if (activeKind) {
                   portfolioAlertRules
-                    .filter(r =>
-                      r.id !== stockPickerForRule
-                      && r.kind === activeKind
-                      && r.enabled
-                      && r.stockIds?.length
-                    )
-                    .forEach(r => r.stockIds!.forEach(sid => alertedStockIds.add(sid)));
+                    .filter(r => r.id !== stockPickerForRule && r.kind === activeKind && r.enabled && r.stockIds?.length)
+                    .forEach(r => r.stockIds!.forEach(sid => alertedIds.add(sid)));
                 }
 
-                return filteredHoldings.map(h => {
-                  const isSelected = selectedStockIds.includes(h.stockId);
-                  const isAlreadyAlerted = alertedStockIds.has(h.stockId);
-                  const canSelect = !isAlreadyAlerted;
-
-                  return (
-                    <TouchableOpacity
-                      key={h.id}
-                      style={[
-                        styles.modalItem,
-                        isSelected && { backgroundColor: colors.primary + '15' },
-                        isAlreadyAlerted && styles.modalItemDimmed,
-                      ]}
-                      onPress={() => {
-                        if (canSelect) toggleStockSelection(h.stockId);
-                      }}
-                      activeOpacity={canSelect ? 0.7 : 1}
-                    >
-                      {/* Checkbox Circle */}
-                      <View
-                        style={[
-                          styles.checkbox,
-                          isAlreadyAlerted && styles.checkboxDisabled,
-                          {
-                            borderColor: isSelected
-                              ? colors.primary
-                              : isAlreadyAlerted
-                                ? colors.textMuted + '40'
-                                : colors.border,
-                            backgroundColor: isSelected
-                              ? colors.primary
-                              : isAlreadyAlerted
-                                ? colors.textMuted + '15'
-                                : 'transparent',
-                          },
-                        ]}
-                      >
-                        {isSelected && (
-                          <Ionicons name="checkmark" size={14} color="#fff" />
-                        )}
-                        {isAlreadyAlerted && !isSelected && (
-                          <Ionicons name="notifications-off" size={12} color={colors.textMuted + '60'} />
-                        )}
-                      </View>
-
-                      <View style={styles.modalItemInfo}>
-                        <View style={styles.modalItemSymbolRow}>
-                          <Text style={[
-                            styles.modalItemSymbol,
-                            isAlreadyAlerted && { color: colors.textMuted },
-                          ]}>
-                            {h.symbol}
-                          </Text>
-                          {isAlreadyAlerted && (
-                            <View style={styles.alreadyAlertedBadge}>
-                              <Text style={styles.alreadyAlertedText}>Alert active</Text>
-                            </View>
-                          )}
-                        </View>
-                        <Text style={styles.modalItemName} numberOfLines={1}>
-                          {h.name}
-                        </Text>
-                      </View>
-                      <View style={styles.modalItemDetails}>
-                        <Text style={styles.modalItemQty}>{h.quantity} shares</Text>
-                        <Text
-                          style={[
-                            styles.modalItemPnl,
-                            { color: h.pnl >= 0 ? colors.marketUp : colors.marketDown },
-                          ]}
-                        >
-                          {h.pnl >= 0 ? '+' : ''}{formatCurrency(h.pnl, true)}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                });
+                return filteredHoldings.filter(h => !alertedIds.has(h.stockId)).map(h => (
+                  <Pressable key={h.stockId} onPress={() => toggleStockSelection(h.stockId)} style={styles.modalItem}>
+                    <View style={styles.modalItemInfo}>
+                      <Text style={[styles.modalItemSymbol, { color: colors.text }]}>{h.symbol}</Text>
+                      <Text style={[styles.modalItemName, { color: colors.textMuted }]} numberOfLines={1}>{h.name}</Text>
+                    </View>
+                    <Ionicons
+                      name={selectedStockIds.includes(h.stockId) ? 'checkbox' : 'square-outline'}
+                      size={22}
+                      color={selectedStockIds.includes(h.stockId) ? colors.primary : colors.textMuted}
+                    />
+                  </Pressable>
+                ));
               })()}
             </ScrollView>
 
             {/* Confirm Button */}
-            <TouchableOpacity
-              style={[
-                styles.confirmBtn,
-                { opacity: selectedStockIds.length === 0 ? 0.5 : 1 },
-              ]}
+            <Pressable
+              style={[styles.confirmBtn, { backgroundColor: colors.primary, opacity: selectedStockIds.length > 0 ? 1 : 0.5 }]}
               onPress={handleConfirmStocks}
               disabled={selectedStockIds.length === 0}
-              activeOpacity={0.8}
             >
-              <Ionicons name="checkmark-circle" size={20} color="#fff" />
-              <Text style={styles.confirmBtnText}>
-                {stockPickerForRule ? 'Update Holdings' : `Create Alert${selectedStockIds.length > 0 ? ` (${selectedStockIds.length})` : ''}`}
-              </Text>
-            </TouchableOpacity>
+              <Ionicons name="checkmark-circle" size={20} color="#FFF" />
+              <Text style={styles.confirmBtnText}>Confirm ({selectedStockIds.length})</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
     </View>
   );
-}
-
-const createStyles = (colors: any) =>
+}const createStyles = (colors: any) =>
   StyleSheet.create({
     container: {
       flex: 1,

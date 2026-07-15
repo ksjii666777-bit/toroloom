@@ -273,7 +273,7 @@ export const offlineMutationQueue = {
     let result;
     try {
       result = await syncClient.syncMutations(syncMutations);
-    } catch (err: any) {
+    } catch (_err: any) {
       // Sync API unreachable — fall back to individual API calls
       log.info('[MutationQueue] Sync API unreachable, falling back to processAll');
       return this.processAll();

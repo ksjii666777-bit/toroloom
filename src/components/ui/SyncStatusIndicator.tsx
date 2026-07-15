@@ -26,13 +26,13 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Animated as RNAnimated,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOfflineStore, type CacheNamespace } from '../../store/offlineStore';
-import { useConnectivityStore } from '../../store/connectivityStore';
+
 import { runSyncCycle } from '../../hooks/useBackgroundSync';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
@@ -168,7 +168,7 @@ export default function SyncStatusIndicator() {
 
   // Compute data info for mini display
   const [staleCount, setStaleCount] = useState(0);
-  const [oldestLabel, setOldestLabel] = useState<string | null>(null);
+  const [_oldestLabel, setOldestLabel] = useState<string | null>(null);
 
   useEffect(() => {
     const fresh = Object.values(freshness);
@@ -228,16 +228,15 @@ export default function SyncStatusIndicator() {
       pointerEvents="box-none"
     >
       {/* ── Pill Button ── */}
-      <TouchableOpacity
+      <Pressable
         onPress={handlePress}
-        activeOpacity={0.7}
-        style={[
+        style={({pressed}) => [[
           styles.pill,
           {
             backgroundColor: config.bgColor,
             borderColor: config.borderColor,
           },
-        ]}
+        ], {opacity: pressed ? 0.7 : 1}]}
       >
         <RNAnimated.View
           style={[
@@ -255,7 +254,7 @@ export default function SyncStatusIndicator() {
           color={config.color}
           style={{ opacity: 0.6 }}
         />
-      </TouchableOpacity>
+      </Pressable>
 
       {/* ── Expanded Dropdown ── */}
       {expanded && (
@@ -285,10 +284,10 @@ export default function SyncStatusIndicator() {
               </Text>
             </View>
             {pendingTotal > 0 && !isSyncing && (
-              <TouchableOpacity onPress={handleSyncNow} style={styles.syncNowBtn}>
+              <Pressable onPress={handleSyncNow} style={styles.syncNowBtn}>
                 <Ionicons name="sync-outline" size={11} color="#0D0D0D" />
                 <Text style={styles.syncNowText}>Sync</Text>
-              </TouchableOpacity>
+              </Pressable>
             )}
           </View>
 

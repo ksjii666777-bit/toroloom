@@ -48,7 +48,7 @@ export default function ReportsScreen({ navigation }: any) {
   const [exporting, setExporting] = useState(false);
   const [histPeriod, setHistPeriod] = useState('6M');
 
-  const analytics = useMemo(() => getAnalytics(), [getAnalytics, trades, holdings]);
+  const analytics = useMemo(() => getAnalytics(), [getAnalytics]);
   const m = analytics.metrics;
   const cg = analytics.capitalGains;
   const isLive = usePortfolioAnalyticsStore(s => s.isLive);

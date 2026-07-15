@@ -79,6 +79,12 @@ export interface AnalyticsEvents {
     warmingRuns: number;
     namespacesWarmed: number;
   };
+  background_sync_complete: {
+    synced: number;
+    failed: number;
+    durationMs: number;
+    namespaces: string;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEvents;

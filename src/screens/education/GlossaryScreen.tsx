@@ -5,7 +5,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, TextInput, Pressable,
   Dimensions, Platform,
 } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -140,11 +140,10 @@ export default function GlossaryScreen({ navigation }: any) {
       key={term.id}
       entering={FadeInDown.delay((index % 10) * 40).springify()}
     >
-      <TouchableOpacity
-        style={styles.termCard}
+      <Pressable
+        style={({pressed}) => [styles.termCard, {opacity: pressed ? 0.7 : 1}]}
         onPress={() => handleTermPress(term)}
         onLongPress={() => toggleFavorite(term.id)}
-        activeOpacity={0.7}
       >
         <View style={[styles.termIconContainer, { backgroundColor: getCategoryColor(term.category) + '18' }]}>
           <Text style={styles.termIcon}>{term.icon || '📘'}</Text>
@@ -159,7 +158,7 @@ export default function GlossaryScreen({ navigation }: any) {
           )}
           <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
         </View>
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 
@@ -169,9 +168,8 @@ export default function GlossaryScreen({ navigation }: any) {
     if (!selectedTerm) return null;
     return (
       <View style={styles.detailOverlay}>
-        <TouchableOpacity
-          style={styles.detailBackdrop}
-          activeOpacity={1}
+        <Pressable
+          style={({pressed}) => [styles.detailBackdrop, {opacity: pressed ? 1 : 1}]}
           onPress={() => setSelectedTerm(null)}
         />
         <Animated.View
@@ -243,17 +241,15 @@ export default function GlossaryScreen({ navigation }: any) {
                   {selectedTerm.relatedTerms.map((relId) => {
                     const relTerm = glossaryTerms.find(t => t.id === relId);
                     if (!relTerm) return null;
-                    return (
-                      <TouchableOpacity
+                    return (                        <Pressable
                         key={relId}
-                        style={[styles.relatedChip, { backgroundColor: getCategoryColor(relTerm.category) + '15' }]}
+                        style={({pressed}) => [[styles.relatedChip, { backgroundColor: getCategoryColor(relTerm.category) + '15' }], {opacity: pressed ? 0.7 : 1}]}
                         onPress={() => handleRelatedTermPress(relId)}
-                        activeOpacity={0.7}
                       >
                         <Text style={[styles.relatedChipText, { color: getCategoryColor(relTerm.category) }]}>
                           {relTerm.term}
                         </Text>
-                      </TouchableOpacity>
+                      </Pressable>
                     );
                   })}
                 </View>
@@ -262,7 +258,7 @@ export default function GlossaryScreen({ navigation }: any) {
 
             {/* Actions */}
             <View style={styles.detailActions}>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.detailActionBtn, { backgroundColor: '#FF5252' + '15' }]}
                 onPress={() => toggleFavorite(selectedTerm.id)}
               >
@@ -274,17 +270,17 @@ export default function GlossaryScreen({ navigation }: any) {
                 <Text style={[styles.detailActionText, { color: '#FF5252' }]}>
                   {favorites.has(selectedTerm.id) ? 'Remove Bookmark' : 'Bookmark'}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </ScrollView>
 
           {/* Close button */}
-          <TouchableOpacity
+          <Pressable
             style={styles.detailCloseBtn}
             onPress={() => setSelectedTerm(null)}
           >
             <Ionicons name="close" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
       </View>
     );
@@ -296,20 +292,20 @@ export default function GlossaryScreen({ navigation }: any) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <View style={styles.headerTextContainer}>
           <Text style={styles.title}>Financial Glossary</Text>
           <Text style={styles.subtitle}>{glossaryTerms.length} terms</Text>
         </View>
-        <TouchableOpacity onPress={() => setShowFilters(!showFilters)} style={styles.filterBtn}>
+        <Pressable onPress={() => setShowFilters(!showFilters)} style={styles.filterBtn}>
           <Ionicons
             name={showFilters ? 'options' : 'options-outline'}
             size={22}
             color={showFilters ? colors.primary : colors.textMuted}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Search bar */}
@@ -325,9 +321,9 @@ export default function GlossaryScreen({ navigation }: any) {
           autoCorrect={false}
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
+          <Pressable onPress={() => setSearchQuery('')}>
             <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
 
@@ -338,50 +334,48 @@ export default function GlossaryScreen({ navigation }: any) {
           <View style={styles.filterRow}>
             <Text style={styles.filterLabel}>Sort by</Text>
             <View style={styles.sortToggle}>
-              <TouchableOpacity
+              <Pressable
                 style={[styles.sortBtn, sortBy === 'alpha' && { backgroundColor: colors.primary + '20' }]}
                 onPress={() => setSortBy('alpha')}
               >
                 <Text style={[styles.sortBtnText, { color: sortBy === 'alpha' ? colors.primary : colors.textMuted }]}>
                   A–Z
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Pressable>
+              <Pressable
                 style={[styles.sortBtn, sortBy === 'category' && { backgroundColor: colors.primary + '20' }]}
                 onPress={() => setSortBy('category')}
               >
                 <Text style={[styles.sortBtnText, { color: sortBy === 'category' ? colors.primary : colors.textMuted }]}>
                   Category
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
 
           {/* Favorites filter */}
           <View style={styles.filterRow}>
-            <TouchableOpacity
+            <Pressable
               style={[styles.favToggle, showFavorites && { backgroundColor: '#FF5252' + '20' }]}
               onPress={() => setShowFavorites(!showFavorites)}
             >
               <Ionicons name={showFavorites ? 'heart' : 'heart-outline'} size={16} color="#FF5252" />
               <Text style={[styles.favToggleText, showFavorites && { color: '#FF5252' }]}>
                 Bookmarks ({favorites.size})
-              </Text>
-            </TouchableOpacity>
+              </Text>              </Pressable>
           </View>
 
           {/* Category filters */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-            <TouchableOpacity
+            <Pressable
               style={[styles.categoryChip, !selectedCategory && { backgroundColor: colors.primary + '20' }]}
               onPress={() => setSelectedCategory(null)}
             >
               <Text style={[styles.categoryChipText, !selectedCategory && { color: colors.primary }]}>
                 All
-              </Text>
-            </TouchableOpacity>
+              </Text>              </Pressable>
             {categories.map(cat => (
-              <TouchableOpacity
+              <Pressable
                 key={cat}
                 style={[
                   styles.categoryChip,
@@ -399,7 +393,7 @@ export default function GlossaryScreen({ navigation }: any) {
                 >
                   {cat}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </ScrollView>
         </Animated.View>

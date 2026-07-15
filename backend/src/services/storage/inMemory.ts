@@ -11,7 +11,7 @@
  * ============================================================================
  */
 
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -191,6 +191,40 @@ export class InMemoryStorage implements StorageEngine {
     this.communityPosts = this.communityPosts.filter((p) => p.id !== postId);
   }
 
+  // ──── Telegram Links ────
+  private telegramLinks = new Map<string, TelegramLinkData>();
+
+  async loadTelegramLink(userId: string): Promise<TelegramLinkData | null> {
+    return this.telegramLinks.get(userId) ?? null;
+  }
+
+  async saveTelegramLink(userId: string, link: TelegramLinkData): Promise<void> {
+    this.telegramLinks.set(userId, link);
+  }
+
+  async deleteTelegramLink(userId: string): Promise<void> {
+    this.telegramLinks.delete(userId);
+  }
+
+  async loadAllTelegramLinks(): Promise<TelegramLinkData[]> {
+    return Array.from(this.telegramLinks.values());
+  }
+
+  // ──── SnapTrade Connections ────
+  private snapTradeConnections = new Map<string, SnapTradeConnectionData>();
+
+  async loadSnapTradeConnection(userId: string): Promise<SnapTradeConnectionData | null> {
+    return this.snapTradeConnections.get(userId) ?? null;
+  }
+
+  async saveSnapTradeConnection(userId: string, connection: SnapTradeConnectionData): Promise<void> {
+    this.snapTradeConnections.set(userId, connection);
+  }
+
+  async deleteSnapTradeConnection(userId: string): Promise<void> {
+    this.snapTradeConnections.delete(userId);
+  }
+
   // ──── Subscriptions ────
   private subscriptions = new Map<string, UserSubscriptionData>();
 
@@ -216,6 +250,7 @@ export class InMemoryStorage implements StorageEngine {
     this.notifications = [];
     this.communityPosts = [];
     this.subscriptions.clear();
+    this.telegramLinks.clear();
   }
 
   async isHealthy(): Promise<boolean> {

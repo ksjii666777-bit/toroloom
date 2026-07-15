@@ -182,6 +182,7 @@ vi.mock('../components/ui/SyncConflictModal', () => ({ default: NullComponent })
 vi.mock('@react-navigation/native', () => ({
   NavigationContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useNavigation: () => ({ navigate: vi.fn(), goBack: vi.fn() }),
+  useFocusEffect: (cb: any) => cb(),
 }));
 
 vi.mock('@react-navigation/native-stack', () => ({

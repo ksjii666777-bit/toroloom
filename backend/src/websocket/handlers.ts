@@ -11,7 +11,8 @@
  */
 
 import { WebSocket } from 'ws';
-import { riskEngine, LockdownStatus } from '../services/riskEngine';
+import { riskEngine } from '../services/riskEngine/RiskEngine';
+import { LockdownStatus } from '../services/riskEngine/types';
 import { getBroker } from '../services/broker';
 import { incrementTickCounter, observeTickLatency, recalculateSymbolSubscriptions } from '../services/metrics';
 import {

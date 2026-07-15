@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { CommunityPost, Comment } from '../types';
 import { mockPosts } from '../constants/mockData';
-import { communityApi } from '../services/api';
+import { communityApi } from '../services/api/community';
 import { offlineCache } from '../services/offlineCache';
 import { registerCacheWarming } from '../services/cacheWarmingService';
 import { log } from '../utils/logger';

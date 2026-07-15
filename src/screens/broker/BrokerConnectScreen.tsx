@@ -32,7 +32,7 @@ import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { api } from '../../services/api';
+import { api, snapTradeApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
@@ -80,8 +80,38 @@ const BROKERS: BrokerMeta[] = [
     icon: 'G',
     color: '#00A86B',
     gradient: ['#00A86B', '#008050'] as const,
-    hasOAuth: false,
+    hasOAuth: true,
     features: ['Trade API', 'Zero Commission', 'Mutual Funds'],
+  },
+  {
+    type: 'dhan',
+    label: 'Dhan',
+    tagline: 'India\'s fastest growing trading platform',
+    icon: 'D',
+    color: '#9B59B6',
+    gradient: ['#9B59B6', '#7D3C98'] as const,
+    hasOAuth: true,
+    features: ['OAuth 2.0', 'Zero Brokerage', 'Fast Execution'],
+  },
+  {
+    type: 'upstox',
+    label: 'Upstox',
+    tagline: 'Trusted by millions of traders',
+    icon: 'U',
+    color: '#E74C3C',
+    gradient: ['#E74C3C', '#C0392B'] as const,
+    hasOAuth: true,
+    features: ['OAuth 2.0', 'Free Account', 'Advanced Charts'],
+  },
+  {
+    type: 'interactive',
+    label: 'Interactive Brokers',
+    tagline: 'Global trading powerhouse',
+    icon: 'I',
+    color: '#2C3E50',
+    gradient: ['#2C3E50', '#1A252F'] as const,
+    hasOAuth: true,
+    features: ['Global Markets', 'Advanced Tools', 'API Access'],
   },
 ];
 
@@ -185,6 +215,20 @@ export default function BrokerConnectScreen({ navigation }: any) {
   // ── Load status ────────────────────────────────────────────
   const loadStatus = useCallback(async () => {
     try {
+      // Try SnapTrade first
+      const st = await snapTradeApi.status();
+      if (st.connected) {
+        setConnectionState({
+          connected: true,
+          brokerType: st.brokerSlug,
+          label: st.brokerName,
+          connectedAt: st.connectedAt,
+          isLoading: false,
+        });
+        return;
+      }
+
+      // Fallback: legacy broker-link API
       const data = await api.get<any>('/broker-link/status');
       setConnectionState({
         connected: data.connected,
@@ -225,6 +269,39 @@ export default function BrokerConnectScreen({ navigation }: any) {
       }
     };
   }, []);
+
+  // SnapTrade specific state
+  const [isConnectingSnapTrade, setIsConnectingSnapTrade] = useState(false);
+  const [snapTradeOauthUrl, setSnapTradeOauthUrl] = useState<string | null>(null);
+
+  // ── Open SnapTrade Connect ────────────────────────────────
+  const openSnapTradeConnect = useCallback(async (broker: BrokerMeta) => {
+    setSelectedBroker(broker);
+    setIsConnectingSnapTrade(true);
+    triggerHaptic(ImpactFeedbackStyle.Medium);
+
+    try {
+      await snapTradeApi.register();
+      const linkResult = await snapTradeApi.getConnectLink();
+      if (linkResult.oauthUrl) {
+        setSnapTradeOauthUrl(linkResult.oauthUrl);
+        setTimeout(() => {
+          setIsConnectingSnapTrade(false);
+          setConnectionState({
+            connected: true,
+            brokerType: broker.type,
+            label: broker.label,
+            connectedAt: new Date().toISOString(),
+            isLoading: false,
+          });
+          showConnectedSuccess();
+        }, 500);
+      }
+    } catch (err: any) {
+      setIsConnectingSnapTrade(false);
+      Alert.alert('Connection Failed', err.message || 'Failed to connect via SnapTrade.');
+    }
+  }, [showConnectedSuccess]);
 
   // ── Open credential modal ──────────────────────────────────
   const openCredentialsModal = useCallback((broker: BrokerMeta) => {
@@ -320,9 +397,11 @@ export default function BrokerConnectScreen({ navigation }: any) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await api.post('/broker-link/disconnect');
+              await snapTradeApi.disconnect();
               notificationAsync(NotificationFeedbackType.Warning);
-              loadStatus();
+              setConnectionState({
+                connected: false, brokerType: null, label: null, connectedAt: null, isLoading: false,
+              });
             } catch (err: any) {
               Alert.alert('Error', err.message || 'Failed to disconnect');
             }
@@ -330,7 +409,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
         },
       ],
     );
-  }, [connectionState, loadStatus]);
+  }, [connectionState]);
 
   // ── WebView navigation handler (extract request_token) ─────
   const handleWebViewNav = useCallback((navState: any) => {
@@ -365,7 +444,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading broker status...</Text>
+        <Text style={[styles.loadingText, { color: colors.textMuted }]}>Checking connection status...</Text>
       </View>
     );
   }
@@ -379,7 +458,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
         </AnimatedPressable>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Connect Broker</Text>
-          <Text style={styles.headerSubtitle}>Link your trading account to start trading</Text>
+          <Text style={styles.headerSubtitle}>1-tap OAuth — no API keys needed</Text>
         </View>
       </View>
 
@@ -401,11 +480,9 @@ export default function BrokerConnectScreen({ navigation }: any) {
                 <Text style={styles.connectedTitle}>
                   Connected to {connectionState.label}
                 </Text>
-                {connectionState.connectedAt && (
-                  <Text style={styles.connectedDate}>
-                    Since {new Date(connectionState.connectedAt).toLocaleDateString()}
-                  </Text>
-                )}
+                <Text style={styles.connectedDate}>
+                  OAuth session active
+                </Text>
               </View>
               <TouchableOpacity onPress={handleDisconnect} style={styles.disconnectBtn}>
                 <Text style={styles.disconnectText}>Disconnect</Text>
@@ -416,11 +493,10 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
         {/* ── Section Title ────────────────────────────────── */}
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          <Text style={styles.sectionTitle}>Choose Your Broker</Text>
-          <Text style={styles.sectionSubtitle}>
+          <Text style={styles.sectionTitle}>Choose Your Broker</Text>            <Text style={styles.sectionSubtitle}>
             {connectionState.connected
               ? 'Switch to a different broker below'
-              : 'Select a broker to connect your trading account'}
+              : 'Select a broker to connect'}
           </Text>
         </Animated.View>
 
@@ -456,10 +532,8 @@ export default function BrokerConnectScreen({ navigation }: any) {
                   onPress={() => {
                     if (isConnected) {
                       handleDisconnect();
-                    } else if (broker.hasOAuth) {
-                      openOAuthWebView(broker);
                     } else {
-                      openCredentialsModal(broker);
+                      openSnapTradeConnect(broker);
                     }
                   }}
                 >
@@ -512,12 +586,12 @@ export default function BrokerConnectScreen({ navigation }: any) {
                           styles.connectBadgeText,
                           isConnected && styles.connectBadgeTextConnected,
                         ]}>
-                          {isConnected ? 'Connected' : broker.hasOAuth ? 'Connect via OAuth' : 'Connect'}
+                          {isConnected ? 'Connected' : 'OAuth Connect'}
                         </Text>
                       </View>
 
                       {/* OAuth indicator */}
-                      {broker.hasOAuth && !isConnected && (
+                      {!isConnected && (
                         <View style={styles.oauthIndicator}>
                           <Ionicons name="shield-checkmark" size={10} color="rgba(255,255,255,0.6)" />
                           <Text style={styles.oauthText}>OAuth Secure</Text>
@@ -531,11 +605,11 @@ export default function BrokerConnectScreen({ navigation }: any) {
           })}
         </View>
 
-        {/* ── Info Box ──────────────────────────────────────── */}
+        {/* ── SnapTrade Info Box ────────────────────────────── */}
         <Animated.View style={[styles.infoBox, { opacity: fadeAnim }]}>
           <Ionicons name="information-circle" size={18} color={colors.primary} />
           <Text style={styles.infoText}>
-            Your credentials are encrypted and securely stored. We never share your broker login details with third parties.
+            SnapTrade provides secure 1-tap OAuth. Your credentials are never shared with us.
           </Text>
         </Animated.View>
 
@@ -775,6 +849,19 @@ export default function BrokerConnectScreen({ navigation }: any) {
           />
         </View>
       </Modal>
+
+      {/* ── Connecting Overlay ──────────────────────────────── */}
+      {isConnectingSnapTrade && (
+        <View style={styles.successOverlay}>
+          <Animated.View style={styles.successContent}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.successTitle}>Connecting...</Text>
+            <Text style={styles.successSubtitle}>
+              Complete login in your browser
+            </Text>
+          </Animated.View>
+        </View>
+      )}
 
       {/* ── Success Animation ───────────────────────────────── */}
       {showSuccess && (

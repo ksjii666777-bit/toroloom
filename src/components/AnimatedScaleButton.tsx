@@ -24,7 +24,7 @@
  */
 
 import React, { useRef } from 'react';
-import { TouchableOpacity, Animated } from 'react-native';
+import { Pressable, Animated } from 'react-native';
 
 interface AnimatedScaleButtonProps {
   children: React.ReactNode;
@@ -58,8 +58,7 @@ export default function AnimatedScaleButton({
   };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
+    <Pressable
       onPress={onPress}
       onLongPress={onLongPress}
       onPressIn={handlePressIn}
@@ -70,6 +69,6 @@ export default function AnimatedScaleButton({
       <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
         {children}
       </Animated.View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }

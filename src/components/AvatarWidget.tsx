@@ -18,7 +18,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity,
+  Pressable, View, Text, StyleSheet,
   Dimensions,
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, withRepeat, withSequence, interpolate, runOnJS } from 'react-native-reanimated';
@@ -100,7 +100,7 @@ export default function AvatarWidget() {
       });
       dismissTimerRef.current = null;
     }, BANNER_AUTO_DISMISS_MS);
-  }, []);
+  }, [messageOpacity, slideUp]);
 
   // ── Tap to toggle ─────────────────────────────────────────
   const handleTap = useCallback(() => {
@@ -166,7 +166,7 @@ export default function AvatarWidget() {
         dismissTimerRef.current = null;
       }
     };
-  }, [lockdown.status, dailyPnL]);
+  }, [lockdown.status, dailyPnL, messageOpacity, slideUp, triggerBanner, voiceSpeak]);
 
   // ── Neon Pulse Loop (idle state) ──────────────────────────
   useEffect(() => {
@@ -182,7 +182,7 @@ export default function AvatarWidget() {
     } else {
       pulseAnim.value = 1;
     }
-  }, [avatarState]);
+  }, [avatarState, triggerBanner, voiceSpeak, pulseAnim]);
 
   // ── Avatar visuals ────────────────────────────────────────
   const avatarIcon = avatarState === 'alert' ? 'shield' :
@@ -224,14 +224,14 @@ export default function AvatarWidget() {
           <Text style={[styles.bannerText, { color: colors.text }]} numberOfLines={3}>
             {message}
           </Text>
-          <TouchableOpacity onPress={handleTap} style={styles.dismissBtn}>
+          <Pressable onPress={handleTap} style={styles.dismissBtn}>
             <Ionicons name="close" size={16} color={colors.textMuted} />
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
       )}
 
       {/* Avatar Circle */}
-      <TouchableOpacity onPress={handleTap} activeOpacity={0.8}>
+      <Pressable onPress={handleTap} style={({pressed}) => ({opacity: pressed ? 0.8 : 1})}>
         <View style={[styles.avatarCircle, { backgroundColor: colors.bgCard, borderColor: avatarColor }]}>
           {/* Glow behind avatar */}
           <Animated.View
@@ -251,7 +251,7 @@ export default function AvatarWidget() {
            avatarState === 'celebration' ? 'PROFIT!' :
            avatarState === 'listening' ? 'LISTENING' : 'TOROLOOM'}
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 }

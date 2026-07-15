@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -31,7 +31,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
 
   useEffect(() => {
     if (course) fetchLesson(lessons[0]?.id || '');
-  }, [courseId]);
+  }, [courseId, course, fetchLesson, lessons]);
 
   if (!course) {
     return (
@@ -64,9 +64,9 @@ export default function CourseDetailScreen({ route, navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Back Button */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Course Hero */}
@@ -133,11 +133,10 @@ export default function CourseDetailScreen({ route, navigation }: any) {
             const isNext = nextIncomplete?.id === lesson.id;
 
             return (
-              <TouchableOpacity
+              <Pressable
                 key={lesson.id}
-                style={[styles.lessonCard, isNext && styles.lessonCardNext]}
+                style={({pressed}) => [[styles.lessonCard, isNext && styles.lessonCardNext], {opacity: pressed ? 0.7 : 1}]}
                 onPress={() => handleLessonPress(lesson.id)}
-                activeOpacity={0.7}
               >
                 <View style={styles.lessonRow}>
                   {/* Status indicator */}
@@ -187,14 +186,14 @@ export default function CourseDetailScreen({ route, navigation }: any) {
                     <Text style={styles.nextBadgeText}>Next Lesson</Text>
                   </View>
                 )}
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
 
         {/* Continue / Next Button */}
         {nextIncomplete && (
-          <TouchableOpacity
+          <Pressable
             style={styles.continueBtn}
             onPress={() => handleLessonPress(nextIncomplete.id)}
           >
@@ -204,12 +203,12 @@ export default function CourseDetailScreen({ route, navigation }: any) {
                 {completedCount === 0 ? 'Start Course' : 'Continue Learning'}
               </Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </Pressable>
         )}
 
         {/* Certificate Button — shown when all lessons complete */}
         {allLessonsComplete && (
-          <TouchableOpacity
+          <Pressable
             style={[styles.continueBtn, { marginTop: SPACING.sm }]}
             onPress={() => navigation.navigate('Certificate', { courseId })}
           >
@@ -219,7 +218,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
                 {certificate ? 'View Certificate' : '🎓 Get Certificate'}
               </Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </Pressable>
         )}
 
         <View style={{ height: 100 }} />

@@ -30,7 +30,7 @@ export function SkeletonBlock({ width = '100%', height = 20, borderRadius = BORD
       true // yoyo (reverse each cycle)
     );
     return () => { opacity.value = 0.3; }; // cleanup
-  }, []);
+  }, [opacity]);
 
   const finalBorderRadius = variant === 'circle' ? 999 : borderRadius;
 
@@ -89,7 +89,7 @@ export function SkeletonList({ count = 5, cardProps, style }: SkeletonListProps)
   return (
     <View style={style}>
       {Array.from({ length: count }).map((_, i) => (
-        <SkeletonCard key={i} {...cardProps} />
+        <SkeletonCard key={`skeleton_${i}`} {...cardProps} />
       ))}
     </View>
   );
@@ -105,7 +105,7 @@ export function PortfolioSkeleton() {
       <View style={{ height: SPACING.md }} />
       <View style={skeletonStyles.statsRow}>
         {[1, 2, 3].map(i => (
-          <View key={i} style={skeletonStyles.statItem}>
+          <View key={`stat_${i}`} style={skeletonStyles.statItem}>
             <SkeletonBlock width={60} height={24} />
             <View style={{ height: 4 }} />
             <SkeletonBlock width={40} height={10} />

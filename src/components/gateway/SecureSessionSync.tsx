@@ -401,7 +401,7 @@ export default function SecureSessionSync({
   /**
    * Determine if the URL contains MFA/TOTP challenge indicators.
    */
-  const isMfaUrl = useCallback(
+  const _isMfaUrl = useCallback(
     (url: string): boolean => {
       const lowerUrl = url.toLowerCase();
       return mfaPatterns.some(pattern => lowerUrl.includes(pattern));
@@ -453,7 +453,7 @@ export default function SecureSessionSync({
       let mfaStep: 0 | 1 | 2 = currentMfaStep;
 
       // Update MFA step tracking
-      if (isMfaUrl(url)) {
+      if (_isMfaUrl(url)) {
         mfaStep = 1;
         setCurrentMfaStep(1);
       } else if (currentMfaStep === 1 && url.includes('callback') || url.includes('dashboard') || isDashboardUrl(url)) {
@@ -511,7 +511,7 @@ export default function SecureSessionSync({
       brokerType,
       extractionStrategy,
       isDashboardUrl,
-      isMfaUrl,
+      _isMfaUrl,
       isSocialLoginRedirect,
       isQrCodeFlow,
       hasAuthTokens,

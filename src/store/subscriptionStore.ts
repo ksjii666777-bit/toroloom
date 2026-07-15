@@ -835,7 +835,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     // Simulate API call
     await new Promise(r => setTimeout(r, 800));
 
-    const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
+    const _plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
     const mandate: UpiMandate = {
       mandateId: `mand_${generateId()}`,
       upiId,

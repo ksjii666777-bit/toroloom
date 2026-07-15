@@ -65,7 +65,7 @@ export default function LearnScreen({ navigation }: any) {
           </View>
           <View style={{ paddingHorizontal: SPACING.xl, marginTop: SPACING.xl }}>
             {[1, 2, 3].map(i => (
-              <View key={i} style={{ flexDirection: 'row', marginBottom: SPACING.md }}>
+              <View key={`learn_${i}`} style={{ flexDirection: 'row', marginBottom: SPACING.md }}>
                 <SkeletonBlock width={80} height={100} borderRadius={BORDER_RADIUS.lg} />
                 <View style={{ flex: 1, marginLeft: SPACING.md, gap: 6 }}>
                   <SkeletonBlock width="70%" height={16} />

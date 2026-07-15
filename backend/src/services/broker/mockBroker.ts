@@ -9,6 +9,117 @@ import {
 } from './interface';
 import { generateMultiTimeframeOHLC } from '../../data/mockOHLC';
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMMODITY MOCK DATA
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Realistic commodity price anchors used for simulated tick generation.
+ * Prices are in USD (international benchmark) with MCX INR equivalents.
+ */
+interface CommoditySeed {
+  symbol: string;
+  name: string;
+  /** Base price in USD */
+  basePrice: number;
+  /** Unit label */
+  unit: string;
+  /** Annualized volatility factor (lower = smoother, higher = choppier) */
+  volatility: number;
+  /** Typical daily range as fraction of price */
+  dailyRange: number;
+  /** Category */
+  category: 'metals' | 'energy' | 'agriculture';
+  /** MCX INR equivalent (per unit) */
+  mcxPrice: number;
+}
+
+const commoditySeeds: CommoditySeed[] = [
+  // Precious Metals
+  { symbol: 'XAUUSD', name: 'Gold', basePrice: 2335.40, unit: 'oz', volatility: 0.15, dailyRange: 0.012, category: 'metals', mcxPrice: 73210 },
+  { symbol: 'XAGUSD', name: 'Silver', basePrice: 29.45, unit: 'oz', volatility: 0.22, dailyRange: 0.018, category: 'metals', mcxPrice: 923 },
+  { symbol: 'XPTUSD', name: 'Platinum', basePrice: 985.00, unit: 'oz', volatility: 0.18, dailyRange: 0.014, category: 'metals', mcxPrice: 30880 },
+  { symbol: 'XPDUSD', name: 'Palladium', basePrice: 965.00, unit: 'oz', volatility: 0.25, dailyRange: 0.020, category: 'metals', mcxPrice: 30250 },
+  // Energy
+  { symbol: 'CL', name: 'Crude Oil (WTI)', basePrice: 78.50, unit: 'barrel', volatility: 0.32, dailyRange: 0.025, category: 'energy', mcxPrice: 6560 },
+  { symbol: 'NG', name: 'Natural Gas', basePrice: 2.85, unit: 'MMBtu', volatility: 0.40, dailyRange: 0.035, category: 'energy', mcxPrice: 238 },
+  { symbol: 'XB', name: 'Gasoline (RBOB)', basePrice: 2.45, unit: 'gallon', volatility: 0.35, dailyRange: 0.028, category: 'energy', mcxPrice: 205 },
+  // Base Metals
+  { symbol: 'HG', name: 'Copper', basePrice: 4.52, unit: 'lb', volatility: 0.22, dailyRange: 0.016, category: 'metals', mcxPrice: 378 },
+  { symbol: 'ALI', name: 'Aluminum', basePrice: 2560.00, unit: 'tonne', volatility: 0.18, dailyRange: 0.014, category: 'metals', mcxPrice: 80220 },
+  { symbol: 'ZNC', name: 'Zinc', basePrice: 2850.00, unit: 'tonne', volatility: 0.20, dailyRange: 0.015, category: 'metals', mcxPrice: 89320 },
+  // Agriculture
+  { symbol: 'ZC', name: 'Corn', basePrice: 445.00, unit: 'bushel', volatility: 0.28, dailyRange: 0.020, category: 'agriculture', mcxPrice: 0 },
+  { symbol: 'ZW', name: 'Wheat', basePrice: 585.00, unit: 'bushel', volatility: 0.32, dailyRange: 0.022, category: 'agriculture', mcxPrice: 0 },
+  { symbol: 'ZS', name: 'Soybeans', basePrice: 1185.00, unit: 'bushel', volatility: 0.25, dailyRange: 0.018, category: 'agriculture', mcxPrice: 0 },
+];
+
+/**
+ * Runtime price state for each commodity — drifts via random walk.
+ */
+const commodityPriceState = new Map<string, number>();
+for (const seed of commoditySeeds) {
+  commodityPriceState.set(seed.symbol, seed.basePrice);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LIVE COMMODITY PRICE GENERATOR (random walk with sector correlation)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Generate a realistic MarketQuote for a commodity using geometric random walk.
+ * Each tick moves the price by a small random factor proportional to the seed's
+ * volatility and daily range.  Energy commodities get a common sector factor for
+ * realistic correlation.
+ */
+function generateCommodityQuote(seed: CommoditySeed): MarketQuote {
+  const currentPrice = commodityPriceState.get(seed.symbol) ?? seed.basePrice;    // ── Sector correlation factor ───────────────────────────────
+    // Energy commodities (CL, NG, XB) share a common shock for realism.
+
+    // ── Geometric random walk ───────────────────────────────────
+  // Scale step size so a full day of ticks (~1000) covers ~dailyRange%
+  const stepSize = seed.basePrice * seed.volatility * 0.002;
+  const sectorShock = seed.category === 'energy'
+    ? (Math.random() - 0.48) * seed.basePrice * 0.003
+    : 0;
+  const idioShock = (Math.random() - 0.48) * stepSize;
+  const drift = seed.symbol === 'XAUUSD' ? stepSize * 0.01 : 0; // slight gold upward bias
+
+  let newPrice = currentPrice + sectorShock + idioShock + drift;
+
+  // Clamp to prevent extreme moves: ±3% per tick
+  const maxMove = currentPrice * 0.03;
+  newPrice = Math.max(currentPrice - maxMove, Math.min(currentPrice + maxMove, newPrice));
+
+  // Absolute floor at 10% of base (can't go to zero)
+  const floor = seed.basePrice * 0.10;
+  newPrice = Math.max(floor, newPrice);
+  newPrice = Math.round(newPrice * 100) / 100;
+
+  // Persist new state
+  commodityPriceState.set(seed.symbol, newPrice);
+
+  const change = Math.round((newPrice - seed.basePrice) * 100) / 100;
+  const changePercent = Math.round((change / seed.basePrice) * 10000) / 100;
+
+  return {
+    symbol: seed.symbol,
+    lastPrice: newPrice,
+    change,
+    changePercent,
+    open: Math.round(seed.basePrice * (1 - Math.random() * 0.005) * 100) / 100,
+    high: Math.round(Math.max(newPrice, seed.basePrice) * (1 + Math.random() * 0.003) * 100) / 100,
+    low: Math.round(Math.min(newPrice, seed.basePrice) * (1 - Math.random() * 0.003) * 100) / 100,
+    close: seed.basePrice,
+    volume: Math.floor(Math.random() * 500000) + 50000,
+    bid: Math.round((newPrice - Math.random() * newPrice * 0.001) * 100) / 100,
+    ask: Math.round((newPrice + Math.random() * newPrice * 0.001) * 100) / 100,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+
 // ============ In-Memory Mock Data ============
 
 const mockIndices: IndexData[] = [
@@ -165,8 +276,12 @@ export class MockBroker implements IBroker {
 
   async getQuote(symbol: string): Promise<MarketQuote> {
     await this.delay(200);
+    // Check commodity symbols first
+    const commoditySeed = commoditySeeds.find(s => s.symbol === symbol);
+    if (commoditySeed) return generateCommodityQuote(commoditySeed);
+    // Fall back to stock
     const stock = mockStocks.find(s => s.symbol === symbol);
-    if (!stock) throw new Error(`Stock not found: ${symbol}`);
+    if (!stock) throw new Error(`Symbol not found: ${symbol}`);
     return generateQuote(stock);
   }
 
@@ -174,6 +289,11 @@ export class MockBroker implements IBroker {
     await this.delay(300);
     const map = new Map<string, MarketQuote>();
     for (const symbol of symbols) {
+      const commoditySeed = commoditySeeds.find(s => s.symbol === symbol);
+      if (commoditySeed) {
+        map.set(symbol, generateCommodityQuote(commoditySeed));
+        continue;
+      }
       const stock = mockStocks.find(s => s.symbol === symbol);
       if (stock) map.set(symbol, generateQuote(stock));
     }
@@ -382,6 +502,13 @@ export class MockBroker implements IBroker {
   subscribeTicks(symbols: string[], onTick: (quote: MarketQuote) => void): () => void {
     const interval = setInterval(() => {
       symbols.forEach(symbol => {
+        // Check if symbol is a commodity first
+        const commoditySeed = commoditySeeds.find(s => s.symbol === symbol);
+        if (commoditySeed) {
+          onTick(generateCommodityQuote(commoditySeed));
+          return;
+        }
+        // Fall back to stock quote generation
         const stock = mockStocks.find(s => s.symbol === symbol);
         if (stock) {
           onTick(generateQuote(stock));

@@ -21,6 +21,7 @@ class MockWebSocketService implements WebSocketService {
   private onConnectionChange: ConnectionCallback | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   /** Symbols auto-subscribed from portfolio holdings on connect — tickers persist across component unmounts */
+  /** Symbols auto-subscribed from portfolio holdings on connect — tickers persist across component unmounts */
   private autoSubscribed = new Set<string>();
 
   // ── Risk Event Callbacks (registered by riskStore.listenToWS()) ──
@@ -33,10 +34,39 @@ class MockWebSocketService implements WebSocketService {
   /** Track whether lockdown has been emitted for the current breach cycle */
   private _lockdownActive = false;
 
-  // Initialize stock prices from mock data
+  // ── Commodity seeds (mirrors backend mockBroker.ts) ─────────────
+  private readonly commoditySeeds: Array<{
+    symbol: string;
+    basePrice: number;
+    volatility: number;
+  }> = [
+    // Precious Metals
+    { symbol: 'XAUUSD', basePrice: 2335.40, volatility: 0.15 },
+    { symbol: 'XAGUSD', basePrice: 29.45, volatility: 0.25 },
+    { symbol: 'XPTUSD', basePrice: 985.00, volatility: 0.20 },
+    { symbol: 'XPDUSD', basePrice: 965.00, volatility: 0.28 },
+    // Energy
+    { symbol: 'CL', basePrice: 78.50, volatility: 0.35 },
+    { symbol: 'NG', basePrice: 2.85, volatility: 0.40 },
+    { symbol: 'XB', basePrice: 2.45, volatility: 0.38 },
+    // Base Metals
+    { symbol: 'HG', basePrice: 4.52, volatility: 0.25 },
+    { symbol: 'ALI', basePrice: 2560.00, volatility: 0.20 },
+    { symbol: 'ZNC', basePrice: 2850.00, volatility: 0.22 },
+    // Agriculture
+    { symbol: 'ZC', basePrice: 445.00, volatility: 0.28 },
+    { symbol: 'ZW', basePrice: 585.00, volatility: 0.32 },
+    { symbol: 'ZS', basePrice: 1185.00, volatility: 0.25 },
+  ];
+
+  // Initialize stock prices from mock data + commodity seeds
   constructor() {
     for (const stock of mockStocks) {
       this.stockPrices.set(stock.id, stock.price);
+    }
+    // Seed commodity symbols so simulateTick works for them too
+    for (const seed of this.commoditySeeds) {
+      this.stockPrices.set(seed.symbol, seed.basePrice);
     }
   }
 

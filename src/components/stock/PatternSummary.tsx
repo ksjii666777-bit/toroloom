@@ -17,7 +17,7 @@ export default function PatternSummary({ patterns }: PatternSummaryProps) {
   return (
     <View style={[styles.container, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
       <Text style={[styles.title, { color: colors.text }]}>Detected Patterns</Text>
-      {patterns.map((p, i) => {
+      {patterns.map((p) => {
         const pColor = p.direction === 'bullish' ? colors.marketUp
           : p.direction === 'bearish' ? colors.marketDown : colors.warning;
         const directionEmoji = p.direction === 'bullish' ? '📈'
@@ -25,7 +25,7 @@ export default function PatternSummary({ patterns }: PatternSummaryProps) {
         const desc = getPatternDescription(p.type);
 
         return (
-          <View key={i} style={[styles.patternItem, { borderColor: colors.divider }]}>
+          <View key={p.type} style={[styles.patternItem, { borderColor: colors.divider }]}>
             <View style={[styles.dot, { backgroundColor: pColor }]} />
             <View style={{ flex: 1 }}>
               <View style={styles.patternHeader}>
@@ -44,7 +44,7 @@ export default function PatternSummary({ patterns }: PatternSummaryProps) {
   );
 }
 
-const createStyles = (colors: any) =>
+const createStyles = (_colors: any) =>
   StyleSheet.create({
     container: {
       borderRadius: BORDER_RADIUS.xl,

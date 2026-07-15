@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Course, Lesson, VideoProgress, VideoBookmark, CourseCertificate } from '../types';
 import { mockCourses, mockLessons } from '../constants/mockData';
-import { educationApi } from '../services/api';
+import { educationApi } from '../services/api/education';
 import { offlineCache } from '../services/offlineCache';
 import { log } from '../utils/logger';
 import { sendEducationalReminder } from '../services/notificationService';
@@ -230,7 +230,7 @@ export const useEducationStore = create<EducationState>((set, get) => ({
       let totalQuizQuestions = 0;
       for (const lesson of courseLessons) {
         if (lesson.quiz) {
-          for (const q of lesson.quiz.questions) {
+          for (const _q of lesson.quiz.questions) {
             totalQuizQuestions++;
             // In real app, track actual answers; here use lesson.quiz.score as proxy
           }

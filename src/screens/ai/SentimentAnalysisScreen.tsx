@@ -17,7 +17,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, Pressable,
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -452,12 +452,12 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('SentimentAlert')} style={[styles.backBtn, { marginLeft: SPACING.sm }]}>
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate('SentimentAlert')} style={[styles.backBtn, { marginLeft: SPACING.sm }]}>
             <Ionicons name="notifications" size={20} color={colors.primary} />
-          </TouchableOpacity>
+          </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Sentiment Analysis</Text>
             <Text style={styles.headerSubtitle}>News + social media sentiment</Text>
@@ -469,11 +469,10 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
           {stockSymbols.map(c => {
             const isActive = c.symbol === selectedSymbol;
             return (
-              <TouchableOpacity
+              <Pressable
                 key={c.symbol}
                 onPress={() => setSelectedSymbol(c.symbol)}
-                activeOpacity={0.7}
-                style={[styles.pickerChip, {
+                style={({pressed}) => [{opacity: pressed ? 0.7 : 1}, styles.pickerChip, {
                   backgroundColor: isActive ? colors.primary : colors.bgCardLight,
                   borderColor: isActive ? colors.primary : colors.border,
                 }]}
@@ -481,7 +480,7 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
                 <Text style={[styles.pickerChipText, { color: isActive ? '#FFFFFF' : colors.textSecondary }]}>
                   {c.symbol}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </ScrollView>
@@ -599,11 +598,10 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
             {(['all', 'bullish', 'bearish', 'neutral'] as const).map(f => {
               const fColors = getSentimentColors(f === 'all' ? 'neutral' : f);
               return (
-                <TouchableOpacity
+                <Pressable
                   key={f}
                   onPress={() => setActiveFilter(f)}
-                  activeOpacity={0.7}
-                  style={[styles.filterChip, {
+                  style={({pressed}) => [{opacity: pressed ? 0.7 : 1}, styles.filterChip, {
                     backgroundColor: activeFilter === f ? fColors.color + '20' : colors.bgCardLight,
                     borderColor: activeFilter === f ? fColors.color : colors.border,
                   }]}
@@ -614,7 +612,7 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
                   }]}>
                     {f.charAt(0).toUpperCase() + f.slice(1)} ({filtered.length})
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
           </ScrollView>
@@ -625,11 +623,10 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
           const s = getSentimentColors(stock.label);
           const stockInfo = mockStocks.find(s => s.id === stock.symbol);
           return (
-            <TouchableOpacity
+            <Pressable
               key={stock.symbol}
-              style={[styles.stockRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+              style={({pressed}) => [[styles.stockRow, { backgroundColor: colors.bgCard, borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
               onPress={() => setSelectedSymbol(stock.symbol)}
-              activeOpacity={0.7}
             >
               <View style={[styles.stockSentimentDot, { backgroundColor: s.color }]} />
               <View style={{ flex: 1 }}>
@@ -648,7 +645,7 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
 

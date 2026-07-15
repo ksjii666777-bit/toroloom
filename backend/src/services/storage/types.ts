@@ -38,6 +38,31 @@ export interface AuditAppendParams {
 
 // ==================== Broker State Domain ====================
 
+// ==================== Telegram User Link Domain ====================
+
+export interface TelegramLinkData {
+  userId: string;
+  chatId: number;
+  firstName: string;
+  username?: string;
+  linkedAt: string;
+}
+
+// ==================== SnapTrade Connection Domain ====================
+
+export interface SnapTradeConnectionData {
+  snapTradeUserId: string;
+  encryptedUserSecret: string;
+  authorizationId: string;
+  accountId: string;
+  brokerName: string;
+  brokerSlug: string;
+  accountName: string;
+  connectedAt: string;
+}
+
+// ==================== Broker State Domain ====================
+
 export interface BrokerStateEntry {
   lastEvent: 'BROKER_CONNECTED' | 'BROKER_DISCONNECTED';
   timestamp: number;
@@ -195,6 +220,31 @@ export interface StorageEngine {
 
   /** Save (insert or overwrite) a user's subscription. */
   saveSubscription(userId: string, sub: UserSubscriptionData): Promise<void>;
+
+  // ──── SnapTrade Connections ────
+
+  /** Load the SnapTrade connection for a user. Returns null if not set. */
+  loadSnapTradeConnection(userId: string): Promise<SnapTradeConnectionData | null>;
+
+  /** Save (insert or overwrite) a SnapTrade connection for a user. */
+  saveSnapTradeConnection(userId: string, connection: SnapTradeConnectionData): Promise<void>;
+
+  /** Delete a SnapTrade connection for a user. */
+  deleteSnapTradeConnection(userId: string): Promise<void>;
+
+  // ──── Telegram Links ────
+
+  /** Load the Telegram link for a user. Returns null if not set. */
+  loadTelegramLink(userId: string): Promise<TelegramLinkData | null>;
+
+  /** Save (insert or overwrite) a Telegram link for a user. */
+  saveTelegramLink(userId: string, link: TelegramLinkData): Promise<void>;
+
+  /** Delete a Telegram link for a user. */
+  deleteTelegramLink(userId: string): Promise<void>;
+
+  /** Load ALL Telegram links (for cache hydration after restart). */
+  loadAllTelegramLinks(): Promise<TelegramLinkData[]>;
 
   // ──── Lifecycle ────
 

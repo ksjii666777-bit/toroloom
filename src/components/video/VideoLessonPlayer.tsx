@@ -11,7 +11,7 @@
 
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView,
+  View, Text, StyleSheet, Pressable, ScrollView,
   Dimensions, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -111,7 +111,7 @@ export default function VideoLessonPlayer({
     }, 500);
 
     return () => { unsubPlay?.remove(); unsubStatus?.remove(); clearInterval(interval); };
-  }, [player, duration, videoUrl]);
+  }, [player, duration, videoUrl, onProgressUpdate, onVideoComplete, playbackSpeed, progress?.lastPosition]);
 
   const togglePlay = useCallback(() => {
     if (isPlaying) player.pause(); else player.play();
@@ -172,11 +172,11 @@ export default function VideoLessonPlayer({
 
         {/* Play/Pause Center Button (always visible when paused) */}
         {!isPlaying && (
-          <TouchableOpacity style={styles.centerOverlay} onPress={togglePlay} activeOpacity={1}>
+          <Pressable style={({pressed}) => [styles.centerOverlay, {opacity: pressed ? 1 : 1}]} onPress={togglePlay}>
             <View style={styles.centerPlayBtn}>
               <Ionicons name="play" size={40} color="#FFF" />
             </View>
-          </TouchableOpacity>
+          </Pressable>
         )}
 
         {/* Controls overlay (always visible) */}
@@ -184,9 +184,8 @@ export default function VideoLessonPlayer({
           {/* Seek bar */}
           <View style={styles.seekRow}>
             <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
-            <TouchableOpacity
-              style={styles.seekTrack}
-              activeOpacity={1}
+            <Pressable
+              style={({pressed}) => [styles.seekTrack, {opacity: pressed ? 1 : 1}]}
               onPress={(e) => {
                 const x = e.nativeEvent.locationX;
                 const trackWidth = SCREEN_WIDTH - SPACING.md * 4 - 100;
@@ -196,28 +195,28 @@ export default function VideoLessonPlayer({
             >
               <View style={[styles.seekTrackFill, { width: `${watchPercent}%` as any }]} />
               <View style={[styles.seekThumb, { left: `${watchPercent}%` as any }]} />
-            </TouchableOpacity>
+            </Pressable>
             <Text style={styles.timeText}>{formatTime(duration)}</Text>
           </View>
 
           {/* Bottom controls row */}
           <View style={styles.controlsRow}>
             <View style={styles.leftControls}>
-              <TouchableOpacity onPress={togglePlay} style={styles.ctrlBtn}>
+              <Pressable onPress={togglePlay} style={styles.ctrlBtn}>
                 <Ionicons name={isPlaying ? 'pause' : 'play'} size={18} color="#FFF" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleSeekBack} style={styles.ctrlBtn}>
+              </Pressable>
+              <Pressable onPress={handleSeekBack} style={styles.ctrlBtn}>
                 <Ionicons name="play-back" size={14} color="#FFF" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleSeekFwd} style={styles.ctrlBtn}>
+              </Pressable>
+              <Pressable onPress={handleSeekFwd} style={styles.ctrlBtn}>
                 <Ionicons name="play-forward" size={14} color="#FFF" />
-              </TouchableOpacity>
+              </Pressable>
             </View>
             <View style={styles.rightControls}>
               {/* Speed */}
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.speedScroll}>
                 {SPEED_OPTIONS.map((s) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={s}
                     style={[styles.speedBtn, playbackSpeed === s && styles.speedBtnActive]}
                     onPress={() => handleSpeedChange(s)}
@@ -225,12 +224,12 @@ export default function VideoLessonPlayer({
                     <Text style={[styles.speedText, playbackSpeed === s && styles.speedTextActive]}>
                       {s}x
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </ScrollView>
-              <TouchableOpacity onPress={handleAddBookmark} style={styles.ctrlBtn}>
+              <Pressable onPress={handleAddBookmark} style={styles.ctrlBtn}>
                 <Ionicons name="bookmark-outline" size={16} color="#FFF" />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </View>
@@ -252,21 +251,21 @@ export default function VideoLessonPlayer({
       {(transcript?.length || bookmarks.length) ? (
         <View style={styles.tabBar}>
           {transcript && transcript.length > 0 && (
-            <TouchableOpacity style={[styles.tab, showTranscript && styles.tabActive]}
+            <Pressable style={[styles.tab, showTranscript && styles.tabActive]}
               onPress={() => { setShowTranscript(true); setShowBookmarks(false); }}>
               <Ionicons name="chatbubbles-outline" size={14}
                 color={showTranscript ? colors.primary : colors.textMuted} />
               <Text style={[styles.tabText, showTranscript && styles.tabTextActive]}>Transcript</Text>
-            </TouchableOpacity>
+            </Pressable>
           )}
-          <TouchableOpacity style={[styles.tab, showBookmarks && styles.tabActive]}
+          <Pressable style={[styles.tab, showBookmarks && styles.tabActive]}
             onPress={() => { setShowBookmarks(true); setShowTranscript(false); }}>
             <Ionicons name="bookmark" size={14}
               color={showBookmarks ? colors.primary : colors.textMuted} />
             <Text style={[styles.tabText, showBookmarks && styles.tabTextActive]}>
               Bookmarks ({bookmarks.length})
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       ) : null}
 
@@ -276,10 +275,9 @@ export default function VideoLessonPlayer({
           {transcript.map((e, i) => {
             const isActive = activeTranscript === e;
             return (
-              <TouchableOpacity key={i}
-                style={[styles.transcriptLine, isActive && styles.transcriptLineActive]}
+              <Pressable key={i}
+                style={({pressed}) => [[styles.transcriptLine, isActive && styles.transcriptLineActive], {opacity: pressed ? 0.7 : 1}]}
                 onPress={() => handleSeek(e.startTime)}
-                activeOpacity={0.7}
               >
                 <Text style={[styles.transcriptTime, { color: isActive ? colors.primary : colors.textMuted }]}>
                   {formatTime(e.startTime)}
@@ -290,7 +288,7 @@ export default function VideoLessonPlayer({
                     {e.text}
                   </Text>
                 </View>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </ScrollView>
@@ -310,16 +308,16 @@ export default function VideoLessonPlayer({
             <ScrollView showsVerticalScrollIndicator={false}>
               {[...bookmarks].sort((a, b) => a.time - b.time).map((bm) => (
                 <View key={bm.id} style={[styles.bookmarkRow, { borderBottomColor: colors.divider }]}>
-                  <TouchableOpacity style={styles.bookmarkLeft} onPress={() => handleSeek(bm.time)}>
+                  <Pressable style={styles.bookmarkLeft} onPress={() => handleSeek(bm.time)}>
                     <View style={[styles.bmTimeBadge, { backgroundColor: colors.primary + '20' }]}>
                       <Ionicons name="bookmark" size={10} color={colors.primary} />
                       <Text style={[styles.bmTime, { color: colors.primary }]}>{formatTime(bm.time)}</Text>
                     </View>
                     <Text style={[styles.bmLabel, { color: colors.text }]} numberOfLines={2}>{bm.label}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => onDeleteBookmark?.(bm.id)} hitSlop={8}>
+                  </Pressable>
+                  <Pressable onPress={() => onDeleteBookmark?.(bm.id)} hitSlop={8}>
                     <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               ))}
             </ScrollView>

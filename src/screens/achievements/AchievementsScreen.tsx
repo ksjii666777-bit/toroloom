@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -47,9 +47,9 @@ export default function AchievementsScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <View style={styles.headerContent}>
           <Text style={styles.title}>Achievements</Text>
           <Text style={styles.subtitle}>{unlockedBadges.length} of {badges.length} badges unlocked</Text>
@@ -106,30 +106,30 @@ export default function AchievementsScreen({ navigation }: any) {
 
         {/* Tab Toggle */}
         <View style={styles.tabRow}>
-          <TouchableOpacity
+          <Pressable
             style={[styles.tabBtn, showTab === 'all' && styles.tabBtnActive]}
             onPress={() => setShowTab('all')}
           >
             <Text style={[styles.tabText, showTab === 'all' && styles.tabTextActive]}>All Badges</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             style={[styles.tabBtn, showTab === 'unlocked' && styles.tabBtnActive]}
             onPress={() => setShowTab('unlocked')}
           >
             <Text style={[styles.tabText, showTab === 'unlocked' && styles.tabTextActive]}>
               Unlocked ({unlockedBadges.length})
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Badges Grid */}
         <View style={styles.badgesGrid}>
           {displayBadges.map(badge => (
-            <TouchableOpacity
+            <Pressable
               key={badge.id}
               style={[styles.badgeCard, !badge.unlocked && styles.badgeCardLocked]}
               onPress={() => setSelectedBadge(badge)}
-              activeOpacity={0.7}
+              
             >
               <View style={[styles.badgeIconWrap, !badge.unlocked && styles.badgeIconLocked]}>
                 <Text style={styles.badgeIcon}>{badge.icon}</Text>
@@ -143,7 +143,7 @@ export default function AchievementsScreen({ navigation }: any) {
               {badge.unlocked && badge.unlockedAt && (
                 <Text style={styles.badgeDate}>{formatDate(badge.unlockedAt, 'dd MMM')}</Text>
               )}
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
 
@@ -169,8 +169,8 @@ export default function AchievementsScreen({ navigation }: any) {
         animationType="fade"
         onRequestClose={() => setSelectedBadge(null)}
       >
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setSelectedBadge(null)}>
-          <TouchableOpacity style={styles.modalContent} activeOpacity={1} onPress={() => {}}>
+        <Pressable style={styles.modalOverlay}  onPress={() => setSelectedBadge(null)}>
+          <Pressable style={styles.modalContent}  onPress={() => {}}>
             {selectedBadge && (
               <>
                 <View style={[styles.modalIconWrap, !selectedBadge.unlocked && styles.modalIconLocked]}>
@@ -208,16 +208,16 @@ export default function AchievementsScreen({ navigation }: any) {
                   </View>
                 )}
 
-                <TouchableOpacity
+                <Pressable
                   style={styles.modalCloseBtn}
                   onPress={() => setSelectedBadge(null)}
                 >
                   <Text style={styles.modalCloseText}>Got it!</Text>
-                </TouchableOpacity>
+                </Pressable>
               </>
             )}
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );

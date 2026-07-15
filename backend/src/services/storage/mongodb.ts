@@ -18,7 +18,7 @@
  */
 
 import type { Collection, Db, MongoClient, MongoClientOptions, Filter } from 'mongodb';
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -154,6 +154,9 @@ export class MongoDBStorage implements StorageEngine {
 
     const subs = this.db.collection('subscriptions');
     await subs.createIndex({ userId: 1 }, { unique: true });
+
+    const tg = this.db.collection('telegram_links');
+    await tg.createIndex({ userId: 1 }, { unique: true });
   }
 
   private getAuditCollection(): Collection<AuditEvent> {
@@ -259,6 +262,7 @@ export class MongoDBStorage implements StorageEngine {
     await this.db.collection('notifications').deleteMany({});
     await this.db.collection('badge_counts').deleteMany({});
     await this.db.collection('community_posts').deleteMany({});
+    await this.db.collection('telegram_links').deleteMany({});
     await this.db.collection('subscriptions').deleteMany({});
   }
 
@@ -359,6 +363,67 @@ export class MongoDBStorage implements StorageEngine {
   async deleteNotification(notificationId: string): Promise<void> {
     const col = this.getNotificationCollection();
     await col.deleteOne({ id: notificationId } as unknown as Filter<NotificationData & { _id?: string }>);
+  }
+
+  // ──── Telegram Links ────
+
+  async loadTelegramLink(userId: string): Promise<TelegramLinkData | null> {
+    if (!this.db) return null;
+    const col = this.db.collection<TelegramLinkData & { _id?: string }>('telegram_links');
+    const doc = await col.findOne({ userId } as any);
+    if (!doc) return null;
+    const { _id, ...link } = doc;
+    return link as TelegramLinkData;
+  }
+
+  async saveTelegramLink(userId: string, link: TelegramLinkData): Promise<void> {
+    if (!this.db) return;
+    const col = this.db.collection('telegram_links');
+    await col.updateOne(
+      { userId },
+      { $set: { ...link, userId } },
+      { upsert: true },
+    );
+  }
+
+  async deleteTelegramLink(userId: string): Promise<void> {
+    if (!this.db) return;
+    const col = this.db.collection('telegram_links');
+    await col.deleteOne({ userId });
+  }
+
+  async loadAllTelegramLinks(): Promise<TelegramLinkData[]> {
+    if (!this.db) return [];
+    const col = this.db.collection<TelegramLinkData & { _id?: string }>('telegram_links');
+    const docs = await col.find({}).toArray();
+    return docs.map(({ _id, ...link }) => link as TelegramLinkData);
+  }
+
+  // ──── SnapTrade Connections ────
+
+  async loadSnapTradeConnection(userId: string): Promise<SnapTradeConnectionData | null> {
+    if (!this.db) return null;
+    const col = this.db.collection('snap_trade_connections');
+    const doc: any = await col.findOne({ userId });
+    if (!doc) return null;
+    const { _id, ...conn } = doc;
+    return conn as unknown as SnapTradeConnectionData;
+  }
+
+  async saveSnapTradeConnection(userId: string, connection: SnapTradeConnectionData): Promise<void> {
+    if (!this.db) return;
+    const col = this.db.collection('snap_trade_connections');
+    await col.updateOne(
+      { userId },
+      { $set: { userId, ...connection } },
+      { upsert: true },
+    );
+  }
+
+  async deleteSnapTradeConnection(userId: string): Promise<void> {
+    if (!this.db) return;
+    const col = this.db.collection('snap_trade_connections');
+    await col.deleteOne({ userId });
   }
 
   // ──── Subscriptions ────

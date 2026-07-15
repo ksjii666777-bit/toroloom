@@ -31,7 +31,7 @@ export interface ProxyResult<T = any> {
 async function proxyRequest<T = any>(
   brokerType: string,
   endpoint: string,
-  method: 'GET' | 'POST' = 'GET',
+  _method: 'GET' | 'POST' = 'GET',
   body?: any,
 ): Promise<ProxyResult<T>> {
   try {

@@ -13,7 +13,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, Pressable,
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -87,9 +87,9 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
         <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>Path not found</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Text style={[styles.backBtnText, { color: colors.primary }]}>Go Back</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     );
   }
@@ -100,9 +100,9 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
     <View style={styles.container}>
       {/* Sticky Header */}
       <View style={[styles.stickyHeader, { backgroundColor: colors.bg, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>{path.title}</Text>
         <View style={{ width: 40 }} />
       </View>
@@ -201,11 +201,11 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
             const isComplete = courseProgress >= 100;
 
             return (
-              <TouchableOpacity
+              <Pressable
                 key={course.id}
                 style={[styles.courseCard, { borderColor: isComplete ? colors.primary + '30' : colors.border }]}
                 onPress={() => handleCoursePress(course.id)}
-                activeOpacity={0.7}
+                
               >
                 <View style={styles.courseRow}>
                   {/* Course number */}
@@ -254,7 +254,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
 
                   <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
                 </View>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </View>
@@ -269,10 +269,10 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
         end={{ x: 0, y: 0.3 }}
         style={styles.bottomCtaWrapper}
       >
-        <TouchableOpacity
+        <Pressable
           style={styles.startBtn}
           onPress={handleStartPath}
-          activeOpacity={0.85}
+          
         >
           <LinearGradient
             colors={path.gradient}
@@ -289,7 +289,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
               {pathProgress.percent > 0 ? 'Continue Learning' : 'Start This Path'}
             </Text>
           </LinearGradient>
-        </TouchableOpacity>
+        </Pressable>
       </LinearGradient>
     </View>
   );

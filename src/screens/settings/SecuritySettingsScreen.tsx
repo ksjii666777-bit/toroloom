@@ -307,6 +307,36 @@ export default function SecuritySettingsScreen({ navigation }: any) {
           </View>
         </Card>
 
+        {/* Audit Log Section */}
+        <Card
+          title="Audit Log"
+          subtitle="Login history & session management"
+          style={{ marginTop: SPACING.md }}
+        >
+          <AnimatedPressable
+            onPress={() => navigation.navigate('SecurityAuditLog')}
+            haptic="medium"
+            scaleTo={0.97}
+          >
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.manageIconBox, { backgroundColor: colors.warning + '20' }]}>
+                  <Ionicons name="receipt" size={22} color={colors.warning} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>
+                    Security Audit Log
+                  </Text>
+                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                    Review login history & manage active sessions
+                  </Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </View>
+          </AnimatedPressable>
+        </Card>
+
         {/* Two-Factor Authentication Section */}
         <Card
           title="Two-Factor Authentication"

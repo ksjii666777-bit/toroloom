@@ -20,3 +20,6 @@ export { useFnoStore } from './fnoStore';
 export { useSocialStore } from './socialStore';
 export { useKycStore } from './kycStore';
 export { useOfflineStore } from './offlineStore';
+export { useStrategyPerformanceStore } from './strategyPerformanceStore';
+export { useFeatureFlagStore } from './featureFlagStore';
+export { useReferralStore } from './referralStore';

@@ -23,11 +23,14 @@ import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { getBroker, getCurrentBrokerType } from '../services/broker';
 import { AngelBroker } from '../services/broker/angelBroker';
+import { IbkrBroker } from '../services/broker/ibkrBroker';
+import { registry } from '../services/broker/registry';
 import type {
   EDISVerifyRequest,
   EDISGenerateTPINRequest,
   EDISTranStatusRequest,
   BrokerageEstimateRequest,
+  BrokerConfig,
 } from '../services/broker/interface';
 
 const router = Router();
@@ -240,6 +243,115 @@ router.post('/brokerage/estimate', async (req: Request, res: Response) => {
     const statusCode = errMsg.includes('only available') ? 400 : 500;
     res.status(statusCode).json({
       error: errMsg || 'Failed to estimate brokerage',
+    });
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════════
+// Interactive Brokers (IBKR) Gateway Routes
+// ═════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/broker/ibkr/connect
+ *
+ * Connect to the IBKR Client Portal Gateway.
+ * Body: { gatewayUrl?: string, accountId?: string }
+ */
+router.post('/ibkr/connect', async (req: Request, res: Response) => {
+  try {
+    const { gatewayUrl, accountId } = req.body;
+    const url = gatewayUrl || process.env.IBKR_GATEWAY_URL || 'http://localhost:5000';
+
+    const broker = new IbkrBroker();
+    const config: BrokerConfig = {
+      apiKey: 'ibkr',
+      gatewayUrl: url,
+      accountId: accountId || '',
+    } as any;
+
+    const success = await broker.authenticate(config);
+
+    if (success) {
+      // Store the broker instance in the registry for this user
+      const userId = req.user!.userId;
+      registry.setUserConnection(userId, 'interactive-brokers', broker);
+
+      res.json({
+        success: true,
+        message: 'Connected to Interactive Brokers Gateway',
+        accountId: (broker as any).accountId,
+        gatewayUrl: url,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: 'Could not authenticate with IBKR Gateway. Make sure the Client Portal Gateway is running and you are logged in.',
+      });
+    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to connect to IBKR Gateway',
+    });
+  }
+});
+
+/**
+ * GET /api/broker/ibkr/status
+ *
+ * Check the current IBKR Gateway connection status.
+ */
+router.get('/ibkr/status', async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const broker = registry.getUserBroker(userId) as IbkrBroker | undefined;
+    const brokerType = registry.getUserBrokerType(userId);
+
+    if (!broker || !brokerType || brokerType !== 'interactive-brokers') {
+      res.json({
+        success: false,
+        connected: false,
+        error: 'No IBKR connection found.',
+      });
+      return;
+    }
+
+    const connected = broker.isConnected();
+
+    res.json({
+      success: connected,
+      connected,
+      broker: broker.name,
+    });
+  } catch (error: any) {
+    res.json({
+      success: false,
+      connected: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * POST /api/broker/ibkr/disconnect
+ *
+ * Disconnect from the IBKR Gateway.
+ */
+router.post('/ibkr/disconnect', async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const broker = registry.getUserBroker(userId) as IbkrBroker | undefined;
+
+    if (broker) {
+      broker.disconnect();
+      registry.setUserConnection(userId, 'interactive-brokers', null);
+    }
+
+    res.json({ success: true, message: 'Disconnected from IBKR Gateway' });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to disconnect from IBKR Gateway',
     });
   }
 });

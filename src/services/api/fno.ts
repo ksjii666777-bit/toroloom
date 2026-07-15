@@ -69,6 +69,41 @@ export interface FnOOrderResult {
   status: string;
 }
 
+// ──── Strategy Persistence Types ─────────────────────────────────────────
+
+export interface SavedStrategy {
+  id: string;
+  name: string;
+  description: string;
+  symbol?: string;
+  createdAt: string;
+  updatedAt: string;
+  spotPrice: number;
+  legs: {
+    type: string;
+    action: string;
+    strike: number;
+    premium: number;
+    quantity: number;
+    lotSize: number;
+    expiry: string;
+  }[];
+  /** Optional backtest result snapshot */
+  backtestSnapshot?: {
+    winRate: number;
+    sharpeRatio: number;
+    maxDrawdownPercent: number;
+    profitFactor: number;
+    totalPnl: number;
+  };
+  /** Whether this strategy is shared publicly */
+  isShared?: boolean;
+  /** Unique share link ID (if shared) */
+  shareId?: string;
+  /** Tags for filtering */
+  tags?: string[];
+}
+
 export const fnoApi = {
   /** Get available expiry dates for a symbol */
   getExpiries: (symbol: string) =>
@@ -109,4 +144,83 @@ export const fnoApi = {
 
   /** Get open F&O positions */
   getPositions: () => api.get<FnOPosition[]>('/fno/positions'),
+
+  // ──── Strategy Persistence ─────────────────────────────────────
+
+  /** Save a strategy to the backend */
+  saveStrategy: (strategy: Omit<SavedStrategy, 'id' | 'createdAt' | 'updatedAt' | 'shareId'>) =>
+    api.post<SavedStrategy>('/fno/strategies', strategy),
+
+  /** Update an existing strategy */
+  updateStrategy: (id: string, updates: Partial<SavedStrategy>) =>
+    api.put<SavedStrategy>(`/fno/strategies/${id}`, updates),
+
+  /** Get all saved strategies for the current user */
+  getSavedStrategies: () =>
+    api.get<SavedStrategy[]>('/fno/strategies'),
+
+  /** Get a single saved strategy by ID */
+  getStrategyById: (id: string) =>
+    api.get<SavedStrategy>(`/fno/strategies/${id}`),
+
+  /** Delete a saved strategy */
+  deleteStrategy: (id: string) =>
+    api.delete<{ success: boolean }>(`/fno/strategies/${id}`),
+
+  /** Share a strategy (makes it public and returns share link) */
+  shareStrategy: (id: string) =>
+    api.post<{ shareId: string; shareUrl: string }>(`/fno/strategies/${id}/share`),
+
+  /** Unshare a strategy */
+  unshareStrategy: (id: string) =>
+    api.post<{ success: boolean }>(`/fno/strategies/${id}/unshare`),
+
+  /** Load a shared strategy by its share ID */
+  getSharedStrategy: (shareId: string) =>
+    api.get<SavedStrategy>(`/fno/strategies/shared/${shareId}`),
+
+  /** Execute a multi-leg strategy (sends all legs to broker) */
+  executeStrategy: (request: {
+    legs: {
+      type: string;
+      action: string;
+      strike: number;
+      premium: number;
+      quantity: number;
+      lotSize: number;
+      expiry: string;
+    }[];
+    symbol: string;
+    spotPrice: number;
+    name?: string;
+    productType?: string;
+    orderType?: string;
+  }) =>
+    api.post<{
+      strategyName: string;
+      totalLegs: number;
+      successful: number;
+      failed: number;
+      totalValue: number;
+      legs: {
+        legIndex: number;
+        legLabel: string;
+        success: boolean;
+        orderId?: string;
+        message: string;
+        status?: string;
+        totalQuantity?: number;
+        totalValue?: number;
+      }[];
+      executedAt: string;
+    }>('/fno/strategy/execute', request),
+
+  /** Fetch historical OHLC data for backtesting */
+  getHistoricalData: (symbol: string, days?: number) =>
+    api.get<{
+      symbol: string;
+      days: number;
+      data: { date: string; open: number; high: number; low: number; close: number; volume: number }[];
+      source: 'broker' | 'mock' | 'cache';
+    }>(`/fno/historical-data?symbol=${encodeURIComponent(symbol)}&days=${days || 365}`),
 };

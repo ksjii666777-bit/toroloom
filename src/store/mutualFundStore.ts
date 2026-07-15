@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import { MutualFund, SIPPlan } from '../types';
+import { MutualFund, SIPPlan, StepUpConfig } from '../types';
 import { mockMutualFunds, mockSIPs } from '../constants/mockData';
-import { mutualFundApi } from '../services/api';
+import { mutualFundApi } from '../services/api/mutualFunds';
 import { log } from '../utils/logger';
 
 interface MutualFundState {
@@ -16,6 +16,12 @@ interface MutualFundState {
   pauseSIP: (sipId: string) => Promise<void>;
   resumeSIP: (sipId: string) => Promise<void>;
   deleteSIP: (sipId: string) => Promise<void>;
+  /** Enable step-up on an existing SIP */
+  enableStepUp: (sipId: string, percent: number, frequency: StepUpConfig['frequency']) => Promise<void>;
+  /** Modify an existing step-up configuration */
+  modifyStepUp: (sipId: string, updates: { percent?: number; frequency?: StepUpConfig['frequency'] }) => Promise<void>;
+  /** Disable step-up on a SIP (keep SIP running without auto-increase) */
+  disableStepUp: (sipId: string) => Promise<void>;
 }
 
 export const useMutualFundStore = create<MutualFundState>((set) => ({
@@ -136,4 +142,88 @@ export const useMutualFundStore = create<MutualFundState>((set) => ({
       sipPlans: state.sipPlans.filter(s => s.id !== sipId),
     }));
   },
+
+  enableStepUp: async (sipId, percent, frequency) => {
+    try {
+      await mutualFundApi.enableStepUp(sipId, { percent, frequency });
+    } catch {
+      // Backend unavailable — update locally
+    }
+
+    set(state => ({
+      sipPlans: state.sipPlans.map(sip => {
+        if (sip.id !== sipId) return sip;
+        const nextYear = new Date();
+        nextYear.setFullYear(nextYear.getFullYear() + 1);
+        return {
+          ...sip,
+          stepUp: {
+            enabled: true,
+            percent,
+            frequency,
+            baseAmount: sip.amount,
+            currentStep: 0,
+            nextStepDate: frequency === 'yearly'
+              ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+              : new Date(Date.now() + 182 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            projectedAmount: computeProjectedAmount(sip.amount, percent, frequency, 10),
+          },
+        };
+      }),
+    }));
+  },
+
+  modifyStepUp: async (sipId, updates) => {
+    try {
+      await mutualFundApi.modifyStepUp(sipId, updates);
+    } catch {
+      // Backend unavailable — update locally
+    }
+
+    set(state => ({
+      sipPlans: state.sipPlans.map(sip => {
+        if (sip.id !== sipId || !sip.stepUp) return sip;
+        const newPercent = updates.percent ?? sip.stepUp.percent;
+        const newFrequency = updates.frequency ?? sip.stepUp.frequency;
+        return {
+          ...sip,
+          stepUp: {
+            ...sip.stepUp,
+            ...updates,
+            projectedAmount: computeProjectedAmount(sip.stepUp.baseAmount, newPercent, newFrequency, 10),
+          },
+        };
+      }),
+    }));
+  },
+
+  disableStepUp: async (sipId) => {
+    try {
+      await mutualFundApi.disableStepUp(sipId);
+    } catch {
+      // Backend unavailable — update locally
+    }
+
+    set(state => ({
+      sipPlans: state.sipPlans.map(sip =>
+        sip.id === sipId ? { ...sip, stepUp: undefined } : sip
+      ),
+    }));
+  },
 }));
+
+/** Helper: compute projected SIP amount after N years with step-up */
+function computeProjectedAmount(
+  baseAmount: number,
+  percent: number,
+  frequency: StepUpConfig['frequency'],
+  years: number
+): number {
+  let amount = baseAmount;
+  const stepsPerYear = frequency === 'yearly' ? 1 : 2;
+  const totalSteps = years * stepsPerYear;
+  for (let i = 0; i < totalSteps; i++) {
+    amount = amount * (1 + percent / 100);
+  }
+  return Math.round(amount);
+}

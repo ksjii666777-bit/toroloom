@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Stock, MarketIndex } from '../types';
 import { mockIndices, mockStocks } from '../constants/mockData';
-import { marketApi } from '../services/api';
+import { marketApi } from '../services/api/market';
 import { offlineCache } from '../services/offlineCache';
 import { registerCacheWarming } from '../services/cacheWarmingService';
 import { analytics } from '../services/analytics';

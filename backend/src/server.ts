@@ -11,8 +11,10 @@ import { requireSubscription, configureSubscriptionGating } from './middleware/s
 import { setupWebSocket } from './websocket/handler';
 import { getStorage, getStorageIfInitialized } from './services/storage';
 import { auditTrail } from './services/auditTrail';
-import { riskEngine } from './services/riskEngine';
+import { riskEngine } from './services/riskEngine/RiskEngine';
 import { configureBrokerPersistence, loadBrokerStateFromStorage } from './services/broker';
+import { configureSnapTradePersistence } from './services/snapTradePersistence';
+import { configureTelegramPersistence } from './services/telegramPersistence';
 import { configureKycPersistence } from './services/kyc';
 import { configureNotificationPersistence } from './services/notifications';
 import { configureCommunityPersistence } from './services/community';
@@ -20,7 +22,7 @@ import { configurePortfolioAlertStorage, configureBadgeCountPersistence } from '
 
 // Services
 import { configureMarketStack } from './services/marketstack';
-import { configureTelegramBot } from './services/telegramBot';
+import { configureTelegramBot, hydrateUserLinksFromStorage } from './services/telegramBot';
 
 // Routes
 import authRoutes from './routes/auth';
@@ -38,6 +40,7 @@ import fundsRoutes from './routes/funds';
 import ordersRoutes from './routes/orders';
 import brokerRoutes from './routes/broker';
 import brokerLinkRoutes from './routes/brokerLink';
+import snapTradeRoutes from './routes/snaptrade';
 import systemRoutes from './routes/system';
 import wsStatusRoutes from './routes/wsStatus';
 import ironLockRoutes from './routes/ironLock';
@@ -49,8 +52,8 @@ import contractNoteRoutes from './routes/contractNote';
 import fnoRoutes from './routes/fno';
 import newsRoutes from './routes/news';
 import telegramRoutes from './routes/telegram';
+import dividendRoutes from './routes/dividends';
 import brokerProxyRoutes from './routes/brokerProxy';
-import angelConnectRoutes from './routes/angelConnect';
 import socialRoutes from './routes/social';
 import kycRoutes from './routes/kyc';
 import twoFactorRoutes from './routes/twoFactor';
@@ -159,6 +162,9 @@ app.use('/api/funds', writeLimiter, fundsRoutes);
 app.use('/api/orders', writeLimiter, ordersRoutes);
 app.use('/api/broker', writeLimiter, brokerRoutes);
 app.use('/api/broker-link', writeLimiter, authMiddleware, requireSubscription('pro'), brokerLinkRoutes);
+
+// ── SnapTrade Broker OAuth — 50 req / min ──────────────────────────────
+app.use('/api/snaptrade', writeLimiter, authMiddleware, snapTradeRoutes);
 app.use('/api/iron-lock', writeLimiter, authMiddleware, requireSubscription('elite'), ironLockRoutes);
 app.use('/api/payments', writeLimiter, paymentsRoutes);
 // Protected subscription routes (authMiddleware applied inside router)
@@ -180,14 +186,14 @@ app.use('/api/auth/2fa', writeLimiter, authMiddleware, twoFactorRoutes);
 // ── News — 100 req / min ──────────────────────────────────────────
 app.use('/api/news', readLimiter, newsRoutes);
 
+// ── Dividends — 100 req / min ───────────────────────────────────────
+app.use('/api/dividends', readLimiter, dividendRoutes);
+
 // ── Telegram — 50 req / min ────────────────────────────────────────
 app.use('/api/telegram', writeLimiter, telegramRoutes);
 
 // ── Broker Proxy — 100 req / min (auth required) ────────────────────
 app.use('/api/broker-proxy', writeLimiter, brokerProxyRoutes);
-
-// ── Angel One SmartAPI (per-user) — 50 req / min ────────────────────
-app.use('/api/angel', writeLimiter, angelConnectRoutes);
 
 app.use('/api/sync', writeLimiter, authMiddleware, syncRoutes);
 
@@ -250,6 +256,16 @@ async function initializeStorage(): Promise<void> {
 
     // Wire storage into the Subscription service for persistence
     configureSubscriptionPersistence(storage);
+
+    // Wire storage into the SnapTrade persistence layer
+    configureSnapTradePersistence(storage);
+
+    // Wire storage into the Telegram persistence layer
+    configureTelegramPersistence(storage);
+
+    // Hydrate Telegram bot's in-memory cache from persisted links
+    // so previously-linked users don't need to re-link after restart
+    await hydrateUserLinksFromStorage();
 
     // Wire storage into the Subscription Gate middleware
     configureSubscriptionGating(storage);

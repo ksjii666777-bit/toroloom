@@ -13,7 +13,7 @@
  * ============================================================================
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Svg, {
   Path,
   Circle,
@@ -107,7 +107,7 @@ export function RocketIllustration({
       -1,
       true
     );
-  }, []);
+  }, [engineGlow, flameH, glowR, starOpacity1, starOpacity2]);
 
   // Note: rocketY not animated here — the interactive RocketAnimation component
   // handles the tap-to-launch. This SVG illustration provides the hero art.
@@ -209,6 +209,7 @@ const PIE_SEGMENTS = [
   { percent: 0.18, color: '#FFAB40', label: 'Energy' },
   { percent: 0.12, color: '#FF5252', label: 'Health' },
 ];
+const _PIE_COUNT = 4;
 
 interface PortfolioIllustrationProps {
   colors?: readonly [string, string];
@@ -218,9 +219,18 @@ interface PortfolioIllustrationProps {
 export function PortfolioIllustration({
   colors = ['#10B981', '#047857'],
 }: PortfolioIllustrationProps) {
-  // ── Animated values ──
-  const segmentOpacity = PIE_SEGMENTS.map(() => useSharedValue(0));
-  const segmentScale = PIE_SEGMENTS.map(() => useSharedValue(1));
+  // ── Animated values (unrolled for Rules of Hooks compliance) ──
+  const segmentOpacity0 = useSharedValue(0);
+  const segmentOpacity1 = useSharedValue(0);
+  const segmentOpacity2 = useSharedValue(0);
+  const segmentOpacity3 = useSharedValue(0);
+  const segmentScale0 = useSharedValue(1);
+  const segmentScale1 = useSharedValue(1);
+  const segmentScale2 = useSharedValue(1);
+  const segmentScale3 = useSharedValue(1);
+  const segmentOpacity = useMemo(() => [segmentOpacity0, segmentOpacity1, segmentOpacity2, segmentOpacity3], [segmentOpacity0, segmentOpacity1, segmentOpacity2, segmentOpacity3]);
+  const segmentScale = useMemo(() => [segmentScale0, segmentScale1, segmentScale2, segmentScale3], [segmentScale0, segmentScale1, segmentScale2, segmentScale3]);
+
   const centerGlowO = useSharedValue(0.3);
   const particle1X = useSharedValue(40);
   const particle1Y = useSharedValue(35);
@@ -299,15 +309,27 @@ export function PortfolioIllustration({
       -1,
       false
     );
-  }, []);
+  }, [centerGlowO, particle1X, particle1Y, particle2X, particle2Y, ringRotate, segmentOpacity, segmentScale]);
 
-  // ── Animated props ──
-  const segmentAnimProps = segmentScale.map((s, i) =>
-    useAnimatedProps(() => ({
-      opacity: segmentOpacity[i].value,
-      transform: [{ scale: s.value }],
-    }))
-  );
+  // ── Animated props (unrolled for Rules of Hooks compliance) ──
+  const segmentAnimProps0 = useAnimatedProps(() => ({
+    opacity: segmentOpacity0.value,
+    transform: [{ scale: segmentScale0.value }],
+  }));
+  const segmentAnimProps1 = useAnimatedProps(() => ({
+    opacity: segmentOpacity1.value,
+    transform: [{ scale: segmentScale1.value }],
+  }));
+  const segmentAnimProps2 = useAnimatedProps(() => ({
+    opacity: segmentOpacity2.value,
+    transform: [{ scale: segmentScale2.value }],
+  }));
+  const segmentAnimProps3 = useAnimatedProps(() => ({
+    opacity: segmentOpacity3.value,
+    transform: [{ scale: segmentScale3.value }],
+  }));
+  const segmentAnimProps = [segmentAnimProps0, segmentAnimProps1, segmentAnimProps2, segmentAnimProps3];
+
   const centerProps = useAnimatedProps(() => ({ opacity: centerGlowO.value }));
   const particle1Props = useAnimatedProps(() => ({ cx: particle1X.value, cy: particle1Y.value }));
   const particle2Props = useAnimatedProps(() => ({ cx: particle2X.value, cy: particle2Y.value }));
@@ -354,7 +376,7 @@ export function PortfolioIllustration({
         const { startAngle, endAngle } = segmentPositions[i];
         const r = 55;
         return (
-          <G key={i}>
+          <G key={`seg_${i}`}>
             <AnimatedPath
               d={buildArcPath(H_CENTER, V_CENTER, r, startAngle, endAngle)}
               fill={seg.color}
@@ -380,7 +402,7 @@ export function PortfolioIllustration({
 
       {/* Percentage labels */}
       {PIE_SEGMENTS.map((seg, i) => (
-        <G key={`label-${i}`}>
+        <G key={`seglabel_${i}`}>
           <Circle cx={segmentPositions[i].midX} cy={segmentPositions[i].midY} r={3} fill="#FFFFFF" opacity={0.8} />
           <Line
             x1={segmentPositions[i].midX}
@@ -416,6 +438,7 @@ const CANDLE_DATA = [
   { open: 105, close: 118, high: 122, low: 103 },
   { open: 118, close: 125, high: 130, low: 116 },
 ];
+const _CANDLE_COUNT = 7;
 
 interface MarketsIllustrationProps {
   colors?: readonly [string, string];
@@ -445,10 +468,34 @@ export function MarketsIllustration({
     return `${x},${closeY}`;
   }).join(' ');
 
-  // ── Animated values ──
-  const candleScales = CANDLE_DATA.map(() => useSharedValue(0));
-  const candleOpacities = CANDLE_DATA.map(() => useSharedValue(0));
-  const dotGlows = CANDLE_DATA.map(() => useSharedValue(0.3));
+  // ── Animated values (unrolled for Rules of Hooks compliance) ──
+  const candleScale0 = useSharedValue(0);
+  const candleScale1 = useSharedValue(0);
+  const candleScale2 = useSharedValue(0);
+  const candleScale3 = useSharedValue(0);
+  const candleScale4 = useSharedValue(0);
+  const candleScale5 = useSharedValue(0);
+  const candleScale6 = useSharedValue(0);
+  const candleScales = useMemo(() => [candleScale0, candleScale1, candleScale2, candleScale3, candleScale4, candleScale5, candleScale6], [candleScale0, candleScale1, candleScale2, candleScale3, candleScale4, candleScale5, candleScale6]);
+
+  const candleOpacity0 = useSharedValue(0);
+  const candleOpacity1 = useSharedValue(0);
+  const candleOpacity2 = useSharedValue(0);
+  const candleOpacity3 = useSharedValue(0);
+  const candleOpacity4 = useSharedValue(0);
+  const candleOpacity5 = useSharedValue(0);
+  const candleOpacity6 = useSharedValue(0);
+  const candleOpacities = useMemo(() => [candleOpacity0, candleOpacity1, candleOpacity2, candleOpacity3, candleOpacity4, candleOpacity5, candleOpacity6], [candleOpacity0, candleOpacity1, candleOpacity2, candleOpacity3, candleOpacity4, candleOpacity5, candleOpacity6]);
+
+  const dotGlow0 = useSharedValue(0.3);
+  const dotGlow1 = useSharedValue(0.3);
+  const dotGlow2 = useSharedValue(0.3);
+  const dotGlow3 = useSharedValue(0.3);
+  const dotGlow4 = useSharedValue(0.3);
+  const dotGlow5 = useSharedValue(0.3);
+  const dotGlow6 = useSharedValue(0.3);
+  const dotGlows = useMemo(() => [dotGlow0, dotGlow1, dotGlow2, dotGlow3, dotGlow4, dotGlow5, dotGlow6], [dotGlow0, dotGlow1, dotGlow2, dotGlow3, dotGlow4, dotGlow5, dotGlow6]);
+
   const trendDash = useSharedValue(200);
   const crosshairX = useSharedValue(H_CENTER);
   const crosshairY = useSharedValue(V_CENTER);
@@ -501,38 +548,119 @@ export function MarketsIllustration({
       -1,
       true
     );
-  }, []);
+  }, [candleOpacities, candleScales, crosshairX, crosshairY, dotGlows, trendDash]);
 
-  // ── Animated props ──
-  const candleAnimProps = CANDLE_DATA.map((d, i) => {
-    const openY = toY(d.open);
-    const closeY = toY(d.close);
+  // ── Animated props for candles (unrolled for Rules of Hooks compliance) ──
+  const candleAnimProps0 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[0].open);
+    const closeY = toY(CANDLE_DATA[0].close);
     const bodyBottom = Math.max(openY, closeY);
     const bodyH = Math.max(Math.abs(closeY - openY), 2);
-
-    return useAnimatedProps(() => ({
-      y: bodyBottom - bodyH * candleScales[i].value,
-      height: bodyH * candleScales[i].value,
-      opacity: candleOpacities[i].value,
-    }));
+    return { y: bodyBottom - bodyH * candleScale0.value, height: bodyH * candleScale0.value, opacity: candleOpacity0.value };
   });
-
-  const glowAnimProps = CANDLE_DATA.map((d, i) => {
-    const openY = toY(d.open);
-    const closeY = toY(d.close);
+  const candleAnimProps1 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[1].open);
+    const closeY = toY(CANDLE_DATA[1].close);
     const bodyBottom = Math.max(openY, closeY);
     const bodyH = Math.max(Math.abs(closeY - openY), 2);
-
-    return useAnimatedProps(() => ({
-      y: bodyBottom - bodyH * candleScales[i].value,
-      height: bodyH * candleScales[i].value,
-      opacity: candleOpacities[i].value * 0.35,
-    }));
+    return { y: bodyBottom - bodyH * candleScale1.value, height: bodyH * candleScale1.value, opacity: candleOpacity1.value };
   });
+  const candleAnimProps2 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[2].open);
+    const closeY = toY(CANDLE_DATA[2].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale2.value, height: bodyH * candleScale2.value, opacity: candleOpacity2.value };
+  });
+  const candleAnimProps3 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[3].open);
+    const closeY = toY(CANDLE_DATA[3].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale3.value, height: bodyH * candleScale3.value, opacity: candleOpacity3.value };
+  });
+  const candleAnimProps4 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[4].open);
+    const closeY = toY(CANDLE_DATA[4].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale4.value, height: bodyH * candleScale4.value, opacity: candleOpacity4.value };
+  });
+  const candleAnimProps5 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[5].open);
+    const closeY = toY(CANDLE_DATA[5].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale5.value, height: bodyH * candleScale5.value, opacity: candleOpacity5.value };
+  });
+  const candleAnimProps6 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[6].open);
+    const closeY = toY(CANDLE_DATA[6].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale6.value, height: bodyH * candleScale6.value, opacity: candleOpacity6.value };
+  });
+  const candleAnimProps = [candleAnimProps0, candleAnimProps1, candleAnimProps2, candleAnimProps3, candleAnimProps4, candleAnimProps5, candleAnimProps6];
 
-  const dotProps = CANDLE_DATA.map((_, i) =>
-    useAnimatedProps(() => ({ opacity: dotGlows[i].value }))
-  );
+  const glowAnimProps0 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[0].open);
+    const closeY = toY(CANDLE_DATA[0].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale0.value, height: bodyH * candleScale0.value, opacity: candleOpacity0.value * 0.35 };
+  });
+  const glowAnimProps1 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[1].open);
+    const closeY = toY(CANDLE_DATA[1].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale1.value, height: bodyH * candleScale1.value, opacity: candleOpacity1.value * 0.35 };
+  });
+  const glowAnimProps2 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[2].open);
+    const closeY = toY(CANDLE_DATA[2].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale2.value, height: bodyH * candleScale2.value, opacity: candleOpacity2.value * 0.35 };
+  });
+  const glowAnimProps3 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[3].open);
+    const closeY = toY(CANDLE_DATA[3].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale3.value, height: bodyH * candleScale3.value, opacity: candleOpacity3.value * 0.35 };
+  });
+  const glowAnimProps4 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[4].open);
+    const closeY = toY(CANDLE_DATA[4].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale4.value, height: bodyH * candleScale4.value, opacity: candleOpacity4.value * 0.35 };
+  });
+  const glowAnimProps5 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[5].open);
+    const closeY = toY(CANDLE_DATA[5].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale5.value, height: bodyH * candleScale5.value, opacity: candleOpacity5.value * 0.35 };
+  });
+  const glowAnimProps6 = useAnimatedProps(() => {
+    const openY = toY(CANDLE_DATA[6].open);
+    const closeY = toY(CANDLE_DATA[6].close);
+    const bodyBottom = Math.max(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    return { y: bodyBottom - bodyH * candleScale6.value, height: bodyH * candleScale6.value, opacity: candleOpacity6.value * 0.35 };
+  });
+  const glowAnimProps = [glowAnimProps0, glowAnimProps1, glowAnimProps2, glowAnimProps3, glowAnimProps4, glowAnimProps5, glowAnimProps6];
+
+  const dotProps0 = useAnimatedProps(() => ({ opacity: dotGlow0.value }));
+  const dotProps1 = useAnimatedProps(() => ({ opacity: dotGlow1.value }));
+  const dotProps2 = useAnimatedProps(() => ({ opacity: dotGlow2.value }));
+  const dotProps3 = useAnimatedProps(() => ({ opacity: dotGlow3.value }));
+  const dotProps4 = useAnimatedProps(() => ({ opacity: dotGlow4.value }));
+  const dotProps5 = useAnimatedProps(() => ({ opacity: dotGlow5.value }));
+  const dotProps6 = useAnimatedProps(() => ({ opacity: dotGlow6.value }));
+  const dotProps = [dotProps0, dotProps1, dotProps2, dotProps3, dotProps4, dotProps5, dotProps6];
 
   const trendProps = useAnimatedProps(() => ({
     strokeDashoffset: trendDash.value,
@@ -558,7 +686,7 @@ export function MarketsIllustration({
       {/* Background grid lines */}
       {[0, 1, 2, 3].map(i => (
         <Line
-          key={`grid-${i}`}
+          key={`grid_${i}`}
           x1={35}
           y1={chartT + (chartH / 4) * i}
           x2={185}
@@ -575,7 +703,7 @@ export function MarketsIllustration({
         const highY = toY(d.high);
         const lowY = toY(d.low);
         return (
-          <G key={i}>
+          <G key={`candle_${i}`}>
             {/* Wick */}
             <Line
               x1={x + candleW / 2}
@@ -616,7 +744,7 @@ export function MarketsIllustration({
         const closeY = toY(d.close);
         return (
           <AnimatedCircle
-            key={`dot-${i}`}
+            key={`dot_${i}`}
             cx={x}
             cy={closeY}
             r={2}
@@ -721,7 +849,7 @@ export function TradingIllustration({
       -1,
       true
     );
-  }, []);
+  }, [buyGlow, buyPulse, dot1X, dot2X, flowOffset, sellGlow, sellPulse]);
 
   // ── Animated props ──
   const buyProps = useAnimatedProps(() => ({
@@ -859,7 +987,7 @@ export function BrokerIllustration({
       -1,
       true
     );
-  }, []);
+  }, [pulse1, pulse2, pulse3, shieldGlow]);
 
   const node1Props = useAnimatedProps(() => ({ opacity: pulse1.value }));
   const node2Props = useAnimatedProps(() => ({ opacity: pulse2.value }));
@@ -975,7 +1103,7 @@ export function LearnIllustration({
       -1,
       true
     );
-  }, []);
+  }, [glow1, glow2, pageOffset]);
 
   const glow1Props = useAnimatedProps(() => ({ r: 12 + glow1.value * 4 }));
   const glow2Props = useAnimatedProps(() => ({ r: 10 + glow2.value * 3 }));

@@ -22,7 +22,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Dimensions,
 } from 'react-native';
@@ -127,7 +127,7 @@ export default function SyncConflictModal() {
       modalScale.value = withTiming(0.85, { duration: 200 });
       modalTranslateY.value = withTiming(80, { duration: 200 });
     }
-  }, [isVisible]);
+  }, [isVisible, backdropOpacity, modalScale, modalTranslateY]);
 
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: backdropOpacity.value,
@@ -203,13 +203,12 @@ export default function SyncConflictModal() {
   return (
     <View style={styles.root} pointerEvents="auto">
       {/* Backdrop */}
-      <TouchableOpacity
-        style={StyleSheet.absoluteFill}
-        activeOpacity={1}
+      <Pressable
+        style={({pressed}) => [StyleSheet.absoluteFill, {opacity: pressed ? 1 : 1}]}
         onPress={handleClose}
       >
         <Animated.View style={[styles.backdrop, backdropStyle]} />
-      </TouchableOpacity>
+      </Pressable>
 
       {/* Modal */}
       <Animated.View
@@ -238,9 +237,9 @@ export default function SyncConflictModal() {
                 </Text>
               </View>
             </View>
-            <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
+            <Pressable onPress={handleClose} style={styles.closeBtn}>
               <Ionicons name="close" size={18} color="rgba(255,255,255,0.5)" />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* ── Conflict List ── */}
@@ -282,29 +281,29 @@ export default function SyncConflictModal() {
 
                 {/* Resolution actions */}
                 <View style={styles.resolutionRow}>
-                  <TouchableOpacity
+                  <Pressable
                     style={[styles.resolveBtn, styles.resolveDismiss]}
                     onPress={() => handleResolve(conflict.id, 'dismissed')}
                     disabled={actionLoading === conflict.id}
                   >
                     <Text style={styles.resolveDismissText}>Dismiss</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                  </Pressable>
+                  <Pressable
                     style={[styles.resolveBtn, styles.resolveRetry]}
                     onPress={() => handleResolve(conflict.id, 'resolved_use_server')}
                     disabled={actionLoading === conflict.id}
                   >
                     <Ionicons name="refresh-outline" size={11} color="#22C55E" />
                     <Text style={styles.resolveRetryText}>Retry</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                  </Pressable>
+                  <Pressable
                     style={[styles.resolveBtn, styles.resolveKeep]}
                     onPress={() => handleResolve(conflict.id, 'resolved_keep_local')}
                     disabled={actionLoading === conflict.id}
                   >
                     <Ionicons name="checkmark-outline" size={11} color="#3B82F6" />
                     <Text style={styles.resolveKeepText}>Keep</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               </View>
             ))}
@@ -312,19 +311,19 @@ export default function SyncConflictModal() {
 
           {/* ── Bulk Actions ── */}
           <View style={styles.bulkActions}>
-            <TouchableOpacity
+            <Pressable
               style={styles.bulkDismissBtn}
               onPress={handleResolveAll}
             >
               <Text style={styles.bulkDismissText}>Dismiss All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               style={styles.bulkRetryBtn}
               onPress={handleRetryAll}
             >
               <Ionicons name="refresh-outline" size={14} color="#0D0D0D" />
               <Text style={styles.bulkRetryText}>Retry All</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* ── Footnote ── */}

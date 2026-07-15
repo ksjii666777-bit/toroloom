@@ -30,6 +30,7 @@ import {
   Alert,
   ActivityIndicator,
   TextInput,
+  Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,7 +42,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SecureSessionSync from '../../components/gateway/SecureSessionSync';
 import { clearBrokerSession, hasValidSession } from '../../services/gateway/sessionStorage';
-import { brokerProxyApi, angelConnectApi } from '../../services/api';
+import { brokerProxyApi, angelConnectApi, snapTradeApi } from '../../services/api';
 import type { SessionPayload } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -96,8 +97,38 @@ const BROKERS: BrokerMeta[] = [
     icon: 'G',
     color: '#00A86B',
     gradient: ['#00A86B', '#008050'] as const,
-    hasOAuth: false,
+    hasOAuth: true,
     features: ['Trade API', 'Zero Commission', 'Mutual Funds'],
+  },
+  {
+    type: 'dhan',
+    label: 'Dhan',
+    tagline: 'India\'s fastest growing trading platform',
+    icon: 'D',
+    color: '#9B59B6',
+    gradient: ['#9B59B6', '#7D3C98'] as const,
+    hasOAuth: true,
+    features: ['OAuth 2.0', 'Zero Brokerage', 'Fast Execution'],
+  },
+  {
+    type: 'upstox',
+    label: 'Upstox',
+    tagline: 'Trusted by millions of traders',
+    icon: 'U',
+    color: '#E74C3C',
+    gradient: ['#E74C3C', '#C0392B'] as const,
+    hasOAuth: true,
+    features: ['OAuth 2.0', 'Free Account', 'Advanced Charts'],
+  },
+  {
+    type: 'interactive',
+    label: 'Interactive Brokers',
+    tagline: 'Global trading powerhouse',
+    icon: 'I',
+    color: '#2C3E50',
+    gradient: ['#2C3E50', '#1A252F'] as const,
+    hasOAuth: true,
+    features: ['Global Markets', 'Advanced Tools', 'API Access'],
   },
 ];
 
@@ -137,6 +168,10 @@ export default function ConnectBrokerView({ navigation }: any) {
     checkExistingSessions();
   }, []);
 
+  // ── SnapTrade integration hooks ──
+  const [isConnectingSnapTrade, setIsConnectingSnapTrade] = useState(false);
+  const [snapTradeConnected, setSnapTradeConnected] = useState<boolean | null>(null);
+
   // Entrance animation
   useEffect(() => {
     Animated.parallel([
@@ -147,6 +182,17 @@ export default function ConnectBrokerView({ navigation }: any) {
 
   const checkExistingSessions = async () => {
     try {
+      // First try SnapTrade status
+      const st = await snapTradeApi.status();
+      if (st.connected && st.brokerSlug) {
+        setConnectedBroker(st.brokerSlug);
+        setConnectedLabel(st.brokerName || st.brokerSlug);
+        setSnapTradeConnected(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Fallback: check legacy Zero-API sessions
       const brokers = ['zerodha', 'angel', 'groww'];
       for (const b of brokers) {
         const valid = await hasValidSession(b);
@@ -159,6 +205,7 @@ export default function ConnectBrokerView({ navigation }: any) {
     } catch {
       // Session storage unavailable — gracefully fall through to disconnected state
     } finally {
+      setSnapTradeConnected(false);
       setIsLoading(false);
     }
   };
@@ -182,9 +229,97 @@ export default function ConnectBrokerView({ navigation }: any) {
     };
   }, []);
 
-  // ── Open Session Sync (Zero-API Gateway) ────────────────────
+  // ── SnapTrade Connect Flow ───────────────────────────────────
+  // Deep link handler for SnapTrade OAuth callback
+  // toroloom://snaptrade/callback?authorizationId=xxx
+  const snapTradeCallbackRef = useRef<string | null>(null);
+
+  const handleSnapTradeCallback = useCallback(
+    async (url: string) => {
+      try {
+        const parsed = new URL(url);
+        const authorizationId = parsed.searchParams.get('authorizationId');
+        if (!authorizationId || snapTradeCallbackRef.current === url) return;
+        snapTradeCallbackRef.current = url;
+
+        setIsConnectingSnapTrade(true);
+        const result = await snapTradeApi.handleCallback(authorizationId);
+
+        if (result.success && result.connection) {
+          setConnectedBroker(result.connection.brokerSlug || selectedBroker?.type || null);
+          setConnectedLabel(result.connection.brokerName || selectedBroker?.label || null);
+          notificationAsync(NotificationFeedbackType.Success);
+          showConnectedSuccess();
+        }
+      } catch (err: any) {
+        Alert.alert('Connection Failed', err.message || 'Failed to complete SnapTrade OAuth.');
+      } finally {
+        setIsConnectingSnapTrade(false);
+      }
+    },
+    [selectedBroker, showConnectedSuccess],
+  );
+
+  // Listen for SnapTrade OAuth deep link callbacks
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      if (event.url.startsWith('toroloom://snaptrade/callback')) {
+        handleSnapTradeCallback(event.url);
+      }
+    };
+
+    // Check cold start deep link
+    Linking.getInitialURL().then((url) => {
+      if (url && url.startsWith('toroloom://snaptrade/callback')) {
+        handleSnapTradeCallback(url);
+      }
+    });
+
+    // Listen for warm start deep links
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+
+    return () => subscription.remove();
+  }, [handleSnapTradeCallback]);
+
+  const openSnapTradeConnect = useCallback(
+    async (broker: BrokerMeta) => {
+      setSelectedBroker(broker);
+      triggerHaptic(ImpactFeedbackStyle.Medium);
+      setIsConnectingSnapTrade(true);
+
+      try {
+        // Step 1: Register user with SnapTrade
+        await snapTradeApi.register();
+
+        // Step 2: Get OAuth connection portal URL
+        const linkResult = await snapTradeApi.getConnectLink();
+
+        if (linkResult.oauthUrl) {
+          // Step 3: Open the OAuth URL in device browser
+          // User will log into their broker there
+          // On completion, SnapTrade redirects back to toroloom://snaptrade/callback?authorizationId=xxx
+          await Linking.openURL(linkResult.oauthUrl);
+        } else {
+          throw new Error('No OAuth URL received from SnapTrade');
+        }
+      } catch (err: any) {
+        Alert.alert('Connection Failed', err.message || 'Failed to connect via SnapTrade.');
+        setIsConnectingSnapTrade(false);
+      }
+      // Don't set isConnectingSnapTrade = false here — the deep link callback will handle it
+    },
+    [],
+  );
+
+  // ── Open Session Sync (Zero-API Gateway) — fallback ────────
   const openSessionSync = useCallback(
     (broker: BrokerMeta) => {
+      // Try SnapTrade first for OAuth-capable brokers
+      if (broker.hasOAuth) {
+        openSnapTradeConnect(broker);
+        return;
+      }
+
       setSelectedBroker(broker);
       triggerHaptic(ImpactFeedbackStyle.Medium);
 
@@ -204,7 +339,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         Alert.alert('Unavailable', `${broker.label} connection is not yet available via Zero-API Gateway.`);
       }
     },
-    [],
+    [openSnapTradeConnect],
   );
 
   // ── Open Broker Selection ───────────────────────────────────
@@ -354,7 +489,7 @@ export default function ConnectBrokerView({ navigation }: any) {
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={NEON_CYAN} />
         <Text style={[styles.loadingText, { color: 'rgba(255,255,255,0.5)' }]}>
-          Restoring secure session...
+          Checking connection status...
         </Text>
       </View>
     );
@@ -370,7 +505,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Connect Broker</Text>
           <Text style={styles.headerSubtitle}>
-            Zero-API gateway — no API keys required
+            1-tap OAuth — powered by SnapTrade
           </Text>
         </View>
       </View>
@@ -380,15 +515,15 @@ export default function ConnectBrokerView({ navigation }: any) {
         <Animated.View style={[styles.statusPillsRow, { opacity: fadeAnim }]}>
           <View style={styles.statusPill}>
             <Text style={styles.statusPillIcon}>✓</Text>
-            <Text style={styles.statusPillText}>ZERO-API SYNC</Text>
+            <Text style={styles.statusPillText}>O AUTH 2.0</Text>
           </View>
           <View style={styles.statusPill}>
             <Text style={styles.statusPillIcon}>★</Text>
-            <Text style={styles.statusPillText}>100% FREE</Text>
+            <Text style={styles.statusPillText}>20+ BROKERS</Text>
           </View>
           <View style={[styles.statusPill, styles.statusPillOutline]}>
             <Ionicons name="shield-checkmark" size={10} color="#00F2FE" />
-            <Text style={[styles.statusPillText, { color: '#00F2FE' }]}>ENCRYPTED</Text>
+            <Text style={[styles.statusPillText, { color: '#00F2FE' }]}>SECURE</Text>
           </View>
         </Animated.View>
 
@@ -494,7 +629,7 @@ export default function ConnectBrokerView({ navigation }: any) {
                     <View style={styles.syncMethodBadge}>
                       <Ionicons name="wifi" size={10} color="rgba(255,255,255,0.7)" />
                       <Text style={styles.syncMethodText}>
-                        {isConnected ? 'Session Active' : 'Zero-API Sync'}
+                        {isConnected ? 'Session Active' : 'OAuth Connect'}
                       </Text>
                     </View>
 
@@ -523,7 +658,7 @@ export default function ConnectBrokerView({ navigation }: any) {
                           isConnected && styles.connectBadgeTextConnected,
                         ]}
                       >
-                        {isConnected ? 'Connected' : 'Sync Now'}
+                        {isConnected ? 'Connected' : 'Tap to Connect'}
                       </Text>
                     </View>
                   </LinearGradient>
@@ -541,10 +676,10 @@ export default function ConnectBrokerView({ navigation }: any) {
                 <Ionicons name="shield-checkmark" size={18} color="#00D2FF" />
               </View>
               <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                <Text style={styles.glassCardTitle}>Zero-API Hybrid Gateway</Text>
+                <Text style={styles.glassCardTitle}>SnapTrade OAuth Gateway</Text>
                 <Text style={styles.glassCardSubtitle}>
-                  Your credentials are extracted via secure browser session, encrypted with
-                  hardware-backed keychain storage, and never shared with third parties.
+                  Connect your Zerodha, Angel One, Dhan, Upstox, Groww, or Interactive Brokers
+                  account with 1-tap OAuth. Your credentials are never shared with us.
                 </Text>
               </View>
             </View>
