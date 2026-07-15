@@ -42,7 +42,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
-import { couponApi } from '../../services/api/coupons';
+import { couponApi, AdminUsageResponse } from '../../services/api/coupons';
 import type { CouponCode } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -720,6 +720,180 @@ const createFormStyles = (colors: any) =>
   });
 
 // ═══════════════════════════════════════════════════════════════
+//  USAGE ANALYTICS TAB
+// ═══════════════════════════════════════════════════════════════
+
+function UsageAnalyticsTab({
+  loading,
+  data,
+  colors,
+  styles: s,
+}: {
+  loading: boolean;
+  data: AdminUsageResponse | null;
+  colors: any;
+  styles: any;
+}) {
+  if (loading) {
+    return (
+      <View style={{ paddingVertical: 80, alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[s.loadingText, { color: colors.textMuted, marginTop: 12 }]}>Loading usage data...</Text>
+      </View>
+    );
+  }
+
+  if (!data || data.usages.length === 0) {
+    return (
+      <View style={[s.emptyContainer, { paddingTop: 60 }]}>
+        <View style={[s.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+          <Ionicons name="analytics-outline" size={36} color={colors.textMuted} />
+        </View>
+        <Text style={[s.emptyTitle, { color: colors.text }]}>No Usage Data</Text>
+        <Text style={[s.emptySubtitle, { color: colors.textMuted }]}>
+          Coupons haven't been used by any users yet.
+        </Text>
+      </View>
+    );
+  }
+
+  const { summary, usages } = data;
+  const breakdownEntries = Object.entries(summary.couponBreakdown).sort(
+    ([, a], [, b]) => b.count - a.count,
+  );
+
+  return (
+    <>
+      {/* Summary Cards */}
+      <Text style={[s.listTitle, { color: colors.text }]}>Overview</Text>
+      <View style={s.statsRow}>
+        <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+          <View style={[s.statIcon, { backgroundColor: colors.marketUp + '20' }]}>
+            <Ionicons name="flash" size={18} color={colors.marketUp} />
+          </View>
+          <Text style={[s.statValue, { color: colors.text }]}>{summary.totalUsages}</Text>
+          <Text style={[s.statLabel, { color: colors.textMuted }]}>Total Uses</Text>
+        </View>
+        <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+          <View style={[s.statIcon, { backgroundColor: colors.warning + '20' }]}>
+            <Ionicons name="people" size={18} color={colors.warning} />
+          </View>
+          <Text style={[s.statValue, { color: colors.text }]}>{summary.uniqueUsers}</Text>
+          <Text style={[s.statLabel, { color: colors.textMuted }]}>Users</Text>
+        </View>
+        <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+          <View style={[s.statIcon, { backgroundColor: colors.primary + '20' }]}>
+            <Ionicons name="pricetag" size={18} color={colors.primary} />
+          </View>
+          <Text style={[s.statValue, { color: colors.text }]}>{summary.uniqueCoupons}</Text>
+          <Text style={[s.statLabel, { color: colors.textMuted }]}>Coupons</Text>
+        </View>
+      </View>
+
+      {/* Total Discount Card */}
+      <View style={[s.totalDiscountCard, { backgroundColor: colors.marketUp + '10', borderColor: colors.marketUp + '30' }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Ionicons name="trending-down" size={20} color={colors.marketUp} />
+          <Text style={{ ...FONTS.medium, fontSize: FONTS.size.sm, color: colors.textSecondary }}>Total Discount Given</Text>
+        </View>
+        <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xxl, color: colors.marketUp, marginTop: 4 }}>
+          ₹{summary.totalDiscountAmount.toLocaleString('en-IN')}
+        </Text>
+        <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted, marginTop: 2 }}>
+          Across {summary.totalUsages} uses · Avg ₹{(summary.totalDiscountAmount / summary.totalUsages || 0).toFixed(0)} per use
+        </Text>
+      </View>
+
+      {/* Per-Coupon Breakdown */}
+      <Text style={[s.listTitle, { color: colors.text, marginTop: 8 }]}>Per-Coupon Breakdown</Text>
+      {breakdownEntries.map(([code, breakdown], i) => (
+        <Animated.View
+          key={code}
+          entering={FadeInDown.delay(i * 50).springify()}
+          style={[s.itemCard as any, { backgroundColor: colors.bgCard, borderColor: colors.border, padding: 12 }]}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={[s.itemIcon as any, { backgroundColor: '#8B5CF6' + '20' }]}>
+              <Ionicons name="pricetag" size={18} color="#8B5CF6" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ ...FONTS.mono, fontSize: FONTS.size.md, fontWeight: '700', letterSpacing: 1.5, color: colors.text }}>
+                {code}
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
+                <Text style={{ ...FONTS.regular, fontSize: 10, color: colors.textMuted }}>
+                  {breakdown.count} uses
+                </Text>
+                <Text style={{ ...FONTS.regular, fontSize: 10, color: colors.textMuted }}>
+                  {breakdown.uniqueUsers} users
+                </Text>
+                <Text style={{ ...FONTS.regular, fontSize: 10, color: colors.marketUp }}>
+                  ₹{breakdown.totalDiscount.toLocaleString('en-IN')} off
+                </Text>
+              </View>
+              {/* Mini bar */}
+              <View style={[s.usageBar as any, { backgroundColor: colors.border, marginTop: 6 }]}>
+                <View
+                  style={{
+                    height: '100%',
+                    borderRadius: 1.5,
+                    width: `${Math.min(100, (breakdown.count / usages.length) * 100)}%`,
+                    backgroundColor: '#8B5CF6',
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        </Animated.View>
+      ))}
+
+      {/* Recent Usage List */}
+      <Text style={[s.listTitle, { color: colors.text, marginTop: 12 }]}>Recent Usage</Text>
+      {usages.slice(0, 50).map((usage, i) => (
+        <Animated.View
+          key={usage.id}
+          entering={FadeInDown.delay(i * 30).springify()}
+          style={{
+            marginHorizontal: SPACING.xl,
+            marginBottom: 6,
+            borderRadius: BORDER_RADIUS.sm,
+            borderWidth: 1,
+            borderColor: colors.border,
+            padding: 10,
+            backgroundColor: colors.bgCard,
+          }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={{ ...FONTS.mono, fontSize: FONTS.size.sm, fontWeight: '700', color: colors.text }}>
+                  {usage.code}
+                </Text>
+                <Text style={{ ...FONTS.regular, fontSize: 10, color: colors.textMuted }}>
+                  @ {usage.planId}
+                </Text>
+              </View>
+              <Text style={{ ...FONTS.regular, fontSize: 9, color: colors.textMuted, marginTop: 2 }}>
+                User: {usage.userId.slice(0, 16)}… · {new Date(usage.usedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </Text>
+            </View>
+            <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.sm, color: colors.marketUp }}>
+              -₹{usage.discountAmount.toLocaleString('en-IN')}
+            </Text>
+          </View>
+        </Animated.View>
+      ))}
+
+      {usages.length > 50 && (
+        <Text style={{ textAlign: 'center', ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted, marginTop: 8 }}>
+          Showing 50 of {usages.length} usages
+        </Text>
+      )}
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  MAIN SCREEN
 // ═══════════════════════════════════════════════════════════════
 
@@ -745,6 +919,11 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [activeTab, setActiveTab] = useState<'coupons' | 'usage'>('coupons');
+
+  // Usage analytics state
+  const [usageData, setUsageData] = useState<AdminUsageResponse | null>(null);
+  const [usageLoading, setUsageLoading] = useState(false);
 
   // Modal state
   const [formModalVisible, setFormModalVisible] = useState(false);
@@ -867,6 +1046,26 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
     setEditingCoupon(null);
   }, []);
 
+  // ─── Load Usage Data ──────────────────────────────────────
+
+  const loadUsageData = useCallback(async () => {
+    setUsageLoading(true);
+    try {
+      const data = await couponApi.getAllUsageHistory();
+      setUsageData(data);
+    } catch {
+      setUsageData(null);
+    } finally {
+      setUsageLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'usage') {
+      loadUsageData();
+    }
+  }, [activeTab, loadUsageData]);
+
   // ─── Stats ─────────────────────────────────────────────────
 
   const totalActive = coupons.filter(c => c.isActive && (!c.expiresAt || new Date(c.expiresAt) > new Date())).length;
@@ -886,12 +1085,40 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
         </AnimatedPressable>
         <View style={{ flex: 1 }}>
           <Text style={[styles.title, { color: colors.text }]}>Coupon Manager</Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>Admin • {coupons.length} coupons</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>Admin • {activeTab === 'coupons' ? `${coupons.length} coupons` : `${usageData?.summary.totalUsages || 0} uses`}</Text>
         </View>
-        <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.92}>
-          <LinearGradient colors={['#3B82F6', '#1D4ED8'] as [string, string]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addBtn}>
-            <Ionicons name="add" size={22} color="#fff" />
-          </LinearGradient>
+        {activeTab === 'coupons' && (
+          <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.92}>
+            <LinearGradient colors={['#3B82F6', '#1D4ED8'] as [string, string]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addBtn}>
+              <Ionicons name="add" size={22} color="#fff" />
+            </LinearGradient>
+          </AnimatedPressable>
+        )}
+      </View>
+
+      {/* Tab Toggle */}
+      <View style={[styles.toggleRow, { backgroundColor: colors.bgInput }]}>
+        <AnimatedPressable
+          onPress={() => setActiveTab('coupons')}
+          haptic="light"
+          scaleTo={0.97}
+          style={{ flex: 1 }}
+        >
+          <View style={[styles.toggleBtn, activeTab === 'coupons' && { backgroundColor: colors.primary }]}>
+            <Ionicons name="pricetag" size={16} color={activeTab === 'coupons' ? '#fff' : colors.textMuted} />
+            <Text style={[styles.toggleText, { color: activeTab === 'coupons' ? '#fff' : colors.textMuted }]}>Coupons</Text>
+          </View>
+        </AnimatedPressable>
+        <AnimatedPressable
+          onPress={() => setActiveTab('usage')}
+          haptic="light"
+          scaleTo={0.97}
+          style={{ flex: 1 }}
+        >
+          <View style={[styles.toggleBtn, activeTab === 'usage' && { backgroundColor: colors.primary }]}>
+            <Ionicons name="analytics" size={16} color={activeTab === 'usage' ? '#fff' : colors.textMuted} />
+            <Text style={[styles.toggleText, { color: activeTab === 'usage' ? '#fff' : colors.textMuted }]}>Usage</Text>
+          </View>
         </AnimatedPressable>
       </View>
 
@@ -900,85 +1127,89 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => loadCoupons(true)}
+            refreshing={activeTab === 'coupons' ? refreshing : usageLoading}
+            onRefresh={activeTab === 'coupons' ? () => loadCoupons(true) : loadUsageData}
             tintColor={colors.primary}
           />
         }
       >
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading coupons...</Text>
-          </View>
-        ) : (
-          <>
-            {/* Stats Cards */}
-            <View style={styles.statsRow}>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <View style={[styles.statIcon, { backgroundColor: colors.marketUp + '20' }]}>
-                  <Ionicons name="pricetag" size={18} color={colors.marketUp} />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>{totalActive}</Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Active</Text>
-              </View>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <View style={[styles.statIcon, { backgroundColor: colors.warning + '20' }]}>
-                  <Ionicons name="ban" size={18} color={colors.warning} />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>{totalDisabled}</Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Disabled</Text>
-              </View>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <View style={[styles.statIcon, { backgroundColor: colors.danger + '20' }]}>
-                  <Ionicons name="calendar" size={18} color={colors.danger} />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>{totalExpired}</Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Expired</Text>
-              </View>
+        {activeTab === 'coupons' ? (
+          loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading coupons...</Text>
             </View>
-
-            {/* Seed Button */}
-            <AnimatedPressable onPress={handleSeed} haptic="light" scaleTo={0.97} disabled={seeding}>
-              <View style={[styles.seedBtn, { borderColor: colors.border }]}>
-                <Ionicons name="refresh" size={16} color={colors.primary} />
-                <Text style={[styles.seedBtnText, { color: colors.primary }]}>
-                  {seeding ? 'Seeding...' : 'Seed Default Coupons'}
-                </Text>
-              </View>
-            </AnimatedPressable>
-
-            {/* Coupon List */}
-            {coupons.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <View style={[styles.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                  <Ionicons name="pricetag-outline" size={36} color={colors.textMuted} />
+          ) : (
+            <>
+              {/* Stats Cards */}
+              <View style={styles.statsRow}>
+                <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <View style={[styles.statIcon, { backgroundColor: colors.marketUp + '20' }]}>
+                    <Ionicons name="pricetag" size={18} color={colors.marketUp} />
+                  </View>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{totalActive}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Active</Text>
                 </View>
-                <Text style={[styles.emptyTitle, { color: colors.text }]}>No Coupons Yet</Text>
-                <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                  Tap the + button to create your first promo code.
-                </Text>
+                <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <View style={[styles.statIcon, { backgroundColor: colors.warning + '20' }]}>
+                    <Ionicons name="ban" size={18} color={colors.warning} />
+                  </View>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{totalDisabled}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Disabled</Text>
+                </View>
+                <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <View style={[styles.statIcon, { backgroundColor: colors.danger + '20' }]}>
+                    <Ionicons name="calendar" size={18} color={colors.danger} />
+                  </View>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{totalExpired}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Expired</Text>
+                </View>
               </View>
-            ) : (
-              <>
-                <Text style={[styles.listTitle, { color: colors.text }]}>
-                  All Coupons ({coupons.length})
-                </Text>
-                {coupons.map((coupon, i) => (
-                  <CouponListItem
-                    key={coupon.code}
-                    coupon={coupon}
-                    index={i}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </>
-            )}
 
-            <View style={{ height: 60 }} />
-          </>
+              {/* Seed Button */}
+              <AnimatedPressable onPress={handleSeed} haptic="light" scaleTo={0.97} disabled={seeding}>
+                <View style={[styles.seedBtn, { borderColor: colors.border }]}>
+                  <Ionicons name="refresh" size={16} color={colors.primary} />
+                  <Text style={[styles.seedBtnText, { color: colors.primary }]}>
+                    {seeding ? 'Seeding...' : 'Seed Default Coupons'}
+                  </Text>
+                </View>
+              </AnimatedPressable>
+
+              {/* Coupon List */}
+              {coupons.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <View style={[styles.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                    <Ionicons name="pricetag-outline" size={36} color={colors.textMuted} />
+                  </View>
+                  <Text style={[styles.emptyTitle, { color: colors.text }]}>No Coupons Yet</Text>
+                  <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
+                    Tap the + button to create your first promo code.
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <Text style={[styles.listTitle, { color: colors.text }]}>
+                    All Coupons ({coupons.length})
+                  </Text>
+                  {coupons.map((coupon, i) => (
+                    <CouponListItem
+                      key={coupon.code}
+                      coupon={coupon}
+                      index={i}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </>
+              )}
+            </>
+          )
+        ) : (
+          /* ═══ Usage Analytics Tab ═══ */
+          <UsageAnalyticsTab loading={usageLoading} data={usageData} colors={colors} styles={styles} />
         )}
+        <View style={{ height: 60 }} />
       </ScrollView>
 
       {/* Coupon Form Modal */}
@@ -1033,6 +1264,34 @@ const createStyles = (colors: any) =>
     },
     scrollContent: {
       paddingBottom: SPACING.xl,
+    },
+    // ─── Tab Toggle ────────────────────────────────────────────
+    toggleRow: {
+      flexDirection: 'row',
+      marginHorizontal: SPACING.xl,
+      borderRadius: BORDER_RADIUS.md,
+      padding: 4,
+      marginBottom: SPACING.lg,
+    },
+    toggleBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: SPACING.sm,
+      paddingVertical: SPACING.md,
+      borderRadius: BORDER_RADIUS.sm,
+    },
+    toggleText: {
+      ...FONTS.medium,
+      fontSize: FONTS.size.sm,
+    },
+    // ─── Total Discount Card ───────────────────────────────────
+    totalDiscountCard: {
+      marginHorizontal: SPACING.xl,
+      marginBottom: SPACING.lg,
+      padding: SPACING.xl,
+      borderRadius: BORDER_RADIUS.md,
+      borderWidth: 1,
     },
     loadingContainer: {
       flex: 1,

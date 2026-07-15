@@ -35,6 +35,7 @@ let _couponStore: {
   recordCouponUsage(usage: CouponUsageData): Promise<void>;
   hasUserUsedCoupon(code: string, userId: string): Promise<boolean>;
   loadUserCouponUsages(userId: string): Promise<CouponUsageData[]>;
+  loadAllCouponUsages(): Promise<CouponUsageData[]>;
 } | null = null;
 
 /**
@@ -85,6 +86,12 @@ class InMemoryCouponStore {
     return this.usages
       .filter(u => u.userId === userId)
       .sort((a, b) => new Date(b.usedAt).getTime() - new Date(a.usedAt).getTime());
+  }
+
+  async loadAllCouponUsages(): Promise<CouponUsageData[]> {
+    return [...this.usages].sort(
+      (a, b) => new Date(b.usedAt).getTime() - new Date(a.usedAt).getTime()
+    );
   }
 }
 
@@ -171,6 +178,7 @@ export function configureCouponPersistence(storage: {
   recordCouponUsage(usage: CouponUsageData): Promise<void>;
   hasUserUsedCoupon(code: string, userId: string): Promise<boolean>;
   loadUserCouponUsages(userId: string): Promise<CouponUsageData[]>;
+  loadAllCouponUsages(): Promise<CouponUsageData[]>;
 }): void {
   _couponStore = storage;
 }
@@ -367,6 +375,55 @@ router.get('/usage', authMiddleware, async (req: Request, res: Response) => {
   } catch (error: unknown) {
     console.error('[Coupons] GET /usage error:', error);
     res.status(500).json({ error: 'Failed to load coupon usage history.' });
+  }
+});
+
+// ──── GET /api/coupons/usage/all ────────────────────────────────────────
+// Get ALL coupon usages across all users (admin only)
+// IMPORTANT: Must be defined BEFORE /:code to avoid Express matching "usage" as :code
+
+router.get('/usage/all', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const store = getStore();
+    const usages = await store.loadAllCouponUsages();
+
+    // Compute summary stats
+    const totalUsages = usages.length;
+    const totalDiscountAmount = usages.reduce((sum, u) => sum + u.discountAmount, 0);
+    const totalOriginalPrice = usages.reduce((sum, u) => sum + u.originalPrice, 0);
+    const uniqueUsers = new Set(usages.map(u => u.userId)).size;
+    const uniqueCoupons = new Set(usages.map(u => u.code)).size;
+
+    // Per-coupon breakdown
+    const couponBreakdown: Record<string, { count: number; totalDiscount: number; uniqueUsers: number }> = {};
+    const seenUsersPerCode: Record<string, Set<string>> = {};
+    for (const u of usages) {
+      if (!couponBreakdown[u.code]) {
+        couponBreakdown[u.code] = { count: 0, totalDiscount: 0, uniqueUsers: 0 };
+        seenUsersPerCode[u.code] = new Set();
+      }
+      couponBreakdown[u.code].count++;
+      couponBreakdown[u.code].totalDiscount += u.discountAmount;
+      seenUsersPerCode[u.code].add(u.userId);
+    }
+    for (const code of Object.keys(couponBreakdown)) {
+      couponBreakdown[code].uniqueUsers = seenUsersPerCode[code].size;
+    }
+
+    res.json({
+      usages,
+      summary: {
+        totalUsages,
+        totalDiscountAmount,
+        totalOriginalPrice,
+        uniqueUsers,
+        uniqueCoupons,
+        couponBreakdown,
+      },
+    });
+  } catch (error: unknown) {
+    console.error('[Coupons] GET /usage/all error:', error);
+    res.status(500).json({ error: 'Failed to load coupon usage data.' });
   }
 });
 

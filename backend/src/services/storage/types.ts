@@ -301,6 +301,9 @@ export interface StorageEngine {
   /** Load all coupon usages for a user (history). */
   loadUserCouponUsages(userId: string): Promise<CouponUsageData[]>;
 
+  /** Load ALL coupon usages across all users (admin only). */
+  loadAllCouponUsages(): Promise<CouponUsageData[]>;
+
   // ──── Lifecycle ────
 
   /** Initialize the storage backend (connect, create tables, etc.). */

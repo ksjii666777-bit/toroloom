@@ -145,6 +145,18 @@ export const couponApi = {
   },
 
   /**
+   * Get ALL coupon usages across all users (admin only).
+   */
+  async getAllUsageHistory(): Promise<AdminUsageResponse> {
+    try {
+      const response: any = await api.get(`${BASE}/usage/all`);
+      return response as AdminUsageResponse;
+    } catch {
+      return { usages: [], summary: { totalUsages: 0, totalDiscountAmount: 0, totalOriginalPrice: 0, uniqueUsers: 0, uniqueCoupons: 0, couponBreakdown: {} } };
+    }
+  },
+
+  /**
    * Seed default coupons (dev only).
    */
   async seedCoupons(): Promise<number> {
@@ -167,4 +179,18 @@ export interface CouponUsageDisplay {
   originalPrice: number;
   finalPrice: number;
   usedAt: string;
+}
+
+export interface AdminUsageSummary {
+  totalUsages: number;
+  totalDiscountAmount: number;
+  totalOriginalPrice: number;
+  uniqueUsers: number;
+  uniqueCoupons: number;
+  couponBreakdown: Record<string, { count: number; totalDiscount: number; uniqueUsers: number }>;
+}
+
+export interface AdminUsageResponse {
+  usages: CouponUsageDisplay[];
+  summary: AdminUsageSummary;
 }
