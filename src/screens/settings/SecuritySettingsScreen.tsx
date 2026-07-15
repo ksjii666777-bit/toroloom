@@ -26,6 +26,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useBiometricStore } from '../../store/biometricStore';
+import { useAuthStore } from '../../store/authStore';
 import { biometricAuth } from '../../services/biometricService';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -42,6 +43,7 @@ export default function SecuritySettingsScreen({ navigation }: any) {
     toggleBiometric,
     toggleRequireForTrades,
   } = useBiometricStore();
+  const { isAdmin, setIsAdmin } = useAuthStore();
 
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLabel, setBiometricLabel] = useState('Biometric');
@@ -366,6 +368,58 @@ export default function SecuritySettingsScreen({ navigation }: any) {
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </View>
           </AnimatedPressable>
+        </Card>
+
+          {/* Developer Section */}
+        <Card
+          title="Developer"
+          subtitle="Admin tools & settings"
+          style={{ marginTop: SPACING.md }}
+        >
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <View style={[styles.manageIconBox, {
+                backgroundColor: isAdmin ? `${colors.warning}20` : `${colors.textMuted}15`
+              }]}>
+                <Ionicons
+                  name="shield-checkmark"
+                  size={22}
+                  color={isAdmin ? colors.warning : colors.textMuted}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.settingLabel, { color: colors.text }]}>
+                  Admin Mode
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                  {isAdmin
+                    ? 'Coupon Manager & admin tools are visible in the menu'
+                    : 'Enable to access admin tools & Coupon Manager'}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={isAdmin}
+              onValueChange={(val) => {
+                triggerHaptic();
+                setIsAdmin(val);
+              }}
+              trackColor={{ false: colors.border, true: `${colors.warning}60` }}
+              thumbColor={isAdmin ? colors.warning : colors.textMuted}
+            />
+          </View>
+
+          {isAdmin && (
+            <View style={[styles.warningBox, {
+              backgroundColor: `${colors.warning}10`,
+              borderColor: `${colors.warning}20`,
+            }]}>
+              <Ionicons name="warning" size={16} color={colors.warning} />
+              <Text style={[styles.warningText, { color: colors.warning }]}>
+                Admin mode is enabled. Coupon Manager and other admin tools are accessible from the More menu.
+              </Text>
+            </View>
+          )}
         </Card>
 
         <View style={{ height: 100 }} />

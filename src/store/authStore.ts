@@ -27,15 +27,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   isAdmin: false,
 
-  setIsAdmin: (value) => set({ isAdmin: value }),
-
   loadStoredAuth: async () => {
     try {
       const storedToken = await AsyncStorage.getItem('toroloom_token');
       const storedUser = await AsyncStorage.getItem('toroloom_user');
+      const storedAdmin = await AsyncStorage.getItem('toroloom_isAdmin');
       if (storedToken && storedUser) {
         const user = JSON.parse(storedUser);
-        set({ user, token: storedToken, isLoggedIn: true });
+        set({ user, token: storedToken, isLoggedIn: true, isAdmin: storedAdmin === 'true' });
 
         // Silently refresh profile from backend
         authApi.getProfile().then(profile => {
@@ -46,6 +45,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
       }
     } catch { /* ignore */ }
+  },
+
+  setIsAdmin: (value) => {
+    set({ isAdmin: value });
+    AsyncStorage.setItem('toroloom_isAdmin', JSON.stringify(value)).catch(() => {});
   },
 
   login: async (email, password) => {
