@@ -2615,6 +2615,22 @@ export interface FuturesCurveData {
   maxOiExpiry: string;
 }
 
+/** Result of a completed quiz attempt */
+export interface QuizResult {
+  quizId: string;
+  quizTitle: string;
+  totalQuestions: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+  unanswered: number;
+  score: number;
+  percentage: number;
+  passed: boolean;
+  timeTaken: number;
+  answers: Record<string, number>;
+  correctAnswerMap: Record<string, number>;
+}
+
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;

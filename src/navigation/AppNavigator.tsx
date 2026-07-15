@@ -46,6 +46,8 @@ import MutualFundsScreen from '../screens/mutual-funds/MutualFundsScreen';
 import RiskSettingsScreen from '../screens/settings/RiskSettingsScreen';
 import CourseDetailScreen from '../screens/education/CourseDetailScreen';
 import LessonViewScreen from '../screens/education/LessonViewScreen';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const QuizResultScreen: any = require('../screens/quiz/QuizResultScreen').default;
 import GlossaryScreen from '../screens/education/GlossaryScreen';
 import CertificateScreen from '../screens/education/CertificateScreen';
 import LearningPathsScreen from '../screens/education/LearningPathsScreen';
@@ -492,6 +494,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
             <Stack.Screen name="LessonView" component={LessonViewScreen} />
+            <Stack.Screen name="QuizResult" component={QuizResultScreen} />
             <Stack.Screen name="Glossary" component={GlossaryScreen} />
             <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
             <Stack.Screen name="CreateCourse" component={CreateCourseScreen} />

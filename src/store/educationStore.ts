@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Course, Lesson, VideoProgress, VideoBookmark, CourseCertificate } from '../types';
+import { Course, Lesson, VideoProgress, VideoBookmark, CourseCertificate, QuizResult } from '../types';
 import { mockCourses, mockLessons } from '../constants/mockData';
 import { educationApi } from '../services/api/education';
 import { offlineCache } from '../services/offlineCache';
@@ -36,6 +36,16 @@ interface EducationState {
   generateCertificate: (courseId: string) => Promise<CourseCertificate | null>;
   /** Get certificate for a specific course */
   getCertificateForCourse: (courseId: string) => CourseCertificate | undefined;
+  /** Quiz attempt history per lesson */
+  quizHistory: Record<string, QuizResult[]>;
+  /** Record a quiz attempt result */
+  recordQuizAttempt: (lessonId: string, result: QuizResult) => void;
+  /** Get best quiz result for a lesson */
+  getBestQuizResult: (lessonId: string) => QuizResult | undefined;
+  /** Get all quiz attempts for a lesson */
+  getQuizAttempts: (lessonId: string) => QuizResult[];
+  /** Get aggregated quiz stats across all attempts */
+  getOverallQuizStats: () => { totalAttempts: number; avgScore: number; quizzesPassed: number; totalQuizzes: number };
   /** Check if a course is eligible for a certificate */
   isCourseComplete: (courseId: string) => boolean;
 }
@@ -51,6 +61,7 @@ export const useEducationStore = create<EducationState>((set, get) => ({
   certificates: [],
   isGeneratingCertificate: false,
   isLoading: false,
+  quizHistory: {},
 
   /** Load cached courses at app startup for instant display */
   loadCachedCourses: async () => {
@@ -180,6 +191,54 @@ export const useEducationStore = create<EducationState>((set, get) => ({
         },
       };
     });
+  },
+
+  /** Record a quiz attempt result */
+  recordQuizAttempt: (lessonId, result) => {
+    set(state => {
+      const existing = state.quizHistory[lessonId] || [];
+      return {
+        quizHistory: {
+          ...state.quizHistory,
+          [lessonId]: [...existing, result],
+        },
+      };
+    });
+  },
+
+  /** Get best quiz result for a lesson */
+  getBestQuizResult: (lessonId) => {
+    const attempts = get().quizHistory[lessonId] || [];
+    if (attempts.length === 0) return undefined;
+    return attempts.reduce((best, curr) =>
+      curr.percentage > best.percentage ? curr : best
+    );
+  },
+
+  /** Get all quiz attempts for a lesson */
+  getQuizAttempts: (lessonId) => {
+    return get().quizHistory[lessonId] || [];
+  },
+
+  /** Get aggregated quiz stats across all attempts */
+  getOverallQuizStats: () => {
+    const state = get();
+    const allAttempts = Object.values(state.quizHistory).flat();
+    const totalAttempts = allAttempts.length;
+    const avgScore = totalAttempts > 0
+      ? Math.round(allAttempts.reduce((sum, a) => sum + a.percentage, 0) / totalAttempts)
+      : 0;
+    const quizzesPassed = allAttempts.filter(a => a.passed).length;
+    
+    // Count unique quiz IDs that have at least one attempt
+    const uniqueQuizIds = new Set(allAttempts.map(a => a.quizId));
+    
+    return {
+      totalAttempts,
+      avgScore,
+      quizzesPassed,
+      totalQuizzes: uniqueQuizIds.size,
+    };
   },
 
   scheduleDailyReminder: async () => {

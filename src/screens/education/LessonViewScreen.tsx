@@ -9,9 +9,9 @@ import { useGamificationStore } from '../../store/gamificationStore';
 import { mockLessons } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Card from '../../components/ui/Card';
-import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
 import VideoLessonPlayer from '../../components/video/VideoLessonPlayer';
+import QuizComponent from '../../components/quiz/QuizComponent';
+import type { QuizResult } from '../../types';
 
 const { width } = Dimensions.get('window');
 
@@ -27,8 +27,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
   const { addXp } = useGamificationStore();
 
   const [showQuiz, setShowQuiz] = useState(false);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [videoCompleted, setVideoCompleted] = useState(false);
 
   const lesson = currentLesson?.id === lessonId ? currentLesson : mockLessons.find(l => l.id === lessonId);
@@ -52,26 +51,14 @@ export default function LessonViewScreen({ route, navigation }: any) {
     addXp(50);
   }, [lessonId, markLessonComplete, addXp]);
 
-  const handleAnswerSelect = useCallback((questionId: string, answerIndex: number) => {
-    if (quizSubmitted) return;
-    setSelectedAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
-  }, [quizSubmitted]);
-
-  const handleQuizSubmit = useCallback(() => {
-    if (!lesson?.quiz) return;
-    setQuizSubmitted(true);
-    let score = 0;
-    lesson.quiz.questions.forEach(q => {
-      if (selectedAnswers[q.id] === q.correctAnswer) score++;
-    });
-    const pct = Math.round((score / lesson.quiz.questions.length) * 100);
-    if (pct >= 60) addXp(30);
-  }, [lesson, selectedAnswers, addXp]);
-
-  const handleRetryQuiz = useCallback(() => {
-    setSelectedAnswers({});
-    setQuizSubmitted(false);
-  }, []);
+  const handleQuizComplete = useCallback((result: QuizResult) => {
+    setQuizResult(result);
+    if (result.passed) {
+      addXp(30);
+    } else {
+      addXp(10);
+    }
+  }, [addXp]);
 
   const handleVideoProgress = useCallback((p: { lastPosition: number; duration: number; watchedPercent: number }) => {
     updateVideoProgress(lessonId, p);
@@ -100,10 +87,6 @@ export default function LessonViewScreen({ route, navigation }: any) {
       </View>
     );
   }
-
-  const quizPassed = quizSubmitted && lesson.quiz
-    ? lesson.quiz.questions.filter(q => selectedAnswers[q.id] === q.correctAnswer).length / lesson.quiz.questions.length >= 0.6
-    : false;
 
   return (
     <View style={styles.container}>
@@ -221,93 +204,23 @@ export default function LessonViewScreen({ route, navigation }: any) {
           </Pressable>
         )}
 
-        {showQuiz && lesson.quiz && (
-          <Card title={lesson.quiz.title} subtitle={quizSubmitted ? `Score: ${lesson.quiz.questions.filter(q => selectedAnswers[q.id] === q.correctAnswer).length}/${lesson.quiz.questions.length}` : 'Test your understanding'}>
-            {lesson.quiz.questions.map((q, qIdx) => (
-              <View key={q.id} style={styles.questionBlock}>
-                <Text style={styles.questionText}>
-                  Q{qIdx + 1}. {q.question}
-                </Text>
-                {q.options.map((opt, oIdx) => {
-                  const isSelected = selectedAnswers[q.id] === oIdx;
-                  const isCorrect = quizSubmitted && oIdx === q.correctAnswer;
-                  const isWrong = quizSubmitted && isSelected && !isCorrect;
-
-                  let optBg = colors.bgCardLight;
-                  let optBorder = colors.border;
-                  let optText = colors.text;
-
-                  if (quizSubmitted) {
-                    if (isCorrect) {
-                      optBg = '#00C85320';
-                      optBorder = '#00C853';
-                      optText = '#00C853';
-                    } else if (isWrong) {
-                      optBg = '#FF174420';
-                      optBorder = '#FF1744';
-                      optText = '#FF1744';
-                    }
-                  } else if (isSelected) {
-                    optBg = colors.primary + '20';
-                    optBorder = colors.primary;
-                    optText = colors.primary;
-                  }
-
-                  return (
-                    <Pressable
-                      key={oIdx}
-                      style={[styles.option, { backgroundColor: optBg, borderColor: optBorder }]}
-                      onPress={() => handleAnswerSelect(q.id, oIdx)}
-                      disabled={quizSubmitted}
-                    >
-                      <Text style={[styles.optionText, { color: optText }]}>{opt}</Text>
-                      {quizSubmitted && isCorrect && (
-                        <Ionicons name="checkmark-circle" size={18} color="#00C853" />
-                      )}
-                      {quizSubmitted && isWrong && (
-                        <Ionicons name="close-circle" size={18} color="#FF1744" />
-                      )}
-                    </Pressable>
-                  );
-                })}
-                {quizSubmitted && (
-                  <View style={styles.explanation}>
-                    <Ionicons name="information-circle" size={16} color="#6C63FF" />
-                    <Text style={styles.explanationText}>{q.explanation}</Text>
-                  </View>
-                )}
-              </View>
-            ))}
-
-            <View style={styles.quizActions}>
-              {!quizSubmitted ? (
-                <Button
-                  title="Submit Answers"
-                  onPress={handleQuizSubmit}
-                  disabled={Object.keys(selectedAnswers).length < lesson.quiz.questions.length}
-                  style={{ flex: 1 }}
-                />
-              ) : (
-                <View style={styles.quizResultRow}>
-                  <Badge
-                    label={quizPassed ? '✅ Passed' : '❌ Needs Improvement'}
-                    variant={quizPassed ? 'success' : 'danger'}
-                    size="medium"
-                  />
-                  <Button
-                    title="Retry"
-                    onPress={handleRetryQuiz}
-                    variant="outline"
-                    size="small"
-                  />
-                </View>
-              )}
+        {showQuiz && lesson.quiz && !quizResult && (
+          <Card title={lesson.quiz.title} subtitle="Test your understanding" noPadding>
+            <View style={styles.quizComponentWrapper}>
+              <QuizComponent
+                quiz={lesson.quiz}
+                onComplete={handleQuizComplete}
+                timerMinutes={5}
+                passingPercent={60}
+                passXp={30}
+                attemptXp={10}
+              />
             </View>
           </Card>
         )}
 
-        {/* Mark Complete Button */}
-        {!isCompleted && (
+        {/* Mark Complete Button — only if quiz passed or no quiz */}
+        {!isCompleted && (!lesson?.quiz || quizResult?.passed) && (
           <Pressable
             style={styles.completeBtn}
             onPress={handleMarkComplete}
@@ -319,6 +232,23 @@ export default function LessonViewScreen({ route, navigation }: any) {
           </Pressable>
         )}
 
+        {/* View Detailed Results */}
+        {quizResult && (
+          <Pressable
+            style={[styles.continueBtn, { marginTop: 0, marginBottom: SPACING.lg }]}
+            onPress={() => navigation.navigate('QuizResult', {
+              result: quizResult,
+              lessonId,
+              courseId,
+            })}
+          >
+            <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
+              <Ionicons name="analytics" size={20} color={colors.white} />
+              <Text style={styles.continueText}>View Detailed Results</Text>
+            </LinearGradient>
+          </Pressable>
+        )}
+
         {/* Navigation */}
         <View style={styles.lessonNav}>
           {prevLesson && (
@@ -326,8 +256,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
               style={styles.lessonNavBtn}
               onPress={() => {
                 setShowQuiz(false);
-                setSelectedAnswers({});
-                setQuizSubmitted(false);
+                setQuizResult(null);
                 navigation.replace('LessonView', { lessonId: prevLesson.id, courseId });
               }}
             >
@@ -343,8 +272,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
               style={[styles.lessonNavBtn, styles.lessonNavBtnRight]}
               onPress={() => {
                 setShowQuiz(false);
-                setSelectedAnswers({});
-                setQuizSubmitted(false);
+                setQuizResult(null);
                 navigation.replace('LessonView', { lessonId: nextLesson.id, courseId });
               }}
             >
@@ -440,8 +368,28 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: '#00C853',
   },
 
+  quizComponentWrapper: {
+    padding: SPACING.md,
+  },
   contentCard: {
     marginBottom: SPACING.lg,
+  },
+  continueBtn: {
+    borderRadius: BORDER_RADIUS.lg,
+    overflow: 'hidden',
+    marginTop: SPACING.sm,
+  },
+  continueGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.md,
+    paddingVertical: SPACING.lg,
+  },
+  continueText: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.lg,
+    color: colors.white,
   },
   contentInner: {
     padding: SPACING.xl,
@@ -511,56 +459,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
     marginTop: 2,
   },
-  questionBlock: {
-    marginBottom: SPACING.xl,
-    paddingBottom: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  questionText: {
-    ...FONTS.medium,
-    fontSize: FONTS.size.md,
-    color: colors.text,
-    marginBottom: SPACING.md,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1,
-    marginBottom: SPACING.sm,
-  },
-  optionText: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    flex: 1,
-  },
-  explanation: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: SPACING.sm,
-    backgroundColor: '#6C63FF15',
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    marginTop: SPACING.sm,
-  },
-  explanationText: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.xs,
-    color: colors.textSecondary,
-    flex: 1,
-    lineHeight: 18,
-  },
-  quizActions: {
-    marginTop: SPACING.md,
-  },
-  quizResultRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
+  // Quiz styles managed by QuizComponent — remove old inline quiz styles
   completeBtn: {
     borderRadius: BORDER_RADIUS.lg,
     overflow: 'hidden',

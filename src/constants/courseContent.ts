@@ -2331,6 +2331,16 @@ Stop Loss Psychology:
 
 The Golden Rule: Every trade must have a stop loss before entry. You decide your exit before you enter. This rule is non-negotiable for professional traders.`,
     duration: '25 min',
+    quiz: {
+      id: 'q17',
+      title: 'Stop Loss Strategies Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q17_1', question: 'What is the primary purpose of a stop loss?', options: ['To maximize profits', 'To limit losses on a trade', 'To time the market', 'To increase position size'], correctAnswer: 1, explanation: 'A stop loss limits losses by automatically exiting a trade when the price reaches a predetermined level.' },
+        { id: 'q17_2', question: 'What is a trailing stop loss?', options: ['A stop loss that moves in the direction of profit', 'A stop loss placed at a fixed price', 'A stop loss used only for options', 'A stop loss that decreases over time'], correctAnswer: 0, explanation: 'A trailing stop loss moves up (in a long trade) as the price rises, locking in profits while protecting against downside.' },
+      ],
+    },
     completed: false,
   },
   {
@@ -2400,6 +2410,16 @@ Common R:R Mistakes:
 
 The Bottom Line: Always know your risk and reward BEFORE entering a trade. If the R:R is not favorable, skip the trade. Discipline in this area separates profitable traders from everyone else.`,
     duration: '20 min',
+    quiz: {
+      id: 'q18',
+      title: 'Risk-Reward Ratio Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q18_1', question: 'What does a 1:3 risk-reward ratio mean?', options: ['Risking ₹3 to make ₹1', 'Risking ₹1 to make ₹3', 'Risking 3% of capital', 'Making 3 trades per day'], correctAnswer: 1, explanation: 'A 1:3 R:R means you risk ₹1 to potentially make ₹3 — the potential profit is three times the potential loss.' },
+        { id: 'q18_2', question: 'With a 30% win rate and 1:3 R:R, is the strategy profitable?', options: ['No, you need above 50% win rate', 'Yes, expected value is positive', 'Only with high volume trading', 'Depends on market conditions'], correctAnswer: 1, explanation: '(0.3×3) - (0.7×1) = 0.2. Expected value is positive, so the strategy is profitable.' },
+      ],
+    },
     completed: false,
   },
   {
@@ -2573,6 +2593,16 @@ The 80/20 Rule: 80% of your journal value comes from reviewing, not recording. S
 
 If you are not journaling, you are not serious about improving as a trader. Full stop.`,
     duration: '20 min',
+    quiz: {
+      id: 'q19',
+      title: 'Trading Journal Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q19_1', question: 'What is the main benefit of keeping a trading journal?', options: ['Recording trades for tax purposes', 'Transforming subjective feelings into objective data for analysis', 'Impressing other traders', 'Meeting minimum trade requirements'], correctAnswer: 1, explanation: 'A trading journal converts emotional, subjective experiences into objective data that can be analyzed to improve performance.' },
+        { id: 'q19_2', question: 'Which metric measures gross profit divided by gross loss?', options: ['Win rate', 'Profit Factor', 'Sharpe Ratio', 'Maximum Drawdown'], correctAnswer: 1, explanation: 'Profit Factor = Gross Profit / Gross Loss. Above 1.5 indicates a profitable strategy; above 2.0 is excellent.' },
+      ],
+    },
     completed: false,
   },
   {
@@ -2898,6 +2928,16 @@ A successful trader is not someone who never loses — it is someone who manages
     title: 'Behavioral Portfolio Construction',
     content: `Traditional portfolio theory assumes investors are rational. Behavioral portfolio construction acknowledges that real investors have emotions, biases, and goals that traditional models do not capture.\n\nGoals-Based Investing — Instead of one optimized portfolio, create separate portfolios for different financial goals:\n• Safety Portfolio (Short-term goals) — Emergency fund, next year's vacation, down payment for house. Invest in liquid funds, FDs, savings accounts.\n• Income Portfolio (Medium-term goals) — Children's education, home renovation. Invest in balanced funds, short-term bonds, dividend stocks.\n• Growth Portfolio (Long-term goals) — Retirement, wealth creation. Invest in equities, index funds, real estate.\n\nMental Accounting — People treat money differently depending on where it comes from and what it is meant for. A tax refund is spent differently than a salary bonus.\n\nHome Bias — The tendency to invest disproportionately in domestic stocks. Indian investors often have 100% of their equity portfolio in Indian stocks when some international diversification would reduce risk.`,
     duration: '25 min',
+    quiz: {
+      id: 'q28',
+      title: 'Behavioral Portfolio Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q28_1', question: 'What is mental accounting bias?', options: ['Tracking expenses accurately', 'Treating money differently based on its source or intended use', 'Following accounting standards', 'Using mental math'], correctAnswer: 1, explanation: 'Mental accounting treats money differently based on arbitrary categories (bonus vs salary money).' },
+        { id: 'q28_2', question: 'What is the "endowment effect"?', options: ['Valuing what you own more than what you don\'t', 'Inheriting assets from family', 'Donating to endowments', 'Investing in endowment funds'], correctAnswer: 0, explanation: 'The endowment effect causes investors to overvalue assets they already own, leading to holding losers too long.' },
+      ],
+    },
     completed: false,
   },
   {
@@ -2981,6 +3021,16 @@ A successful trader is not someone who never loses — it is someone who manages
     title: 'Hedging with Derivatives',
     content: `Hedging is the primary reason derivatives were created — to transfer risk from those who want to avoid it to those who are willing to take it.\n\nWhat is Hedging? — Hedging is taking an offsetting position in derivatives to reduce the risk of adverse price movements in an existing investment.\n\nHedging a Stock Portfolio with Index Futures:\n• If you have a diversified equity portfolio and expect a short-term market decline, short Nifty futures`,
     duration: '30 min',
+    quiz: {
+      id: 'q31',
+      title: 'Hedging Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q31_1', question: 'What is hedging?', options: ['Speculating on price moves', 'Reducing risk by taking offsetting positions', 'Maximizing profits with leverage', 'Buying at low prices'], correctAnswer: 1, explanation: 'Hedging is a risk management strategy using offsetting positions to reduce adverse price movement risk.' },
+        { id: 'q31_2', question: 'If you own stocks and buy put options, what are you doing?', options: ['Speculating on a rally', 'Hedging your portfolio against a decline', 'Increasing portfolio beta', 'Writing covered calls'], correctAnswer: 1, explanation: 'Buying puts on your portfolio acts as insurance — if markets fall, puts gain value, offsetting losses.' },
+      ],
+    },
     completed: false,
   },
   {
@@ -3064,6 +3114,16 @@ A successful trader is not someone who never loses — it is someone who manages
     title: 'Nudging & Choice Architecture',
     content: `Choice architecture is the design of how choices are presented to people. Nudges are small changes that can significantly improve financial decisions.\n\nDefault Options — The single most powerful nudge:\n• When employees are automatically enrolled in a 401(k), participation exceeds 90%\n• When they must opt-in, participation drops below 50%`,
     duration: '25 min',
+    quiz: {
+      id: 'q34',
+      title: 'Nudge Theory Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q34_1', question: 'What is a "nudge" in behavioral finance?', options: ['A push notification', 'A subtle change in choice architecture influencing behavior without restricting options', 'A high-pressure sales tactic', 'A government regulation'], correctAnswer: 1, explanation: 'A nudge subtly changes how choices are presented to influence behavior predictably without forbidding options.' },
+        { id: 'q34_2', question: 'Which is an example of a positive nudge?', options: ['High-pressure cold calling', 'Automatic enrollment in retirement savings plans', 'Removing all investment options', 'Charging penalty fees'], correctAnswer: 1, explanation: 'Auto-enrollment in retirement plans leverages inertia to help people save by making participation the default.' },
+      ],
+    },
     completed: false,
   },
   {
@@ -3121,6 +3181,16 @@ A successful trader is not someone who never loses — it is someone who manages
     title: 'IPO Application Process',
     content: `Applying for an IPO in India is now completely digital. Step-by-step guide to the application process.\n\nRequired Infrastructure:\n1. Demat Account\n2. Trading Account\n3. Bank Account\n4. UPI ID\n5. PAN Card\n\nThrough UPI: Log in to broker app, enter bid details, approve mandate.`,
     duration: '25 min',
+    quiz: {
+      id: 'q36',
+      title: 'IPO Application Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q36_1', question: 'What is the minimum lot size in an IPO?', options: ['100 shares for all IPOs', 'Minimum shares you can apply for, varies by IPO', '1 share', '1000 shares'], correctAnswer: 1, explanation: 'Minimum lot size varies based on price band and issue size.' },
+        { id: 'q36_2', question: 'Retail vs HNI application difference?', options: ['No difference', 'Retail: up to ₹2L, HNI: above ₹2L application amount', 'HNI needs Demat account', 'Retail has higher priority'], correctAnswer: 1, explanation: 'Retail investors apply for up to ₹2 lakh, HNI applies for more than ₹2 lakh.' },
+      ],
+    },
     completed: false,
   },
   {
@@ -3230,6 +3300,16 @@ A successful trader is not someone who never loses — it is someone who manages
     title: 'Portfolio Hedging with Options',
     content: `Professional portfolio managers use sophisticated hedging strategies to protect portfolios.\n\nHedging Tools:\n• Index Put Options — Most common\n• Cost: 0.5-2% of portfolio value per year\n\nHedging Strategies:\n1. Static Hedge — Buy puts and hold to expiry\n2. Rolling Hedge — Continuously roll puts`,
     duration: '30 min',
+    quiz: {
+      id: 'q40',
+      title: 'Portfolio Hedging Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q40_1', question: 'What is a collar strategy?', options: ['Buying put, selling call, and holding the underlying stock', 'Only buying put options', 'Selling naked calls', 'An iron condor'], correctAnswer: 0, explanation: 'A collar involves holding stock + protective put (floor) + covered call (cap) to finance the put premium.' },
+        { id: 'q40_2', question: 'What is tail risk hedging?', options: ['Hedging normal volatility', 'Protecting against extreme, low-probability events (black swans)', 'Daily trading strategy', 'Insuring against theft'], correctAnswer: 1, explanation: 'Tail risk hedging protects against extreme but rare catastrophic events like market crashes.' },
+      ],
+    },
     completed: false,
   },
   {
@@ -3313,6 +3393,16 @@ A successful trader is not someone who never loses — it is someone who manages
     title: 'International Investing & Taxation',
     content: `International investing offers diversification benefits with additional tax considerations.\n\nWays to Invest:\n1. International Mutual Funds\n2. Direct US Stock Purchase\n3. ADRs/GDRs\n\nUS Dividend TDS: 15-25% (DTAA benefit)\nCapital gains: Taxed in India at standard rates`,
     duration: '25 min',
+    quiz: {
+      id: 'q43',
+      title: 'International Tax Quiz',
+      score: 0,
+      passed: false,
+      questions: [
+        { id: 'q43_1', question: 'What is FATCA compliance?', options: ['A US law requiring foreign financial institutions to report US account holders', 'An Indian tax law', 'A type of investment account', 'A tax treaty'], correctAnswer: 0, explanation: 'FATCA (Foreign Account Tax Compliance Act) requires foreign financial institutions to report US persons\' accounts.' },
+        { id: 'q43_2', question: 'What is a Double Taxation Avoidance Agreement (DTAA)?', options: ['Paying double tax', 'Treaty preventing double taxation of same income in two countries', 'Tax exemption for foreign income', 'A type of tax return'], correctAnswer: 1, explanation: 'DTAA ensures income is not taxed twice — you get credit in one country for tax paid in the other.' },
+      ],
+    },
     completed: false,
   },
   {
