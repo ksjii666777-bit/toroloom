@@ -47,6 +47,7 @@ import ironLockRoutes from './routes/ironLock';
 import metricsRoutes from './routes/metrics';
 import paymentsRoutes from './routes/payments';
 import subscriptionRoutes, { webhookRouter, configureSubscriptionPersistence, setWebhookSecret } from './routes/subscriptions';
+import couponRoutes, { configureCouponPersistence } from './routes/coupons';
 import pushNotificationsRoutes from './routes/pushNotifications';
 import contractNoteRoutes from './routes/contractNote';
 import fnoRoutes from './routes/fno';
@@ -177,6 +178,9 @@ app.use('/api/fno', readLimiter, fnoRoutes);
 // ── Social — 200 req / min (rates apply in production) ────────────────────
 app.use('/api/social', readLimiter, authMiddleware, requireSubscription('elite'), socialRoutes);
 
+// ── Coupons — 50 req / min ──────────────────────────────────────────────
+app.use('/api/coupons', writeLimiter, couponRoutes);
+
 // ── KYC — 50 req / min (writes), auth required ────────────────────────
 app.use('/api/kyc', writeLimiter, authMiddleware, kycRoutes);
 
@@ -256,6 +260,9 @@ async function initializeStorage(): Promise<void> {
 
     // Wire storage into the Subscription service for persistence
     configureSubscriptionPersistence(storage);
+
+    // Wire storage into the Coupon service for persistence
+    configureCouponPersistence(storage);
 
     // Wire storage into the SnapTrade persistence layer
     configureSnapTradePersistence(storage);

@@ -11,7 +11,7 @@
  * ============================================================================
  */
 
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -225,6 +225,47 @@ export class InMemoryStorage implements StorageEngine {
     this.snapTradeConnections.delete(userId);
   }
 
+  // ──── Coupons ────
+  private coupons = new Map<string, CouponData>();
+  private couponUsages: CouponUsageData[] = [];
+
+  async loadCoupon(code: string): Promise<CouponData | null> {
+    return this.coupons.get(code.toUpperCase()) ?? null;
+  }
+
+  async saveCoupon(coupon: CouponData): Promise<void> {
+    this.coupons.set(coupon.code.toUpperCase(), coupon);
+  }
+
+  async deleteCoupon(code: string): Promise<void> {
+    this.coupons.delete(code.toUpperCase());
+    this.couponUsages = this.couponUsages.filter(u => u.code.toUpperCase() !== code.toUpperCase());
+  }
+
+  async loadAllCoupons(): Promise<CouponData[]> {
+    return Array.from(this.coupons.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async incrementCouponUsage(code: string): Promise<void> {
+    const coupon = this.coupons.get(code.toUpperCase());
+    if (coupon) {
+      coupon.currentUses++;
+      coupon.updatedAt = new Date().toISOString();
+    }
+  }
+
+  async recordCouponUsage(usage: CouponUsageData): Promise<void> {
+    this.couponUsages.push(usage);
+  }
+
+  async hasUserUsedCoupon(code: string, userId: string): Promise<boolean> {
+    return this.couponUsages.some(
+      u => u.code.toUpperCase() === code.toUpperCase() && u.userId === userId
+    );
+  }
+
   // ──── Subscriptions ────
   private subscriptions = new Map<string, UserSubscriptionData>();
 
@@ -251,6 +292,8 @@ export class InMemoryStorage implements StorageEngine {
     this.communityPosts = [];
     this.subscriptions.clear();
     this.telegramLinks.clear();
+    this.coupons.clear();
+    this.couponUsages = [];
   }
 
   async isHealthy(): Promise<boolean> {

@@ -60,7 +60,7 @@
  */
 
 import type { Pool, PoolConfig } from 'pg';
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -279,6 +279,40 @@ export class PostgreSQLStorage implements StorageEngine {
     `);
 
     await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS coupons (
+        code TEXT PRIMARY KEY,
+        type TEXT NOT NULL CHECK (type IN ('percentage', 'fixed', 'free_trial')),
+        value INTEGER NOT NULL,
+        trial_days INTEGER,
+        min_plan_tier TEXT,
+        max_uses INTEGER NOT NULL DEFAULT 0,
+        current_uses INTEGER NOT NULL DEFAULT 0,
+        expires_at TEXT,
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        description TEXT NOT NULL,
+        created_by TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_coupons_active ON coupons (code) WHERE is_active = true;
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS coupon_usage (
+        id TEXT PRIMARY KEY,
+        code TEXT NOT NULL REFERENCES coupons(code) ON DELETE CASCADE,
+        user_id TEXT NOT NULL,
+        plan_id TEXT NOT NULL,
+        discount_amount INTEGER NOT NULL,
+        original_price INTEGER NOT NULL,
+        final_price INTEGER NOT NULL,
+        used_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_coupon_usage_code ON coupon_usage (code);
+      CREATE INDEX IF NOT EXISTS idx_coupon_usage_user ON coupon_usage (code, user_id);
+    `);
+
+    await this.pool.query(`
       CREATE TABLE IF NOT EXISTS subscriptions (
         user_id TEXT PRIMARY KEY,
         tier TEXT NOT NULL DEFAULT 'free',
@@ -489,6 +523,8 @@ export class PostgreSQLStorage implements StorageEngine {
     await this.pool.query('DELETE FROM community_posts');
     await this.pool.query('DELETE FROM telegram_links');
     await this.pool.query('DELETE FROM subscriptions');
+    await this.pool.query('DELETE FROM coupon_usage');
+    await this.pool.query('DELETE FROM coupons');
   }
 
   private rowToEvent(row: any): AuditEvent {
@@ -887,6 +923,109 @@ export class PostgreSQLStorage implements StorageEngine {
       comments: row.comments,
       timestamp: row.timestamp,
       tags: row.tags ? parseJSON<string[]>(row.tags) : [],
+    };
+  }
+
+  // ──── Coupons ────
+
+  async loadCoupon(code: string): Promise<CouponData | null> {
+    if (!this.pool) return null;
+    const result = await this.pool.query(
+      'SELECT * FROM coupons WHERE code = $1',
+      [code.toUpperCase()],
+    );
+    if (result.rows.length === 0) return null;
+    return this.rowToCoupon(result.rows[0]);
+  }
+
+  async saveCoupon(coupon: CouponData): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO coupons (code, type, value, trial_days, min_plan_tier, max_uses, current_uses, expires_at, is_active, description, created_by, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       ON CONFLICT (code) DO UPDATE SET
+         type = EXCLUDED.type,
+         value = EXCLUDED.value,
+         trial_days = EXCLUDED.trial_days,
+         min_plan_tier = EXCLUDED.min_plan_tier,
+         max_uses = EXCLUDED.max_uses,
+         current_uses = EXCLUDED.current_uses,
+         expires_at = EXCLUDED.expires_at,
+         is_active = EXCLUDED.is_active,
+         description = EXCLUDED.description,
+         created_by = EXCLUDED.created_by,
+         updated_at = EXCLUDED.updated_at`,
+      [
+        coupon.code.toUpperCase(),
+        coupon.type,
+        coupon.value,
+        coupon.trialDays || null,
+        coupon.minPlanTier || null,
+        coupon.maxUses,
+        coupon.currentUses,
+        coupon.expiresAt,
+        coupon.isActive,
+        coupon.description,
+        coupon.createdBy || null,
+        coupon.createdAt,
+        coupon.updatedAt,
+      ],
+    );
+  }
+
+  async deleteCoupon(code: string): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query('DELETE FROM coupon_usage WHERE code = $1', [code.toUpperCase()]);
+    await this.pool.query('DELETE FROM coupons WHERE code = $1', [code.toUpperCase()]);
+  }
+
+  async loadAllCoupons(): Promise<CouponData[]> {
+    if (!this.pool) return [];
+    const result = await this.pool.query('SELECT * FROM coupons ORDER BY created_at DESC');
+    return result.rows.map((r: any) => this.rowToCoupon(r));
+  }
+
+  async incrementCouponUsage(code: string): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      'UPDATE coupons SET current_uses = current_uses + 1, updated_at = $2 WHERE code = $1',
+      [code.toUpperCase(), new Date().toISOString()],
+    );
+  }
+
+  async recordCouponUsage(usage: CouponUsageData): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO coupon_usage (id, code, user_id, plan_id, discount_amount, original_price, final_price, used_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [usage.id, usage.code.toUpperCase(), usage.userId, usage.planId, usage.discountAmount, usage.originalPrice, usage.finalPrice, usage.usedAt],
+    );
+  }
+
+  async hasUserUsedCoupon(code: string, userId: string): Promise<boolean> {
+    if (!this.pool) return false;
+    const result = await this.pool.query(
+      'SELECT 1 FROM coupon_usage WHERE code = $1 AND user_id = $2 LIMIT 1',
+      [code.toUpperCase(), userId],
+    );
+    return result.rows.length > 0;
+  }
+
+  private rowToCoupon(row: any): CouponData {
+    return {
+      code: row.code,
+      type: row.type,
+      value: row.value,
+      trialDays: row.trial_days || undefined,
+      minPlanTier: row.min_plan_tier || undefined,
+      maxUses: row.max_uses,
+      currentUses: row.current_uses,
+      expiresAt: row.expires_at,
+      isActive: row.is_active,
+      description: row.description,
+      createdBy: row.created_by || undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     };
   }
 }

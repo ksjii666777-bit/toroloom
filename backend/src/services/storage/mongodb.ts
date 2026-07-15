@@ -18,7 +18,7 @@
  */
 
 import type { Collection, Db, MongoClient, MongoClientOptions, Filter } from 'mongodb';
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -264,6 +264,8 @@ export class MongoDBStorage implements StorageEngine {
     await this.db.collection('community_posts').deleteMany({});
     await this.db.collection('telegram_links').deleteMany({});
     await this.db.collection('subscriptions').deleteMany({});
+    await this.db.collection('coupons').deleteMany({});
+    await this.db.collection('coupon_usage').deleteMany({});
   }
 
   // ──── Risk Profiles ────
@@ -445,6 +447,60 @@ export class MongoDBStorage implements StorageEngine {
       { $set: sub },
       { upsert: true },
     );
+  }
+
+  // ──── Coupons ────
+
+  async loadCoupon(code: string): Promise<CouponData | null> {
+    if (!this.db) return null;
+    const col = this.db.collection<CouponData & { _id?: string }>('coupons');
+    const doc = await col.findOne({ code: code.toUpperCase() } as any);
+    if (!doc) return null;
+    const { _id, ...coupon } = doc;
+    return coupon as CouponData;
+  }
+
+  async saveCoupon(coupon: CouponData): Promise<void> {
+    if (!this.db) return;
+    const col = this.db.collection('coupons');
+    await col.updateOne(
+      { code: coupon.code.toUpperCase() },
+      { $set: { ...coupon, code: coupon.code.toUpperCase() } },
+      { upsert: true },
+    );
+  }
+
+  async deleteCoupon(code: string): Promise<void> {
+    if (!this.db) return;
+    await this.db.collection('coupon_usage').deleteMany({ code: code.toUpperCase() });
+    await this.db.collection('coupons').deleteOne({ code: code.toUpperCase() });
+  }
+
+  async loadAllCoupons(): Promise<CouponData[]> {
+    if (!this.db) return [];
+    const col = this.db.collection<CouponData & { _id?: string }>('coupons');
+    const docs = await col.find({}).sort({ createdAt: -1 }).toArray();
+    return docs.map(({ _id, ...coupon }) => coupon as CouponData);
+  }
+
+  async incrementCouponUsage(code: string): Promise<void> {
+    if (!this.db) return;
+    await this.db.collection('coupons').updateOne(
+      { code: code.toUpperCase() },
+      { $inc: { currentUses: 1 }, $set: { updatedAt: new Date().toISOString() } },
+    );
+  }
+
+  async recordCouponUsage(usage: CouponUsageData): Promise<void> {
+    if (!this.db) return;
+    await this.db.collection('coupon_usage').insertOne(usage as any);
+  }
+
+  async hasUserUsedCoupon(code: string, userId: string): Promise<boolean> {
+    if (!this.db) return false;
+    const col = this.db.collection('coupon_usage');
+    const doc = await col.findOne({ code: code.toUpperCase(), userId } as any);
+    return !!doc;
   }
 
   // ──── Badge Counts ────

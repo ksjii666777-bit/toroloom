@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, TextInput, Pressable } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, withSequence } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,6 +41,25 @@ export default function SubscriptionScreen({ navigation }: any) {
     const interval = setInterval(refreshTrialStatus, 60000); // every minute
     return () => clearInterval(interval);
   }, [, refreshTrialStatus]);
+
+  // Auto-show coupon input when returning from AvailableCoupons with a selected coupon
+  useFocusEffect(
+    useCallback(() => {
+      const store = useSubscriptionStore.getState();
+      if (store.couponSelectedFromList && store.couponInput && !store.couponResult) {
+        setShowCouponInput(true);
+        // Auto-apply the coupon with current selected plan
+        const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);
+        if (plan && plan.tier !== 'free') {
+          const price = getPlanPrice(plan.id);
+          const displayPrice = isYearly ? price.yearly : price.monthly;
+          applyCoupon(plan.tier, displayPrice);
+        }
+        store.markCouponFromList(false);
+      }
+      return () => {};
+    }, [selectedPlanId, isYearly, getPlanPrice, applyCoupon]),
+  );
 
   const trialActive = isInTrial();
 
@@ -294,13 +314,22 @@ export default function SubscriptionScreen({ navigation }: any) {
         {!isPaidUser && !trialActive && selectedPlanId !== 'plan_free' && (
           <View style={styles.couponSection}>
             {!showCouponInput && !couponResult ? (
-              <AnimatedPressable onPress={() => setShowCouponInput(true)} haptic="light" scaleTo={0.97}>
-                <View style={styles.couponToggle}>
-                  <Ionicons name="pricetag-outline" size={16} color={colors.primary} />
-                  <Text style={styles.couponToggleText}>Have a coupon code?</Text>
-                  <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-                </View>
-              </AnimatedPressable>
+              <>
+                <AnimatedPressable onPress={() => setShowCouponInput(true)} haptic="light" scaleTo={0.97}>
+                  <View style={styles.couponToggle}>
+                    <Ionicons name="pricetag-outline" size={16} color={colors.primary} />
+                    <Text style={styles.couponToggleText}>Have a coupon code?</Text>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                  </View>
+                </AnimatedPressable>
+                <AnimatedPressable onPress={() => navigation.navigate('AvailableCoupons')} haptic="light" scaleTo={0.97}>
+                  <View style={[styles.couponToggle, { marginTop: 8, borderStyle: 'solid', borderColor: colors.primary + '30' }]}>
+                    <Ionicons name="pricetag" size={16} color={colors.primary} />
+                    <Text style={styles.couponToggleText}>View available coupons</Text>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                  </View>
+                </AnimatedPressable>
+              </>
             ) : couponResult && couponResult.valid ? (
               <Animated.View style={styles.couponApplied}>
                 <View style={styles.couponAppliedRow}>

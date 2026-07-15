@@ -105,6 +105,35 @@ export interface UserSubscriptionData {
   updatedAt: string;
 }
 
+// ==================== Coupon Domain ====================
+
+export interface CouponData {
+  code: string;
+  type: 'percentage' | 'fixed' | 'free_trial';
+  value: number;
+  trialDays?: number;
+  minPlanTier?: 'free' | 'pro' | 'elite';
+  maxUses: number;
+  currentUses: number;
+  expiresAt: string | null;
+  isActive: boolean;
+  description: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CouponUsageData {
+  id: string;
+  code: string;
+  userId: string;
+  planId: string;
+  discountAmount: number;
+  originalPrice: number;
+  finalPrice: number;
+  usedAt: string;
+}
+
 // ==================== Community Domain ====================
 
 export interface CommunityPostData {
@@ -245,6 +274,29 @@ export interface StorageEngine {
 
   /** Load ALL Telegram links (for cache hydration after restart). */
   loadAllTelegramLinks(): Promise<TelegramLinkData[]>;
+
+  // ──── Coupons ────
+
+  /** Load a coupon by code. Returns null if not found. */
+  loadCoupon(code: string): Promise<CouponData | null>;
+
+  /** Save (insert or overwrite) a coupon. */
+  saveCoupon(coupon: CouponData): Promise<void>;
+
+  /** Delete a coupon by code. */
+  deleteCoupon(code: string): Promise<void>;
+
+  /** Load all coupons (for admin listing). */
+  loadAllCoupons(): Promise<CouponData[]>;
+
+  /** Increment the usage count for a coupon. */
+  incrementCouponUsage(code: string): Promise<void>;
+
+  /** Record a coupon usage by a user. */
+  recordCouponUsage(usage: CouponUsageData): Promise<void>;
+
+  /** Check if a user has already used a coupon code. */
+  hasUserUsedCoupon(code: string, userId: string): Promise<boolean>;
 
   // ──── Lifecycle ────
 

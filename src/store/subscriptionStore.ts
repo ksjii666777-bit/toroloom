@@ -40,6 +40,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Alert } from 'react-native';
 import { paymentsApi } from '../services/api/payments';
+import { couponApi } from '../services/api/coupons';
 
 // ============ Storage Keys ============
 
@@ -257,6 +258,8 @@ interface SubscriptionState {
   couponInput: string;
   couponResult: CouponDiscountResult | null;
   isApplyingCoupon: boolean;
+  /** Set true when a coupon is selected from AvailableCoupons list — SubscriptionScreen auto-shows input on focus */
+  couponSelectedFromList: boolean;
 
   // ──── Trial State ────────────────────────────────────────
   trialDaysRemaining: number | null;
@@ -288,7 +291,7 @@ interface SubscriptionState {
   /** Check if user has trial available for a plan */
   hasTrialAvailable: (planTier: SubscriptionTier) => boolean;
   /** Get all available coupon codes (mock) */
-  getAvailableCoupons: () => CouponCode[];
+  getAvailableCoupons: () => Promise<CouponCode[]>;
 
   // ──── Actions ────────────────────────────────────────────
   loadSubscription: () => Promise<void>;
@@ -303,6 +306,8 @@ interface SubscriptionState {
   setCouponInput: (code: string) => void;
   applyCoupon: (planTier: SubscriptionTier, price: number) => Promise<void>;
   removeCoupon: () => void;
+  /** Mark/unmark that a coupon was just selected from the available coupons list */
+  markCouponFromList: (value: boolean) => void;
 
   // ──── Trial Actions ──────────────────────────────────────
   startTrial: (planTier: SubscriptionTier) => Promise<void>;
@@ -347,6 +352,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   couponInput: '',
   couponResult: null,
   isApplyingCoupon: false,
+  couponSelectedFromList: false,
 
   // ──── Trial State ─────────────────────────────────────────
   trialDaysRemaining: null,
@@ -620,7 +626,15 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     return true;
   },
 
-  getAvailableCoupons: () => {
+  getAvailableCoupons: async () => {
+    try {
+      const response = await couponApi.getCoupons();
+      if (response?.coupons?.length > 0) {
+        return response.coupons.filter(c => c.isActive);
+      }
+    } catch {
+      // Backend unavailable — fallback to mock coupons
+    }
     return MOCK_COUPONS.filter(c => c.isActive);
   },
 
@@ -640,70 +654,42 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
     set({ isApplyingCoupon: true });
 
-    // Simulate network delay
-    await new Promise(r => setTimeout(r, 600));
+    try {
+      // Call backend API for coupon validation
+      const result = await couponApi.validateCoupon(couponInput, planTier, price);
 
-    const coupon = MOCK_COUPONS.find(
-      c => c.code === couponInput && c.isActive
-    );
+      set({ isApplyingCoupon: false, couponResult: result });
 
-    if (!coupon) {
-      set({
-        isApplyingCoupon: false,
-        couponResult: {
-          code: couponInput,
-          valid: false,
-          type: 'percentage',
-          discountAmount: 0,
-          originalPrice: price,
-          finalPrice: price,
-          message: 'Invalid or expired coupon code.',
-        },
-      });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
+      if (result.valid) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch {
+      // Fallback to mock validation if backend is unavailable
+      const coupon = MOCK_COUPONS.find(
+        c => c.code === couponInput && c.isActive
+      );
 
-    // Check expiry
-    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
-      set({
-        isApplyingCoupon: false,
-        couponResult: {
-          code: couponInput,
-          valid: false,
-          type: coupon.type,
-          discountAmount: 0,
-          originalPrice: price,
-          finalPrice: price,
-          message: 'This coupon has expired.',
-        },
-      });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
+      if (!coupon) {
+        set({
+          isApplyingCoupon: false,
+          couponResult: {
+            code: couponInput,
+            valid: false,
+            type: 'percentage',
+            discountAmount: 0,
+            originalPrice: price,
+            finalPrice: price,
+            message: 'Invalid or expired coupon code.',
+          },
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+      }
 
-    // Check max uses
-    if (coupon.maxUses && coupon.currentUses && coupon.currentUses >= coupon.maxUses) {
-      set({
-        isApplyingCoupon: false,
-        couponResult: {
-          code: couponInput,
-          valid: false,
-          type: coupon.type,
-          discountAmount: 0,
-          originalPrice: price,
-          finalPrice: price,
-          message: 'This coupon has reached its usage limit.',
-        },
-      });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
-
-    // Check min plan tier
-    if (coupon.minPlanTier) {
-      const TIER_RANK: Record<SubscriptionTier, number> = { free: 0, pro: 1, elite: 2 };
-      if (TIER_RANK[planTier] < TIER_RANK[coupon.minPlanTier]) {
+      // Check expiry
+      if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
         set({
           isApplyingCoupon: false,
           couponResult: {
@@ -713,45 +699,88 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
             discountAmount: 0,
             originalPrice: price,
             finalPrice: price,
-            message: `This coupon requires at least the ${coupon.minPlanTier} plan.`,
+            message: 'This coupon has expired.',
           },
         });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         return;
       }
+
+      // Check max uses
+      if (coupon.maxUses && coupon.currentUses && coupon.currentUses >= coupon.maxUses) {
+        set({
+          isApplyingCoupon: false,
+          couponResult: {
+            code: couponInput,
+            valid: false,
+            type: coupon.type,
+            discountAmount: 0,
+            originalPrice: price,
+            finalPrice: price,
+            message: 'This coupon has reached its usage limit.',
+          },
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+      }
+
+      // Check min plan tier
+      if (coupon.minPlanTier) {
+        const TIER_RANK: Record<SubscriptionTier, number> = { free: 0, pro: 1, elite: 2 };
+        if (TIER_RANK[planTier] < TIER_RANK[coupon.minPlanTier]) {
+          set({
+            isApplyingCoupon: false,
+            couponResult: {
+              code: couponInput,
+              valid: false,
+              type: coupon.type,
+              discountAmount: 0,
+              originalPrice: price,
+              finalPrice: price,
+              message: `This coupon requires at least the ${coupon.minPlanTier} plan.`,
+            },
+          });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+        }
+      }
+
+      // Calculate discount
+      let discountAmount = 0;
+      if (coupon.type === 'percentage') {
+        discountAmount = Math.round(price * (coupon.value / 100));
+      } else if (coupon.type === 'fixed') {
+        discountAmount = Math.min(coupon.value, price);
+      }
+
+      const finalPrice = Math.max(0, price - discountAmount);
+
+      set({
+        isApplyingCoupon: false,
+        couponResult: {
+          code: coupon.code,
+          valid: true,
+          type: coupon.type,
+          discountAmount,
+          originalPrice: price,
+          finalPrice,
+          trialDays: coupon.trialDays,
+          message: coupon.type === 'free_trial'
+            ? `${coupon.trialDays}-day free trial applied!`
+            : `Coupon applied! You save ₹${discountAmount.toLocaleString('en-IN')}`,
+        },
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-
-    // Calculate discount
-    let discountAmount = 0;
-    if (coupon.type === 'percentage') {
-      discountAmount = Math.round(price * (coupon.value / 100));
-    } else if (coupon.type === 'fixed') {
-      discountAmount = Math.min(coupon.value, price);
-    }
-
-    const finalPrice = Math.max(0, price - discountAmount);
-
-    set({
-      isApplyingCoupon: false,
-      couponResult: {
-        code: coupon.code,
-        valid: true,
-        type: coupon.type,
-        discountAmount,
-        originalPrice: price,
-        finalPrice,
-        trialDays: coupon.trialDays,
-        message: coupon.type === 'free_trial'
-          ? `${coupon.trialDays}-day free trial applied!`
-          : `Coupon applied! You save ₹${discountAmount.toLocaleString('en-IN')}`,
-      },
-    });
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   },
 
   removeCoupon: () => {
     set({ couponInput: '', couponResult: null });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  },
+
+  markCouponFromList: (value: boolean) => {
+    set({ couponSelectedFromList: value });
   },
 
   // ──── Trial Actions ─────────────────────────────────────────
