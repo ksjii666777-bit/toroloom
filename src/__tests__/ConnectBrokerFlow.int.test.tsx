@@ -16,41 +16,41 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockGoBack = vi.fn();
 
-// Session storage services
-export const mockHasValidSession = vi.fn();
-export const mockStoreBrokerSession = vi.fn();
-export const mockClearBrokerSession = vi.fn();
-export const mockParseSessionPayload = vi.fn();
-export const mockGetBrokerHoldings = vi.fn();
+// Session storage services — hoisted so vi.mock() factory can reference them
+const mockHasValidSession = vi.hoisted(() => vi.fn());
+const mockStoreBrokerSession = vi.hoisted(() => vi.fn());
+const mockClearBrokerSession = vi.hoisted(() => vi.fn());
+const mockParseSessionPayload = vi.hoisted(() => vi.fn());
+const mockGetBrokerHoldings = vi.hoisted(() => vi.fn());
 
 vi.mock('../services/gateway/sessionStorage', () => ({
-  hasValidSession: (...args: any[]) => mockHasValidSession(...args),
-  storeBrokerSession: (...args: any[]) => mockStoreBrokerSession(...args),
-  clearBrokerSession: (...args: any[]) => mockClearBrokerSession(...args),
-  parseSessionPayload: (...args: any[]) => mockParseSessionPayload(...args),
+  hasValidSession: mockHasValidSession,
+  storeBrokerSession: mockStoreBrokerSession,
+  clearBrokerSession: mockClearBrokerSession,
+  parseSessionPayload: mockParseSessionPayload,
   listStoredSessions: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock('../services/gateway/proxyClient', () => ({
-  getBrokerHoldings: (...args: any[]) => mockGetBrokerHoldings(...args),
+  getBrokerHoldings: mockGetBrokerHoldings,
 }));
 
 // Mock API services used by ConnectBrokerView
-export const mockSnapTradeStatus = vi.fn(() => Promise.resolve({ connected: false }));
-export const mockSnapTradeRegister = vi.fn(() => Promise.resolve({ success: true }));
-export const mockSnapTradeGetLink = vi.fn(() => Promise.resolve({ oauthUrl: 'https://example.com/oauth' }));
-export const mockBrokerApiGetHoldings = vi.fn(() => Promise.resolve({ success: true, statusCode: 200, data: { holdings: [] } }));
+const mockSnapTradeStatus = vi.hoisted(() => vi.fn(() => Promise.resolve({ connected: false })));
+const mockSnapTradeRegister = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true })));
+const mockSnapTradeGetLink = vi.hoisted(() => vi.fn(() => Promise.resolve({ oauthUrl: 'https://example.com/oauth' })));
+const mockBrokerApiGetHoldings = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true, statusCode: 200, data: { holdings: [] } })));
 
 vi.mock('../services/api', () => ({
   snapTradeApi: {
-    status: (...args: any[]) => mockSnapTradeStatus(...args),
-    register: (...args: any[]) => mockSnapTradeRegister(...args),
-    getConnectLink: (...args: any[]) => mockSnapTradeGetLink(...args),
+    status: mockSnapTradeStatus,
+    register: mockSnapTradeRegister,
+    getConnectLink: mockSnapTradeGetLink,
     handleCallback: vi.fn(() => Promise.resolve({ success: true })),
     disconnect: vi.fn(() => Promise.resolve({ success: true })),
   },
   brokerProxyApi: {
-    getHoldings: (...args: any[]) => mockBrokerApiGetHoldings(...args),
+    getHoldings: mockBrokerApiGetHoldings,
   },
   angelConnectApi: {
     status: vi.fn(() => Promise.resolve({ connected: false })),

@@ -143,7 +143,7 @@ const mockUseUserCourseStore = vi.hoisted(() => {
       loadFromCache: mockLoadFromCache,
     };
     return sel ? sel(state) : state;
-  });
+  }) as any;
   fn.getState = vi.fn(() => ({ loadFromCache: mockLoadFromCache }));
   return fn;
 });
