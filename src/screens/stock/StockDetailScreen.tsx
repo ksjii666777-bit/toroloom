@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useMarketStore } from '../../store/marketStore';
+import { useT } from '../../hooks/useT';
 import { useWatchlistStore } from '../../store/watchlistStore';
 import { useAIStore } from '../../store/aiStore';
 import { useTheme } from '../../context/ThemeContext';
@@ -47,6 +48,7 @@ function formatCompactMarketCap(marketCap: string): string {
 export default function StockDetailScreen({ route, navigation }: any) {
   const { stockId } = route.params;
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { stocks } = useMarketStore();
   const { insights } = useAIStore();
@@ -188,14 +190,14 @@ export default function StockDetailScreen({ route, navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.close')}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', gap: SPACING.sm, alignItems: 'center' }}>
             <View style={[styles.connectionBadge, { backgroundColor: isConnected ? colors.marketUp + '20' : colors.marketDown + '20' }]}>
               <View style={[styles.connectionDot, { backgroundColor: isConnected ? colors.marketUp : colors.marketDown }]} />
               <Text style={[styles.connectionText, { color: isConnected ? colors.marketUp : colors.marketDown }]}>
-                {isConnected ? 'Live' : 'Offline'}
+{isConnected ? t('status.live') : t('status.offline')}
               </Text>
             </View>
             <TouchableOpacity style={styles.watchlistBtn} onPress={handleWatchlistToggle}>

@@ -4,6 +4,7 @@ import Animated from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
@@ -94,6 +95,7 @@ const quickActions = [
 
 export default function MoreScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user, logout, isAdmin } = useAuthStore();
   const { userLevel, badges } = useGamificationStore();
@@ -214,7 +216,7 @@ export default function MoreScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>More</Text>
+          <Text style={styles.title}>{t('profile.more')}</Text>
         </View>
 
         {/* Profile Card */}
@@ -233,7 +235,7 @@ export default function MoreScreen({ navigation }: any) {
                   <Badge label={`Level ${userLevel.level}`} variant="primary" />
                   <View style={styles.kycVerifiedBadge}>
                     <Ionicons name="shield-checkmark" size={12} color="#00D2FF" />
-                    <Text style={styles.kycVerifiedText}>KYC Verified</Text>
+                    <Text style={styles.kycVerifiedText}>{t('profile.kycVerified')}</Text>
                   </View>
                 </View>
               </View>
@@ -260,18 +262,18 @@ export default function MoreScreen({ navigation }: any) {
         <Card style={styles.balanceCard}>
           <View style={styles.balanceRow}>
             <View>
-              <Text style={styles.balanceLabel}>Available Balance</Text>
+              <Text style={styles.balanceLabel}>{t('profile.availableBalance')}</Text>
               <Text style={styles.balanceValue}>₹{((user?.balance || 2500000) / 100000).toFixed(1)}L</Text>
             </View>
             <View style={styles.balanceActions}>
               <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>
                 <View style={styles.balanceBtn}>
-                  <Text style={styles.balanceBtnText}>Add</Text>
+                  <Text style={styles.balanceBtnText}>{t('profile.add')}</Text>
                 </View>
               </AnimatedPressable>
               <AnimatedPressable onPress={() => navigation.navigate('Withdraw')} haptic="light" scaleTo={0.95}>
                 <View style={[styles.balanceBtn, styles.balanceBtnOutline]}>
-                  <Text style={styles.balanceBtnOutlineText}>Withdraw</Text>
+                  <Text style={styles.balanceBtnOutlineText}>{t('profile.withdraw')}</Text>
                 </View>
               </AnimatedPressable>
             </View>
@@ -325,7 +327,7 @@ export default function MoreScreen({ navigation }: any) {
 
         {/* Achievements Preview */}
         <AnimatedPressable onPress={() => navigation.navigate('Achievements')} haptic="light" scaleTo={0.98}>
-          <Card title="Achievements" subtitle={`${unlockedCount}/${badges.length} unlocked`}>
+          <Card title={t('profile.achievements')} subtitle={`${unlockedCount}/${badges.length} ${t('gamification.unlocked', { count: unlockedCount })}`}>
             <View style={styles.badgesGrid}>
               {badges.slice(0, BADGE_DISPLAY_COUNT).map((badge, i) => (
                 <Animated.View key={badge.id} style={badgeStyles[i]}>
@@ -348,7 +350,7 @@ export default function MoreScreen({ navigation }: any) {
         <AnimatedPressable onPress={logout} haptic="warning" scaleTo={0.97}>
           <View style={styles.logoutBtn}>
             <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-            <Text style={styles.logoutText}>Log Out</Text>
+            <Text style={styles.logoutText}>{t('profile.logout')}</Text>
           </View>
         </AnimatedPressable>
 

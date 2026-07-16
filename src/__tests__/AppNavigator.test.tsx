@@ -144,16 +144,59 @@ vi.mock('../screens/settings/VoiceSettingsScreen', () => ({
 vi.mock('../screens/stock/StockScreenerScreen', () => ({
   default: NullComponent,
 }));
+vi.mock('../screens/quiz/QuizResultScreen', () => ({
+  default: NullComponent,
+}));
 
-// ==================== Mock remaining AppNavigator screens ====================
+// ==================== Mock all remaining AppNavigator screens ====================
 vi.mock('../screens/community/PostDetailScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/ai/AIChatScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/ai/AITradeAssistantScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/ai/EarningsCallScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/ai/SentimentAnalysisScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/ai/SentimentAlertScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/ai/LiveFeedScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/education/GlossaryScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/education/CertificateScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/education/LearningPathsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/education/LearningPathDetailScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/education/MyCoursesScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/education/CreateCourseScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/education/CommunityCoursesScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/trade/OpenOrdersScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/trade/StrategyPerformanceScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/calculators/StepUpSipScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/settings/PortfolioAlertsScreen', () => ({ default: NullComponent }));
-vi.mock('../screens/payments/PaymentHistoryScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/settings/SecuritySettingsScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/settings/TwoFactorSetupScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/WidgetSettingsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/SecurityAuditLogScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/ApiKeyManagementScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/WebhookManagementScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/TelegramConnectScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/AISettingsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/DarkModeSettingsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/AccessibilitySettingsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/LandscapeSettingsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/settings/CDNOptimizationScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/referral/ReferralScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/payments/PaymentHistoryScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/stock/USStockDetailScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/markets/USMarketsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/markets/BondDashboardScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/markets/CurrencyMarketsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/markets/CommodityMarketsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/markets/FuturesCurveScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/analytics/TaxHarvestingCalendarScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/news/IPOCalendarScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/ipos/IPODashboardScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/news/EconomicCalendarScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/social/SocialTradingScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/social/TraderProfileScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/social/PollsScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/social/CreatePollScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/social/RevenueDashboardScreen', () => ({ default: NullComponent }));
+vi.mock('../screens/reports/ContractNoteUploadScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/trade/FnOOptionsChainScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/trade/StrategyBuilderScreen', () => ({ default: NullComponent }));
 vi.mock('../screens/calculators/SIPCalculator', () => ({ default: NullComponent }));
@@ -193,8 +236,6 @@ vi.mock('@react-navigation/native-stack', () => ({
         {props.name}
         {props.component
           ? React.createElement(props.component, {
-              // Pass default route / navigation so unmocked screens don't crash
-              // (e.g. route.params access would throw with undefined route)
               route: { params: {} },
               navigation: { navigate: vi.fn(), goBack: vi.fn() },
             })
@@ -268,6 +309,24 @@ vi.mock('../hooks/useCacheInvalidation', () => ({
   useCacheInvalidation: () => {},
 }));
 
+// Hoisted mock reference so both test code and vi.mock factory share the same function
+const mockRecordReferral = vi.hoisted(() => vi.fn());
+
+vi.mock('../services/api', () => ({
+  authApi: {
+    recordReferral: mockRecordReferral,
+  },
+}));
+
+vi.mock('../services/analytics', () => ({
+  analytics: {
+    logEvent: () => Promise.resolve(),
+    logScreenView: () => Promise.resolve(),
+    setUserId: () => {},
+    setUserProperty: () => {},
+  },
+}));
+
 vi.mock('../services/cacheWarmingService', () => ({
   startCacheWarming: () => {},
   registerCacheWarming: () => {},
@@ -314,7 +373,6 @@ vi.mock('@expo/vector-icons', () => ({
 /*  Tests                                                              */
 /* ------------------------------------------------------------------ */
 
-import { authApi } from '../services/api/auth';
 import AppNavigator from '../navigation/AppNavigator';
 
 /**
@@ -606,8 +664,7 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
       return { remove: removeSubscription } as any;
     });
 
-    // Add recordReferral to the mocked authApi
-    (authApi as any).recordReferral = vi.fn();
+    mockRecordReferral.mockClear();
   });
 
   afterEach(() => {
@@ -615,7 +672,7 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
   });
 
   it('calls recordReferral when a warm-start custom scheme deep link arrives', async () => {
-    (authApi as any).recordReferral = vi.fn().mockResolvedValue({ success: true });
+    mockRecordReferral.mockResolvedValue({ success: true });
     const alertSpy = vi.spyOn(Alert, 'alert').mockImplementation(() => {});
 
     TestRenderer.act(() => {
@@ -629,7 +686,7 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
     });
 
     await vi.waitFor(() => {
-      expect((authApi as any).recordReferral).toHaveBeenCalledWith('friend123');
+      expect(mockRecordReferral).toHaveBeenCalledWith('friend123');
     });
     await vi.waitFor(() => {
       expect(alertSpy).toHaveBeenCalledWith(
@@ -641,7 +698,7 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
   });
 
   it('calls recordReferral when a warm-start universal link arrives', async () => {
-    (authApi as any).recordReferral = vi.fn().mockResolvedValue({ success: true });
+    mockRecordReferral.mockResolvedValue({ success: true });
 
     TestRenderer.act(() => {
       TestRenderer.create(<AppNavigator />);
@@ -652,12 +709,12 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
     });
 
     await vi.waitFor(() => {
-      expect((authApi as any).recordReferral).toHaveBeenCalledWith('partner42');
+      expect(mockRecordReferral).toHaveBeenCalledWith('partner42');
     });
   });
 
   it('falls back to setReferralSource when the API call fails', async () => {
-    (authApi as any).recordReferral = vi.fn().mockRejectedValue(new Error('Network error'));
+    mockRecordReferral.mockRejectedValue(new Error('Network error'));
     const mockSetReferralSource = vi.fn();
     (mockOnboardingStore.getState as any).mockReturnValue({ setReferralSource: mockSetReferralSource });
 
@@ -685,7 +742,7 @@ describe('AppNavigator — Warm-Start Deep Links', () => {
 
     // Flush pending microtasks then verify no API call was made
     await new Promise(resolve => setImmediate(resolve));
-    expect((authApi as any).recordReferral).not.toHaveBeenCalled();
+    expect(mockRecordReferral).not.toHaveBeenCalled();
   });
 
   it('cleans up the addEventListener subscription on unmount', async () => {

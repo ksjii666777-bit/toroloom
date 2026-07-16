@@ -7,6 +7,7 @@ import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useWatchlistStore } from '../../store/watchlistStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useNotificationStore } from '../../store/notificationStore';
@@ -66,6 +67,7 @@ const SECTOR_ICONS: Record<string, string> = {
 
 export default function WatchlistScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { watchlists, createWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlistStore();
   const { stocks } = useMarketStore();
@@ -314,7 +316,7 @@ export default function WatchlistScreen({ navigation }: any) {
         <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Set Price Alert — {alertStock?.symbol}
+              {t('watchlist.setPriceAlert', { symbol: alertStock?.symbol || '' })}
             </Text>
             <TouchableOpacity onPress={() => setAlertModalVisible(false)}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
@@ -323,7 +325,7 @@ export default function WatchlistScreen({ navigation }: any) {
 
           {alertStock && (
             <View style={[styles.alertInfoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.alertInfoLabel, { color: colors.textMuted }]}>Current Price</Text>
+              <Text style={[styles.alertInfoLabel, { color: colors.textMuted }]}>{t('watchlist.currentPrice')}</Text>
               <Text style={[styles.alertInfoValue, { color: colors.text }]}>{formatCurrency(alertStock.price)}</Text>
               <View style={[styles.alertChangeBadge, { backgroundColor: alertStock.isPositive ? '#00C85315' : '#FF174415' }]}>
                 <Ionicons name={alertStock.isPositive ? 'caret-up' : 'caret-down'} size={14} color={alertStock.isPositive ? '#00C853' : '#FF1744'} />
@@ -335,7 +337,7 @@ export default function WatchlistScreen({ navigation }: any) {
           )}
 
           {/* Direction Selector */}
-          <Text style={[styles.alertSectionLabel, { color: colors.textSecondary }]}>Alert when price goes</Text>
+          <Text style={[styles.alertSectionLabel, { color: colors.textSecondary }]}>{t('watchlist.alertWhenPriceGoes')}</Text>
           <View style={styles.alertDirectionRow}>
             <TouchableOpacity
               onPress={() => setAlertDirection('above')}
@@ -346,7 +348,7 @@ export default function WatchlistScreen({ navigation }: any) {
               ]}
             >
               <Ionicons name="arrow-up" size={20} color={alertDirection === 'above' ? '#00C853' : colors.textMuted} />
-              <Text style={[styles.alertDirText, { color: alertDirection === 'above' ? '#00C853' : colors.textMuted }]}>Above</Text>
+              <Text style={[styles.alertDirText, { color: alertDirection === 'above' ? '#00C853' : colors.textMuted }]}>{t('watchlist.above')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setAlertDirection('below')}
@@ -357,12 +359,12 @@ export default function WatchlistScreen({ navigation }: any) {
               ]}
             >
               <Ionicons name="arrow-down" size={20} color={alertDirection === 'below' ? '#FF1744' : colors.textMuted} />
-              <Text style={[styles.alertDirText, { color: alertDirection === 'below' ? '#FF1744' : colors.textMuted }]}>Below</Text>
+              <Text style={[styles.alertDirText, { color: alertDirection === 'below' ? '#FF1744' : colors.textMuted }]}>{t('watchlist.below')}</Text>
             </TouchableOpacity>
           </View>
 
           {/* Price Input */}
-          <Text style={[styles.alertSectionLabel, { color: colors.textSecondary }]}>Target Price (₹)</Text>
+          <Text style={[styles.alertSectionLabel, { color: colors.textSecondary }]}>{t('watchlist.targetPrice')}</Text>
           <TextInput
             style={[styles.alertPriceInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
             value={alertPrice}
@@ -418,7 +420,7 @@ export default function WatchlistScreen({ navigation }: any) {
         onPress={() => setShowSortMenu(false)}
       >
         <View style={[styles.sortMenu, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sortMenuTitle, { color: colors.text }]}>Sort By</Text>
+          <Text style={[styles.sortMenuTitle, { color: colors.text }]}>{t('watchlist.sortBy')}</Text>
           {SORT_OPTIONS.map(opt => (
             <TouchableOpacity
               key={opt.field}
@@ -499,8 +501,8 @@ export default function WatchlistScreen({ navigation }: any) {
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.title}>Watchlist</Text>
-              <Text style={styles.subtitle}>Monitor your favorite stocks</Text>
+              <Text style={styles.title}>{t('watchlist.title')}</Text>
+              <Text style={styles.subtitle}>{t('watchlist.subtitle')}</Text>
             </View>
             {/* Performance buttons + Sort Button */}
             <View style={styles.headerActions}>
@@ -564,7 +566,7 @@ export default function WatchlistScreen({ navigation }: any) {
           <Ionicons name="search" size={16} color={colors.textMuted} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Filter stocks..."
+            placeholder={t('watchlist.filterStocks')}
             placeholderTextColor={colors.textMuted}
             value={listSearchQuery}
             onChangeText={setListSearchQuery}
@@ -580,7 +582,7 @@ export default function WatchlistScreen({ navigation }: any) {
         <View style={[styles.sortIndicator, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="funnel" size={14} color={colors.textMuted} />
           <Text style={[styles.sortIndicatorText, { color: colors.textSecondary }]}>
-            Sorted by: {SORT_OPTIONS.find(o => o.field === sortBy)?.label} ({sortDir === 'asc' ? 'Asc' : 'Desc'})
+{t('watchlist.sortedBy', { field: SORT_OPTIONS.find(o => o.field === sortBy)?.label || '', dir: sortDir === 'asc' ? t('watchlist.desc') : t('watchlist.asc') })}
           </Text>
           <TouchableOpacity onPress={toggleSortDir} style={styles.sortDirToggle}>
             <Ionicons name={sortDir === 'asc' ? 'arrow-up' : 'arrow-down'} size={16} color={colors.primary} />
@@ -657,7 +659,7 @@ export default function WatchlistScreen({ navigation }: any) {
               color={activeTopMovers ? '#FF6D00' : colors.textMuted}
             />
             <Text style={[styles.filterChipText, { color: activeTopMovers ? '#FF6D00' : colors.textSecondary }]}>
-              Top Movers
+{t('watchlist.topMovers')}
             </Text>
           </TouchableOpacity>
 
@@ -694,7 +696,7 @@ export default function WatchlistScreen({ navigation }: any) {
               style={[styles.filterChip, styles.filterChipClear, { borderColor: colors.border }]}
             >
               <Ionicons name="close-circle" size={13} color={colors.textMuted} />
-              <Text style={[styles.filterChipText, { color: colors.textMuted }]}>Clear</Text>
+              <Text style={[styles.filterChipText, { color: colors.textMuted }]}>{t('watchlist.clear')}</Text>
             </TouchableOpacity>
           )}
         </ScrollView>
@@ -885,12 +887,12 @@ export default function WatchlistScreen({ navigation }: any) {
                 <LinearGradient colors={GRADIENTS.card} style={styles.emptyCard}>
                   <Ionicons name={isAllView ? 'layers-outline' : 'heart-outline'} size={64} color={colors.textMuted} />
                   <Text style={styles.emptyTitle}>
-                    {isAllView ? 'No Stocks Yet' : 'Empty Watchlist'}
+                    {isAllView ? t('watchlist.emptyAll') : t('watchlist.empty')}
                   </Text>
                   <Text style={styles.emptySubtitle}>
                     {isAllView
-                      ? 'Add stocks to any watchlist to see them here'
-                      : 'Add stocks from the Markets tab to track them here'}
+                      ? t('watchlist.emptyAllSubtitle')
+                      : t('watchlist.emptySubtitle')}
                   </Text>
                 </LinearGradient>
               </Animated.View>
@@ -900,8 +902,8 @@ export default function WatchlistScreen({ navigation }: any) {
             {availableStocks.length > 0 && currentWatchlist && (
               <>
                 <View style={styles.suggestedHeader}>
-                  <Text style={styles.suggestedTitle}>Suggested Stocks</Text>
-                  <Text style={styles.suggestedSub}>Tap + to add to watchlist</Text>
+                  <Text style={styles.suggestedTitle}>{t('watchlist.suggestedStocks')}</Text>
+                  <Text style={styles.suggestedSub}>{t('watchlist.suggestedSub')}</Text>
                 </View>
                 {availableStocks.slice(0, 5).map((stock, i) => (
                   <Animated.View key={stock.id} style={suggestedStyles[i]}>

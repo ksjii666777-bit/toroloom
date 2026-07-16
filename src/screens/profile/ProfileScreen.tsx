@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore, useKycStore } from '../../store';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -29,6 +30,7 @@ const KYC_SCREENS: Record<string, string> = {
 
 export default function ProfileScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user, logout } = useAuthStore();
   const { userLevel } = useGamificationStore();
@@ -117,7 +119,7 @@ export default function ProfileScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Profile & KYC</Text>
+          <Text style={styles.title}>{t('profile.profileKyc')}</Text>
         </View>
 
         {/* Profile Banner */}
@@ -138,7 +140,7 @@ export default function ProfileScreen({ navigation }: any) {
           <View style={styles.bannerStats}>
             <View style={styles.bannerStat}>
               <Text style={styles.bannerStatValue}>{formatCurrency(user?.balance || 2500000, true)}</Text>
-              <Text style={styles.bannerStatLabel}>Available Balance</Text>
+              <Text style={styles.bannerStatLabel}>{t('profile.availableBalance')}</Text>
             </View>
             <View style={styles.bannerStatDivider} />
             <View style={styles.bannerStat}>
@@ -152,8 +154,8 @@ export default function ProfileScreen({ navigation }: any) {
         <View style={styles.quickActionsGrid}>
           {[
             { icon: 'add-circle', label: 'Add Funds', color: '#00C853', gradient: GRADIENTS.success },
-            { icon: 'arrow-up-circle', label: 'Withdraw', color: '#FF1744', gradient: GRADIENTS.danger },
-            { icon: 'swap-horizontal', label: 'Transfer', color: '#6C63FF', gradient: GRADIENTS.primary },
+            { icon: 'arrow-up-circle', label: t('profile.withdraw'), color: '#FF1744', gradient: GRADIENTS.danger },
+            { icon: 'swap-horizontal', label: t('funds.transfer'), color: '#6C63FF', gradient: GRADIENTS.primary },
             { icon: 'qr-code', label: 'UPI Settings', color: '#00D2FF', gradient: GRADIENTS.accent },
           ].map((action, idx) => (
             <TouchableOpacity key={idx} style={styles.quickAction}>
@@ -172,7 +174,7 @@ export default function ProfileScreen({ navigation }: any) {
             onPress={() => setActiveTab('profile')}
           >
             <Ionicons name="person-outline" size={16} color={activeTab === 'profile' ? colors.white : colors.textMuted} />
-            <Text style={[styles.toggleText, activeTab === 'profile' && styles.toggleTextActive]}>Profile</Text>
+            <Text style={[styles.toggleText, activeTab === 'profile' && styles.toggleTextActive]}>{t('profile.title')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.toggleBtn, activeTab === 'kyc' && styles.toggleBtnActive]}
@@ -236,7 +238,7 @@ export default function ProfileScreen({ navigation }: any) {
         ) : (
           <>
             {/* KYC Status */}
-            <Card title="KYC Status" subtitle="Complete your verification" style={{ marginBottom: SPACING.md }}>
+            <Card title={t('profile.kycStatus')} subtitle={t('kyc.title')} style={{ marginBottom: SPACING.md }}>
               <View style={styles.kycHeader}>
                 <View style={[styles.kycStatusBadge, {
                   backgroundColor: completedStepsCount >= 4 ? '#00C85320' : colors.bgInput,
@@ -249,7 +251,7 @@ export default function ProfileScreen({ navigation }: any) {
                   <Text style={[styles.kycStatusText, {
                     color: completedStepsCount >= 4 ? '#00C853' : colors.textMuted,
                   }]}>
-                    {completedStepsCount >= 4 ? 'KYC Verified' : `${completedStepsCount}/4 Steps Complete`}
+                    {completedStepsCount >= 4 ? t('profile.kycVerified') : `${completedStepsCount}/4 ${t('kyc.verified')}`}
                   </Text>
                 </View>
               </View>
@@ -309,8 +311,7 @@ export default function ProfileScreen({ navigation }: any) {
               )}
             </Card>
 
-            {/* Linked Bank Accounts */}
-            <Card title="Linked Bank Accounts" subtitle={`${bankDetails.length} account(s) linked`}>
+            {/* Linked Bank Accounts */}                <Card title="Linked Bank Accounts" subtitle={`${bankDetails.length} account(s) linked`}>
               {bankDetails.map((bank, i) => (
                 <View key={i}>
                   <View style={styles.bankCard}>
@@ -349,7 +350,7 @@ export default function ProfileScreen({ navigation }: any) {
         {/* Logout */}
         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
           <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-          <Text style={styles.logoutText}>Log Out</Text>
+          <Text style={styles.logoutText}>{t('profile.logout')}</Text>
         </TouchableOpacity>
 
         <View style={{ height: 100 }} />

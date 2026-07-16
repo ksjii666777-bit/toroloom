@@ -78,6 +78,26 @@ vi.mock('../store/gamificationStore', () => ({
   })),
 }));
 
+// Mock QuizComponent to render quiz content in test env
+vi.mock('../components/quiz/QuizComponent', () => ({
+  default: (props: any) => {
+    const React = require('react');
+    const questions = props.quiz?.questions || [];
+    return React.createElement('View', null,
+      React.createElement('Text', null, props.quiz?.title || 'Quiz'),
+      ...questions.map((q: any, i: number) =>
+        React.createElement('View', { key: i },
+          React.createElement('Text', null, `Q${i + 1}: ${q.question}`),
+          ...(q.options || []).map((opt: string, j: number) =>
+            React.createElement('Text', { key: j }, opt)
+          )
+        )
+      ),
+      React.createElement('Text', null, 'Submit Answers')
+    );
+  },
+}));
+
 // ==================== Imports ====================
 
 import LessonViewScreen from '../screens/education/LessonViewScreen';
@@ -314,14 +334,16 @@ describe('LessonViewScreen — Last Lesson Navigation', () => {
 
   it('does not show Next button on last lesson', () => {
     const route = { params: { lessonId: 'l8', courseId: 'c1' } };
-    const { getByText } = render(
+    const { getByText, queryByText } = render(
       <LessonViewScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     advanceAndRender(500);
     // Previous should be visible (l8 of 8 has a prev l7)
     expect(getByText('Previous')).toBeDefined();
-    // Mark as Complete should be visible
-    expect(getByText('Mark as Complete')).toBeDefined();
+    // Next should NOT be visible on the last lesson
+    expect(queryByText('Next')).toBeNull();
+    // Mark as Complete conditionally shows (requires quiz to be passed first)
+    // l8 has a quiz, so without completing it, the button doesn't render
   });
 });
 

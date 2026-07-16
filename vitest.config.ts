@@ -11,8 +11,8 @@ export default defineConfig({
     reporters: ['verbose'],
     server: {
       deps: {
-        // Inline date-fns so vitest can resolve it
-        inline: ['date-fns', 'react-native-webview'],
+        // Inline packages that have strict exports maps which Node.js can't resolve
+        inline: ['date-fns', 'react-native-webview', '@react-navigation/native'],
       },
     },
     coverage: {

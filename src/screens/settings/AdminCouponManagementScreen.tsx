@@ -46,6 +46,8 @@ import { couponApi, AdminUsageResponse } from '../../services/api/coupons';
 import type { CouponCode } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import { cacheDirectory, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 
 // ─── Type Helpers ─────────────────────────────────────────────
 
@@ -800,6 +802,90 @@ function UsageBarChart({
   );
 }
 
+// ─── CSV Export Helpers ──────────────────────────────────────────
+
+/** Escape CSV field (wrap in quotes if contains comma, quote, or newline) */
+function csvField(val: string | number): string {
+  const s = String(val);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+/** Build a CSV row from values */
+function csvRow(...vals: (string | number)[]): string {
+  return vals.map(v => csvField(v)).join(',') + '\n';
+}
+
+/** Generate a unique filename with timestamp */
+function generateCsvFilename(): string {
+  const date = new Date().toISOString().slice(0, 10);
+  const time = Date.now().toString(36).slice(-6).toUpperCase();
+  return `CouponUsage_${date}_${time}.csv`;
+}
+
+/** Build CSV string from usage analytics data */
+function buildCouponUsageCSV(data: AdminUsageResponse): string {
+  const { summary, usages } = data;
+  let csv = '';
+
+  // ── Header ──
+  csv += 'Toroloom Coupon Usage Report\n';
+  csv += `Generated,${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}\n\n`;
+
+  // ── Summary Section ──
+  csv += '=== SUMMARY ===\n';
+  csv += csvRow('Metric', 'Value');
+  csv += csvRow('Total Uses', summary.totalUsages);
+  csv += csvRow('Total Discount Given', summary.totalDiscountAmount);
+  csv += csvRow('Total Original Price', summary.totalOriginalPrice);
+  csv += csvRow('Unique Users', summary.uniqueUsers);
+  csv += csvRow('Unique Coupons Used', summary.uniqueCoupons);
+  csv += '\n';
+
+  // ── Per-Coupon Breakdown ──
+  csv += '=== PER-COUPON BREAKDOWN ===\n';
+  csv += csvRow('Code', 'Uses', 'Unique Users', 'Total Discount');
+  for (const [code, b] of Object.entries(summary.couponBreakdown)) {
+    csv += csvRow(code, b.count, b.uniqueUsers, b.totalDiscount);
+  }
+  csv += '\n';
+
+  // ── Usage History ──
+  csv += '=== USAGE HISTORY ===\n';
+  csv += csvRow('ID', 'Code', 'User ID', 'Plan ID', 'Discount Amount', 'Original Price', 'Used At');
+  for (const usage of usages) {
+    const date = new Date(usage.usedAt).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+    csv += csvRow(usage.id, usage.code, usage.userId, usage.planId, usage.discountAmount, usage.originalPrice, date);
+  }
+
+  return csv;
+}
+
+/** Export coupon usage data as CSV and share via OS share sheet */
+async function exportCouponUsageCSV(data: AdminUsageResponse): Promise<{ success: boolean; error?: string }> {
+  try {
+    const csv = buildCouponUsageCSV(data);
+    const filename = generateCsvFilename();
+    const filePath = `${cacheDirectory ?? '.'}/${filename}`;
+
+    await writeAsStringAsync(filePath, csv, { encoding: EncodingType.UTF8 });
+
+    if (!(await Sharing.isAvailableAsync())) {
+      return { success: false, error: 'Sharing is not available on this device' };
+    }
+
+    await Sharing.shareAsync(filePath, { mimeType: 'text/csv' });
+    return { success: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error exporting CSV';
+    return { success: false, error: msg };
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  USAGE ANALYTICS TAB
 // ═══════════════════════════════════════════════════════════════
@@ -869,6 +955,33 @@ function UsageAnalyticsTab({
           <Text style={[s.statValue, { color: colors.text }]}>{summary.uniqueCoupons}</Text>
           <Text style={[s.statLabel, { color: colors.textMuted }]}>Coupons</Text>
         </View>
+      </View>
+
+      {/* Export Button */}
+      <View style={{ marginHorizontal: SPACING.xl, marginBottom: SPACING.lg }}>
+        <AnimatedPressable
+          onPress={async () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            const result = await exportCouponUsageCSV(data);
+            if (!result.success && result.error) {
+              Alert.alert('Export Failed', result.error);
+            }
+          }}
+          haptic="medium"
+          scaleTo={0.96}
+        >
+          <LinearGradient colors={['#8B5CF6', '#6C63FF'] as [string, string]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: SPACING.sm,
+            paddingVertical: SPACING.lg,
+            borderRadius: BORDER_RADIUS.md,
+          }}>
+            <Ionicons name="download-outline" size={18} color="#fff" />
+            <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.md, color: '#fff' }}>Export CSV</Text>
+          </LinearGradient>
+        </AnimatedPressable>
       </View>
 
       {/* Total Discount Card */}

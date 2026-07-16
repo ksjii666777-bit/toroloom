@@ -478,6 +478,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
               return (
                 <Pressable
                   disabled={exists}
+                  onPress={() => handleAddRule(config.kind)}
                 >
                   <View style={[styles.addCardIcon, { backgroundColor: config.color + '20' }]}>
                     <Ionicons name={config.icon as keyof typeof Ionicons.glyphMap} size={24} color={exists ? colors.textMuted : config.color} />

@@ -175,25 +175,26 @@ describe('ConnectBrokerView — Disconnected State', () => {
     expect(getByText('Zero Commission')).toBeDefined();
   });
 
-  it('renders status pills (Zero-API Sync, Free, Encrypted)', async () => {
+  it('renders status pills (OAuth, Brokers, Secure)', async () => {
     const { getByText } = renderView();
     await flushPromises();
-    expect(getByText('ZERO-API SYNC')).toBeDefined();
-    expect(getByText('100% FREE')).toBeDefined();
-    expect(getByText('ENCRYPTED')).toBeDefined();
+    expect(getByText('O AUTH 2.0')).toBeDefined();
+    expect(getByText('20+ BROKERS')).toBeDefined();
+    expect(getByText('SECURE')).toBeDefined();
   });
 
-  it('renders the info card about Zero-API gateway', async () => {
+  it('renders the info card about SnapTrade Gateway', async () => {
     const { getByText } = renderView();
     await flushPromises();
-    expect(getByText('Zero-API Hybrid Gateway')).toBeDefined();
+    expect(getByText('SnapTrade OAuth Gateway')).toBeDefined();
   });
 
-  it('renders Sync Now text when disconnected', async () => {
-    const { queryByText } = renderView();
+  it('renders Tap to Connect text when disconnected', async () => {
+    const { getByText, queryByText } = renderView();
     await flushPromises();
-    // Sync Now appears in the connect badge of each broker card
-    expect(queryByText('Sync Now')).not.toBeNull();
+    // Tap to Connect appears in the connect badge of each broker card
+    expect(getByText('Tap to Connect')).toBeDefined();
+    expect(queryByText('Connected')).toBeNull();
   });
 
   it('does NOT render connected banner when disconnected', async () => {
@@ -274,6 +275,6 @@ describe('ConnectBrokerView — Edge Cases', () => {
   it('renders the info card description', async () => {
     const { getByText } = renderView();
     await flushPromises();
-    expect(getByText(/Your credentials are extracted via secure browser session/)).toBeDefined();
+    expect(getByText(/Connect your Zerodha, Angel One/)).toBeDefined();
   });
 });

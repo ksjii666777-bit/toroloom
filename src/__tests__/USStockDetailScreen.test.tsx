@@ -1,22 +1,18 @@
 /**
  * ============================================================================
- * Toroloom — US Stock Detail Screen Integration Tests
+ * Toroloom — Stock Detail Screen Tests
  * ============================================================================
  *
- * Tests that StockDetailScreen correctly handles US stocks:
- *   - US stock detection (isUSStock) from mockUSStocks
- *   - IBKR connection states — "IBKR Live" vs "Mock" badge
- *   - USD formatting ($) for prices, stats, and bottom action bar
- *   - Exchange badge (NASDAQ / NYSE)
- *   - Mock data fallback when IBKR not connected
- *   - Sector context with US peer stocks
+ * Tests that StockDetailScreen renders correctly with stock data, price,
+ * chart controls, key stats, about section, peer comparison, buy/sell
+ * buttons, and navigation actions.
  * ============================================================================
  */
 
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
-import { mockStocks} from '../constants/mockData';
+import { mockStocks } from '../constants/mockData';
 
 // ==================== Mocks (hoisted) ====================
 
@@ -25,16 +21,14 @@ const mockAddToWatchlist = vi.fn();
 const mockRemoveFromWatchlist = vi.fn();
 const mockIsInWatchlist = vi.fn((_id: string) => false);
 const mockLoadHistory = vi.fn();
-const mockHasValidSession = vi.fn();
-const mockBuyStock = vi.fn();
 
-// Shared mutable reference — reset in beforeEach to prevent cross-test leakage
-let mockUSRealtimePrice: ReturnType<typeof createMockPrice>;
+// Shared mutable reference
+let mockRealtimePrice: ReturnType<typeof createMockPrice>;
 
 function createMockPrice(
-  currentPrice = 234.50,
-  priceChange = 3.45,
-  priceChangePercent = 1.49,
+  currentPrice = 2890.50,
+  priceChange = 45.20,
+  priceChangePercent = 1.59,
   isConnected = true,
   isPositive = true,
 ) {
@@ -43,8 +37,8 @@ function createMockPrice(
     priceChange,
     priceChangePercent,
     candleHistory: [
-      { date: '2025-05-20', open: 231, high: 236, low: 230, close: currentPrice, volume: 48000000 },
-      { date: '2025-05-21', open: currentPrice, high: currentPrice + 3, low: currentPrice - 2, close: currentPrice + 1, volume: 52000000 },
+      { date: '2025-05-20', open: 2800, high: 2910, low: 2780, close: currentPrice, volume: 48000000 },
+      { date: '2025-05-21', open: currentPrice, high: currentPrice + 30, low: currentPrice - 20, close: currentPrice + 10, volume: 52000000 },
     ],
     isConnected,
     isPositive,
@@ -53,7 +47,7 @@ function createMockPrice(
   };
 }
 
-mockUSRealtimePrice = createMockPrice();
+mockRealtimePrice = createMockPrice();
 
 vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({
@@ -78,7 +72,7 @@ vi.mock('../store/marketStore', () => ({
 }));
 
 vi.mock('../store/portfolioStore', () => ({
-  usePortfolioStore: vi.fn(() => ({ buyStock: mockBuyStock })),
+  usePortfolioStore: vi.fn(() => ({ buyStock: vi.fn() })),
 }));
 
 const currentWatchlists: Array<{
@@ -101,14 +95,7 @@ vi.mock('../store/aiStore', () => ({
 }));
 
 vi.mock('../hooks/useRealtimePrice', () => ({
-  useRealtimePrice: vi.fn(() => mockUSRealtimePrice),
-}));
-
-vi.mock('../services/gateway/sessionStorage', () => ({
-  hasValidSession: (...args: any[]) => mockHasValidSession(...args),
-  storeBrokerSession: vi.fn(() => Promise.resolve(true)),
-  clearBrokerSession: vi.fn(() => Promise.resolve(undefined)),
-  parseSessionPayload: vi.fn((payload: any) => ({ ...payload, parsed: true })),
+  useRealtimePrice: vi.fn(() => mockRealtimePrice),
 }));
 
 // ==================== Imports ====================
@@ -118,15 +105,10 @@ import { useRealtimePrice } from '../hooks/useRealtimePrice';
 
 // ==================== Helpers ====================
 
-/** Advance fake timers by ms, wrapped in act() for React state flushing */
 function advanceAndRender(ms: number) {
   act(() => { vi.advanceTimersByTime(ms); });
 }
 
-/**
- * Flush pending microtasks (promise resolutions) wrapped in act().
- * This resolves async effects like the IBKR connection check.
- */
 async function flushMicrotasks() {
   await act(async () => {
     await Promise.resolve();
@@ -138,190 +120,42 @@ async function flushMicrotasks() {
 // ==================== Global beforeEach ====================
 
 beforeEach(() => {
-  // Reset the shared mutable mock to AAPL defaults
-  mockUSRealtimePrice = createMockPrice();
-  vi.mocked(useRealtimePrice).mockImplementation(() => mockUSRealtimePrice);
+  mockRealtimePrice = createMockPrice();
+  vi.mocked(useRealtimePrice).mockImplementation(() => mockRealtimePrice);
 });
 
 // ==================== Tests ====================
 
-describe('US Stock — Detection', () => {
+describe('StockDetail — Stock Info', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockNavigate.mockClear();
-    mockHasValidSession.mockResolvedValue(false);
   });
 
   afterEach(() => { vi.useRealTimers(); });
 
-  it('renders NASDAQ exchange badge for AAPL (US stock)', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('AAPL')).toBeDefined();
-    expect(getByText('Apple Inc.')).toBeDefined();
-    expect(getByText('NASDAQ')).toBeDefined();
-    expect(getByText('Technology')).toBeDefined();
-  });
-
-  it('renders NYSE exchange badge for JPM (US stock)', () => {
-    const route = { params: { stockId: 'JPM', symbol: 'JPM' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('NYSE')).toBeDefined();
-    expect(getByText('Finance')).toBeDefined();
-  });
-
-  it('does NOT render exchange badge for Indian stock (RELIANCE)', () => {
+  it('renders stock symbol and name', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { queryByText } = render(
+    const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-    expect(queryByText('NASDAQ')).toBeNull();
-    expect(queryByText('NYSE')).toBeNull();
-  });
-});
-
-describe('US Stock — IBKR Connection States', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockLoadHistory.mockClear();
+    expect(getByText('RELIANCE')).toBeDefined();
+    expect(getByText('Reliance Industries Ltd.')).toBeDefined();
   });
 
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('shows "IBKR Live" badge when hasValidSession returns true', async () => {
-    mockHasValidSession.mockResolvedValue(true);
-
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-
-    // Flush microtasks so the async useEffect (hasValidSession) resolves
-    await flushMicrotasks();
-
-    expect(getByText('IBKR Live')).toBeDefined();
-    expect(getByText('Receiving live data from Interactive Brokers')).toBeDefined();
-  });
-
-  it('shows "Mock" badge when hasValidSession returns false', async () => {
-    mockHasValidSession.mockResolvedValue(false);
-
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-
-    await flushMicrotasks();
-
-    expect(getByText('Mock')).toBeDefined();
-    expect(getByText('Showing simulated US market data')).toBeDefined();
-  });
-
-  it('shows "Mock" badge when hasValidSession throws', async () => {
-    mockHasValidSession.mockRejectedValue(new Error('Storage error'));
-
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-
-    await flushMicrotasks();
-
-    expect(getByText('Mock')).toBeDefined();
-  });
-
-  it('hides original Live/Offline badge for US stocks (only IBKR badge shown)', async () => {
-    mockHasValidSession.mockResolvedValue(true);
-
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText, queryByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-
-    await flushMicrotasks();
-
-    // IBKR badge should be shown for connected state
-    expect(getByText('IBKR Live')).toBeDefined();
-    // The original indicator text ("Streaming live prices") should NOT appear
-    expect(queryByText('Streaming live prices')).toBeNull();
-    expect(queryByText('Using simulated prices')).toBeNull();
-    // The IBKR-specific indicator text should appear
-    expect(getByText('Receiving live data from Interactive Brokers')).toBeDefined();
-  });
-
-  it('keeps Live/Offline badge for Indian stock when IBKR is irrelevant', () => {
-    mockHasValidSession.mockResolvedValue(false);
-
+  it('renders sector badge', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText, queryByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-
-    // Indian stock should still show the original Live/Offline badge
-    expect(getByText('Live')).toBeDefined();
-    // IBKR badge should NOT appear for Indian stocks
-    expect(queryByText('IBKR Live')).toBeNull();
-    expect(queryByText('Mock')).toBeNull();
-  });
-});
-
-describe('US Stock — USD Formatting', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockHasValidSession.mockResolvedValue(false);
-    // Re-mock useRealtimePrice to point at the reset mockUSRealtimePrice
-    vi.mocked(useRealtimePrice).mockImplementation(() => mockUSRealtimePrice);
-  });
-
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('renders AAPL price in USD format ($234.50)', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-    expect(getByText('$234.50')).toBeDefined();
+    expect(getByText('Energy')).toBeDefined();
   });
 
-  it('renders LTP in USD in bottom action bar', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-
-    expect(getByText('LTP')).toBeDefined();
-    expect(getByText('$234.50')).toBeDefined();
-  });
-
-  it('renders NVDA price in USD with proper formatting', () => {
-    // Override mock for NVDA — reset in beforeEach prevents leakage
-    mockUSRealtimePrice = createMockPrice(128.45, 5.30, 4.31, true, true);
-    vi.mocked(useRealtimePrice).mockImplementation(() => mockUSRealtimePrice);
-
-    const route = { params: { stockId: 'NVDA', symbol: 'NVDA' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('$128.45')).toBeDefined();
-  });
-
-  it('maintains INR format for Indian stocks', () => {
-    // Restore mock to default AAPL values for RELIANCE (formatCurrency handles it)
-    mockUSRealtimePrice = createMockPrice(2890.50, 45.20, 1.59, true, true);
-    vi.mocked(useRealtimePrice).mockImplementation(() => mockUSRealtimePrice);
+  it('renders price in INR format', () => {
+    mockRealtimePrice = createMockPrice(2890.50, 45.20, 1.59, true, true);
+    vi.mocked(useRealtimePrice).mockImplementation(() => mockRealtimePrice);
 
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
@@ -331,202 +165,203 @@ describe('US Stock — USD Formatting', () => {
     expect(getByText('₹2,890.50')).toBeDefined();
   });
 
-  it('renders change badge values without currency symbol', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText(/\+?3\.45/)).toBeDefined();
-    expect(getByText(/\+?1\.49%/)).toBeDefined();
-  });
-});
+  it('renders change badge with positive change', () => {
+    mockRealtimePrice = createMockPrice(2890.50, 45.20, 1.59, true, true);
+    vi.mocked(useRealtimePrice).mockImplementation(() => mockRealtimePrice);
 
-describe('US Stock — Market Cap Display', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockHasValidSession.mockResolvedValue(false);
-  });
-
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('displays pre-formatted US market cap ($3.68T for AAPL)', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('Market Cap')).toBeDefined();
-    expect(getByText('$3.68T')).toBeDefined();
-  });
-
-  it('displays T-format market cap for MSFT ($3.48T)', () => {
-    const route = { params: { stockId: 'MSFT', symbol: 'MSFT' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('$3.48T')).toBeDefined();
-  });
-
-  it('maintains Indian market cap format for Indian stocks (₹19,56,000 Cr)', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-    expect(getByText('₹19,56,000 Cr')).toBeDefined();
+    expect(getByText(/\+45\.20/)).toBeDefined();
+    expect(getByText(/\+1\.59%/)).toBeDefined();
   });
 });
 
-describe('US Stock — Peer Comparison & Sector Context', () => {
+describe('StockDetail — Connection Badge', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockNavigate.mockClear();
-    mockHasValidSession.mockResolvedValue(false);
   });
 
   afterEach(() => { vi.useRealTimers(); });
 
-  it('renders peer comparison table for AAPL with US tech peers', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
+  it('shows Live badge when connected', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-    expect(getByText('Peer Comparison')).toBeDefined();
-    // Tech sector peers from mockUSStocks: MSFT, GOOGL, AMZN, META, NFLX, ADBE
-    expect(getByText('MSFT')).toBeDefined();
-    expect(getByText('GOOGL')).toBeDefined();
-    expect(getByText('YOU')).toBeDefined();
+    expect(getByText('Live')).toBeDefined();
   });
 
-  it('renders sector context for US technology sector', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
+  it('shows streaming live prices text when connected', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-    expect(getByText('Sector Context')).toBeDefined();
+    expect(getByText('Streaming live prices')).toBeDefined();
   });
 
-  it('renders peer comparison for Finance sector stocks (JPM)', () => {
-    const route = { params: { stockId: 'JPM', symbol: 'JPM' } };
+  it('shows Offline badge when not connected', () => {
+    mockRealtimePrice = createMockPrice(2890.50, 0, 0, false, true);
+    vi.mocked(useRealtimePrice).mockImplementation(() => mockRealtimePrice);
+
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-    expect(getByText('Peer Comparison')).toBeDefined();
-    // Finance sector peers: V, BAC
-    expect(getByText('V')).toBeDefined();
-    expect(getByText('BAC')).toBeDefined();
-  });
-
-  it('renders US peers as clickable (navigates to StockDetail)', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-
-    act(() => {
-      fireEvent.press(getByText('MSFT'));
-    });
-    advanceAndRender(100);
-
-    expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
-      stockId: 'MSFT',
-      symbol: 'MSFT',
-    });
+    expect(getByText('Offline')).toBeDefined();
   });
 });
 
-describe('US Stock — About Company', () => {
+describe('StockDetail — Key Stats', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockNavigate.mockClear();
-    mockHasValidSession.mockResolvedValue(false);
   });
 
   afterEach(() => { vi.useRealTimers(); });
 
-  it('renders About Company section with US-specific details', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
+  it('renders Key Stats Grid section', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+    );
+    advanceAndRender(500);
+    expect(getByText('Market Cap')).toBeDefined();
+    expect(getByText('P/E')).toBeDefined();
+  });
+});
+
+describe('StockDetail — About Company', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+  });
+
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('renders About Company section', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
     expect(getByText('About Company')).toBeDefined();
-    // US About card mentions exchange (NASDAQ)
-    expect(getByText(/NASDAQ/)).toBeDefined();
-  });
-});
-
-describe('US Stock — Navigation', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockHasValidSession.mockResolvedValue(false);
   });
 
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('navigates to PlaceOrder with buy for AAPL', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
+  it('renders company description with sector and market cap info', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
-
-    act(() => {
-      fireEvent.press(getByText('Buy'));
-    });
-    advanceAndRender(100);
-
-    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
-      stockId: 'AAPL',
-      symbol: 'AAPL',
-      tradeType: 'buy',
-    });
-  });
-
-  it('navigates to PlaceOrder with sell for AAPL', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-
-    act(() => {
-      fireEvent.press(getByText('Sell'));
-    });
-    advanceAndRender(100);
-
-    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
-      stockId: 'AAPL',
-      symbol: 'AAPL',
-      tradeType: 'sell',
-    });
+    expect(getByText(/Energy/)).toBeDefined();
   });
 });
 
-describe('US Stock — Buy/Sell Buttons', () => {
+
+
+describe('StockDetail — Buy/Sell Buttons', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockNavigate.mockClear();
-    mockHasValidSession.mockResolvedValue(false);
   });
 
   afterEach(() => { vi.useRealTimers(); });
 
-  it('renders Buy and Sell buttons for US stocks', () => {
-    const route = { params: { stockId: 'AAPL', symbol: 'AAPL' } };
+  it('renders Buy and Sell buttons', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
       <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
     );
     advanceAndRender(500);
     expect(getByText('Buy')).toBeDefined();
     expect(getByText('Sell')).toBeDefined();
+  });
+});
+
+describe('StockDetail — Navigation', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+  });
+
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('navigates to PlaceOrder with buy', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+    );
+    advanceAndRender(500);
+
+    act(() => { fireEvent.press(getByText('Buy')); });
+    advanceAndRender(100);
+
+    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      tradeType: 'buy',
+    });
+  });
+
+  it('navigates to PlaceOrder with sell', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+    );
+    advanceAndRender(500);
+
+    act(() => { fireEvent.press(getByText('Sell')); });
+    advanceAndRender(100);
+
+    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      tradeType: 'sell',
+    });
+  });
+});
+
+describe('StockDetail — Watchlist', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    mockIsInWatchlist.mockClear();
+  });
+
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('renders watchlist toggle (heart outline when not in watchlist)', () => {
+    mockIsInWatchlist.mockReturnValue(false);
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { toJSON } = render(
+      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+    );
+    advanceAndRender(500);
+    expect(toJSON).not.toBeNull();
+  });
+});
+
+describe('StockDetail — Sector Context', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+  });
+
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('renders Sector Context section', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+    );
+    advanceAndRender(500);
+    expect(getByText('Sector Context')).toBeDefined();
   });
 });

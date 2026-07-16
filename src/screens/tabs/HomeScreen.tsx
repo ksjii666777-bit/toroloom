@@ -8,6 +8,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming, Easing, interpolate } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
@@ -32,6 +33,7 @@ import type { LiveFeedEvent } from '../../services/ai/sentimentLiveFeed';
 
 export default function HomeScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user } = useAuthStore();
   const { indices, stocks } = useMarketStore();
@@ -46,7 +48,7 @@ export default function HomeScreen({ navigation }: any) {
 
   // ── Dynamic greeting ────────────────────────────────────────
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
+  const greeting = hour < 12 ? t('home.greeting.morning') : hour < 17 ? t('home.greeting.afternoon') : t('home.greeting.evening');
 
   // ── Market status (weekdays 9:15 AM - 3:30 PM) ──
   const day = new Date().getDay();
@@ -270,11 +272,11 @@ export default function HomeScreen({ navigation }: any) {
             <View>
               <Text style={styles.greeting}>{greeting},</Text>
               <View style={styles.greetingRow}>
-                <Text style={styles.userName}>{user?.name?.split(' ')[0] || 'Investor'} 👋</Text>
+                <Text style={styles.userName}>{user?.name?.split(' ')[0] || t('home.investor')} 👋</Text>
                 <View style={[styles.marketStatusBadge, { backgroundColor: isMarketOpen ? '#00C85320' : '#FF174420' }]}>
                   <View style={[styles.marketStatusDot, { backgroundColor: isMarketOpen ? '#00C853' : '#FF1744' }]} />
                   <Text style={[styles.marketStatusText, { color: isMarketOpen ? '#00C853' : '#FF1744' }]}>
-                    {isMarketOpen ? 'Open' : 'Closed'}
+                    {isMarketOpen ? t('market.open') : t('market.closed')}
                   </Text>
                 </View>
               </View>
@@ -304,7 +306,7 @@ export default function HomeScreen({ navigation }: any) {
           {/* Portfolio Summary Card — Glassmorphic */}
           <View style={styles.portfolioCardWrapper}>
             <View style={[styles.portfolioCard, { backgroundColor: 'rgba(0,230,118,0.04)', borderWidth: 1, borderColor: 'rgba(0,230,118,0.12)' }]}>
-              <Text style={styles.portfolioLabel}>Portfolio Value</Text>
+              <Text style={styles.portfolioLabel}>{t('home.portfolioValue')}</Text>
               <Text style={styles.portfolioValue}>{formatLargeCurrency(displayInvested || 1250000)}</Text>
               <View style={styles.portfolioChange}>
                 <View style={[styles.changeChip, { backgroundColor: displayPnl >= 0 ? 'rgba(0,230,118,0.15)' : 'rgba(255,82,82,0.15)' }]}>
@@ -313,25 +315,25 @@ export default function HomeScreen({ navigation }: any) {
                     {formatPercent(displayPnlPercent || 12.5)}
                   </Text>
                 </View>
-                <Text style={styles.portfolioSubtext}>Total P&L: {formatCurrency(displayPnl || 150000)}</Text>
+                <Text style={styles.portfolioSubtext}>{t('home.totalPnl')}: {formatCurrency(displayPnl || 150000)}</Text>
               </View>
               <View style={styles.portfolioActions}>
                 <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>
                   <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
                     <Ionicons name="add-circle" size={20} color={colors.marketUp} />
-                    <Text style={styles.actionText}>Add Funds</Text>
+                    <Text style={styles.actionText}>{t('home.addFunds')}</Text>
                   </View>
                 </AnimatedPressable>
                 <AnimatedPressable onPress={() => navigation.navigate('Transfer')} haptic="light" scaleTo={0.95}>
                   <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
                     <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
-                    <Text style={styles.actionText}>Transfer</Text>
+                    <Text style={styles.actionText}>{t('home.transfer')}</Text>
                   </View>
                 </AnimatedPressable>
                 <AnimatedPressable onPress={() => navigation.navigate('FundsDashboard')} haptic="light" scaleTo={0.95}>
                   <View style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
                     <Ionicons name="wallet" size={20} color={colors.accent} />
-                    <Text style={styles.actionText}>Balance</Text>
+                    <Text style={styles.actionText}>{t('home.balance')}</Text>
                   </View>
                 </AnimatedPressable>
               </View>
@@ -341,10 +343,10 @@ export default function HomeScreen({ navigation }: any) {
           {/* Quick Actions — Glassmorphic */}
           <View style={styles.quickActions}>
             {[
-              { icon: 'trending-up', label: 'Buy', screen: 'Markets', color: colors.marketUp },
-              { icon: 'trending-down', label: 'Sell', screen: 'Portfolio', color: colors.marketDown },
-              { icon: 'pie-chart', label: 'SIP', screen: 'SIPCalculator', color: colors.primary },
-              { icon: 'school', label: 'Learn', screen: 'Learn', color: colors.warning },
+              { icon: 'trending-up', label: t('home.buy'), screen: 'Markets', color: colors.marketUp },
+              { icon: 'trending-down', label: t('home.sell'), screen: 'Portfolio', color: colors.marketDown },
+              { icon: 'pie-chart', label: t('home.sip'), screen: 'SIPCalculator', color: colors.primary },
+              { icon: 'school', label: t('home.learn'), screen: 'Learn', color: colors.warning },
             ].map((item, i) => (
               <AnimatedPressable key={i} onPress={() => navigation.navigate(item.screen)} haptic="light" scaleTo={0.92}>
                 <View style={styles.quickAction}>
@@ -365,7 +367,7 @@ export default function HomeScreen({ navigation }: any) {
             <TextInput
               ref={searchInputRef}
               style={[styles.searchInput, { color: colors.text }]}
-              placeholder="Search stocks by name or symbol..."
+              placeholder={t('home.searchStocks')}
               placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -409,22 +411,22 @@ export default function HomeScreen({ navigation }: any) {
           <View style={styles.marketBreadthRow}>
             <View style={[styles.breadthCard, { borderColor: colors.border }]}>
               <Ionicons name="arrow-up-circle" size={18} color="#00C853" />
-              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>Adv</Text>
+              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>{t('market.adv')}</Text>
               <Text style={[styles.breadthValue, { color: '#00C853' }]}>{advancing}</Text>
             </View>
             <View style={[styles.breadthCard, { borderColor: colors.border }]}>
               <Ionicons name="remove-circle" size={18} color={colors.textMuted} />
-              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>Flat</Text>
+              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>{t('market.flat')}</Text>
               <Text style={[styles.breadthValue, { color: colors.textMuted }]}>{unchanged}</Text>
             </View>
             <View style={[styles.breadthCard, { borderColor: colors.border }]}>
               <Ionicons name="arrow-down-circle" size={18} color="#FF1744" />
-              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>Dec</Text>
+              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>{t('market.dec')}</Text>
               <Text style={[styles.breadthValue, { color: '#FF1744' }]}>{declining}</Text>
             </View>
             <View style={[styles.breadthCard, { borderColor: colors.border }]}>
               <Ionicons name="stats-chart" size={18} color={advancing > declining ? '#00C853' : '#FF1744'} />
-              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>Ratio</Text>
+              <Text style={[styles.breadthLabel, { color: colors.textSecondary }]}>{t('market.ratio')}</Text>
               <Text style={[styles.breadthValue, { color: advancing > declining ? '#00C853' : '#FF1744' }]}>
                 {declining > 0 ? (advancing / declining).toFixed(1) : '∞'}
               </Text>
@@ -444,9 +446,9 @@ export default function HomeScreen({ navigation }: any) {
         {/* Market Indices */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[1]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Market Indices</Text>
+            <Text style={styles.sectionTitle}>{t('home.marketIndices')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
-              <Text style={styles.seeAll}>See All</Text>
+              <Text style={styles.seeAll}>{t('app.seeAll')}</Text>
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.indicesScroll}>
@@ -459,7 +461,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Sector Heatmap */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[2]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Sector Performance 🔥</Text>
+            <Text style={styles.sectionTitle}>{t('home.sectorPerformance')}</Text>
           </View>
           <View style={[styles.heatmapContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             {sectorPerformance.slice(0, 6).map((sector, i) => {
@@ -469,7 +471,7 @@ export default function HomeScreen({ navigation }: any) {
                 <View key={sector.sector} style={[styles.heatmapItem, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
                   <View style={styles.heatmapLeft}>
                     <Text style={[styles.heatmapSector, { color: colors.text }]}>{sector.sector}</Text>
-                    <Text style={[styles.heatmapCount, { color: colors.textMuted }]}>{sector.count} stocks</Text>
+                    <Text style={[styles.heatmapCount, { color: colors.textMuted }]}>{t('market.stocks', { count: sector.count })}</Text>
                   </View>
                   <View style={[styles.heatmapBar, {
                     backgroundColor: isGreen
@@ -492,14 +494,14 @@ export default function HomeScreen({ navigation }: any) {
         {/* Quick Calculators */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[3]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Financial Calculators 🧮</Text>
+            <Text style={styles.sectionTitle}>{t('home.financialCalculators')}</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {[
-              { icon: 'calculator', label: 'SIP', desc: 'Systematic Investment', color: colors.primary, screen: 'SIPCalculator' },
-              { icon: 'briefcase', label: 'Lumpsum', desc: 'One-time Investment', color: colors.accent, screen: 'LumpsumCalculator' },
-              { icon: 'trending-up', label: 'EMI', desc: 'Loan Calculator', color: colors.warning, screen: 'EMICalculator' },
-              { icon: 'cash', label: 'Tax', desc: 'Capital Gains Tax', color: colors.secondary, screen: 'TaxCalculator' },
+              { icon: 'calculator', label: t('home.sipCalculator'), desc: t('home.systematicInvestment'), color: colors.primary, screen: 'SIPCalculator' },
+              { icon: 'briefcase', label: t('calculators.lumpsum'), desc: t('home.oneTimeInvestment'), color: colors.accent, screen: 'LumpsumCalculator' },
+              { icon: 'trending-up', label: t('calculators.emi'), desc: t('home.loanCalculator'), color: colors.warning, screen: 'EMICalculator' },
+              { icon: 'cash', label: t('calculators.tax'), desc: t('home.capitalGainsTax'), color: colors.secondary, screen: 'TaxCalculator' },
             ].map((calc, i) => (
               <TouchableOpacity
                 key={i}
@@ -527,7 +529,7 @@ export default function HomeScreen({ navigation }: any) {
                     <Ionicons name="bulb" size={16} color={colors.primary} />
                   </View>
                   <View>
-                    <Text style={[styles.aiLabel, { color: colors.textSecondary }]}>AI Market Insight</Text>
+                    <Text style={[styles.aiLabel, { color: colors.textSecondary }]}>{t('home.aiMarketInsight')}</Text>
                     <Text style={[styles.aiSymbol, { color: colors.text }]}>{topInsight.symbol}</Text>
                   </View>
                 </View>
@@ -551,7 +553,7 @@ export default function HomeScreen({ navigation }: any) {
                 {topInsight.summary}
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate('AIInsights')} style={styles.aiCta}>
-                <Text style={[styles.aiCtaText, { color: colors.primary }]}>View Full Analysis →</Text>
+                <Text style={[styles.aiCtaText, { color: colors.primary }]}>{t('home.viewFullAnalysis')}</Text>
               </TouchableOpacity>
             </Card>
           </ReanimatedAnimated.View>
@@ -560,16 +562,16 @@ export default function HomeScreen({ navigation }: any) {
         {/* Live Sentiment Feed */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[5]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Live Sentiment Feed ⚡</Text>
+            <Text style={styles.sectionTitle}>{t('home.liveSentimentFeed')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('SentimentAnalysis')}>
-              <Text style={styles.seeAll}>View All</Text>
+              <Text style={styles.seeAll}>{t('app.viewAll')}</Text>
             </TouchableOpacity>
           </View>
           <View style={[styles.liveFeedContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             {feedEvents.length === 0 ? (
               <View style={styles.liveFeedEmpty}>
                 <Ionicons name="pulse-outline" size={24} color={colors.textMuted} />
-                <Text style={[styles.liveFeedEmptyText, { color: colors.textMuted }]}>Waiting for signals...</Text>
+                <Text style={[styles.liveFeedEmptyText, { color: colors.textMuted }]}>{t('home.waitingForSignals')}</Text>
               </View>
             ) : (
               feedEvents.map((event, i) => {
@@ -617,7 +619,7 @@ export default function HomeScreen({ navigation }: any) {
                           </Text>
                           <View style={[styles.liveFeedScoreChip, { backgroundColor: dirColor + '12' }]}>
                             <Text style={[styles.liveFeedScoreText, { color: dirColor }]}>
-                              Score: {event.score > 0 ? '+' : ''}{event.score}
+                              {t('ai.score', { value: event.score > 0 ? `+${event.score}` : event.score })}
                             </Text>
                           </View>
                         </View>
@@ -647,9 +649,9 @@ export default function HomeScreen({ navigation }: any) {
                   <Ionicons name="pulse" size={18} color="#8B5CF6" />
                 </View>
                 <View>
-                  <Text style={[styles.sentimentAlertTitle, { color: colors.text }]}>Sentiment Alerts</Text>
+                  <Text style={[styles.sentimentAlertTitle, { color: colors.text }]}>{t('home.sentimentAlerts')}</Text>
                   <Text style={[styles.sentimentAlertSubtitle, { color: colors.textMuted }]}>
-                    {activeAlertCount} active rule{activeAlertCount !== 1 ? 's' : ''}
+                    {t('home.activeRules', { count: activeAlertCount })}
                   </Text>
                 </View>
               </View>
@@ -712,14 +714,14 @@ export default function HomeScreen({ navigation }: any) {
                     <View style={[styles.sentimentQuickAddIcon, { backgroundColor: '#8B5CF620' }]}>
                       <Ionicons name="add" size={16} color="#8B5CF6" />
                     </View>
-                    <Text style={[styles.sentimentQuickAddText, { color: colors.primary }]}>Quick Add</Text>
+                    <Text style={[styles.sentimentQuickAddText, { color: colors.primary }]}>{t('home.quickAdd')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.sentimentViewAllRow}
                     onPress={() => navigation.navigate('SentimentAlert')}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.sentimentViewAllText, { color: colors.textMuted }]}>View All</Text>
+                    <Text style={[styles.sentimentViewAllText, { color: colors.textMuted }]}>{t('app.viewAll')}</Text>
                     <Ionicons name="arrow-forward" size={14} color={colors.textMuted} />
                   </TouchableOpacity>
                 </View>
@@ -733,7 +735,7 @@ export default function HomeScreen({ navigation }: any) {
           <View style={styles.qamOverlay}>
             <View style={[styles.qamContent, { backgroundColor: colors.bgSecondary }]}>
               <View style={styles.qamHeader}>
-                <Text style={[styles.qamTitle, { color: colors.text }]}>Quick Add Alert Rule</Text>
+                <Text style={[styles.qamTitle, { color: colors.text }]}>{t('home.quickAdd')} Alert Rule</Text>
                 <TouchableOpacity onPress={() => setShowQuickAlert(false)}>
                   <Ionicons name="close" size={22} color={colors.textMuted} />
                 </TouchableOpacity>
@@ -757,11 +759,11 @@ export default function HomeScreen({ navigation }: any) {
           <Card animated animationDelay={400}>
             <View style={styles.levelRow}>
               <View style={styles.levelInfo}>
-                <Badge label={`Lvl ${userLevel.level}`} variant="primary" animated />
+                <Badge label={t('home.level', { level: userLevel.level })} variant="primary" animated />
                 <Text style={styles.levelTitle}>{userLevel.title}</Text>
               </View>
               <View style={styles.xpContainer}>
-                <Text style={styles.xpText}>{userLevel.xp} / {userLevel.xpToNext} XP</Text>
+                <Text style={styles.xpText}>{t('home.xpProgress', { current: userLevel.xp, next: userLevel.xpToNext })}</Text>
                 <View style={styles.xpBar}>
                   <View style={[styles.xpFill, { flex: xpProgress }]} />
                   {xpProgress < 1 && <View style={{ flex: 1 - xpProgress }} />}
@@ -774,7 +776,7 @@ export default function HomeScreen({ navigation }: any) {
                   <Text style={styles.badgeIcon}>{badge.icon}</Text>
                 </View>
               ))}
-              <Text style={styles.moreBadges}>+{badges.filter(b => !b.unlocked).length} more</Text>
+              <Text style={styles.moreBadges}>{t('home.moreBadges', { count: badges.filter(b => !b.unlocked).length })}</Text>
             </View>
           </Card>
         </ReanimatedAnimated.View>
@@ -783,9 +785,9 @@ export default function HomeScreen({ navigation }: any) {
         {topHoldings.length > 0 && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[8]]}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Top Holdings 📊</Text>
+              <Text style={styles.sectionTitle}>{t('home.topHoldings')}</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Portfolio')}>
-                <Text style={styles.seeAll}>All Holdings</Text>
+                <Text style={styles.seeAll}>{t('home.allHoldings')}</Text>
               </TouchableOpacity>
             </View>
             {topHoldings.map(holding => {
@@ -802,7 +804,7 @@ export default function HomeScreen({ navigation }: any) {
                     </View>
                     <View>
                       <Text style={[styles.holdingSymbol, { color: colors.text }]}>{holding.symbol}</Text>
-                      <Text style={[styles.holdingQty, { color: colors.textMuted }]}>{holding.quantity} shares</Text>
+                      <Text style={[styles.holdingQty, { color: colors.textMuted }]}>{t('home.shares', { count: holding.quantity })}</Text>
                     </View>
                   </View>
                   <View style={styles.holdingRight}>
@@ -825,9 +827,9 @@ export default function HomeScreen({ navigation }: any) {
         {/* Top Gainers */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[9]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Top Gainers 🔥</Text>
+            <Text style={styles.sectionTitle}>{t('home.topGainers')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
-              <Text style={styles.seeAll}>View All</Text>
+              <Text style={styles.seeAll}>{t('app.viewAll')}</Text>
             </TouchableOpacity>
           </View>
           {topGainers.map(stock => (
@@ -842,9 +844,9 @@ export default function HomeScreen({ navigation }: any) {
         {/* Top Losers */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[10]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Top Losers 📉</Text>
+            <Text style={styles.sectionTitle}>{t('home.topLosers')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
-              <Text style={styles.seeAll}>View Losers</Text>
+              <Text style={styles.seeAll}>{t('market.viewLosers')}</Text>
             </TouchableOpacity>
           </View>
           {topLosers.map(stock => (
@@ -860,9 +862,9 @@ export default function HomeScreen({ navigation }: any) {
         {recentTrades.length > 0 && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[11]]}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Recent Activity 📋</Text>
+              <Text style={styles.sectionTitle}>{t('home.recentActivity')}</Text>
               <TouchableOpacity onPress={() => navigation.navigate('TradeHistory')}>
-                <Text style={styles.seeAll}>All Trades</Text>
+                <Text style={styles.seeAll}>{t('home.allTrades')}</Text>
               </TouchableOpacity>
             </View>
             {recentTrades.map(trade => (
@@ -876,7 +878,7 @@ export default function HomeScreen({ navigation }: any) {
                   <View>
                     <Text style={[styles.tradeSymbol, { color: colors.text }]}>{trade.symbol}</Text>
                     <Text style={[styles.tradeMeta, { color: colors.textMuted }]}>
-                      {trade.type === 'buy' ? 'Bought' : 'Sold'} {trade.quantity} @ ₹{trade.price.toFixed(2)}
+                      {trade.type === 'buy' ? t('home.bought') : t('home.sold')} {trade.quantity} @ ₹{trade.price.toFixed(2)}
                     </Text>
                   </View>
                 </View>
@@ -893,9 +895,9 @@ export default function HomeScreen({ navigation }: any) {
         {/* Watchlist Preview */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[12]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>My Watchlist ⭐</Text>
+            <Text style={styles.sectionTitle}>{t('home.myWatchlist')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Watchlist')}>
-              <Text style={styles.seeAll}>Manage</Text>
+              <Text style={styles.seeAll}>{t('app.manage')}</Text>
             </TouchableOpacity>
           </View>
           {stocks.slice(0, 3).map(stock => (
@@ -913,9 +915,9 @@ export default function HomeScreen({ navigation }: any) {
         {latestNews.length > 0 && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[13]]}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Market News 📰</Text>
+              <Text style={styles.sectionTitle}>{t('home.marketNews')}</Text>
               <TouchableOpacity onPress={() => navigation.navigate('NewsFeed')}>
-                <Text style={styles.seeAll}>All News</Text>
+                <Text style={styles.seeAll}>{t('home.allNews')}</Text>
               </TouchableOpacity>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -966,6 +968,7 @@ function QuickAddAlertForm({
   onAdd: (rule: SentimentAlertRule) => void;
   onClose: () => void;
 }) {
+  const { t } = useT();
   const [selectedSymbol, setSelectedSymbol] = useState<string>('RELIANCE');
   const [sensitivity, setSensitivity] = useState<SentimentAlertSensitivity>('medium');
   const [direction, setDirection] = useState<SentimentAlertDirection>('both');
@@ -999,7 +1002,7 @@ function QuickAddAlertForm({
   return (
     <>
       {/* Stock Picker */}
-      <Text style={[styles.qamLabel, { color: colors.textSecondary }]}>Stock</Text>
+      <Text style={[styles.qamLabel, { color: colors.textSecondary }]}>{t('watchlist.name')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.qamStockRow}>
         {availableStocks.map(s => {
           const isActive = s.symbol === selectedSymbol;
@@ -1066,7 +1069,7 @@ function QuickAddAlertForm({
       {/* Action Buttons */}
       <View style={styles.qamActions}>
         <TouchableOpacity style={[styles.qamCancelBtn, { borderColor: colors.border }]} onPress={onClose}>
-          <Text style={[styles.qamCancelText, { color: colors.textMuted }]}>Cancel</Text>
+          <Text style={[styles.qamCancelText, { color: colors.textMuted }]}>{t('app.cancel')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.qamAddBtn} onPress={handleAdd}>
           <Ionicons name="add-circle" size={18} color="#FFF" />

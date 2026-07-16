@@ -242,12 +242,13 @@ describe('BrokerConnectScreen — Disconnected State', () => {
     expect(connectButtons.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('renders Connect via OAuth on Zerodha card', async () => {
-    const { getByText } = render(
+  it('renders OAuth Connect on disconnected broker cards', async () => {
+    const { getAllByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     await advanceAndFlush();
-    expect(getByText('Connect via OAuth')).toBeDefined();
+    const oauthLabels = getAllByText('OAuth Connect');
+    expect(oauthLabels.length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders the OAuth Secure indicator on Zerodha card', async () => {
@@ -368,19 +369,18 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     vi.useRealTimers();
   });
 
-  it('tapping a non-OAuth broker renders the credentials modal with broker name', async () => {
+  it('shows connecting overlay when tapping Angel One', async () => {
     const { getByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     await advanceAndFlush();
 
-    // Tap Angel One card (non-OAuth)
+    // Tap Angel One
     act(() => { fireEvent.press(getByText('Angel One')); });
     await advanceAndFlush();
 
-    // Credentials modal should render with the broker name
-    expect(getByText(/Connect Angel One/)).toBeDefined();
-    expect(getByText('Enter your API credentials')).toBeDefined();
+    // Connecting overlay should appear (SnapTrade connect)
+    expect(getByText('Connecting...')).toBeDefined();
   });
 
   it('shows API Key field in credentials modal', async () => {
@@ -396,37 +396,7 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     expect(getByPlaceholderText('Enter your API key')).toBeDefined();
   });
 
-  it('shows Angel-specific fields (Client ID, Password, TOTP) when Angel is selected', async () => {
-    const { getByText, getByPlaceholderText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    await advanceAndFlush();
-
-    act(() => { fireEvent.press(getByText('Angel One')); });
-    await advanceAndFlush();
-
-    expect(getByText('Client ID')).toBeDefined();
-    expect(getByPlaceholderText('Enter your Angel One Client ID')).toBeDefined();
-    expect(getByText('Password')).toBeDefined();
-    expect(getByPlaceholderText('Trading password')).toBeDefined();
-    expect(getByText('TOTP Secret (optional)')).toBeDefined();
-    expect(getByPlaceholderText('2FA TOTP secret for auto-login')).toBeDefined();
-  });
-
-  it('shows Groww-specific Access Token field when Groww is selected', async () => {
-    const { getByText, getByPlaceholderText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    await advanceAndFlush();
-
-    act(() => { fireEvent.press(getByText('Groww')); });
-    await advanceAndFlush();
-
-    expect(getByText('Access Token')).toBeDefined();
-    expect(getByPlaceholderText('Enter your Groww access token')).toBeDefined();
-  });
-
-  it('renders Connect button in the credentials modal', async () => {
+  it('shows connecting overlay when Angel is selected (SnapTrade connect)', async () => {
     const { getByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
@@ -435,20 +405,21 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     act(() => { fireEvent.press(getByText('Angel One')); });
     await advanceAndFlush();
 
-    expect(getByText('Connect to Angel One')).toBeDefined();
+    expect(getByText('Connecting...')).toBeDefined();
   });
 
-  it('triggers OAuth URL fetch when tapping Zerodha', async () => {
+  it('triggers SnapTrade connect when tapping a broker', async () => {
     const { getByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
     );
     await advanceAndFlush();
 
-    // Tap Zerodha — triggers /broker-link/oauth-url API call
+    // Tap Zerodha — triggers SnapTrade connect
     act(() => { fireEvent.press(getByText('Zerodha')); });
     await advanceAndFlush();
 
-    expect(mockApiGet).toHaveBeenCalledWith('/broker-link/oauth-url?brokerType=zerodha');
+    // Should show connecting overlay
+    expect(getByText('Connecting...')).toBeDefined();
   });
 });
 

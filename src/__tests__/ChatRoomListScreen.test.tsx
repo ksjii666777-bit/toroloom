@@ -1,7 +1,48 @@
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
-import { mockChatRooms } from '../constants/mockData';
+
+// Override setup.ts react-native mock so FlatList actually renders items
+vi.mock('react-native', () => {
+  const React = require('react');
+
+  function MockFlatList(props: any) {
+    if (!props.data || props.data.length === 0) {
+      return props.ListEmptyComponent || null;
+    }
+    // Render each item via renderItem and wrap in a View
+    return React.createElement('View', null,
+      ...props.data.map((item: any, idx: number) => {
+        const element = props.renderItem({ item, index: idx });
+        return element || null;
+      })
+    );
+  }
+
+  return {
+    View: (props: any) => React.createElement('View', props, props.children),
+    Text: (props: any) => React.createElement('Text', props, props.children),
+    Pressable: (props: any) => React.createElement('View', { onPress: props.onPress, style: props.style }, props.children),
+    TextInput: (props: any) => React.createElement('TextInput', props, props.children),
+    ScrollView: (props: any) => React.createElement('ScrollView', props, props.children),
+    StyleSheet: { create: (s: any) => s },
+    FlatList: MockFlatList,
+    Platform: { OS: 'ios' },
+    KeyboardAvoidingView: (props: any) => React.createElement('View', null, props.children),
+    ActivityIndicator: (props: any) => null,
+    Modal: (props: any) => props.visible ? React.createElement('View', null, props.children) : null,
+    TouchableOpacity: (props: any) => React.createElement('View', { onPress: props.onPress }, props.children),
+    Animated: {
+      View: (props: any) => React.createElement('View', props, props.children),
+      Value: class { constructor(v: number) {}; interpolate() { return {}; } },
+      timing: () => ({ start: (cb: any) => cb?.() }),
+      spring: () => ({ start: (cb: any) => cb?.() }),
+      parallel: () => ({ start: (cb: any) => cb?.() }),
+    },
+    Dimensions: { get: () => ({ width: 400, height: 800 }) },
+    Keyboard: { dismiss: () => {} },
+  };
+});
 
 vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({
@@ -62,41 +103,42 @@ describe('ChatRoomListScreen', () => {
 
   it('renders the screen title', () => {
     const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
-    expect(getByText('Messages')).toBeDefined();
-  });
-
-  it('renders conversation count', () => {
-    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
-    expect(getByText(/conversations/)).toBeDefined();
+    expect(getByText('Chat Rooms')).toBeDefined();
   });
 
   it('renders room names', () => {
     const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
-    expect(getByText('Trading Legends')).toBeDefined();
-    expect(getByText('RELIANCE Discussion')).toBeDefined();
+    expect(getByText('Trading Discussion')).toBeDefined();
+    expect(getByText('Nifty Options')).toBeDefined();
+    expect(getByText('Stock Picks')).toBeDefined();
+    expect(getByText('Technical Analysis')).toBeDefined();
   });
 
-  it('renders unread badge when rooms have unread messages', () => {
+  it('renders member count for rooms', () => {
     const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
-    const roomsWithUnread = mockChatRooms.filter(r => r.unreadCount > 0);
-    if (roomsWithUnread.length > 0) {
-      expect(getByText(/unread/)).toBeDefined();
-    }
+    expect(getByText('234 members')).toBeDefined();
+    expect(getByText('189 members')).toBeDefined();
+    expect(getByText('312 members')).toBeDefined();
+  });
+
+  it('renders unread badge numbers', () => {
+    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
+    expect(getByText('3')).toBeDefined();
+    expect(getByText('7')).toBeDefined();
+    expect(getByText('1')).toBeDefined();
   });
 
   it('navigates to chat room on press', () => {
     const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
-    fireEvent.press(getByText('Trading Legends'));
-    expect(mockNavigate).toHaveBeenCalledWith('ChatRoom', { roomId: 'room_1' });
+    fireEvent.press(getByText('Trading Discussion'));
+    expect(mockNavigate).toHaveBeenCalledWith('ChatRoom', { roomId: '1' });
   });
 
-  it('shows search bar when search icon pressed', () => {
-    const { getByText, getByPlaceholderText } = render(
+  it('has search input with correct placeholder', () => {
+    const { getByPlaceholderText } = render(
       <ChatRoomListScreen navigation={mockNavigation} />
     );
-
-    fireEvent.press(getByText('search'));
-    expect(getByPlaceholderText('Search conversations...')).toBeDefined();
+    expect(getByPlaceholderText('Search rooms...')).toBeDefined();
   });
 
   it('filters rooms by search', () => {
@@ -104,12 +146,24 @@ describe('ChatRoomListScreen', () => {
       <ChatRoomListScreen navigation={mockNavigation} />
     );
 
-    fireEvent.press(getByText('search'));
-    const searchInput = getByPlaceholderText('Search conversations...');
+    const searchInput = getByPlaceholderText('Search rooms...');
     act(() => {
-      fireEvent.changeText(searchInput, 'RELIANCE');
+      fireEvent.changeText(searchInput, 'Trading');
     });
-    expect(getByText('RELIANCE Discussion')).toBeDefined();
+    expect(getByText('Trading Discussion')).toBeDefined();
+  });
+
+  it('shows empty state when no rooms match search', () => {
+    const { getByText, getByPlaceholderText } = render(
+      <ChatRoomListScreen navigation={mockNavigation} />
+    );
+
+    const searchInput = getByPlaceholderText('Search rooms...');
+    act(() => {
+      fireEvent.changeText(searchInput, 'zzzznonexistent');
+    });
+
+    expect(getByText('No rooms found')).toBeDefined();
   });
 
   it('renders without crashing', () => {

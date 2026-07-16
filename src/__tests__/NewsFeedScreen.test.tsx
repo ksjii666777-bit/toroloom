@@ -35,12 +35,18 @@ vi.mock('expo-linear-gradient', () => ({
   LinearGradient: 'LinearGradient',
 }));
 
+// Mock newsApi.getNews to reject so component falls back to mockNews data
+vi.mock('../services/api', () => ({
+  newsApi: {
+    getNews: vi.fn(() => Promise.reject(new Error('API not configured'))),
+  },
+}));
+
 vi.mock('../components/ui/AnimatedPressable', () => ({
   default: 'TouchableOpacity',
 }));
 
 // Override setup.ts Ionicons mock so icon names render as text children.
-// No TS annotations inside the factory — vitest hoists the raw source.
 vi.mock('@expo/vector-icons', () => {
   const React = require('react');
   const IconComponent = function(props: any) {
@@ -62,6 +68,13 @@ import NewsFeedScreen from '../screens/news/NewsFeedScreen';
 const mockNavigate = vi.fn();
 const mockNavigation = { navigate: mockNavigate };
 
+/** Flush pending promises so async effects (like newsApi fetch) resolve */
+async function flushPromises() {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  });
+}
+
 describe('NewsFeedScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -72,13 +85,15 @@ describe('NewsFeedScreen', () => {
     expect(getByText('Market News')).toBeDefined();
   });
 
-  it('renders article count', () => {
+  it('renders article count after loading', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     expect(getByText(/articles/)).toBeDefined();
   });
 
-  it('renders all category chips', () => {
+  it('renders all category chips', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     expect(getByText('All')).toBeDefined();
     expect(getByText('Markets')).toBeDefined();
     expect(getByText('Corporate')).toBeDefined();
@@ -88,29 +103,31 @@ describe('NewsFeedScreen', () => {
     expect(getByText('Global')).toBeDefined();
   });
 
-  it('renders a news card title', () => {
+  it('renders a news card title', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     expect(getByText(mockNews[0].title)).toBeDefined();
   });
 
-  it('filters articles by market category', () => {
+  it('filters articles by market category', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     fireEvent.press(getByText('Markets'));
     const marketsArticles = mockNews.filter(function(n) { return n.category === 'markets'; });
     expect(getByText(marketsArticles[0].title)).toBeDefined();
   });
 
-  it('shows empty state when search yields no matches', () => {
+  it('shows empty state when search yields no matches', async () => {
     const { getByText, getByPlaceholderText } = render(
       <NewsFeedScreen navigation={mockNavigation} />
     );
+    await flushPromises();
 
     // The search bar is hidden by default. Press the search icon to open it.
     // Ionicons mock renders icon name as text, so we can press by the name text.
     fireEvent.press(getByText('search'));
 
     // Type impossible text into the search input
-    // Wrap in act() to flush React 18 batched state updates
     const searchInput = getByPlaceholderText('Search news, symbols, sources...');
     act(() => {
       fireEvent.changeText(searchInput, 'zzzzimpossible');
@@ -119,15 +136,17 @@ describe('NewsFeedScreen', () => {
     expect(getByText('No articles found')).toBeDefined();
   });
 
-  it('renders sentiment badges', () => {
+  it('renders sentiment badges', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     expect(getByText('Positive')).toBeDefined();
     expect(getByText('Negative')).toBeDefined();
     expect(getByText('Neutral')).toBeDefined();
   });
 
-  it('switches category and returns to all', () => {
+  it('switches category and returns to all', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     fireEvent.press(getByText('IPO'));
     fireEvent.press(getByText('All'));
     expect(getByText(mockNews[0].title)).toBeDefined();
@@ -138,21 +157,21 @@ describe('NewsFeedScreen', () => {
     expect(toJSON()).toBeTruthy();
   });
 
-  // ── New Feature Tests ──
-
-  it('renders Breaking News banner with BREAKING badge', () => {
+  it('renders Breaking News banner with BREAKING badge', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
-    // The breaking banner shows the latest unread articles
+    await flushPromises();
     expect(getByText('BREAKING')).toBeDefined();
   });
 
-  it('renders Trending Symbols section', () => {
+  it('renders Trending Symbols section', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     expect(getByText('Trending')).toBeDefined();
   });
 
-  it('renders Trending symbol chips from mock data', () => {
+  it('renders Trending symbol chips from mock data', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     // At least one trending symbol should be displayed
     const trendingSymbolsFromMock = new Set(mockNews.filter(n => n.symbol).map(n => n.symbol));
     const firstSymbol = Array.from(trendingSymbolsFromMock)[0];
@@ -161,20 +180,23 @@ describe('NewsFeedScreen', () => {
     }
   });
 
-  it('renders Saved (bookmark) filter chip', () => {
+  it('renders Saved (bookmark) filter chip', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     expect(getByText('Saved')).toBeDefined();
   });
 
-  it('renders Hero Featured Card with Read Now', () => {
+  it('renders Hero Featured Card with Read Now', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     expect(getByText('Read Now')).toBeDefined();
     // Hero card shows the first article's title
     expect(getByText(mockNews[0].title)).toBeDefined();
   });
 
-  it('filters news by bookmarked when Saved chip is toggled', () => {
+  it('filters news by bookmarked when Saved chip is toggled', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     // Toggle the Saved bookmark filter
     fireEvent.press(getByText('Saved'));
     // Bookmarked article should still be visible
@@ -186,8 +208,9 @@ describe('NewsFeedScreen', () => {
     expect(getByText(/Showing 1 article/)).toBeDefined();
   });
 
-  it('filters by trending symbol chip', () => {
+  it('filters by trending symbol chip', async () => {
     const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    await flushPromises();
     // Find a trending symbol chip and press it
     const trendingSymbolsFromMock = new Set(mockNews.filter(n => n.symbol).map(n => n.symbol));
     const firstSymbol = Array.from(trendingSymbolsFromMock)[0];

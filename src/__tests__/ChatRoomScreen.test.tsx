@@ -53,7 +53,10 @@ const mockSetTyping = vi.fn();
 const mockMarkRoomRead = vi.fn();
 
 vi.mock('../store/chatStore', () => ({
-  useChatStore: () => mockStoreState,
+  useChatStore: (selector?: any) => {
+    const state = mockStoreState;
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('../context/ThemeContext', () => ({

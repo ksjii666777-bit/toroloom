@@ -25,6 +25,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mockNavigate = vi.fn();
 const mockGoBack = vi.fn();
 
+vi.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate, goBack: mockGoBack }),
+  NavigationContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useFocusEffect: (cb: any) => cb(),
+}));
+
 vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({
     colors: {

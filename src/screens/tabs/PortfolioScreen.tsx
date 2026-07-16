@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Refre
 import ReanimatedAnimated, { useSharedValue, withTiming, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
@@ -19,6 +20,7 @@ const { width } = Dimensions.get('window');
 
 export default function PortfolioScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { holdings, trades } = usePortfolioStore();
   const [view, setView] = useState<'holdings' | 'trades'>('holdings');
@@ -118,8 +120,8 @@ export default function PortfolioScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Portfolio</Text>
-          <Text style={styles.subtitle}>Track your investments</Text>
+          <Text style={styles.title}>{t('portfolio.title')}</Text>
+          <Text style={styles.subtitle}>{t('portfolio.subtitle')}</Text>
         </View>
 
         {/* Portfolio Summary — Glassmorphic */}
@@ -127,18 +129,18 @@ export default function PortfolioScreen({ navigation }: any) {
           <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>Invested</Text>
+                <Text style={styles.summaryLabel}>{t('portfolio.invested')}</Text>
                 <Text style={styles.summaryValue}>{formatCurrency(displayInvested, true)}</Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>Current Value</Text>
+                <Text style={styles.summaryLabel}>{t('portfolio.currentValue')}</Text>
                 <Text style={styles.summaryValue}>{formatCurrency(displayPortfolio, true)}</Text>
               </View>
             </View>
 
             <View style={styles.pnlContainer}>
-              <Text style={styles.pnlLabel}>Total Returns</Text>
+              <Text style={styles.pnlLabel}>{t('portfolio.totalReturns')}</Text>
               <View style={styles.pnlRow}>
                 <Text style={[styles.pnlValue, { color: displayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
                   {displayPnl >= 0 ? '+' : ''}{formatCurrency(displayPnl, true)}
@@ -166,20 +168,20 @@ export default function PortfolioScreen({ navigation }: any) {
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>{holdingsCount}</Text>
-                <Text style={styles.statLabel}>Holdings</Text>
+                <Text style={styles.statLabel}>{t('portfolio.holdings_short')}</Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>{trades.length}</Text>
-                <Text style={styles.statLabel}>Trades</Text>
+                <Text style={styles.statLabel}>{t('portfolio.trades')}</Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>{winningCount}/{holdingsCount}</Text>
-                <Text style={styles.statLabel}>Winning</Text>
+                <Text style={styles.statLabel}>{t('portfolio.winning')}</Text>
               </View>
               {a.sharpeRatio !== 0 && (
                 <View style={styles.statItem}>
                   <Text style={styles.statValue}>{a.sharpeRatio.toFixed(1)}</Text>
-                  <Text style={styles.statLabel}>Sharpe</Text>
+                  <Text style={styles.statLabel}>{t('portfolio.sharpe')}</Text>
                 </View>
               )}
             </View>
@@ -194,7 +196,7 @@ export default function PortfolioScreen({ navigation }: any) {
               onPress={() => setView('holdings')}
             >
               <Text style={[styles.toggleText, view === 'holdings' && styles.toggleTextActive]}>
-                Holdings ({holdings.length})
+{t('portfolio.holdings', { count: holdings.length })}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -202,7 +204,7 @@ export default function PortfolioScreen({ navigation }: any) {
               onPress={() => setView('trades')}
             >
               <Text style={[styles.toggleText, view === 'trades' && styles.toggleTextActive]}>
-                Recent Trades
+{t('portfolio.recentTrades')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -224,13 +226,13 @@ export default function PortfolioScreen({ navigation }: any) {
               <Card>
                 <View style={styles.emptyState}>
                   <Ionicons name="wallet-outline" size={56} color={colors.textMuted} />
-                  <Text style={styles.emptyTitle}>No Holdings Yet</Text>
-                  <Text style={styles.emptySubtitle}>Start investing to build your portfolio</Text>
+                  <Text style={styles.emptyTitle}>{t('portfolio.noHoldingsYet')}</Text>
+                  <Text style={styles.emptySubtitle}>{t('portfolio.noHoldingsSubtitle')}</Text>
                   <View style={{ marginTop: SPACING.lg }}>
                     <AnimatedPressable onPress={() => navigation.navigate('Markets')} haptic="medium">
                       <View style={[styles.exploreBtn, { backgroundColor: colors.primary }]}>
                         <Ionicons name="trending-up" size={18} color={colors.white} />
-                        <Text style={styles.exploreBtnText}>Explore Markets</Text>
+                        <Text style={styles.exploreBtnText}>{t('portfolio.exploreMarkets')}</Text>
                       </View>
                     </AnimatedPressable>
                   </View>
@@ -297,16 +299,16 @@ export default function PortfolioScreen({ navigation }: any) {
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionHeaderLeft}>
                   <Ionicons name="calendar" size={18} color={colors.primary} />
-                  <Text style={[styles.sectionTitle, { color: colors.text }]}>Dividend Calendar</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('portfolio.dividendCalendar')}</Text>
                 </View>
                 <View style={[styles.annualChip, { backgroundColor: colors.primary + '20' }]}>
-                  <Text style={[styles.annualChipText, { color: colors.primary }]}>₹{totalAnnualDividend.toFixed(0)}/yr</Text>
+                  <Text style={[styles.annualChipText, { color: colors.primary }]}>₹{totalAnnualDividend.toFixed(0)}{t('portfolio.annualYield')}</Text>
                 </View>
               </View>
 
               {dividendEvents.length > 0 && (
                 <View style={styles.dividendTimeline}>
-                  <Text style={[styles.timelineLabel, { color: colors.textMuted }]}>Upcoming Estimates</Text>
+                  <Text style={[styles.timelineLabel, { color: colors.textMuted }]}>{t('portfolio.upcomingEstimates')}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dividendScroll}>
                     {dividendEvents[0]?.upcoming.map((event, ei) => {
                     const totalForMonth = dividendEvents.reduce((s, d) => s + (d.upcoming[ei]?.amount || 0), 0);
@@ -340,10 +342,10 @@ export default function PortfolioScreen({ navigation }: any) {
                   <View key={d.symbol} style={styles.dividendSummaryRow}>
                     <View style={styles.dividendSummaryLeft}>
                       <Text style={[styles.dividendSummarySymbol, { color: colors.text }]}>{d.symbol}</Text>
-                      <Text style={[styles.dividendSummaryYield, { color: colors.textMuted }]}>{d.yield}% yield</Text>
+                      <Text style={[styles.dividendSummaryYield, { color: colors.textMuted }]}>{d.yield}% {t('portfolio.yield')}</Text>
                     </View>
                     <View style={styles.dividendSummaryRight}>
-                      <Text style={[styles.dividendSummaryQty, { color: colors.textSecondary }]}>{d.quantity} shares</Text>
+                      <Text style={[styles.dividendSummaryQty, { color: colors.textSecondary }]}>{d.quantity} {t('portfolio.shares')}</Text>
                       <Text style={[styles.dividendSummaryAmount, { color: colors.marketUp }]}>+₹{d.annualAmount.toFixed(0)}/yr</Text>
                     </View>
                   </View>
@@ -360,7 +362,7 @@ export default function PortfolioScreen({ navigation }: any) {
             <View style={[styles.analyticsToggle, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
                 <Ionicons name="stats-chart" size={18} color={colors.primary} />
-                <Text style={[styles.analyticsToggleText, { color: colors.text }]}>Detailed Analytics</Text>
+                <Text style={[styles.analyticsToggleText, { color: colors.text }]}>{t('portfolio.detailedAnalytics')}</Text>
               </View>
               <Ionicons name={showDetailedAnalytics ? 'chevron-up' : 'chevron-down'} size={18} color={colors.textMuted} />
             </View>
@@ -371,12 +373,12 @@ export default function PortfolioScreen({ navigation }: any) {
               {/* Sector Allocation */}
               {sectorAllocation.length > 0 && (
                 <View style={[styles.analyticsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                  <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>Sector Allocation</Text>
+                  <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>{t('portfolio.sectorAllocation')}</Text>
                   {sectorAllocation.map((sector) => (
                     <View key={sector.sector} style={styles.sectorRow}>
                       <View style={styles.sectorLeft}>
                         <Text style={[styles.sectorName, { color: colors.text }]}>{sector.sector}</Text>
-                        <Text style={[styles.sectorCount, { color: colors.textMuted }]}>{sector.count} holdings</Text>
+                        <Text style={[styles.sectorCount, { color: colors.textMuted }]}>{sector.count} {t('portfolio.holdings_short')}</Text>
                       </View>
                       <View style={styles.sectorRight}>
                         <View style={styles.sectorBarContainer}>
@@ -392,7 +394,7 @@ export default function PortfolioScreen({ navigation }: any) {
               {/* Monthly Returns */}
               {monthlyReturns.length > 0 && (
                 <View style={[styles.analyticsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                  <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>Monthly Returns</Text>
+                  <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>{t('portfolio.monthlyReturns')}</Text>
                   {monthlyReturns.slice(-6).map((mr) => {
                     const isPositive = mr.returnPercent >= 0;
                     return (
@@ -418,15 +420,15 @@ export default function PortfolioScreen({ navigation }: any) {
 
               {/* Capital Gains Summary */}
               <View style={[styles.analyticsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>Capital Gains & Tax</Text>
+                <Text style={[styles.analyticsSectionTitle, { color: colors.text }]}>{t('portfolio.capitalGainsTax')}</Text>
                 <View style={styles.cgRow}>
-                  <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Short-term Gains</Text>
+                  <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>{t('portfolio.shortTermGains')}</Text>
                   <Text style={[styles.cgValue, { color: capitalGains.shortTerm.gains >= 0 ? colors.marketUp : colors.marketDown }]}>
                     {formatCurrency(capitalGains.shortTerm.gains)}
                   </Text>
                 </View>
                 <View style={styles.cgRow}>
-                  <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Long-term Gains</Text>
+                  <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>{t('portfolio.longTermGains')}</Text>
                   <Text style={[styles.cgValue, { color: capitalGains.longTerm.gains >= 0 ? colors.marketUp : colors.marketDown }]}>
                     {formatCurrency(capitalGains.longTerm.gains)}
                   </Text>
@@ -437,22 +439,22 @@ export default function PortfolioScreen({ navigation }: any) {
                 {a.winRate > 0 && (
                   <>
                     <View style={styles.cgRow}>
-                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Win Rate</Text>
+                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>{t('portfolio.winRate')}</Text>
                       <View style={styles.winRateContainer}>
                         <View style={[styles.winRateBar, { width: `${a.winRate}%`, backgroundColor: a.winRate >= 50 ? colors.marketUp : colors.warning }]} />
                       </View>
                       <Text style={[styles.cgValue, { color: a.winRate >= 50 ? colors.marketUp : colors.warning }]}>{a.winRate.toFixed(0)}%</Text>
                     </View>
                     <View style={styles.cgRow}>
-                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Profit Factor</Text>
+                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>{t('portfolio.profitFactor')}</Text>
                       <Text style={[styles.cgValue, { color: colors.text }]}>{a.profitFactor > 0 ? a.profitFactor.toFixed(2) : 'N/A'}</Text>
                     </View>
                     <View style={styles.cgRow}>
-                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Avg Hold</Text>
+                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>{t('portfolio.avgHold')}</Text>
                       <Text style={[styles.cgValue, { color: colors.text }]}>{a.avgHoldingDays}d</Text>
                     </View>
                     <View style={styles.cgRow}>
-                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>Max Drawdown</Text>
+                      <Text style={[styles.cgLabel, { color: colors.textSecondary }]}>{t('portfolio.maxDrawdown')}</Text>
                       <Text style={[styles.cgValue, { color: colors.marketDown }]}>{a.maxDrawdownPercent.toFixed(1)}%</Text>
                     </View>
                   </>
@@ -470,7 +472,7 @@ export default function PortfolioScreen({ navigation }: any) {
                 <Ionicons name="stats-chart" size={24} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.analyticsCtaTitle, { color: colors.text }]}>Advanced Analytics</Text>
+                <Text style={[styles.analyticsCtaTitle, { color: colors.text }]}>{t('portfolio.advancedAnalytics')}</Text>
                 <Text style={[styles.analyticsCtaSub, { color: colors.textSecondary }]}>
                   P&L charts · Sharpe: {a.sharpeRatio.toFixed(1)} · Win rate: {a.winRate.toFixed(0)}% · Tax reports
                 </Text>

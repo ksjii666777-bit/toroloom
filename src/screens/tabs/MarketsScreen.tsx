@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Dimens
 import ReanimatedAnimated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, interpolate, interpolateColor } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import StockItem from '../../components/StockItem';
@@ -13,6 +14,7 @@ import { SkeletonBlock, SkeletonCard } from '../../components/ui/SkeletonLoader'
 
 const { width } = Dimensions.get('window');
 const SECTORS = ['All', 'Technology', 'Finance', 'Energy', 'Consumer', 'Automobile', 'Telecom'];
+const ALL_SECTOR = 'All';
 
 const SUGGESTED_SEARCHES = ['RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'SBIN', 'ICICIBANK', 'BAJFINANCE', 'TATAMOTORS'];
 
@@ -20,6 +22,7 @@ const HEATMAP_HOT_THRESHOLD = 1.5;
 
 export default function MarketsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { stocks, indices, searchQuery, searchResults, setSearchQuery } = useMarketStore();
   const [selectedSector, setSelectedSector] = useState('All');
@@ -149,7 +152,7 @@ export default function MarketsScreen({ navigation }: any) {
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={styles.title}>Markets</Text>
+            <Text style={styles.title}>{t('market.title')}</Text>
             <AnimatedPressable
               onPress={() => navigation.navigate('StockScreener')}
               haptic="light"
@@ -157,11 +160,11 @@ export default function MarketsScreen({ navigation }: any) {
             >
               <View style={[styles.screenerBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary }]}>
                 <Ionicons name="funnel" size={16} color={colors.primary} />
-                <Text style={[styles.screenerBtnText, { color: colors.primary }]}>Screener</Text>
+                <Text style={[styles.screenerBtnText, { color: colors.primary }]}>{t('market.screener')}</Text>
               </View>
             </AnimatedPressable>
           </View>
-          <Text style={styles.subtitle}>Real-time stock market data</Text>
+          <Text style={styles.subtitle}>{t('market.subtitle')}</Text>
         </View>
 
         {/* Search Bar — elevated when focused */}
@@ -174,7 +177,7 @@ export default function MarketsScreen({ navigation }: any) {
           <TextInput
             ref={searchInputRef}
             style={styles.searchInput}
-            placeholder="Search stocks by name or symbol..."
+            placeholder={t('market.searchPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -191,7 +194,7 @@ export default function MarketsScreen({ navigation }: any) {
         {/* Search Suggestion Dashboard — slides down when search is focused */}
         {isSearchFocused && !searchQuery && (
           <ReanimatedAnimated.View style={[styles.suggestionDashboard, overlayStyle]}>
-            <Text style={styles.suggestionTitle}>Popular Stocks</Text>
+            <Text style={styles.suggestionTitle}>{t('market.popularStocks')}</Text>
             <View style={styles.suggestionChips}>
               {SUGGESTED_SEARCHES.map(symbol => (
                 <AnimatedPressable
@@ -228,7 +231,7 @@ export default function MarketsScreen({ navigation }: any) {
               <View style={[styles.perfColumn, { borderColor: colors.border }]}>
                 <View style={styles.perfHeader}>
                   <Ionicons name="arrow-up-circle" size={14} color="#00C853" />
-                  <Text style={[styles.perfLabel, { color: colors.textMuted }]}>Top Gainers</Text>
+                  <Text style={[styles.perfLabel, { color: colors.textMuted }]}>{t('market.topGainers')}</Text>
                 </View>
                 {[...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 3).map(s => (
                   <TouchableOpacity
@@ -248,7 +251,7 @@ export default function MarketsScreen({ navigation }: any) {
               <View style={[styles.perfColumn, { borderColor: colors.border }]}>
                 <View style={styles.perfHeader}>
                   <Ionicons name="arrow-down-circle" size={14} color="#FF1744" />
-                  <Text style={[styles.perfLabel, { color: colors.textMuted }]}>Top Losers</Text>
+                  <Text style={[styles.perfLabel, { color: colors.textMuted }]}>{t('market.topLosers')}</Text>
                 </View>
                 {[...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 3).map(s => (
                   <TouchableOpacity
@@ -272,7 +275,7 @@ export default function MarketsScreen({ navigation }: any) {
         {!searchQuery && (
           <View style={styles.heatmapSection}>
             <View style={styles.heatmapHeader}>
-              <Text style={[styles.heatmapTitle, { color: colors.text }]}>Sector Performance</Text>
+              <Text style={[styles.heatmapTitle, { color: colors.text }]}>{t('market.sectorPerformance')}</Text>
             </View>
             <View style={styles.heatmapGrid}>
               {sectorPerformance.map(sector => {
@@ -300,7 +303,7 @@ export default function MarketsScreen({ navigation }: any) {
                       {isPositive ? '+' : ''}{sector.avgChange.toFixed(2)}%
                     </Text>
                     <View style={styles.heatmapMeta}>
-                      <Text style={[styles.heatmapCount, { color: colors.textMuted }]}>{sector.count} stocks</Text>
+                      <Text style={[styles.heatmapCount, { color: colors.textMuted }]}>{t('market.stocks', { count: sector.count })}</Text>
                       {isHot && (
                         <View style={[styles.heatmapHotBadge, {
                           backgroundColor: isPositive ? '#00C85320' : '#FF174420',
@@ -349,9 +352,9 @@ export default function MarketsScreen({ navigation }: any) {
         <View style={styles.stockList}>
           <View style={styles.listHeader}>
             <Text style={styles.listTitle}>
-              {searchQuery ? `Results (${filteredStocks.length})` : `${selectedSector} Stocks`}
+              {searchQuery ? t('market.results', { count: filteredStocks.length }) : selectedSector === 'All' ? t('market.allStocks') : `${selectedSector} ${t('market.stocks', { count: filteredStocks.length })}`}
             </Text>
-            <Text style={styles.listCount}>{filteredStocks.length} stocks</Text>
+            <Text style={styles.listCount}>{t('market.stocks', { count: filteredStocks.length })}</Text>
           </View>
           {filteredStocks.map((stock, i) => (
             <ReanimatedAnimated.View key={stock.id} style={stockStyles[i]}>
