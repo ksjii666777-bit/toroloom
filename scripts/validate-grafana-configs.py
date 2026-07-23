@@ -18,6 +18,11 @@ Output:
 import json
 import sys
 
+# Force UTF-8 stdout encoding for Windows compatibility (fixes UnicodeEncodeError
+# when printing checkmark/cross characters like \u2713/\u274c on cp1252 consoles)
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 try:
     import yaml
 except ImportError:
