@@ -1,0 +1,118 @@
+# ==============================================================================
+# Toroloom — Public API Integration CI
+# ==============================================================================
+#
+# Fast-track job that runs the Public REST API integration tests on every pull
+# request that touches API key or public API source files. Covers:
+#   - API key management (create, list, revoke, delete)
+#   - Public API v1 endpoints (market, portfolio, watchlist, account)
+#   - API key auth middleware (valid/invalid/expired keys, scopes)
+#   - OpenAPI/Swagger documentation
+#
+# Unlike the main backend-integration job, this one does NOT require PostgreSQL
+# or MongoDB service containers — all tests use in-memory storage and run in
+# ~15s, providing fast feedback for API changes.
+#
+# Test file:
+#   - publicApi.routes.int.test.ts  (48 integration tests, no DB required)
+#
+# Also runs as part of the full backend-integration suite via `*.int.test.ts`.
+# ==============================================================================
+
+name: Public API Integration CI
+
+on:
+  pull_request:
+    branches: [master, main]
+    # Only trigger when public API related source or test files change
+    paths:
+      # Integration test file
+      - 'backend/src/__tests__/publicApi.routes.int.test.ts'
+      # API key service
+      - 'backend/src/services/apiKeyService.ts'
+      # API key auth middleware
+      - 'backend/src/middleware/apiKeyAuth.ts'
+      # API key management routes
+      - 'backend/src/routes/apiKeys.ts'
+      # Public API v1 routes
+      - 'backend/src/routes/publicApi.ts'
+      # OpenAPI docs
+      - 'backend/src/routes/apiDocs.ts'
+      # Storage layer (types + implementations)
+      - 'backend/src/services/storage/types.ts'
+      - 'backend/src/services/storage/inMemory.ts'
+      - 'backend/src/services/storage/postgres.ts'
+      - 'backend/src/services/storage/mongodb.ts'
+      # Server entry point (wiring)
+      - 'backend/src/server.ts'
+      # Workflow definition itself
+      - '.github/workflows/public-api-integration-ci.yml'
+  workflow_dispatch:            # Allow manual trigger from the Actions tab
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true     # Cancel in-flight runs on the same branch
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  public-api-integration-tests:
+    name: Public API Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: backend
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Run the public API integration test suite.
+      # Uses in-memory storage — no DB services required.
+      - name: Run public API integration tests
+        run: npx vitest run --reporter=verbose \
+          src/__tests__/publicApi.routes.int.test.ts
+        env:
+          NODE_ENV: test
+
+      # Post a concise summary to the GitHub Actions job summary
+      - name: Post test summary
+        if: always()
+        shell: bash
+        run: |
+          cat <<'EOF' >> $GITHUB_STEP_SUMMARY
+          ## Public API Integration Tests
+
+          | Suite | Tests | DB Required |
+          |-------|-------|:-----------:|
+          | publicApi.routes.int.test.ts | 48 | ❌ No (in-memory) |
+
+          **Endpoints tested:**
+          - API Key Management (create, list, revoke, delete)
+          - Market (indices, stocks, quotes, OHLC, search)
+          - Portfolio (holdings, positions, trades)
+          - Account (profile with scopes)
+          - Watchlist
+          - API Docs (HTML page + OpenAPI spec)
+
+          **Security scenarios tested:**
+          - Missing/invalid/expired/revoked API keys
+          - Insufficient scopes (403 rejection)
+          - Full key lifecycle (create → use → revoke → fail → delete)
+          - Auth enforcement (all endpoints reject without credentials)
+
+          Run via \`public-api-integration-ci.yml\` — fast-track public API job.
+          EOF

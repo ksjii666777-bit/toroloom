@@ -37,6 +37,18 @@ interface EducationState {
   generateCertificate: (courseId: string) => Promise<CourseCertificate | null>;
   /** Get certificate for a specific course */
   getCertificateForCourse: (courseId: string) => CourseCertificate | undefined;
+  /** Downloaded video URIs per lesson (lessonId → local file path) */
+  downloadedVideos: Record<string, string>;
+  /** Currently downloading videos per lesson */
+  downloadingVideos: Record<string, boolean>;
+  /** Download progress per lesson (0–100) */
+  downloadProgress: Record<string, number>;
+  /** Download a video for offline playback */
+  downloadVideo: (lessonId: string, url: string) => Promise<void>;
+  /** Remove a downloaded video */
+  removeOfflineVideo: (lessonId: string) => Promise<void>;
+  /** Check if a video is downloaded */
+  isVideoDownloaded: (lessonId: string) => boolean;
   /** Quiz attempt history per lesson */
   quizHistory: Record<string, QuizResult[]>;
   /** Record a quiz attempt result */
@@ -61,6 +73,9 @@ export const useEducationStore = create<EducationState>()(
   lessonProgress: {},
   videoProgress: {},
   videoBookmarks: {},
+  downloadedVideos: {},
+  downloadingVideos: {},
+  downloadProgress: {},
   certificates: [],
   isGeneratingCertificate: false,
   isLoading: false,
@@ -194,6 +209,53 @@ export const useEducationStore = create<EducationState>()(
         },
       };
     });
+  },
+
+  /** Download a video for offline playback */
+  downloadVideo: async (lessonId, url) => {
+    if (get().downloadingVideos[lessonId]) return;
+    set(state => ({
+      downloadingVideos: { ...state.downloadingVideos, [lessonId]: true },
+      downloadProgress: { ...state.downloadProgress, [lessonId]: 0 },
+    }));
+    try {
+      const fs = await import('expo-file-system') as any;
+      const ext = url.split('.').pop() || 'mp4';
+      const dest = `${fs.cacheDirectory ?? '.'}toroloom_video_${lessonId}.${ext}`;
+      const result = await fs.downloadAsync(url, dest);
+      set(state => ({
+        downloadedVideos: { ...state.downloadedVideos, [lessonId]: result.uri },
+        downloadingVideos: { ...state.downloadingVideos, [lessonId]: false },
+        downloadProgress: { ...state.downloadProgress, [lessonId]: 100 },
+      }));
+    } catch (err) {
+      console.error('[EducationStore] Download failed:', err);
+      set(state => ({
+        downloadingVideos: { ...state.downloadingVideos, [lessonId]: false },
+        downloadProgress: { ...state.downloadProgress, [lessonId]: 0 },
+      }));
+    }
+  },
+
+  /** Remove a downloaded video */
+  removeOfflineVideo: async (lessonId) => {
+    const uri = get().downloadedVideos[lessonId];
+    if (uri) {
+      try {
+        const { deleteAsync } = await import('expo-file-system');
+        await deleteAsync(uri, { idempotent: true });
+      } catch { /* ignore */ }
+    }
+    set(state => {
+      const newDownloaded = { ...state.downloadedVideos };
+      delete newDownloaded[lessonId];
+      return { downloadedVideos: newDownloaded };
+    });
+  },
+
+  /** Check if a video is downloaded */
+  isVideoDownloaded: (lessonId) => {
+    return !!get().downloadedVideos[lessonId];
   },
 
   /** Record a quiz attempt result */

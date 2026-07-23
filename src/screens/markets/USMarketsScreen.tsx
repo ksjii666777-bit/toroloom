@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { globalMarketsApi } from '../../services/api/globalMarkets';
 import {
   mockUSIndices, mockUSStocks, mockUSETFs, mockCryptoAssets,
 } from '../../constants/mockData';
@@ -181,12 +182,19 @@ export default function USMarketsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [apiStatus, setApiStatus] = useState<{ marketstackConfigured: boolean; coinGeckoConfigured: boolean } | null>(null);
 
-  // Simulate loading
+  // Simulate loading + fetch API status
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 500);
+    // Fetch backend API status for live/mock badge
+    globalMarketsApi.getStatus()
+      .then(res => setApiStatus(res))
+      .catch(() => setApiStatus({ marketstackConfigured: false, coinGeckoConfigured: false }));
     return () => clearTimeout(t);
   }, []);
+
+  const isLive = apiStatus?.marketstackConfigured === true || apiStatus?.coinGeckoConfigured === true;
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -249,7 +257,15 @@ export default function USMarketsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Global Markets</Text>
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { color: colors.text }]}>Global Markets</Text>
+          {apiStatus && (
+            <View style={[styles.liveBadge, { backgroundColor: isLive ? colors.success + '20' : colors.warning + '20', borderColor: isLive ? colors.success + '40' : colors.warning + '40' }]}>
+              <View style={[styles.liveDot, { backgroundColor: isLive ? colors.success : colors.warning }]} />
+              <Text style={[styles.liveBadgeText, { color: isLive ? colors.success : colors.warning }]}>{isLive ? 'Live' : 'Mock'}</Text>
+            </View>
+          )}
+        </View>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>US · ETFs · Crypto</Text>
 
         {/* Search Bar */}
@@ -429,7 +445,14 @@ export default function USMarketsScreen() {
             ) : (
               filteredCrypto.map((asset, i) => (
                 <Animated.View key={asset.id} entering={FadeInUp.duration(300).delay(i * 40)}>
-                  <CryptoRow asset={asset} />
+                  <CryptoRow
+                    asset={asset}
+                    onPress={() => navigation.navigate('CryptoDetail', {
+                      coinId: asset.id,
+                      coinSymbol: asset.symbol,
+                      coinName: asset.name,
+                    })}
+                  />
                 </Animated.View>
               ))
             )}
@@ -453,6 +476,31 @@ export default function USMarketsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  liveBadgeText: {
+    ...FONTS.semiBold,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   header: {
     padding: SPACING.xl,
     paddingTop: 60,

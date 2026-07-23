@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { MarketIndex, Stock, StockHistoryPoint } from '../../types';
+import type { MarketIndex, Stock, StockHistoryPoint, CompanyFundamentals } from '../../types';
 
 // The broker interface types – these mirror what the backend returns
 export type BrokerStock = Stock;
@@ -18,4 +18,7 @@ export const marketApi = {
     api.get<StockHistoryPoint[]>(`/market/ohlc/${symbol}?interval=${interval}&days=${days}`),
 
   search: (query: string) => api.get<Stock[]>(`/market/search?q=${encodeURIComponent(query)}`),
+
+  getFundamentals: (symbol: string) =>
+    api.get<CompanyFundamentals>(`/market/fundamentals/${symbol}`),
 };

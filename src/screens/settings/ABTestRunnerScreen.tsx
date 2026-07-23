@@ -6,6 +6,7 @@ import {
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useABTestStore } from '../../store/abTestStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -13,6 +14,7 @@ import type { ABExperiment, ABTestStatus } from '../../types';
 
 export default function ABTestRunnerScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     experiments, selectedExperimentId, selectExperiment,
@@ -45,7 +47,7 @@ export default function ABTestRunnerScreen({ navigation }: any) {
     switch (action) {
       case 'start':
         startExperiment(exp.id);
-        Alert.alert('Experiment Started', `${exp.name} is now live.`);
+        Alert.alert(t('abTestRunner.experimentStarted'), t('abTestRunner.experimentStartedMsg', { name: exp.name }));
         break;
       case 'pause':
         pauseExperiment(exp.id);
@@ -63,43 +65,43 @@ export default function ABTestRunnerScreen({ navigation }: any) {
         archiveExperiment(exp.id);
         break;
       case 'delete':
-        Alert.alert('Delete Experiment', `Delete "${exp.name}"? This cannot be undone.`, [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: () => {
+        Alert.alert(t('abTestRunner.deleteTitle'), t('abTestRunner.deleteMsg', { name: exp.name }), [
+          { text: t('app.cancel'), style: 'cancel' },
+          { text: t('abTestRunner.deleteConfirm'), style: 'destructive', onPress: () => {
             deleteExperiment(exp.id);
             if (selectedExperimentId === exp.id) selectExperiment(null);
           }},
         ]);
         break;
     }
-  }, [startExperiment, pauseExperiment, resumeExperiment, completeExperiment, simulateMetrics, deleteExperiment, selectedExperimentId, selectExperiment]);
+  }, [t, startExperiment, pauseExperiment, resumeExperiment, completeExperiment, simulateMetrics, deleteExperiment, selectedExperimentId, selectExperiment]);
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>A/B Test Runner</Text>
-          <Text style={styles.subtitle}>Run experiments without app update</Text>
+          <Text style={styles.title}>{t('abTestRunner.title')}</Text>
+          <Text style={styles.subtitle}>{t('abTestRunner.subtitle')}</Text>
         </View>
 
         {/* Stats */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { borderLeftColor: colors.primary }]}>
             <Text style={styles.statValue}>{stats.total}</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel}>{t('abTestRunner.total')}</Text>
           </View>
           <View style={[styles.statCard, { borderLeftColor: '#00C853' }]}>
             <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.running}</Text>
-            <Text style={styles.statLabel}>Running</Text>
+            <Text style={styles.statLabel}>{t('abTestRunner.running')}</Text>
           </View>
           <View style={[styles.statCard, { borderLeftColor: '#6C63FF' }]}>
             <Text style={[styles.statValue, { color: '#6C63FF' }]}>{stats.completed}</Text>
-            <Text style={styles.statLabel}>Completed</Text>
+            <Text style={styles.statLabel}>{t('abTestRunner.completed')}</Text>
           </View>
           <View style={[styles.statCard, { borderLeftColor: '#FFC107' }]}>
             <Text style={[styles.statValue, { color: '#FFC107' }]}>{stats.draft}</Text>
-            <Text style={styles.statLabel}>Drafts</Text>
+            <Text style={styles.statLabel}>{t('abTestRunner.drafts')}</Text>
           </View>
         </View>
 
@@ -107,7 +109,7 @@ export default function ABTestRunnerScreen({ navigation }: any) {
         <AnimatedPressable onPress={() => setShowCreate(true)} haptic="medium" scaleTo={0.97}>
           <View style={styles.createBtn}>
             <Ionicons name="flask" size={20} color="#fff" />
-            <Text style={styles.createBtnText}>New Experiment</Text>
+            <Text style={styles.createBtnText}>{t('abTestRunner.newExperiment')}</Text>
           </View>
         </AnimatedPressable>
 
@@ -124,7 +126,7 @@ export default function ABTestRunnerScreen({ navigation }: any) {
               >
                 <View style={[styles.filterChip, isActive && { backgroundColor: colors.primary + '25', borderColor: colors.primary }]}>
                   <Text style={[styles.filterChipText, isActive && { color: colors.primary }]}>
-                    {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                    {status === 'all' ? t('abTestRunner.all') : t('abTestRunner.' + status)}
                   </Text>
                 </View>
               </AnimatedPressable>
@@ -136,8 +138,8 @@ export default function ABTestRunnerScreen({ navigation }: any) {
         {filteredExperiments.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="flask-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>No experiments</Text>
-            <Text style={styles.emptySubtitle}>Create your first A/B test to get started.</Text>
+            <Text style={styles.emptyTitle}>{t('abTestRunner.noExperiments')}</Text>
+            <Text style={styles.emptySubtitle}>{t('abTestRunner.noExperimentsSub')}</Text>
           </View>
         ) : (
           filteredExperiments.map((exp, idx) => (
@@ -154,6 +156,7 @@ export default function ABTestRunnerScreen({ navigation }: any) {
                 getSnapshot={getMetricSnapshot}
                 colors={colors}
                 styles={styles}
+                t={t}
               />
             </Animated.View>
           ))
@@ -176,7 +179,7 @@ export default function ABTestRunnerScreen({ navigation }: any) {
 // ─── Experiment Card Component ───────────────────────────────────────────
 
 function ExperimentCard({
-  exp, isSelected, onSelect, onAction, getSnapshot, colors, styles,
+  exp, isSelected, onSelect, onAction, getSnapshot, colors, styles, t,
 }: {
   exp: ABExperiment;
   isSelected: boolean;
@@ -185,6 +188,7 @@ function ExperimentCard({
   getSnapshot: (id: string) => any;
   colors: any;
   styles: any;
+  t: (key: string, ...args: any[]) => string;
 }) {
   const statusColor = exp.status === 'running' ? '#00C853' :
     exp.status === 'completed' ? '#6C63FF' :
@@ -196,21 +200,21 @@ function ExperimentCard({
   const availableActions = useMemo(() => {
     const acts: { key: string; icon: string; label: string; color: string }[] = [];
     if (exp.status === 'draft') {
-      acts.push({ key: 'start', icon: 'play', label: 'Start', color: '#00C853' });
-      acts.push({ key: 'delete', icon: 'trash', label: 'Delete', color: '#FF5252' });
+      acts.push({ key: 'start', icon: 'play', label: t('abTestRunner.start'), color: '#00C853' });
+      acts.push({ key: 'delete', icon: 'trash', label: t('abTestRunner.delete'), color: '#FF5252' });
     } else if (exp.status === 'running') {
-      acts.push({ key: 'pause', icon: 'pause', label: 'Pause', color: '#FFC107' });
-      acts.push({ key: 'simulate', icon: 'pulse', label: 'Simulate', color: colors.primary });
-      acts.push({ key: 'complete', icon: 'checkmark', label: 'Complete', color: '#6C63FF' });
+      acts.push({ key: 'pause', icon: 'pause', label: t('abTestRunner.pause'), color: '#FFC107' });
+      acts.push({ key: 'simulate', icon: 'pulse', label: t('abTestRunner.simulate'), color: colors.primary });
+      acts.push({ key: 'complete', icon: 'checkmark', label: t('abTestRunner.complete'), color: '#6C63FF' });
     } else if (exp.status === 'paused') {
-      acts.push({ key: 'resume', icon: 'play', label: 'Resume', color: '#00C853' });
-      acts.push({ key: 'simulate', icon: 'pulse', label: 'Simulate', color: colors.primary });
-      acts.push({ key: 'complete', icon: 'checkmark', label: 'Complete', color: '#6C63FF' });
+      acts.push({ key: 'resume', icon: 'play', label: t('abTestRunner.resume'), color: '#00C853' });
+      acts.push({ key: 'simulate', icon: 'pulse', label: t('abTestRunner.simulate'), color: colors.primary });
+      acts.push({ key: 'complete', icon: 'checkmark', label: t('abTestRunner.complete'), color: '#6C63FF' });
     } else if (exp.status === 'completed') {
-      acts.push({ key: 'archive', icon: 'archive', label: 'Archive', color: colors.textMuted });
+      acts.push({ key: 'archive', icon: 'archive', label: t('abTestRunner.archive'), color: colors.textMuted });
     }
     return acts;
-  }, [exp.status, colors]);
+  }, [exp.status, colors, t]);
 
   return (
     <View style={[styles.expCard, { borderLeftColor: statusColor, borderLeftWidth: 3 }]}>
@@ -227,8 +231,8 @@ function ExperimentCard({
 
       {/* Meta */}
       <View style={styles.expMetaRow}>
-        <Text style={styles.expMeta}>Feature: {exp.featureKey}</Text>
-        <Text style={styles.expMeta}>{exp.variants.length} variants</Text>
+        <Text style={styles.expMeta}>{t('abTestRunner.feature', { key: exp.featureKey })}</Text>
+        <Text style={styles.expMeta}>{t('abTestRunner.variants', { count: exp.variants.length })}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
           <Text style={[styles.statusText, { color: statusColor }]}>
             {exp.status.charAt(0).toUpperCase() + exp.status.slice(1)}
@@ -266,17 +270,17 @@ function ExperimentCard({
             <View style={styles.metricsRow}>
               <View style={styles.metricCard}>
                 <Text style={styles.metricValue}>{snapshot.totalExposed}</Text>
-                <Text style={styles.metricLabel}>Users</Text>
+                <Text style={styles.metricLabel}>{t('abTestRunner.users')}</Text>
               </View>
               <View style={styles.metricCard}>
                 <Text style={styles.metricValue}>{snapshot.overallConversionRate}%</Text>
-                <Text style={styles.metricLabel}>Conversion</Text>
+                <Text style={styles.metricLabel}>{t('abTestRunner.conversion')}</Text>
               </View>
               <View style={styles.metricCard}>
                 <Text style={[styles.metricValue, { color: snapshot.liftOverControl > 0 ? '#00C853' : '#FF5252' }]}>
                   {snapshot.liftOverControl > 0 ? '+' : ''}{snapshot.liftOverControl}%
                 </Text>
-                <Text style={styles.metricLabel}>Lift</Text>
+                <Text style={styles.metricLabel}>{t('abTestRunner.lift')}</Text>
               </View>
             </View>
           )}
@@ -296,11 +300,11 @@ function ExperimentCard({
                   <View style={styles.variantRowRight}>
                     <View style={styles.variantStat}>
                       <Text style={styles.variantStatValue}>{v.assignedUsers}</Text>
-                      <Text style={styles.variantStatLabel}>Users</Text>
+                      <Text style={styles.variantStatLabel}>{t('abTestRunner.users')}</Text>
                     </View>
                     <View style={styles.variantStat}>
                       <Text style={styles.variantStatValue}>{v.conversionRate}%</Text>
-                      <Text style={styles.variantStatLabel}>Conv.</Text>
+                      <Text style={styles.variantStatLabel}>{t('abTestRunner.conv')}</Text>
                     </View>
                     {!v.isControl && (
                       <View style={[styles.confidenceBadge, { backgroundColor: v.confidence >= 80 ? '#00C85320' : v.confidence >= 50 ? '#FFC10720' : colors.bgCardLight }]}>
@@ -309,7 +313,7 @@ function ExperimentCard({
                         </Text>
                       </View>
                     )}
-                    {v.isControl && <Text style={styles.controlLabel}>Control</Text>}
+                    {v.isControl && <Text style={styles.controlLabel}>{t('abTestRunner.control')}</Text>}
                   </View>
                 </View>
               ))}
@@ -321,7 +325,7 @@ function ExperimentCard({
             <View style={styles.winnerBanner}>
               <Ionicons name="trophy" size={16} color="#FFC107" />
               <Text style={styles.winnerText}>
-                Winner: {exp.variants.find(v => v.id === exp.winnerVariantId)?.name || 'Unknown'}
+                {t('abTestRunner.winner', { name: exp.variants.find(v => v.id === exp.winnerVariantId)?.name || t('abTestRunner.unknown') })}
               </Text>
             </View>
           )}
@@ -358,6 +362,7 @@ function CreateExperimentModal({
   colors: any;
   styles: any;
 }) {
+  const { t } = useT();
   const { createExperiment } = useABTestStore();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -372,7 +377,7 @@ function CreateExperimentModal({
 
   const handleCreate = () => {
     if (!canSubmit) {
-      Alert.alert('Incomplete', 'Please fill in the experiment name, feature key, and all variant names.');
+      Alert.alert(t('abTestRunner.incomplete'), t('abTestRunner.incompleteMsg'));
       return;
     }
 
@@ -406,7 +411,7 @@ function CreateExperimentModal({
 
   const addVariant = () => {
     if (variantNames.length >= 5) {
-      Alert.alert('Max Variants', 'Maximum 5 variants per experiment.');
+      Alert.alert(t('abTestRunner.maxVariants'), t('abTestRunner.maxVariantsMsg'));
       return;
     }
     setVariantNames(prev => [...prev, `Variant ${String.fromCharCode(65 + prev.length - 1)}`]);
@@ -426,26 +431,26 @@ function CreateExperimentModal({
       <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>New Experiment</Text>
+            <Text style={styles.modalTitle}>{t('abTestRunner.modalTitle')}</Text>
             <AnimatedPressable onPress={onClose} haptic="light" scaleTo={0.88}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </AnimatedPressable>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 500 }}>
-            <Text style={styles.inputLabel}>Experiment Name</Text>
+            <Text style={styles.inputLabel}>{t('abTestRunner.expName')}</Text>
             <TextInput
               style={styles.textInput}
-              placeholder="e.g., Home Screen Layout Test"
+              placeholder={t('abTestRunner.expNamePlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={name}
               onChangeText={setName}
             />
 
-            <Text style={styles.inputLabel}>Description</Text>
+            <Text style={styles.inputLabel}>{t('abTestRunner.description')}</Text>
             <TextInput
               style={[styles.textInput, styles.textArea]}
-              placeholder="What are you testing?"
+              placeholder={t('abTestRunner.descPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={description}
               onChangeText={setDescription}
@@ -453,20 +458,20 @@ function CreateExperimentModal({
               numberOfLines={3}
             />
 
-            <Text style={styles.inputLabel}>Feature Key</Text>
+            <Text style={styles.inputLabel}>{t('abTestRunner.featureKey')}</Text>
             <TextInput
               style={[styles.textInput, { fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}
-              placeholder="e.g., home_layout"
+              placeholder={t('abTestRunner.featureKeyPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={featureKey}
               onChangeText={setFeatureKey}
               autoCapitalize="none"
             />
 
-            <Text style={styles.inputLabel}>Tags (comma separated)</Text>
+            <Text style={styles.inputLabel}>{t('abTestRunner.tags')}</Text>
             <TextInput
               style={styles.textInput}
-              placeholder="e.g., ui, conversion"
+              placeholder={t('abTestRunner.tagsPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={tagsText}
               onChangeText={setTagsText}
@@ -474,12 +479,12 @@ function CreateExperimentModal({
 
             {/* Variants */}
             <View style={styles.variantSectionHeader}>
-              <Text style={styles.inputLabel}>Variants ({variantNames.length})</Text>
+              <Text style={styles.inputLabel}>{t('abTestRunner.variantsLabel', { count: variantNames.length })}</Text>
               {variantNames.length < 5 && (
                 <AnimatedPressable onPress={addVariant} haptic="light" scaleTo={0.92}>
                   <View style={styles.addVariantBtn}>
                     <Ionicons name="add" size={14} color={colors.primary} />
-                    <Text style={styles.addVariantBtnText}>Add</Text>
+                    <Text style={styles.addVariantBtnText}>{t('abTestRunner.add')}</Text>
                   </View>
                 </AnimatedPressable>
               )}
@@ -489,7 +494,7 @@ function CreateExperimentModal({
               <View key={idx} style={styles.variantFormRow}>
                 <View style={styles.variantFormHeader}>
                   <View style={[styles.variantColorDot, { backgroundColor: variantColors[idx] || '#6C63FF' }]} />
-                  <Text style={styles.variantFormLabel}>Variant {idx + 1}</Text>
+                  <Text style={styles.variantFormLabel}>{t('abTestRunner.variantNum', { num: idx + 1 })}</Text>
                   {idx > 0 && (
                     <AnimatedPressable onPress={() => removeVariant(idx)} haptic="warning" scaleTo={0.88}>
                       <Ionicons name="close-circle" size={18} color={colors.danger} />
@@ -498,14 +503,14 @@ function CreateExperimentModal({
                 </View>
                 <TextInput
                   style={styles.textInput}
-                  placeholder="Variant name"
+                  placeholder={t('abTestRunner.variantNamePlaceholder')}
                   placeholderTextColor={colors.textMuted}
                   value={vn}
                   onChangeText={(val) => setVariantNames(prev => prev.map((n, i) => i === idx ? val : n))}
                 />
                 <TextInput
                   style={styles.textInput}
-                  placeholder="Description"
+                  placeholder={t('abTestRunner.variantDescPlaceholder')}
                   placeholderTextColor={colors.textMuted}
                   value={variantDescs[idx] || ''}
                   onChangeText={(val) => setVariantDescs(prev => prev.map((d, i) => i === idx ? val : d))}
@@ -517,7 +522,7 @@ function CreateExperimentModal({
           <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.97} disabled={!canSubmit}>
             <View style={[styles.submitBtn, !canSubmit && { opacity: 0.5 }]}>
               <Ionicons name="flask" size={18} color="#fff" />
-              <Text style={styles.submitBtnText}>Create Experiment</Text>
+              <Text style={styles.submitBtnText}>{t('abTestRunner.createExperiment')}</Text>
             </View>
           </AnimatedPressable>
         </View>

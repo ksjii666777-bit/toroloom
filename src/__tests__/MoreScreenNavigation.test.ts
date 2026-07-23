@@ -57,6 +57,9 @@ const MORE_SCREEN_ROUTES = [
   'UPI',
   // Navigated from UPIScreen success view
   'TransactionHistory',
+  'CurrencyConverter',
+  'CommodityMarkets',
+  'EarningsCall',
 ] as const;
 
 type MoreScreenRoute = (typeof MORE_SCREEN_ROUTES)[number];
@@ -87,6 +90,9 @@ const REGISTERED_ROUTES: Record<MoreScreenRoute, string> = {
   Transfer: 'Transfer',
   UPI: 'UPI',
   TransactionHistory: 'TransactionHistory',
+  CurrencyConverter: 'CurrencyConverter',
+  CommodityMarkets: 'CommodityMarkets',
+  EarningsCall: 'EarningsCall',
 };
 
 // ============ Parameterised route info for richer tests ============
@@ -103,6 +109,10 @@ const MENU_ITEM_ROUTES: MenuItemRoute[] = [
   { section: 'Investments', label: 'My SIPs', route: 'SIPs' },
   { section: 'Investments', label: 'Trade History', route: 'TradeHistory' },
   { section: 'Investments', label: 'Reports', route: 'Reports' },
+  // Investments
+  { section: 'Investments', label: 'Commodities', route: 'CommodityMarkets' },
+  // Learn & Grow
+  { section: 'Learn & Grow', label: 'Earnings Calls', route: 'EarningsCall' },
   // Learn & Grow
   { section: 'Learn & Grow', label: 'Courses', route: 'Learn' },
   { section: 'Learn & Grow', label: 'Community', route: 'Community' },

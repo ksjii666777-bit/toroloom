@@ -356,7 +356,7 @@ export const useABTestStore = create<ABTestStoreState>((set, get) => ({
         e.id === experimentId
           ? {
               ...e,
-              variants: e.variants.filter(v => v.id !== variantId && !v.isControl),
+              variants: e.variants.filter(v => v.id !== variantId || v.isControl),
             }
           : e
       ),

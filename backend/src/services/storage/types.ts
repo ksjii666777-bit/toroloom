@@ -89,6 +89,13 @@ export interface NotificationData {
 
 // ==================== Subscription Domain ====================
 
+/**
+ * Extended subscription data stored per-user.
+ *
+ * In addition to basic tier/status, includes UPI Autopay mandate
+ * tracking and payment failure resilience fields used by the
+ * payment retry queue and webhook handler.
+ */
 export interface UserSubscriptionData {
   userId: string;
   tier: 'free' | 'pro' | 'elite';
@@ -100,8 +107,39 @@ export interface UserSubscriptionData {
   paymentMethod?: string;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
+  razorpaySubscriptionId?: string;
   lastPaymentDate?: string;
   tenantId?: string;
+
+  // ── UPI Autopay / Mandate ──────────────────────────────────────
+  /** Razorpay mandate ID for UPI Autopay recurring payments */
+  mandateId?: string;
+  /** Status of the UPI mandate: active | paused | cancelled | expired */
+  mandateStatus?: 'active' | 'paused' | 'cancelled' | 'expired';
+  /** The UPI ID used for the mandate (e.g. user@bank) */
+  upiId?: string;
+  /** Whether UPI Autopay is enabled on this subscription */
+  isAutoPayEnabled?: boolean;
+  /** Next scheduled charge date for the mandate */
+  nextChargeDate?: string;
+
+  // ── Payment Failure Recovery ───────────────────────────────────
+  /** Number of consecutive payment failures */
+  paymentFailureCount?: number;
+  /** ISO date when grace period ends (subscription still active during this window) */
+  gracePeriodEndDate?: string;
+  /** ISO date of the last payment failure */
+  lastPaymentFailureDate?: string;
+  /** ISO date of the last retry attempt */
+  lastPaymentRetryDate?: string;
+  /** Number of failed retry attempts (used by BullMQ payment retry worker) */
+  failedPaymentRetryCount?: number;
+
+  // ── Trial ──────────────────────────────────────────────────────
+  isTrialUsed?: boolean;
+  trialStartDate?: string;
+  trialEndDate?: string;
+
   updatedAt: string;
 }
 
@@ -146,6 +184,60 @@ export interface CommunityPostData {
   comments: number;
   timestamp: string;
   tags: string[];
+}
+
+// ==================== Webhook Domain ====================
+
+export interface WebhookStorageData {
+  id: string;
+  userId: string;
+  name: string;
+  url: string;
+  secret: string;
+  events: string[];
+  isActive: boolean;
+  lastTriggeredAt: string | null;
+  deliveryCount: number;
+  successCount: number;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WebhookDeliveryLogData {
+  id: string;
+  webhookId: string;
+  event: string;
+  statusCode: number;
+  success: boolean;
+  duration: number;
+  responseBody: string;
+  errorMessage: string | null;
+  timestamp: string;
+}
+
+// ==================== API Key Domain ====================
+
+export interface ApiKeyStorageData {
+  id: string;
+  userId: string;
+  name: string;
+  keyPrefix: string;
+  keyHash: string;
+  scopes: string[];
+  expiresAt: string | null;
+  isActive: boolean;
+  lastUsedAt: string | null;
+  ipRestrict: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ==================== Idempotency Event Domain ====================
+
+export interface ProcessedEventData {
+  eventId: string;
+  processedAt: string;
 }
 
 // ==================== Storage Engine Interface ====================
@@ -250,6 +342,40 @@ export interface StorageEngine {
   /** Save (insert or overwrite) a user's subscription. */
   saveSubscription(userId: string, sub: UserSubscriptionData): Promise<void>;
 
+  /** Load ALL subscriptions (for admin analytics). */
+  loadAllSubscriptions(): Promise<UserSubscriptionData[]>;
+
+  // ──── Webhook Storage ────
+
+  /** Save a webhook configuration. */
+  saveWebhook(webhook: WebhookStorageData): Promise<void>;
+
+  /** Load a webhook by ID. Returns null if not found. */
+  loadWebhook(id: string): Promise<WebhookStorageData | null>;
+
+  /** Load all webhooks for a user. */
+  loadUserWebhooks(userId: string): Promise<WebhookStorageData[]>;
+
+  /** Load all active webhooks subscribed to a specific event. */
+  loadActiveWebhooksByEvent(event: string): Promise<WebhookStorageData[]>;
+
+  /** Delete a webhook by ID. */
+  deleteWebhook(id: string): Promise<void>;
+
+  /** Save a webhook delivery log entry. */
+  saveWebhookDeliveryLog(log: WebhookDeliveryLogData): Promise<void>;
+
+  /** Load delivery logs for a webhook, most recent first. */
+  loadWebhookDeliveryLogs(webhookId: string, limit?: number): Promise<WebhookDeliveryLogData[]>;
+
+  // ──── Idempotency ────
+
+  /** Mark an event as processed (for idempotency). */
+  markEventProcessed?(eventId: string): Promise<void>;
+
+  /** Check if an event has already been processed. */
+  isEventProcessed?(eventId: string): Promise<boolean>;
+
   // ──── SnapTrade Connections ────
 
   /** Load the SnapTrade connection for a user. Returns null if not set. */
@@ -274,6 +400,26 @@ export interface StorageEngine {
 
   /** Load ALL Telegram links (for cache hydration after restart). */
   loadAllTelegramLinks(): Promise<TelegramLinkData[]>;
+
+  // ──── API Keys ────
+
+  /** Save (insert or overwrite) an API key. */
+  saveApiKey(key: ApiKeyStorageData): Promise<void>;
+
+  /** Load an API key by its SHA-256 hash. Returns null if not found. */
+  loadApiKeyByHash(hash: string): Promise<ApiKeyStorageData | null>;
+
+  /** Load all API keys for a user. */
+  loadUserApiKeys(userId: string): Promise<ApiKeyStorageData[]>;
+
+  /** Load a single API key by ID. Returns null if not found. */
+  loadApiKey(id: string): Promise<ApiKeyStorageData | null>;
+
+  /** Delete an API key by ID. */
+  deleteApiKey(id: string): Promise<void>;
+
+  /** Touch (update lastUsedAt) an API key by ID. */
+  touchApiKey(id: string): Promise<void>;
 
   // ──── Coupons ────
 

@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -21,20 +21,26 @@ export default function LessonViewScreen({ route, navigation }: any) {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     currentLesson, fetchLesson, markLessonComplete, lessonProgress,
-    videoProgress, videoBookmarks,
+    videoProgress, videoBookmarks, downloadingVideos, downloadProgress,
     updateVideoProgress, addVideoBookmark, deleteVideoBookmark,
+    downloadVideo, removeOfflineVideo, isVideoDownloaded,
   } = useEducationStore();
   const { addXp } = useGamificationStore();
 
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [videoCompleted, setVideoCompleted] = useState(false);
+  const [autoAdvancing, setAutoAdvancing] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const lesson = currentLesson?.id === lessonId ? currentLesson : mockLessons.find(l => l.id === lessonId);
   const isCompleted = lessonProgress[lessonId] || lesson?.completed || false;
   const hasVideo = !!lesson?.videoUrl;
   const lessonVideoProgress = videoProgress[lessonId];
   const lessonBookmarks = videoBookmarks[lessonId] || [];
+  const lessonIsDownloading = downloadingVideos[lessonId] || false;
+  const lessonDownloadProgress = downloadProgress[lessonId] || 0;
+  const lessonIsDownloaded = isVideoDownloaded(lessonId);
 
   useEffect(() => {
     if (lessonId) fetchLesson(lessonId);
@@ -49,7 +55,27 @@ export default function LessonViewScreen({ route, navigation }: any) {
   const handleMarkComplete = useCallback(async () => {
     await markLessonComplete(lessonId);
     addXp(50);
-  }, [lessonId, markLessonComplete, addXp]);
+    // Auto-advance to next lesson after marking complete
+    if (nextLesson) {
+      setAutoAdvancing(true);
+      try {
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      } catch {
+        // Animation may not be supported in test/headless environments
+      }
+      setTimeout(() => {
+        setShowQuiz(false);
+        setQuizResult(null);
+        setAutoAdvancing(false);
+        fadeAnim.setValue(0);
+        navigation.replace('LessonView', { lessonId: nextLesson.id, courseId });
+      }, 2000);
+    }
+  }, [lessonId, markLessonComplete, addXp, nextLesson, courseId, navigation, fadeAnim]);
 
   const handleQuizComplete = useCallback((result: QuizResult) => {
     setQuizResult(result);
@@ -80,6 +106,14 @@ export default function LessonViewScreen({ route, navigation }: any) {
     deleteVideoBookmark(lessonId, bookmarkId);
   }, [lessonId, deleteVideoBookmark]);
 
+  const handleDownload = useCallback(() => {
+    if (lesson?.videoUrl) downloadVideo(lessonId, lesson.videoUrl);
+  }, [lessonId, lesson?.videoUrl, downloadVideo]);
+
+  const handleRemoveDownload = useCallback(() => {
+    removeOfflineVideo(lessonId);
+  }, [lessonId, removeOfflineVideo]);
+
   if (!lesson) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -90,6 +124,16 @@ export default function LessonViewScreen({ route, navigation }: any) {
 
   return (
     <View style={styles.container}>
+      {/* Auto-advance overlay */}
+      {autoAdvancing && (
+        <Animated.View style={[styles.autoAdvanceOverlay, { opacity: fadeAnim }]}>
+          <View style={styles.autoAdvanceCard}>
+            <Ionicons name="checkmark-circle" size={48} color="#00C853" />
+            <Text style={styles.autoAdvanceTitle}>🎉 Lesson Complete!</Text>
+            <Text style={styles.autoAdvanceSub}>Moving to next lesson...</Text>
+          </View>
+        </Animated.View>
+      )}
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
@@ -136,6 +180,11 @@ export default function LessonViewScreen({ route, navigation }: any) {
             onDeleteBookmark={handleDeleteBookmark}
             onProgressUpdate={handleVideoProgress}
             onVideoComplete={handleVideoComplete}
+            isDownloaded={lessonIsDownloaded}
+            isDownloading={lessonIsDownloading}
+            downloadProgress={lessonDownloadProgress}
+            onDownload={handleDownload}
+            onRemoveDownload={handleRemoveDownload}
           />
         )}
 
@@ -247,6 +296,14 @@ export default function LessonViewScreen({ route, navigation }: any) {
               <Text style={styles.continueText}>View Detailed Results</Text>
             </LinearGradient>
           </Pressable>
+        )}
+
+        {/* Auto-advance in progress indicator */}
+        {autoAdvancing && (
+          <View style={styles.autoAdvanceInline}>
+            <Ionicons name="hourglass-outline" size={16} color="#00C853" />
+            <Text style={styles.autoAdvanceInlineText}>Auto-advancing to next lesson...</Text>
+          </View>
         )}
 
         {/* Navigation */}
@@ -476,6 +533,48 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.bold,
     fontSize: FONTS.size.lg,
     color: colors.white,
+  },
+  // ── Auto-advance ──
+  autoAdvanceOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  autoAdvanceCard: {
+    backgroundColor: colors.bgCard,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.xxl,
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  autoAdvanceTitle: {
+    ...FONTS.bold,
+    fontSize: FONTS.size.xxl,
+    color: colors.text,
+  },
+  autoAdvanceSub: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.md,
+    color: colors.textSecondary,
+  },
+  autoAdvanceInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  autoAdvanceInlineText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: '#00C853',
   },
   lessonNav: {
     flexDirection: 'row',

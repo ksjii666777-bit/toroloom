@@ -24,6 +24,7 @@ import { formatCurrency, hexToRgba } from '../../utils/formatters';
 import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
+import { api, ApiError } from '../../services/api/client';
 
 const { width } = Dimensions.get('window');
 
@@ -93,6 +94,10 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
     tradeType === 'sell' ? qtyNum <= ownedQuantity : isBalanceSufficient
   ) && !isProcessing;
 
+  // Validate trigger price for SL/SL-M orders
+  const triggerPriceNum = parseFloat(triggerPrice) || 0;
+  const isTriggerValid = orderType !== 'SL' && orderType !== 'SL-M' || triggerPriceNum > 0;
+
   // Quick-select preset quantities
   const handleQuickQty = useCallback((qty: number | 'Max') => {
     if (qty === 'Max') {
@@ -117,22 +122,49 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
     });
   }, [tradeType, ownedQuantity]);
 
-  // Place order handler with biometric check
+  // ── Pre-validate order with backend risk engine ────────────
+  const preValidateOrder = useCallback(async (): Promise<string | null> => {
+    try {
+      const result = await api.post<{ allowed: boolean; message?: string; riskEvaluation?: any }>(
+        '/orders/validate',
+        {
+          actionType: tradeType === 'buy' ? 'BUY' : 'SELL',
+          symbol: stock.symbol,
+          quantity: qtyNum,
+          price: displayPrice,
+        },
+      );
+      if (result && !result.allowed) {
+        return result.message || 'Order blocked by risk engine. Check your limits.';
+      }
+      return null; // All good
+    } catch {
+      // Backend unavailable — skip pre-validation (non-critical)
+      return null;
+    }
+  }, [tradeType, stock, qtyNum, displayPrice]);
+
+  // Place order handler with biometric check + pre-validation
   const handlePlaceOrder = useCallback(async () => {
     if (!canPlaceOrder) return;
+
+    // Validate trigger price for SL/SL-M orders
+    if ((orderType === 'SL' || orderType === 'SL-M') && triggerPriceNum <= 0) {
+      Alert.alert('Trigger Price Required', 'Please enter a trigger price for Stop Loss orders.');
+      return;
+    }
 
     // Check if biometric trade confirmation is enabled
     const { enabled: bioEnabled, requireForTrades } = useBiometricStore.getState();
     if (bioEnabled && requireForTrades) {
-      setIsProcessing(true);
       const bioLabel = await biometricAuth.getBiometricLabel();
       const result = await biometricAuth.authenticate(
         `Confirm ${tradeType === 'buy' ? 'Buy' : 'Sell'} order with ${bioLabel}`,
         true,
       );
-      setIsProcessing(false);
 
       if (!result.success) {
+        setIsProcessing(false);
         if (result.error !== 'Authentication cancelled') {
           Alert.alert('Order Cancelled', result.error || 'Biometric verification failed.');
         }
@@ -143,23 +175,61 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
     setIsProcessing(true);
 
     try {
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Pre-validate with backend risk engine
+      const validationError = await preValidateOrder();
+      if (validationError) {
+        setIsProcessing(false);
+        Alert.alert('Order Blocked', validationError);
+        return;
+      }
+
+      // Build order options with full parameters
+      const orderOptions = {
+        orderType,
+        productType,
+        ...(triggerPriceNum > 0 && { triggerPrice: triggerPriceNum }),
+      };
 
       if (tradeType === 'buy') {
-        await buyStock(stock, qtyNum, displayPrice);
+        await buyStock(stock, qtyNum, displayPrice, orderOptions);
       } else {
-        if (!existingHolding) return;
-        await sellStock(existingHolding.id, qtyNum, displayPrice);
+        if (!existingHolding) {
+          setIsProcessing(false);
+          Alert.alert('Error', 'No holding found to sell.');
+          return;
+        }
+        await sellStock(existingHolding.id, qtyNum, displayPrice, orderOptions);
       }
 
       setIsProcessing(false);
       setShowConfirmation(true);
-    } catch (_err) {
+    } catch (err: any) {
       setIsProcessing(false);
-      Alert.alert('Order Failed', 'There was an error placing your order. Please try again.');
+
+      // Broker-specific error messages
+      let errorMsg = 'There was an error placing your order. Please try again.';
+      const msg = (err?.message || err?.error || '').toLowerCase();
+
+      if (msg.includes('margin') || msg.includes('insufficient balance')) {
+        errorMsg = 'Insufficient margin. Please reduce quantity or add funds.';
+      } else if (msg.includes('position') || msg.includes('holdings')) {
+        errorMsg = 'Insufficient holdings to sell. Check your portfolio.';
+      } else if (msg.includes('limit') || msg.includes('max')) {
+        errorMsg = 'Position limit exceeded. You have reached the maximum allowed quantity.';
+      } else if (msg.includes('reject')) {
+        errorMsg = 'Order rejected by broker. Check your trading settings.';
+      } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout')) {
+        errorMsg = 'Network error. Your order may not have been placed. Please check your open orders.';
+      } else if (msg.includes('authenticate') || msg.includes('session') || msg.includes('token')) {
+        errorMsg = 'Broker session expired. Please reconnect your broker.';
+      } else if (err instanceof ApiError && err.status) {
+        errorMsg = `Broker error (${err.status}): ${err.message}`;
+      }
+
+      Alert.alert('Order Failed', errorMsg);
     }
-  }, [canPlaceOrder, tradeType, stock, qtyNum, displayPrice, existingHolding, buyStock, sellStock]);
+  }, [canPlaceOrder, tradeType, stock, qtyNum, displayPrice, existingHolding,
+      buyStock, sellStock, orderType, productType, triggerPriceNum, preValidateOrder]);
 
   const handleConfirmationClose = useCallback(() => {
     setShowConfirmation(false);
@@ -453,6 +523,11 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
               placeholder="Enter trigger price"
               placeholderTextColor={colors.textMuted}
             />
+            {!isTriggerValid && qtyNum > 0 && (
+              <Text style={{ color: colors.marketDown, fontSize: FONTS.size.xs, marginTop: 4 }}>
+                Trigger price is required for Stop Loss orders
+              </Text>
+            )}
           </View>
         )}
 

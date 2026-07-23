@@ -408,7 +408,7 @@ export interface OpenOrder {
 // ============ Notifications ============
 export interface AppNotification {
   id: string;
-  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert' | 'sentiment_alert' | 'course_review';
+  type: 'price_alert' | 'trade' | 'news' | 'system' | 'educational' | 'portfolio_alert' | 'sentiment_alert' | 'course_review' | 'smart_alert';
   title: string;
   message: string;
   read: boolean;
@@ -2029,6 +2029,93 @@ export interface CreatorStats {
   totalEarnings: number; // ₹ from purchased courses
 }
 
+// ============ Company Fundamentals ============
+
+/** A single quarter's financial performance data */
+export interface FinancialQuarter {
+  /** Quarter label e.g. "Q4 FY26" */
+  quarter: string;
+  /** ISO date of the quarter end */
+  date: string;
+  /** Total revenue in Cr */
+  revenue: number;
+  /** Net profit in Cr */
+  netProfit: number;
+  /** Earnings per share in INR */
+  eps: number;
+  /** Net profit margin % */
+  margin: number;
+}
+
+/** Full company fundamental data including ratios and quarterly results */
+export interface CompanyFundamentals {
+  symbol: string;
+  name: string;
+  sector: string;
+  industry: string;
+  
+  // Valuation Ratios
+  peRatio: number;              // Price-to-Earnings
+  pbRatio: number;              // Price-to-Book
+  psRatio: number;              // Price-to-Sales
+  evEbitda: number;             // Enterprise Value / EBITDA
+  
+  // Profitability Ratios
+  roe: number;                  // Return on Equity (%)
+  roa: number;                  // Return on Assets (%)
+  roce: number;                 // Return on Capital Employed (%)
+  operatingMargin: number;      // Operating margin (%)
+  netMargin: number;            // Net profit margin (%)
+  
+  // Efficiency Ratios
+  assetTurnover: number;        // Asset turnover ratio
+  inventoryTurnover: number;    // Inventory turnover
+  receivablesDays: number;      // Days sales outstanding
+  
+  // Liquidity Ratios
+  currentRatio: number;         // Current ratio
+  quickRatio: number;           // Quick ratio
+  debtToEquity: number;         // Debt-to-Equity
+  interestCoverage: number;     // Interest coverage ratio
+  
+  // Growth Metrics (YoY %)
+  revenueGrowth: number;
+  profitGrowth: number;
+  epsGrowth: number;
+  
+  // Cash Flow
+  operatingCashFlow: number;    // Operating CF in Cr
+  freeCashFlow: number;         // Free CF in Cr
+  
+  // Dividend
+  dividendYield: number;        // Dividend yield (%)
+  dividendPayout: number;       // Dividend payout ratio (%)
+  
+  // Shareholding
+  promotersHolding: number;     // Promoter holding (%)
+  fiiHolding: number;           // FII holding (%)
+  mutualFundHolding: number;    // MF holding (%)
+  publicHolding: number;        // Public holding (%)
+  
+  // Quarterly Results (last 4 quarters)
+  quarterlyResults: FinancialQuarter[];
+  
+  // Annual Results (last 3 years)
+  annualResults: FinancialQuarter[];
+  
+  // Peer Comparison (sector averages)
+  sectorAvgPe: number;
+  sectorAvgPb: number;
+  sectorAvgRoce: number;
+  sectorAvgDebtEquity: number;
+  
+  // Company Info
+  website: string;
+  about: string;
+  strengths: string[];
+  risks: string[];
+}
+
 // ============ Navigation Types ============
 // ============ 2FA / TOTP Types ============
 
@@ -2631,6 +2718,109 @@ export interface QuizResult {
   timeTaken: number;
   answers: Record<string, number>;
   correctAnswerMap: Record<string, number>;
+}
+
+// ============ NFO (New Fund Offer) ============
+
+/** NFO subscription status */
+export type NFOSubscriptionStatus = 'upcoming' | 'open' | 'closed' | 'matured';
+
+/** Risk level for mutual fund schemes */
+export type NFORiskLevel = 'low' | 'moderate' | 'moderately_high' | 'high';
+
+/** A New Fund Offer (NFO) — when an AMC launches a new mutual fund scheme */
+export interface NFOItem {
+  id: string;
+  /** AMC name (e.g. "HDFC Mutual Fund", "Nippon India") */
+  amcName: string;
+  /** Logo short form */
+  logo: string;
+  /** Fund scheme name */
+  schemeName: string;
+  /** Fund category (e.g. "Flexi Cap", "Mid Cap", "Sectoral") */
+  category: string;
+  /** Sub-category */
+  subCategory: string;
+  /** NFO open date */
+  openDate: string;
+  /** NFO close date */
+  closeDate: string;
+  /** Date when the scheme will be listed/open for redemption */
+  maturityDate: string;
+  /** Minimum investment amount in \u20B9 */
+  minInvestment: number;
+  /** Maximum investment amount (0 = unlimited) */
+  maxInvestment: number;
+  /** Entry load percentage (usually 0 for open-ended) */
+  entryLoad: number;
+  /** Exit load percentage and period description */
+  exitLoad: string;
+  /** Expense ratio (estimated) */
+  expenseRatio: number;
+  /** Total fund size target in Cr */
+  targetSize: number;
+  /** Current collections so far in Cr */
+  collectedAmount: number;
+  /** Number of investors so far */
+  totalInvestors: number;
+  /** Subscription status */
+  subscriptionStatus: NFOSubscriptionStatus;
+  /** Risk level */
+  riskLevel: NFORiskLevel;
+  /** Benchmark index name */
+  benchmark: string;
+  /** Fund manager name(s) */
+  fundManagers: string[];
+  /** Asset allocation breakdown */
+  assetAllocation: { label: string; percent: number; color: string }[];
+  /** Top 5 sectors to invest in */
+  topSectors: string[];
+  /** Investment objective */
+  objective: string;
+  /** Investment strategy */
+  strategy: string;
+  /** AMC details */
+  amcRating: number;
+  amcAum: string;
+  amcFundsCount: number;
+  /** About the scheme */
+  about: string;
+  /** Key strengths */
+  strengths: string[];
+  /** Key risks */
+  risks: string[];
+  /** Is bookmarked */
+  isBookmarked: boolean;
+  /** Application counts */
+  applications: number;
+}
+
+/** User's NFO application/investment */
+export interface NFOApplication {
+  id: string;
+  nfoId: string;
+  amcName: string;
+  logo: string;
+  schemeName: string;
+  category: string;
+  /** Amount invested */
+  amount: number;
+  /** NAV at allotment */
+  navAtAllotment: number;
+  /** Units allotted */
+  unitsAllotted: number;
+  /** Current estimated NAV */
+  currentNav: number;
+  /** Current estimated value */
+  currentValue: number;
+  /** Status of the application */
+  status: 'submitted' | 'allotted' | 'in_progress' | 'matured';
+  /** Application date */
+  appliedAt: string;
+  /** Allotment date */
+  allotmentDate?: string;
+  /** Total return percentage */
+  returnPercent?: number;
 }
 
 export type RootStackParamList = {

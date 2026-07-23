@@ -41,28 +41,29 @@ import {
   DEFAULT_EXPERIMENTS,
 } from '../../types/featureFlags';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 // ──── Category Config ──────────────────────────────────────────────────────
 
-const CATEGORY_CONFIG: Record<string, { icon: keyof typeof Ionicons.glyphMap; label: string }> = {
-  ui: { icon: 'grid', label: 'UI & Layout' },
-  trading: { icon: 'trending-up', label: 'Trading' },
-  ai: { icon: 'bulb', label: 'AI & Insights' },
-  social: { icon: 'people', label: 'Social' },
-  onboarding: { icon: 'rocket', label: 'Onboarding' },
-  experimental: { icon: 'flask', label: 'Experimental' },
+const CATEGORY_CONFIG: Record<string, { icon: keyof typeof Ionicons.glyphMap; labelKey: string }> = {
+  ui: { icon: 'grid', labelKey: 'featureFlags.catUi' },
+  trading: { icon: 'trending-up', labelKey: 'featureFlags.catTrading' },
+  ai: { icon: 'bulb', labelKey: 'featureFlags.catAi' },
+  social: { icon: 'people', labelKey: 'featureFlags.catSocial' },
+  onboarding: { icon: 'rocket', labelKey: 'featureFlags.catOnboarding' },
+  experimental: { icon: 'flask', labelKey: 'featureFlags.catExperimental' },
 };
 
 const CATEGORY_ORDER = ['ui', 'trading', 'ai', 'social', 'onboarding', 'experimental'];
 
-// ──── Experiment Labels ────────────────────────────────────────────────────
+// ──── Experiment Label Keys ────────────────────────────────────────────────
 
-const EXPERIMENT_LABELS: Record<ExperimentVariant, string> = {
-  control: 'Control',
-  variant_a: 'Variant A',
-  variant_b: 'Variant B',
-  variant_c: 'Variant C',
+const EXPERIMENT_LABEL_KEYS: Record<ExperimentVariant, string> = {
+  control: 'featureFlags.variantControl',
+  variant_a: 'featureFlags.variantA',
+  variant_b: 'featureFlags.variantB',
+  variant_c: 'featureFlags.variantC',
 };
 
 const EXPERIMENT_COLORS: Record<ExperimentVariant, string> = {
@@ -77,6 +78,7 @@ const EXPERIMENT_COLORS: Record<ExperimentVariant, string> = {
 export default function FeatureFlagsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   const overrideFlag = useFeatureFlagStore((s) => s.overrideFlag);
@@ -143,28 +145,28 @@ export default function FeatureFlagsScreen({ navigation }: any) {
 
   const handleResetOverrides = useCallback(() => {
     Alert.alert(
-      'Reset All Overrides',
-      'This will clear all flag and experiment overrides and revert to default behaviour.',
+      t('featureFlags.resetTitle'),
+      t('featureFlags.resetMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('featureFlags.cancel'), style: 'cancel' },
         {
-          text: 'Reset',
+          text: t('featureFlags.resetConfirm'),
           style: 'destructive',
           onPress: () => resetOverrides(),
         },
       ],
     );
-  }, [resetOverrides]);
+  }, [resetOverrides, t]);
 
   const handleActivateExperiment = useCallback(
     (experimentId: ExperimentId) => {
       Alert.alert(
-        'Override Experiment',
-        `Override "${DEFAULT_EXPERIMENTS[experimentId]?.name || experimentId}" variant?\nTap again to cycle: Control → Variant A → Variant B → Variant C`,
-        [{ text: 'OK' }],
+        t('featureFlags.experimentOverrideTitle'),
+        t('featureFlags.experimentOverrideMsg', { name: DEFAULT_EXPERIMENTS[experimentId]?.name || experimentId }),
+        [{ text: t('featureFlags.experimentOk') }],
       );
     },
-    [],
+    [t],
   );
 
   const onRefresh = useCallback(async () => {
@@ -182,7 +184,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
           <Ionicons name="flask" size={32} color={colors.primary} />
         </View>
         <Text style={[styles.loadingText, { color: colors.textMuted }]}>
-          Initializing feature flags...
+          {t('featureFlags.loading')}
         </Text>
       </View>
     );
@@ -196,9 +198,9 @@ export default function FeatureFlagsScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Feature Flags</Text>
+          <Text style={styles.headerTitle}>{t('featureFlags.title')}</Text>
           <Text style={styles.headerSubtitle}>
-            {flagsData.activeCount} active · {flagsData.overriddenCount} overridden
+            {t('featureFlags.subtitle', { active: flagsData.activeCount, overridden: flagsData.overriddenCount })}
           </Text>
         </View>
         <Pressable
@@ -210,7 +212,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
           disabled={flagsData.overriddenCount === 0}
         >
           <Ionicons name="refresh-outline" size={14} color="#EF4444" />
-          <Text style={styles.resetBtnText}>Reset</Text>
+          <Text style={styles.resetBtnText}>{t('featureFlags.reset')}</Text>
         </Pressable>
       </View>
 
@@ -231,7 +233,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
         <View style={styles.infoBanner}>
           <Ionicons name="information-circle" size={16} color="#3B82F6" />
           <Text style={styles.infoBannerText}>
-            Feature flags let you gradually roll out features. Overrides apply only on this device.
+            {t('featureFlags.infoText')}
           </Text>
         </View>
 
@@ -252,7 +254,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
                     color={getCategoryColor(cat, 1)}
                   />
                 </View>
-                <Text style={styles.categoryLabel}>{catConfig?.label || cat}</Text>
+                <Text style={styles.categoryLabel}>{t(catConfig?.labelKey || 'featureFlags.catExperimental')}</Text>
                 <View style={styles.categoryCount}>
                   <Text style={styles.categoryCountText}>
                     {flags.filter((f) => f.enabled).length}/{flags.length}
@@ -276,7 +278,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
                         {flag.overridden && (
                           <View style={styles.overriddenBadge}>
                             <Ionicons name="pencil" size={8} color="#FFAB40" />
-                            <Text style={styles.overriddenText}>Override</Text>
+                            <Text style={styles.overriddenText}>{t('featureFlags.overrideLabel')}</Text>
                           </View>
                         )}
                       </View>
@@ -286,19 +288,19 @@ export default function FeatureFlagsScreen({ navigation }: any) {
                           <View style={styles.rolloutBadge}>
                             <Ionicons name="people" size={9} color="#3B82F6" />
                             <Text style={styles.rolloutText}>
-                              {flag.meta.rolloutPercent}% rollout
+                              {t('featureFlags.rolloutLabel', { percent: flag.meta.rolloutPercent })}
                             </Text>
                           </View>
                         )}
                         {flag.meta.requiresBackend && (
                           <View style={styles.backendBadge}>
                             <Ionicons name="server" size={9} color="#8B5CF6" />
-                            <Text style={styles.backendBadgeText}>Backend</Text>
+                            <Text style={styles.backendBadgeText}>{t('featureFlags.backendLabel')}</Text>
                           </View>
                         )}
                         {!flag.overridden && (
                           <Text style={styles.defaultLabel}>
-                            Default: {flag.meta.defaultValue ? 'ON' : 'OFF'}
+                            {flag.meta.defaultValue ? t('featureFlags.defaultOn') : t('featureFlags.defaultOff')}
                           </Text>
                         )}
                       </View>
@@ -337,10 +339,10 @@ export default function FeatureFlagsScreen({ navigation }: any) {
               <View style={[styles.categoryIconContainer, { backgroundColor: 'rgba(139, 92, 246, 0.1)' }]}>
                 <Ionicons name="flask" size={14} color="#8B5CF6" />
               </View>
-              <Text style={styles.categoryLabel}>A/B Experiments</Text>
+              <Text style={styles.categoryLabel}>{t('featureFlags.experimentsTitle')}</Text>
               <View style={styles.categoryCount}>
                 <Text style={styles.categoryCountText}>
-                  {experimentsData.filter((e) => e.isEnrolled).length}/{experimentsData.length} active
+                  {t('featureFlags.experimentsActive', { active: experimentsData.filter((e) => e.isEnrolled).length, total: experimentsData.length })}
                 </Text>
               </View>
             </View>
@@ -378,7 +380,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
                             { color: EXPERIMENT_COLORS[exp.assignedVariant] },
                           ]}
                         >
-                          {EXPERIMENT_LABELS[exp.assignedVariant]}
+                          {t(EXPERIMENT_LABEL_KEYS[exp.assignedVariant])}
                         </Text>
                       </View>
                       {exp.config.targetSegment && (
@@ -405,7 +407,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
                         },
                       ]}
                     >
-                      {exp.config.isActive ? 'Live' : 'Paused'}
+                      {exp.config.isActive ? t('featureFlags.experimentLive') : t('featureFlags.experimentPaused')}
                     </Text>
                     <Ionicons
                       name="chevron-forward"
@@ -419,7 +421,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
 
             {/* Experiment Footnote */}
             <Text style={styles.footnote}>
-              Tap an experiment to cycle its variant. Enrolment is deterministic per user ID.
+              {t('featureFlags.experimentFootnote')}
             </Text>
           </View>
         )}
@@ -427,24 +429,24 @@ export default function FeatureFlagsScreen({ navigation }: any) {
         {/* ── Flag Count Summary ── */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total Flags</Text>
+            <Text style={styles.summaryLabel}>{t('featureFlags.summaryTotal')}</Text>
             <Text style={styles.summaryValue}>{flagsData.totalCount}</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Enabled</Text>
+            <Text style={styles.summaryLabel}>{t('featureFlags.summaryEnabled')}</Text>
             <Text style={[styles.summaryValue, { color: '#22C55E' }]}>{flagsData.activeCount}</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Disabled</Text>
+            <Text style={styles.summaryLabel}>{t('featureFlags.summaryDisabled')}</Text>
             <Text style={[styles.summaryValue, { color: 'rgba(255,255,255,0.5)' }]}>
               {flagsData.totalCount - flagsData.activeCount}
             </Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Overridden</Text>
+            <Text style={styles.summaryLabel}>{t('featureFlags.summaryOverridden')}</Text>
             <Text style={[styles.summaryValue, { color: '#FFAB40' }]}>
               {flagsData.overriddenCount}
             </Text>
@@ -455,11 +457,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
         <View style={styles.noteCard}>
           <Ionicons name="code-slash" size={16} color="#3B82F6" />
           <Text style={styles.noteText}>
-            To add a new flag, update{' '}
-            <Text style={{ fontFamily: 'monospace' }}>src/types/featureFlags.ts</Text> and add the
-            key to the{' '}
-            <Text style={{ fontFamily: 'monospace' }}>FeatureFlagKey</Text> type and{' '}
-            <Text style={{ fontFamily: 'monospace' }}>DEFAULT_FEATURE_FLAGS</Text> object.
+            {t('featureFlags.noteText')}
           </Text>
         </View>
 

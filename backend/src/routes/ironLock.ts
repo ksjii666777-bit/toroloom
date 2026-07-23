@@ -56,7 +56,7 @@ const MARKET_CLOSE_MS = 10 * 60 * 60 * 1000;                  // 10:00 UTC = 3:3
  * Checks whether the current time falls within Indian equity market hours
  * (Monday–Friday, 9:15 AM – 3:30 PM IST).
  */
-function isMarketHours(): boolean {
+export function isMarketHours(): boolean {
   const now = new Date();
   const day = now.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
   if (day === 0 || day === 6) return false; // Weekend

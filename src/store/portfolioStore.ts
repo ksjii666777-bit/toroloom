@@ -18,8 +18,8 @@ interface PortfolioState {
   ordersLoading: boolean;
   isLoading: boolean;
 
-  buyStock: (stock: Stock, quantity: number, price: number) => Promise<void>;
-  sellStock: (holdingId: string, quantity: number, price: number) => Promise<void>;
+  buyStock: (stock: Stock, quantity: number, price: number, options?: { orderType?: string; productType?: string; triggerPrice?: number }) => Promise<void>;
+  sellStock: (holdingId: string, quantity: number, price: number, options?: { orderType?: string; productType?: string; triggerPrice?: number }) => Promise<void>;
   refreshPortfolio: () => Promise<void>;
   fetchOpenOrders: () => Promise<void>;
   modifyOrder: (orderId: string, updates: Partial<OpenOrder>) => Promise<boolean>;
@@ -160,23 +160,27 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     }
   },
 
-  buyStock: async (stock, quantity, price) => {
+  buyStock: async (stock, quantity, price, options) => {
     const state = get();
     const totalCost = quantity * price;
 
     // Execute through Risk-Guarded Pipeline (POST /api/orders/execute)
     try {
       const user = useAuthStore.getState().user;
-      const result = await api.post<{ success: boolean; message?: string }>('/orders/execute', {
+      const payload: Record<string, any> = {
         userId: user?.id || 'user_1',
         actionType: 'BUY',
         symbol: stock.symbol,
         exchange: 'NSE',
         quantity,
         price,
-        productType: 'CNC',
-        orderType: 'MARKET',
-      });
+        productType: options?.productType || 'CNC',
+        orderType: options?.orderType || 'MARKET',
+      };
+      if (options?.triggerPrice && options?.triggerPrice > 0) {
+        payload.triggerPrice = options.triggerPrice;
+      }
+      const result = await api.post<{ success: boolean; message?: string }>('/orders/execute', payload);
       // If risk engine rejected the order, warn but still update local state
       // so the demo portfolio remains functional
       if (result && !result.success) {
@@ -277,7 +281,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     sendTradeConfirmation('buy', stock.symbol, quantity, price, totalCost);
   },
 
-  sellStock: async (holdingId, quantity, price) => {
+  sellStock: async (holdingId, quantity, price, options) => {
     const state = get();
     const holding = state.holdings.find(h => h.id === holdingId);
     if (!holding) return;
@@ -287,21 +291,25 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     // Execute through Risk-Guarded Pipeline (POST /api/orders/execute)
     try {
       const user = useAuthStore.getState().user;
-      const result = await api.post<{ success: boolean; message?: string }>('/orders/execute', {
+      const payload: Record<string, any> = {
         userId: user?.id || 'user_1',
         actionType: 'SELL',
         symbol: holding.symbol,
         exchange: 'NSE',
         quantity,
         price,
-        productType: 'CNC',
-        orderType: 'MARKET',
+        productType: options?.productType || 'CNC',
+        orderType: options?.orderType || 'MARKET',
         // Pass current position so risk engine can detect this as an exit
         currentPosition: {
           quantity: holding.quantity,
           avgPrice: holding.buyPrice,
         },
-      });
+      };
+      if (options?.triggerPrice && options?.triggerPrice > 0) {
+        payload.triggerPrice = options.triggerPrice;
+      }
+      const result = await api.post<{ success: boolean; message?: string }>('/orders/execute', payload);
       if (result && !result.success) {
         log.warn('[Portfolio] Risk engine blocked SELL:', result.message);
       }

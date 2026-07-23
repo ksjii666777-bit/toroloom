@@ -11,7 +11,7 @@
  * ============================================================================
  */
 
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData, WebhookStorageData, WebhookDeliveryLogData, ApiKeyStorageData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -289,6 +289,101 @@ export class InMemoryStorage implements StorageEngine {
     this.subscriptions.set(userId, sub);
   }
 
+  async loadAllSubscriptions(): Promise<UserSubscriptionData[]> {
+    return Array.from(this.subscriptions.values());
+  }
+
+  // ──── API Keys ────
+  private apiKeys = new Map<string, ApiKeyStorageData>();
+
+  async saveApiKey(key: ApiKeyStorageData): Promise<void> {
+    this.apiKeys.set(key.id, key);
+  }
+
+  async loadApiKeyByHash(hash: string): Promise<ApiKeyStorageData | null> {
+    for (const key of this.apiKeys.values()) {
+      if (key.keyHash === hash) return key;
+    }
+    return null;
+  }
+
+  async loadUserApiKeys(userId: string): Promise<ApiKeyStorageData[]> {
+    return Array.from(this.apiKeys.values()).filter(k => k.userId === userId);
+  }
+
+  async loadApiKey(id: string): Promise<ApiKeyStorageData | null> {
+    return this.apiKeys.get(id) ?? null;
+  }
+
+  async deleteApiKey(id: string): Promise<void> {
+    this.apiKeys.delete(id);
+  }
+
+  async touchApiKey(id: string): Promise<void> {
+    const key = this.apiKeys.get(id);
+    if (key) {
+      key.lastUsedAt = new Date().toISOString();
+      key.updatedAt = new Date().toISOString();
+    }
+  }
+
+  // ──── Webhooks ────
+  private webhooks: WebhookStorageData[] = [];
+  private webhookLogs: WebhookDeliveryLogData[] = [];
+
+  async saveWebhook(webhook: WebhookStorageData): Promise<void> {
+    const idx = this.webhooks.findIndex(w => w.id === webhook.id);
+    if (idx >= 0) {
+      this.webhooks[idx] = webhook;
+    } else {
+      this.webhooks.push(webhook);
+    }
+  }
+
+  async loadWebhook(id: string): Promise<WebhookStorageData | null> {
+    return this.webhooks.find(w => w.id === id) ?? null;
+  }
+
+  async loadUserWebhooks(userId: string): Promise<WebhookStorageData[]> {
+    return this.webhooks.filter(w => w.userId === userId);
+  }
+
+  async loadActiveWebhooksByEvent(event: string): Promise<WebhookStorageData[]> {
+    return this.webhooks.filter(w => w.isActive && w.events.includes(event));
+  }
+
+  async deleteWebhook(id: string): Promise<void> {
+    this.webhooks = this.webhooks.filter(w => w.id !== id);
+  }
+
+  async saveWebhookDeliveryLog(log: WebhookDeliveryLogData): Promise<void> {
+    const idx = this.webhookLogs.findIndex(l => l.id === log.id);
+    if (idx >= 0) {
+      this.webhookLogs[idx] = log;
+    } else {
+      this.webhookLogs.push(log);
+    }
+  }
+
+  async loadWebhookDeliveryLogs(webhookId: string, limit?: number): Promise<WebhookDeliveryLogData[]> {
+    let logs = this.webhookLogs
+      .filter(l => l.webhookId === webhookId)
+      .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+    if (limit) logs = logs.slice(0, limit);
+    return logs;
+  }
+
+  // ──── Idempotency ────
+  private processedEvents = new Set<string>();
+
+  async markEventProcessed(eventId: string): Promise<void> {
+    this.processedEvents.add(eventId);
+  }
+
+  async isEventProcessed(eventId: string): Promise<boolean> {
+    return this.processedEvents.has(eventId);
+  }
+
   // ──── Lifecycle ────
   async connect(): Promise<void> {
     // Nothing to do for in-memory
@@ -302,8 +397,12 @@ export class InMemoryStorage implements StorageEngine {
     this.brokerDedupCache = {};
     this.notifications = [];
     this.communityPosts = [];
+    this.webhooks = [];
+    this.webhookLogs = [];
+    this.processedEvents.clear();
     this.subscriptions.clear();
     this.telegramLinks.clear();
+    this.apiKeys.clear();
     this.coupons.clear();
     this.couponUsages = [];
   }

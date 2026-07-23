@@ -588,110 +588,154 @@ function detectBearFlag(
 }
 
 /**
- * Triangle patterns — Look for converging swing highs/lows
+ * Shared helper: extract recent swing points and classify triangle shape.
  */
-function detectTriangles(
-  data: StockHistoryPoint[],
-  highs: number[],
-  lows: number[],
-): DetectedPattern | null {
-  if (data.length < 20) return null;
+interface TriangleSwingData {
+  recentHighs: SwingPoint[];
+  recentLows: SwingPoint[];
+  highsDescending: boolean;
+  lowsAscending: boolean;
+}
+
+function getTriangleSwingData(highs: number[], lows: number[]): TriangleSwingData | null {
+  if (highs.length < 20 || lows.length < 20) return null;
 
   const swingHighs = findSwingHighs(highs, 3);
   const swingLows = findSwingLows(lows, 3);
 
   if (swingHighs.length < 4 || swingLows.length < 4) return null;
 
-  // Get the last 4 swing highs and swing lows
   const recentHighs = swingHighs.slice(-4);
   const recentLows = swingLows.slice(-4);
 
-  // Check if highs are descending (lower highs)
   const highsDescending = recentHighs.length >= 3 &&
     recentHighs[recentHighs.length - 1].price < recentHighs[0].price &&
     recentHighs[recentHighs.length - 2].price < recentHighs[0].price;
 
-  // Check if lows are ascending (higher lows)
   const lowsAscending = recentLows.length >= 3 &&
     recentLows[recentLows.length - 1].price > recentLows[0].price &&
     recentLows[recentLows.length - 2].price > recentLows[0].price;
 
-  if (highsDescending && lowsAscending) {
-    // Symmetrical triangle
-    const startIdx = Math.min(recentHighs[0].index, recentLows[0].index);
-    const endIdx = Math.max(recentHighs[recentHighs.length - 1].index, recentLows[recentLows.length - 1].index);
-    const recentClose = data[data.length - 1].close;
-    const isBreakout = recentClose > recentHighs[recentHighs.length - 1].price || 
-                       recentClose < recentLows[recentLows.length - 1].price;
+  return { recentHighs, recentLows, highsDescending, lowsAscending };
+}
 
-    return {
-      type: 'symmetrical_triangle',
-      label: 'Sym Triangle',
-      startIndex: startIdx,
-      endIndex: endIdx,
-      confidence: 60,
-      direction: 'neutral',
-      isComplete: isBreakout,
-      levels: [
-        ...recentHighs.map(h => ({ x: h.index, price: h.price, label: '' as string })),
-        ...recentLows.map(l => ({ x: l.index, price: l.price, label: '' as string })),
-      ],
-    };
-  }
+/**
+ * Symmetrical Triangle — Converging swing highs and lows.
+ * Neutral direction; breakout determines eventual move.
+ */
+export function detectSymmetricalTriangle(
+  data: StockHistoryPoint[],
+  highs: number[],
+  lows: number[],
+  precomputedSwing?: TriangleSwingData | null,
+): DetectedPattern | null {
+  const swingData = precomputedSwing !== undefined ? precomputedSwing : getTriangleSwingData(highs, lows);
+  if (!swingData) return null;
 
-  if (highsDescending && !lowsAscending) {
-    // Descending triangle (bearish)
-    const startIdx = Math.min(recentHighs[0].index, recentLows[recentLows.length - 1].index);
-    const endIdx = recentHighs[recentHighs.length - 1].index;
+  const { recentHighs, recentLows, highsDescending, lowsAscending } = swingData;
+  if (!highsDescending || !lowsAscending) return null;
 
-    // Find support level from lows
-    const avgSupport = recentLows.reduce((s, l) => s + l.price, 0) / recentLows.length;
-    const supportRange = recentLows.reduce((max, l) => Math.max(max, Math.abs(l.price - avgSupport)), 0) / avgSupport;
+  const startIdx = Math.min(recentHighs[0].index, recentLows[0].index);
+  const endIdx = Math.max(
+    recentHighs[recentHighs.length - 1].index,
+    recentLows[recentLows.length - 1].index,
+  );
+  const recentClose = data[data.length - 1].close;
+  const isBreakout =
+    recentClose > recentHighs[recentHighs.length - 1].price ||
+    recentClose < recentLows[recentLows.length - 1].price;
 
-    if (supportRange > 0.03) return null; // support not flat enough
+  return {
+    type: 'symmetrical_triangle',
+    label: 'Sym Triangle',
+    startIndex: startIdx,
+    endIndex: endIdx,
+    confidence: 60,
+    direction: 'neutral',
+    isComplete: isBreakout,
+    levels: [
+      ...recentHighs.map(h => ({ x: h.index, price: h.price, label: '' as string })),
+      ...recentLows.map(l => ({ x: l.index, price: l.price, label: '' as string })),
+    ],
+  };
+}
 
-    return {
-      type: 'descending_triangle',
-      label: 'Desc Triangle',
-      startIndex: startIdx,
-      endIndex: endIdx,
-      confidence: 65,
-      direction: 'bearish',
-      necklinePrice: avgSupport,
-      levels: [
-        ...recentHighs.map(h => ({ x: h.index, price: h.price, label: '' as string })),
-        { x: recentLows[0].index, price: avgSupport, label: 'S' },
-      ],
-    };
-  }
+/**
+ * Descending Triangle — Lower highs with flat support.
+ * Break below support = bearish.
+ */
+export function detectDescendingTriangle(
+  _data: StockHistoryPoint[],
+  highs: number[],
+  lows: number[],
+  precomputedSwing?: TriangleSwingData | null,
+): DetectedPattern | null {
+  const swingData = precomputedSwing !== undefined ? precomputedSwing : getTriangleSwingData(highs, lows);
+  if (!swingData) return null;
 
-  if (!highsDescending && lowsAscending) {
-    // Ascending triangle (bullish)
-    const startIdx = Math.min(recentHighs[recentHighs.length - 1].index, recentLows[0].index);
-    const endIdx = recentLows[recentLows.length - 1].index;
+  const { recentHighs, recentLows, highsDescending, lowsAscending } = swingData;
+  if (!highsDescending || lowsAscending) return null;
 
-    // Find resistance level from highs
-    const avgResistance = recentHighs.reduce((s, h) => s + h.price, 0) / recentHighs.length;
-    const resistanceRange = recentHighs.reduce((max, h) => Math.max(max, Math.abs(h.price - avgResistance)), 0) / avgResistance;
+  const startIdx = Math.min(recentHighs[0].index, recentLows[recentLows.length - 1].index);
+  const endIdx = recentHighs[recentHighs.length - 1].index;
 
-    if (resistanceRange > 0.03) return null;
+  // Find support level from lows
+  const avgSupport = recentLows.reduce((s, l) => s + l.price, 0) / recentLows.length;
+  const supportRange = recentLows.reduce((max, l) => Math.max(max, Math.abs(l.price - avgSupport)), 0) / avgSupport;
+  if (supportRange > 0.03) return null; // support not flat enough
 
-    return {
-      type: 'ascending_triangle',
-      label: 'Asc Triangle',
-      startIndex: startIdx,
-      endIndex: endIdx,
-      confidence: 65,
-      direction: 'bullish',
-      necklinePrice: avgResistance,
-      levels: [
-        ...recentLows.map(l => ({ x: l.index, price: l.price, label: '' as string })),
-        { x: recentHighs[0].index, price: avgResistance, label: 'R' },
-      ],
-    };
-  }
+  return {
+    type: 'descending_triangle',
+    label: 'Desc Triangle',
+    startIndex: startIdx,
+    endIndex: endIdx,
+    confidence: 65,
+    direction: 'bearish',
+    necklinePrice: avgSupport,
+    levels: [
+      ...recentHighs.map(h => ({ x: h.index, price: h.price, label: '' as string })),
+      { x: recentLows[0].index, price: avgSupport, label: 'S' },
+    ],
+  };
+}
 
-  return null;
+/**
+ * Ascending Triangle — Higher lows with flat resistance.
+ * Break above resistance = bullish.
+ */
+export function detectAscendingTriangle(
+  _data: StockHistoryPoint[],
+  highs: number[],
+  lows: number[],
+  precomputedSwing?: TriangleSwingData | null,
+): DetectedPattern | null {
+  const swingData = precomputedSwing !== undefined ? precomputedSwing : getTriangleSwingData(highs, lows);
+  if (!swingData) return null;
+
+  const { recentHighs, recentLows, highsDescending, lowsAscending } = swingData;
+  if (highsDescending || !lowsAscending) return null;
+
+  const startIdx = Math.min(recentHighs[recentHighs.length - 1].index, recentLows[0].index);
+  const endIdx = recentLows[recentLows.length - 1].index;
+
+  // Find resistance level from highs
+  const avgResistance = recentHighs.reduce((s, h) => s + h.price, 0) / recentHighs.length;
+  const resistanceRange = recentHighs.reduce((max, h) => Math.max(max, Math.abs(h.price - avgResistance)), 0) / avgResistance;
+  if (resistanceRange > 0.03) return null;
+
+  return {
+    type: 'ascending_triangle',
+    label: 'Asc Triangle',
+    startIndex: startIdx,
+    endIndex: endIdx,
+    confidence: 65,
+    direction: 'bullish',
+    necklinePrice: avgResistance,
+    levels: [
+      ...recentLows.map(l => ({ x: l.index, price: l.price, label: '' as string })),
+      { x: recentHighs[0].index, price: avgResistance, label: 'R' },
+    ],
+  };
 }
 
 // ============================================================================
@@ -702,47 +746,106 @@ export interface PatternDetectionResult {
   patterns: DetectedPattern[];
 }
 
+export interface PatternDetectionOptions {
+  /** Minimum confidence threshold 0-100 (default 0 — show all) */
+  minConfidence?: number;
+  /** Only detect these pattern types (default: all) */
+  enabledPatterns?: PatternType[];
+  /** Number of recent candles to analyze (0 = all data, default 0) */
+  lookback?: number;
+}
+
 /**
  * Run all pattern detection algorithms on the given candlestick data.
  * Returns detected patterns sorted by confidence (highest first).
  */
-export function detectPatterns(data: StockHistoryPoint[]): PatternDetectionResult {
+export function detectPatterns(
+  data: StockHistoryPoint[],
+  options: PatternDetectionOptions = {},
+): PatternDetectionResult {
   if (!data || data.length < 20) {
     return { patterns: [] };
   }
 
-  const highs = data.map(d => d.high);
-  const lows = data.map(d => d.low);
+  const {
+    minConfidence = 0,
+    enabledPatterns,
+    lookback = 0,
+  } = options;
+
+  // Slice data by lookback if set
+  const analysisData = lookback > 0 && lookback < data.length
+    ? data.slice(-lookback)
+    : data;
+
+  const highs = analysisData.map(d => d.high);
+  const lows = analysisData.map(d => d.low);
+
+  // Build detector list filtered by enabledPatterns
+  const enabledSet = enabledPatterns ? new Set(enabledPatterns) : null;
+
+  function isEnabled(key: PatternType): boolean {
+    return !enabledSet || enabledSet.has(key);
+  }
 
   const patterns: DetectedPattern[] = [];
 
-  // Run all detectors
-  const hs = detectHeadAndShoulders(data, highs, lows);
-  if (hs) patterns.push(hs);
+  // Reversal patterns
+  if (isEnabled('head_and_shoulders')) {
+    const r = detectHeadAndShoulders(analysisData, highs, lows);
+    if (r) patterns.push(r);
+  }
+  if (isEnabled('inverse_head_and_shoulders')) {
+    const r = detectInverseHeadAndShoulders(analysisData, highs, lows);
+    if (r) patterns.push(r);
+  }
+  if (isEnabled('double_top')) {
+    const r = detectDoubleTop(analysisData, highs, lows);
+    if (r) patterns.push(r);
+  }
+  if (isEnabled('double_bottom')) {
+    const r = detectDoubleBottom(analysisData, highs, lows);
+    if (r) patterns.push(r);
+  }
 
-  const ihs = detectInverseHeadAndShoulders(data, highs, lows);
-  if (ihs) patterns.push(ihs);
+  // Continuation patterns
+  if (isEnabled('bull_flag')) {
+    const r = detectBullFlag(analysisData, highs, lows);
+    if (r) patterns.push(r);
+  }
+  if (isEnabled('bear_flag')) {
+    const r = detectBearFlag(analysisData, highs, lows);
+    if (r) patterns.push(r);
+  }
 
-  const dt = detectDoubleTop(data, highs, lows);
-  if (dt) patterns.push(dt);
+  // Triangle patterns (with precomputed swing data to avoid 3× recomputation)
+  const anyTriangleEnabled = isEnabled('ascending_triangle')
+    || isEnabled('descending_triangle')
+    || isEnabled('symmetrical_triangle');
+  const triangleSwingData = anyTriangleEnabled ? getTriangleSwingData(highs, lows) : null;
 
-  const db = detectDoubleBottom(data, highs, lows);
-  if (db) patterns.push(db);
-
-  const bf = detectBullFlag(data, highs, lows);
-  if (bf) patterns.push(bf);
-
-  const bef = detectBearFlag(data, highs, lows);
-  if (bef) patterns.push(bef);
-
-  const tri = detectTriangles(data, highs, lows);
-  if (tri) patterns.push(tri);
+  if (isEnabled('ascending_triangle')) {
+    const r = detectAscendingTriangle(analysisData, highs, lows, triangleSwingData);
+    if (r) patterns.push(r);
+  }
+  if (isEnabled('descending_triangle')) {
+    const r = detectDescendingTriangle(analysisData, highs, lows, triangleSwingData);
+    if (r) patterns.push(r);
+  }
+  if (isEnabled('symmetrical_triangle')) {
+    const r = detectSymmetricalTriangle(analysisData, highs, lows, triangleSwingData);
+    if (r) patterns.push(r);
+  }
 
   // Sort by confidence descending
   patterns.sort((a, b) => b.confidence - a.confidence);
 
-  // Return top patterns (max 3 to avoid clutter)
-  return { patterns: patterns.slice(0, 3) };
+  // Filter by min confidence
+  const filtered = minConfidence > 0
+    ? patterns.filter(p => p.confidence >= minConfidence)
+    : patterns;
+
+  return { patterns: filtered };
 }
 
 /**

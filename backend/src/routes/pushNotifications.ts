@@ -36,6 +36,8 @@ router.use(authMiddleware);
 // In-memory store of push tokens per user
 const pushTokenStore = new Map<string, string>();
 
+export { pushTokenStore };
+
 /**
  * POST /api/notifications/push-token
  *

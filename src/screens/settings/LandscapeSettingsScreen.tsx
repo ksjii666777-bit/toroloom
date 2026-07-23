@@ -5,6 +5,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useResponsiveLayout, BREAKPOINTS } from '../../hooks/useResponsiveLayout';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -29,6 +30,7 @@ const DEFAULT_PREFS: LandscapePrefs = {
 
 export default function LandscapeSettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { isLandscape, isTablet, width, height, columns, fontSizeScale, spacingScale } = useResponsiveLayout();
 
@@ -40,11 +42,11 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
 
   const resetDefaults = useCallback(() => {
     Alert.alert(
-      'Reset to Defaults',
-      'Reset all landscape preferences to their default values?',
+      t('landscapeSettings.resetTitle'),
+      t('landscapeSettings.resetMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Reset', onPress: () => setPrefs(DEFAULT_PREFS) },
+        { text: t('app.cancel'), style: 'cancel' },
+        { text: t('landscapeSettings.reset'), onPress: () => setPrefs(DEFAULT_PREFS) },
       ],
     );
   }, []);
@@ -54,17 +56,15 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Landscape Mode</Text>
-          <Text style={styles.subtitle}>
-            Optimize the app for landscape and tablet layouts
-          </Text>
+          <Text style={styles.title}>{t('landscapeSettings.title')}</Text>
+          <Text style={styles.subtitle}>{t('landscapeSettings.subtitle')}</Text>
         </View>
 
         {/* ── Current Status Card ── */}
         <Animated.View entering={FadeInDown.springify()} style={[styles.statusCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={styles.statusRow}>
             <View style={styles.statusItem}>
-              <Text style={styles.statusLabel}>Orientation</Text>
+              <Text style={styles.statusLabel}>{t('landscapeSettings.orientation')}</Text>
               <View style={styles.statusValueRow}>
                 <Ionicons
                   name={isLandscape ? 'phone-landscape' : 'phone-portrait'}
@@ -72,13 +72,13 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
                   color={isLandscape ? '#00C853' : colors.primary}
                 />
                 <Text style={[styles.statusValue, { color: isLandscape ? '#00C853' : colors.primary }]}>
-                  {isLandscape ? 'Landscape' : 'Portrait'}
+                  {isLandscape ? t('landscapeSettings.landscape') : t('landscapeSettings.portrait')}
                 </Text>
               </View>
             </View>
             <View style={styles.statusDivider} />
             <View style={styles.statusItem}>
-              <Text style={styles.statusLabel}>Device</Text>
+              <Text style={styles.statusLabel}>{t('landscapeSettings.device')}</Text>
               <View style={styles.statusValueRow}>
                 <Ionicons
                   name={isTablet ? 'tablet-landscape' : 'phone-portrait'}
@@ -86,13 +86,13 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
                   color={isTablet ? '#8B5CF6' : colors.textMuted}
                 />
                 <Text style={[styles.statusValue, { color: isTablet ? '#8B5CF6' : colors.textMuted }]}>
-                  {isTablet ? 'Tablet' : 'Phone'}
+                  {isTablet ? t('landscapeSettings.tablet') : t('landscapeSettings.phone')}
                 </Text>
               </View>
             </View>
             <View style={styles.statusDivider} />
             <View style={styles.statusItem}>
-              <Text style={styles.statusLabel}>Screen</Text>
+              <Text style={styles.statusLabel}>{t('landscapeSettings.screen')}</Text>
               <Text style={[styles.statusValue, { color: colors.text, fontSize: FONTS.size.sm }]}>
                 {width < 600 ? `${Math.round(width)}×${Math.round(height)}` : `${Math.round(width)}×${Math.round(height)}`}
               </Text>
@@ -102,40 +102,40 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
 
         {/* ── Breakpoint Info ── */}
         <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Layout Info</Text>
+          <Text style={styles.sectionTitle}>{t('landscapeSettings.layoutInfo')}</Text>
           <View style={styles.infoGrid}>
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
-              <Text style={styles.infoLabel}>Columns</Text>
+              <Text style={styles.infoLabel}>{t('landscapeSettings.columns')}</Text>
               <Text style={styles.infoValue}>{columns}</Text>
-              <Text style={styles.infoDesc}>Grid columns</Text>
+              <Text style={styles.infoDesc}>{t('landscapeSettings.gridColumns')}</Text>
             </View>
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
-              <Text style={styles.infoLabel}>Spacing</Text>
+              <Text style={styles.infoLabel}>{t('landscapeSettings.spacing')}</Text>
               <Text style={styles.infoValue}>{(spacingScale * 100).toFixed(0)}%</Text>
-              <Text style={styles.infoDesc}>Spacing scale</Text>
+              <Text style={styles.infoDesc}>{t('landscapeSettings.spacingScale')}</Text>
             </View>
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
-              <Text style={styles.infoLabel}>Font</Text>
+              <Text style={styles.infoLabel}>{t('landscapeSettings.font')}</Text>
               <Text style={styles.infoValue}>{(fontSizeScale * 100).toFixed(0)}%</Text>
-              <Text style={styles.infoDesc}>Font scale</Text>
+              <Text style={styles.infoDesc}>{t('landscapeSettings.fontScale')}</Text>
             </View>
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
-              <Text style={styles.infoLabel}>Compact</Text>
-              <Text style={styles.infoValue}>{prefs.compactMode ? 'On' : 'Off'}</Text>
-              <Text style={styles.infoDesc}>Headers</Text>
+              <Text style={styles.infoLabel}>{t('landscapeSettings.compact')}</Text>
+              <Text style={styles.infoValue}>{prefs.compactMode ? t('status.on') : t('status.off')}</Text>
+              <Text style={styles.infoDesc}>{t('landscapeSettings.headers')}</Text>
             </View>
           </View>
         </Animated.View>
 
         {/* ── Toggles ── */}
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          <Text style={styles.sectionTitle}>{t('landscapeSettings.preferences')}</Text>
 
           {/* Allow Landscape */}
           <SettingRow
             icon="phone-landscape"
-            label="Allow Landscape Mode"
-            description="Enable rotation to landscape orientation"
+            label={t('landscapeSettings.allowLandscape')}
+            description={t('landscapeSettings.allowLandscapeDesc')}
             value={prefs.allowLandscape}
             onToggle={() => togglePref('allowLandscape')}
             colors={colors}
@@ -145,8 +145,8 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
           {/* Auto-rotate Charts */}
           <SettingRow
             icon="pie-chart"
-            label="Auto-rotate Charts"
-            description="Charts automatically fill the screen in landscape"
+            label={t('landscapeSettings.autoRotateCharts')}
+            description={t('landscapeSettings.autoRotateChartsDesc')}
             value={prefs.autoRotateCharts}
             onToggle={() => togglePref('autoRotateCharts')}
             colors={colors}
@@ -156,8 +156,8 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
           {/* Split Pane */}
           <SettingRow
             icon="grid"
-            label="Split Pane Layout"
-            description="Show content side-by-side on tablets in landscape (e.g. chart + details)"
+            label={t('landscapeSettings.splitPane')}
+            description={t('landscapeSettings.splitPaneDesc')}
             value={prefs.splitPaneEnabled}
             onToggle={() => togglePref('splitPaneEnabled')}
             disabled={!isTablet}
@@ -168,8 +168,8 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
           {/* Compact Mode */}
           <SettingRow
             icon="remove-circle"
-            label="Compact Headers"
-            description="Reduce header height in landscape for more content space"
+            label={t('landscapeSettings.compactHeaders')}
+            description={t('landscapeSettings.compactHeadersDesc')}
             value={prefs.compactMode}
             onToggle={() => togglePref('compactMode')}
             colors={colors}
@@ -179,8 +179,8 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
           {/* Side Navigation */}
           <SettingRow
             icon="menu"
-            label="Side Navigation"
-            description="Show persistent sidebar on tablets in landscape"
+            label={t('landscapeSettings.sideNav')}
+            description={t('landscapeSettings.sideNavDesc')}
             value={prefs.showSideNav}
             onToggle={() => togglePref('showSideNav')}
             disabled={!isTablet}
@@ -191,16 +191,16 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
 
         {/* ── Device Info ── */}
         <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Device Info</Text>
+          <Text style={styles.sectionTitle}>{t('landscapeSettings.deviceInfo')}</Text>
           <View style={[styles.deviceInfoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <DeviceInfoRow label="Screen Width" value={`${Math.round(width)}px`} color={colors.primary} styles={styles} />
-            <DeviceInfoRow label="Screen Height" value={`${Math.round(height)}px`} color={colors.primary} styles={styles} />
-            <DeviceInfoRow label="Orientation" value={isLandscape ? 'Landscape' : 'Portrait'} color={isLandscape ? '#00C853' : colors.primary} styles={styles} />
-            <DeviceInfoRow label="Form Factor" value={isTablet ? 'Tablet' : 'Phone'} color={isTablet ? '#8B5CF6' : colors.textMuted} styles={styles} />
-            <DeviceInfoRow label="Grid Columns" value={`${columns}`} color={colors.primary} styles={styles} />
-            <DeviceInfoRow label="Font Scale" value={`${(fontSizeScale * 100).toFixed(0)}%`} color={colors.text} styles={styles} />
-            <DeviceInfoRow label="Spacing Scale" value={`${(spacingScale * 100).toFixed(0)}%`} color={colors.text} styles={styles} />
-            <DeviceInfoRow label="Breakpoint" value={getBreakpointLabel(width)} color="#6C63FF" styles={styles} />
+            <DeviceInfoRow label={t('landscapeSettings.screenWidth')} value={`${Math.round(width)}px`} color={colors.primary} styles={styles} />
+            <DeviceInfoRow label={t('landscapeSettings.screenHeight')} value={`${Math.round(height)}px`} color={colors.primary} styles={styles} />
+            <DeviceInfoRow label={t('landscapeSettings.orientation')} value={isLandscape ? t('landscapeSettings.landscape') : t('landscapeSettings.portrait')} color={isLandscape ? '#00C853' : colors.primary} styles={styles} />
+            <DeviceInfoRow label={t('landscapeSettings.formFactor')} value={isTablet ? t('landscapeSettings.tablet') : t('landscapeSettings.phone')} color={isTablet ? '#8B5CF6' : colors.textMuted} styles={styles} />
+            <DeviceInfoRow label={t('landscapeSettings.gridColumns')} value={`${columns}`} color={colors.primary} styles={styles} />
+            <DeviceInfoRow label={t('landscapeSettings.font')} value={`${(fontSizeScale * 100).toFixed(0)}%`} color={colors.text} styles={styles} />
+            <DeviceInfoRow label={t('landscapeSettings.spacing')} value={`${(spacingScale * 100).toFixed(0)}%`} color={colors.text} styles={styles} />
+            <DeviceInfoRow label={t('landscapeSettings.breakpoint')} value={getBreakpointLabel(width)} color="#6C63FF" styles={styles} />
           </View>
         </Animated.View>
 
@@ -208,7 +208,7 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
         <AnimatedPressable onPress={resetDefaults} haptic="medium" scaleTo={0.97}>
           <View style={styles.resetBtn}>
             <Ionicons name="refresh" size={18} color={colors.textMuted} />
-            <Text style={styles.resetBtnText}>Reset to Defaults</Text>
+            <Text style={styles.resetBtnText}>{t('landscapeSettings.resetDefaults')}</Text>
           </View>
         </AnimatedPressable>
 

@@ -404,3 +404,19 @@ export function observeCacheCompute(endpoint: string, durationMs: number): void 
 export function getMetricsRegistry() {
   return register;
 }
+
+// ──── Market Schedule Metrics (no-op stubs for marketScheduleWorker) ────────
+// These are called by the market schedule worker to push health metrics to
+// Prometheus. The market schedule-specific gauges are defined in a separate
+// dashboard but these stubs keep the worker import happy without crashing.
+
+export function updateMarketScheduleMetrics(
+  _health: { isRunning: boolean; startedAt: string | null; lastPollTimestamp: string | null; totalPolls: number; totalErrors: number; marketOpenCount: number; marketCloseCount: number; pollIntervalMs: number; uptimeSeconds: number | null },
+): void {
+  // No-op: Prometheus gauges for market schedule are registered by
+  // the worker module itself when Prometheus is configured.
+}
+
+export function _resetMarketScheduleMetricsPrometheus(): void {
+  // No-op: resets Prometheus gauge values — only needed in tests.
+}

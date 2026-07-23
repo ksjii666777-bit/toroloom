@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAccessibilityStore, FontScaleLevel, FONT_SCALE_VALUES } from '../../store/accessibilityStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -31,11 +32,11 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // FONT SCALE OPTIONS
 // ═════════════════════════════════════════════════════════════════════════
 
-const FONT_OPTIONS: { key: FontScaleLevel; label: string; description: string; icon: string }[] = [
-  { key: 'small',   label: 'Small',   description: 'Compact — fit more content on screen',    icon: 'text' },
-  { key: 'medium',  label: 'Medium',  description: 'Default — recommended size',               icon: 'text' },
-  { key: 'large',   label: 'Large',   description: 'Larger — easier to read',                  icon: 'text' },
-  { key: 'xlarge',  label: 'X-Large', description: 'Extra large — maximum readability',         icon: 'text' },
+const FONT_OPTIONS: { key: FontScaleLevel; labelKey: string; descKey: string; icon: string }[] = [
+  { key: 'small',   labelKey: 'accessibility.small',   descKey: 'accessibility.smallDesc',   icon: 'text' },
+  { key: 'medium',  labelKey: 'accessibility.medium',  descKey: 'accessibility.mediumDesc',  icon: 'text' },
+  { key: 'large',   labelKey: 'accessibility.large',   descKey: 'accessibility.largeDesc',   icon: 'text' },
+  { key: 'xlarge',  labelKey: 'accessibility.xLarge',  descKey: 'accessibility.xLargeDesc',  icon: 'text' },
 ];
 
 // ═════════════════════════════════════════════════════════════════════════
@@ -121,11 +122,26 @@ const infoRowStyles = StyleSheet.create({
 });
 
 // ═════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═════════════════════════════════════════════════════════════════════════
+
+function getFontLabel(t: (key: string) => string, level: FontScaleLevel): string {
+  const labels: Record<FontScaleLevel, string> = {
+    small: t('accessibility.small'),
+    medium: t('accessibility.medium'),
+    large: t('accessibility.large'),
+    xlarge: t('accessibility.xLarge'),
+  };
+  return labels[level] || t('accessibility.medium');
+}
+
+// ═════════════════════════════════════════════════════════════════════════
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
 export default function AccessibilitySettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   const {
     fontScale,
@@ -144,12 +160,12 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
   // ── Reset to defaults ──
   const handleReset = useCallback(() => {
     Alert.alert(
-      'Reset Accessibility Settings',
-      'This will reset font size, motion, and contrast preferences to their defaults.',
+      t('accessibility.resetTitle'),
+      t('accessibility.resetMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
-          text: 'Reset',
+          text: t('accessibility.reset'),
           style: 'destructive',
           onPress: () => {
             setFontScale('medium');
@@ -159,7 +175,7 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
         },
       ],
     );
-  }, [setFontScale, setReduceMotion, setHighContrast]);
+  }, [t, setFontScale, setReduceMotion, setHighContrast]);
 
   // ── Font scale preview text sizes ──
   const previewSizes = useMemo(() => ({
@@ -180,10 +196,8 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Accessibility</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              Customize your viewing experience
-            </Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('accessibility.title')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('accessibility.subtitle')}</Text>
           </View>
         </View>
       </View>
@@ -191,10 +205,10 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* ═══════════════════ FONT SCALING ═══════════════════ */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          <Ionicons name="text" size={16} color={colors.text} /> Font Size
+          <Ionicons name="text" size={16} color={colors.text} /> {t('accessibility.fontSection')}
         </Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          Adjust text size across the app. Currently: {fontScale === 'small' ? 'Small' : fontScale === 'medium' ? 'Medium (Default)' : fontScale === 'large' ? 'Large' : 'X-Large'} ({Math.round(fontMultiplier * 100)}%)
+          {t('accessibility.fontSectionSub', { label: getFontLabel(t, fontScale), percent: Math.round(fontMultiplier * 100) })}
         </Text>
 
         {/* Font scale options */}
@@ -233,10 +247,10 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
                     styles.fontOptionLabel,
                     { color: isSelected ? colors.primary : colors.text, fontWeight: isSelected ? '700' : '400' },
                   ]}>
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </Text>
                   <Text style={[styles.fontOptionDesc, { color: colors.textMuted }]}>
-                    {opt.description}
+                    {t(opt.descKey)}
                   </Text>
                 </View>
 
@@ -260,7 +274,7 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
           borderLeftWidth: 3,
         }]}>
           <View style={styles.previewHeader}>
-            <Text style={[styles.previewLabel, { color: colors.textMuted }]}>Live Preview</Text>
+            <Text style={[styles.previewLabel, { color: colors.textMuted }]}>{t('accessibility.livePreview')}</Text>
             <Text style={[styles.previewSize, { color: colors.textMuted }]}>
               {fontScale} ({Math.round(fontMultiplier * 100)}%)
             </Text>
@@ -282,18 +296,16 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
 
         {/* ═══════════════════ MOTION & CONTRAST ═══════════════════ */}
         <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
-          <Ionicons name="options" size={16} color={colors.text} /> Display & Motion
+          <Ionicons name="options" size={16} color={colors.text} /> {t('accessibility.motionSection')}
         </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          Control animations and visual presentation
-        </Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('accessibility.motionSectionSub')}</Text>
 
         <View style={[styles.settingsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           {/* Reduce Motion */}
           <SettingRow
             icon="pause-circle"
-            title="Reduce Motion"
-            description="Disable animations and transitions throughout the app for reduced visual stimulation"
+            title={t('accessibility.reduceMotion')}
+            description={t('accessibility.reduceMotionDesc')}
             value={reduceMotion}
             onToggle={() => toggleReduceMotion()}
             colors={colors}
@@ -302,8 +314,8 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
           {/* High Contrast */}
           <SettingRow
             icon="contrast"
-            title="High Contrast"
-            description="Increase color contrast for better readability — stronger borders, brighter text"
+            title={t('accessibility.highContrast')}
+            description={t('accessibility.highContrastDesc')}
             value={highContrast}
             onToggle={() => toggleHighContrast()}
             colors={colors}
@@ -312,15 +324,13 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
 
         {/* ═══════════════════ SCREEN READER ═══════════════════ */}
         <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
-          <Ionicons name="ear" size={16} color={colors.text} /> Screen Reader
+          <Ionicons name="ear" size={16} color={colors.text} /> {t('accessibility.screenReader')}
         </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          Optimized for TalkBack (Android) and VoiceOver (iOS)
-        </Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('accessibility.screenReaderSub')}</Text>
 
         <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Text style={[styles.infoCardTitle, { color: colors.text }]}>
-            <Ionicons name="checkmark-circle" size={14} color={colors.success} /> What's already optimized
+            <Ionicons name="checkmark-circle" size={14} color={colors.success} /> {t('accessibility.alreadyOptimized')}
           </Text>
           <InfoRow icon="checkmark" text="All interactive elements have accessibility labels" colors={colors} />
           <InfoRow icon="checkmark" text="Buttons and controls use proper roles for screen readers" colors={colors} />
@@ -331,7 +341,7 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
           <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
 
           <Text style={[styles.infoCardTitle, { color: colors.text }]}>
-            <Ionicons name="bulb" size={14} color={colors.warning} /> Tips
+            <Ionicons name="bulb" size={14} color={colors.warning} /> {t('accessibility.tips')}
           </Text>
           <InfoRow icon="information-circle" text={'Use your device\'s built-in screen reader: Settings, Accessibility, TalkBack (Android) or VoiceOver (iOS)'} colors={colors} />
           <InfoRow icon="information-circle" text="Dynamic text will automatically scale with your device's font size settings if you use 'Medium' or above" colors={colors} />
@@ -342,7 +352,7 @@ export default function AccessibilitySettingsScreen({ navigation }: any) {
           <View style={[styles.resetBtn, { borderColor: colors.danger + '40' }]}>
             <Ionicons name="refresh-outline" size={18} color={colors.danger} />
             <Text style={[styles.resetBtnText, { color: colors.danger }]}>
-              Reset to Defaults
+              {t('accessibility.resetToDefaults')}
             </Text>
           </View>
         </AnimatedPressable>

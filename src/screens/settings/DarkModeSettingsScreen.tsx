@@ -26,6 +26,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeStore, type ThemeOverride } from '../../store/themeStore';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 // ──── Options ──────────────────────────────────────────────────────────────
@@ -33,8 +34,8 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 interface OptionConfig {
   key: ThemeOverride;
   icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  description: string;
+  labelKey: string;
+  descKey: string;
   previewDark: string;   // Background color for preview
   previewLight: string;  // Text color for preview
 }
@@ -43,24 +44,24 @@ const OPTIONS: OptionConfig[] = [
   {
     key: 'system',
     icon: 'phone-portrait',
-    label: 'System Default',
-    description: 'Automatically follows your device theme settings',
+    labelKey: 'darkMode.systemDefault',
+    descKey: 'darkMode.systemDefaultDesc',
     previewDark: '#1E293B',
     previewLight: '#F8FAFC',
   },
   {
     key: 'dark',
     icon: 'moon',
-    label: 'Dark Mode',
-    description: 'Dark theme — easy on the eyes in low light',
+    labelKey: 'darkMode.dark',
+    descKey: 'darkMode.darkDesc',
     previewDark: '#0A0D14',
     previewLight: '#E0E6ED',
   },
   {
     key: 'light',
     icon: 'sunny',
-    label: 'Light Mode',
-    description: 'Light theme — crisp and bright for daytime',
+    labelKey: 'darkMode.light',
+    descKey: 'darkMode.lightDesc',
     previewDark: '#F8FAFC',
     previewLight: '#0F172A',
   },
@@ -70,6 +71,7 @@ const OPTIONS: OptionConfig[] = [
 
 export default function DarkModeSettingsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const { colors, toggleTheme, setOverride, isDark, mode } = useTheme();
   const override = useThemeStore((s) => s.override);
   const styles = createStyles(colors);
@@ -81,7 +83,7 @@ export default function DarkModeSettingsScreen({ navigation }: any) {
         <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Appearance</Text>
+        <Text style={styles.headerTitle}>{t('darkMode.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -95,7 +97,7 @@ export default function DarkModeSettingsScreen({ navigation }: any) {
             <View style={styles.previewBarContent}>
               <Ionicons name={isDark ? 'moon' : 'sunny'} size={16} color={colors.text} />
               <Text style={[styles.previewBarText, { color: colors.text }]}>
-                {isDark ? 'Dark Mode' : 'Light Mode'} — Active
+                {(isDark ? t('darkMode.dark') : t('darkMode.light'))} — {t('darkMode.active')}
               </Text>
             </View>
             <View style={[styles.modeDot, { backgroundColor: isDark ? '#3B82F6' : '#3B82F6' }]} />
@@ -119,7 +121,7 @@ export default function DarkModeSettingsScreen({ navigation }: any) {
         </View>
 
         {/* ── Option Cards ── */}
-        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>CHOOSE YOUR THEME</Text>
+        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t('darkMode.chooseTheme')}</Text>
 
         {OPTIONS.map((opt) => {
           const isSelected = override === opt.key;
@@ -150,10 +152,10 @@ export default function DarkModeSettingsScreen({ navigation }: any) {
               {/* Info */}
               <View style={styles.optionInfo}>
                 <Text style={[styles.optionLabel, { color: colors.text }]}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </Text>
                 <Text style={[styles.optionDesc, { color: colors.textMuted }]}>
-                  {opt.description}
+                  {t(opt.descKey)}
                 </Text>
               </View>
 
@@ -176,8 +178,7 @@ export default function DarkModeSettingsScreen({ navigation }: any) {
         <View style={[styles.tipCard, { backgroundColor: 'rgba(59, 130, 246, 0.05)', borderColor: 'rgba(59, 130, 246, 0.15)' }]}>
           <Ionicons name="bulb" size={16} color="#60A5FA" />
           <Text style={styles.tipText}>
-            Choose "System Default" to automatically switch between dark and light
-            modes based on your device settings.
+            {t('darkMode.tip')}
           </Text>
         </View>
 

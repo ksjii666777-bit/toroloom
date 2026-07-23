@@ -262,4 +262,192 @@ router.post('/verify', async (req: Request, res: Response) => {
   }
 });
 
+// ============ POST /api/payments/create-subscription ============
+// Creates a Razorpay subscription (recurring payment) for UPI AutoPay
+
+router.post('/create-subscription', async (req: Request, res: Response) => {
+  try {
+    const { planId, billingPeriod = 'monthly', totalCount, tenantId } = req.body;
+
+    const planAmounts = PLAN_AMOUNTS[planId];
+    if (!planAmounts) {
+      res.status(400).json({ error: 'Invalid plan ID' });
+      return;
+    }
+
+    const amount = billingPeriod === 'yearly' ? planAmounts.yearly : planAmounts.monthly;
+    const maxCount = totalCount || 12; // Default: 12 billing cycles
+
+    const razorpay = getRazorpayClient(tenantId);
+    const { keyId } = resolveRazorpayKeys(tenantId);
+
+    if (razorpay && keyId) {
+      // Create a plan first, then the subscription
+      // This avoids the empty plan_id issue since Razorpay requires a valid plan
+      const razorpayPlan = await razorpay.plans.create({
+        period: billingPeriod === 'yearly' ? 'yearly' : 'monthly',
+        interval: 1,
+        item: {
+          name: `Toroloom ${planId === 'plan_pro' ? 'Pro' : 'Elite'} (${billingPeriod})`,
+          amount,
+          currency: 'INR',
+          description: `Toroloom ${planId} ${billingPeriod} subscription`,
+        },
+        notes: {
+          planId,
+          billingPeriod,
+          type: 'subscription_plan',
+        },
+      });
+
+      const subscription = await razorpay.subscriptions.create({
+        plan_id: razorpayPlan.id,
+        total_count: maxCount,
+        quantity: 1,
+        customer_notify: true,
+        addons: [],
+        notes: {
+          userId: req.user!.userId,
+          planId,
+          billingPeriod,
+          type: 'subscription',
+          tenantId: tenantId || 'default',
+        },
+      });
+
+      res.json({
+        subscriptionId: subscription.id,
+        keyId: keyId,
+        status: subscription.status,
+        currentStart: subscription.current_start,
+        currentEnd: subscription.current_end,
+        endedAt: subscription.ended_at,
+        chargeAt: subscription.charge_at,
+        startAt: subscription.start_at,
+        totalCount: subscription.total_count,
+        paidCount: subscription.paid_count,
+      });
+    } else {
+      // Development fallback — return mock subscription
+      res.json({
+        subscriptionId: `sub_mock_${Date.now()}`,
+        keyId: keyId || 'rzp_test_placeholder',
+        status: 'created',
+        currentStart: Math.floor(Date.now() / 1000),
+        currentEnd: Math.floor(Date.now() / 1000) + 30 * 24 * 3600,
+        totalCount: maxCount,
+        paidCount: 0,
+      });
+    }
+  } catch (error: unknown) {
+    console.error('[Payments] create-subscription error:', error);
+    res.status(500).json({ error: (error as Error).message || 'Failed to create subscription' });
+  }
+});
+
+// ============ POST /api/payments/create-mandate ============
+// Creates a Razorpay UPI mandate for UPI AutoPay recurring payments
+
+router.post('/create-mandate', async (req: Request, res: Response) => {
+  try {
+    const { planId, billingPeriod = 'monthly', customerName, customerEmail, customerContact, tenantId } = req.body;
+
+    const planAmounts = PLAN_AMOUNTS[planId];
+    if (!planAmounts) {
+      res.status(400).json({ error: 'Invalid plan ID' });
+      return;
+    }
+
+    const amount = billingPeriod === 'yearly' ? planAmounts.yearly : planAmounts.monthly;
+
+    const razorpay = getRazorpayClient(tenantId);
+    const { keyId } = resolveRazorpayKeys(tenantId);
+
+    if (razorpay && keyId) {
+      // Create an authorization order that will capture the mandate
+      const order = await razorpay.orders.create({
+        amount,
+        currency: 'INR',
+        receipt: `mandate_${planId}_${Date.now()}`,
+        notes: {
+          userId: req.user!.userId,
+          planId,
+          billingPeriod,
+          type: 'mandate_setup',
+          tenantId: tenantId || 'default',
+        },
+      });
+
+      res.json({
+        orderId: order.id,
+        keyId: keyId,
+        amount: order.amount,
+        currency: order.currency,
+        method: 'upi',
+      });
+    } else {
+      // Development fallback — return mock mandate setup
+      res.json({
+        orderId: `order_mandate_mock_${Date.now()}`,
+        keyId: keyId || 'rzp_test_placeholder',
+        amount,
+        currency: 'INR',
+        method: 'upi',
+        mandateId: `mand_mock_${Date.now()}`,
+      });
+    }
+  } catch (error: unknown) {
+    console.error('[Payments] create-mandate error:', error);
+    res.status(500).json({ error: (error as Error).message || 'Failed to create mandate' });
+  }
+});
+
+// ============ POST /api/payments/create-paid-order ============
+// Creates a direct order for one-time payment (used for UPI app redirect)
+
+router.post('/create-paid-order', async (req: Request, res: Response) => {
+  try {
+    const { amount, currency = 'INR', receipt } = req.body;
+
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      res.status(400).json({ error: 'A valid positive amount is required' });
+      return;
+    }
+
+    const razorpay = getRazorpayClient();
+    const { keyId } = resolveRazorpayKeys();
+
+    if (razorpay && keyId) {
+      const order = await razorpay.orders.create({
+        amount,
+        currency,
+        receipt: receipt || `paid_${Date.now()}`,
+        notes: {
+          userId: req.user!.userId,
+          type: 'direct_payment',
+        },
+      });
+
+      res.json({
+        orderId: order.id,
+        keyId: keyId,
+        amount: order.amount,
+        currency: order.currency,
+        status: order.status,
+      });
+    } else {
+      res.json({
+        orderId: `order_mock_${Date.now()}`,
+        keyId: keyId || 'rzp_test_placeholder',
+        amount,
+        currency,
+        status: 'created',
+      });
+    }
+  } catch (error: unknown) {
+    console.error('[Payments] create-paid-order error:', error);
+    res.status(500).json({ error: (error as Error).message || 'Failed to create paid order' });
+  }
+});
+
 export default router;

@@ -279,6 +279,96 @@ describe('OnboardingStore — skipOnboarding', () => {
   });
 });
 
+// ==================== markStepInteracted ====================
+
+describe('OnboardingStore — markStepInteracted', () => {
+  beforeEach(() => {
+    useOnboardingStore.setState({
+      interactedSteps: {},
+    });
+  });
+
+  it('marks a step as interacted', () => {
+    useOnboardingStore.getState().markStepInteracted('welcome');
+    expect(useOnboardingStore.getState().interactedSteps.welcome).toBe(true);
+  });
+
+  it('can mark multiple steps independently', () => {
+    useOnboardingStore.getState().markStepInteracted('portfolio');
+    useOnboardingStore.getState().markStepInteracted('markets');
+    const state = useOnboardingStore.getState();
+    expect(state.interactedSteps.portfolio).toBe(true);
+    expect(state.interactedSteps.markets).toBe(true);
+    expect(state.interactedSteps.welcome).toBeUndefined();
+  });
+
+  it('is idempotent — calling twice has same result', () => {
+    useOnboardingStore.getState().markStepInteracted('trading');
+    useOnboardingStore.getState().markStepInteracted('trading');
+    expect(useOnboardingStore.getState().interactedSteps.trading).toBe(true);
+  });
+
+  it('does not affect stepDemoCompleted', () => {
+    useOnboardingStore.getState().markStepInteracted('broker');
+    expect(useOnboardingStore.getState().stepDemoCompleted.broker).toBeUndefined();
+  });
+});
+
+// ==================== markStepDemoCompleted ====================
+
+describe('OnboardingStore — markStepDemoCompleted', () => {
+  beforeEach(() => {
+    useOnboardingStore.setState({
+      interactedSteps: {},
+      stepDemoCompleted: {},
+    });
+  });
+
+  it('marks a step demo as completed', () => {
+    useOnboardingStore.getState().markStepDemoCompleted('welcome');
+    expect(useOnboardingStore.getState().stepDemoCompleted.welcome).toBe(true);
+  });
+
+  it('also marks the step as interacted implicitly', () => {
+    expect(useOnboardingStore.getState().interactedSteps.portfolio).toBeUndefined();
+    useOnboardingStore.getState().markStepDemoCompleted('portfolio');
+    expect(useOnboardingStore.getState().interactedSteps.portfolio).toBe(true);
+  });
+
+  it('can complete multiple steps independently', () => {
+    useOnboardingStore.getState().markStepDemoCompleted('welcome');
+    useOnboardingStore.getState().markStepDemoCompleted('markets');
+    useOnboardingStore.getState().markStepDemoCompleted('learn');
+    const state = useOnboardingStore.getState();
+    expect(state.stepDemoCompleted.welcome).toBe(true);
+    expect(state.stepDemoCompleted.markets).toBe(true);
+    expect(state.stepDemoCompleted.learn).toBe(true);
+    expect(state.stepDemoCompleted.trading).toBeUndefined();
+  });
+
+  it('does not mark unrelated steps as completed', () => {
+    useOnboardingStore.getState().markStepDemoCompleted('trading');
+    expect(useOnboardingStore.getState().stepDemoCompleted.welcome).toBeUndefined();
+    expect(useOnboardingStore.getState().stepDemoCompleted.portfolio).toBeUndefined();
+  });
+
+  it('is idempotent — calling twice on same step is fine', () => {
+    useOnboardingStore.getState().markStepDemoCompleted('broker');
+    useOnboardingStore.getState().markStepDemoCompleted('broker');
+    expect(useOnboardingStore.getState().stepDemoCompleted.broker).toBe(true);
+  });
+
+  it('resetOnboarding clears stepDemoCompleted', async () => {
+    useOnboardingStore.getState().markStepDemoCompleted('welcome');
+    useOnboardingStore.getState().markStepDemoCompleted('markets');
+    expect(Object.keys(useOnboardingStore.getState().stepDemoCompleted).length).toBeGreaterThan(0);
+
+    await useOnboardingStore.getState().resetOnboarding();
+    expect(useOnboardingStore.getState().stepDemoCompleted).toEqual({});
+    expect(useOnboardingStore.getState().interactedSteps).toEqual({});
+  });
+});
+
 // ==================== resetOnboarding ====================
 
 describe('OnboardingStore — resetOnboarding', () => {

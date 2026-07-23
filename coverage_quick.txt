@@ -1,0 +1,1254 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.7 [39m[90mC:/Users/Karan/Desktop/New folder/Toroloom[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Initial State[2m > [22mhas empty freshness for all 8 namespaces[32m 9[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Initial State[2m > [22mstarts with empty pending state[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Initial State[2m > [22mstarts with no sync in progress[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Initial State[2m > [22mstarts with empty sync history and conflicts[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — markSynced[2m > [22mupdates freshness for the given namespace[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — markSynced[2m > [22mdoes not affect other namespaces[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — markSynced[2m > [22mupdates lastSyncAttemptAt and lastSyncResult[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — markSynced[2m > [22mcan mark all namespaces independently[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — refreshFreshness[2m > [22msets freshness to empty when no cache entries exist[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — refreshFreshness[2m > [22mreads freshness from cache entries[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — refreshFreshness[2m > [22mmarks stale when cache entry is older than 5 minutes[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — refreshFreshness[2m > [22mhandles mixed cache availability across namespaces[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — setPendingGroups[2m > [22msets pending groups and total[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — setPendingGroups[2m > [22moverwrites previous pending groups[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Sync State[2m > [22msetSyncing toggles isSyncing[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Sync State[2m > [22msetSyncResult updates result and timestamp[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Sync State[2m > [22msetSyncResult accepts all result types[32m 5[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — recordSyncAttempt[2m > [22madds a sync entry to history[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — recordSyncAttempt[2m > [22mprepends new entries[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — recordSyncAttempt[2m > [22mcaps history at 20 entries[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — recordSyncAttempt[2m > [22mgenerates unique IDs for each entry[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22maddConflict[2m > [22madds a new conflict with pending status[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22maddConflict[2m > [22maccumulates multiple conflicts[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22mresolveConflict[2m > [22mmarks a conflict as resolved_keep_local[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22mresolveConflict[2m > [22mmarks a conflict as resolved_use_server[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22mresolveConflict[2m > [22mmarks a conflict as dismissed[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22mresolveConflict[2m > [22mdoes nothing for non-existent conflict ID[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22mresolveConflict[2m > [22monly affects the targeted conflict[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22mclearResolvedConflicts[2m > [22mremoves all resolved/dismissed conflicts, keeps pending[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22mclearResolvedConflicts[2m > [22mkeeps all conflicts when none are resolved[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — Conflict Management[2m > [22mclearResolvedConflicts[2m > [22mhandles empty conflicts gracefully[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — computeSyncStatus[2m > [22mreturns online when nothing is pending and no conflicts[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — computeSyncStatus[2m > [22mreturns syncing when isSyncing is true[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — computeSyncStatus[2m > [22mreturns conflict when there are pending conflicts[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — computeSyncStatus[2m > [22mreturns conflict even when isSyncing is true (conflict takes priority)[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — computeSyncStatus[2m > [22mreturns pending when there are pending mutations[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — computeSyncStatus[2m > [22mreturns online after all pending are cleared[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — computeSyncStatus[2m > [22mresets to online via resetOfflineStore[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — resetOfflineStore[2m > [22mresets sync history, conflicts, and sync status[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/offlineStore.test.ts[2m > [22mOfflineStore — resetOfflineStore[2m > [22mpreserves freshness and pending data[32m 1[2mms[22m[39m
+[90mstdout[2m | src/__tests__/mutualFundStore.test.ts[2m > [22m[2mMutualFundStore — Fund Operations (local fallback)[2m > [22m[2minvests in a fund (lump sum) without throwing
+[22m[39m[Toroloom] [MutualFunds] Invested ₹10000 in fund mf1
+
+[90mstdout[2m | src/__tests__/mutualFundStore.test.ts[2m > [22m[2mMutualFundStore — Fund Operations (local fallback)[2m > [22m[2mdoes NOT change sipPlans when investing lump sum
+[22m[39m[Toroloom] [MutualFunds] Invested ₹10000 in fund mf1
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mcreates a new application with submitted status
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 3 lots @ ₹110 via test@upi
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — loadCachedCourses[2m > [22m[2mrestores courses from offline cache when available
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mcomputes bidQuantity as bidLots * lotSize
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 3 lots @ ₹110 via test@upi
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mcomputes totalAmount as bidQuantity * bidPrice
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 3 lots @ ₹110 via test@upi
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mprepends the new application to the list
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 1 lots @ ₹100 via user@upi
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mpreserves existing seed applications
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 1 lots @ ₹100 via user@upi
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mgenerates unique application IDs
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 1 lots @ ₹100 via u1@upi
+[Toroloom] [IPOStore] Applied for Test IPO Company: 2 lots @ ₹110 via u2@upi
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mcopies logo and sector from the IPO item
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 1 lots @ ₹100 via u@upi
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI failure fallback[2m > [22m[2msets isLoading during fetch and clears it on failure
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI failure fallback[2m > [22m[2msets isLoading during fetch and clears it on failure
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mhandles single lot application
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 1 lots @ ₹100 via u@upi
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI failure fallback[2m > [22m[2mpreserves existing courses when API fails
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — applyForIPO[2m > [22m[2mhandles large lot count
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 100 lots @ ₹120 via u@upi
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI failure fallback[2m > [22m[2mpreserves existing courses when API fails
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI failure fallback[2m > [22m[2mfalls back to stale cache when API fails and cache exists
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstdout[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI failure fallback[2m > [22m[2mfalls back to stale cache when API fails and cache exists
+[22m[39m[Toroloom] [Education] Serving stale cached courses
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI failure fallback[2m > [22m[2mfalls back to stale cache when API fails and cache exists
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI success[2m > [22m[2mloads courses from API and caches them
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI success[2m > [22m[2mloads courses from API and caches them
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI success[2m > [22m[2mdoes not fall back to cache when API succeeds
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — getApplicationsForIPO[2m > [22m[2mreturns multiple applications for the same IPO
+[22m[39m[Toroloom] [IPOStore] Applied for Vishal Mega Mart: 2 lots @ ₹360 via test@upi
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchCourses[2m > [22m[2mAPI success[2m > [22m[2mdoes not fall back to cache when API succeeds
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchLesson[2m > [22m[2mAPI failure fallback[2m > [22m[2msets isLoading during fetch and clears it on failure
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchLesson[2m > [22m[2mAPI failure fallback[2m > [22m[2msets isLoading during fetch and clears it on failure
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchLesson[2m > [22m[2mAPI failure fallback[2m > [22m[2mfalls back to mock lesson when API fails for known lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchLesson[2m > [22m[2mAPI failure fallback[2m > [22m[2mfalls back to mock lesson when API fails for known lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchLesson[2m > [22m[2mAPI failure fallback[2m > [22m[2mleaves currentLesson null for unknown lesson ID
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchLesson[2m > [22m[2mAPI failure fallback[2m > [22m[2mleaves currentLesson null for unknown lesson ID
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchLesson[2m > [22m[2mAPI success[2m > [22m[2mloads lesson from API when available
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — fetchLesson[2m > [22m[2mAPI success[2m > [22m[2mloads lesson from API when available
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — setCurrentLesson[2m > [22m[2msets the current lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — getApplicationStats[2m > [22m[2mupdates stats after a new application
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 2 lots @ ₹100 via u@upi
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — setCurrentLesson[2m > [22m[2mclears the current lesson when set to null
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mmarks a lesson as complete in lessonProgress
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2maccumulates progress across multiple lessons
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2maccumulates progress across multiple lessons
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2maccumulates progress across multiple lessons
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — Edge Cases[2m > [22m[2mapplyForIPO followed by updateAllotment — full lifecycle
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 5 lots @ ₹110 via user@upi
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — Edge Cases[2m > [22m[2mapplyForIPO for an existing IPO from the mock list
+[22m[39m[Toroloom] [IPOStore] Applied for LG Electronics India: 2 lots @ ₹475 via rahul@upi
+
+[90mstdout[2m | src/__tests__/ipoStore.test.ts[2m > [22m[2mIPOStore — Edge Cases[2m > [22m[2mmultiple applications accumulate correctly
+[22m[39m[Toroloom] [IPOStore] Applied for Test IPO Company: 1 lots @ ₹100 via a@upi
+[Toroloom] [IPOStore] Applied for Test IPO Company: 2 lots @ ₹110 via b@upi
+[Toroloom] [IPOStore] Applied for Test IPO Company: 3 lots @ ₹120 via c@upi
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mdoes not throw when called with unknown ID
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mupdates course progress percentage based on total lessons
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mreaches 100% when all 5 lessons completed
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mreaches 100% when all 5 lessons completed
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mreaches 100% when all 5 lessons completed
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mreaches 100% when all 5 lessons completed
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mreaches 100% when all 5 lessons completed
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mcaps progress at 100%
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mcaps progress at 100%
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mcaps progress at 100%
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mcaps progress at 100%
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mcaps progress at 100%
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — markLessonComplete[2m > [22m[2mcaps progress at 100%
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Initial State[2m > [22mstarts with empty state when reset[32m 6[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fund Operations (local fallback)[2m > [22minvests in a fund (lump sum) without throwing[32m 5[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fund Operations (local fallback)[2m > [22mdoes NOT change sipPlans when investing lump sum[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fund Operations (local fallback)[2m > [22mstartSIP[2m > [22mstarts a monthly SIP with local fallback[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fund Operations (local fallback)[2m > [22mstartSIP[2m > [22mstarts SIP with quarterly frequency[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fund Operations (local fallback)[2m > [22mstartSIP[2m > [22mstarts multiple SIPs[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fund Operations (local fallback)[2m > [22mstartSIP[2m > [22mhandles non-existent fund gracefully (no SIP added)[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fund Operations (local fallback)[2m > [22mstartSIP[2m > [22mgenerates SIP ids with sip_ prefix[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mmodifySIP[2m > [22mupdates amount locally[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mmodifySIP[2m > [22mupdates frequency locally[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mmodifySIP[2m > [22mupdates both amount and frequency together[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mmodifySIP[2m > [22mdoes nothing for non-existent SIP id[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mmodifySIP[2m > [22mpreserves id, fundId, fundName when updating[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mpauseSIP[2m > [22mpauses a running SIP (sets nextDate to PAUSED)[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mpauseSIP[2m > [22mleaves sipPlans length unchanged when pausing[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mpauseSIP[2m > [22mdoes nothing for non-existent SIP[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mresumeSIP[2m > [22msets a future nextDate after resuming a paused SIP[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mresumeSIP[2m > [22mresumes a SIP that is already running (overwrites nextDate)[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mresumeSIP[2m > [22mdoes nothing for non-existent SIP[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mdeleteSIP[2m > [22mdeletes an existing SIP[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mdeleteSIP[2m > [22mdoes nothing when deleting non-existent SIP[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — SIP Lifecycle (local fallback)[2m > [22mdeleteSIP[2m > [22monly removes the targeted SIP when multiple exist[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22menableStepUp[2m > [22menables yearly step-up with correct percent[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22menableStepUp[2m > [22msets baseAmount to current SIP amount[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22menableStepUp[2m > [22mstarts currentStep at 0[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22menableStepUp[2m > [22mcomputes projectedAmount based on step-up params[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22menableStepUp[2m > [22menables half_yearly step-up[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22menableStepUp[2m > [22msets a future nextStepDate[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22menableStepUp[2m > [22mdoes nothing for non-existent SIP[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mmodifyStepUp[2m > [22mmodifies step-up percent[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mmodifyStepUp[2m > [22mmodifies step-up frequency[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mmodifyStepUp[2m > [22mmodifies both percent and frequency together[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mmodifyStepUp[2m > [22mrecomputes projectedAmount after modification[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mmodifyStepUp[2m > [22mdoes nothing when SIP has no stepUp config[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mmodifyStepUp[2m > [22mdoes nothing for non-existent SIP[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mdisableStepUp[2m > [22mremoves stepUp config from the SIP[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mdisableStepUp[2m > [22mkeeps the SIP running after disabling step-up[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Step-Up Config (local fallback)[2m > [22mdisableStepUp[2m > [22mdoes nothing for non-existent SIP[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fetch Operations[2m > [22msets loading state during fetchFunds call[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fetch Operations[2m > [22msets loading false after fetchFunds completes (rejected)[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fetch Operations[2m > [22mfetchSIPs does not throw[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — Fetch Operations[2m > [22msets loading false after fetchFunds resolves successfully[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mfetchFunds: loads funds from API[32m 21[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mfetchSIPs: loads SIPs from API[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mstartSIP: creates SIP via API when available[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mmodifySIP: updates SIP via API when available[32m 10[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Initial State[2m > [22mstarts with empty state when reset[32m 7[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — loadCachedCourses[2m > [22mrestores courses from offline cache when available[32m 5[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — loadCachedCourses[2m > [22mdoes not change courses when cache is empty[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — loadCachedCourses[2m > [22mleaves courses unchanged when cache load fails[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchCourses[2m > [22mAPI failure fallback[2m > [22msets isLoading during fetch and clears it on failure[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchCourses[2m > [22mAPI failure fallback[2m > [22mpreserves existing courses when API fails[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchCourses[2m > [22mAPI failure fallback[2m > [22mfalls back to stale cache when API fails and cache exists[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchCourses[2m > [22mAPI success[2m > [22mloads courses from API and caches them[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchCourses[2m > [22mAPI success[2m > [22mdoes not fall back to cache when API succeeds[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchLesson[2m > [22mAPI failure fallback[2m > [22msets isLoading during fetch and clears it on failure[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchLesson[2m > [22mAPI failure fallback[2m > [22mfalls back to mock lesson when API fails for known lesson[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchLesson[2m > [22mAPI failure fallback[2m > [22mleaves currentLesson null for unknown lesson ID[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — fetchLesson[2m > [22mAPI success[2m > [22mloads lesson from API when available[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — setCurrentLesson[2m > [22msets the current lesson[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — setCurrentLesson[2m > [22mclears the current lesson when set to null[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — enrollInCourse[2m > [22mdoes not throw[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — enrollInCourse[2m > [22mdoes not modify courses (no-op for now)[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — markLessonComplete[2m > [22mmarks a lesson as complete in lessonProgress[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — markLessonComplete[2m > [22maccumulates progress across multiple lessons[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — markLessonComplete[2m > [22mdoes not throw when called with unknown ID[32m 16[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — markLessonComplete[2m > [22mupdates course progress percentage based on total lessons[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — markLessonComplete[2m > [22mreaches 100% when all 5 lessons completed[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — markLessonComplete[2m > [22mcaps progress at 100%[32m 5[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Initial State[2m > [22mloads IPOs from mock data[32m 5[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Initial State[2m > [22mloads 3 seed applications[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Initial State[2m > [22mstarts with isLoading false[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Initial State[2m > [22mstarts with selectedIPO null[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Initial State[2m > [22mseed applications have different statuses[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — fetchIPOs[2m > [22msets isLoading false after fetch completes[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — fetchIPOs[2m > [22mdoes not change the existing IPOs array[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mcreates a new application with submitted status[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mcomputes bidQuantity as bidLots * lotSize[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mcomputes totalAmount as bidQuantity * bidPrice[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mprepends the new application to the list[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mpreserves existing seed applications[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mgenerates unique application IDs[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mcopies logo and sector from the IPO item[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mhandles single lot application[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — applyForIPO[2m > [22mhandles large lot count[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — updateAllotment[2m > [22mupdates application status to allotted[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — updateAllotment[2m > [22mupdates application status to not_allotted[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — updateAllotment[2m > [22mpreserves existing fields when optional fields are not provided[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — updateAllotment[2m > [22mdoes nothing for non-existent application[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — updateAllotment[2m > [22monly updates the targeted application[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationsForIPO[2m > [22mreturns applications for a specific IPO[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationsForIPO[2m > [22mreturns multiple applications for the same IPO[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationsForIPO[2m > [22mreturns empty array when no applications match[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mcounts total applications[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mcounts submitted applications[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mcounts allotted applications[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mcounts not_allotted applications[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mcomputes totalInvestment across all applications[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mcomputes profitFromAllotted from allotted applications[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mcounts pending applications (pending + pending_allotment status)[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mupdates stats after a new application[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — getApplicationStats[2m > [22mupdates stats after allotment status change[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — clearSeedData[2m > [22mempties the applications array[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — clearSeedData[2m > [22mdoes not affect IPOs list[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — setSelectedIPO[2m > [22msets selectedIPO to the given IPO[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — setSelectedIPO[2m > [22mclears selectedIPO when passing null[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — toggleBookmark[2m > [22mtoggles isBookmarked from false to true[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — toggleBookmark[2m > [22mtoggles isBookmarked from true to false[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — toggleBookmark[2m > [22mdoes nothing for non-existent IPO[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — toggleBookmark[2m > [22monly toggles the targeted IPO[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Edge Cases[2m > [22mapplyForIPO followed by updateAllotment — full lifecycle[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Edge Cases[2m > [22mapplyForIPO for an existing IPO from the mock list[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Edge Cases[2m > [22mmultiple applications accumulate correctly[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Edge Cases[2m > [22mgetApplicationStats with zero applications after clear[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/ipoStore.test.ts[2m > [22mIPOStore — Edge Cases[2m > [22mtoggleBookmark preserves other fields[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mpauseSIP: pauses via API when available[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mresumeSIP: resumes via API when available[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mdeleteSIP: deletes via API when available[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22menableStepUp: enables step-up via API when available[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mmodifyStepUp: modifies step-up via API when available[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mdisableStepUp: disables step-up via API when available[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/mutualFundStore.test.ts[2m > [22mMutualFundStore — API Success Paths[2m > [22mdeleteSIP: only removes the targeted SIP[32m 2[2mms[22m[39m
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — updateVideoProgress[2m > [22m[2mrecords video progress for a lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — updateVideoProgress[2m > [22m[2mmarks video as completed when watchedPercent >= 95
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — updateVideoProgress[2m > [22m[2mdoes NOT mark as completed when watchedPercent < 95
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — updateVideoProgress[2m > [22m[2mstores separate progress for different lessons
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — updateVideoProgress[2m > [22m[2moverwrites existing progress for the same lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — updateVideoProgress[2m > [22m[2msets lessonId on the progress record
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2maddVideoBookmark[2m > [22m[2madds a bookmark to a lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2maddVideoBookmark[2m > [22m[2massigns unique bookmark IDs
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2maddVideoBookmark[2m > [22m[2madds bookmarks to different lessons independently
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2maddVideoBookmark[2m > [22m[2maccumulates multiple bookmarks for the same lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2mdeleteVideoBookmark[2m > [22m[2mremoves a specific bookmark by its ID
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2mdeleteVideoBookmark[2m > [22m[2mremoves a specific bookmark by its ID
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2mdeleteVideoBookmark[2m > [22m[2mdoes nothing when bookmark ID does not exist
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2mdeleteVideoBookmark[2m > [22m[2mdoes nothing when bookmark ID does not exist
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2mdeleteVideoBookmark[2m > [22m[2mdoes nothing for a lesson with no bookmarks
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2mdeleteVideoBookmark[2m > [22m[2mdoes nothing for a lesson with no bookmarks
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2mdeleteVideoBookmark[2m > [22m[2mremoves all bookmarks one by one
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Video Bookmarks[2m > [22m[2mdeleteVideoBookmark[2m > [22m[2mremoves all bookmarks one by one
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mrecordQuizAttempt[2m > [22m[2mrecords a quiz attempt for a lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mrecordQuizAttempt[2m > [22m[2maccumulates multiple attempts for the same lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mrecordQuizAttempt[2m > [22m[2mstores attempts for different lessons separately
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mgetBestQuizResult[2m > [22m[2mreturns the only attempt when there is one
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mgetBestQuizResult[2m > [22m[2mreturns the attempt with highest percentage
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mgetQuizAttempts[2m > [22m[2mreturns all attempts for a lesson
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mgetOverallQuizStats[2m > [22m[2mcomputes average score across all attempts
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mgetOverallQuizStats[2m > [22m[2mcounts passed quizzes
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Quiz History[2m > [22m[2mgetOverallQuizStats[2m > [22m[2mcounts unique quiz IDs across lessons
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Certificates[2m > [22m[2mgenerateCertificate[2m > [22m[2mgenerates certificate with grade and serial number on success
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Certificates[2m > [22m[2mgenerateCertificate[2m > [22m[2mgenerates certificate with grade and serial number on success
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — scheduleDailyReminder[2m > [22mdoes not throw when called[32m 78[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — updateVideoProgress[2m > [22mrecords video progress for a lesson[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — updateVideoProgress[2m > [22mmarks video as completed when watchedPercent >= 95[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — updateVideoProgress[2m > [22mdoes NOT mark as completed when watchedPercent < 95[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — updateVideoProgress[2m > [22mstores separate progress for different lessons[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — updateVideoProgress[2m > [22moverwrites existing progress for the same lesson[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — updateVideoProgress[2m > [22msets lessonId on the progress record[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Video Bookmarks[2m > [22maddVideoBookmark[2m > [22madds a bookmark to a lesson[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Video Bookmarks[2m > [22maddVideoBookmark[2m > [22massigns unique bookmark IDs[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Video Bookmarks[2m > [22maddVideoBookmark[2m > [22madds bookmarks to different lessons independently[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Video Bookmarks[2m > [22maddVideoBookmark[2m > [22maccumulates multiple bookmarks for the same lesson[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Video Bookmarks[2m > [22mdeleteVideoBookmark[2m > [22mremoves a specific bookmark by its ID[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Video Bookmarks[2m > [22mdeleteVideoBookmark[2m > [22mdoes nothing when bookmark ID does not exist[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Video Bookmarks[2m > [22mdeleteVideoBookmark[2m > [22mdoes nothing for a lesson with no bookmarks[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Video Bookmarks[2m > [22mdeleteVideoBookmark[2m > [22mremoves all bookmarks one by one[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mrecordQuizAttempt[2m > [22mrecords a quiz attempt for a lesson[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mrecordQuizAttempt[2m > [22maccumulates multiple attempts for the same lesson[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mrecordQuizAttempt[2m > [22mstores attempts for different lessons separately[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetBestQuizResult[2m > [22mreturns undefined when no attempts exist[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetBestQuizResult[2m > [22mreturns the only attempt when there is one[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetBestQuizResult[2m > [22mreturns the attempt with highest percentage[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetQuizAttempts[2m > [22mreturns empty array when no attempts exist[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetQuizAttempts[2m > [22mreturns all attempts for a lesson[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetOverallQuizStats[2m > [22mreturns zeroes when no attempts exist[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetOverallQuizStats[2m > [22mcomputes average score across all attempts[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetOverallQuizStats[2m > [22mcounts passed quizzes[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Quiz History[2m > [22mgetOverallQuizStats[2m > [22mcounts unique quiz IDs across lessons[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — isCourseComplete[2m > [22mreturns false when no lessons are completed[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — isCourseComplete[2m > [22mreturns false when not all lessons are completed[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — isCourseComplete[2m > [22mreturns false for a course that does not exist in mockLessons[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Certificates[2m > [22mgetCertificateForCourse[2m > [22mreturns undefined when no certificate exists[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Certificates[2m > [22mgetCertificateForCourse[2m > [22mreturns the certificate when it exists[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Certificates[2m > [22mgenerateCertificate[2m > [22mreturns null when the course does not exist[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Certificates[2m > [22mgenerateCertificate[2m > [22mreturns existing certificate without re-generating[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Certificates[2m > [22mgenerateCertificate[2m > [22mreturns null when not all lessons are completed[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Certificates[2m > [22mgenerateCertificate[2m > [22mgenerates certificate with grade and serial number on success[32m 3[2mms[22m[39m
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Certificates[2m > [22m[2mgenerateCertificate[2m > [22m[2msets isGeneratingCertificate during generation
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Certificates[2m > [22m[2mgenerateCertificate[2m > [22m[2msets isGeneratingCertificate during generation
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Certificates[2m > [22m[2mgenerateCertificate[2m > [22m[2madds the certificate to the certificates array
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/educationStore.test.ts[2m > [22m[2mEducationStore — Certificates[2m > [22m[2mgenerateCertificate[2m > [22m[2madds the certificate to the certificates array
+[22m[39m[zustand persist middleware] Unable to update item 'toroloom-education', the given storage is currently unavailable.
+
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Header & Tabs[2m > [22m[2mrenders the header title
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Header & Tabs[2m > [22mrenders the header title[32m 119[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Certificates[2m > [22mgenerateCertificate[2m > [22msets isGeneratingCertificate during generation[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/educationStore.test.ts[2m > [22mEducationStore — Certificates[2m > [22mgenerateCertificate[2m > [22madds the certificate to the certificates array[32m 2[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Header & Tabs[2m > [22m[2mrenders the subtitle with counts
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Header & Tabs[2m > [22m[2mrenders the back button
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Header & Tabs[2m > [22mrenders the subtitle with counts[32m 67[2mms[22m[39m
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Header & Tabs[2m > [22mrenders the back button[32m 68[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Header & Tabs[2m > [22m[2mnavigates back when back button is pressed
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Header & Tabs[2m > [22m[2mrenders both tab buttons
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Header & Tabs[2m > [22mnavigates back when back button is pressed[32m 91[2mms[22m[39m
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Header & Tabs[2m > [22mrenders both tab buttons[32m 108[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Header & Tabs[2m > [22m[2mshows application count in My Apps tab
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Header & Tabs[2m > [22mshows application count in My Apps tab[32m 121[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Header & Tabs[2m > [22m[2mswitches to My Apps tab when pressed
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Header & Tabs[2m > [22mswitches to My Apps tab when pressed[32m 266[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Active IPOs Filters[2m > [22m[2mrenders all 5 filter chips
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Active IPOs Filters[2m > [22mrenders all 5 filter chips[32m 229[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Active IPOs Filters[2m > [22m[2mshows IPO count for active filter
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Active IPOs Filters[2m > [22mshows IPO count for active filter[32m 163[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Active IPOs Filters[2m > [22m[2mfilters IPOs when a different filter is selected
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Active IPOs Filters[2m > [22mfilters IPOs when a different filter is selected[32m 278[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Active IPOs Filters[2m > [22m[2mshows all IPOs when All filter is selected
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Active IPOs Filters[2m > [22mshows all IPOs when All filter is selected[33m 343[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders company name and sector
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders company name and sector[32m 274[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders price band
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders price band[33m 342[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders lot size
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders lot size[33m 336[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders min investment
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders min investment[33m 328[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders GMP with positive value
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders GMP with positive value[33m 378[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders expected listing price
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders expected listing price[33m 425[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders subscription details
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders subscription details[33m 354[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders Open and Listing dates
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders Open and Listing dates[33m 411[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders status badge for open IPO
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders status badge for open IPO[33m 506[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mrenders Apply via UPI button for open IPOs
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mrenders Apply via UPI button for open IPOs[33m 373[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mshows bookmarked icon for bookmarked IPOs
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mshows bookmarked icon for bookmarked IPOs[33m 369[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — IPO Card[2m > [22m[2mnavigates to IPO detail on card press
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — IPO Card[2m > [22mnavigates to IPO detail on card press[33m 414[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Bookmark Toggle[2m > [22m[2mtoggles bookmark when bookmark icon is pressed
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Bookmark Toggle[2m > [22mtoggles bookmark when bookmark icon is pressed[33m 873[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Bookmark Toggle[2m > [22m[2mshows bookmark-outline for non-bookmarked IPOs
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Bookmark Toggle[2m > [22mshows bookmark-outline for non-bookmarked IPOs[33m 506[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Empty IPO State[2m > [22m[2mshows empty state when no IPOs match
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Empty IPO State[2m > [22mshows empty state when no IPOs match[32m 264[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — My Apps Tab[2m > [22m[2mshows stat chips for application counts
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — My Apps Tab[2m > [22mshows stat chips for application counts[33m 630[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — My Apps Tab[2m > [22m[2mshows total application count in stats
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — My Apps Tab[2m > [22mshows total application count in stats[33m 721[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — My Apps Tab[2m > [22m[2mshows profit stat when profit exists
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — My Apps Tab[2m > [22mshows profit stat when profit exists[33m 773[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — My Apps Tab[2m > [22m[2mshows app filter chips for filtering applications
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — My Apps Tab[2m > [22mshows app filter chips for filtering applications[33m 627[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Application Card[2m > [22m[2mrenders company info for each application
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Application Card[2m > [22mrenders company info for each application[33m 569[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Application Card[2m > [22m[2mrenders bid details (lots, shares, price, amount)
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Application Card[2m > [22mrenders bid details (lots, shares, price, amount)[33m 1377[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Application Card[2m > [22m[2mrenders UPI ID for each application
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Application Card[2m > [22mrenders UPI ID for each application[33m 1491[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Application Card[2m > [22m[2mrenders application date
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Application Card[2m > [22mrenders application date[33m 1088[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Application Card[2m > [22m[2mrenders status badges for different statuses
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Application Card[2m > [22mrenders status badges for different statuses[33m 731[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Application Card[2m > [22m[2mshows allotment details for allotted applications
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Application Card[2m > [22mshows allotment details for allotted applications[33m 544[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Empty Applications State[2m > [22m[2mshows empty state when no applications exist
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Empty Applications State[2m > [22mshows empty state when no applications exist[33m 559[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Application Filters[2m > [22m[2mfilters by Allotted status
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Application Filters[2m > [22mfilters by Allotted status[33m 1171[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — Application Filters[2m > [22m[2mfilters by Not Allotted status
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — Application Filters[2m > [22mfilters by Not Allotted status[33m 1034[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mopens apply modal when Apply via UPI is pressed
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mopens apply modal when Apply via UPI is pressed[33m 1140[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mshows company info in the modal
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mshows company info in the modal[33m 1813[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mshows lot options in the modal
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mshows lot options in the modal[33m 1868[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mshows UPI ID input field
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mshows UPI ID input field[33m 879[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mshows summary with lot, shares, price, and total
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mshows summary with lot, shares, price, and total[33m 1190[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mshows the apply button with total amount
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mshows the apply button with total amount[33m 1610[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mshows info text about UPI amount blocking
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mshows info text about UPI amount blocking[33m 879[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mshows validation error for empty UPI ID
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mshows validation error for empty UPI ID[33m 1042[2mms[22m[39m
+[90mstdout[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2maccepts valid UPI input and submits application
+[22m[39m[Toroloom] [IPOStore] Applied for LG Electronics India: 1 lots @ ₹450 via user@hdfc
+
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2maccepts valid UPI input and submits application
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22maccepts valid UPI input and submits application[33m 2569[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mcloses modal when close button is pressed
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mcloses modal when close button is pressed[33m 1259[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mselects a different lot count
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mselects a different lot count[33m 1241[2mms[22m[39m
+[90mstderr[2m | src/__tests__/IPODashboardScreen.test.tsx[2m > [22m[2mIPODashboardScreen — UPI Apply Modal[2m > [22m[2mswitches between Cut-off and Higher price
+[22m[39mreact-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ [32m✓[39m src/__tests__/IPODashboardScreen.test.tsx[2m > [22mIPODashboardScreen — UPI Apply Modal[2m > [22mswitches between Cut-off and Higher price[33m 1795[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[32m251 passed[39m[22m[90m (251)[39m
+[2m   Start at [22m 20:26:34
+[2m   Duration [22m 84.26s[2m (transform 3.94s, setup 615ms, import 5.79s, tests 37.08s, environment 2ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |    7.82 |     5.74 |    7.29 |    7.87 |                   
+ components        |       0 |        0 |       0 |       0 |                   
+  ...aleButton.tsx |       0 |      100 |       0 |       0 | 40-60             
+  AppContent.tsx   |       0 |        0 |       0 |       0 | 21-94             
+  AvatarWidget.tsx |       0 |        0 |       0 |       0 | 32-261            
+  ...ckOverlay.tsx |       0 |        0 |       0 |       0 | 48-278            
+  ...tickChart.tsx |       0 |        0 |       0 |       0 | 26-1094           
+  ...airContext.ts |       0 |      100 |       0 |       0 | 10-15             
+  ...adingGate.tsx |       0 |        0 |       0 |       0 | 10-25             
+  ...ckOverlay.tsx |       0 |        0 |       0 |       0 | 31-298            
+  MarketCard.tsx   |       0 |        0 |       0 |       0 | 17-63             
+  PnLChart.tsx     |       0 |        0 |       0 |       0 | 28-264            
+  ...ioHolding.tsx |       0 |        0 |       0 |       0 | 17-80             
+  StockChart.tsx   |       0 |        0 |       0 |       0 | 32-198            
+  StockItem.tsx    |       0 |        0 |       0 |       0 | 21-74             
+  ...ndicators.tsx |       0 |        0 |       0 |       0 | 16-719            
+  ...omptModal.tsx |       0 |        0 |       0 |       0 | 52-328            
+ components/chart  |       0 |        0 |       0 |       0 |                   
+  DrawingTools.tsx |       0 |        0 |       0 |       0 | 81-1410           
+  ...tickChart.tsx |       0 |        0 |       0 |       0 | 118-747           
+  ...ChartUtils.ts |       0 |        0 |       0 |       0 | 17-266            
+  ...nDetection.ts |       0 |        0 |       0 |       0 | 59-778            
+ components/fno    |       0 |        0 |       0 |       0 |                   
+  ...testPanel.tsx |       0 |        0 |       0 |       0 | 51-285            
+  ...giesPanel.tsx |       0 |        0 |       0 |       0 | 47-323            
+  GreeksPanel.tsx  |       0 |        0 |       0 |       0 | 55-275            
+  ...nnerPanel.tsx |       0 |        0 |       0 |       0 | 35-469            
+  ...rendChart.tsx |       0 |        0 |       0 |       0 | 51-397            
+  ...ardCharts.tsx |       0 |        0 |       0 |       0 | 36-251            
+  ...egyCanvas.tsx |       0 |        0 |       0 |       0 | 68-738            
+ ...onents/gateway |       0 |        0 |       0 |       0 |                   
+  ...ssionSync.tsx |       0 |        0 |       0 |       0 | 92-630            
+ ...nts/onboarding |       0 |        0 |       0 |       0 |                   
+  ...strations.tsx |       0 |        0 |       0 |       0 | 40-1236           
+  ...ingLottie.tsx |       0 |        0 |       0 |       0 | 75-595            
+ components/quiz   |       0 |        0 |       0 |       0 |                   
+  ...Component.tsx |       0 |        0 |       0 |       0 | 17-595            
+ components/stock  |       0 |        0 |       0 |       0 |                   
+  ...sightCard.tsx |       0 |        0 |       0 |       0 | 27-112            
+  ...ActionBar.tsx |       0 |        0 |       0 |       0 | 16-52             
+  ...tControls.tsx |       0 |        0 |       0 |       0 | 23-76             
+  ...hartModal.tsx |       0 |        0 |       0 |       0 | 47-282            
+  KeyStatsGrid.tsx |       0 |        0 |       0 |       0 | 7-85              
+  ...rnSummary.tsx |       0 |        0 |       0 |       0 | 12-48             
+  ...omparison.tsx |       0 |        0 |       0 |       0 | 23-93             
+  ...orContext.tsx |       0 |        0 |       0 |       0 | 27-101            
+ components/ui     |    3.54 |     6.81 |    3.77 |    3.24 |                   
+  ...Pressable.tsx |   28.84 |    44.44 |    37.5 |    32.5 | ...80,85-87,91-95 
+  ...e.stories.tsx |       0 |      100 |       0 |       0 | 12-201            
+  Badge.tsx        |       0 |        0 |       0 |       0 | 16-57             
+  ...n.stories.tsx |       0 |      100 |       0 |       0 | 13-192            
+  Button.tsx       |       0 |        0 |       0 |       0 | 33-158            
+  Card.stories.tsx |       0 |      100 |       0 |       0 | 14-142            
+  Card.tsx         |   91.66 |    73.91 |     100 |   88.88 | 47                
+  ...t.stories.tsx |       0 |      100 |       0 |       0 | 12-120            
+  Input.tsx        |       0 |        0 |       0 |       0 | 54-143            
+  ...G.stories.tsx |       0 |      100 |       0 |       0 | 13-105            
+  ...ShieldSVG.tsx |       0 |        0 |       0 |       0 | 33-38             
+  ...ineBanner.tsx |       0 |        0 |       0 |       0 | 43-567            
+  ...izedImage.tsx |       0 |        0 |       0 |       0 | 98-271            
+  ...r.stories.tsx |       0 |      100 |       0 |       0 | 17-133            
+  ...tonLoader.tsx |       0 |        0 |       0 |       0 | 16-119            
+  ...lictModal.tsx |       0 |        0 |       0 |       0 | 46-343            
+  ...Indicator.tsx |       0 |        0 |       0 |       0 | 50-345            
+  ...o.stories.tsx |       0 |      100 |       0 |       0 | 12-74             
+  ToroloomLogo.tsx |       0 |        0 |       0 |       0 | 16-35             
+ components/video  |       0 |        0 |       0 |       0 |                   
+  ...sonPlayer.tsx |       0 |        0 |       0 |       0 | 23-333            
+ context           |       0 |        0 |       0 |       0 |                   
+  ThemeContext.tsx |       0 |        0 |       0 |       0 | 18-115            
+ hooks             |    0.82 |     0.86 |    1.36 |    1.02 |                   
+  ...groundSync.ts |       0 |        0 |       0 |       0 | 36-168            
+  ...validation.ts |       0 |        0 |       0 |       0 | 31-61             
+  ...dityPrices.ts |       0 |        0 |       0 |       0 | 39-196            
+  ...nnectivity.ts |       0 |      100 |       0 |       0 | 31-43             
+  ...eatureFlag.ts |       0 |        0 |       0 |       0 | 44-103            
+  useLoadFonts.ts  |       0 |      100 |       0 |       0 | 13-26             
+  ...ationSetup.ts |       0 |        0 |       0 |       0 | 16-92             
+  ...ltimePrice.ts |       0 |        0 |       0 |       0 | 16-118            
+  ...siveLayout.ts |       0 |        0 |       0 |       0 | 21-125            
+  ...dAnimation.ts |       0 |        0 |       0 |       0 | 36-226            
+  useT.ts          |     100 |       50 |     100 |     100 | 29                
+ i18n              |   78.57 |     37.5 |   66.66 |   76.92 |                   
+  index.ts         |   78.57 |     37.5 |   66.66 |   76.92 | 38,76-77          
+ i18n/locales      |     100 |      100 |     100 |     100 |                   
+  en.ts            |     100 |      100 |     100 |     100 |                   
+  hi.ts            |     100 |      100 |     100 |     100 |                   
+ navigation        |      50 |    22.85 |   56.25 |   52.27 |                   
+  AppNavigator.tsx |      50 |    22.85 |   56.25 |   52.27 | ...03-410,418-446 
+ screens           |       0 |        0 |       0 |       0 |                   
+  ...onsScreen.tsx |       0 |        0 |       0 |       0 | 18-514            
+  SplashScreen.tsx |       0 |        0 |       0 |       0 | 21-317            
+ ...s/achievements |       0 |        0 |       0 |       0 |                   
+  ...ntsScreen.tsx |       0 |        0 |       0 |       0 | 11-226            
+ screens/ai        |       0 |        0 |       0 |       0 |                   
+  AIChatScreen.tsx |       0 |        0 |       0 |       0 | 32-448            
+  ...htsScreen.tsx |       0 |        0 |       0 |       0 | 13-108            
+  ...antScreen.tsx |       0 |        0 |       0 |       0 | 38-575            
+  ...allScreen.tsx |       0 |        0 |       0 |       0 | 33-692            
+  ...eedScreen.tsx |       0 |        0 |       0 |       0 | 38-744            
+  ...ertScreen.tsx |       0 |        0 |       0 |       0 | 38-753            
+  ...sisScreen.tsx |       0 |        0 |       0 |       0 | 38-678            
+ screens/analytics |    42.4 |    41.72 |   35.08 |   44.05 |                   
+  ...rixScreen.tsx |    72.5 |    60.97 |   73.07 |      75 | ...33-202,501-511 
+  ...kerScreen.tsx |   68.51 |    40.22 |   45.83 |   69.38 | ...56,275,332-433 
+  ...sisScreen.tsx |      65 |    71.42 |   66.66 |   62.16 | ...-81,94,188-273 
+  ...ionScreen.tsx |   25.61 |    26.31 |   13.63 |   28.15 | ...70,195,219-638 
+  ...ingScreen.tsx |    92.1 |       90 |    87.5 |   93.54 | 67-117            
+  ...darScreen.tsx |       0 |        0 |       0 |       0 | 38-632            
+ screens/auth      |       0 |        0 |       0 |       0 |                   
+  LoginScreen.tsx  |       0 |        0 |       0 |       0 | 18-145            
+  SignupScreen.tsx |       0 |        0 |       0 |       0 | 18-184            
+ screens/broker    |       0 |        0 |       0 |       0 |                   
+  ...ectScreen.tsx |       0 |        0 |       0 |       0 | 40-893            
+  ...rokerView.tsx |       0 |        0 |       0 |       0 | 49-962            
+ ...ns/calculators |       0 |        0 |       0 |       0 |                   
+  ...alculator.tsx |       0 |        0 |       0 |       0 | 17-312            
+  ...alculator.tsx |       0 |        0 |       0 |       0 | 17-264            
+  ...alculator.tsx |       0 |        0 |       0 |       0 | 17-270            
+  ...SipScreen.tsx |       0 |        0 |       0 |       0 | 24-377            
+  ...alculator.tsx |       0 |        0 |       0 |       0 | 18-315            
+ screens/chat      |       0 |        0 |       0 |       0 |                   
+  ...istScreen.tsx |       0 |        0 |       0 |       0 | 10-68             
+  ...oomScreen.tsx |       0 |        0 |       0 |       0 | 20-164            
+ screens/community |       0 |        0 |       0 |       0 |                   
+  ...ityScreen.tsx |       0 |        0 |       0 |       0 | 37-367            
+  ...ailScreen.tsx |       0 |        0 |       0 |       0 | 36-487            
+ screens/education |       0 |        0 |       0 |       0 |                   
+  ...ateScreen.tsx |       0 |        0 |       0 |       0 | 30-462            
+  ...sesScreen.tsx |       0 |        0 |       0 |       0 | 32-508            
+  ...ailScreen.tsx |       0 |        0 |       0 |       0 | 14-230            
+  ...rseScreen.tsx |       0 |        0 |       0 |       0 | 15-586            
+  ...aryScreen.tsx |       0 |        0 |       0 |       0 | 20-454            
+  ...ailScreen.tsx |       0 |        0 |       0 |       0 | 27-301            
+  ...thsScreen.tsx |       0 |        0 |       0 |       0 | 28-230            
+  ...iewScreen.tsx |       0 |        0 |       0 |       0 | 16-294            
+  ...sesScreen.tsx |       0 |        0 |       0 |       0 | 16-469            
+ screens/funds     |       0 |        0 |       0 |       0 |                   
+  ...ndsScreen.tsx |       0 |        0 |       0 |       0 | 17-367            
+  ...ardScreen.tsx |       0 |        0 |       0 |       0 | 13-289            
+  ...oryScreen.tsx |       0 |        0 |       0 |       0 | 13-261            
+  ...ferScreen.tsx |       0 |        0 |       0 |       0 | 17-404            
+  UPIScreen.tsx    |       0 |        0 |       0 |       0 | 20-510            
+  ...rawScreen.tsx |       0 |        0 |       0 |       0 | 17-366            
+ screens/ipos      |   91.74 |    89.61 |    92.3 |    92.7 |                   
+  ...ardScreen.tsx |   91.74 |    89.61 |    92.3 |    92.7 | ...58,526-545,833 
+ screens/journal   |       0 |        0 |       0 |       0 |                   
+  ...nalScreen.tsx |       0 |        0 |       0 |       0 | 21-260            
+ screens/kyc       |       0 |        0 |       0 |       0 |                   
+  ...ionScreen.tsx |       0 |        0 |       0 |       0 | 33-401            
+  ...ingScreen.tsx |       0 |        0 |       0 |       0 | 32-676            
+  ...kerScreen.tsx |       0 |        0 |       0 |       0 | 32-247            
+  ...ionScreen.tsx |       0 |        0 |       0 |       0 | 29-268            
+ screens/markets   |       0 |        0 |       0 |       0 |                   
+  ...ardScreen.tsx |       0 |        0 |       0 |       0 | 35-461            
+  ...etsScreen.tsx |       0 |        0 |       0 |       0 | 36-555            
+  ...etsScreen.tsx |       0 |        0 |       0 |       0 | 29-402            
+  ...rveScreen.tsx |       0 |        0 |       0 |       0 | 37-792            
+  ...etsScreen.tsx |       0 |        0 |       0 |       0 | 29-454            
+ ...s/mutual-funds |       0 |        0 |       0 |       0 |                   
+  ...ndsScreen.tsx |       0 |        0 |       0 |       0 | 17-546            
+ screens/news      |       0 |        0 |       0 |       0 |                   
+  ...darScreen.tsx |       0 |      100 |       0 |       0 | 11-31             
+  ...darScreen.tsx |       0 |        0 |       0 |       0 | 23-403            
+  ...eedScreen.tsx |       0 |        0 |       0 |       0 | 26-942            
+ ...ens/onboarding |       0 |        0 |       0 |       0 |                   
+  ...ingScreen.tsx |       0 |        0 |       0 |       0 | 23-1886           
+ screens/payments  |   93.33 |    86.15 |   84.21 |   92.15 |                   
+  ...oryScreen.tsx |   93.33 |    86.15 |   84.21 |   92.15 | 100-101,207-216   
+ screens/profile   |       0 |        0 |       0 |       0 |                   
+  ...ileScreen.tsx |       0 |        0 |       0 |       0 | 14-362            
+ screens/quiz      |       0 |        0 |       0 |       0 |                   
+  ...ultScreen.tsx |       0 |        0 |       0 |       0 | 31-336            
+ screens/referral  |       0 |        0 |       0 |       0 |                   
+  ...ralScreen.tsx |       0 |        0 |       0 |       0 | 24-338            
+ screens/reports   |       0 |        0 |       0 |       0 |                   
+  ...oadScreen.tsx |       0 |        0 |       0 |       0 | 57-1003           
+  ...rtsScreen.tsx |       0 |        0 |       0 |       0 | 29-1087           
+ screens/settings  |   14.17 |     9.11 |   11.31 |   14.67 |                   
+  ...nerScreen.tsx |   45.92 |    36.69 |   36.53 |      50 | ...18-421,494-511 
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 33-341            
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 28-360            
+  ...entScreen.tsx |   23.33 |    21.99 |   18.66 |   24.79 | ...1332,1348-1463 
+  ...iewScreen.tsx |   49.01 |    12.67 |   27.27 |   52.38 | ...3,80-88,99-278 
+  ...entScreen.tsx |       0 |        0 |       0 |       0 | 35-629            
+  ...onsScreen.tsx |   78.37 |    66.15 |   76.19 |   84.37 | ...42-249,261-289 
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 49-410            
+  ...ionScreen.tsx |       0 |        0 |       0 |       0 | 18-310            
+  ...oryScreen.tsx |      50 |    54.54 |    37.5 |   54.05 | 21-45,99,119-193  
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 42-193            
+  ...agsScreen.tsx |      75 |    65.57 |   58.06 |      75 | ...06,309,352-353 
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 23-280            
+  ...cesScreen.tsx |       0 |        0 |       0 |       0 | 18-251            
+  ...rtsScreen.tsx |       0 |        0 |       0 |       0 | 24-797            
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 19-570            
+  ...LogScreen.tsx |       0 |        0 |       0 |       0 | 33-772            
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 38-432            
+  ...ionScreen.tsx |       0 |        0 |       0 |       0 | 17-760            
+  ...ectScreen.tsx |       0 |        0 |       0 |       0 | 52-505            
+  ...figScreen.tsx |       0 |        0 |       0 |       0 | 42-487            
+  ...tupScreen.tsx |       0 |        0 |       0 |       0 | 33-637            
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 13-203            
+  ...entScreen.tsx |       0 |        0 |       0 |       0 | 35-572            
+  ...ngsScreen.tsx |       0 |        0 |       0 |       0 | 46-552            
+ screens/social    |       0 |        0 |       0 |       0 |                   
+  ...ollScreen.tsx |       0 |        0 |       0 |       0 | 15-276            
+  PollsScreen.tsx  |       0 |        0 |       0 |       0 | 17-427            
+  ...ardScreen.tsx |       0 |        0 |       0 |       0 | 15-426            
+  ...ingScreen.tsx |       0 |        0 |       0 |       0 | 33-1054           
+  ...ileScreen.tsx |       0 |        0 |       0 |       0 | 38-612            
+ screens/stock     |       0 |        0 |       0 |       0 |                   
+  ...ailScreen.tsx |       0 |        0 |       0 |       0 | 33-390            
+  ...nerScreen.tsx |       0 |        0 |       0 |       0 | 49-1304           
+  ...ailScreen.tsx |       0 |        0 |       0 |       0 | 26-215            
+ screens/support   |       0 |        0 |       0 |       0 |                   
+  HelpScreen.tsx   |       0 |        0 |       0 |       0 | 10-256            
+ screens/tabs      |       0 |        0 |       0 |       0 |                   
+  HomeScreen.tsx   |       0 |        0 |       0 |       0 | 5-1083            
+  LearnScreen.tsx  |       0 |        0 |       0 |       0 | 15-344            
+  ...etsScreen.tsx |       0 |        0 |       0 |       0 | 15-412            
+  MoreScreen.tsx   |       0 |        0 |       0 |       0 | 18-400            
+  ...lioScreen.tsx |       0 |        0 |       0 |       0 | 19-491            
+  ...istScreen.tsx |       0 |        0 |       0 |       0 | 24-947            
+ screens/trade     |       0 |        0 |       0 |       0 |                   
+  ...ainScreen.tsx |       0 |        0 |       0 |       0 | 36-805            
+  ...ersScreen.tsx |       0 |        0 |       0 |       0 | 23-435            
+  ...derScreen.tsx |       0 |        0 |       0 |       0 | 28-574            
+  ...derScreen.tsx |       0 |        0 |       0 |       0 | 36-527            
+  ...nceScreen.tsx |       0 |      100 |       0 |       0 | 11-31             
+  ...oryScreen.tsx |       0 |        0 |       0 |       0 | 11-190            
+ services          |   17.65 |     8.95 |   20.64 |   17.43 |                   
+  analytics.ts     |       0 |        0 |       0 |       0 | 24-179            
+  ...yncService.ts |       0 |        0 |       0 |       0 | 36-342            
+  ...testEngine.ts |       0 |        0 |       0 |       0 | 118-539           
+  ...ricService.ts |       0 |        0 |       0 |       0 | 39-166            
+  ...ingService.ts |       0 |        0 |       0 |       0 | 41-210            
+  ...tionMatrix.ts |   92.04 |    54.16 |   92.85 |   94.36 | 101-102,182,192   
+  ...endService.ts |   94.16 |       75 |     100 |   95.93 | 53,55-58          
+  ...orAnalysis.ts |   89.32 |    54.44 |   96.42 |   91.08 | ...68,473,478,482 
+  ...Calculator.ts |       0 |        0 |       0 |       0 | 73-295            
+  ...timization.ts |       0 |        0 |       0 |       0 | 23-229            
+  ...ataService.ts |       0 |      100 |     100 |       0 | 49-81             
+  ...ketService.ts |       0 |        0 |       0 |       0 | 15-416            
+  ...Simulation.ts |    2.94 |        0 |       0 |    3.63 | 35-181            
+  ...ionService.ts |       0 |        0 |       0 |       0 | 19-678            
+  offlineCache.ts  |       0 |        0 |       0 |       0 | 44-407            
+  ...ationQueue.ts |    2.17 |        0 |       0 |    2.41 | 71-204,216-445    
+  ...onsScanner.ts |       0 |        0 |       0 |       0 | 80-415            
+  ...ketService.ts |       0 |        0 |       0 |       0 | 37-401            
+  reportExport.ts  |       0 |        0 |       0 |       0 | 41-504            
+  sentry.ts        |       0 |        0 |     100 |       0 | 23-42             
+  syncClient.ts    |    6.66 |        0 |       0 |    6.81 | 71-85,96-226      
+  ...ingService.ts |       0 |        0 |       0 |       0 | 24-355            
+  widgetService.ts |   57.31 |       40 |      60 |   56.57 | ...23,234-290,309 
+  wsRegistry.ts    |       0 |        0 |       0 |       0 | 29-60             
+  wsService.ts     |       0 |        0 |       0 |       0 |                   
+ services/ai       |       0 |        0 |       0 |       0 |                   
+  ...gsAnalyzer.ts |       0 |        0 |       0 |       0 | 22-442            
+  ...ertService.ts |       0 |        0 |       0 |       0 | 18-204            
+  ...ntAnalyzer.ts |       0 |        0 |       0 |       0 | 22-303            
+  ...ntLiveFeed.ts |       0 |        0 |       0 |       0 | 33-163            
+  ...eAssistant.ts |       0 |        0 |       0 |       0 | 47-700            
+ services/api      |   10.35 |      7.5 |    7.65 |   10.74 |                   
+  ai.ts            |       0 |        0 |       0 |       0 | 19-34             
+  angelConnect.ts  |       0 |      100 |       0 |       0 | 24-32             
+  auth.ts          |       0 |      100 |       0 |       0 | 14-58             
+  brokerProxy.ts   |       0 |        0 |       0 |       0 | 37-132            
+  client.ts        |   45.65 |    17.64 |      50 |   55.55 | ...42,157-166,174 
+  community.ts     |       0 |        0 |       0 |       0 | 11-28             
+  coupons.ts       |      15 |        0 |      20 |      15 | ...31,141,151-167 
+  dividends.ts     |   14.49 |    14.28 |      24 |      15 | 64-65,111-208     
+  education.ts     |       0 |      100 |       0 |       0 | 8-18              
+  fno.ts           |       0 |        0 |       0 |       0 | 107-220           
+  index.ts         |       0 |        0 |       0 |       0 |                   
+  kyc.ts           |       0 |        0 |       0 |       0 | 24-88             
+  market.ts        |       0 |        0 |       0 |       0 | 7-20              
+  mutualFunds.ts   |       0 |      100 |       0 |       0 | 26-58             
+  news.ts          |       0 |        0 |       0 |       0 | 10-39             
+  notifications.ts |       0 |        0 |       0 |       0 | 34-87             
+  payments.ts      |      25 |        0 |       0 |      25 | 25-56             
+  portfolio.ts     |       0 |      100 |       0 |       0 | 40-63             
+  referral.ts      |       0 |      100 |       0 |       0 | 4-14              
+  snaptrade.ts     |       0 |      100 |       0 |       0 | 76-179            
+  social.ts        |       0 |        0 |       0 |       0 | 11-69             
+  support.ts       |       0 |      100 |       0 |       0 | 11-18             
+  telegram.ts      |       0 |      100 |       0 |       0 | 27-50             
+  watchlist.ts     |       0 |      100 |       0 |       0 | 11-23             
+ services/gateway  |       0 |        0 |       0 |       0 |                   
+  ...oginConfig.ts |       0 |        0 |       0 |       0 | 53-512            
+  ...eAnalytics.ts |       0 |        0 |       0 |       0 | 31-351            
+  pdfExtractor.ts  |       0 |        0 |       0 |       0 | 109-646           
+  proxyClient.ts   |       0 |        0 |       0 |       0 | 46-303            
+  ...E2ESession.ts |       0 |        0 |       0 |       0 | 34-143            
+  ...ionStorage.ts |       0 |        0 |       0 |       0 | 28-247            
+  ...dgerParser.ts |       0 |        0 |       0 |       0 | 42-590            
+ store             |   16.13 |    13.14 |   14.53 |   16.43 |                   
+  abTestStore.ts   |   13.53 |     8.86 |    9.37 |   13.68 | ...13,418,441-443 
+  ...ilityStore.ts |       0 |      100 |       0 |       0 | 28-71             
+  aiStore.ts       |       0 |        0 |       0 |       0 | 17-66             
+  authStore.ts     |       0 |        0 |       0 |       0 | 23-122            
+  ...urnalStore.ts |       0 |        0 |       0 |       0 | 5-282             
+  ...etricStore.ts |       0 |      100 |       0 |       0 | 53-77             
+  chatStore.ts     |       0 |        0 |       0 |       0 | 18-90             
+  ...unityStore.ts |       0 |        0 |       0 |       0 | 34-225            
+  ...ivityStore.ts |       0 |        0 |       0 |       0 | 35-215            
+  ...ationStore.ts |      96 |       82 |   97.72 |   96.11 | 340-348           
+  ...eFlagStore.ts |   59.32 |    54.54 |   61.53 |   61.11 | ...42,163-198,215 
+  fnoStore.ts      |       0 |        0 |       0 |       0 | 16-882            
+  fundStore.ts     |       0 |        0 |       0 |       0 | 26-119            
+  ...ationStore.ts |       0 |        0 |       0 |       0 | 6-57              
+  index.ts         |       0 |        0 |       0 |       0 |                   
+  ipoStore.ts      |   71.79 |    47.36 |   66.66 |   73.52 | ...80-197,220-224 
+  kycStore.ts      |       0 |        0 |       0 |       0 | 21-239            
+  marketStore.ts   |    3.73 |        0 |       4 |    3.48 | 45-80,122-258     
+  ...lFundStore.ts |       0 |        0 |       0 |       0 | 27-228            
+  ...ationStore.ts |    6.63 |     4.13 |    7.14 |    6.97 | ...63-664,666-671 
+  offlineStore.ts  |    6.89 |        0 |    4.34 |    7.14 | 140-150,182-293   
+  ...rdingStore.ts |       0 |        0 |       0 |       0 | 19-292            
+  pollStore.ts     |       0 |        0 |       0 |       0 | 17-367            
+  ...yticsStore.ts |       0 |        0 |       0 |       0 | 42-612            
+  ...folioStore.ts |    1.85 |        0 |       4 |       1 | 44-380            
+  ...lanceStore.ts |   79.54 |       85 |   73.33 |   77.77 | 184-185,201-216   
+  referralStore.ts |       0 |        0 |       0 |       0 | 15-57             
+  revenueStore.ts  |       0 |        0 |       0 |       0 | 19-182            
+  riskStore.ts     |       0 |        0 |       0 |       0 | 104-448           
+  socialStore.ts   |       0 |        0 |       0 |       0 | 22-302            
+  ...manceStore.ts |       0 |        0 |       0 |       0 | 70-253            
+  ...ptionStore.ts |   80.07 |    68.21 |   94.33 |   78.96 | ...24,797-798,855 
+  ...ionUIStore.ts |       0 |        0 |       0 |       0 | 57-75             
+  themeStore.ts    |       0 |        0 |       0 |       0 | 21-55             
+  ...ourseStore.ts |    4.63 |     0.84 |     1.8 |    5.69 | ...30-414,424-562 
+  voiceStore.ts    |       0 |        0 |       0 |       0 | 3-125             
+  ...hlistStore.ts |       0 |        0 |       0 |       0 | 13-194            
+ utils             |      17 |    12.41 |     8.1 |   17.34 |                   
+  ...eGenerator.ts |       0 |        0 |       0 |       0 | 12-238            
+  ...gTextError.ts |       0 |        0 |       0 |       0 | 22-63             
+  ...eFlagUtils.ts |   26.92 |        0 |   33.33 |      30 | 44-78             
+  formatters.ts    |   25.92 |        0 |       0 |   31.11 | ...63,67,71,75,79 
+  haptics.ts       |      50 |        0 |       0 |      50 | 30                
+  logger.ts        |     100 |       50 |       0 |     100 | 33-52             
+  sector.ts        |   52.63 |       40 |     100 |   58.33 | 23-27             
+  share.ts         |       0 |        0 |       0 |       0 | 26-207            
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 7.82% ( 1707/21821 )
+Branches     : 5.74% ( 943/16410 )
+Functions    : 7.29% ( 459/6296 )
+Lines        : 7.87% ( 1503/19078 )
+================================================================================
+ERROR: Coverage for lines (7.87%) does not meet global threshold (73%)
+ERROR: Coverage for functions (7.29%) does not meet global threshold (68%)
+ERROR: Coverage for statements (7.82%) does not meet global threshold (73%)
+ERROR: Coverage for branches (5.74%) does not meet global threshold (63%)

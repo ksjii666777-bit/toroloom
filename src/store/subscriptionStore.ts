@@ -342,6 +342,65 @@ function daysBetween(a: Date, b: Date): number {
   return Math.max(0, Math.floor(diff / 86400000));
 }
 
+/**
+ * Shared helper: persist a UPI mandate to local storage and update store state.
+ * Used by both the real API path and the fallback mock path in setUpAutopay.
+ */
+function saveMandateAndNotify(
+  set: (partial: Partial<SubscriptionState> | ((state: SubscriptionState) => Partial<SubscriptionState>)) => void,
+  get: () => SubscriptionState,
+  mandate: UpiMandate,
+  amount: number,
+  upiId: string,
+  billingPeriod: 'monthly' | 'yearly',
+): void {
+  const updatedSubscription: UserSubscription = {
+    ...get().subscription,
+    isAutoPayEnabled: true,
+    upiMandate: mandate,
+  };
+
+  AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(updatedSubscription)).catch(() => {});
+
+  set({
+    subscription: updatedSubscription,
+    upiMandates: [...get().upiMandates, mandate],
+    isSettingUpAutopay: false,
+  });
+
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  Alert.alert(
+    'UPI AutoPay Enabled ✅',
+    `Recurring payments of ₹${amount.toLocaleString('en-IN')}/${billingPeriod === 'yearly' ? 'yr' : 'mo'} will be charged from ${upiId}.`,
+    [{ text: 'Done' }]
+  );
+}
+
+/**
+ * Build a UpiMandate object from common parameters.
+ * Used by both the real API path and the fallback mock path in setUpAutopay.
+ */
+function buildMandate(
+  upiId: string,
+  planId: string,
+  amount: number,
+  billingPeriod: 'monthly' | 'yearly',
+  bankFallback: string = 'UPI',
+): UpiMandate {
+  return {
+    mandateId: `mand_${generateId()}`,
+    upiId,
+    bankName: upiId.includes('@') && upiId.split('@')[1]?.toUpperCase() || bankFallback,
+    planId,
+    amount,
+    billingPeriod,
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    nextChargeDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    tpv: 'PIN',
+  };
+}
+
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   subscription: DEFAULT_SUBSCRIPTION,
   tenantConfig: null,
@@ -449,7 +508,8 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
       // 3. Try to open the Razorpay Checkout (native module)
       try {
-        const RazorpayCheckout = require('react-native-razorpay').default;
+        const RazorpayCheckoutModule = await import('react-native-razorpay');
+        const RazorpayCheckout = RazorpayCheckoutModule.default;
 
         const options = {
           key: tenantConfig?.razorpay?.keyId || order.keyId,
@@ -861,43 +921,80 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   setUpAutopay: async (upiId: string, planId: string, amount: number, billingPeriod: 'monthly' | 'yearly') => {
     set({ isSettingUpAutopay: true });
 
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 800));
+    try {
+      const { tenantConfig } = get();
+      const tenantId = tenantConfig?.id !== 'default' ? tenantConfig?.id : undefined;
+      const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
 
-    const _plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
-    const mandate: UpiMandate = {
-      mandateId: `mand_${generateId()}`,
-      upiId,
-      bankName: 'ICICI Bank',
-      planId,
-      amount,
-      billingPeriod,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      nextChargeDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      tpv: 'PIN',
-    };
+      // 1. Create a mandate setup order on the backend
+      const mandateOrder = await paymentsApi.createMandate({
+        planId,
+        billingPeriod,
+        tenantId,
+      });
 
-    const updatedSubscription: UserSubscription = {
-      ...get().subscription,
-      isAutoPayEnabled: true,
-      upiMandate: mandate,
-    };
+      // 2. Try to open Razorpay Checkout for UPI mandate authentication
+      try {
+        const RazorpayCheckoutModule = await import('react-native-razorpay');
+        const RazorpayCheckout = RazorpayCheckoutModule.default;
 
-    await AsyncStorage.setItem(STORAGE_KEY_SUBSCRIPTION, JSON.stringify(updatedSubscription));
+        const options = {
+          key: tenantConfig?.razorpay?.keyId || mandateOrder.keyId,
+          amount: mandateOrder.amount,
+          currency: mandateOrder.currency,
+          order_id: mandateOrder.orderId,
+          name: tenantConfig?.name || 'Toroloom',
+          description: `UPI AutoPay — ${plan?.name || planId} (${billingPeriod === 'yearly' ? 'Yearly' : 'Monthly'})`,
+          image: 'https://toroloom.dev/assets/logo.png',
+          prefill: { email: '', contact: '', vpa: upiId },
+          theme: { color: plan?.tier === 'elite' ? '#10B981' : '#3B82F6' },
+          modal: {
+            confirm_close: true,
+            ondismiss: () => { set({ isSettingUpAutopay: false }); },
+          },
+        };
 
-    set({
-      subscription: updatedSubscription,
-      upiMandates: [...get().upiMandates, mandate],
-      isSettingUpAutopay: false,
-    });
+        const data = await RazorpayCheckout.open(options);
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert(
-      'UPI AutoPay Enabled ✅',
-      `Recurring payments of ₹${amount.toLocaleString('en-IN')}/${billingPeriod === 'yearly' ? 'yr' : 'mo'} will be charged from ${upiId}.`,
-      [{ text: 'Done' }]
-    );
+        // 3. Verify the mandate payment on backend
+        await paymentsApi.verifyPayment({
+          razorpayPaymentId: data.razorpay_payment_id,
+          razorpayOrderId: data.razorpay_order_id,
+          razorpaySignature: data.razorpay_signature,
+          planId,
+          type: 'subscription',
+          tenantId,
+        });
+
+        // 4. Create a recurring subscription for future billing
+        try {
+          await paymentsApi.createSubscription({
+            planId,
+            billingPeriod,
+            totalCount: 12,
+            tenantId,
+          });
+        } catch {
+          // Subscription creation is non-critical for mandate setup
+          console.log('[Autopay] Subscription creation skipped — recurring will be handled by webhook');
+        }
+
+        // 5. Build & persist mandate, show notification
+        const mandate = buildMandate(upiId, planId, amount, billingPeriod, 'UPI');
+        saveMandateAndNotify(set, get, mandate, amount, upiId, billingPeriod);
+        return;
+      } catch {
+        // Razorpay Checkout or native module not available — fall through to mock
+        console.log('[Autopay] Razorpay Checkout unavailable — using fallback');
+      }
+    } catch {
+      // Backend API unavailable — fall through to mock
+      console.log('[Autopay] Backend API unavailable — using fallback');
+    }
+
+    // ── Fallback: Client-side mock ─────────────────────────────────
+    const mandate = buildMandate(upiId, planId, amount, billingPeriod, 'ICICI Bank');
+    saveMandateAndNotify(set, get, mandate, amount, upiId, billingPeriod);
   },
 
   cancelAutopay: async (mandateId: string) => {

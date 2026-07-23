@@ -106,6 +106,15 @@ export const env = {
   /** Telegram Bot Token for sending trading alerts to users */
   telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || '',
 
+  /** Upstox API Client ID for OAuth 2.0 flow */
+  upstoxClientId: process.env.UPSTOX_CLIENT_ID || '',
+
+  /** Upstox API Client Secret for OAuth 2.0 flow */
+  upstoxClientSecret: process.env.UPSTOX_CLIENT_SECRET || '',
+
+  /** Upstox OAuth Redirect URI */
+  upstoxRedirectUri: process.env.UPSTOX_REDIRECT_URI || '',
+
   /** Angel One SmartAPI developer API key (server-level, free from smartapi.angelbroking.com) */
   angelSmartApiKey: process.env.ANGEL_SMARTAPI_KEY || '',
 

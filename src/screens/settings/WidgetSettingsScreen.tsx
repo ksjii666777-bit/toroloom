@@ -23,6 +23,7 @@ import {
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { widgetService, WidgetPreferences, WidgetPortfolioSnapshot } from '../../services/widgetService';
@@ -147,6 +148,7 @@ const widgetPreviewStyles = StyleSheet.create({
 
 export default function WidgetSettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { holdings } = usePortfolioStore();
   const { stocks } = useMarketStore();
@@ -204,37 +206,35 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 
   // ── Add widget guide ──
   const showAddWidgetGuide = useCallback(() => {
+    const iosSteps =
+      '1. ' + t('widgetSettings.iosStep1') + '\n' +
+      '2. ' + t('widgetSettings.iosStep2') + '\n' +
+      '3. ' + t('widgetSettings.iosStep3') + '\n' +
+      '4. ' + t('widgetSettings.iosStep4') + '\n' +
+      '5. ' + t('widgetSettings.iosStep5');
+    const androidSteps =
+      '1. ' + t('widgetSettings.androidStep1') + '\n' +
+      '2. ' + t('widgetSettings.androidStep2') + '\n' +
+      '3. ' + t('widgetSettings.androidStep3') + '\n' +
+      '4. ' + t('widgetSettings.androidStep4');
     Alert.alert(
-      '📱 Add Widget to Home Screen',
-      Platform.select({
-        ios:
-          '1. Press and hold on your home screen\n' +
-          '2. Tap the "+" button in the top-left\n' +
-          '3. Search for "Toroloom"\n' +
-          '4. Choose your preferred size\n' +
-          '5. Tap "Add Widget"',
-        android:
-          '1. Press and hold on your home screen\n' +
-          '2. Select "Widgets" from the menu\n' +
-          '3. Scroll to find "Toroloom"\n' +
-          '4. Press and drag the widget to your home screen',
-        default: 'Widget setup instructions are platform-specific.',
-      }),
-      [{ text: 'Got it!' }],
+      t('widgetSettings.instructionTitle'),
+      Platform.select({ ios: iosSteps, android: androidSteps, default: t('widgetSettings.widgetDefault') }),
+      [{ text: t('widgetSettings.instructionGotIt') }],
     );
-  }, []);
+  }, [t]);
 
   const sizeOptions: { key: 'small' | 'medium' | 'large'; label: string; desc: string }[] = [
-    { key: 'small', label: 'Small', desc: 'Value only' },
-    { key: 'medium', label: 'Medium', desc: 'Value + top 2 holdings' },
-    { key: 'large', label: 'Large', desc: 'Value + top 5 holdings' },
+    { key: 'small', label: t('widgetSettings.small'), desc: t('widgetSettings.smallDesc') },
+    { key: 'medium', label: t('widgetSettings.medium'), desc: t('widgetSettings.mediumDesc') },
+    { key: 'large', label: t('widgetSettings.large'), desc: t('widgetSettings.largeDesc') },
   ];
 
   const metricOptions: { key: WidgetPreferences['highlightedMetric']; label: string; icon: string }[] = [
-    { key: 'totalValue', label: 'Total Value', icon: 'wallet' },
-    { key: 'pnl', label: 'P&L Amount', icon: 'trending-up' },
-    { key: 'pnlPercent', label: 'P&L %', icon: 'percent' },
-    { key: 'topHolding', label: 'Top Holding', icon: 'star' },
+    { key: 'totalValue', label: t('widgetSettings.totalValue'), icon: 'wallet' },
+    { key: 'pnl', label: t('widgetSettings.pnlAmount'), icon: 'trending-up' },
+    { key: 'pnlPercent', label: t('widgetSettings.pnlPercent'), icon: 'percent' },
+    { key: 'topHolding', label: t('widgetSettings.topHolding'), icon: 'star' },
   ];
 
   return (
@@ -245,15 +245,15 @@ export default function WidgetSettingsScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <View style={styles.headerTextContainer}>
-          <Text style={styles.headerTitle}>Widget Settings</Text>
-          <Text style={styles.headerSubtitle}>Customize your home screen widget</Text>
+          <Text style={styles.headerTitle}>{t('widgetSettings.title')}</Text>
+          <Text style={styles.headerSubtitle}>{t('widgetSettings.subtitle')}</Text>
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* ── Widget Preview ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={styles.sectionTitle}>Preview</Text>
+          <Text style={styles.sectionTitle}>{t('widgetSettings.preview')}</Text>
           <WidgetPreview
             size={selectedSize}
             snapshot={snapshot}
@@ -261,15 +261,15 @@ export default function WidgetSettingsScreen({ navigation }: any) {
             colors={colors}
           />
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            {selectedSize === 'small' ? 'Shows portfolio value only' :
-             selectedSize === 'medium' ? 'Shows value + top 2 holdings' :
-             'Shows value + top 5 holdings'}
+            {selectedSize === 'small' ? t('widgetSettings.hintSmall') :
+             selectedSize === 'medium' ? t('widgetSettings.hintMedium') :
+             t('widgetSettings.hintLarge')}
           </Text>
         </View>
 
         {/* ── Size Selector ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={styles.sectionTitle}>Widget Size</Text>
+          <Text style={styles.sectionTitle}>{t('widgetSettings.widgetSize')}</Text>
           <View style={styles.sizeRow}>
             {sizeOptions.map(opt => {
               const isActive = selectedSize === opt.key;
@@ -304,7 +304,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
 
         {/* ── Display Options ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={styles.sectionTitle}>Display Options</Text>
+          <Text style={styles.sectionTitle}>{t('widgetSettings.displayOptions')}</Text>
 
           {/* Show P&L */}
           <View style={styles.settingRow}>
@@ -313,9 +313,9 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                 <Ionicons name="trending-up" size={18} color="#00E676" />
               </View>
               <View>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>Show Profit & Loss</Text>
+                <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.showPnL')}</Text>
                 <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  Display P&L amount and percentage on the widget
+                  {t('widgetSettings.showPnLDesc')}
                 </Text>
               </View>
             </View>
@@ -334,9 +334,9 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                 <Ionicons name={prefs.theme === 'dark' ? 'moon' : 'sunny'} size={18} color="#8B5CF6" />
               </View>
               <View>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>Widget Theme</Text>
+                <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.widgetTheme')}</Text>
                 <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  {prefs.theme === 'dark' ? 'Dark theme (matches app)' : 'Light theme'}
+                  {prefs.theme === 'dark' ? t('widgetSettings.darkTheme') : t('widgetSettings.lightTheme')}
                 </Text>
               </View>
             </View>
@@ -358,9 +358,9 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                 <Ionicons name="analytics" size={18} color="#3B82F6" />
               </View>
               <View>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>Highlighted Metric</Text>
+                <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.highlightedMetric')}</Text>
                 <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  Which metric appears most prominently
+                  {t('widgetSettings.highlightedMetricDesc')}
                 </Text>
               </View>
             </View>
@@ -397,16 +397,16 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         {/* ── Privacy — Hidden Symbols ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Privacy</Text>
+            <Text style={styles.sectionTitle}>{t('widgetSettings.privacy')}</Text>
             <Pressable onPress={() => setShowHiddenPicker(!showHiddenPicker)}>
               <Text style={[styles.editButton, { color: colors.primary }]}>
-                {showHiddenPicker ? 'Done' : 'Edit'}
+                {showHiddenPicker ? t('widgetSettings.done') : t('widgetSettings.edit')}
               </Text>
             </Pressable>
           </View>
 
           <Text style={[styles.settingDesc, { color: colors.textMuted, marginBottom: SPACING.md }]}>
-            Hide specific holdings from the widget for privacy
+            {t('widgetSettings.privacyDesc')}
           </Text>
 
           {prefs.hiddenSymbols.length > 0 ? (
@@ -423,7 +423,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
             </View>
           ) : (
             <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              No symbols hidden. All holdings are visible on the widget.
+              {t('widgetSettings.noHiddenSymbols')}
             </Text>
           )}
 
@@ -431,7 +431,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
           {showHiddenPicker && (
             <Animated.View entering={FadeInUp.duration(300)} style={[styles.symbolPicker, { borderTopColor: colors.divider }]}>
               <Text style={[styles.pickerLabel, { color: colors.textSecondary }]}>
-                Tap to hide a symbol:
+                {t('widgetSettings.tapToHide')}
               </Text>
               <View style={styles.symbolGrid}>
                 {allSymbols.map(sym => {
@@ -470,22 +470,22 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         {/* ── Add Widget Guide ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Add to Home Screen</Text>
+            <Text style={styles.sectionTitle}>{t('widgetSettings.addToHomeScreen')}</Text>
           </View>
 
           <Text style={[styles.settingDesc, { color: colors.textMuted, marginBottom: SPACING.lg }]}>
-            Follow these steps to add the Toroloom widget to your device's home screen:
+            {t('widgetSettings.addToHomeScreenDesc')}
           </Text>
 
           {Platform.select({
             ios: (
               <View style={styles.stepsList}>
                 {[
-                  { icon: 'hand-left', text: 'Press and hold on an empty area of your home screen' },
-                  { icon: 'add-circle', text: 'Tap the "+" button in the top-left corner' },
-                  { icon: 'search', text: 'Search for "Toroloom" in the widget gallery' },
-                  { icon: 'options', text: 'Choose Small, Medium, or Large size' },
-                  { icon: 'checkmark-circle', text: 'Tap "Add Widget" and then "Done"' },
+                  { icon: 'hand-left', text: t('widgetSettings.iosStep1') },
+                  { icon: 'add-circle', text: t('widgetSettings.iosStep2') },
+                  { icon: 'search', text: t('widgetSettings.iosStep3') },
+                  { icon: 'options', text: t('widgetSettings.iosStep4') },
+                  { icon: 'checkmark-circle', text: t('widgetSettings.iosStep5') },
                 ].map((step, i) => (
                   <View key={`wgt_${i}`} style={styles.stepRow}>
                     <View style={[styles.stepNumber, { backgroundColor: colors.primary + '20' }]}>
@@ -500,10 +500,10 @@ export default function WidgetSettingsScreen({ navigation }: any) {
             android: (
               <View style={styles.stepsList}>
                 {[
-                  { icon: 'hand-left', text: 'Press and hold on an empty area of your home screen' },
-                  { icon: 'apps', text: 'Select "Widgets" from the menu that appears' },
-                  { icon: 'search', text: 'Scroll or search for "Toroloom"' },
-                  { icon: 'add-circle', text: 'Press and drag the widget to your desired location' },
+                  { icon: 'hand-left', text: t('widgetSettings.androidStep1') },
+                  { icon: 'apps', text: t('widgetSettings.androidStep2') },
+                  { icon: 'search', text: t('widgetSettings.androidStep3') },
+                  { icon: 'add-circle', text: t('widgetSettings.androidStep4') },
                 ].map((step, i) => (
                   <View key={`wgt_${i}`} style={styles.stepRow}>
                     <View style={[styles.stepNumber, { backgroundColor: colors.primary + '20' }]}>
@@ -517,7 +517,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
             ),
             default: (
               <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                Widgets are available on iOS and Android devices.
+                {t('widgetSettings.widgetDefault')}
               </Text>
             ),
           })}
@@ -527,7 +527,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
             onPress={showAddWidgetGuide}
           >
             <Ionicons name="add-circle" size={20} color="#FFF" />
-            <Text style={styles.addWidgetBtnText}>Show Instructions</Text>
+            <Text style={styles.addWidgetBtnText}>{t('widgetSettings.showInstructions')}</Text>
           </Pressable>
         </View>
 
@@ -535,9 +535,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
         <View style={[styles.infoCard, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
           <Ionicons name="information-circle" size={18} color={colors.primary} />
           <Text style={[styles.infoText, { color: colors.textMuted }]}>
-            Widget data updates automatically when your portfolio changes.
-            {'\n'}The widget refreshes every ~15 minutes in the background.
-            {'\n'}Open the app to force an immediate update.
+            {t('widgetSettings.widgetInfo')}
           </Text>
         </View>
 

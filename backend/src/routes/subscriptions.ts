@@ -30,6 +30,7 @@ import crypto from 'crypto';
 import { authMiddleware } from '../middleware/auth';
 import { getStorage } from '../services/storage';
 import type { UserSubscriptionData } from '../services/storage/types';
+import { logWebhookEvent } from './webhookHealth';
 
 // ──── Unauthenticated router for webhooks (no authMiddleware) ──────────────
 // Note: This router is mounted at /api/payments/webhook with express.raw()
@@ -327,6 +328,7 @@ webhookRouter.post('/', async (req: Request, res: Response) => {
     const order = body.payload?.order?.entity;
     const subscriptionEntity = body.payload?.subscription?.entity;
 
+    const startTime = Date.now();
     console.log(`[Webhook] Received: ${event} (id: ${eventId?.substring(0, 20)}...)`);
 
     // ── Extract notes from payment or order (order notes may be used) ───
@@ -337,30 +339,55 @@ webhookRouter.post('/', async (req: Request, res: Response) => {
 
     // ── Process the event ───────────────────────────────────────────────
     let processed = false;
+    let processingError: string | undefined;
 
-    if (event === 'payment.captured' && userId && planId && PLANS[planId]) {
-      processed = await handlePaymentCaptured(userId, planId, billingPeriod, payment, order, notes);
-    } else if (event === 'order.paid' && order) {
-      // order.paid may arrive before payment.captured — check notes
-      if (notes.type === 'subscription' && userId && planId && PLANS[planId]) {
+    try {
+      if (event === 'payment.captured' && userId && planId && PLANS[planId]) {
         processed = await handlePaymentCaptured(userId, planId, billingPeriod, payment, order, notes);
-      } else if (notes.type === 'fund_add' && userId) {
-        console.log(`[Webhook] Fund add order paid: user=${userId}, order=${order.id}`);
+      } else if (event === 'order.paid' && order) {
+        // order.paid may arrive before payment.captured — check notes
+        if (notes.type === 'subscription' && userId && planId && PLANS[planId]) {
+          processed = await handlePaymentCaptured(userId, planId, billingPeriod, payment, order, notes);
+        } else if (notes.type === 'fund_add' && userId) {
+          console.log(`[Webhook] Fund add order paid: user=${userId}, order=${order.id}`);
+          processed = true;
+        }
+      } else if (event === 'subscription.charged' && subscriptionEntity && userId) {
+        console.log(`[Webhook] Subscription charged: ${subscriptionEntity.id}, user=${userId}`);
+        processed = true;
+      } else if (event === 'subscription.activated' && subscriptionEntity && userId) {
+        console.log(`[Webhook] Subscription activated: ${subscriptionEntity.id}, user=${userId}`);
+        processed = true;
+      } else if (event === 'subscription.cancelled' && subscriptionEntity && userId) {
+        console.log(`[Webhook] Subscription cancelled: ${subscriptionEntity.id}, user=${userId}`);
         processed = true;
       }
-    } else if (event === 'subscription.charged' && subscriptionEntity && userId) {
-      console.log(`[Webhook] Subscription charged: ${subscriptionEntity.id}, user=${userId}`);
-      processed = true;
-    } else if (event === 'subscription.activated' && subscriptionEntity && userId) {
-      console.log(`[Webhook] Subscription activated: ${subscriptionEntity.id}, user=${userId}`);
-      processed = true;
-    } else if (event === 'subscription.cancelled' && subscriptionEntity && userId) {
-      console.log(`[Webhook] Subscription cancelled: ${subscriptionEntity.id}, user=${userId}`);
-      processed = true;
+    } catch (err: unknown) {
+      processingError = err instanceof Error ? err.message : 'Unknown processing error';
+      console.error('[Webhook] Processing error:', processingError);
     }
 
+    // ── Log to webhook health monitor ──────────────────────────────────
+    const durationMs = Date.now() - startTime;
+    const logStatus = processingError ? 'failed'
+      : eventId && await isDuplicateEvent(eventId) ? 'duplicate'
+      : processed ? 'processed'
+      : 'received';
+
+    logWebhookEvent({
+      id: `wh_${eventId || crypto.randomBytes(8).toString('hex')}`,
+      event,
+      eventId: eventId || 'unknown',
+      userId,
+      planId,
+      status: logStatus,
+      error: processingError,
+      durationMs,
+      timestamp: new Date().toISOString(),
+    });
+
     // ── Mark event as processed ─────────────────────────────────────────
-    if (eventId) {
+    if (eventId && !processingError) {
       await markEventProcessed(eventId);
     }
 

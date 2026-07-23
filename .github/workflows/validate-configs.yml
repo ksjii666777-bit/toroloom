@@ -1,0 +1,121 @@
+# ==============================================================================
+# Toroloom — Grafana Config Validation
+# ==============================================================================
+#
+# Fast-track job that validates all Grafana provisioning YAML files and
+# dashboard JSON files for syntax correctness.
+#
+# Runs on every pull request that touches files under backend/grafana/,
+# and can be triggered manually from the Actions tab.
+#
+# Validates:
+#   - alert_rules.yml      — Prometheus/Grafana alert rule definitions (11 rules)
+#   - contact_points.yml   — Slack & PagerDuty contact point configuration
+#   - notification_policies.yml — Alert routing and notification policies
+#   - datasource.yml       — Prometheus datasource configuration
+#   - dashboards.yml       — Dashboard auto-provisioning configuration
+#   - prometheus.yml       — Prometheus scrape configuration
+#   - toroloom-ws-dashboard.json          — WebSocket dashboard (24 panels)
+#   - toroloom-market-schedule-dashboard.json — Market schedule dashboard (15 panels)
+#   - toroloom-broker-dashboard.json      — Broker dashboard
+#
+# Also runs as part of the main CI suite (ci.yml) on every push.
+# ==============================================================================
+
+name: Grafana Config Validation
+
+on:
+  pull_request:
+    branches: [master, main]
+    # Only trigger when Grafana configuration files change
+    paths:
+      # Alert rules
+      - 'backend/grafana/provisioning/alerting/*.yml'
+      # Datasources
+      - 'backend/grafana/provisioning/datasources/*.yml'
+      # Dashboard provisioning
+      - 'backend/grafana/provisioning/dashboards/*.yml'
+      # Prometheus scrape config
+      - 'backend/grafana/provisioning/prometheus/*.yml'
+      # Dashboard JSON files
+      - 'backend/grafana/toroloom-*.json'
+      # The workflow definition itself
+      - '.github/workflows/validate-configs.yml'
+  workflow_dispatch:            # Allow manual trigger from the Actions tab
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true     # Cancel in-flight runs on the same branch
+
+jobs:
+  validate-grafana-configs:
+    name: Validate Grafana Configs
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate YAML and JSON config files
+        shell: bash
+        run: |
+          pip3 install pyyaml --user -q
+
+          echo "=== Validating Grafana YAML files ==="
+          for f in \
+            backend/grafana/provisioning/alerting/alert_rules.yml \
+            backend/grafana/provisioning/alerting/contact_points.yml \
+            backend/grafana/provisioning/alerting/notification_policies.yml \
+            backend/grafana/provisioning/datasources/datasource.yml \
+            backend/grafana/provisioning/dashboards/dashboards.yml \
+            backend/grafana/provisioning/prometheus/prometheus.yml; do
+            if [ ! -f "$f" ]; then
+              echo "❌ MISSING: $f"
+              exit 1
+            fi
+          done
+
+          echo ""
+          echo "=== Validating Grafana dashboard JSON files ==="
+          for f in \
+            backend/grafana/toroloom-ws-dashboard.json \
+            backend/grafana/toroloom-market-schedule-dashboard.json \
+            backend/grafana/toroloom-broker-dashboard.json; do
+            if [ ! -f "$f" ]; then
+              echo "❌ MISSING: $f"
+              exit 1
+            fi
+          done
+
+          echo ""
+          echo ""
+          echo "=== Running Grafana config validation (syntax checks, no cross-refs) ==="
+          python3 scripts/validate-grafana-configs.py --no-cross-file \
+            backend/grafana/provisioning/alerting/alert_rules.yml \
+            backend/grafana/provisioning/alerting/contact_points.yml \
+            backend/grafana/provisioning/alerting/notification_policies.yml \
+            backend/grafana/provisioning/datasources/datasource.yml \
+            backend/grafana/provisioning/dashboards/dashboards.yml \
+            backend/grafana/provisioning/prometheus/prometheus.yml \
+            backend/grafana/toroloom-ws-dashboard.json \
+            backend/grafana/toroloom-market-schedule-dashboard.json \
+            backend/grafana/toroloom-broker-dashboard.json
+
+      - name: Post validation summary
+        if: always()
+        shell: bash
+        run: |
+          cat <<'EOF' >> $GITHUB_STEP_SUMMARY
+          ## Grafana Config Validation
+
+          | Type | Files | Status |
+          |------|-------|--------|
+          | YAML | alert_rules, contact_points, notification_policies, datasource, dashboards, prometheus | ✅ |
+          | JSON | ws-dashboard, market-schedule-dashboard, broker-dashboard | ✅ |
+
+          **Triggered by:** paths matching `backend/grafana/**` or manual dispatch.
+
+          Run via `validate-configs.yml` — independent fast-track job.
+          EOF

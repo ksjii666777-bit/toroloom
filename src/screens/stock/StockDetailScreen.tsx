@@ -14,9 +14,12 @@ import TechnicalIndicators from '../../components/TechnicalIndicators';
 import type { IndicatorType } from '../../components/TechnicalIndicators';
 import { DrawingToolbar, type DrawingAnnotation, type DrawingToolType } from '../../components/chart/DrawingTools';
 import { detectPatterns, getPatternDescription, type DetectedPattern } from '../../components/chart/patternDetection';
+import { usePatternSettingsStore } from '../../store/patternSettingsStore';
+import PatternSettingsModal from '../../components/stock/PatternSettingsModal';
 import { ChartCrosshairContext } from '../../components/ChartCrosshairContext';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useRealtimePrice } from '../../hooks/useRealtimePrice';
 
 // ── Extracted components ──
@@ -66,6 +69,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
   const [drawings, setDrawings] = useState<DrawingAnnotation[]>([]);
   const [activeDrawTool, setActiveDrawTool] = useState<DrawingToolType>('none');
   const [showPatterns, setShowPatterns] = useState(false);
+  const [showPatternSettings, setShowPatternSettings] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // ── Sector Performance Data ──
@@ -143,12 +147,23 @@ export default function StockDetailScreen({ route, navigation }: any) {
     );
   }, []);
 
+  // ── Pattern detection settings from store ──
+  const patternSettings = usePatternSettingsStore(s => ({
+    minConfidence: s.minConfidence,
+    enabledPatterns: s.enabledPatterns,
+    lookback: s.lookback,
+  }));
+
   // ── Detect patterns on candle history ──
   const detectedPatterns: DetectedPattern[] = useMemo(() => {
     if (!showPatterns || candleHistory.length < 20) return [];
-    const result = detectPatterns(candleHistory);
+    const result = detectPatterns(candleHistory, {
+      minConfidence: patternSettings.minConfidence,
+      enabledPatterns: patternSettings.enabledPatterns,
+      lookback: patternSettings.lookback,
+    });
     return result.patterns;
-  }, [candleHistory, showPatterns]);
+  }, [candleHistory, showPatterns, patternSettings]);
 
   const handleWatchlistToggle = useCallback(() => {
     const firstWatchlist = watchlists[0];
@@ -239,9 +254,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
               {isConnected ? 'Streaming live prices' : 'Using simulated prices'}
             </Text>
           </View>
-        </View>
-
-        {/* ── Extracted: Chart Controls ── */}
+        </View>          {/* ── Extracted: Chart Controls ── */}
         <ChartControls
           showMA={showMA}
           activeIndicators={activeIndicators}
@@ -256,6 +269,29 @@ export default function StockDetailScreen({ route, navigation }: any) {
           onChangeChartType={handleChartTypeCycle}
           onToggleFullscreen={() => setIsFullscreen(prev => !prev)}
         />
+
+        {/* Pattern Settings gear icon (visible when patterns are toggled on) */}
+        {showPatterns && (
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: SPACING.sm }}>
+            <TouchableOpacity
+              onPress={() => setShowPatternSettings(true)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                paddingHorizontal: SPACING.sm,
+                paddingVertical: 4,
+                borderRadius: BORDER_RADIUS.sm,
+                borderWidth: 1,
+                borderColor: colors.border,
+                backgroundColor: colors.bgCard,
+              }}
+            >
+              <Ionicons name="settings-outline" size={14} color={colors.textSecondary} />
+              <Text style={[styles.advancedLabel, { color: colors.textSecondary }]}>Advanced</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <ChartCrosshairContext.Provider value={{ focusedIndex, setFocusedIndex }}>
           {/* Drawing Toolbar */}
@@ -293,7 +329,30 @@ export default function StockDetailScreen({ route, navigation }: any) {
           />
 
           {/* ── Extracted: Pattern Summary ── */}
-          {showPatterns && <PatternSummary patterns={detectedPatterns} />}
+          {showPatterns && detectedPatterns.length > 0 && (
+            <PatternSummary patterns={detectedPatterns} />
+          )}
+          {showPatterns && detectedPatterns.length === 0 && (
+            <View style={{
+              padding: SPACING.md,
+              borderRadius: BORDER_RADIUS.md,
+              backgroundColor: colors.bg,
+              marginBottom: SPACING.sm,
+              alignItems: 'center',
+            }}>
+              <Text style={[{
+                ...FONTS.regular, fontSize: FONTS.size.sm, color: colors.textMuted,
+              }]}>
+                No patterns detected with current settings. Try lowering the confidence threshold or enabling more pattern types in{' '}
+                <Text
+                  style={{ color: colors.primary, textDecorationLine: 'underline' }}
+                  onPress={() => setShowPatternSettings(true)}
+                >
+                  Advanced settings
+                </Text>.
+              </Text>
+            </View>
+          )}
 
           {/* ── Extracted: Technical Indicators ── */}
           {activeIndicators.length > 0 && (
@@ -310,6 +369,24 @@ export default function StockDetailScreen({ route, navigation }: any) {
         <View style={{ marginTop: SPACING.lg }}>
           <KeyStatsGrid stats={{ open: candleHistory[0]?.open || stock.price, dayHigh, dayLow, volume, marketCap: stock.marketCap, pe: stock.pe, high52: stock.high52, low52: stock.low52 }} />
         </View>
+
+        {/* Fundamentals Button — Company Analysis */}
+        <AnimatedPressable onPress={() => navigation.navigate('CompanyFundamentals', { symbol: stock.symbol, stockId: stock.id })} haptic="medium" scaleTo={0.97}>
+          <View style={[styles.fundamentalsCard, { borderColor: colors.border, backgroundColor: `${colors.primary}08` }]}>
+            <View style={styles.fundamentalsRow}>
+              <View style={[styles.fundamentalsIcon, { backgroundColor: `${colors.primary}20` }]}>
+                <Ionicons name="analytics" size={22} color={colors.primary} />
+              </View>
+              <View style={styles.fundamentalsInfo}>
+                <Text style={[styles.fundamentalsTitle, { color: colors.text }]}>Company Fundamentals</Text>
+                <Text style={[styles.fundamentalsSub, { color: colors.textSecondary }]}>
+                  P/E {stock.pe.toFixed(1)}x · P/B {stock.pb.toFixed(1)}x · ROCE · Debt Ratios · Quarterly Results
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </View>
+          </View>
+        </AnimatedPressable>
 
         {/* About Company */}
         <Card title="About Company" style={styles.aboutCard}>
@@ -358,6 +435,11 @@ export default function StockDetailScreen({ route, navigation }: any) {
       />
 
       {/* ── Fullscreen Chart Modal ── */}
+      <PatternSettingsModal
+        visible={showPatternSettings}
+        onClose={() => setShowPatternSettings(false)}
+      />
+
       <FullscreenChartModal
         visible={isFullscreen}
         onClose={() => setIsFullscreen(false)}
@@ -509,6 +591,40 @@ const createStyles = (colors: any) =>
       ...FONTS.regular,
       fontSize: FONTS.size.xs,
       color: colors.textMuted,
+    },
+    fundamentalsCard: {
+      marginBottom: SPACING.md,
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING.lg,
+      borderWidth: 1,
+    },
+    fundamentalsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.md,
+    },
+    fundamentalsIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    fundamentalsInfo: {
+      flex: 1,
+    },
+    fundamentalsTitle: {
+      ...FONTS.semiBold,
+      fontSize: FONTS.size.md,
+    },
+    fundamentalsSub: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.xs,
+      marginTop: 2,
+    },
+    advancedLabel: {
+      ...FONTS.medium,
+      fontSize: FONTS.size.xs,
     },
     aboutCard: {
       marginBottom: SPACING.lg,

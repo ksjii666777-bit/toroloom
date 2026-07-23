@@ -18,7 +18,7 @@
  */
 
 import type { Collection, Db, MongoClient, MongoClientOptions, Filter } from 'mongodb';
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData, WebhookStorageData, WebhookDeliveryLogData, ApiKeyStorageData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -157,6 +157,20 @@ export class MongoDBStorage implements StorageEngine {
 
     const tg = this.db.collection('telegram_links');
     await tg.createIndex({ userId: 1 }, { unique: true });
+
+    const wh = this.db.collection('webhooks');
+    await wh.createIndex({ userId: 1 });
+
+    const whLogs = this.db.collection('webhook_delivery_logs');
+    await whLogs.createIndex({ webhookId: 1 });
+    await whLogs.createIndex({ timestamp: -1 });
+
+    const pe = this.db.collection('processed_events');
+    await pe.createIndex({ eventId: 1 }, { unique: true });
+
+    const ak = this.db.collection('api_keys');
+    await ak.createIndex({ keyHash: 1 }, { unique: true });
+    await ak.createIndex({ userId: 1 });
   }
 
   private getAuditCollection(): Collection<AuditEvent> {
@@ -182,6 +196,26 @@ export class MongoDBStorage implements StorageEngine {
   private getCommunityCollection(): Collection<CommunityPostData & { _id?: string }> {
     if (!this.db) throw new Error('MongoDB not connected');
     return this.db.collection('community_posts');
+  }
+
+  private getApiKeyCollection(): Collection<ApiKeyStorageData & { _id?: string }> {
+    if (!this.db) throw new Error('MongoDB not connected');
+    return this.db.collection('api_keys');
+  }
+
+  private getWebhookCollection(): Collection<WebhookStorageData & { _id?: string }> {
+    if (!this.db) throw new Error('MongoDB not connected');
+    return this.db.collection('webhooks');
+  }
+
+  private getWebhookLogCollection(): Collection<WebhookDeliveryLogData & { _id?: string }> {
+    if (!this.db) throw new Error('MongoDB not connected');
+    return this.db.collection('webhook_delivery_logs');
+  }
+
+  private getProcessedEventsCollection(): Collection<{ eventId: string; processedAt: string; _id?: string }> {
+    if (!this.db) throw new Error('MongoDB not connected');
+    return this.db.collection('processed_events');
   }
 
   /**
@@ -266,6 +300,9 @@ export class MongoDBStorage implements StorageEngine {
     await this.db.collection('subscriptions').deleteMany({});
     await this.db.collection('coupons').deleteMany({});
     await this.db.collection('coupon_usage').deleteMany({});
+    await this.db.collection('webhooks').deleteMany({});
+    await this.db.collection('webhook_delivery_logs').deleteMany({});
+    await this.db.collection('processed_events').deleteMany({});
   }
 
   // ──── Risk Profiles ────
@@ -446,6 +483,140 @@ export class MongoDBStorage implements StorageEngine {
       { userId },
       { $set: sub },
       { upsert: true },
+    );
+  }
+
+  async loadAllSubscriptions(): Promise<UserSubscriptionData[]> {
+    if (!this.db) return [];
+    const col = this.db.collection('subscriptions');
+    const docs = await col.find({}).toArray();
+    return docs.map((doc: any) => {
+      const { _id, ...sub } = doc;
+      return sub as unknown as UserSubscriptionData;
+    });
+  }
+
+  // ──── Webhook Storage ────
+
+  async saveWebhook(webhook: WebhookStorageData): Promise<void> {
+    const col = this.getWebhookCollection();
+    await col.replaceOne(
+      { id: webhook.id } as unknown as Filter<WebhookStorageData & { _id?: string }>,
+      webhook as unknown as WebhookStorageData & { _id?: string },
+      { upsert: true },
+    );
+  }
+
+  async loadWebhook(id: string): Promise<WebhookStorageData | null> {
+    const col = this.getWebhookCollection();
+    const doc = await col.findOne({ id } as unknown as Filter<WebhookStorageData & { _id?: string }>);
+    if (!doc) return null;
+    const { _id, ...data } = doc;
+    return data as unknown as WebhookStorageData;
+  }
+
+  async loadUserWebhooks(userId: string): Promise<WebhookStorageData[]> {
+    const col = this.getWebhookCollection();
+    const docs = await col
+      .find({ userId } as unknown as Filter<WebhookStorageData & { _id?: string }>)
+      .sort({ createdAt: -1 })
+      .toArray();
+    return docs.map(({ _id, ...data }) => data as unknown as WebhookStorageData);
+  }
+
+  async loadActiveWebhooksByEvent(event: string): Promise<WebhookStorageData[]> {
+    const col = this.getWebhookCollection();
+    const docs = await col
+      .find({ isActive: true, events: event } as unknown as Filter<WebhookStorageData & { _id?: string }>)
+      .toArray();
+    return docs.map(({ _id, ...data }) => data as unknown as WebhookStorageData);
+  }
+
+  async deleteWebhook(id: string): Promise<void> {
+    const col = this.getWebhookCollection();
+    const logCol = this.getWebhookLogCollection();
+    await logCol.deleteMany({ webhookId: id });
+    await col.deleteOne({ id } as unknown as Filter<WebhookStorageData & { _id?: string }>);
+  }
+
+  async saveWebhookDeliveryLog(log: WebhookDeliveryLogData): Promise<void> {
+    const col = this.getWebhookLogCollection();
+    await col.insertOne(log as unknown as WebhookDeliveryLogData & { _id?: string });
+  }
+
+  async loadWebhookDeliveryLogs(webhookId: string, limit?: number): Promise<WebhookDeliveryLogData[]> {
+    const col = this.getWebhookLogCollection();
+    let cursor = col
+      .find({ webhookId } as unknown as Filter<WebhookDeliveryLogData & { _id?: string }>)
+      .sort({ timestamp: -1 });
+    if (limit) cursor = cursor.limit(limit);
+    const docs = await cursor.toArray();
+    return docs.map(({ _id, ...data }) => data as unknown as WebhookDeliveryLogData);
+  }
+
+  // ──── Idempotency ────
+
+  async markEventProcessed(eventId: string): Promise<void> {
+    const col = this.getProcessedEventsCollection();
+    await col.updateOne(
+      { eventId },
+      { $setOnInsert: { eventId, processedAt: new Date().toISOString() } },
+      { upsert: true },
+    );
+  }
+
+  async isEventProcessed(eventId: string): Promise<boolean> {
+    const col = this.getProcessedEventsCollection();
+    const doc = await col.findOne({ eventId });
+    return !!doc;
+  }
+
+  // ──── API Keys ────
+
+  async saveApiKey(key: ApiKeyStorageData): Promise<void> {
+    const col = this.getApiKeyCollection();
+    await col.replaceOne(
+      { id: key.id } as unknown as Filter<ApiKeyStorageData & { _id?: string }>,
+      key as unknown as ApiKeyStorageData & { _id?: string },
+      { upsert: true },
+    );
+  }
+
+  async loadApiKeyByHash(hash: string): Promise<ApiKeyStorageData | null> {
+    const col = this.getApiKeyCollection();
+    const doc = await col.findOne({ keyHash: hash } as unknown as Filter<ApiKeyStorageData & { _id?: string }>);
+    if (!doc) return null;
+    const { _id, ...data } = doc;
+    return data as unknown as ApiKeyStorageData;
+  }
+
+  async loadUserApiKeys(userId: string): Promise<ApiKeyStorageData[]> {
+    const col = this.getApiKeyCollection();
+    const docs = await col
+      .find({ userId } as unknown as Filter<ApiKeyStorageData & { _id?: string }>)
+      .sort({ createdAt: -1 })
+      .toArray();
+    return docs.map(({ _id, ...data }) => data as unknown as ApiKeyStorageData);
+  }
+
+  async loadApiKey(id: string): Promise<ApiKeyStorageData | null> {
+    const col = this.getApiKeyCollection();
+    const doc = await col.findOne({ id } as unknown as Filter<ApiKeyStorageData & { _id?: string }>);
+    if (!doc) return null;
+    const { _id, ...data } = doc;
+    return data as unknown as ApiKeyStorageData;
+  }
+
+  async deleteApiKey(id: string): Promise<void> {
+    const col = this.getApiKeyCollection();
+    await col.deleteOne({ id } as unknown as Filter<ApiKeyStorageData & { _id?: string }>);
+  }
+
+  async touchApiKey(id: string): Promise<void> {
+    const col = this.getApiKeyCollection();
+    await col.updateOne(
+      { id } as unknown as Filter<ApiKeyStorageData & { _id?: string }>,
+      { $set: { lastUsedAt: new Date().toISOString(), updatedAt: new Date().toISOString() } },
     );
   }
 

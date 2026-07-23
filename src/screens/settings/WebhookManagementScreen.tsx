@@ -27,6 +27,7 @@ import {
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { WebhookConfig, WebhookEvent, WebhookDeliveryLog, WebhookEventMeta } from '../../types';
@@ -130,12 +131,12 @@ function maskSecret(secret: string): string {
 // EVENT CATEGORY CHIP
 // ═════════════════════════════════════════════════════════════════════════
 
-const EVENT_CATEGORIES: { key: string; label: string; icon: string }[] = [
-  { key: 'trading', label: 'Trading', icon: 'swap-horizontal' },
-  { key: 'portfolio', label: 'Portfolio', icon: 'pie-chart' },
-  { key: 'market', label: 'Market', icon: 'trending-up' },
-  { key: 'ai', label: 'AI', icon: 'bulb' },
-  { key: 'system', label: 'System', icon: 'settings' },
+const EVENT_CATEGORIES: { key: string; labelKey: string; icon: string }[] = [
+  { key: 'trading', labelKey: 'webhookManagement.trading', icon: 'swap-horizontal' },
+  { key: 'portfolio', labelKey: 'webhookManagement.portfolio', icon: 'pie-chart' },
+  { key: 'market', labelKey: 'webhookManagement.market', icon: 'trending-up' },
+  { key: 'ai', labelKey: 'webhookManagement.ai', icon: 'bulb' },
+  { key: 'system', labelKey: 'webhookManagement.system', icon: 'settings' },
 ];
 
 function EventCategoryChip({ label, icon, active, onPress, color }: {
@@ -184,7 +185,7 @@ const statStyles = StyleSheet.create({
 // ═════════════════════════════════════════════════════════════════════════
 
 function WebhookCard({
-  wh, logs, onToggle, onDelete, onTestPing, expanded, onToggleExpand, colors,
+  wh, logs, onToggle, onDelete, onTestPing, expanded, onToggleExpand, colors, t,
 }: {
   wh: WebhookConfig;
   logs: WebhookDeliveryLog[];
@@ -194,6 +195,7 @@ function WebhookCard({
   expanded: boolean;
   onToggleExpand: () => void;
   colors: any;
+  t: (key: string, ...args: any[]) => string;
 }) {
   const successRate = wh.deliveryCount > 0 ? Math.round((wh.successCount / wh.deliveryCount) * 100) : 0;
   const isUp = wh.isActive;
@@ -239,15 +241,15 @@ function WebhookCard({
       <View style={cardStyles.statsRow}>
         <View style={cardStyles.statItem}>
           <Text style={[cardStyles.statValue, { color: colors.text }]}>{wh.deliveryCount}</Text>
-          <Text style={[cardStyles.statLabel, { color: colors.textMuted }]}>Deliveries</Text>
+          <Text style={[cardStyles.statLabel, { color: colors.textMuted }]}>{t('webhookManagement.deliveries')}</Text>
         </View>
         <View style={cardStyles.statItem}>
           <Text style={[cardStyles.statValue, { color: isUp ? '#00C853' : colors.textMuted }]}>{successRate}%</Text>
-          <Text style={[cardStyles.statLabel, { color: colors.textMuted }]}>Success</Text>
+          <Text style={[cardStyles.statLabel, { color: colors.textMuted }]}>{t('webhookManagement.successRateLabel')}</Text>
         </View>
         <View style={cardStyles.statItem}>
           <Text style={[cardStyles.statValue, { color: colors.text }]}>{formatRelativeTime(wh.lastTriggeredAt)}</Text>
-          <Text style={[cardStyles.statLabel, { color: colors.textMuted }]}>Last Ping</Text>
+          <Text style={[cardStyles.statLabel, { color: colors.textMuted }]}>{t('webhookManagement.lastPing')}</Text>
         </View>
       </View>
 
@@ -255,24 +257,24 @@ function WebhookCard({
       <View style={cardStyles.actionsRow}>
         <Pressable onPress={() => onTestPing(wh)} style={[cardStyles.actionBtn, { borderColor: colors.primary + '30' }]}>
           <Ionicons name="flash" size={14} color={colors.primary} />
-          <Text style={[cardStyles.actionBtnText, { color: colors.primary }]}>Test Ping</Text>
+          <Text style={[cardStyles.actionBtnText, { color: colors.primary }]}>{t('webhookManagement.testPing')}</Text>
         </Pressable>
         <Pressable onPress={onToggleExpand} style={[cardStyles.actionBtn, { borderColor: colors.border }]}>
           <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={14} color={colors.textMuted} />
-          <Text style={[cardStyles.actionBtnText, { color: colors.textMuted }]}>Logs</Text>
+          <Text style={[cardStyles.actionBtnText, { color: colors.textMuted }]}>{t('webhookManagement.logs')}</Text>
         </Pressable>
         <Pressable onPress={() => onDelete(wh)} style={[cardStyles.actionBtn, { borderColor: '#FF525230' }]}>
           <Ionicons name="trash-outline" size={14} color="#FF5252" />
-          <Text style={[cardStyles.actionBtnText, { color: '#FF5252' }]}>Delete</Text>
+          <Text style={[cardStyles.actionBtnText, { color: '#FF5252' }]}>{t('webhookManagement.delete')}</Text>
         </Pressable>
       </View>
 
       {/* Expanded: Delivery Logs */}
       {expanded && (
         <View style={[cardStyles.logsSection, { backgroundColor: colors.bgInput, borderColor: colors.divider }]}>
-          <Text style={[cardStyles.logsTitle, { color: colors.text }]}>Recent Deliveries</Text>
+          <Text style={[cardStyles.logsTitle, { color: colors.text }]}>{t('webhookManagement.recentDeliveries')}</Text>
           {logs.length === 0 ? (
-            <Text style={[cardStyles.noLogs, { color: colors.textMuted }]}>No delivery logs yet</Text>
+            <Text style={[cardStyles.noLogs, { color: colors.textMuted }]}>{t('webhookManagement.noDeliveryLogs')}</Text>
           ) : (
             logs.map(log => {
               const meta = WEBHOOK_EVENTS[log.event];
@@ -343,6 +345,7 @@ const cardStyles = StyleSheet.create({
 
 export default function WebhookManagementScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [webhooks, setWebhooks] = useState<WebhookConfig[]>(MOCK_WEBHOOKS);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [expandedWhId, setExpandedWhId] = useState<string | null>(null);
@@ -375,21 +378,21 @@ export default function WebhookManagementScreen({ navigation }: any) {
 
   const deleteWebhook = useCallback((wh: WebhookConfig) => {
     Alert.alert(
-      'Delete Webhook',
-      `Permanently delete "${wh.name}"?\n\nThis cannot be undone.`,
+      t('webhookManagement.deleteTitle'),
+      t('webhookManagement.deleteMsg', { name: wh.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
+        { text: t('app.cancel'), style: 'cancel' },
+        { text: t('webhookManagement.deleteConfirm'), style: 'destructive', onPress: () => {
           setWebhooks(prev => prev.filter(w => w.id !== wh.id));
           if (expandedWhId === wh.id) setExpandedWhId(null);
         }},
       ],
     );
-  }, [expandedWhId]);
+  }, [t, expandedWhId]);
 
   const testPing = useCallback((wh: WebhookConfig) => {
-    Alert.alert('🔍 Test Ping', `Sending test event to:\n${wh.url}\n\nStatus: 200 OK\nDuration: 187ms`, [{ text: 'OK' }]);
-  }, []);
+    Alert.alert(t('webhookManagement.pingTitle'), t('webhookManagement.pingMsg', { url: wh.url, duration: '187' }), [{ text: t('app.confirm') }]);
+  }, [t]);
 
   const toggleExpand = useCallback((id: string) => {
     setExpandedWhId(prev => prev === id ? null : id);
@@ -400,9 +403,9 @@ export default function WebhookManagementScreen({ navigation }: any) {
   }, []);
 
   const handleCreate = useCallback(() => {
-    if (!newName.trim()) { Alert.alert('Name Required', 'Please enter a webhook name.'); return; }
-    if (!newUrl.trim()) { Alert.alert('URL Required', 'Please enter a target URL.'); return; }
-    if (selectedEvents.length === 0) { Alert.alert('Events Required', 'Please select at least one event.'); return; }
+    if (!newName.trim()) { Alert.alert(t('webhookManagement.nameRequired'), t('webhookManagement.nameRequiredMsg')); return; }
+    if (!newUrl.trim()) { Alert.alert(t('webhookManagement.urlRequired'), t('webhookManagement.urlRequiredMsg')); return; }
+    if (selectedEvents.length === 0) { Alert.alert(t('webhookManagement.eventsRequired'), t('webhookManagement.eventsRequiredMsg')); return; }
 
     const generatedSecret = newSecret.trim() || `whsec_${Math.random().toString(36).slice(2, 10)}...${Math.random().toString(36).slice(-4)}`;
     const newWebhook: WebhookConfig = {
@@ -423,8 +426,8 @@ export default function WebhookManagementScreen({ navigation }: any) {
     setShowCreateForm(false);
     setNewName(''); setNewUrl(''); setNewSecret(''); setNewDesc('');
     setSelectedEvents([]);
-    Alert.alert('✅ Created', `Webhook "${newName}" created successfully.`);
-  }, [newName, newUrl, newSecret, newDesc, selectedEvents]);
+    Alert.alert(t('webhookManagement.created'), t('webhookManagement.createdMsg', { name: newName }));
+  }, [newName, newUrl, newSecret, newDesc, selectedEvents, t]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -435,8 +438,8 @@ export default function WebhookManagementScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Webhooks</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>Real-time event notifications</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('webhookManagement.title')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('webhookManagement.subtitle')}</Text>
           </View>
         </View>
       </View>
@@ -444,10 +447,10 @@ export default function WebhookManagementScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Stats */}
         <View style={styles.statsRow}>
-          <StatCard icon="link" value={stats.total.toString()} label="Total" color="#3B82F6" />
-          <StatCard icon="checkmark-circle" value={stats.active.toString()} label="Active" color="#00C853" />
-          <StatCard icon="pulse" value={stats.totalDeliveries.toString()} label="Delivered" color="#8B5CF6" />
-          <StatCard icon="trending-up" value={`${stats.successRate}%`} label="Success" color="#00E676" />
+          <StatCard icon="link" value={stats.total.toString()} label={t('webhookManagement.total')} color="#3B82F6" />
+          <StatCard icon="checkmark-circle" value={stats.active.toString()} label={t('webhookManagement.active')} color="#00C853" />
+          <StatCard icon="pulse" value={stats.totalDeliveries.toString()} label={t('webhookManagement.delivered')} color="#8B5CF6" />
+          <StatCard icon="trending-up" value={`${stats.successRate}%`} label={t('webhookManagement.success')} color="#00E676" />
         </View>
 
         {/* Create Button */}
@@ -455,45 +458,45 @@ export default function WebhookManagementScreen({ navigation }: any) {
           <AnimatedPressable onPress={() => setShowCreateForm(true)} haptic="medium" scaleTo={0.97}>
             <View style={[styles.createBtn, { borderColor: colors.primary + '40' }]}>
               <Ionicons name="add-circle" size={20} color={colors.primary} />
-              <Text style={[styles.createBtnText, { color: colors.primary }]}>Add Webhook</Text>
+              <Text style={[styles.createBtnText, { color: colors.primary }]}>{t('webhookManagement.addWebhook')}</Text>
             </View>
           </AnimatedPressable>
         ) : (
           <Animated.View entering={FadeInDown} style={[styles.createForm, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={styles.formHeader}>
-              <Text style={[styles.formTitle, { color: colors.text }]}>New Webhook</Text>
+              <Text style={[styles.formTitle, { color: colors.text }]}>{t('webhookManagement.newWebhook')}</Text>
               <Pressable onPress={() => setShowCreateForm(false)}>
                 <Ionicons name="close" size={22} color={colors.textMuted} />
               </Pressable>
             </View>
 
-            <Text style={[styles.formLabel, { color: colors.textMuted }]}>Name</Text>
+            <Text style={[styles.formLabel, { color: colors.textMuted }]}>{t('webhookManagement.name')}</Text>
             <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              placeholder="My Webhook" placeholderTextColor={colors.textMuted} value={newName} onChangeText={setNewName} autoFocus />
+              placeholder={t('webhookManagement.namePlaceholder')} placeholderTextColor={colors.textMuted} value={newName} onChangeText={setNewName} autoFocus />
 
-            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>Target URL</Text>
+            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.targetUrl')}</Text>
             <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              placeholder="https://hooks.example.com/..." placeholderTextColor={colors.textMuted} value={newUrl} onChangeText={setNewUrl} autoCapitalize="none" autoCorrect={false} />
+              placeholder={t('webhookManagement.urlPlaceholder')} placeholderTextColor={colors.textMuted} value={newUrl} onChangeText={setNewUrl} autoCapitalize="none" autoCorrect={false} />
 
             <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>Secret (optional)</Text>
+                <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.secret')}</Text>
                 <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-                  placeholder="whsec_..." placeholderTextColor={colors.textMuted} value={newSecret} onChangeText={setNewSecret} autoCapitalize="none" />
+                  placeholder={t('webhookManagement.secretPlaceholder')} placeholderTextColor={colors.textMuted} value={newSecret} onChangeText={setNewSecret} autoCapitalize="none" />
               </View>
             </View>
 
-            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>Description</Text>
+            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.description')}</Text>
             <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              placeholder="Optional description" placeholderTextColor={colors.textMuted} value={newDesc} onChangeText={setNewDesc} />
+              placeholder={t('webhookManagement.descPlaceholder')} placeholderTextColor={colors.textMuted} value={newDesc} onChangeText={setNewDesc} />
 
             {/* Event selector */}
             <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>
-              Events ({selectedEvents.length} selected)
+              {t('webhookManagement.events', { count: selectedEvents.length })}
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll}>
               {EVENT_CATEGORIES.map(cat => (
-                <EventCategoryChip key={cat.key} label={cat.label} icon={cat.icon} active={eventCategoryFilter === cat.key} onPress={() => setEventCategoryFilter(cat.key)} color={colors.primary} />
+                <EventCategoryChip key={cat.key} label={t(cat.labelKey)} icon={cat.icon} active={eventCategoryFilter === cat.key} onPress={() => setEventCategoryFilter(cat.key)} color={colors.primary} />
               ))}
             </ScrollView>
             <View style={styles.eventsGrid}>
@@ -519,7 +522,7 @@ export default function WebhookManagementScreen({ navigation }: any) {
             <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.97}>
               <View style={[styles.submitBtn, { backgroundColor: colors.primary }]}>
                 <Ionicons name="link" size={18} color="#FFF" />
-                <Text style={styles.submitBtnText}>Create Webhook</Text>
+                <Text style={styles.submitBtnText}>{t('webhookManagement.createWebhook')}</Text>
               </View>
             </AnimatedPressable>
           </Animated.View>
@@ -527,10 +530,10 @@ export default function WebhookManagementScreen({ navigation }: any) {
 
         {/* Webhook List */}
         <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
-          Configured Webhooks
+          {t('webhookManagement.configuredWebhooks')}
         </Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          {webhooks.filter(w => w.isActive).length} active · {webhooks.length} total
+          {t('webhookManagement.webhookCount', { active: webhooks.filter(w => w.isActive).length, total: webhooks.length })}
         </Text>
 
         {webhooks.map(wh => (
@@ -544,6 +547,7 @@ export default function WebhookManagementScreen({ navigation }: any) {
             expanded={expandedWhId === wh.id}
             onToggleExpand={() => toggleExpand(wh.id)}
             colors={colors}
+          t={t}
           />
         ))}
 
@@ -551,11 +555,8 @@ export default function WebhookManagementScreen({ navigation }: any) {
         <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="information-circle" size={18} color={colors.primary} />
           <View style={{ flex: 1 }}>
-            <Text style={[styles.infoTitle, { color: colors.text }]}>About Webhooks</Text>
-            <Text style={[styles.infoText, { color: colors.textMuted }]}>
-              Webhooks send HTTP POST requests to your URL when specific events occur in your account.
-              Your server can then react in real-time — sync portfolio, execute trades, or send notifications.
-            </Text>
+            <Text style={[styles.infoTitle, { color: colors.text }]}>{t('webhookManagement.aboutTitle')}</Text>
+            <Text style={[styles.infoText, { color: colors.textMuted }]}>{t('webhookManagement.aboutDesc')}</Text>
           </View>
         </View>
 

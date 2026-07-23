@@ -5,6 +5,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import {
   DEFAULT_OPTIMIZATION_CONFIG, ImageFormat, ImageSizeKey,
   IMAGE_SIZES, IMAGE_SIZE_LABELS, isWebPSupported,
@@ -16,6 +17,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
 export default function CDNOptimizationScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // ── Settings State ──
@@ -40,45 +42,57 @@ export default function CDNOptimizationScreen({ navigation }: any) {
   const sizeLabel = IMAGE_SIZE_LABELS[previewSize];
 
   const handleResetDefaults = useCallback(() => {
-    Alert.alert('Reset to Defaults', 'Restore default optimization settings?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Reset',
-        onPress: () => {
-          setCdnEnabled(DEFAULT_OPTIMIZATION_CONFIG.cdnEnabled);
-          setImageFormat(DEFAULT_OPTIMIZATION_CONFIG.format);
-          setQuality(DEFAULT_OPTIMIZATION_CONFIG.quality);
-          setLazyLoading(DEFAULT_OPTIMIZATION_CONFIG.lazyLoading);
-          setPreviewSize('medium');
+    Alert.alert(
+      t('cdnOptimization.resetTitle'),
+      t('cdnOptimization.resetMsg'),
+      [
+        { text: t('app.cancel'), style: 'cancel' },
+        {
+          text: t('cdnOptimization.resetConfirm'),
+          onPress: () => {
+            setCdnEnabled(DEFAULT_OPTIMIZATION_CONFIG.cdnEnabled);
+            setImageFormat(DEFAULT_OPTIMIZATION_CONFIG.format);
+            setQuality(DEFAULT_OPTIMIZATION_CONFIG.quality);
+            setLazyLoading(DEFAULT_OPTIMIZATION_CONFIG.lazyLoading);
+            setPreviewSize('medium');
+          },
         },
-      },
-    ]);
-  }, []);
-
-  const qualityDescriptions: Record<number, string> = {
-    60: 'Fast loading, lower quality',
-    70: 'Good balance for thumbnails',
-    80: 'High quality, small size',
-    85: 'Very high quality',
-    90: 'Maximum quality, larger file',
-  };
+      ],
+    );
+  }, [t]);
 
   const qualityOptions = [60, 70, 80, 85, 90];
 
+  const getQualityDesc = useCallback((q: number): string => {
+    const descs: Record<number, string> = {
+      60: t('cdnOptimization.qFast'),
+      70: t('cdnOptimization.qThumbnail'),
+      80: t('cdnOptimization.qHigh'),
+      85: t('cdnOptimization.qVeryHigh'),
+      90: t('cdnOptimization.qMax'),
+    };
+    return descs[q] || t('cdnOptimization.qStandard');
+  }, [t]);
+
   // Simulate savings based on quality
   const webpSavings = useMemo(() => {
-    // Simulate 500KB original JPEG, compute WebP savings
     const originalSize = 512000; // 500KB
     return estimateWebPSavings(originalSize);
   }, []);
+
+  const formatConfig: Partial<Record<ImageFormat, { icon: keyof typeof Ionicons.glyphMap; color: string; labelKey: string; descKey: string }>> = {
+    webp: { icon: 'image', color: '#8B5CF6', labelKey: 'cdnOptimization.formatWebp', descKey: 'cdnOptimization.webpDesc' },
+    jpeg: { icon: 'document', color: '#3B82F6', labelKey: 'cdnOptimization.formatJpeg', descKey: 'cdnOptimization.jpegDesc' },
+    png: { icon: 'albums', color: '#00C853', labelKey: 'cdnOptimization.formatPng', descKey: 'cdnOptimization.pngDesc' },
+  };
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>CDN Image Optimization</Text>
-          <Text style={styles.subtitle}>Optimize image loading, reduce bandwidth</Text>
+          <Text style={styles.title}>{t('cdnOptimization.title')}</Text>
+          <Text style={styles.subtitle}>{t('cdnOptimization.subtitle')}</Text>
         </View>
 
         {/* ── Status Card ── */}
@@ -87,7 +101,7 @@ export default function CDNOptimizationScreen({ navigation }: any) {
             <View style={styles.statusItem}>
               <Ionicons name="checkmark-circle" size={20} color={cdnEnabled ? '#00C853' : colors.textMuted} />
               <Text style={[styles.statusLabel, { color: cdnEnabled ? '#00C853' : colors.textMuted }]}>
-                {cdnEnabled ? 'CDN Active' : 'CDN Disabled'}
+                {cdnEnabled ? t('cdnOptimization.cdnActive') : t('cdnOptimization.cdnDisabled')}
               </Text>
             </View>
             <View style={styles.statusDivider} />
@@ -98,7 +112,7 @@ export default function CDNOptimizationScreen({ navigation }: any) {
             <View style={styles.statusDivider} />
             <View style={styles.statusItem}>
               <Ionicons name="speedometer" size={20} color={colors.primary} />
-              <Text style={styles.statusLabel}>Q{quality}</Text>
+              <Text style={styles.statusLabel}>{t('cdnOptimization.quality', { percent: quality })}</Text>
             </View>
           </View>
         </Animated.View>
@@ -107,23 +121,21 @@ export default function CDNOptimizationScreen({ navigation }: any) {
         {!webpSupported && imageFormat === 'webp' && (
           <View style={styles.alertCard}>
             <Ionicons name="warning" size={16} color="#FFC107" />
-            <Text style={styles.alertText}>WebP is not supported on this platform. Falling back to JPEG.</Text>
+            <Text style={styles.alertText}>{t('cdnOptimization.webpAlert')}</Text>
           </View>
         )}
 
         {/* ── CDN Toggle ── */}
         <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>CDN Optimization</Text>
+          <Text style={styles.sectionTitle}>{t('cdnOptimization.cdnOptimization')}</Text>
           <View style={styles.settingRow}>
             <View style={styles.settingLeft}>
               <View style={[styles.settingIcon, { backgroundColor: '#00C85320' }]}>
                 <Ionicons name="cloud-download" size={18} color="#00C853" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.settingLabel}>Enable CDN Optimization</Text>
-                <Text style={styles.settingDesc}>
-                  Auto-resize, convert to WebP, and compress images
-                </Text>
+                <Text style={styles.settingLabel}>{t('cdnOptimization.enableCdn')}</Text>
+                <Text style={styles.settingDesc}>{t('cdnOptimization.enableCdnDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -138,13 +150,14 @@ export default function CDNOptimizationScreen({ navigation }: any) {
 
         {/* ── Format Selector ── */}
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Output Format</Text>
-          <Text style={styles.sectionDesc}>Choose the image format for optimized delivery</Text>
+          <Text style={styles.sectionTitle}>{t('cdnOptimization.outputFormat')}</Text>
+          <Text style={styles.sectionDesc}>{t('cdnOptimization.outputFormatDesc')}</Text>
 
           <View style={styles.formatRow}>
             {(['webp', 'jpeg', 'png'] as ImageFormat[]).map(format => {
               const isActive = imageFormat === format;
-              const formatColor = format === 'webp' ? '#8B5CF6' : format === 'jpeg' ? '#3B82F6' : '#00C853';
+              const fc = formatConfig[format];
+              if (!fc) return null;
               return (
                 <AnimatedPressable
                   key={format}
@@ -154,19 +167,19 @@ export default function CDNOptimizationScreen({ navigation }: any) {
                 >
                   <View style={[
                     styles.formatCard,
-                    isActive && { borderColor: formatColor, backgroundColor: formatColor + '15' },
+                    isActive && { borderColor: fc.color, backgroundColor: fc.color + '15' },
                     !isActive && { opacity: 0.7 },
                   ]}>
                     <Ionicons
-                      name={format === 'webp' ? 'image' : format === 'jpeg' ? 'document' : 'albums'}
+                      name={fc.icon}
                       size={22}
-                      color={isActive ? formatColor : colors.textMuted}
+                      color={isActive ? fc.color : colors.textMuted}
                     />
-                    <Text style={[styles.formatLabel, isActive && { color: formatColor }]}>
-                      {format.toUpperCase()}
+                    <Text style={[styles.formatLabel, isActive && { color: fc.color }]}>
+                      {t(fc.labelKey)}
                     </Text>
                     <Text style={styles.formatDesc}>
-                      {format === 'webp' ? 'Best compression' : format === 'jpeg' ? 'Universal' : 'Lossless'}
+                      {t(fc.descKey)}
                     </Text>
                   </View>
                 </AnimatedPressable>
@@ -178,7 +191,10 @@ export default function CDNOptimizationScreen({ navigation }: any) {
             <View style={styles.savingsCard}>
               <Ionicons name="trending-down" size={16} color="#00C853" />
               <Text style={styles.savingsText}>
-                Est. {webpSavings.savingsPercent}% bandwidth savings ({webpSavings.savingsFormatted} per 500KB image)
+                {t('cdnOptimization.savingsLabel', {
+                  percent: webpSavings.savingsPercent,
+                  savings: webpSavings.savingsFormatted,
+                })}
               </Text>
             </View>
           )}
@@ -186,8 +202,8 @@ export default function CDNOptimizationScreen({ navigation }: any) {
 
         {/* ── Quality Slider (simplified as radio buttons) ── */}
         <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Quality: {quality}%</Text>
-          <Text style={styles.sectionDesc}>{qualityDescriptions[quality] || 'Standard quality'}</Text>
+          <Text style={styles.sectionTitle}>{t('cdnOptimization.quality', { percent: quality })}</Text>
+          <Text style={styles.sectionDesc}>{getQualityDesc(quality)}</Text>
           <View style={styles.qualityRow}>
             {qualityOptions.map(q => (
               <AnimatedPressable
@@ -218,10 +234,8 @@ export default function CDNOptimizationScreen({ navigation }: any) {
                 <Ionicons name="hourglass" size={18} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.settingLabel}>Lazy Loading</Text>
-                <Text style={styles.settingDesc}>
-                  Only load images when they enter the viewport (reduces initial load)
-                </Text>
+                <Text style={styles.settingLabel}>{t('cdnOptimization.lazyLoading')}</Text>
+                <Text style={styles.settingDesc}>{t('cdnOptimization.lazyLoadingDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -236,7 +250,7 @@ export default function CDNOptimizationScreen({ navigation }: any) {
 
         {/* ── Preset Size Preview ── */}
         <Animated.View entering={FadeInDown.delay(250).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Size Preset Preview</Text>
+          <Text style={styles.sectionTitle}>{t('cdnOptimization.sizePreset')}</Text>
           <Text style={styles.sectionDesc}>{sizeLabel.description}</Text>
 
           <View style={styles.presetRow}>
@@ -273,10 +287,15 @@ export default function CDNOptimizationScreen({ navigation }: any) {
               preset={previewSize}
               borderRadius={BORDER_RADIUS.md}
               lazy={false}
-              alt={`Preview at ${previewSize} size`}
+              alt={t('cdnOptimization.previewAlt', { size: previewSize })}
             />
             <Text style={styles.previewSizeText}>
-              {currentSize.width}×{currentSize.height} · Q{quality} · {imageFormat.toUpperCase()}
+              {t('cdnOptimization.previewSizeText', {
+                width: currentSize.width,
+                height: currentSize.height,
+                quality,
+                format: imageFormat.toUpperCase(),
+              })}
             </Text>
           </View>
 
@@ -288,7 +307,7 @@ export default function CDNOptimizationScreen({ navigation }: any) {
           >
             <View style={styles.cycleBtn}>
               <Ionicons name="shuffle" size={16} color={colors.primary} />
-              <Text style={styles.cycleBtnText}>Switch Image</Text>
+              <Text style={styles.cycleBtnText}>{t('cdnOptimization.switchImage')}</Text>
             </View>
           </AnimatedPressable>
         </Animated.View>
@@ -297,7 +316,7 @@ export default function CDNOptimizationScreen({ navigation }: any) {
         <AnimatedPressable onPress={handleResetDefaults} haptic="medium" scaleTo={0.97}>
           <View style={styles.resetBtn}>
             <Ionicons name="refresh" size={18} color={colors.textMuted} />
-            <Text style={styles.resetBtnText}>Reset to Defaults</Text>
+            <Text style={styles.resetBtnText}>{t('cdnOptimization.resetDefaults')}</Text>
           </View>
         </AnimatedPressable>
 

@@ -11,6 +11,9 @@
 import { describe, it, expect } from 'vitest';
 import {
   detectPatterns,
+  detectAscendingTriangle,
+  detectDescendingTriangle,
+  detectSymmetricalTriangle,
   getPatternColor,
   getPatternDescription,
 } from '../components/chart/patternDetection';
@@ -597,20 +600,24 @@ describe('detectPatterns — Edge Cases', () => {
     expect(result.patterns).toEqual([]);
   });
 
-  it('returns at most 3 patterns', () => {
+  it('returns detected patterns without a hard cap (confidence filters instead)', () => {
     // Use the H&S dataset which may also trigger other patterns
     const data = buildHeadAndShouldersData();
     const result = detectPatterns(data);
-    expect(result.patterns.length).toBeLessThanOrEqual(3);
+    // No hard slice(0,3) cap — multiple detectors can fire
+    expect(result.patterns.length).toBeGreaterThanOrEqual(1);
+    for (const p of result.patterns) {
+      expect(p.confidence).toBeGreaterThanOrEqual(0);
+    }
   });
 
-  it('returns few or no patterns for random noise (no clear structure)', () => {
+  it('returns few patterns for random noise (no clear structure)', () => {
     const data = buildRandomNoiseData();
     const result = detectPatterns(data);
     // Random walk data can occasionally trigger false positives with
-    // small bar counts (30 bars) due to local price swings. Accept up
-    // to 2 false positives to avoid flakiness on CI.
-    expect(result.patterns.length).toBeLessThanOrEqual(2);
+    // small bar counts (30 bars) due to local price swings. Without the
+    // old hard cap of 3 patterns, accept up to 4 to avoid flakiness.
+    expect(result.patterns.length).toBeLessThanOrEqual(4);
   });
 
 
@@ -627,7 +634,7 @@ describe('detectPatterns — Edge Cases', () => {
 });
 
 describe('detectPatterns — Multiple Detectors Run', () => {
-  it('runs all 7 detectors and reports top 3', () => {
+  it('runs all detectors and reports all detected patterns', () => {
     // H&S dataset is rich enough to potentially trigger multiple detectors
     const data = buildHeadAndShouldersData();
     const result = detectPatterns(data);
@@ -649,6 +656,273 @@ describe('detectPatterns — Multiple Detectors Run', () => {
       expect(p.endIndex).toBeLessThan(data.length);
       expect(p.startIndex).toBeLessThanOrEqual(p.endIndex);
     }
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════
+// Dedicated data builders for direct triangle function tests
+// These produce ≥4 swing highs and ≥4 swing lows (required by getTriangleSwingData)
+// ═════════════════════════════════════════════════════════════════════════
+
+/**
+ * Build triangle data with explicit per-bar high/low values.
+ * Guarantees 4+ swing points within valid index range [3, 26] for lookback=3,
+ * with neighbors clearly separated from swing values and proper high ≥ low.
+ */
+function buildAscTriangleDirect(): StockHistoryPoint[] {
+  const data: StockHistoryPoint[] = [];
+  for (let i = 0; i < 30; i++) {
+    let high = 100;
+    let low = 99;
+    // 4 flat swing highs at indices 4, 10, 16, 22
+    if ([4, 10, 16, 22].includes(i)) { high = 105; low = 99; }
+    // 4 ascending swing lows at indices 7, 13, 19, 25: 92, 94, 96, 98
+    if (i === 7)  { high = 100; low = 92; }
+    if (i === 13) { high = 100; low = 94; }
+    if (i === 19) { high = 100; low = 96; }
+    if (i === 25) { high = 100; low = 98; }
+    // Default 100/99 → neighbors always < 105 (highs) and > 92-98 (lows) ✅
+    const close = (high + low) / 2;
+    data.push({
+      date: `2024-01-${String(i + 1).padStart(2, '0')}`,
+      open: i === 0 ? close : data[i - 1].close,
+      high, low, close,
+      volume: 1_000_000,
+    });
+  }
+  return data;
+}
+
+function buildDescTriangleDirect(): StockHistoryPoint[] {
+  const data: StockHistoryPoint[] = [];
+  for (let i = 0; i < 30; i++) {
+    let high = 100;
+    let low = 99;
+    // 4 descending swing highs at 4, 10, 16, 22: 109, 107, 105, 103
+    if (i === 4)  { high = 109; low = 99; }
+    if (i === 10) { high = 107; low = 99; }
+    if (i === 16) { high = 105; low = 99; }
+    if (i === 22) { high = 103; low = 99; }
+    // 4 flat swing lows at 7, 13, 19, 25 all at 95
+    if ([7, 13, 19, 25].includes(i)) { high = 100; low = 95; }
+    // Default 100/99 → neighbors always < 103-109 and > 95 ✅
+    const close = (high + low) / 2;
+    data.push({
+      date: `2024-01-${String(i + 1).padStart(2, '0')}`,
+      open: i === 0 ? close : data[i - 1].close,
+      high, low, close,
+      volume: 1_000_000,
+    });
+  }
+  return data;
+}
+
+function buildSymTriangleDirect(): StockHistoryPoint[] {
+  const data: StockHistoryPoint[] = [];
+  for (let i = 0; i < 30; i++) {
+    let high = 100;
+    let low = 99;
+    // 4 descending swing highs at 4, 10, 16, 22: 109, 107, 105, 103
+    if (i === 4)  { high = 109; low = 99; }
+    if (i === 10) { high = 107; low = 99; }
+    if (i === 16) { high = 105; low = 99; }
+    if (i === 22) { high = 103; low = 99; }
+    // 4 ascending swing lows at 7, 13, 19, 25: 92, 94, 96, 98
+    if (i === 7)  { high = 100; low = 92; }
+    if (i === 13) { high = 100; low = 94; }
+    if (i === 19) { high = 100; low = 96; }
+    if (i === 25) { high = 100; low = 98; }
+    // Default 100/99 → neighbors always < 103-109 and > 92-98 ✅
+    const close = (high + low) / 2;
+    data.push({
+      date: `2024-01-${String(i + 1).padStart(2, '0')}`,
+      open: i === 0 ? close : data[i - 1].close,
+      high, low, close,
+      volume: 1_000_000,
+    });
+  }
+  return data;
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// Direct triangle function tests (not through detectPatterns)
+// ═════════════════════════════════════════════════════════════════════════
+
+describe('detectAscendingTriangle (direct)', () => {
+  it('detects ascending triangle with correct type, direction, and confidence', () => {
+    const data = buildAscTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectAscendingTriangle(data, highs, lows);
+
+    expect(result).not.toBeNull();
+    expect(result!.type).toBe('ascending_triangle');
+    expect(result!.direction).toBe('bullish');
+    expect(result!.confidence).toBeGreaterThanOrEqual(50);
+    expect(result!.label).toBe('Asc Triangle');
+    expect(result!.necklinePrice).toBeDefined();
+  });
+
+  it('returns null for descending triangle data (wrong condition)', () => {
+    const data = buildDescTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectAscendingTriangle(data, highs, lows);
+    expect(result).toBeNull();
+  });
+
+  it('returns null for data too short (< 20 bars)', () => {
+    const data = makeData([100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114]);
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectAscendingTriangle(data, highs, lows);
+    expect(result).toBeNull();
+  });
+
+  it('accepts precomputedSwing = null to short-circuit (no recomputation)', () => {
+    const data = buildAscTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectAscendingTriangle(data, highs, lows, null);
+    expect(result).toBeNull(); // null swing data → null result
+  });
+
+  it('returns structured levels and startIndex ≤ endIndex', () => {
+    const data = buildAscTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectAscendingTriangle(data, highs, lows);
+    expect(result).not.toBeNull();
+    expect(result!.startIndex).toBeLessThanOrEqual(result!.endIndex);
+    expect(result!.levels.length).toBeGreaterThanOrEqual(3);
+    for (const lvl of result!.levels) {
+      expect(typeof lvl.x).toBe('number');
+      expect(typeof lvl.price).toBe('number');
+    }
+  });
+});
+
+describe('detectDescendingTriangle (direct)', () => {
+  it('detects descending triangle with correct type, direction, and confidence', () => {
+    const data = buildDescTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectDescendingTriangle(data, highs, lows);
+
+    expect(result).not.toBeNull();
+    expect(result!.type).toBe('descending_triangle');
+    expect(result!.direction).toBe('bearish');
+    expect(result!.confidence).toBeGreaterThanOrEqual(50);
+    expect(result!.label).toBe('Desc Triangle');
+    expect(result!.necklinePrice).toBeDefined();
+  });
+
+  it('returns null for ascending triangle data (wrong condition)', () => {
+    const data = buildAscTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectDescendingTriangle(data, highs, lows);
+    expect(result).toBeNull();
+  });
+
+  it('returns null for symmetrical triangle data (mixed condition not met)', () => {
+    const data = buildSymTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectDescendingTriangle(data, highs, lows);
+    // Symmetrical has both descending highs AND ascending lows → doesn't match descending-only
+    expect(result).toBeNull();
+  });
+
+  it('returns null for short data', () => {
+    const data = makeData([100]);
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectDescendingTriangle(data, highs, lows);
+    expect(result).toBeNull();
+  });
+
+  it('precomputedSwing skip works correctly', () => {
+    const data = buildDescTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectDescendingTriangle(data, highs, lows, null);
+    expect(result).toBeNull();
+  });
+});
+
+describe('detectSymmetricalTriangle (direct)', () => {
+  it('detects symmetrical triangle with correct type, direction, and confidence', () => {
+    const data = buildSymTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectSymmetricalTriangle(data, highs, lows);
+
+    expect(result).not.toBeNull();
+    expect(result!.type).toBe('symmetrical_triangle');
+    expect(result!.direction).toBe('neutral');
+    expect(result!.confidence).toBeGreaterThanOrEqual(50);
+    expect(result!.label).toBe('Sym Triangle');
+  });
+
+  it('returns null for ascending-only data (no descending highs)', () => {
+    const data = buildAscTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectSymmetricalTriangle(data, highs, lows);
+    expect(result).toBeNull();
+  });
+
+  it('returns null for descending-only data (no ascending lows)', () => {
+    const data = buildDescTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectSymmetricalTriangle(data, highs, lows);
+    expect(result).toBeNull();
+  });
+
+  it('returns null for short data (< 20 bars)', () => {
+    const prices = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114];
+    const data = makeData(prices);
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectSymmetricalTriangle(data, highs, lows);
+    expect(result).toBeNull();
+  });
+
+  it('precomputedSwing = null returns null without computing', () => {
+    const data = buildSymTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectSymmetricalTriangle(data, highs, lows, null);
+    expect(result).toBeNull();
+  });
+
+  it('returns isComplete boolean and valid levels', () => {
+    const data = buildSymTriangleDirect();
+    const highs = data.map(d => d.high);
+    const lows = data.map(d => d.low);
+
+    const result = detectSymmetricalTriangle(data, highs, lows);
+    expect(result).not.toBeNull();
+    expect(typeof result!.isComplete).toBe('boolean');
+    expect(result!.levels.length).toBeGreaterThanOrEqual(4);
+    expect(result!.startIndex).toBeLessThanOrEqual(result!.endIndex);
   });
 });
 

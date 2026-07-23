@@ -47,6 +47,8 @@ import ironLockRoutes from './routes/ironLock';
 import metricsRoutes from './routes/metrics';
 import paymentsRoutes from './routes/payments';
 import subscriptionRoutes, { webhookRouter, configureSubscriptionPersistence, setWebhookSecret } from './routes/subscriptions';
+import subscriptionAnalyticsRoutes, { configureSubscriptionAnalyticsStore } from './routes/subscriptionAnalytics';
+import webhookHealthRoutes from './routes/webhookHealth';
 import couponRoutes, { configureCouponPersistence } from './routes/coupons';
 import pushNotificationsRoutes from './routes/pushNotifications';
 import contractNoteRoutes from './routes/contractNote';
@@ -54,6 +56,7 @@ import fnoRoutes from './routes/fno';
 import newsRoutes from './routes/news';
 import telegramRoutes from './routes/telegram';
 import dividendRoutes from './routes/dividends';
+import fundamentalsRoutes from './routes/fundamentals';
 import brokerProxyRoutes from './routes/brokerProxy';
 import socialRoutes from './routes/social';
 import kycRoutes from './routes/kyc';
@@ -145,6 +148,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 
 // ── Reads — 200 req / min ────────────────────────────────────────────
 app.use('/api/market', readLimiter, marketRoutes);
+app.use('/api/market/fundamentals', authMiddleware, fundamentalsRoutes);
 app.use('/api/portfolio', readLimiter, portfolioRoutes);
 app.use('/api/watchlist', readLimiter, watchlistRoutes);
 app.use('/api/mutual-funds', readLimiter, mutualFundsRoutes);
@@ -170,6 +174,12 @@ app.use('/api/iron-lock', writeLimiter, authMiddleware, requireSubscription('eli
 app.use('/api/payments', writeLimiter, paymentsRoutes);
 // Protected subscription routes (authMiddleware applied inside router)
 app.use('/api/subscriptions', writeLimiter, subscriptionRoutes);
+
+// Subscription analytics (admin only)
+app.use('/api/subscription-analytics', writeLimiter, authMiddleware, subscriptionAnalyticsRoutes);
+
+// Razorpay webhook health & monitoring
+app.use('/api/webhooks', readLimiter, webhookHealthRoutes);
 app.use('/api/contract-note', writeLimiter, authMiddleware, requireSubscription('pro'), contractNoteRoutes);
 
 // ── F&O — 100 req / min (data reads), 50 req / min (writes) ────────────
@@ -279,6 +289,9 @@ async function initializeStorage(): Promise<void> {
     if (env.razorpayWebhookSecret) {
       setWebhookSecret(env.razorpayWebhookSecret);
     }
+
+    // Wire storage into the Subscription Analytics module
+    configureSubscriptionAnalyticsStore(storage);
 
     // Load persisted broker state (type + dedup cache)
     await loadBrokerStateFromStorage();

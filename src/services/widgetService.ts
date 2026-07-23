@@ -141,16 +141,21 @@ export const widgetService = {
       const portfolioState = usePortfolioStore.getState();
       const { holdings } = portfolioState;
 
+      // Get preferences (needed before top holdings to filter hidden symbols)
+      const prefs = await widgetService.getPreferences();
+
       // Calculate totals
       const totalInvested = holdings.reduce((sum, h) => sum + h.totalInvested, 0);
       const currentValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
       const pnl = currentValue - totalInvested;
       const pnlPercent = totalInvested > 0 ? (pnl / totalInvested) * 100 : 0;
 
-      // Top 3 holdings by value
+      // Top 5 holdings by value (filter out hidden symbols for privacy)
+      const hiddenSet = new Set(prefs.hiddenSymbols);
       const topHoldings: WidgetHolding[] = [...holdings]
+        .filter(h => !hiddenSet.has(h.symbol))
         .sort((a, b) => b.currentValue - a.currentValue)
-        .slice(0, 3)
+        .slice(0, 5)
         .map(h => ({
           symbol: h.symbol,
           name: h.name,
@@ -159,9 +164,6 @@ export const widgetService = {
           pnlPercent: h.pnlPercent,
           quantity: h.quantity,
         }));
-
-      // Get preferences
-      const prefs = await widgetService.getPreferences();
 
       // Check market status
       const day = new Date().getDay();

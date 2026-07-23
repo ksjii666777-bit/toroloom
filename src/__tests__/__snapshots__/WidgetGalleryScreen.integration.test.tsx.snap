@@ -1,0 +1,2031 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`WidgetGalleryScreen — Integration > matches snapshot with added widgets and category sections > WidgetGalleryScreen-full 1`] = `
+"{
+  "type": "View",
+  "props": {
+    "style": [
+      {
+        "flex": 1
+      },
+      {
+        "backgroundColor": "#06080C"
+      }
+    ]
+  },
+  "children": [
+    {
+      "type": "View",
+      "props": {
+        "style": [
+          {
+            "flexDirection": "row",
+            "alignItems": "center",
+            "paddingHorizontal": 20,
+            "paddingBottom": 16
+          },
+          {
+            "paddingTop": 12
+          }
+        ]
+      },
+      "children": [
+        {
+          "type": "TouchableOpacity",
+          "props": {
+            "style": [
+              {
+                "width": 40,
+                "height": 40,
+                "borderRadius": 12,
+                "justifyContent": "center",
+                "alignItems": "center",
+                "borderWidth": 1
+              },
+              {
+                "backgroundColor": "#1A1D28",
+                "borderColor": "rgba(255,255,255,0.07)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "IonIonicons",
+              "props": {
+                "name": "arrow-back",
+                "size": 22,
+                "color": "#E0E6ED"
+              },
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": {
+              "flex": 1,
+              "marginLeft": 12
+            }
+          },
+          "children": [
+            {
+              "type": "Text",
+              "props": {
+                "style": [
+                  {
+                    "fontFamily": "Inter-Bold",
+                    "fontWeight": "700",
+                    "letterSpacing": 0.05,
+                    "fontSize": 28
+                  },
+                  {
+                    "color": "#E0E6ED"
+                  }
+                ]
+              },
+              "children": [
+                "Widget Gallery"
+              ]
+            },
+            {
+              "type": "Text",
+              "props": {
+                "style": [
+                  {
+                    "fontFamily": "Inter-Regular",
+                    "fontWeight": "400",
+                    "letterSpacing": 0.2,
+                    "fontSize": 12,
+                    "marginTop": 2
+                  },
+                  {
+                    "color": "#94A3B8"
+                  }
+                ]
+              },
+              "children": [
+                "Add widgets to customize your dashboard"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ScrollView",
+      "props": {
+        "showsVerticalScrollIndicator": false,
+        "contentContainerStyle": [
+          {
+            "paddingHorizontal": 20,
+            "paddingBottom": 40
+          },
+          {
+            "paddingBottom": 100
+          }
+        ]
+      },
+      "children": [
+        {
+          "type": "View",
+          "props": {
+            "entering": "[Animation]",
+            "layout": "[Animation]",
+            "style": {
+              "marginBottom": 20
+            }
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "alignItems": "center",
+                  "marginBottom": 12
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "IonIonicons",
+                      "props": {
+                        "name": "trending-up",
+                        "size": 16,
+                        "color": "#3B82F6"
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Bold",
+                            "fontWeight": "700",
+                            "letterSpacing": 0.05,
+                            "fontSize": 14
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Performance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "style": [
+                      {
+                        "fontFamily": "Inter-Regular",
+                        "fontWeight": "400",
+                        "letterSpacing": 0.2,
+                        "fontSize": 10
+                      },
+                      {
+                        "color": "#475569"
+                      }
+                    ]
+                  },
+                  "children": [
+                    "1",
+                    "/",
+                    "3",
+                    " added"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "gap": 12
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "entering": "[Animation]",
+                    "style": [
+                      {
+                        "borderRadius": 16,
+                        "borderWidth": 1,
+                        "padding": 16,
+                        "gap": 8,
+                        "position": "relative"
+                      },
+                      {
+                        "backgroundColor": "#1A1D28",
+                        "borderColor": "#00E67650",
+                        "opacity": 0.7
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "width": 44,
+                            "height": 44,
+                            "borderRadius": 12,
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                          },
+                          {
+                            "backgroundColor": "#00E67620"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "trending-up",
+                            "size": 24,
+                            "color": "#00E676"
+                          },
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-SemiBold",
+                            "fontWeight": "600",
+                            "letterSpacing": 0.1,
+                            "fontSize": 16
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "P&L Overview"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Regular",
+                            "fontWeight": "400",
+                            "letterSpacing": 0.2,
+                            "fontSize": 12,
+                            "lineHeight": 18
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ],
+                        "numberOfLines": 2
+                      },
+                      "children": [
+                        "Real-time profit & loss with mini sparkline chart"
+                      ]
+                    },
+                    {
+                      "type": "TouchableOpacity",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "justifyContent": "center",
+                            "gap": 8,
+                            "paddingVertical": 12,
+                            "borderRadius": 12,
+                            "marginTop": 4
+                          },
+                          {
+                            "backgroundColor": "#151821",
+                            "opacity": 0.5
+                          }
+                        ],
+                        "disabled": true
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "checkmark",
+                            "size": 18,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-SemiBold",
+                                "fontWeight": "600",
+                                "letterSpacing": 0.1,
+                                "fontSize": 12
+                              },
+                              {
+                                "color": "#475569"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Added"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "entering": "[Animation]",
+                    "style": [
+                      {
+                        "borderRadius": 16,
+                        "borderWidth": 1,
+                        "padding": 16,
+                        "gap": 8,
+                        "position": "relative"
+                      },
+                      {
+                        "backgroundColor": "#1A1D28",
+                        "borderColor": "rgba(255,255,255,0.07)",
+                        "opacity": 1
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "width": 44,
+                            "height": 44,
+                            "borderRadius": 12,
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                          },
+                          {
+                            "backgroundColor": "#06B6D420"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "swap-horizontal",
+                            "size": 24,
+                            "color": "#06B6D4"
+                          },
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-SemiBold",
+                            "fontWeight": "600",
+                            "letterSpacing": 0.1,
+                            "fontSize": 16
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Recent Trades"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Regular",
+                            "fontWeight": "400",
+                            "letterSpacing": 0.2,
+                            "fontSize": 12,
+                            "lineHeight": 18
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ],
+                        "numberOfLines": 2
+                      },
+                      "children": [
+                        "Latest buy/sell trades with P&L"
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "flexDirection": "row",
+                          "gap": 8,
+                          "marginTop": 4
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Pressable",
+                          "props": {
+                            "style": [
+                              {
+                                "flexDirection": "row",
+                                "alignItems": "center",
+                                "gap": 4,
+                                "paddingHorizontal": 8,
+                                "paddingVertical": 6,
+                                "borderRadius": 999,
+                                "borderWidth": 1
+                              },
+                              {
+                                "borderColor": "rgba(255,255,255,0.07)",
+                                "backgroundColor": "transparent"
+                              }
+                            ]
+                          },
+                          "children": [
+                            {
+                              "type": "IonIonicons",
+                              "props": {
+                                "name": "remove",
+                                "size": 12,
+                                "color": "#475569"
+                              },
+                              "children": null
+                            },
+                            {
+                              "type": "Text",
+                              "props": {
+                                "style": [
+                                  {
+                                    "fontFamily": "Inter-Medium",
+                                    "fontWeight": "500",
+                                    "letterSpacing": 0.15,
+                                    "fontSize": 10
+                                  },
+                                  {
+                                    "color": "#475569"
+                                  }
+                                ]
+                              },
+                              "children": [
+                                "Small"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Pressable",
+                          "props": {
+                            "style": [
+                              {
+                                "flexDirection": "row",
+                                "alignItems": "center",
+                                "gap": 4,
+                                "paddingHorizontal": 8,
+                                "paddingVertical": 6,
+                                "borderRadius": 999,
+                                "borderWidth": 1
+                              },
+                              {
+                                "borderColor": "#06B6D4",
+                                "backgroundColor": "#06B6D415"
+                              }
+                            ]
+                          },
+                          "children": [
+                            {
+                              "type": "IonIonicons",
+                              "props": {
+                                "name": "square-outline",
+                                "size": 12,
+                                "color": "#06B6D4"
+                              },
+                              "children": null
+                            },
+                            {
+                              "type": "Text",
+                              "props": {
+                                "style": [
+                                  {
+                                    "fontFamily": "Inter-Medium",
+                                    "fontWeight": "500",
+                                    "letterSpacing": 0.15,
+                                    "fontSize": 10
+                                  },
+                                  {
+                                    "color": "#06B6D4"
+                                  }
+                                ]
+                              },
+                              "children": [
+                                "Medium"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Pressable",
+                          "props": {
+                            "style": [
+                              {
+                                "flexDirection": "row",
+                                "alignItems": "center",
+                                "gap": 4,
+                                "paddingHorizontal": 8,
+                                "paddingVertical": 6,
+                                "borderRadius": 999,
+                                "borderWidth": 1
+                              },
+                              {
+                                "borderColor": "rgba(255,255,255,0.07)",
+                                "backgroundColor": "transparent"
+                              }
+                            ]
+                          },
+                          "children": [
+                            {
+                              "type": "IonIonicons",
+                              "props": {
+                                "name": "expand",
+                                "size": 12,
+                                "color": "#475569"
+                              },
+                              "children": null
+                            },
+                            {
+                              "type": "Text",
+                              "props": {
+                                "style": [
+                                  {
+                                    "fontFamily": "Inter-Medium",
+                                    "fontWeight": "500",
+                                    "letterSpacing": 0.15,
+                                    "fontSize": 10
+                                  },
+                                  {
+                                    "color": "#475569"
+                                  }
+                                ]
+                              },
+                              "children": [
+                                "Large"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "TouchableOpacity",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "justifyContent": "center",
+                            "gap": 8,
+                            "paddingVertical": 12,
+                            "borderRadius": 12,
+                            "marginTop": 4
+                          },
+                          {
+                            "backgroundColor": "#06B6D4",
+                            "opacity": 1
+                          }
+                        ],
+                        "disabled": false
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "add",
+                            "size": 18,
+                            "color": "#FFF"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-SemiBold",
+                                "fontWeight": "600",
+                                "letterSpacing": 0.1,
+                                "fontSize": 12
+                              },
+                              {
+                                "color": "#FFF"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Add to Dashboard"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "entering": "[Animation]",
+                    "style": [
+                      {
+                        "borderRadius": 16,
+                        "borderWidth": 1,
+                        "padding": 16,
+                        "gap": 8,
+                        "position": "relative"
+                      },
+                      {
+                        "backgroundColor": "#1A1D28",
+                        "borderColor": "rgba(255,255,255,0.07)",
+                        "opacity": 1
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "width": 44,
+                            "height": 44,
+                            "borderRadius": 12,
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                          },
+                          {
+                            "backgroundColor": "#00BCD420"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "pulse",
+                            "size": 24,
+                            "color": "#00BCD4"
+                          },
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-SemiBold",
+                            "fontWeight": "600",
+                            "letterSpacing": 0.1,
+                            "fontSize": 16
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Performance Chart"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Regular",
+                            "fontWeight": "400",
+                            "letterSpacing": 0.2,
+                            "fontSize": 12,
+                            "lineHeight": 18
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ],
+                        "numberOfLines": 2
+                      },
+                      "children": [
+                        "Portfolio value over time with interactive area chart"
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "flexDirection": "row",
+                          "gap": 8,
+                          "marginTop": 4
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Pressable",
+                          "props": {
+                            "style": [
+                              {
+                                "flexDirection": "row",
+                                "alignItems": "center",
+                                "gap": 4,
+                                "paddingHorizontal": 8,
+                                "paddingVertical": 6,
+                                "borderRadius": 999,
+                                "borderWidth": 1
+                              },
+                              {
+                                "borderColor": "rgba(255,255,255,0.07)",
+                                "backgroundColor": "transparent"
+                              }
+                            ]
+                          },
+                          "children": [
+                            {
+                              "type": "IonIonicons",
+                              "props": {
+                                "name": "remove",
+                                "size": 12,
+                                "color": "#475569"
+                              },
+                              "children": null
+                            },
+                            {
+                              "type": "Text",
+                              "props": {
+                                "style": [
+                                  {
+                                    "fontFamily": "Inter-Medium",
+                                    "fontWeight": "500",
+                                    "letterSpacing": 0.15,
+                                    "fontSize": 10
+                                  },
+                                  {
+                                    "color": "#475569"
+                                  }
+                                ]
+                              },
+                              "children": [
+                                "Small"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Pressable",
+                          "props": {
+                            "style": [
+                              {
+                                "flexDirection": "row",
+                                "alignItems": "center",
+                                "gap": 4,
+                                "paddingHorizontal": 8,
+                                "paddingVertical": 6,
+                                "borderRadius": 999,
+                                "borderWidth": 1
+                              },
+                              {
+                                "borderColor": "#00BCD4",
+                                "backgroundColor": "#00BCD415"
+                              }
+                            ]
+                          },
+                          "children": [
+                            {
+                              "type": "IonIonicons",
+                              "props": {
+                                "name": "square-outline",
+                                "size": 12,
+                                "color": "#00BCD4"
+                              },
+                              "children": null
+                            },
+                            {
+                              "type": "Text",
+                              "props": {
+                                "style": [
+                                  {
+                                    "fontFamily": "Inter-Medium",
+                                    "fontWeight": "500",
+                                    "letterSpacing": 0.15,
+                                    "fontSize": 10
+                                  },
+                                  {
+                                    "color": "#00BCD4"
+                                  }
+                                ]
+                              },
+                              "children": [
+                                "Medium"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Pressable",
+                          "props": {
+                            "style": [
+                              {
+                                "flexDirection": "row",
+                                "alignItems": "center",
+                                "gap": 4,
+                                "paddingHorizontal": 8,
+                                "paddingVertical": 6,
+                                "borderRadius": 999,
+                                "borderWidth": 1
+                              },
+                              {
+                                "borderColor": "rgba(255,255,255,0.07)",
+                                "backgroundColor": "transparent"
+                              }
+                            ]
+                          },
+                          "children": [
+                            {
+                              "type": "IonIonicons",
+                              "props": {
+                                "name": "expand",
+                                "size": 12,
+                                "color": "#475569"
+                              },
+                              "children": null
+                            },
+                            {
+                              "type": "Text",
+                              "props": {
+                                "style": [
+                                  {
+                                    "fontFamily": "Inter-Medium",
+                                    "fontWeight": "500",
+                                    "letterSpacing": 0.15,
+                                    "fontSize": 10
+                                  },
+                                  {
+                                    "color": "#475569"
+                                  }
+                                ]
+                              },
+                              "children": [
+                                "Large"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "TouchableOpacity",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "justifyContent": "center",
+                            "gap": 8,
+                            "paddingVertical": 12,
+                            "borderRadius": 12,
+                            "marginTop": 4
+                          },
+                          {
+                            "backgroundColor": "#00BCD4",
+                            "opacity": 1
+                          }
+                        ],
+                        "disabled": false
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "add",
+                            "size": 18,
+                            "color": "#FFF"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-SemiBold",
+                                "fontWeight": "600",
+                                "letterSpacing": 0.1,
+                                "fontSize": 12
+                              },
+                              {
+                                "color": "#FFF"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Add to Dashboard"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "entering": "[Animation]",
+            "layout": "[Animation]",
+            "style": {
+              "marginBottom": 20
+            }
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "alignItems": "center",
+                  "marginBottom": 12
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "IonIonicons",
+                      "props": {
+                        "name": "pie-chart",
+                        "size": 16,
+                        "color": "#3B82F6"
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Bold",
+                            "fontWeight": "700",
+                            "letterSpacing": 0.05,
+                            "fontSize": 14
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Holdings"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "style": [
+                      {
+                        "fontFamily": "Inter-Regular",
+                        "fontWeight": "400",
+                        "letterSpacing": 0.2,
+                        "fontSize": 10
+                      },
+                      {
+                        "color": "#475569"
+                      }
+                    ]
+                  },
+                  "children": [
+                    "1",
+                    "/",
+                    "2",
+                    " added"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "gap": 12
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "entering": "[Animation]",
+                    "style": [
+                      {
+                        "borderRadius": 16,
+                        "borderWidth": 1,
+                        "padding": 16,
+                        "gap": 8,
+                        "position": "relative"
+                      },
+                      {
+                        "backgroundColor": "#1A1D28",
+                        "borderColor": "#3B82F650",
+                        "opacity": 0.7
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "width": 44,
+                            "height": 44,
+                            "borderRadius": 12,
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                          },
+                          {
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "pie-chart",
+                            "size": 24,
+                            "color": "#3B82F6"
+                          },
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-SemiBold",
+                            "fontWeight": "600",
+                            "letterSpacing": 0.1,
+                            "fontSize": 16
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Holdings Breakdown"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Regular",
+                            "fontWeight": "400",
+                            "letterSpacing": 0.2,
+                            "fontSize": 12,
+                            "lineHeight": 18
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ],
+                        "numberOfLines": 2
+                      },
+                      "children": [
+                        "Portfolio holdings with value allocation and P&L"
+                      ]
+                    },
+                    {
+                      "type": "TouchableOpacity",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "justifyContent": "center",
+                            "gap": 8,
+                            "paddingVertical": 12,
+                            "borderRadius": 12,
+                            "marginTop": 4
+                          },
+                          {
+                            "backgroundColor": "#151821",
+                            "opacity": 0.5
+                          }
+                        ],
+                        "disabled": true
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "checkmark",
+                            "size": 18,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-SemiBold",
+                                "fontWeight": "600",
+                                "letterSpacing": 0.1,
+                                "fontSize": 12
+                              },
+                              {
+                                "color": "#475569"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Added"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "entering": "[Animation]",
+                    "style": [
+                      {
+                        "borderRadius": 16,
+                        "borderWidth": 1,
+                        "padding": 16,
+                        "gap": 8,
+                        "position": "relative"
+                      },
+                      {
+                        "backgroundColor": "#1A1D28",
+                        "borderColor": "#47556930",
+                        "opacity": 0.85
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "width": 44,
+                            "height": 44,
+                            "borderRadius": 12,
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                          },
+                          {
+                            "backgroundColor": "#FFC10720"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "business",
+                            "size": 24,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-SemiBold",
+                            "fontWeight": "600",
+                            "letterSpacing": 0.1,
+                            "fontSize": 16
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Sector Allocation"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Regular",
+                            "fontWeight": "400",
+                            "letterSpacing": 0.2,
+                            "fontSize": 12,
+                            "lineHeight": 18
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ],
+                        "numberOfLines": 2
+                      },
+                      "children": [
+                        "Sector-wise portfolio allocation donut chart"
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "flexDirection": "row",
+                          "alignItems": "center",
+                          "justifyContent": "center",
+                          "gap": 6,
+                          "paddingVertical": 12,
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "borderColor": "transparent",
+                          "marginTop": 4
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "lock-closed",
+                            "size": 14,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Medium",
+                                "fontWeight": "500",
+                                "letterSpacing": 0.15,
+                                "fontSize": 10,
+                                "fontStyle": "italic"
+                              },
+                              {
+                                "color": "#475569"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Pro plan",
+                            " required"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "top": 12,
+                            "right": 12,
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 3,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 3,
+                            "borderRadius": 999
+                          },
+                          {
+                            "backgroundColor": "#47556920"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "lock-closed",
+                            "size": 10,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.05,
+                                "fontSize": 9,
+                                "color": "#FFC107"
+                              },
+                              {
+                                "color": "#475569"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Pro"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "entering": "[Animation]",
+            "layout": "[Animation]",
+            "style": {
+              "marginBottom": 20
+            }
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "alignItems": "center",
+                  "marginBottom": 12
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "IonIonicons",
+                      "props": {
+                        "name": "shield",
+                        "size": 16,
+                        "color": "#3B82F6"
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Bold",
+                            "fontWeight": "700",
+                            "letterSpacing": 0.05,
+                            "fontSize": 14
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Risk"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "style": [
+                      {
+                        "fontFamily": "Inter-Regular",
+                        "fontWeight": "400",
+                        "letterSpacing": 0.2,
+                        "fontSize": 10
+                      },
+                      {
+                        "color": "#475569"
+                      }
+                    ]
+                  },
+                  "children": [
+                    "0",
+                    "/",
+                    "1",
+                    " added"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "gap": 12
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "entering": "[Animation]",
+                    "style": [
+                      {
+                        "borderRadius": 16,
+                        "borderWidth": 1,
+                        "padding": 16,
+                        "gap": 8,
+                        "position": "relative"
+                      },
+                      {
+                        "backgroundColor": "#1A1D28",
+                        "borderColor": "#47556930",
+                        "opacity": 0.85
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "width": 44,
+                            "height": 44,
+                            "borderRadius": 12,
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                          },
+                          {
+                            "backgroundColor": "#8B5CF620"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "shield",
+                            "size": 24,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-SemiBold",
+                            "fontWeight": "600",
+                            "letterSpacing": 0.1,
+                            "fontSize": 16
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Risk Metrics"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Regular",
+                            "fontWeight": "400",
+                            "letterSpacing": 0.2,
+                            "fontSize": 12,
+                            "lineHeight": 18
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ],
+                        "numberOfLines": 2
+                      },
+                      "children": [
+                        "Sharpe ratio, Sortino, max drawdown & volatility"
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "flexDirection": "row",
+                          "alignItems": "center",
+                          "justifyContent": "center",
+                          "gap": 6,
+                          "paddingVertical": 12,
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "borderColor": "transparent",
+                          "marginTop": 4
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "lock-closed",
+                            "size": 14,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Medium",
+                                "fontWeight": "500",
+                                "letterSpacing": 0.15,
+                                "fontSize": 10,
+                                "fontStyle": "italic"
+                              },
+                              {
+                                "color": "#475569"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Pro plan",
+                            " required"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "top": 12,
+                            "right": 12,
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 3,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 3,
+                            "borderRadius": 999
+                          },
+                          {
+                            "backgroundColor": "#47556920"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "lock-closed",
+                            "size": 10,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.05,
+                                "fontSize": 9,
+                                "color": "#FFC107"
+                              },
+                              {
+                                "color": "#475569"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Pro"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "entering": "[Animation]",
+            "layout": "[Animation]",
+            "style": {
+              "marginBottom": 20
+            }
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "alignItems": "center",
+                  "marginBottom": 12
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "IonIonicons",
+                      "props": {
+                        "name": "stats-chart",
+                        "size": 16,
+                        "color": "#3B82F6"
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Bold",
+                            "fontWeight": "700",
+                            "letterSpacing": 0.05,
+                            "fontSize": 14
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Market"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "style": [
+                      {
+                        "fontFamily": "Inter-Regular",
+                        "fontWeight": "400",
+                        "letterSpacing": 0.2,
+                        "fontSize": 10
+                      },
+                      {
+                        "color": "#475569"
+                      }
+                    ]
+                  },
+                  "children": [
+                    "0",
+                    "/",
+                    "1",
+                    " added"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "gap": 12
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "entering": "[Animation]",
+                    "style": [
+                      {
+                        "borderRadius": 16,
+                        "borderWidth": 1,
+                        "padding": 16,
+                        "gap": 8,
+                        "position": "relative"
+                      },
+                      {
+                        "backgroundColor": "#1A1D28",
+                        "borderColor": "#47556930",
+                        "opacity": 0.85
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "width": 44,
+                            "height": 44,
+                            "borderRadius": 12,
+                            "justifyContent": "center",
+                            "alignItems": "center"
+                          },
+                          {
+                            "backgroundColor": "#F9731620"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "stats-chart",
+                            "size": 24,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-SemiBold",
+                            "fontWeight": "600",
+                            "letterSpacing": 0.1,
+                            "fontSize": 16
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "Market Overview"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "Inter-Regular",
+                            "fontWeight": "400",
+                            "letterSpacing": 0.2,
+                            "fontSize": 12,
+                            "lineHeight": 18
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ],
+                        "numberOfLines": 2
+                      },
+                      "children": [
+                        "Nifty, Sensex & key market indices snapshot"
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "flexDirection": "row",
+                          "alignItems": "center",
+                          "justifyContent": "center",
+                          "gap": 6,
+                          "paddingVertical": 12,
+                          "borderRadius": 12,
+                          "borderWidth": 1,
+                          "borderColor": "transparent",
+                          "marginTop": 4
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "lock-closed",
+                            "size": 14,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Medium",
+                                "fontWeight": "500",
+                                "letterSpacing": 0.15,
+                                "fontSize": 10,
+                                "fontStyle": "italic"
+                              },
+                              {
+                                "color": "#475569"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Elite plan",
+                            " required"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "top": 12,
+                            "right": 12,
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 3,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 3,
+                            "borderRadius": 999
+                          },
+                          {
+                            "backgroundColor": "#47556920"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "IonIonicons",
+                          "props": {
+                            "name": "lock-closed",
+                            "size": 10,
+                            "color": "#475569"
+                          },
+                          "children": null
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.05,
+                                "fontSize": 9,
+                                "color": "#FFC107"
+                              },
+                              {
+                                "color": "#475569"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "Elite"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "flexDirection": "row",
+                "gap": 12,
+                "padding": 16,
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "marginTop": 12
+              },
+              {
+                "backgroundColor": "#1A1D28",
+                "borderColor": "rgba(255,255,255,0.07)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "IonIonicons",
+              "props": {
+                "name": "information-circle",
+                "size": 18,
+                "color": "#3B82F6"
+              },
+              "children": null
+            },
+            {
+              "type": "Text",
+              "props": {
+                "style": [
+                  {
+                    "fontFamily": "Inter-Regular",
+                    "fontWeight": "400",
+                    "letterSpacing": 0.2,
+                    "fontSize": 12,
+                    "flex": 1,
+                    "lineHeight": 18
+                  },
+                  {
+                    "color": "#94A3B8"
+                  }
+                ]
+              },
+              "children": [
+                "Long-press any widget on the dashboard to reorder. Tap the ⋮ menu to resize or remove widgets."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}"
+`;

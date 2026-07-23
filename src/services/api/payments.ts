@@ -7,6 +7,28 @@ export interface CreateOrderResponse {
   currency: string;
 }
 
+export interface CreateMandateResponse {
+  orderId: string;
+  keyId: string;
+  amount: number;
+  currency: string;
+  method: string;
+  mandateId?: string;
+}
+
+export interface CreateSubscriptionResponse {
+  subscriptionId: string;
+  keyId: string;
+  status: string;
+  currentStart: number;
+  currentEnd: number;
+  endedAt: number | null;
+  chargeAt: number;
+  startAt: number;
+  totalCount: number;
+  paidCount: number;
+}
+
 export interface VerifyPaymentResponse {
   success: boolean;
   message: string;
@@ -54,5 +76,45 @@ export const paymentsApi = {
     tenantId?: string;
   }): Promise<VerifyPaymentResponse & { type?: string }> => {
     return api.post<VerifyPaymentResponse & { type?: string }>('/payments/verify', params);
+  },
+
+  /**
+   * Creates a Razorpay mandate setup order for UPI AutoPay.
+   * Returns an order that the frontend should open in Razorpay Checkout
+   * to capture the user's UPI mandate.
+   */
+  createMandate: async (params: {
+    planId: string;
+    billingPeriod: 'monthly' | 'yearly';
+    customerName?: string;
+    customerEmail?: string;
+    customerContact?: string;
+    tenantId?: string;
+  }): Promise<CreateMandateResponse> => {
+    return api.post<CreateMandateResponse>('/payments/create-mandate', params);
+  },
+
+  /**
+   * Creates a Razorpay subscription (recurring payment plan).
+   * Used when setting up recurring billing for UPI AutoPay mandates.
+   */
+  createSubscription: async (params: {
+    planId: string;
+    billingPeriod: 'monthly' | 'yearly';
+    totalCount?: number;
+    tenantId?: string;
+  }): Promise<CreateSubscriptionResponse> => {
+    return api.post<CreateSubscriptionResponse>('/payments/create-subscription', params);
+  },
+
+  /**
+   * Creates a direct paid order for one-time payments.
+   */
+  createPaidOrder: async (params: {
+    amount: number;
+    currency?: string;
+    receipt?: string;
+  }): Promise<CreateOrderResponse & { status: string }> => {
+    return api.post<CreateOrderResponse & { status: string }>('/payments/create-paid-order', params);
   },
 };

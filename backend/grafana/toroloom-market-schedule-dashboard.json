@@ -1,0 +1,875 @@
+{
+  "title": "Toroloom — Market Schedule Worker",
+  "description": "Monitoring dashboard for the market open/close poller. Tracks poller running state, poll frequency, error rate, and market open/close transition counts. Helps detect when the poller stops, when market transitions are missed, and when poll errors accumulate.",
+  "tags": ["toroloom", "market-schedule", "market-hours", "polling", "uptime"],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "15s",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "collapsed": false,
+      "title": "Overview",
+      "description": "Current state of the market schedule poller at a glance.",
+      "panels": [
+        {
+          "id": 1,
+          "type": "stat",
+          "title": "Poller Status",
+          "description": "1 = poller is running and polling isMarketHours() every 30s. 0 = poller is stopped (⚠ investigate immediately).",
+          "gridPos": { "h": 8, "w": 4, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              },
+              "mappings": [
+                { "type": "value", "value": "0", "text": "⛔ Stopped" },
+                { "type": "value", "value": "1", "text": "✅ Running" }
+              ],
+              "min": 0,
+              "max": 1,
+              "noValue": "No Data"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_running",
+              "legendFormat": "Status",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Total Polls",
+          "description": "Total number of isMarketHours() calls since the poller started (initial call + interval ticks). Expected rate: ~2 polls/min = ~120/hr = ~2880/day.",
+          "gridPos": { "h": 8, "w": 4, "x": 4, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 10000 },
+                  { "color": "red", "value": 100000 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_total_polls",
+              "legendFormat": "Total Polls",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Total Errors",
+          "description": "Total number of poll errors (caught exceptions from isMarketHours()). Any value > 0 indicates a problem with the market hours check or webhook dispatch.",
+          "gridPos": { "h": 8, "w": 4, "x": 8, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 10 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [
+                { "type": "value", "value": "0", "text": "0 — No Errors" }
+              ],
+              "min": 0,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_total_errors",
+              "legendFormat": "Total Errors",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Market Opens",
+          "description": "Number of market:open transitions (closed→open) detected since process start. Expected: ~1 per trading day.",
+          "gridPos": { "h": 8, "w": 4, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 5 },
+                  { "color": "red", "value": 10 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_market_open_total",
+              "legendFormat": "Market Opens",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Market Closes",
+          "description": "Number of market:close transitions (open→closed) detected since process start. Expected: ~1 per trading day.",
+          "gridPos": { "h": 8, "w": 4, "x": 16, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 5 },
+                  { "color": "red", "value": 10 }
+                ]
+              },
+              "unit": "short",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_market_close_total",
+              "legendFormat": "Market Closes",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "Poller Uptime",
+          "description": "How long the poller has been running since the last start. Resets on server restart or poller restart. Expected: continuous during server uptime.",
+          "gridPos": { "h": 8, "w": 4, "x": 20, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 300 },
+                  { "color": "green", "value": 3600 }
+                ]
+              },
+              "unit": "s",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 s"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_uptime_seconds",
+              "legendFormat": "Uptime",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Trends",
+      "description": "Time-series views of poller activity and market transitions over time.",
+      "panels": [
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "Polls & Errors Over Time",
+          "description": "Cumulative poll count and error count. The poll count should increase steadily at ~2/min. Flat lines indicate the poller has stopped. Error increases indicate persistent failures in isMarketHours().",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 15,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 4,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 10000 },
+                  { "color": "red", "value": 100000 }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*Errors.*/i" },
+                "properties": [
+                  { "id": "custom.lineWidth", "value": 3 },
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_total_polls",
+              "legendFormat": "Total Polls",
+              "refId": "A"
+            },
+            {
+              "expr": "toroloom_market_schedule_total_errors",
+              "legendFormat": "Total Errors",
+              "refId": "B"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "Market Transitions Over Time",
+          "description": "Cumulative market open and close transitions. Each step increase represents one detected transition. Outside trading hours no changes are expected. During market hours, exactly one open and one close per trading day.",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 15,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 2,
+                "pointSize": 4,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 5 },
+                  { "color": "red", "value": 10 }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*Close.*/i" },
+                "properties": [
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byRegexp", "options": "/.*Open.*/i" },
+                "properties": [
+                  { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_market_open_total",
+              "legendFormat": "Market Opens (closed→open)",
+              "refId": "A"
+            },
+            {
+              "expr": "toroloom_market_schedule_market_close_total",
+              "legendFormat": "Market Closes (open→closed)",
+              "refId": "B"
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "type": "timeseries",
+          "title": "Error Rate",
+          "description": "Rate of poll errors per minute. Any sustained activity > 0 indicates a persistent issue with isMarketHours() or webhook dispatch. Spikes followed by zero mean transient errors that were recovered.",
+          "gridPos": { "h": 10, "w": 12, "x": 0, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "errors / min",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 4,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 1 },
+                  { "color": "red", "value": 5 }
+                ]
+              },
+              "unit": "cpm"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max", "mean"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "rate(toroloom_market_schedule_total_errors[$__rate_interval])",
+              "legendFormat": "Errors/min",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "type": "timeseries",
+          "title": "Poller Running State",
+          "description": "Poller running status over time. Should be a solid line at 1 (running). Drops to 0 indicate the poller stopped — investigate immediately (server restart without auto-start, or unexpected worker crash).",
+          "gridPos": { "h": 10, "w": 12, "x": 12, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "steps",
+                "fillOpacity": 70,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 2,
+                "pointSize": 4,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "dashed" }
+              },
+              "mappings": [
+                { "type": "value", "value": "0", "text": "Stopped" },
+                { "type": "value", "value": "1", "text": "Running" }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              },
+              "unit": "short",
+              "min": 0,
+              "max": 1
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "calcs": ["lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_running",
+              "legendFormat": "Running",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Health & Diagnostics",
+      "description": "Last poll timestamp and uptime metrics for diagnosing poller health.",
+      "panels": [
+        {
+          "id": 11,
+          "type": "stat",
+          "title": "Last Poll (Age)",
+          "description": "How long since the last successful poll of isMarketHours(). Should always be < 30s when the poller is running. Values > 60s indicate the poller may be stuck or stopped.",
+          "gridPos": { "h": 8, "w": 6, "x": 0, "y": 28 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 30 },
+                  { "color": "red", "value": 60 }
+                ]
+              },
+              "unit": "s",
+              "mappings": [],
+              "min": 0,
+              "noValue": "No Data"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "time() - toroloom_market_schedule_last_poll_timestamp",
+              "legendFormat": "Age (s)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "type": "stat",
+          "title": "Poller Uptime",
+          "description": "Total uptime of the market schedule poller. Resets on server restart. Expected to match the server's process uptime when the poller auto-starts.",
+          "gridPos": { "h": 8, "w": 6, "x": 6, "y": 28 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 60 },
+                  { "color": "green", "value": 3600 }
+                ]
+              },
+              "unit": "duration(s)",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0 s"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_uptime_seconds",
+              "legendFormat": "Uptime",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "type": "stat",
+          "title": "Poll Interval",
+          "description": "Configured poll interval (constant: 30s). If this value changes, the poller configuration has been updated.",
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 28 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null }
+                ]
+              },
+              "unit": "s",
+              "mappings": [
+                { "type": "value", "value": "30", "text": "30s (default)" }
+              ],
+              "noValue": "No Data"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_uptime_seconds",
+              "legendFormat": "Uptime",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "type": "stat",
+          "title": "Last Poll Timestamp",
+          "description": "Unix timestamp of the last successful isMarketHours() call. Compare with the current time() to determine staleness.",
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 28 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null }
+                ]
+              },
+              "unit": "dateTimeAsUS",
+              "mappings": [],
+              "noValue": "Never Polled"
+            },
+            "overrides": []
+          },
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_last_poll_timestamp",
+              "legendFormat": "Last Poll",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "title": "Annotations",
+      "description": "Raw metric values for debugging and correlation with other dashboards.",
+      "panels": [
+        {
+          "id": 15,
+          "type": "table",
+          "title": "Raw Market Schedule Metrics",
+          "description": "Current values of all market schedule Prometheus metrics for debugging.",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 36 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": { "align": "auto", "displayMode": "auto" },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": false
+            },
+            "sortBy": [{ "displayName": "Metric", "desc": false }],
+            "showTypeIcons": false
+          },
+          "targets": [
+            {
+              "expr": "toroloom_market_schedule_running",
+              "legendFormat": "toroloom_market_schedule_running",
+              "refId": "running"
+            },
+            {
+              "expr": "toroloom_market_schedule_total_polls",
+              "legendFormat": "toroloom_market_schedule_total_polls",
+              "refId": "polls"
+            },
+            {
+              "expr": "toroloom_market_schedule_total_errors",
+              "legendFormat": "toroloom_market_schedule_total_errors",
+              "refId": "errors"
+            },
+            {
+              "expr": "toroloom_market_schedule_market_open_total",
+              "legendFormat": "toroloom_market_schedule_market_open_total",
+              "refId": "open"
+            },
+            {
+              "expr": "toroloom_market_schedule_market_close_total",
+              "legendFormat": "toroloom_market_schedule_market_close_total",
+              "refId": "close"
+            },
+            {
+              "expr": "toroloom_market_schedule_uptime_seconds",
+              "legendFormat": "toroloom_market_schedule_uptime_seconds",
+              "refId": "uptime"
+            },
+            {
+              "expr": "toroloom_market_schedule_last_poll_timestamp",
+              "legendFormat": "toroloom_market_schedule_last_poll_timestamp",
+              "refId": "lastpoll"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "instance": true,
+                  "job": true
+                },
+                "indexByName": { "__name__": 0, "Value": 1 },
+                "renameByName": { "__name__": "Metric", "Value": "Value" }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "value": "prometheus" },
+        "hide": 0
+      }
+    ]
+  }
+}

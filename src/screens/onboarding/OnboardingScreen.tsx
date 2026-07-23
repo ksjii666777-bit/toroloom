@@ -63,11 +63,15 @@ const MOCK_BADGES = [
 
 function MiniPieChart({
   onInteract,
+  onDemoComplete,
 }: {
   onInteract: () => void;
+  onDemoComplete?: () => void;
 }) {
   const [selectedSector, setSelectedSector] = useState<number | null>(null);
+  const [exploredSectors, setExploredSectors] = useState<Set<number>>(new Set());
   const total = MOCK_SECTORS.reduce((sum, s) => sum + s.value, 0);
+  const demoCompletedRef = useRef(false);
 
   // Build segments using simple stacked bar (simulating pie segments)
   let currentAngle = 0;
@@ -93,6 +97,15 @@ function MiniPieChart({
                 
                 onPress={() => {
                   onInteract();
+                  setExploredSectors(prev => {
+                    const next = new Set(prev);
+                    next.add(i);
+                    if (next.size >= MOCK_SECTORS.length && !demoCompletedRef.current) {
+                      demoCompletedRef.current = true;
+                      setTimeout(() => onDemoComplete?.(), 300);
+                    }
+                    return next;
+                  });
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setSelectedSector(isSelected ? null : i);
                 }}
@@ -121,6 +134,15 @@ function MiniPieChart({
               style={[demoStyles.legendItem, isSelected && demoStyles.legendItemActive]}
               onPress={() => {
                 onInteract();
+                setExploredSectors(prev => {
+                  const next = new Set(prev);
+                  next.add(i);
+                  if (next.size >= MOCK_SECTORS.length && !demoCompletedRef.current) {
+                    demoCompletedRef.current = true;
+                    setTimeout(() => onDemoComplete?.(), 300);
+                  }
+                  return next;
+                });
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setSelectedSector(isSelected ? null : i);
               }}
@@ -156,10 +178,13 @@ function MiniPieChart({
 
 function MiniCandlestickChart({
   onInteract,
+  onDemoComplete,
 }: {
   onInteract: () => void;
+  onDemoComplete?: () => void;
 }) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const demoCompletedRef = useRef(false);
   const chartHeight = 100;
   const chartWidth = CARD_WIDTH - SPACING.xl * 2 - 20;
   const candleWidth = Math.floor(chartWidth / MOCK_CANDLE_DATA.length) - 4;
@@ -194,6 +219,10 @@ function MiniCandlestickChart({
                 
                 onPress={() => {
                   onInteract();
+                  if (!demoCompletedRef.current) {
+                    demoCompletedRef.current = true;
+                    onDemoComplete?.();
+                  }
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setSelectedIndex(isSelected ? null : i);
                 }}
@@ -263,8 +292,10 @@ function MiniCandlestickChart({
 
 function MockTradePanel({
   onInteract,
+  onDemoComplete,
 }: {
   onInteract: () => void;
+  onDemoComplete?: () => void;
 }) {
   const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
   const [quantity, setQuantity] = useState(10);
@@ -288,6 +319,7 @@ function MockTradePanel({
 
   const handleConfirm = () => {
     onInteract();
+    onDemoComplete?.();
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setConfirmed(true);
     pulseAnim.value = withTiming(1, { duration: 200 });
@@ -398,9 +430,11 @@ function MockTradePanel({
 
 function MiniBrokerConnect({
   onInteract,
+  onDemoComplete,
   interacted,
 }: {
   onInteract: () => void;
+  onDemoComplete?: () => void;
   interacted: boolean;
 }) {
   const [connectedBroker, setConnectedBroker] = useState<string | null>(null);
@@ -415,6 +449,7 @@ function MiniBrokerConnect({
     // Simulate connection delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
+    onDemoComplete?.();
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setConnectedBroker(brokerId);
     setConnectingBroker(null);
@@ -491,15 +526,24 @@ function MiniBrokerConnect({
 
 function InteractiveBadges({
   onInteract,
+  onDemoComplete,
 }: {
   onInteract: () => void;
+  onDemoComplete?: () => void;
 }) {
   const [unlocked, setUnlocked] = useState<Record<string, boolean>>({});
 
   const handleBadgeTap = (id: string) => {
     onInteract();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setUnlocked(prev => ({ ...prev, [id]: !prev[id] }));
+    setUnlocked(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      const allUnlocked = Object.values(next).filter(Boolean).length >= MOCK_BADGES.length;
+      if (allUnlocked) {
+        setTimeout(() => onDemoComplete?.(), 400);
+      }
+      return next;
+    });
   };
 
   const unlockedCount = Object.values(unlocked).filter(Boolean).length;
@@ -561,9 +605,11 @@ function InteractiveBadges({
 
 function RocketAnimation({
   onInteract,
+  onDemoComplete,
   interacted,
 }: {
   onInteract: () => void;
+  onDemoComplete?: () => void;
   interacted: boolean;
 }) {
   const [launched, setLaunched] = useState(false);
@@ -590,6 +636,7 @@ function RocketAnimation({
   const handleLaunch = () => {
     if (launched) return;
     onInteract();
+    onDemoComplete?.();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     setLaunched(true);
     rocketY.value = withTiming(-200, { duration: 1200 });
@@ -655,6 +702,7 @@ export default function OnboardingScreen({ _navigation }: any) {
     currentStep, setCurrentStep, skipOnboarding,
     completeOnboarding,
     referralSource, interactedSteps, markStepInteracted,
+    markStepDemoCompleted, stepDemoCompleted,
   } = useOnboardingStore();
 
   // Toggle between SVG illustrations and Lottie animations
@@ -669,7 +717,7 @@ export default function OnboardingScreen({ _navigation }: any) {
 
   const scrollRef = useRef<ScrollView>(null);
   const scrollX = useSharedValue(startStep * CARD_WIDTH);
-  const [isLastStep, setIsLastStep] = useState(startStep === totalSteps - 1);
+  const isLastStep = currentStep >= totalSteps - 1;
   const hasScrolledToStart = useRef(false);
   const parallaxX = useSharedValue(0);
 
@@ -762,7 +810,6 @@ export default function OnboardingScreen({ _navigation }: any) {
       const page = Math.round(offsetX / CARD_WIDTH);
       const clamped = Math.max(0, Math.min(totalSteps - 1, page));
       setCurrentStep(clamped);
-      setIsLastStep(clamped === totalSteps - 1);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     },
     [setCurrentStep, totalSteps]
@@ -772,7 +819,6 @@ export default function OnboardingScreen({ _navigation }: any) {
     (index: number) => {
       scrollRef.current?.scrollTo({ x: index * (CARD_WIDTH + CARD_GAP), animated: true });
       setCurrentStep(index);
-      setIsLastStep(index === totalSteps - 1);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     },
     [setCurrentStep, totalSteps]
@@ -840,6 +886,7 @@ export default function OnboardingScreen({ _navigation }: any) {
             </View>
             <RocketAnimation
               onInteract={() => markStepInteracted(stepId)}
+              onDemoComplete={() => handleDemoComplete(stepId)}
               interacted={!!interactedSteps[stepId]}
             />
           </View>
@@ -850,7 +897,10 @@ export default function OnboardingScreen({ _navigation }: any) {
             <View style={demoStyles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
-            <MiniPieChart onInteract={() => markStepInteracted(stepId)} />
+            <MiniPieChart
+              onInteract={() => markStepInteracted(stepId)}
+              onDemoComplete={() => handleDemoComplete(stepId)}
+            />
           </View>
         );
       case 'markets':
@@ -859,7 +909,10 @@ export default function OnboardingScreen({ _navigation }: any) {
             <View style={demoStyles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
-            <MiniCandlestickChart onInteract={() => markStepInteracted(stepId)} />
+            <MiniCandlestickChart
+              onInteract={() => markStepInteracted(stepId)}
+              onDemoComplete={() => handleDemoComplete(stepId)}
+            />
           </View>
         );
       case 'trading':
@@ -868,7 +921,10 @@ export default function OnboardingScreen({ _navigation }: any) {
             <View style={demoStyles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
-            <MockTradePanel onInteract={() => markStepInteracted(stepId)} />
+            <MockTradePanel
+              onInteract={() => markStepInteracted(stepId)}
+              onDemoComplete={() => handleDemoComplete(stepId)}
+            />
           </View>
         );
       case 'broker':
@@ -877,7 +933,11 @@ export default function OnboardingScreen({ _navigation }: any) {
             <View style={demoStyles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
-            <MiniBrokerConnect onInteract={() => markStepInteracted(stepId)} interacted={!!interactedSteps[stepId]} />
+            <MiniBrokerConnect
+              onInteract={() => markStepInteracted(stepId)}
+              onDemoComplete={() => handleDemoComplete(stepId)}
+              interacted={!!interactedSteps[stepId]}
+            />
           </View>
         );
       case 'learn':
@@ -886,13 +946,27 @@ export default function OnboardingScreen({ _navigation }: any) {
             <View style={demoStyles.illustrationBg} pointerEvents="none">
               {renderIllustration({ stepId, gradient })}
             </View>
-            <InteractiveBadges onInteract={() => markStepInteracted(stepId)} />
+            <InteractiveBadges
+              onInteract={() => markStepInteracted(stepId)}
+              onDemoComplete={() => handleDemoComplete(stepId)}
+            />
           </View>
         );
       default:
         return null;
     }
   };
+
+  // ── Demo completion handler ──
+  const handleDemoComplete = useCallback((stepId: string) => {
+    markStepDemoCompleted(stepId); // also calls markStepInteracted internally
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, [markStepDemoCompleted]);
+
+  // ── Completion stats ──
+  const totalInteractiveSteps = visibleSteps.length;
+  const completedStepsCount = visibleSteps.filter(s => stepDemoCompleted[s.id]).length;
+  const allDemosCompleted = totalInteractiveSteps > 0 && completedStepsCount >= totalInteractiveSteps;
 
   // ── Determine demo area height ──
   const getDemoAreaHeight = (stepId: string) => {
@@ -915,22 +989,35 @@ export default function OnboardingScreen({ _navigation }: any) {
           <Text style={styles.skipText}>Skip</Text>
         </Pressable>
 
-        {/* Progress dots */}
+        {/* Progress dots with completion checkmarks */}
         <View style={styles.dotsRow}>
-          {visibleSteps.map((_, i) => (
-            <Pressable
-              key={i}
-              onPress={() => scrollToStep(i)}
-              
-            >
-              <View
-                style={[
-                  styles.dot,
-                  i === currentStep && styles.dotActive,
-                ]}
-              />
-            </Pressable>
-          ))}
+          {visibleSteps.map((_, i) => {
+            const stepId = visibleSteps[i].id;
+            const isCompleted = !!stepDemoCompleted[stepId];
+            const isWelcome = stepId === 'welcome';
+            return (
+              <Pressable
+                key={i}
+                onPress={() => scrollToStep(i)}
+                
+              >
+                <View style={styles.dotWrapper}>
+                  <View
+                    style={[
+                      styles.dot,
+                      i === currentStep && styles.dotActive,
+                      isCompleted && styles.dotCompleted,
+                      isCompleted && i === currentStep && styles.dotActiveCompleted,
+                    ]}
+                  >
+                    {isCompleted && (
+                      <Ionicons name="checkmark" size={10} color="#0B0F19" />
+                    )}
+                  </View>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Lottie toggle */}
@@ -1042,7 +1129,19 @@ export default function OnboardingScreen({ _navigation }: any) {
           { paddingBottom: insets.bottom + SPACING.xl },
         ]}
       >
-        {/* Progress bar */}
+        {/* Completion summary */}
+      {isLastStep && (
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.completionSummary}>
+          <Ionicons name={allDemosCompleted ? 'trophy' : 'information-circle'} size={18} color={allDemosCompleted ? '#F59E0B' : '#6B7280'} />
+          <Text style={[styles.completionText, allDemosCompleted && styles.completionTextDone]}>
+            {allDemosCompleted
+              ? `All ${totalInteractiveSteps} interactive demos completed!`
+              : `${completedStepsCount}/${totalInteractiveSteps} demos completed`}
+          </Text>
+        </Animated.View>
+      )}
+
+      {/* Progress bar */}
         <View style={styles.progressBarBg}>
           <Animated.View style={[styles.progressBarFill, progressStyle]} />
         </View>
@@ -1672,17 +1771,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
+  dotWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#374151',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   dotActive: {
     width: 24,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#3B82F6',
+  },
+  dotCompleted: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#10B981',
+  },
+  dotActiveCompleted: {
+    backgroundColor: '#34D399',
+    width: 24,
+    height: 18,
+    borderRadius: 9,
   },
 
   // ── Cards ──
@@ -1816,6 +1934,29 @@ const styles = StyleSheet.create({
     ...FONTS.bold,
     fontSize: FONTS.size.lg,
     color: '#FFFFFF',
+  },
+
+  // ── Completion Summary ──
+  completionSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+    backgroundColor: '#111827',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#1F2937',
+  },
+  completionText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
+    color: '#6B7280',
+  },
+  completionTextDone: {
+    color: '#F59E0B',
   },
 
   // ── Lottie Toggle Button ──

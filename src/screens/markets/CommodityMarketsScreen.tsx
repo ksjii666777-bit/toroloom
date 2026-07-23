@@ -29,6 +29,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import Svg, { Polyline } from 'react-native-svg';
 import type { CommodityAsset } from '../../types';
 import { useCommodityPrices } from '../../hooks/useCommodityPrices';
@@ -317,6 +318,139 @@ function mergeLivePrices(
 }
 
 // ══════════════════════════════════════════════════════════════
+// COMMODITY PRICE CALCULATOR MODAL
+// ══════════════════════════════════════════════════════════════
+
+function CommodityPriceCalculatorModal({
+  visible,
+  onClose,
+  commodities,
+  colors,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  commodities: CommodityAsset[];
+  colors: any;
+}) {
+  const [selectedId, setSelectedId] = useState('gold');
+  const [quantityStr, setQuantityStr] = useState('1');
+
+  const selected = commodities.find(c => c.id === selectedId) ?? commodities[0];
+  const quantity = parseFloat(quantityStr) || 0;
+
+  // USD value = quantity * price per unit
+  const usdValue = quantity * selected.price;
+  // INR value approximation using ₹83.45/USD
+  const inrValue = usdValue * 83.45;
+  // MCX approximation (INR price * quantity in units)
+  const mcxValue = selected.inrPrice ? quantity * selected.inrPrice : 0;
+
+  if (!visible) return null;
+
+  return (
+    <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.6)' }]}>
+      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+      <Animated.View entering={FadeInUp.duration(300)} style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScrollContent}>
+          {/* Header */}
+          <View style={styles.modalHeader}>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Price Calculator</Text>
+              <Text style={[styles.modalSubtitle, { color: colors.textMuted }]}>Commodity value in INR</Text>
+            </View>
+            <Pressable onPress={onClose} style={[styles.modalCloseBtn, { backgroundColor: colors.bgInput }]}>
+              <Ionicons name="close" size={20} color={colors.text} />
+            </Pressable>
+          </View>
+
+          {/* Commodity Selector */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: SPACING.md }}>
+            {commodities.map(c => {
+              const selected = selectedId === c.id;
+              return (
+                <Pressable
+                  key={c.id}
+                  onPress={() => { setSelectedId(c.id); setQuantityStr('1'); }}
+                  style={[styles.calcChip, {
+                    backgroundColor: selected ? c.color + '25' : colors.bgInput,
+                    borderColor: selected ? c.color + '50' : colors.border,
+                  }]}
+                >
+                  <Text style={{ fontSize: 16 }}>{c.icon}</Text>
+                  <Text style={[styles.calcChipText, { color: selected ? c.color : colors.textMuted }]}>{c.symbol}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* Selected Commodity Info */}
+          <View style={[styles.calcInfoRow, { backgroundColor: selected.color + '10', borderColor: selected.color + '30' }]}>
+            <Text style={{ fontSize: 32 }}>{selected.icon}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.calcInfoName, { color: colors.text }]}>{selected.name}</Text>
+              <Text style={[styles.calcInfoMeta, { color: colors.textMuted }]}>
+                ${selected.price.toFixed(selected.price < 10 ? 2 : 1)} / {selected.unit}
+              </Text>
+            </View>
+          </View>
+
+          {/* Quantity Input */}
+          <Text style={[styles.calcLabel, { color: colors.textMuted }]}>Quantity ({selected.unit})</Text>
+          <View style={[styles.calcInputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+            <TextInput
+              style={[styles.calcInput, { color: colors.text }]}
+              value={quantityStr}
+              onChangeText={setQuantityStr}
+              keyboardType="decimal-pad"
+              placeholderTextColor={colors.textMuted}
+              selectTextOnFocus
+            />
+            <Text style={[styles.calcInputUnit, { color: colors.textMuted }]}>{selected.unit}</Text>
+          </View>
+
+          {/* Result Cards */}
+          <View style={styles.calcResultsGrid}>
+            {/* USD Value */}
+            <View style={[styles.calcResultCard, { backgroundColor: '#3B82F615', borderColor: '#3B82F630' }]}>
+              <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>USD Value</Text>
+              <Text style={[styles.calcResultValue, { color: '#3B82F6' }]}>
+                ${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Text>
+            </View>
+
+            {/* INR Value (approx) */}
+            <View style={[styles.calcResultCard, { backgroundColor: '#FF993315', borderColor: '#FF993330' }]}>
+              <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>INR Value (approx)</Text>
+              <Text style={[styles.calcResultValue, { color: '#FF9933' }]}>
+                ₹{inrValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Text>
+            </View>
+
+            {/* MCX India */}
+            {mcxValue > 0 && (
+              <View style={[styles.calcResultCard, { backgroundColor: selected.color + '15', borderColor: selected.color + '30' }]}>
+                <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>MCX India (1 unit)</Text>
+                <Text style={[styles.calcResultValue, { color: selected.color }]}>
+                  ₹{selected.inrPrice!.toLocaleString('en-IN')}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Exchange Rate Note */}
+          <View style={[styles.calcNote, { backgroundColor: colors.bgInput }]}>
+            <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+            <Text style={[styles.calcNoteText, { color: colors.textMuted }]}>
+              INR values are approximate using ₹83.45/USD. Actual MCX prices may differ due to local demand, duties, and exchange fees.
+            </Text>
+          </View>
+        </ScrollView>
+      </Animated.View>
+    </View>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
 // MAIN SCREEN
 // ══════════════════════════════════════════════════════════════
 
@@ -327,6 +461,7 @@ export default function CommodityMarketsScreen({ navigation }: any) {
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [calculatorVisible, setCalculatorVisible] = useState(false);
 
   // ── Live WebSocket prices (auto-detects backend) ────────────
   const { prices: livePrices, connected, source: wsSource, isDetecting } = useCommodityPrices();
@@ -388,6 +523,13 @@ export default function CommodityMarketsScreen({ navigation }: any) {
             <Text style={[styles.title, { color: colors.text }]}>Commodities</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>Global Markets Dashboard</Text>
           </View>
+          {/* Calculator button */}
+          <Pressable
+            onPress={() => setCalculatorVisible(true)}
+            style={[styles.calculatorBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
+          >
+            <Ionicons name="calculator" size={18} color={colors.primary} />
+          </Pressable>
           {/* Live connection / data source indicator */}
           <SourceBadge source={wsSource} isDetecting={isDetecting} connected={connected} />
         </View>
@@ -544,6 +686,14 @@ export default function CommodityMarketsScreen({ navigation }: any) {
 
         <View style={{ height: 80 }} />
       </ScrollView>
+
+      {/* Commodity Price Calculator Modal */}
+      <CommodityPriceCalculatorModal
+        visible={calculatorVisible}
+        onClose={() => setCalculatorVisible(false)}
+        commodities={COMMODITIES}
+        colors={colors}
+      />
     </View>
   );
 }
@@ -647,4 +797,97 @@ const styles = StyleSheet.create({
   infoCard: { flexDirection: 'row', gap: SPACING.md, padding: SPACING.lg, borderRadius: BORDER_RADIUS.md, borderWidth: 1, marginBottom: SPACING.lg },
   infoTitle: { ...FONTS.semiBold, fontSize: FONTS.size.sm, marginBottom: 4 },
   infoText: { ...FONTS.regular, fontSize: FONTS.size.xs, lineHeight: 16 },
+
+  // ── Calculator Button ──
+  calculatorBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+
+  // ── Calculator Modal ──
+  modalOverlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 1000,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    maxHeight: '85%',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  modalScrollContent: {
+    padding: SPACING.xl,
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.lg,
+  },
+  modalTitle: { ...FONTS.bold, fontSize: FONTS.size.lg },
+  modalSubtitle: { ...FONTS.regular, fontSize: FONTS.size.xs, marginTop: 2 },
+  modalCloseBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calcChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    marginRight: SPACING.sm,
+  },
+  calcChipText: { ...FONTS.semiBold, fontSize: 10 },
+  calcInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    marginBottom: SPACING.md,
+  },
+  calcInfoName: { ...FONTS.bold, fontSize: FONTS.size.md },
+  calcInfoMeta: { ...FONTS.regular, fontSize: FONTS.size.xs, marginTop: 2 },
+  calcLabel: { ...FONTS.medium, fontSize: FONTS.size.xs, marginBottom: SPACING.xs },
+  calcInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: Platform.OS === 'ios' ? SPACING.lg : SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    marginBottom: SPACING.md,
+  },
+  calcInput: { flex: 1, ...FONTS.bold, fontSize: 28, padding: 0 },
+  calcInputUnit: { ...FONTS.medium, fontSize: FONTS.size.sm, marginLeft: SPACING.sm },
+  calcResultsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginBottom: SPACING.md },
+  calcResultCard: {
+    width: (width - 48 - SPACING.sm) / 2,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    gap: 4,
+  },
+  calcResultLabel: { ...FONTS.regular, fontSize: FONTS.size.xs },
+  calcResultValue: { ...FONTS.bold, fontSize: FONTS.size.lg, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+  calcNote: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'flex-start',
+  },
+  calcNoteText: { ...FONTS.regular, fontSize: 9, flex: 1, lineHeight: 14 },
 });

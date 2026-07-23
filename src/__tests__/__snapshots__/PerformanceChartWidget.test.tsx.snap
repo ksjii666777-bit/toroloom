@@ -1,0 +1,413 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PerformanceChartWidget > matches snapshot for medium size with positive data > PerformanceChartWidget-medium-positive 1`] = `
+<View
+  style={
+    {
+      "gap": 8,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "gap": 4,
+        "justifyContent": "center",
+      }
+    }
+  >
+    <Pressable
+      onPress={[Function]}
+      style={
+        [
+          {
+            "borderRadius": 999,
+            "borderWidth": 1,
+            "paddingHorizontal": 8,
+            "paddingVertical": 3,
+          },
+          {
+            "backgroundColor": "transparent",
+            "borderColor": "rgba(255,255,255,0.07)",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-SemiBold",
+              "fontSize": 10,
+              "fontWeight": "600",
+              "letterSpacing": 0.1,
+            },
+            {
+              "color": "#475569",
+            },
+          ]
+        }
+      >
+        1W
+      </Text>
+    </Pressable>
+    <Pressable
+      onPress={[Function]}
+      style={
+        [
+          {
+            "borderRadius": 999,
+            "borderWidth": 1,
+            "paddingHorizontal": 8,
+            "paddingVertical": 3,
+          },
+          {
+            "backgroundColor": "transparent",
+            "borderColor": "rgba(255,255,255,0.07)",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-SemiBold",
+              "fontSize": 10,
+              "fontWeight": "600",
+              "letterSpacing": 0.1,
+            },
+            {
+              "color": "#475569",
+            },
+          ]
+        }
+      >
+        1M
+      </Text>
+    </Pressable>
+    <Pressable
+      onPress={[Function]}
+      style={
+        [
+          {
+            "borderRadius": 999,
+            "borderWidth": 1,
+            "paddingHorizontal": 8,
+            "paddingVertical": 3,
+          },
+          {
+            "backgroundColor": "transparent",
+            "borderColor": "rgba(255,255,255,0.07)",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-SemiBold",
+              "fontSize": 10,
+              "fontWeight": "600",
+              "letterSpacing": 0.1,
+            },
+            {
+              "color": "#475569",
+            },
+          ]
+        }
+      >
+        3M
+      </Text>
+    </Pressable>
+    <Pressable
+      onPress={[Function]}
+      style={
+        [
+          {
+            "borderRadius": 999,
+            "borderWidth": 1,
+            "paddingHorizontal": 8,
+            "paddingVertical": 3,
+          },
+          {
+            "backgroundColor": "#00E67620",
+            "borderColor": "#00E676",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-SemiBold",
+              "fontSize": 10,
+              "fontWeight": "600",
+              "letterSpacing": 0.1,
+            },
+            {
+              "color": "#00E676",
+            },
+          ]
+        }
+      >
+        1Y
+      </Text>
+    </Pressable>
+    <Pressable
+      onPress={[Function]}
+      style={
+        [
+          {
+            "borderRadius": 999,
+            "borderWidth": 1,
+            "paddingHorizontal": 8,
+            "paddingVertical": 3,
+          },
+          {
+            "backgroundColor": "transparent",
+            "borderColor": "rgba(255,255,255,0.07)",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-SemiBold",
+              "fontSize": 10,
+              "fontWeight": "600",
+              "letterSpacing": 0.1,
+            },
+            {
+              "color": "#475569",
+            },
+          ]
+        }
+      >
+        ALL
+      </Text>
+    </Pressable>
+  </View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "marginVertical": 4,
+      }
+    }
+  >
+    <Svg
+      height={72}
+      width={279}
+    >
+      <Defs>
+        <LinearGradient
+          id="perfFill"
+          x1="0"
+          x2="0"
+          y1="0"
+          y2="1"
+        >
+          <Stop
+            offset="0"
+            stopColor="#00E676"
+            stopOpacity="0.3"
+          />
+          <Stop
+            offset="1"
+            stopColor="#00E676"
+            stopOpacity="0"
+          />
+        </LinearGradient>
+      </Defs>
+      <Path
+        d="M 0 72 L 46.5 67.17201166180757 L 93 57.51603498542274 L 139.5 43.241982507288625 L 186 29.80758017492711 L 232.5 15.533527696793001 L 279 0 L 279 72 L 0 72 Z"
+        fill="url(#perfFill)"
+      />
+      <Path
+        d="M 0 72 L 46.5 67.17201166180757 L 93 57.51603498542274 L 139.5 43.241982507288625 L 186 29.80758017492711 L 232.5 15.533527696793001 L 279 0"
+        fill="none"
+        stroke="#00E676"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+      />
+      <Circle
+        cx={279}
+        cy={0}
+        fill="#00E676"
+        r={3}
+      />
+    </Svg>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingTop": 2,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "flex-start",
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-Regular",
+              "fontSize": 9,
+              "fontWeight": "400",
+              "letterSpacing": 0.2,
+              "marginBottom": 1,
+            },
+            {
+              "color": "#475569",
+            },
+          ]
+        }
+      >
+        Portfolio Value
+      </Text>
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-Bold",
+              "fontSize": 16,
+              "fontWeight": "700",
+              "letterSpacing": 0.05,
+            },
+            {
+              "color": "#E0E6ED",
+            },
+          ]
+        }
+      >
+        ₹7.95L
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "alignItems": "flex-end",
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-Regular",
+              "fontSize": 9,
+              "fontWeight": "400",
+              "letterSpacing": 0.2,
+              "marginBottom": 1,
+            },
+            {
+              "color": "#475569",
+            },
+          ]
+        }
+      >
+        Total Return
+      </Text>
+      <Text
+        style={
+          [
+            {
+              "fontFamily": "Inter-Bold",
+              "fontSize": 16,
+              "fontWeight": "700",
+              "letterSpacing": 0.05,
+            },
+            {
+              "color": "#00E676",
+            },
+          ]
+        }
+      >
+        ₹1.72L
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PerformanceChartWidget > matches snapshot for small size > PerformanceChartWidget-small 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "gap": 4,
+      "paddingVertical": 4,
+    }
+  }
+>
+  <Text
+    style={
+      [
+        {
+          "fontFamily": "Inter-Bold",
+          "fontSize": 20,
+          "fontWeight": "700",
+          "letterSpacing": 0.05,
+        },
+        {
+          "color": "#00E676",
+        },
+      ]
+    }
+  >
+    ₹7.95L
+  </Text>
+  <View
+    style={
+      {
+        "alignItems": "center",
+      }
+    }
+  >
+    <Svg
+      height={40}
+      width={80}
+    >
+      <Path
+        d="M 0 40 L 13.333333333333332 37.31778425655977 L 26.666666666666664 31.9533527696793 L 40 24.02332361516035 L 53.33333333333333 16.559766763848394 L 66.66666666666667 8.629737609329446 L 80 0"
+        fill="none"
+        stroke="#00E676"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+      />
+    </Svg>
+  </View>
+  <Text
+    style={
+      [
+        {
+          "fontFamily": "Inter-Regular",
+          "fontSize": 9,
+          "fontWeight": "400",
+          "letterSpacing": 0.2,
+        },
+        {
+          "color": "#475569",
+        },
+      ]
+    }
+  >
+    1Y
+  </Text>
+</View>
+`;

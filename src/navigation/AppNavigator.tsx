@@ -99,6 +99,7 @@ import LandscapeSettingsScreen from '../screens/settings/LandscapeSettingsScreen
 import CDNOptimizationScreen from '../screens/settings/CDNOptimizationScreen';
 import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
 import USStockDetailScreen from '../screens/stock/USStockDetailScreen';
+import CompanyFundamentalsScreen from '../screens/stock/CompanyFundamentalsScreen';
 import USMarketsScreen from '../screens/markets/USMarketsScreen';
 import BondDashboardScreen from '../screens/markets/BondDashboardScreen';
 import CurrencyMarketsScreen from '../screens/markets/CurrencyMarketsScreen';
@@ -108,6 +109,8 @@ import FuturesCurveScreen from '../screens/markets/FuturesCurveScreen';
 import NewsFeedScreen from '../screens/news/NewsFeedScreen';
 import IPOCalendarScreen from '../screens/news/IPOCalendarScreen';
 import IPODashboardScreen from '../screens/ipos/IPODashboardScreen';
+import NFODashboardScreen from '../screens/nfo/NFODashboardScreen';
+import NFODetailScreen from '../screens/nfo/NFODetailScreen';
 import DividendTrackerScreen from '../screens/analytics/DividendTrackerScreen';
 import EconomicCalendarScreen from '../screens/news/EconomicCalendarScreen';
 import ChatRoomListScreen from '../screens/chat/ChatRoomListScreen';
@@ -129,6 +132,7 @@ import StepUpSipScreen from '../screens/calculators/StepUpSipScreen';
 import LumpsumCalculator from '../screens/calculators/LumpsumCalculator';
 import EMICalculator from '../screens/calculators/EMICalculator';
 import TaxCalculator from '../screens/calculators/TaxCalculator';
+import CurrencyConverterScreen from '../screens/calculators/CurrencyConverterScreen';
 import AvatarWidget from '../components/AvatarWidget';
 
 // KYC Screens
@@ -458,6 +462,8 @@ export default function AppNavigator() {
             <Stack.Screen name="NewsFeed" component={NewsFeedScreen} />
             <Stack.Screen name="IPOCalendar" component={IPOCalendarScreen} />
             <Stack.Screen name="IPODashboard" component={IPODashboardScreen} />
+            <Stack.Screen name="NFODashboard" component={NFODashboardScreen} />
+            <Stack.Screen name="NFODetail" component={NFODetailScreen} />
             <Stack.Screen name="EconomicCalendar" component={EconomicCalendarScreen} />
             <Stack.Screen name="ChatList" component={ChatRoomListScreen} />
             <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
@@ -470,6 +476,7 @@ export default function AppNavigator() {
             <Stack.Screen name="CommodityMarkets" component={CommodityMarketsScreen} />
             <Stack.Screen name="FuturesCurve" component={FuturesCurveScreen} />
             <Stack.Screen name="USStockDetail" component={USStockDetailScreen} />
+            <Stack.Screen name="CompanyFundamentals" component={CompanyFundamentalsScreen} />
             <Stack.Screen name="Learn" component={LearnScreen} />
             <Stack.Screen name="Polls" component={PollsScreen} />
             <Stack.Screen name="CreatePoll" component={CreatePollScreen} />
@@ -551,6 +558,7 @@ export default function AppNavigator() {
             <Stack.Screen name="LumpsumCalculator" component={LumpsumCalculator} />
             <Stack.Screen name="EMICalculator" component={EMICalculator} />
             <Stack.Screen name="TaxCalculator" component={TaxCalculator} />
+            <Stack.Screen name="CurrencyConverter" component={CurrencyConverterScreen} />
             <Stack.Screen name="PanVerification" component={PanVerificationScreen} />
             <Stack.Screen name="AadhaarVerification" component={AadhaarVerificationScreen} />
             <Stack.Screen name="DigiLocker" component={DigiLockerScreen} />

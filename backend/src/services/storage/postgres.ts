@@ -60,7 +60,7 @@
  */
 
 import type { Pool, PoolConfig } from 'pg';
-import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData } from './types';
+import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData, WebhookStorageData, WebhookDeliveryLogData, ApiKeyStorageData } from './types';
 import type { AuditEvent, AuditTrailSnapshot } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
@@ -323,8 +323,85 @@ export class PostgreSQLStorage implements StorageEngine {
         auto_renew BOOLEAN NOT NULL DEFAULT false,
         payment_method TEXT,
         razorpay_order_id TEXT,
+        razorpay_payment_id TEXT,
+        razorpay_subscription_id TEXT,
         last_payment_date TEXT,
-        tenant_id TEXT
+        tenant_id TEXT,
+        mandate_id TEXT,
+        mandate_status TEXT,
+        upi_id TEXT,
+        is_auto_pay_enabled BOOLEAN NOT NULL DEFAULT false,
+        next_charge_date TEXT,
+        payment_failure_count INTEGER NOT NULL DEFAULT 0,
+        grace_period_end_date TEXT,
+        last_payment_failure_date TEXT,
+        last_payment_retry_date TEXT,
+        failed_payment_retry_count INTEGER NOT NULL DEFAULT 0,
+        is_trial_used BOOLEAN NOT NULL DEFAULT false,
+        trial_start_date TEXT,
+        trial_end_date TEXT
+      );
+    `);
+
+    // ── API keys table ──
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS api_keys (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        key_prefix TEXT NOT NULL,
+        key_hash TEXT NOT NULL UNIQUE,
+        scopes JSONB NOT NULL DEFAULT '[]',
+        expires_at TEXT,
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        last_used_at TEXT,
+        ip_restrict TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON api_keys (user_id);
+    `);
+
+    // ── Webhook storage tables ──
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS webhooks (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        url TEXT NOT NULL,
+        secret TEXT NOT NULL,
+        events JSONB NOT NULL DEFAULT '[]',
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        last_triggered_at TEXT,
+        delivery_count INTEGER NOT NULL DEFAULT 0,
+        success_count INTEGER NOT NULL DEFAULT 0,
+        description TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_webhooks_user_id ON webhooks (user_id);
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS webhook_delivery_logs (
+        id TEXT PRIMARY KEY,
+        webhook_id TEXT NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE,
+        event TEXT NOT NULL,
+        status_code INTEGER NOT NULL DEFAULT 0,
+        success BOOLEAN NOT NULL DEFAULT false,
+        duration INTEGER NOT NULL DEFAULT 0,
+        response_body TEXT NOT NULL DEFAULT '',
+        error_message TEXT,
+        timestamp TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_webhook_logs_webhook_id ON webhook_delivery_logs (webhook_id);
+      CREATE INDEX IF NOT EXISTS idx_webhook_logs_timestamp ON webhook_delivery_logs (timestamp DESC);
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS processed_events (
+        event_id TEXT PRIMARY KEY,
+        processed_at TIMESTAMPTZ NOT NULL DEFAULT now()
       );
     `);
 
@@ -523,6 +600,7 @@ export class PostgreSQLStorage implements StorageEngine {
     await this.pool.query('DELETE FROM community_posts');
     await this.pool.query('DELETE FROM telegram_links');
     await this.pool.query('DELETE FROM subscriptions');
+    await this.pool.query('DELETE FROM api_keys');
     await this.pool.query('DELETE FROM coupon_usage');
     await this.pool.query('DELETE FROM coupons');
   }
@@ -805,27 +883,87 @@ export class PostgreSQLStorage implements StorageEngine {
       [userId],
     );
     if (result.rows.length === 0) return null;
+    const r = result.rows[0];
     return {
-      userId: result.rows[0].user_id,
-      tier: result.rows[0].tier,
-      planId: result.rows[0].plan_id,
-      status: result.rows[0].status,
-      startDate: result.rows[0].start_date,
-      endDate: result.rows[0].end_date,
-      autoRenew: result.rows[0].auto_renew,
-      paymentMethod: result.rows[0].payment_method || undefined,
-      razorpayOrderId: result.rows[0].razorpay_order_id || undefined,
-      lastPaymentDate: result.rows[0].last_payment_date || undefined,
-      tenantId: result.rows[0].tenant_id || undefined,
-      updatedAt: result.rows[0].updated_at,
+      userId: r.user_id,
+      tier: r.tier,
+      planId: r.plan_id,
+      status: r.status,
+      startDate: r.start_date,
+      endDate: r.end_date,
+      autoRenew: r.auto_renew,
+      paymentMethod: r.payment_method || undefined,
+      razorpayOrderId: r.razorpay_order_id || undefined,
+      razorpayPaymentId: r.razorpay_payment_id || undefined,
+      razorpaySubscriptionId: r.razorpay_subscription_id || undefined,
+      lastPaymentDate: r.last_payment_date || undefined,
+      tenantId: r.tenant_id || undefined,
+      mandateId: r.mandate_id || undefined,
+      mandateStatus: r.mandate_status || undefined,
+      upiId: r.upi_id || undefined,
+      isAutoPayEnabled: r.is_auto_pay_enabled || undefined,
+      nextChargeDate: r.next_charge_date || undefined,
+      paymentFailureCount: r.payment_failure_count || undefined,
+      gracePeriodEndDate: r.grace_period_end_date || undefined,
+      lastPaymentFailureDate: r.last_payment_failure_date || undefined,
+      lastPaymentRetryDate: r.last_payment_retry_date || undefined,
+      failedPaymentRetryCount: r.failed_payment_retry_count || undefined,
+      isTrialUsed: r.is_trial_used || undefined,
+      trialStartDate: r.trial_start_date || undefined,
+      trialEndDate: r.trial_end_date || undefined,
+      updatedAt: r.updated_at,
     };
+  }
+
+  async loadAllSubscriptions(): Promise<UserSubscriptionData[]> {
+    if (!this.pool) return [];
+    const result = await this.pool.query(
+      'SELECT * FROM subscriptions ORDER BY updated_at DESC'
+    );
+    return result.rows.map((r: any) => ({
+      userId: r.user_id,
+      tier: r.tier,
+      planId: r.plan_id,
+      status: r.status,
+      startDate: r.start_date,
+      endDate: r.end_date,
+      autoRenew: r.auto_renew,
+      paymentMethod: r.payment_method || undefined,
+      razorpayOrderId: r.razorpay_order_id || undefined,
+      razorpayPaymentId: r.razorpay_payment_id || undefined,
+      razorpaySubscriptionId: r.razorpay_subscription_id || undefined,
+      lastPaymentDate: r.last_payment_date || undefined,
+      tenantId: r.tenant_id || undefined,
+      mandateId: r.mandate_id || undefined,
+      mandateStatus: r.mandate_status || undefined,
+      upiId: r.upi_id || undefined,
+      isAutoPayEnabled: r.is_auto_pay_enabled || undefined,
+      nextChargeDate: r.next_charge_date || undefined,
+      paymentFailureCount: r.payment_failure_count || undefined,
+      gracePeriodEndDate: r.grace_period_end_date || undefined,
+      lastPaymentFailureDate: r.last_payment_failure_date || undefined,
+      lastPaymentRetryDate: r.last_payment_retry_date || undefined,
+      failedPaymentRetryCount: r.failed_payment_retry_count || undefined,
+      isTrialUsed: r.is_trial_used || undefined,
+      trialStartDate: r.trial_start_date || undefined,
+      trialEndDate: r.trial_end_date || undefined,
+      updatedAt: r.updated_at,
+    }));
   }
 
   async saveSubscription(userId: string, sub: UserSubscriptionData): Promise<void> {
     if (!this.pool) return;
     await this.pool.query(
-      `INSERT INTO subscriptions (user_id, tier, plan_id, status, start_date, end_date, auto_renew, payment_method, razorpay_order_id, last_payment_date, tenant_id, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      `INSERT INTO subscriptions (
+         user_id, tier, plan_id, status, start_date, end_date, auto_renew,
+         payment_method, razorpay_order_id, razorpay_payment_id, razorpay_subscription_id,
+         last_payment_date, tenant_id,
+         mandate_id, mandate_status, upi_id, is_auto_pay_enabled, next_charge_date,
+         payment_failure_count, grace_period_end_date, last_payment_failure_date,
+         last_payment_retry_date, failed_payment_retry_count,
+         is_trial_used, trial_start_date, trial_end_date, updated_at
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
        ON CONFLICT (user_id) DO UPDATE SET
          tier = EXCLUDED.tier,
          plan_id = EXCLUDED.plan_id,
@@ -835,8 +973,23 @@ export class PostgreSQLStorage implements StorageEngine {
          auto_renew = EXCLUDED.auto_renew,
          payment_method = EXCLUDED.payment_method,
          razorpay_order_id = EXCLUDED.razorpay_order_id,
+         razorpay_payment_id = EXCLUDED.razorpay_payment_id,
+         razorpay_subscription_id = EXCLUDED.razorpay_subscription_id,
          last_payment_date = EXCLUDED.last_payment_date,
          tenant_id = EXCLUDED.tenant_id,
+         mandate_id = EXCLUDED.mandate_id,
+         mandate_status = EXCLUDED.mandate_status,
+         upi_id = EXCLUDED.upi_id,
+         is_auto_pay_enabled = EXCLUDED.is_auto_pay_enabled,
+         next_charge_date = EXCLUDED.next_charge_date,
+         payment_failure_count = EXCLUDED.payment_failure_count,
+         grace_period_end_date = EXCLUDED.grace_period_end_date,
+         last_payment_failure_date = EXCLUDED.last_payment_failure_date,
+         last_payment_retry_date = EXCLUDED.last_payment_retry_date,
+         failed_payment_retry_count = EXCLUDED.failed_payment_retry_count,
+         is_trial_used = EXCLUDED.is_trial_used,
+         trial_start_date = EXCLUDED.trial_start_date,
+         trial_end_date = EXCLUDED.trial_end_date,
          updated_at = EXCLUDED.updated_at`,
       [
         userId,
@@ -848,8 +1001,23 @@ export class PostgreSQLStorage implements StorageEngine {
         sub.autoRenew,
         sub.paymentMethod || null,
         sub.razorpayOrderId || null,
+        sub.razorpayPaymentId || null,
+        sub.razorpaySubscriptionId || null,
         sub.lastPaymentDate || null,
         sub.tenantId || null,
+        sub.mandateId || null,
+        sub.mandateStatus || null,
+        sub.upiId || null,
+        sub.isAutoPayEnabled ?? false,
+        sub.nextChargeDate || null,
+        sub.paymentFailureCount ?? 0,
+        sub.gracePeriodEndDate || null,
+        sub.lastPaymentFailureDate || null,
+        sub.lastPaymentRetryDate || null,
+        sub.failedPaymentRetryCount ?? 0,
+        sub.isTrialUsed ?? false,
+        sub.trialStartDate || null,
+        sub.trialEndDate || null,
         sub.updatedAt,
       ],
     );
@@ -924,6 +1092,108 @@ export class PostgreSQLStorage implements StorageEngine {
       timestamp: row.timestamp,
       tags: row.tags ? parseJSON<string[]>(row.tags) : [],
     };
+  }
+
+  // ──── API Keys ────
+
+  async saveApiKey(key: ApiKeyStorageData): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO api_keys (id, user_id, name, key_prefix, key_hash, scopes, expires_at, is_active, last_used_at, ip_restrict, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       ON CONFLICT (id) DO UPDATE SET
+         name = EXCLUDED.name,
+         scopes = EXCLUDED.scopes,
+         is_active = EXCLUDED.is_active,
+         last_used_at = EXCLUDED.last_used_at,
+         ip_restrict = EXCLUDED.ip_restrict,
+         updated_at = EXCLUDED.updated_at`,
+      [key.id, key.userId, key.name, key.keyPrefix, key.keyHash, JSON.stringify(key.scopes), key.expiresAt, key.isActive, key.lastUsedAt, key.ipRestrict, key.createdAt, key.updatedAt],
+    );
+  }
+
+  async loadApiKeyByHash(hash: string): Promise<ApiKeyStorageData | null> {
+    if (!this.pool) return null;
+    const result = await this.pool.query(
+      'SELECT * FROM api_keys WHERE key_hash = $1',
+      [hash],
+    );
+    if (result.rows.length === 0) return null;
+    const r = result.rows[0];
+    return {
+      id: r.id,
+      userId: r.user_id,
+      name: r.name,
+      keyPrefix: r.key_prefix,
+      keyHash: r.key_hash,
+      scopes: parseJSON<string[]>(r.scopes),
+      expiresAt: r.expires_at || null,
+      isActive: r.is_active,
+      lastUsedAt: r.last_used_at || null,
+      ipRestrict: r.ip_restrict || null,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    };
+  }
+
+  async loadUserApiKeys(userId: string): Promise<ApiKeyStorageData[]> {
+    if (!this.pool) return [];
+    const result = await this.pool.query(
+      'SELECT * FROM api_keys WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId],
+    );
+    return result.rows.map((r: any) => ({
+      id: r.id,
+      userId: r.user_id,
+      name: r.name,
+      keyPrefix: r.key_prefix,
+      keyHash: r.key_hash,
+      scopes: parseJSON<string[]>(r.scopes),
+      expiresAt: r.expires_at || null,
+      isActive: r.is_active,
+      lastUsedAt: r.last_used_at || null,
+      ipRestrict: r.ip_restrict || null,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    }));
+  }
+
+  async loadApiKey(id: string): Promise<ApiKeyStorageData | null> {
+    if (!this.pool) return null;
+    const result = await this.pool.query(
+      'SELECT * FROM api_keys WHERE id = $1',
+      [id],
+    );
+    if (result.rows.length === 0) return null;
+    const r = result.rows[0];
+    return {
+      id: r.id,
+      userId: r.user_id,
+      name: r.name,
+      keyPrefix: r.key_prefix,
+      keyHash: r.key_hash,
+      scopes: parseJSON<string[]>(r.scopes),
+      expiresAt: r.expires_at || null,
+      isActive: r.is_active,
+      lastUsedAt: r.last_used_at || null,
+      ipRestrict: r.ip_restrict || null,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    };
+  }
+
+  async deleteApiKey(id: string): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query('DELETE FROM api_keys WHERE id = $1', [id]);
+  }
+
+  async touchApiKey(id: string): Promise<void> {
+    if (!this.pool) return;
+    const now = new Date().toISOString();
+    await this.pool.query(
+      'UPDATE api_keys SET last_used_at = $1, updated_at = $2 WHERE id = $3',
+      [now, now, id],
+    );
   }
 
   // ──── Coupons ────
@@ -1062,5 +1332,128 @@ export class PostgreSQLStorage implements StorageEngine {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };
+  }
+
+  // ──── Webhook Storage ────
+
+  async saveWebhook(webhook: WebhookStorageData): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO webhooks (id, user_id, name, url, secret, events, is_active, last_triggered_at, delivery_count, success_count, description, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10, $11, $12, $13)
+       ON CONFLICT (id) DO UPDATE SET
+         name = EXCLUDED.name,
+         url = EXCLUDED.url,
+         events = EXCLUDED.events,
+         is_active = EXCLUDED.is_active,
+         last_triggered_at = EXCLUDED.last_triggered_at,
+         delivery_count = EXCLUDED.delivery_count,
+         success_count = EXCLUDED.success_count,
+         description = EXCLUDED.description,
+         updated_at = EXCLUDED.updated_at`,
+      [
+        webhook.id, webhook.userId, webhook.name, webhook.url, webhook.secret,
+        JSON.stringify(webhook.events), webhook.isActive,
+        webhook.lastTriggeredAt, webhook.deliveryCount, webhook.successCount,
+        webhook.description, webhook.createdAt, webhook.updatedAt,
+      ],
+    );
+  }
+
+  async loadWebhook(id: string): Promise<WebhookStorageData | null> {
+    if (!this.pool) return null;
+    const result = await this.pool.query('SELECT * FROM webhooks WHERE id = $1', [id]);
+    if (result.rows.length === 0) return null;
+    return this.rowToWebhook(result.rows[0]);
+  }
+
+  async loadUserWebhooks(userId: string): Promise<WebhookStorageData[]> {
+    if (!this.pool) return [];
+    const result = await this.pool.query(
+      'SELECT * FROM webhooks WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId],
+    );
+    return result.rows.map((r: any) => this.rowToWebhook(r));
+  }
+
+  async loadActiveWebhooksByEvent(event: string): Promise<WebhookStorageData[]> {
+    if (!this.pool) return [];
+    const result = await this.pool.query(
+      'SELECT * FROM webhooks WHERE is_active = true AND events::jsonb @> $1::jsonb',
+      [JSON.stringify([event])],
+    );
+    return result.rows.map((r: any) => this.rowToWebhook(r));
+  }
+
+  async deleteWebhook(id: string): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query('DELETE FROM webhook_delivery_logs WHERE webhook_id = $1', [id]);
+    await this.pool.query('DELETE FROM webhooks WHERE id = $1', [id]);
+  }
+
+  async saveWebhookDeliveryLog(log: WebhookDeliveryLogData): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      `INSERT INTO webhook_delivery_logs (id, webhook_id, event, status_code, success, duration, response_body, error_message, timestamp)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [log.id, log.webhookId, log.event, log.statusCode, log.success, log.duration, log.responseBody, log.errorMessage, log.timestamp],
+    );
+  }
+
+  async loadWebhookDeliveryLogs(webhookId: string, limit?: number): Promise<WebhookDeliveryLogData[]> {
+    if (!this.pool) return [];
+    const query = limit
+      ? 'SELECT * FROM webhook_delivery_logs WHERE webhook_id = $1 ORDER BY timestamp DESC LIMIT $2'
+      : 'SELECT * FROM webhook_delivery_logs WHERE webhook_id = $1 ORDER BY timestamp DESC';
+    const params = limit ? [webhookId, limit] : [webhookId];
+    const result = await this.pool.query(query, params);
+    return result.rows.map((r: any) => ({
+      id: r.id,
+      webhookId: r.webhook_id,
+      event: r.event,
+      statusCode: r.status_code,
+      success: r.success,
+      duration: r.duration,
+      responseBody: r.response_body,
+      errorMessage: r.error_message,
+      timestamp: r.timestamp,
+    }));
+  }
+
+  private rowToWebhook(row: any): WebhookStorageData {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      name: row.name,
+      url: row.url,
+      secret: row.secret,
+      events: parseJSON<string[]>(row.events),
+      isActive: row.is_active,
+      lastTriggeredAt: row.last_triggered_at,
+      deliveryCount: row.delivery_count,
+      successCount: row.success_count,
+      description: row.description,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
+  // ──── Idempotency ────
+
+  async markEventProcessed(eventId: string): Promise<void> {
+    if (!this.pool) return;
+    await this.pool.query(
+      'INSERT INTO processed_events (event_id) VALUES ($1) ON CONFLICT (event_id) DO NOTHING',
+      [eventId],
+    );
+  }
+
+  async isEventProcessed(eventId: string): Promise<boolean> {
+    if (!this.pool) return false;
+    const result = await this.pool.query(
+      'SELECT 1 FROM processed_events WHERE event_id = $1',
+      [eventId],
+    );
+    return result.rows.length > 0;
   }
 }

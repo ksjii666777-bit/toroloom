@@ -27,6 +27,7 @@ import {
 import Animated, { FadeInDown, FadeOutUp, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { ApiKey, ApiKeyScope, ApiKeyScopeMeta } from '../../types';
@@ -88,10 +89,10 @@ const MOCK_API_KEYS: ApiKey[] = [
 ];
 
 const EXPIRY_OPTIONS = [
-  { label: '30 days', value: 30 },
-  { label: '90 days', value: 90 },
-  { label: '1 year', value: 365 },
-  { label: 'Never', value: -1 },
+  { labelKey: 'apiKeyManagement.expiry30', value: 30 },
+  { labelKey: 'apiKeyManagement.expiry90', value: 90 },
+  { labelKey: 'apiKeyManagement.expiry1y', value: 365 },
+  { labelKey: 'apiKeyManagement.expiryNever', value: -1 },
 ] as const;
 
 // ═════════════════════════════════════════════════════════════════════════
@@ -202,10 +203,11 @@ function ApiKeyCard({
   onToggleActive: (key: ApiKey) => void;
   colors: any;
 }) {
+  const { t } = useT();
   const isExpired = apiKey.expiresAt && new Date(apiKey.expiresAt) < new Date();
   const expiryLabel = apiKey.expiresAt
-    ? (isExpired ? `Expired ${formatRelativeTime(apiKey.expiresAt)} ago` : `Expires ${formatDate(apiKey.expiresAt)}`)
-    : 'No expiry';
+    ? (isExpired ? t('apiKeyManagement.expiredLabel', { time: formatRelativeTime(apiKey.expiresAt) }) : t('apiKeyManagement.expiresLabel', { date: formatDate(apiKey.expiresAt) }))
+    : t('apiKeyManagement.noExpiry');
 
   return (
     <View style={[
@@ -229,12 +231,12 @@ function ApiKeyCard({
               <Text style={[keyCardStyles.keyName, { color: colors.text }]}>{apiKey.name}</Text>
               {isExpired && (
                 <View style={[keyCardStyles.expiredBadge, { backgroundColor: '#FF525220' }]}>
-                  <Text style={keyCardStyles.expiredBadgeText}>Expired</Text>
+                  <Text style={keyCardStyles.expiredBadgeText}>{t('apiKeyManagement.expired')}</Text>
                 </View>
               )}
               {!apiKey.isActive && !isExpired && (
                 <View style={[keyCardStyles.revokedBadge, { backgroundColor: '#FFAB4020' }]}>
-                  <Text style={keyCardStyles.revokedBadgeText}>Revoked</Text>
+                  <Text style={keyCardStyles.revokedBadgeText}>{t('apiKeyManagement.revoked')}</Text>
                 </View>
               )}
             </View>
@@ -275,7 +277,7 @@ function ApiKeyCard({
         <View style={keyCardStyles.metaItem}>
           <Ionicons name="time-outline" size={11} color={colors.textMuted} />
           <Text style={[keyCardStyles.metaText, { color: colors.textMuted }]}>
-            Last used: {formatRelativeTime(apiKey.lastUsedAt)}
+            {t('apiKeyManagement.lastUsed', { time: formatRelativeTime(apiKey.lastUsedAt) })}
           </Text>
         </View>
       </View>
@@ -283,7 +285,7 @@ function ApiKeyCard({
       {apiKey.ipRestrict && (
         <View style={[keyCardStyles.restrictBadge, { backgroundColor: '#3B82F615' }]}>
           <Ionicons name="shield-outline" size={11} color="#3B82F6" />
-          <Text style={keyCardStyles.restrictText}>IP: {apiKey.ipRestrict}</Text>
+          <Text style={keyCardStyles.restrictText}>{t('apiKeyManagement.ipRestricted', { ip: apiKey.ipRestrict })}</Text>
         </View>
       )}
 
@@ -293,7 +295,7 @@ function ApiKeyCard({
         style={({ pressed }) => [keyCardStyles.revokeBtn, { opacity: pressed ? 0.7 : 1 }]}
       >
         <Ionicons name="trash-outline" size={14} color={colors.danger} />
-        <Text style={keyCardStyles.revokeBtnText}>{apiKey.isActive ? 'Revoke' : 'Delete'}</Text>
+        <Text style={keyCardStyles.revokeBtnText}>{apiKey.isActive ? t('apiKeyManagement.revoke') : t('apiKeyManagement.delete')}</Text>
       </Pressable>
     </View>
   );
@@ -339,6 +341,7 @@ const keyCardStyles = StyleSheet.create({
 
 export default function ApiKeyManagementScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [keys, setKeys] = useState<ApiKey[]>(MOCK_API_KEYS);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
@@ -362,39 +365,41 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
 
   // ── Handlers ──
   const handleRevoke = useCallback((key: ApiKey) => {
-    const label = key.isActive ? 'Revoke' : 'Delete';
+    const labelKey = key.isActive ? 'apiKeyManagement.revoke' : 'apiKeyManagement.delete';
+    const label = t(labelKey);
+    const action = label.toLowerCase();
     Alert.alert(
-      `${label} API Key`,
-      `This will permanently ${label.toLowerCase()} "${key.name}" (${key.maskedKey}).\n\nAny applications using this key will lose access immediately.`,
+      `${label} ${t('apiKeyManagement.title')}`,
+      t('apiKeyManagement.revokeConfirmMsg', { action, name: key.name, maskedKey: key.maskedKey }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
           text: label,
           style: 'destructive',
           onPress: () => {
             setKeys(prev => prev.map(k => k.id === key.id ? { ...k, isActive: false } : k));
-            Alert.alert('✅ Done', `"${key.name}" has been ${label.toLowerCase()}ed.`);
+            Alert.alert(t('apiKeyManagement.doneLabel'), t('apiKeyManagement.doneMsg', { name: key.name, action }));
           },
         },
       ],
     );
-  }, []);
+  }, [t]);
 
   const handleToggleActive = useCallback((key: ApiKey) => {
     Alert.alert(
-      'Revoke API Key',
-      `Revoke "${key.name}"? Any applications using it will lose access.`,
+      t('apiKeyManagement.revokeTitle'),
+      t('apiKeyManagement.revokeMsg', { name: key.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
-          text: 'Revoke', style: 'destructive',
+          text: t('apiKeyManagement.revoke'), style: 'destructive',
           onPress: () => {
             setKeys(prev => prev.map(k => k.id === key.id ? { ...k, isActive: false } : k));
           },
         },
       ],
     );
-  }, []);
+  }, [t]);
 
   const toggleScope = useCallback((scope: ApiKeyScope) => {
     setSelectedScopes(prev =>
@@ -404,11 +409,11 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
 
   const handleCreateKey = useCallback(() => {
     if (!newKeyName.trim()) {
-      Alert.alert('Name Required', 'Please enter a name for this API key.');
+      Alert.alert(t('apiKeyManagement.nameRequiredTitle'), t('apiKeyManagement.nameRequiredMsg'));
       return;
     }
     if (selectedScopes.length === 0) {
-      Alert.alert('Scopes Required', 'Please select at least one permission scope.');
+      Alert.alert(t('apiKeyManagement.scopesRequiredTitle'), t('apiKeyManagement.scopesRequiredMsg'));
       return;
     }
 
@@ -431,7 +436,7 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
     setNewKeyName('');
     setSelectedScopes(['portfolio:read', 'market:read']);
     setSelectedExpiry(90);
-  }, [newKeyName, selectedScopes, selectedExpiry]);
+  }, [newKeyName, selectedScopes, selectedExpiry, t]);
 
   const dismissCreatedKey = useCallback(() => {
     setCreatedKey(null);
@@ -446,9 +451,9 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>API Keys</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('apiKeyManagement.title')}</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              Manage personal access tokens
+              {t('apiKeyManagement.subtitle')}
             </Text>
           </View>
         </View>
@@ -460,13 +465,13 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
           <Animated.View entering={FadeInDown} exiting={FadeOutUp} style={[styles.keyReveal, { borderColor: colors.primary + '40' }]}>
             <View style={styles.keyRevealHeader}>
               <Ionicons name="key" size={20} color={colors.primary} />
-              <Text style={[styles.keyRevealTitle, { color: colors.text }]}>Key Created!</Text>
+              <Text style={[styles.keyRevealTitle, { color: colors.text }]}>{t('apiKeyManagement.keyCreated')}</Text>
               <Pressable onPress={dismissCreatedKey}>
                 <Ionicons name="close" size={20} color={colors.textMuted} />
               </Pressable>
             </View>
             <Text style={[styles.keyRevealDesc, { color: colors.textSecondary }]}>
-              Copy this key now. You won't be able to see it again!
+              {t('apiKeyManagement.keyCreatedDesc')}
             </Text>
             <View style={[styles.keyDisplay, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <Text style={[styles.keyDisplayText, { color: colors.text }]} selectable>
@@ -474,7 +479,7 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
               </Text>
             </View>
             <Text style={[styles.keyRevealNote, { color: colors.textMuted }]}>
-              Store it securely — treat it like a password
+              {t('apiKeyManagement.keyCreatedNote')}
             </Text>
           </Animated.View>
         )}
@@ -484,22 +489,22 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
           <View style={[styles.statCard, { borderColor: '#3B82F630' }]}>
             <Ionicons name="key" size={18} color="#3B82F6" />
             <Text style={[styles.statValue, { color: '#3B82F6' }]}>{stats.total}</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel}>{t('apiKeyManagement.statTotal')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: '#00C85330' }]}>
             <Ionicons name="checkmark-circle" size={18} color="#00C853" />
             <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.active}</Text>
-            <Text style={styles.statLabel}>Active</Text>
+            <Text style={styles.statLabel}>{t('apiKeyManagement.statActive')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: '#FFAB4030' }]}>
             <Ionicons name="moon" size={18} color="#FFAB40" />
             <Text style={[styles.statValue, { color: '#FFAB40' }]}>{stats.unused}</Text>
-            <Text style={styles.statLabel}>Unused</Text>
+            <Text style={styles.statLabel}>{t('apiKeyManagement.statUnused')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: '#8B5CF630' }]}>
             <Ionicons name="layers" size={18} color="#8B5CF6" />
             <Text style={[styles.statValue, { color: '#8B5CF6' }]}>{stats.usedScopes}</Text>
-            <Text style={styles.statLabel}>Scopes</Text>
+            <Text style={styles.statLabel}>{t('apiKeyManagement.statScopes')}</Text>
           </View>
         </View>
 
@@ -508,24 +513,24 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
           <AnimatedPressable onPress={() => setShowCreateForm(true)} haptic="medium" scaleTo={0.97}>
             <View style={[styles.createBtn, { borderColor: colors.primary + '40' }]}>
               <Ionicons name="add-circle" size={20} color={colors.primary} />
-              <Text style={[styles.createBtnText, { color: colors.primary }]}>Create New API Key</Text>
+              <Text style={[styles.createBtnText, { color: colors.primary }]}>{t('apiKeyManagement.createNewKey')}</Text>
             </View>
           </AnimatedPressable>
         ) : (
           <Animated.View entering={FadeInDown} layout={LinearTransition} style={[styles.createForm, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             {/* Form Header */}
             <View style={styles.formHeader}>
-              <Text style={[styles.formTitle, { color: colors.text }]}>New API Key</Text>
+              <Text style={[styles.formTitle, { color: colors.text }]}>{t('apiKeyManagement.newKeyTitle')}</Text>
               <Pressable onPress={() => setShowCreateForm(false)}>
                 <Ionicons name="close" size={22} color={colors.textMuted} />
               </Pressable>
             </View>
 
             {/* Name */}
-            <Text style={[styles.formLabel, { color: colors.textMuted }]}>Key Name</Text>
+            <Text style={[styles.formLabel, { color: colors.textMuted }]}>{t('apiKeyManagement.keyName')}</Text>
             <TextInput
               style={[styles.textInput, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              placeholder="e.g. My Trading Bot"
+              placeholder={t('apiKeyManagement.keyNamePlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={newKeyName}
               onChangeText={setNewKeyName}
@@ -534,7 +539,7 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
 
             {/* Scopes */}
             <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.md }]}>
-              Permissions ({selectedScopes.length} selected)
+              {t('apiKeyManagement.permissions', { count: selectedScopes.length })}
             </Text>
             <View style={styles.scopesGrid}>
               {(Object.values(API_KEY_SCOPES) as ApiKeyScopeMeta[]).map(meta => (
@@ -549,13 +554,13 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
             </View>
 
             {/* Expiry */}
-            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.md }]}>Expiry</Text>
+            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.md }]}>{t('apiKeyManagement.expiry')}</Text>
             <View style={styles.expiryRow}>
               {EXPIRY_OPTIONS.map(opt => {
                 const isActive = selectedExpiry === opt.value;
                 return (
                   <Pressable
-                    key={opt.label}
+                    key={opt.labelKey}
                     onPress={() => setSelectedExpiry(opt.value)}
                     style={[
                       styles.expiryChip,
@@ -566,7 +571,7 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
                     ]}
                   >
                     <Text style={[styles.expiryChipText, { color: isActive ? colors.primary : colors.textMuted }]}>
-                      {opt.label}
+                      {t(opt.labelKey)}
                     </Text>
                   </Pressable>
                 );
@@ -577,7 +582,7 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
             <AnimatedPressable onPress={handleCreateKey} haptic="medium" scaleTo={0.97}>
               <View style={[styles.submitBtn, { backgroundColor: colors.primary }]}>
                 <Ionicons name="key" size={18} color="#FFFFFF" />
-                <Text style={styles.submitBtnText}>Generate API Key</Text>
+                <Text style={styles.submitBtnText}>{t('apiKeyManagement.generateKey')}</Text>
               </View>
             </AnimatedPressable>
           </Animated.View>
@@ -585,10 +590,10 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
 
         {/* ── Existing Keys ── */}
         <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
-          Your API Keys
+          {t('apiKeyManagement.yourApiKeys')}
         </Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          {keys.filter(k => k.isActive).length} active · {keys.filter(k => !k.isActive).length} revoked
+          {t('apiKeyManagement.activeCount', { active: keys.filter(k => k.isActive).length, revoked: keys.filter(k => !k.isActive).length })}
         </Text>
 
         {keys.map((key) => (
@@ -605,13 +610,9 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
         <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="information-circle" size={18} color={colors.primary} />
           <View style={{ flex: 1 }}>
-            <Text style={[styles.infoTitle, { color: colors.text }]}>About API Keys</Text>
+            <Text style={[styles.infoTitle, { color: colors.text }]}>{t('apiKeyManagement.aboutTitle')}</Text>
             <Text style={[styles.infoText, { color: colors.textMuted }]}>
-              API keys allow external applications to access your Toroloom account programmatically.{'\n\n'}
-              • Each key has limited permissions (scopes){'\n'}
-              • Store keys securely — they grant access to your account{'\n'}
-              • Rotate keys periodically for best security{'\n'}
-              • Revoke keys that are no longer needed
+              {t('apiKeyManagement.aboutDesc')}
             </Text>
           </View>
         </View>

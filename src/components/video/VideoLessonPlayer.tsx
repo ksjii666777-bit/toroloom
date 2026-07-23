@@ -34,6 +34,16 @@ interface VideoLessonPlayerProps {
   onDeleteBookmark?: (bookmarkId: string) => void;
   onProgressUpdate?: (p: { lastPosition: number; duration: number; watchedPercent: number }) => void;
   onVideoComplete?: () => void;
+  /** Whether the video is downloaded for offline playback */
+  isDownloaded?: boolean;
+  /** Whether the video is currently downloading */
+  isDownloading?: boolean;
+  /** Download progress 0–100 */
+  downloadProgress?: number;
+  /** Called to download the video */
+  onDownload?: () => void;
+  /** Called to remove the downloaded video */
+  onRemoveDownload?: () => void;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -59,11 +69,54 @@ function getActiveTranscript(
   return closest;
 }
 
+/** Generate chapters from transcript by grouping sequential entries into logical sections.
+ *  A new chapter starts when the text signals a topic shift (e.g., contains key phrases)
+ *  or after a significant time gap (>= 30 seconds between entries). */
+function extractChapters(transcript: TranscriptEntry[]): { title: string; startTime: number; endTime: number }[] {
+  if (!transcript || transcript.length === 0) return [];
+  const chapters: { title: string; startTime: number; endTime: number }[] = [];
+  const topicMarkers = ['introduction', 'overview', 'concept', 'example', 'summary',
+    'key takeaway', 'practical tip', 'definition', 'strategy', 'case study',
+    'how to', 'why', 'what is', 'types of', 'benefits', 'risks', 'best practices'];
+
+  let chapterStart = transcript[0].startTime;
+  let chapterTexts: string[] = [transcript[0].text];
+
+  for (let i = 1; i < transcript.length; i++) {
+    const prev = transcript[i - 1];
+    const curr = transcript[i];
+    const gap = curr.startTime - prev.endTime;
+    const lowerText = curr.text.toLowerCase();
+    const isTopicShift = gap >= 30 || topicMarkers.some(m => lowerText.startsWith(m));
+
+    if (isTopicShift) {
+      chapters.push({
+        title: chapterTexts[0].substring(0, 50) + (chapterTexts[0].length > 50 ? '...' : ''),
+        startTime: chapterStart,
+        endTime: prev.endTime,
+      });
+      chapterStart = curr.startTime;
+      chapterTexts = [curr.text];
+    } else {
+      chapterTexts.push(curr.text);
+    }
+  }
+  // Last chapter
+  chapters.push({
+    title: chapterTexts[0].substring(0, 50) + (chapterTexts[0].length > 50 ? '...' : ''),
+    startTime: chapterStart,
+    endTime: transcript[transcript.length - 1].endTime,
+  });
+
+  return chapters;
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function VideoLessonPlayer({
   videoUrl, transcript, bookmarks = [], progress,
   onAddBookmark, onDeleteBookmark, onProgressUpdate, onVideoComplete,
+  isDownloaded, isDownloading, downloadProgress, onDownload, onRemoveDownload,
 }: VideoLessonPlayerProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -75,6 +128,7 @@ export default function VideoLessonPlayer({
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [showTranscript, setShowTranscript] = useState(true);
   const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showChapters, setShowChapters] = useState(false);
   const transcriptScrollRef = useRef<ScrollView>(null);
   const watchedRef = useRef<Set<number>>(new Set());
 
@@ -137,6 +191,15 @@ export default function VideoLessonPlayer({
 
   const handleSeekBack = useCallback(() => handleSeek(Math.max(0, currentTime - 10)), [currentTime, handleSeek]);
   const handleSeekFwd = useCallback(() => handleSeek(Math.min(duration, currentTime + 10)), [currentTime, duration, handleSeek]);
+
+  const chapters = useMemo(() => transcript ? extractChapters(transcript) : [], [transcript]);
+
+  const activeChapter = useMemo(() => {
+    if (!chapters.length) return null;
+    return chapters.find(c => currentTime >= c.startTime && currentTime <= c.endTime)
+      || [...chapters].reverse().find(c => currentTime >= c.startTime)
+      || chapters[chapters.length - 1];
+  }, [chapters, currentTime]);
 
   const activeTranscript = useMemo(() => {
     if (!transcript) return null;
@@ -244,22 +307,49 @@ export default function VideoLessonPlayer({
             <Text style={[styles.pctText, { color: colors.primary }]}>{watchPercent}%</Text>
           </View>
         </View>
-        <Text style={styles.speedTextInfo}>{playbackSpeed}x speed</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Text style={styles.speedTextInfo}>{playbackSpeed}x speed</Text>
+          {onDownload && !isDownloaded && !isDownloading && (
+            <Pressable onPress={onDownload} style={styles.ctrlBtn}>
+              <Ionicons name="cloud-download-outline" size={14} color={colors.textMuted} />
+            </Pressable>
+          )}
+          {isDownloading && downloadProgress !== undefined && (
+            <View style={[styles.pctBadge, { backgroundColor: colors.primary + '20' }]}>
+              <Text style={[styles.pctText, { color: colors.primary }]}>{downloadProgress}%</Text>
+            </View>
+          )}
+          {isDownloaded && onRemoveDownload && (
+            <Pressable onPress={onRemoveDownload} style={styles.ctrlBtn}>
+              <Ionicons name="checkmark-circle" size={14} color="#00E676" />
+            </Pressable>
+          )}
+        </View>
       </View>
 
-      {/* ─── Transcript / Bookmarks Tabs ─── */}
-      {(transcript?.length || bookmarks.length) ? (
+      {/* ─── Transcript / Chapters / Bookmarks Tabs ─── */}
+      {(transcript?.length || bookmarks.length || chapters.length > 1) ? (
         <View style={styles.tabBar}>
           {transcript && transcript.length > 0 && (
             <Pressable style={[styles.tab, showTranscript && styles.tabActive]}
-              onPress={() => { setShowTranscript(true); setShowBookmarks(false); }}>
+              onPress={() => { setShowTranscript(true); setShowBookmarks(false); setShowChapters(false); }}>
               <Ionicons name="chatbubbles-outline" size={14}
                 color={showTranscript ? colors.primary : colors.textMuted} />
               <Text style={[styles.tabText, showTranscript && styles.tabTextActive]}>Transcript</Text>
             </Pressable>
           )}
+          {chapters.length > 1 && (
+            <Pressable style={[styles.tab, showChapters && styles.tabActive]}
+              onPress={() => { setShowChapters(true); setShowTranscript(false); setShowBookmarks(false); }}>
+              <Ionicons name="list-outline" size={14}
+                color={showChapters ? colors.primary : colors.textMuted} />
+              <Text style={[styles.tabText, showChapters && styles.tabTextActive]}>
+                Chapters ({chapters.length})
+              </Text>
+            </Pressable>
+          )}
           <Pressable style={[styles.tab, showBookmarks && styles.tabActive]}
-            onPress={() => { setShowBookmarks(true); setShowTranscript(false); }}>
+            onPress={() => { setShowBookmarks(true); setShowTranscript(false); setShowChapters(false); }}>
             <Ionicons name="bookmark" size={14}
               color={showBookmarks ? colors.primary : colors.textMuted} />
             <Text style={[styles.tabText, showBookmarks && styles.tabTextActive]}>
@@ -269,8 +359,40 @@ export default function VideoLessonPlayer({
         </View>
       ) : null}
 
+      {/* ─── Chapters ─── */}
+      {showChapters && chapters.length > 1 && (
+        <ScrollView style={styles.transcriptBox} showsVerticalScrollIndicator={false}>
+          {chapters.map((ch, i) => {
+            const isActive = activeChapter === ch;
+            return (
+              <Pressable key={i}
+                style={({pressed}) => [[styles.transcriptLine, isActive && styles.transcriptLineActive], {opacity: pressed ? 0.7 : 1}]}
+                onPress={() => handleSeek(ch.startTime)}
+              >
+                <View style={styles.chapterNumber}>
+                  <Text style={[styles.chapterNumberText, { color: isActive ? colors.primary : colors.textMuted }]}>
+                    {String(i + 1).padStart(2, '0')}
+                  </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.chapterTime, { color: isActive ? colors.primary : colors.textMuted }]}>
+                    {formatTime(ch.startTime)} – {formatTime(ch.endTime)}
+                  </Text>
+                  <Text style={[styles.chapterTitle, { color: isActive ? colors.text : colors.textSecondary }]} numberOfLines={2}>
+                    {ch.title}
+                  </Text>
+                </View>
+                {isActive && (
+                  <Ionicons name="play" size={14} color={colors.primary} style={{ alignSelf: 'center', marginLeft: 4 }} />
+                )}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      )}
+
       {/* ─── Transcript ─── */}
-      {showTranscript && transcript && transcript.length > 0 && (
+      {showTranscript && !showChapters && transcript && transcript.length > 0 && (
         <ScrollView ref={transcriptScrollRef} style={styles.transcriptBox} showsVerticalScrollIndicator={false}>
           {transcript.map((e, i) => {
             const isActive = activeTranscript === e;
@@ -380,6 +502,12 @@ const createStyles = (colors: any) => StyleSheet.create({
   transcriptTime: { fontSize: 10, fontWeight: '600', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', width: 40, marginRight: 8, paddingTop: 2 },
   transcriptSpeaker: { fontSize: 10, fontWeight: '700', marginBottom: 1 },
   transcriptText: { fontSize: 12, lineHeight: 18 },
+
+  // Chapters
+  chapterNumber: { width: 24, height: 24, borderRadius: 12, backgroundColor: 'rgba(59,130,246,0.1)', justifyContent: 'center', alignItems: 'center', marginRight: 8 },
+  chapterNumberText: { fontSize: 10, fontWeight: '700' },
+  chapterTime: { fontSize: 10, fontWeight: '600', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', marginBottom: 1 },
+  chapterTitle: { fontSize: 12, lineHeight: 16 },
 
   // Bookmarks
   bookmarksBox: { maxHeight: 180, paddingHorizontal: 12, paddingVertical: 4 },

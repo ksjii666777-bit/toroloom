@@ -154,7 +154,7 @@ export default function CertificateScreen({ navigation, route }: any) {
               <View style={[styles.emptyIconRing, { borderColor: colors.border }]}>
                 <Ionicons name="ribbon-outline" size={48} color={colors.textMuted} />
               </View>
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>No Certificates Yet</Text>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>No certificates yet</Text>
               <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>
                 Complete all lessons in a course to earn your completion certificate.
               </Text>
@@ -309,7 +309,7 @@ export default function CertificateScreen({ navigation, route }: any) {
           {isGeneratingCertificate && (
             <View style={styles.generatingOverlay}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.generatingText, { color: colors.text }]}>Generating Certificate...</Text>
+              <Text style={[styles.generatingText, { color: colors.text }]}>Generating your certificate...</Text>
             </View>
           )}
         </ScrollView>
@@ -334,7 +334,7 @@ function CertificatePreview({
   sharing: boolean;
 }) {
   const grade = gradeConfig[cert.grade];
-  const gradeLabel = cert.grade === 'A' ? 'with Distinction' : cert.grade === 'B' ? 'with Merit' : '';
+  const gradeLabel = cert.grade === 'A' ? 'With Distinction' : cert.grade === 'B' ? 'With Merit' : '';
   const insets = useSafeAreaInsets();
 
   return (
@@ -352,8 +352,7 @@ function CertificatePreview({
         <View style={[styles.previewCorner, styles.previewCornerBR, { borderBottomColor: colors.primary, borderRightColor: colors.primary }]} />
 
         <Text style={styles.previewTitle}>Certificate</Text>
-        <View style={[styles.previewLine, { backgroundColor: colors.primary + '60' }]} />
-        <Text style={styles.previewSubtitle}>of Completion</Text>
+        <View style={[styles.previewLine, { backgroundColor: colors.primary + '60' }]} />          <Text style={styles.previewSubtitle}>OF COMPLETION</Text>
         <View style={[styles.previewDivider, { backgroundColor: colors.primary + '30' }]} />
 
         <Text style={[styles.previewAwarded, { color: colors.textMuted }]}>This is to certify that</Text>
@@ -395,7 +394,7 @@ function CertificatePreview({
         </View>
 
         <Text style={[styles.previewSerial, { color: colors.textMuted }]}>
-          Serial #{cert.serialNumber}
+          Serial No: {cert.serialNumber}
         </Text>
         <Text style={[styles.previewFooterText, { color: colors.textMuted }]}>
           Toroloom — AI-Powered Trading & Investment Platform
@@ -406,7 +405,7 @@ function CertificatePreview({
       {cert.pdfUri ? (
         <View style={[styles.pdfStatusCard, { backgroundColor: colors.success + '15', borderColor: colors.success + '30' }]}>
           <Ionicons name="checkmark-circle" size={18} color={colors.success} />
-          <Text style={[styles.pdfStatusText, { color: colors.success }]}>PDF generated</Text>
+          <Text style={[styles.pdfStatusText, { color: colors.success }]}>PDF generated successfully</Text>
         </View>
       ) : (
         <View style={[styles.pdfStatusCard, { backgroundColor: colors.warning + '15', borderColor: colors.warning + '30' }]}>

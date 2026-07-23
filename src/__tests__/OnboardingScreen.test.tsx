@@ -26,6 +26,8 @@ const mockSkipOnboarding = vi.fn();
 
 // Track referral source per-test so individual tests can override
 let currentReferralSource: string | null = null;
+let currentStepDemoCompleted: Record<string, boolean> = {};
+let currentOverriddenStep: number | undefined; // undefined = use default (0)
 
 vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({
@@ -64,14 +66,15 @@ vi.mock('../context/ThemeContext', () => ({
 vi.mock('../store/onboardingStore', () => ({
   useOnboardingStore: vi.fn((sel?: (s: any) => any) => {
     const state = {
-      currentStep: 0,
+      currentStep: currentOverriddenStep ?? 0,
       setCurrentStep: mockSetCurrentStep,
       skipOnboarding: mockSkipOnboarding,
       referralSource: currentReferralSource,
       completeOnboarding: vi.fn(),
       hasCompletedOnboarding: false,
       initialized: true,
-      interactedSteps: {},
+      interactedSteps: { ...currentStepDemoCompleted }, // if completed, also interacted
+      stepDemoCompleted: { ...currentStepDemoCompleted },
       markStepInteracted: vi.fn(),
       markStepDemoCompleted: vi.fn(),
     };
@@ -272,5 +275,112 @@ describe('OnboardingScreen — Skip Button', () => {
     });
 
     expect(mockSkipOnboarding).toHaveBeenCalledOnce();
+  });
+});
+
+describe('OnboardingScreen — Demo Completion Flow', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    mockSetCurrentStep.mockClear();
+    mockSkipOnboarding.mockClear();
+    currentReferralSource = null;
+    currentStepDemoCompleted = {};
+    currentOverriddenStep = undefined;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    currentReferralSource = null;
+    currentStepDemoCompleted = {};
+    currentOverriddenStep = undefined;
+  });
+
+  it('renders progress dots without checkmarks when no steps completed', () => {
+    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+
+    // All 6 dots render — no completed checkmarks in the DOM
+    // Just verify the screen renders without crashing
+    expect(root).toBeDefined();
+  });
+
+  it('renders completion summary on the last step when some demos completed', () => {
+    // Mark some steps as completed
+    currentStepDemoCompleted = { welcome: true, portfolio: true };
+    // Override currentStep to be the last step (index 5 for default variant)
+    currentOverriddenStep = 5;
+
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(1500);
+
+    // Should show "2/6 demos completed" somewhere
+    expect(getByText(/2.*6.*demos/)).toBeDefined();
+  });
+
+  it('shows "All 6 interactive demos completed!" when all steps completed', () => {
+    // Mark ALL steps as completed
+    currentStepDemoCompleted = {
+      welcome: true,
+      portfolio: true,
+      markets: true,
+      trading: true,
+      broker: true,
+      learn: true,
+    };
+    // Override to last step (index 5)
+    currentOverriddenStep = 5;
+
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(1500);
+
+    // Last step should show the all-completed message
+    expect(getByText(/All 6 interactive demos completed/)).toBeDefined();
+  });
+
+  it('shows correct count for referral variant (5 instead of 6)', () => {
+    // Referral variant = 5 steps (welcome excluded)
+    currentReferralSource = 'referral';
+    currentStepDemoCompleted = {
+      portfolio: true,
+      markets: true,
+      trading: true,
+      broker: true,
+      learn: true,
+    };
+    // Referral variant has 5 visible steps, last is index 4
+    currentOverriddenStep = 4;
+
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(1500);
+
+    // Should show "5/5 demos completed" or "All 5 interactive demos completed"
+    expect(getByText(/All 5 interactive demos completed/)).toBeDefined();
+  });
+
+  it('does not render completion summary when NOT on last step', () => {
+    // Mark some steps completed
+    currentStepDemoCompleted = { welcome: true };
+    // Stay on step 0 (first step) — summary should NOT render
+    currentOverriddenStep = 0;
+
+    const { queryByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(1500);
+
+    // No completion summary text should appear on step 0
+    expect(queryByText(/demos/)).toBeNull();
+  });
+
+  it('renders partial completion without crashing', () => {
+    // Simulate having only first step completed
+    currentStepDemoCompleted = { welcome: true };
+    // Not on last step
+    currentOverriddenStep = 0;
+
+    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    advanceAndRender(500);
+
+    // Just verify render is stable with partial completion
+    expect(root).toBeDefined();
   });
 });
