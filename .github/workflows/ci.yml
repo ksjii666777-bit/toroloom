@@ -596,28 +596,27 @@ jobs:
               echo "Running ALL Maestro E2E flows..."
               maestro test .maestro/flows --app-id host.exp.exponent --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
 
-  # ── E2E — Maestro (Android) PR Smoke + Nav Test ─────────────────────────
-  # Fast PR-level E2E: runs the smoke test + tab navigation flow to catch
-  # critical regressions before merge. Blocks the build on failure
-  # (continue-on-error: false). Shorter timeout (20 min) vs the full
-  # suite (60 min) because only 2 essential flows are executed.
+  # ── E2E — Maestro (Android) PR Critical Flows ───────────────────────────
+  # Fast PR-level E2E: runs 5 key flows to catch critical regressions before
+  # merge. Blocks the build on failure (continue-on-error: false).
+  # Timeout 30 min vs the full suite (60 min) since only essential flows run.
   #
-  # Runs on every PR to master/main. Uses the same Android emulator
-  # setup as the full e2e job above. Executes:
-  #   - .maestro/flows/smoke/smokeTest.yaml            (full app smoke test)
-  #   - .maestro/flows/navigation/tabNavigation.yaml    (all 5 tab screens)
+  # Flows executed (in order):
+  #   1. smoke/smokeTest.yaml        — Login → Home → Learn → Markets → More → Portfolio → Logout
+  #   2. navigation/tabNavigation.yaml — All 5 bottom tabs load correctly
+  #   3. trade/placeOrder.yaml        — Full order placement: Buy/Sell toggle, order types, qty, confirm
+  #   4. kyc/bankLinking.yaml         — 3-step bank linking: IFSC verify, account verify, link
+  #   5. stock/stockDetail.yaml       — Stock detail: chart, stats, sector context, AI analysis
   #
-  # The smoke test covers: Login → Home → Learn → Markets → More →
-  # Portfolio → Logout — the critical user journey.
-  # The tab navigation test verifies all 5 bottom tabs load correctly.
-  # If either fails, the PR is blocked from merging.
+  # NOTE: Each flow starts fresh with its own login step. The flows must be
+  # self-contained because Maestro does NOT reset app state between flows.
   # ───────────────────────────────────────────────────────────────────────
   e2e-pr:
     if: github.event_name == 'pull_request'
-    name: E2E — Smoke + Nav (PR)
+    name: E2E — Critical Flows (PR)
     needs: [frontend]
     runs-on: macos-13
-    timeout-minutes: 20
+    timeout-minutes: 30
     continue-on-error: false
     strategy:
       fail-fast: false
@@ -649,7 +648,12 @@ jobs:
       - name: Validate Maestro PR flows
         run: |
           maestro --version
-          for f in .maestro/flows/smoke/smokeTest.yaml .maestro/flows/navigation/tabNavigation.yaml; do
+          for f in \
+            .maestro/flows/smoke/smokeTest.yaml \
+            .maestro/flows/navigation/tabNavigation.yaml \
+            .maestro/flows/trade/placeOrder.yaml \
+            .maestro/flows/kyc/bankLinking.yaml \
+            .maestro/flows/stock/stockDetail.yaml; do
             if [ -f "$f" ]; then
               echo "  ✓ $f"
             else
@@ -657,6 +661,7 @@ jobs:
               exit 1
             fi
           done
+          echo "All 5 PR flow files validated."
 
       - name: Verify E2E secrets are configured
         shell: bash
@@ -669,7 +674,7 @@ jobs:
           fi
           echo "E2E secrets are configured."
 
-      - name: Boot Android emulator and run E2E smoke + nav tests (retry once on failure)
+      - name: Boot Android emulator and run E2E critical flows (retry once on failure)
         uses: Wandalen/wretry.action@v3.1.0
         with:
           action: reactivecircus/android-emulator-runner@v2
@@ -717,8 +722,16 @@ jobs:
                 echo "Expo/Metro server is ready!"
               '
               sleep 15
-              echo "Running Maestro E2E flows (smoke + nav)..."
-              maestro test .maestro/flows/smoke/smokeTest.yaml .maestro/flows/navigation/tabNavigation.yaml --app-id host.exp.exponent --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
+              echo "Running Maestro E2E critical flows (smoke + nav + trade + KYC + stock)..."
+              maestro test \
+                .maestro/flows/smoke/smokeTest.yaml \
+                .maestro/flows/navigation/tabNavigation.yaml \
+                .maestro/flows/trade/placeOrder.yaml \
+                .maestro/flows/kyc/bankLinking.yaml \
+                .maestro/flows/stock/stockDetail.yaml \
+                --app-id host.exp.exponent \
+                --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} \
+                --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
 
   # ── Coverage badge deployment ────────────────────────────────────────────
   # Runs after frontend and backend (with their coverage data) finish.

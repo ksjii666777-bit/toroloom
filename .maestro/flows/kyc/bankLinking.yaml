@@ -12,6 +12,9 @@
 
 appId: com.anonymous.Toroloom
 ---
+# ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
+- stopApp
+
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
     id: "login-email-input"
