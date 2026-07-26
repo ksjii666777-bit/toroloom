@@ -596,26 +596,28 @@ jobs:
               echo "Running ALL Maestro E2E flows..."
               maestro test .maestro/flows --app-id host.exp.exponent --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
 
-  # ── E2E — Maestro (Android) PR Smoke Test ───────────────────────────────
-  # Fast PR-level E2E: runs only the smoke test + login flow to catch
+  # ── E2E — Maestro (Android) PR Smoke + Nav Test ─────────────────────────
+  # Fast PR-level E2E: runs the smoke test + tab navigation flow to catch
   # critical regressions before merge. Blocks the build on failure
-  # (continue-on-error: false). Shorter timeout (15 min) vs the full
-  # suite (60 min) because only 1-2 flows are executed.
+  # (continue-on-error: false). Shorter timeout (20 min) vs the full
+  # suite (60 min) because only 2 essential flows are executed.
   #
   # Runs on every PR to master/main. Uses the same Android emulator
-  # setup as the full e2e job above, but only executes:
-  #   - .maestro/flows/smoke/smokeTest.yaml  (full app smoke test)
+  # setup as the full e2e job above. Executes:
+  #   - .maestro/flows/smoke/smokeTest.yaml            (full app smoke test)
+  #   - .maestro/flows/navigation/tabNavigation.yaml    (all 5 tab screens)
   #
   # The smoke test covers: Login → Home → Learn → Markets → More →
-  # Portfolio → Logout — the critical user journey. If any of these
-  # fail, the PR is blocked from merging.
+  # Portfolio → Logout — the critical user journey.
+  # The tab navigation test verifies all 5 bottom tabs load correctly.
+  # If either fails, the PR is blocked from merging.
   # ───────────────────────────────────────────────────────────────────────
   e2e-pr:
     if: github.event_name == 'pull_request'
-    name: E2E — Smoke (PR)
+    name: E2E — Smoke + Nav (PR)
     needs: [frontend]
     runs-on: macos-13
-    timeout-minutes: 15
+    timeout-minutes: 20
     continue-on-error: false
     strategy:
       fail-fast: false
@@ -644,16 +646,17 @@ jobs:
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
         shell: bash
 
-      - name: Validate Maestro smoke flow
+      - name: Validate Maestro PR flows
         run: |
           maestro --version
-          echo "Checking smokeTest.yaml..."
-          if [ -f .maestro/flows/smoke/smokeTest.yaml ]; then
-            echo "  ✓ smokeTest.yaml found"
-          else
-            echo "  ✗ smokeTest.yaml not found!"
-            exit 1
-          fi
+          for f in .maestro/flows/smoke/smokeTest.yaml .maestro/flows/navigation/tabNavigation.yaml; do
+            if [ -f "$f" ]; then
+              echo "  ✓ $f"
+            else
+              echo "  ✗ $f not found!"
+              exit 1
+            fi
+          done
 
       - name: Verify E2E secrets are configured
         shell: bash
@@ -666,7 +669,7 @@ jobs:
           fi
           echo "E2E secrets are configured."
 
-      - name: Boot Android emulator and run smoke test (retry once on failure)
+      - name: Boot Android emulator and run E2E smoke + nav tests (retry once on failure)
         uses: Wandalen/wretry.action@v3.1.0
         with:
           action: reactivecircus/android-emulator-runner@v2
@@ -714,8 +717,8 @@ jobs:
                 echo "Expo/Metro server is ready!"
               '
               sleep 15
-              echo "Running Maestro smoke test..."
-              maestro test .maestro/flows/smoke/smokeTest.yaml --app-id host.exp.exponent --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
+              echo "Running Maestro E2E flows (smoke + nav)..."
+              maestro test .maestro/flows/smoke/smokeTest.yaml .maestro/flows/navigation/tabNavigation.yaml --app-id host.exp.exponent --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
 
   # ── Coverage badge deployment ────────────────────────────────────────────
   # Runs after frontend and backend (with their coverage data) finish.
