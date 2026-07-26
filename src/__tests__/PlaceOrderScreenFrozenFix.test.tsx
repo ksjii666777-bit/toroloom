@@ -17,6 +17,123 @@
  * without attempting to navigate through or mutate frozen descriptors.
  */
 
+
+// ==================== Mock useT hook ====================
+const trading = {
+  "buySecurities": "Buy Securities",
+  "sellSecurities": "Sell Securities",
+  "productType": "Product Type",
+  "marketDesc": "Buy/Sell at current market price",
+  "limitDesc": "Execute only at your specified price or better",
+  "stopLossDesc": "Convert to market order when trigger price is hit",
+  "stopLossMarketDesc": "Market order that activates at trigger price",
+  "cncDesc": "Delivery — settle with actual shares",
+  "misDesc": "Intraday — square off by EOD",
+  "nrmlDesc": "Normal — for futures & options",
+  "owned": "(Owned: {{count}})",
+  "max": "Max",
+  "limitPrice": "Limit Price (₹)",
+  "triggerPrice": "Trigger Price (₹)",
+  "enterTriggerPrice": "Enter trigger price",
+  "triggerPriceRequired": "Trigger price is required for Stop Loss orders",
+  "pricePerShare": "Price per share",
+  "shares": "shares",
+  "estimatedTotal": "Estimated Total",
+  "estCharges": "Est. Charges (brokerage + taxes)",
+  "grandTotal": "Grand Total",
+  "balanceAvailable": "Available: {{amount}}",
+  "insufficientBalance": "Insufficient balance — need {{amount}} more",
+  "availableBalance": "Available Balance",
+  "stockNotFound": "Stock not found",
+  "goBack": "Go Back",
+  "processing": "Processing...",
+  "triggerPriceRequiredTitle": "Trigger Price Required",
+  "triggerPriceRequiredMsg": "Please enter a trigger price for Stop Loss orders.",
+  "bioConfirm": "Confirm {{action}} order with {{label}}",
+  "orderCancelled": "Order Cancelled",
+  "biometricFailed": "Biometric verification failed.",
+  "orderBlocked": "Order Blocked",
+  "orderPlacedSuccessfully": "Order Placed Successfully!",
+  "bought": "Bought",
+  "sold": "Sold",
+  "of": "of",
+  "price": "Price",
+  "time": "Time",
+  "done": "Done",
+  "riskEngineBlocked": "Order blocked by risk engine.",
+  "error": "Error",
+  "errorNoHolding": "No holding found to sell.",
+  "errorGeneric": "There was an error placing your order.",
+  "errorInsufficientMargin": "Insufficient margin.",
+  "errorInsufficientHoldings": "Insufficient holdings to sell.",
+  "errorLimitExceeded": "Position limit exceeded.",
+  "errorRejected": "Order rejected by broker.",
+  "errorNetwork": "Network error.",
+  "errorSessionExpired": "Broker session expired.",
+  "errorBroker": "Broker error ({{status}}): {{message}}",
+  "orderFailed": "Order Failed",
+  "quantityLabel": "Quantity",
+  "orderTypeLabel": "Order Type"
+};
+
+function resolveT(key: string, params?: Record<string, any>): string {
+  const parts = key.split('.');
+  const rootNs = parts[0];
+  const subKey = parts.slice(1).join('.');
+  
+  const translations: Record<string, any> = { trading };
+  const obj = translations[rootNs];
+  if (!obj) {
+    const parts2 = key.split('.');
+    const lastSeg = parts2[parts2.length - 1] || key;
+    return lastSeg
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (s: string) => s.toUpperCase())
+      .trim();
+  }
+  
+  // Check for plural variant FIRST when count !== 1
+  if (params && params.count !== undefined && params.count !== 1) {
+    const pluralKey = subKey + '_plural';
+    if (pluralKey in obj && typeof obj[pluralKey] === 'string') {
+      let result: string = obj[pluralKey];
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+      return result;
+    }
+  }
+  
+  // Fall back to singular
+  if (subKey in obj && typeof obj[subKey] === 'string') {
+    let result: string = obj[subKey];
+    if (params) {
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+    }
+    return result;
+  }
+  
+  // Fallback: return last key segment as readable text
+  const lastSeg = subKey || key;
+  return lastSeg
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s: string) => s.toUpperCase())
+    .trim();
+}
+
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+  default: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act } from 'react-test-renderer';

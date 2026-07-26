@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -18,6 +19,7 @@ const PIE_SIZE = 100;
 
 export default function EMICalculator() {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
@@ -100,7 +102,7 @@ export default function EMICalculator() {
         </Pressable>
         <View style={styles.headerCenter}>
           <Ionicons name="trending-up" size={20} color={colors.warning} />
-          <Text style={[styles.headerTitle, { color: colors.text }]}>EMI Calculator</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.emi')}</Text>
         </View>
         <Pressable onPress={handleClear} style={({ pressed: _pressed }) => [styles.clearBtn, { backgroundColor: colors.bgCard }]}>
           <Ionicons name="refresh" size={18} color={colors.textMuted} />
@@ -115,22 +117,22 @@ export default function EMICalculator() {
       >
         {/* EMI Result */}
         <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.resultLabel, { color: colors.textMuted }]}>Monthly EMI</Text>
+          <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.monthlyEmi')}</Text>
           <Text style={[styles.emiAmount, { color: colors.text }]}>{formatCurrency(emi)}</Text>
 
           <View style={[styles.resultRow, { borderTopColor: colors.divider }]}>
             <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>Principal</Text>
+              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
               <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
             </View>
             <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>Interest Payable</Text>
+              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.interestPayable')}</Text>
               <Text style={[styles.resultValue, { color: colors.danger }]}>{formatCurrency(totalInterest)}</Text>
             </View>
             <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>Total Payment</Text>
+              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.totalPayment')}</Text>
               <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(totalPayment)}</Text>
             </View>
           </View>
@@ -139,13 +141,13 @@ export default function EMICalculator() {
         {/* Breakdown Visual */}
         {totalPayment > 0 && (
           <View style={[styles.pieCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Breakdown</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.breakdown')}</Text>
             <View style={styles.pieContainer}>
               {/* Principal vs Interest bar representation */}
               <View style={styles.breakdownVisual}>
                 <View style={[styles.breakdownCircle, { borderColor: colors.border }]}>
                   <Text style={[styles.breakdownEmi, { color: colors.text }]}>{formatCurrency(emi)}</Text>
-                  <Text style={[styles.breakdownLabel, { color: colors.textMuted }]}>per month</Text>
+                  <Text style={[styles.breakdownLabel, { color: colors.textMuted }]}>{t('calculators.perMonth')}</Text>
                 </View>
                 <View style={styles.breakdownBars}>
                   <View style={styles.breakdownBarRow}>
@@ -169,12 +171,12 @@ export default function EMICalculator() {
               <View style={styles.pieLegend}>
                 <View style={styles.pieLegendItem}>
                   <View style={[styles.pieDot, { backgroundColor: colors.accent }]} />
-                  <Text style={[styles.pieLegendText, { color: colors.textSecondary }]}>Principal</Text>
+                  <Text style={[styles.pieLegendText, { color: colors.textSecondary }]}>{t('calculators.principal')}</Text>
                   <Text style={[styles.pieLegendValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
                 </View>
                 <View style={styles.pieLegendItem}>
                   <View style={[styles.pieDot, { backgroundColor: colors.danger }]} />
-                  <Text style={[styles.pieLegendText, { color: colors.textSecondary }]}>Interest</Text>
+                  <Text style={[styles.pieLegendText, { color: colors.textSecondary }]}>{t('calculators.interest')}</Text>
                   <Text style={[styles.pieLegendValue, { color: colors.text }]}>{formatCurrency(totalInterest)}</Text>
                 </View>
               </View>
@@ -190,10 +192,10 @@ export default function EMICalculator() {
 
         {/* Inputs */}
         <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Loan Details</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.loanDetails')}</Text>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Loan Amount (₹)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.loanAmount')}</Text>
             <TextInput
               style={[styles.input, inputStyle(loanAmount)]}
               value={loanAmount}
@@ -218,7 +220,7 @@ export default function EMICalculator() {
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Interest Rate (% p.a.)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.interestRate')}</Text>
             <TextInput
               style={[styles.input, inputStyle(interestRate)]}
               value={interestRate}
@@ -241,7 +243,7 @@ export default function EMICalculator() {
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Loan Tenure (Months)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.loanTenure')}</Text>
             <TextInput
               style={[styles.input, inputStyle(tenureMonths)]}
               value={tenureMonths}
@@ -269,7 +271,7 @@ export default function EMICalculator() {
         {/* Amortization Schedule */}
         {yearlySchedule.length > 0 && (
           <View style={[styles.scheduleCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Yearly Amortization</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.yearlyAmortization')}</Text>
             {yearlySchedule.map((row) => {
               const totalYearly = row.principalPaid + row.interestPaid;
               const principalPct = totalYearly > 0 ? (row.principalPaid / totalYearly) * 100 : 0;
@@ -301,7 +303,7 @@ export default function EMICalculator() {
         <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="information-circle-outline" size={16} color={colors.warning} style={{ marginRight: 8 }} />
           <Text style={[styles.infoText, { color: colors.textMuted }]}>
-            EMI calculations are indicative. Actual EMI may vary based on lender's terms, processing fees, and applicable interest rate changes.
+            {t('calculators.emiInfo')}
           </Text>
         </View>
       </ScrollView>

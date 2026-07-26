@@ -9,6 +9,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useMutualFundStore } from '../../store/mutualFundStore';
 import { MutualFund, SIPPlan } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { useT } from '../../hooks/useT';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -21,15 +22,16 @@ const _riskColors: Record<string, string> = {
   high: '#FF1744',
 };
 
-const frequencyOptions: { label: string; value: SIPPlan['frequency'] }[] = [
-  { label: 'Daily', value: 'daily' },
-  { label: 'Weekly', value: 'weekly' },
-  { label: 'Monthly', value: 'monthly' },
-  { label: 'Quarterly', value: 'quarterly' },
+const frequencyOptions: { label: string; value: SIPPlan['frequency']; tKey: string }[] = [
+  { label: 'Daily', value: 'daily', tKey: 'mutualFunds.daily' },
+  { label: 'Weekly', value: 'weekly', tKey: 'mutualFunds.weekly' },
+  { label: 'Monthly', value: 'monthly', tKey: 'mutualFunds.monthly' },
+  { label: 'Quarterly', value: 'quarterly', tKey: 'mutualFunds.quarterly' },
 ];
 
 export default function MutualFundsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { funds, sipPlans, fetchFunds, fetchSIPs, investInFund, startSIP, modifySIP, pauseSIP, resumeSIP, deleteSIP } = useMutualFundStore();
   const [activeTab, setActiveTab] = useState<'funds' | 'sips'>('funds');
@@ -59,15 +61,15 @@ export default function MutualFundsScreen({ navigation }: any) {
     if (!investModal || !amount) return;
     const amt = parseFloat(amount);
     if (isNaN(amt) || amt < investModal.fund.minInvestment) {
-      Alert.alert('Invalid Amount', `Minimum investment is ${formatCurrency(investModal.fund.minInvestment)}`);
+      Alert.alert(t('mutualFunds.invalidAmount'), t('mutualFunds.minInvestError', { amount: formatCurrency(investModal.fund.minInvestment) }));
       return;
     }
     if (investModal.type === 'lumpsum') {
       investInFund(investModal.fund.id, amt);
-      Alert.alert('Success', `Invested ${formatCurrency(amt)} in ${investModal.fund.name}`);
+      Alert.alert(t('mutualFunds.success'), t('mutualFunds.investedMsg', { amount: formatCurrency(amt), name: investModal.fund.name }));
     } else {
       startSIP(investModal.fund.id, amt, frequency);
-      Alert.alert('SIP Started', `SIP of ${formatCurrency(amt)}/${frequency} started in ${investModal.fund.name}`);
+      Alert.alert(t('mutualFunds.sipStarted'), t('mutualFunds.sipStartedMsg', { amount: formatCurrency(amt), frequency, name: investModal.fund.name }));
     }
     setInvestModal(null);
     setAmount('');
@@ -81,7 +83,7 @@ export default function MutualFundsScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Mutual Funds</Text>
+          <Text style={styles.title}>{t('mutualFunds.title')}</Text>
         </View>
 
         {/* Tab Toggle */}
@@ -92,7 +94,7 @@ export default function MutualFundsScreen({ navigation }: any) {
           >
             <Ionicons name="pie-chart" size={16} color={activeTab === 'funds' ? colors.white : colors.textMuted} />
             <Text style={[styles.toggleText, activeTab === 'funds' && styles.toggleTextActive]}>
-              Funds ({funds.length})
+              {t('mutualFunds.fundsTab', { count: funds.length })}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -101,7 +103,7 @@ export default function MutualFundsScreen({ navigation }: any) {
           >
             <Ionicons name="calendar" size={16} color={activeTab === 'sips' ? colors.white : colors.textMuted} />
             <Text style={[styles.toggleText, activeTab === 'sips' && styles.toggleTextActive]}>
-              My SIPs ({sipPlans.length})
+              {t('mutualFunds.mySipsTab', { count: sipPlans.length })}
             </Text>
           </TouchableOpacity>
         </View>
@@ -114,7 +116,7 @@ export default function MutualFundsScreen({ navigation }: any) {
                 style={[styles.categoryChip, !selectedCategory && styles.categoryChipActive]}
                 onPress={() => setSelectedCategory(null)}
               >
-                <Text style={[styles.categoryText, !selectedCategory && styles.categoryTextActive]}>All</Text>
+                <Text style={[styles.categoryText, !selectedCategory && styles.categoryTextActive]}>{t('mutualFunds.all')}</Text>
               </TouchableOpacity>
               {categories.map(cat => (
                 <TouchableOpacity
@@ -155,7 +157,7 @@ export default function MutualFundsScreen({ navigation }: any) {
 
                     <View style={styles.fundNav}>
                       <View>
-                        <Text style={styles.navLabel}>NAV</Text>
+                        <Text style={styles.navLabel}>{t('mutualFunds.nav')}</Text>
                         <Text style={styles.navValue}>{formatCurrency(fund.nav)}</Text>
                       </View>
                       <View style={styles.navChange}>
@@ -196,19 +198,19 @@ export default function MutualFundsScreen({ navigation }: any) {
                         style={[styles.fundActionBtn, { backgroundColor: colors.primary }]}
                         onPress={() => setInvestModal({ fund, type: 'lumpsum' })}
                       >
-                        <Text style={styles.fundActionText}>Invest</Text>
+                        <Text style={styles.fundActionText}>{t('mutualFunds.invest')}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.fundActionBtn, styles.fundActionOutline]}
                         onPress={() => setInvestModal({ fund, type: 'sip' })}
                       >
-                        <Text style={[styles.fundActionText, { color: colors.primary }]}>Start SIP</Text>
+                        <Text style={[styles.fundActionText, { color: colors.primary }]}>{t('mutualFunds.startSip')}</Text>
                       </TouchableOpacity>
                     </View>
 
                     <View style={styles.fundFooter}>
-                      <Text style={styles.fundFooterText}>Min: {formatCurrency(fund.minInvestment)}</Text>
-                      <Text style={styles.fundFooterText}>AUM: {fund.fundSize}</Text>
+                      <Text style={styles.fundFooterText}>{t('mutualFunds.minLabel', { value: formatCurrency(fund.minInvestment) })}</Text>
+                      <Text style={styles.fundFooterText}>{t('mutualFunds.aumLabel', { value: fund.fundSize })}</Text>
                     </View>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -222,19 +224,19 @@ export default function MutualFundsScreen({ navigation }: any) {
               <Card style={styles.sipOverview}>
                 <View style={styles.sipOverviewRow}>
                   <View style={styles.sipOverviewItem}>
-                    <Text style={styles.sipOverviewLabel}>Total Invested</Text>
+                    <Text style={styles.sipOverviewLabel}>{t('mutualFunds.totalInvested')}</Text>
                     <Text style={styles.sipOverviewValue}>{formatCurrency(totalSipInvested, true)}</Text>
                   </View>
                   <View style={styles.sipOverviewDivider} />
                   <View style={styles.sipOverviewItem}>
-                    <Text style={styles.sipOverviewLabel}>Current Value</Text>
+                    <Text style={styles.sipOverviewLabel}>{t('mutualFunds.currentValue')}</Text>
                     <Text style={[styles.sipOverviewValue, { color: '#00C853' }]}>
                       {formatCurrency(totalSipValue, true)}
                     </Text>
                   </View>
                   <View style={styles.sipOverviewDivider} />
                   <View style={styles.sipOverviewItem}>
-                    <Text style={styles.sipOverviewLabel}>Returns</Text>
+                    <Text style={styles.sipOverviewLabel}>{t('mutualFunds.returns')}</Text>
                     <Text style={[styles.sipOverviewValue, { color: '#00C853' }]}>
                       +{formatCurrency(totalSipValue - totalSipInvested, true)}
                     </Text>
@@ -261,17 +263,17 @@ export default function MutualFundsScreen({ navigation }: any) {
                     </View>
                     <View style={styles.sipStats}>
                       <View style={styles.sipStat}>
-                        <Text style={styles.sipStatLabel}>Invested</Text>
+                        <Text style={styles.sipStatLabel}>{t('mutualFunds.totalInvested')}</Text>
                         <Text style={styles.sipStatValue}>{formatCurrency(sip.totalInvested, true)}</Text>
                       </View>
                       <View style={styles.sipStat}>
-                        <Text style={styles.sipStatLabel}>Current</Text>
+                        <Text style={styles.sipStatLabel}>{t('mutualFunds.current')}</Text>
                         <Text style={[styles.sipStatValue, { color: '#00C853' }]}>
                           {formatCurrency(sip.currentValue, true)}
                         </Text>
                       </View>
                       <View style={styles.sipStat}>
-                        <Text style={styles.sipStatLabel}>Returns</Text>
+                        <Text style={styles.sipStatLabel}>{t('mutualFunds.returns')}</Text>
                         <Text style={[styles.sipStatValue, { color: '#00C853' }]}>
                           +{formatCurrency(sip.returns, true)}
                         </Text>
@@ -286,21 +288,21 @@ export default function MutualFundsScreen({ navigation }: any) {
                           setEditFrequency(sip.frequency);
                         }}
                       >
-                        <Text style={styles.sipActionText}>Edit SIP</Text>
+                        <Text style={styles.sipActionText}>{t('mutualFunds.editSip')}</Text>
                       </TouchableOpacity>
                       {sip.nextDate === 'PAUSED' ? (
                         <TouchableOpacity
                           style={[styles.sipActionBtn, { backgroundColor: colors.accent + '20', borderColor: colors.accent + '40' }]}
                           onPress={() => resumeSIP(sip.id)}
                         >
-                          <Text style={[styles.sipActionText, { color: colors.accent }]}>Resume</Text>
+                          <Text style={[styles.sipActionText, { color: colors.accent }]}>{t('mutualFunds.resume')}</Text>
                         </TouchableOpacity>
                       ) : (
                         <TouchableOpacity
                           style={[styles.sipActionBtn, styles.sipActionDanger]}
                           onPress={() => pauseSIP(sip.id)}
                         >
-                          <Text style={[styles.sipActionText, { color: colors.danger }]}>Pause</Text>
+                          <Text style={[styles.sipActionText, { color: colors.danger }]}>{t('mutualFunds.pause')}</Text>
                         </TouchableOpacity>
                       )}
                       <TouchableOpacity
@@ -317,8 +319,8 @@ export default function MutualFundsScreen({ navigation }: any) {
               <Card>
                 <View style={styles.emptyState}>
                   <Ionicons name="calendar-outline" size={48} color={colors.textMuted} />
-                  <Text style={styles.emptyTitle}>No Active SIPs</Text>
-                  <Text style={styles.emptySubtitle}>Start a SIP to invest regularly and build wealth over time</Text>
+                  <Text style={styles.emptyTitle}>{t('mutualFunds.noActiveSips')}</Text>
+                  <Text style={styles.emptySubtitle}>{t('mutualFunds.noActiveSipsSub')}</Text>
                 </View>
               </Card>
             )}
@@ -334,7 +336,7 @@ export default function MutualFundsScreen({ navigation }: any) {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {investModal?.type === 'lumpsum' ? 'Invest' : 'Start SIP'}
+                {investModal?.type === 'lumpsum' ? t('mutualFunds.investTitle') : t('mutualFunds.startSipTitle')}
               </Text>
               <TouchableOpacity onPress={() => { setInvestModal(null); setAmount(''); }}>
                 <Ionicons name="close" size={24} color={colors.text} />
@@ -349,7 +351,7 @@ export default function MutualFundsScreen({ navigation }: any) {
                 </View>
 
                 <Text style={styles.modalLabel}>
-                  Amount (Min: {formatCurrency(investModal.fund.minInvestment)})
+                  {t('mutualFunds.amountLabel', { value: formatCurrency(investModal.fund.minInvestment) })}
                 </Text>
                 <View style={styles.amountInputRow}>
                   <Text style={styles.currencySign}>₹</Text>
@@ -380,7 +382,7 @@ export default function MutualFundsScreen({ navigation }: any) {
 
                 {investModal.type === 'sip' && (
                   <>
-                    <Text style={styles.modalLabel}>Frequency</Text>
+                    <Text style={styles.modalLabel}>{t('mutualFunds.frequency')}</Text>
                     <View style={styles.frequencyRow}>
                       {frequencyOptions.map(opt => (
                         <TouchableOpacity
@@ -389,7 +391,7 @@ export default function MutualFundsScreen({ navigation }: any) {
                           onPress={() => setFrequency(opt.value)}
                         >
                           <Text style={[styles.freqText, frequency === opt.value && styles.freqTextActive]}>
-                            {opt.label}
+                            {t(opt.tKey)}
                           </Text>
                         </TouchableOpacity>
                       ))}
@@ -403,7 +405,7 @@ export default function MutualFundsScreen({ navigation }: any) {
                 >
                   <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.investBtnGradient}>
                     <Text style={styles.investBtnText}>
-                      {investModal.type === 'lumpsum' ? `Invest ${amount ? formatCurrency(parseFloat(amount), true) : ''}` : `Start SIP of ${amount ? formatCurrency(parseFloat(amount), true) : ''}`}
+                      {investModal.type === 'lumpsum' ? `${t('mutualFunds.invest')} ${amount ? formatCurrency(parseFloat(amount), true) : ''}` : `${t('mutualFunds.startSipTitle')} ${t('mutualFunds.of')} ${amount ? formatCurrency(parseFloat(amount), true) : ''}`}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -418,7 +420,7 @@ export default function MutualFundsScreen({ navigation }: any) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Edit SIP</Text>
+              <Text style={styles.modalTitle}>{t('mutualFunds.editSip')}</Text>
               <TouchableOpacity onPress={() => { setEditSIP(null); setEditAmount(''); }}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
@@ -428,10 +430,10 @@ export default function MutualFundsScreen({ navigation }: any) {
               <>
                 <View style={styles.modalFundInfo}>
                   <Text style={styles.modalFundName}>{editSIP.sip.fundName}</Text>
-                  <Text style={styles.modalFundMeta}>Current: {formatCurrency(editSIP.sip.amount)}/{editSIP.sip.frequency}</Text>
+                  <Text style={styles.modalFundMeta}>{t('mutualFunds.sipCurrentLabel', { amount: formatCurrency(editSIP.sip.amount), frequency: editSIP.sip.frequency })}</Text>
                 </View>
 
-                <Text style={styles.modalLabel}>New Amount (₹)</Text>
+                <Text style={styles.modalLabel}>{t('mutualFunds.newAmount')}</Text>
                 <View style={styles.amountInputRow}>
                   <Text style={styles.currencySign}>₹</Text>
                   <TextInput
@@ -456,19 +458,16 @@ export default function MutualFundsScreen({ navigation }: any) {
                       </Text>
                     </TouchableOpacity>
                   ))}
-                </View>
-
-                <Text style={styles.modalLabel}>Frequency</Text>
+                </View>                    <Text style={styles.modalLabel}>{t('mutualFunds.frequency')}</Text>
                 <View style={styles.frequencyRow}>
                   {frequencyOptions.map(opt => (
                     <TouchableOpacity
                       key={opt.value}
                       style={[styles.freqBtn, editFrequency === opt.value && styles.freqBtnActive]}
                       onPress={() => setEditFrequency(opt.value)}
-                    >
-                      <Text style={[styles.freqText, editFrequency === opt.value && styles.freqTextActive]}>
-                        {opt.label}
-                      </Text>
+                    >                          <Text style={[styles.freqText, editFrequency === opt.value && styles.freqTextActive]}>
+                            {t(opt.tKey)}
+                          </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -478,17 +477,17 @@ export default function MutualFundsScreen({ navigation }: any) {
                   onPress={() => {
                     const amt = parseFloat(editAmount);
                     if (isNaN(amt) || amt < 500) {
-                      Alert.alert('Invalid Amount', 'Minimum SIP amount is ₹500');
+                      Alert.alert(t('mutualFunds.invalidAmount'), t('mutualFunds.minSipAmount'));
                       return;
                     }
                     modifySIP(editSIP.sip.id, { amount: amt, frequency: editFrequency });
-                    Alert.alert('SIP Updated', `SIP updated to ${formatCurrency(amt)}/${editFrequency}`);
+                    Alert.alert(t('mutualFunds.sipUpdated'), t('mutualFunds.sipUpdatedMsg', { amount: formatCurrency(amt), frequency: editFrequency }));
                     setEditSIP(null);
                     setEditAmount('');
                   }}
                 >
                   <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.investBtnGradient}>
-                    <Text style={styles.investBtnText}>Update SIP</Text>
+                    <Text style={styles.investBtnText}>{t('mutualFunds.updateSip')}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </>
@@ -505,9 +504,9 @@ export default function MutualFundsScreen({ navigation }: any) {
               <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: '#FF174420', justifyContent: 'center', alignItems: 'center', marginBottom: SPACING.md }}>
                 <Ionicons name="warning" size={28} color={colors.danger} />
               </View>
-              <Text style={[styles.modalTitle, { textAlign: 'center' }]}>Delete SIP?</Text>
+              <Text style={[styles.modalTitle, { textAlign: 'center' }]}>{t('mutualFunds.deleteSipTitle')}</Text>
               <Text style={[styles.modalFundMeta, { textAlign: 'center', marginTop: SPACING.sm }]}>
-                This will cancel your SIP. Existing investments will remain.
+                {t('mutualFunds.deleteSipMsg')}
               </Text>
             </View>
             <View style={{ flexDirection: 'row', gap: SPACING.md }}>
@@ -515,7 +514,7 @@ export default function MutualFundsScreen({ navigation }: any) {
                 style={{ flex: 1, paddingVertical: SPACING.md, borderRadius: BORDER_RADIUS.md, alignItems: 'center', backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }}
                 onPress={() => setConfirmDelete(null)}
               >
-                <Text style={[styles.fundActionText, { color: colors.text }]}>Cancel</Text>
+                <Text style={[styles.fundActionText, { color: colors.text }]}>{t('app.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ flex: 1, paddingVertical: SPACING.md, borderRadius: BORDER_RADIUS.md, alignItems: 'center', backgroundColor: colors.danger }}
@@ -524,7 +523,7 @@ export default function MutualFundsScreen({ navigation }: any) {
                   setConfirmDelete(null);
                 }}
               >
-                <Text style={styles.fundActionText}>Delete</Text>
+                <Text style={styles.fundActionText}>{t('mutualFunds.delete')}</Text>
               </TouchableOpacity>
             </View>
           </View>

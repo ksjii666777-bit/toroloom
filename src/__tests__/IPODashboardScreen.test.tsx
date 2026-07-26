@@ -8,6 +8,140 @@
  * bookmarks, and empty states.
  */
 
+
+// ==================== Mock useT hook ====================
+const ipos = {
+  "dashboard": "IPO Dashboard",
+  "subtitleSummary": "{{open}} open · {{upcoming}} upcoming · {{listed}} listed",
+  "activeIPOs": "Active IPOs",
+  "myApps": "My Apps ({{count}})",
+  "showingCount": "{{count}} IPO",
+  "showingCount_plural": "{{count}} IPOs",
+  "applyViaUPI": "Apply via UPI",
+  "noIPOs": "No IPOs found",
+  "noIPOsSub": "Check back later for new IPOs",
+  "appliedLabel": "Applied: {{date}}",
+  "openLabel": "Open: {{date}}",
+  "listingLabel": "Listing: {{date}}",
+  "subscriptionLabel": "{{value}}x",
+  "subQIB": "QIB",
+  "subHNI": "HNI",
+  "subRetail": "Ret",
+  "priceBand": "Price Band",
+  "lot": "Lot",
+  "shares": "shares",
+  "minInvest": "Min Investment",
+  "gmp": "GMP",
+  "expectedListing": "Exp. Listing",
+  "statusOpen": "Open Now",
+  "statusListed": "Listed",
+  "statusUpcoming": "Upcoming",
+  "lots": "Lots",
+  "sharesLabel": "Shares",
+  "price": "Price",
+  "amount": "Amount",
+  "allottedLabel": "Allotted",
+  "listingPriceLabel": "Listing Price",
+  "gain": "Gain",
+  "upiLabel": "UPI: {{id}}",
+  "applyTitle": "Apply via UPI",
+  "numberOfLots": "Number of Lots",
+  "custom": "Custom",
+  "lotsSuffix": "lots",
+  "bidPriceLabel": "Bid Price (₹)",
+  "cutOff": "Cut-off",
+  "higher": "Higher",
+  "upiIdLabel": "UPI ID",
+  "upiPlaceholder": "e.g., name@hdfc",
+  "pricePerShare": "Price per share",
+  "totalAmount": "Total Amount",
+  "submitting": "Submitting...",
+  "applyFor": "Apply for {{amount}}",
+  "upiInfo": "Amount will be blocked in UPI until allotment",
+  "invalidUpiTitle": "Invalid UPI ID",
+  "invalidUpiMsg": "Please enter a valid UPI ID (e.g., name@bank).",
+  "invalidLotsTitle": "Invalid Lots",
+  "invalidLotsMsg": "Please select a valid number of lots.",
+  "appSubmittedTitle": "Application Submitted ✅",
+  "submitError": "Failed to submit application",
+  "filterAll": "All",
+  "filterOpen": "Open",
+  "filterUpcoming": "Upcoming",
+  "filterClosed": "Closed",
+  "filterListed": "Listed",
+  "filterActive": "Active",
+  "total": "Total",
+  "appSubmitted": "Submitted",
+  "appAllotted": "Allotted",
+  "appNotAllotted": "Not Allotted",
+  "invested": "Invested",
+  "profit": "Profit",
+  "noApplications": "No Applications",
+  "noAppsSub": "Apply to an open IPO to see it here",
+  "appCount": "{{count}}",
+  "appCount_plural": "{{count}}",
+  "appsTracked": "{{count}} applications tracked"
+};
+const errors = {"unknown": "An unexpected error occurred"};
+
+function resolveT(key: string, params?: Record<string, any>): string {
+  const parts = key.split('.');
+  const rootNs = parts[0];
+  const subKey = parts.slice(1).join('.');
+  
+  const translations: Record<string, any> = { ipos, ...errors };
+  const obj = translations[rootNs];
+  if (!obj) {
+    const parts2 = key.split('.');
+    const lastSeg = parts2[parts2.length - 1] || key;
+    return lastSeg
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (s: string) => s.toUpperCase())
+      .trim();
+  }
+  
+  // Check for plural variant FIRST when count !== 1
+  if (params && params.count !== undefined && params.count !== 1) {
+    const pluralKey = subKey + '_plural';
+    if (pluralKey in obj && typeof obj[pluralKey] === 'string') {
+      let result: string = obj[pluralKey];
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+      return result;
+    }
+  }
+  
+  // Fall back to singular
+  if (subKey in obj && typeof obj[subKey] === 'string') {
+    let result: string = obj[subKey];
+    if (params) {
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+    }
+    return result;
+  }
+  
+  // Fallback: return last key segment as readable text
+  const lastSeg = subKey || key;
+  return lastSeg
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s: string) => s.toUpperCase())
+    .trim();
+}
+
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+  default: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from './testUtils';

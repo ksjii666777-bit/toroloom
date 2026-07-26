@@ -1,0 +1,19 @@
+// Auto-generated from hi.ts — community namespace
+export default {
+    title: 'समुदाय',
+    subtitle: 'साथी ट्रेडर्स से जुड़ें',
+    posts: 'पोस्ट',
+    likes: 'पसंद',
+    comments: 'टिप्पणियाँ',
+    share: 'साझा करें',
+    post: 'पोस्ट करें',
+    writePost: 'एक पोस्ट लिखें...',
+    noPosts: 'अभी कोई पोस्ट नहीं। पहली पोस्ट साझा करने वाले बनें!',
+    chat: 'चैट',
+    chatRooms: 'चैट रूम',
+    messages: 'संदेश',
+    typeMessage: 'एक संदेश लिखें...',
+    behavioralJournal: 'व्यवहार पत्रिका',
+    journalEntry: 'पत्रिका प्रविष्टि',
+    howAreYouFeeling: 'आज आप कैसा महसूस कर रहे हैं?',
+};

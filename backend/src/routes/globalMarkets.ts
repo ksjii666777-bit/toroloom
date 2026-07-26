@@ -8,14 +8,15 @@
  * API is not configured or returns an error.
  *
  * Endpoints:
- *   GET /api/global-markets/indices    — US indices (S&P 500, NASDAQ, DJIA, VIX)
- *   GET /api/global-markets/stocks     — Top US stocks by sector
- *   GET /api/global-markets/quote/:symbol — Single US stock quote
+ *   GET /api/global-markets/indices         — Global indices (US + Europe + Asia-Pacific)
+ *   GET /api/global-markets/indices/:region — Filtered by region (us, europe, asia)
+ *   GET /api/global-markets/stocks          — Top US stocks by sector
+ *   GET /api/global-markets/quote/:symbol   — Single US stock quote
  *   GET /api/global-markets/quotes?symbols=AAPL,MSFT — Bulk quotes
- *   GET /api/global-markets/crypto     — Top cryptocurrencies
- *   GET /api/global-markets/crypto/:id — Single crypto detail + chart
- *   GET /api/global-markets/search?q=Apple — Search US stocks
- *   GET /api/global-markets/status     — Check which APIs are configured
+ *   GET /api/global-markets/crypto          — Top cryptocurrencies
+ *   GET /api/global-markets/crypto/:id      — Single crypto detail + chart
+ *   GET /api/global-markets/search?q=Apple  — Search US stocks
+ *   GET /api/global-markets/status          — Check which APIs are configured
  *
  * ============================================================================
  */
@@ -28,12 +29,32 @@ const router = Router();
 // ─── Mock Data (fallback when APIs are not configured) ─────────────────
 
 const MOCK_INDICES = [
-  { symbol: 'SPX',  name: 'S&P 500',                  price: 5678.30, change: 42.15,  changePercent: 0.75 },
-  { symbol: 'IXIC', name: 'NASDAQ Composite',          price: 18725.60, change: 156.80, changePercent: 0.84 },
-  { symbol: 'DJI',  name: 'Dow Jones Industrial Avg.', price: 41234.90, change: -78.45, changePercent: -0.19 },
-  { symbol: 'RUT',  name: 'Russell 2000',              price: 2189.45,  change: 12.30,  changePercent: 0.57 },
-  { symbol: 'VIX',  name: 'CBOE Volatility Index',     price: 14.28,    change: -1.15,  changePercent: -7.46 },
-  { symbol: 'DXY',  name: 'US Dollar Index',           price: 104.56,   change: 0.32,   changePercent: 0.31 },
+  // US Indices
+  { symbol: 'SPX',   name: 'S&P 500',                    price: 5678.30, change: 42.15,  changePercent: 0.75,  region: 'us' },
+  { symbol: 'IXIC',  name: 'NASDAQ Composite',            price: 18725.60, change: 156.80, changePercent: 0.84,  region: 'us' },
+  { symbol: 'DJI',   name: 'Dow Jones Industrial Avg.',   price: 41234.90, change: -78.45, changePercent: -0.19, region: 'us' },
+  { symbol: 'RUT',   name: 'Russell 2000',                price: 2189.45,  change: 12.30,  changePercent: 0.57,  region: 'us' },
+  { symbol: 'VIX',   name: 'CBOE Volatility Index',       price: 14.28,    change: -1.15,  changePercent: -7.46, region: 'us' },
+  { symbol: 'DXY',   name: 'US Dollar Index',             price: 104.56,   change: 0.32,   changePercent: 0.31,  region: 'us' },
+  // European Indices
+  { symbol: 'FTSE',  name: 'FTSE 100 (UK)',               price: 8345.20,  change: 38.60,  changePercent: 0.46,  region: 'europe' },
+  { symbol: 'DAX',   name: 'DAX 40 (Germany)',            price: 18678.50, change: 145.30, changePercent: 0.78,  region: 'europe' },
+  { symbol: 'CAC40', name: 'CAC 40 (France)',             price: 8123.40,  change: -28.70, changePercent: -0.35, region: 'europe' },
+  { symbol: 'STOXX', name: 'Euro Stoxx 600',              price: 524.80,   change: 3.20,   changePercent: 0.61,  region: 'europe' },
+  { symbol: 'SMI',   name: 'SMI (Switzerland)',           price: 12345.60, change: 67.80,  changePercent: 0.55,  region: 'europe' },
+  { symbol: 'IBEX',  name: 'IBEX 35 (Spain)',             price: 11234.50, change: -45.20, changePercent: -0.40, region: 'europe' },
+  // Asia-Pacific Indices
+  { symbol: 'N225',  name: 'Nikkei 225 (Japan)',          price: 39234.80, change: 567.20, changePercent: 1.47,  region: 'asia' },
+  { symbol: 'HSI',   name: 'Hang Seng (Hong Kong)',       price: 18234.60, change: -234.50, changePercent: -1.27, region: 'asia' },
+  { symbol: 'ASX200',name: 'ASX 200 (Australia)',          price: 7923.40,  change: 45.60,  changePercent: 0.58,  region: 'asia' },
+  { symbol: 'SHCOMP',name: 'Shanghai Composite (China)',   price: 3123.50,  change: -12.80, changePercent: -0.41, region: 'asia' },
+  { symbol: 'SZCOMP',name: 'Shenzhen Component (China)',   price: 10234.50, change: 89.20,  changePercent: 0.88,  region: 'asia' },
+  { symbol: 'SENSEX',name: 'BSE Sensex (India)',           price: 78123.45, change: 456.78, changePercent: 0.59,  region: 'asia' },
+  { symbol: 'NIFTY', name: 'Nifty 50 (India)',             price: 23789.60, change: 312.40, changePercent: 1.33,  region: 'asia' },
+  { symbol: 'KOSPI', name: 'KOSPI (South Korea)',          price: 2789.30,  change: 23.40,  changePercent: 0.85,  region: 'asia' },
+  { symbol: 'STI',   name: 'Straits Times (Singapore)',    price: 3367.80,  change: 15.60,  changePercent: 0.47,  region: 'asia' },
+  { symbol: 'TAIEX', name: 'TAIEX (Taiwan)',             price: 17234.50, change: -123.40, changePercent: -0.71, region: 'asia' },
+  { symbol: 'SET',   name: 'SET Index (Thailand)',        price: 1456.70,  change: 8.90,   changePercent: 0.62,  region: 'asia' },
 ];
 
 const MOCK_STOCKS = [
@@ -169,15 +190,15 @@ router.get('/status', (_req: Request, res: Response) => {
 
 /**
  * GET /api/global-markets/indices
- * Returns US indices (S&P 500, NASDAQ, DJIA, etc.)
- * Note: MarketStack doesn't support index symbols natively, so we use
- * simulated mock data with realistic random fluctuations.
+ * Returns all global indices (US + Europe + Asia-Pacific) with realistic
+ * simulated fluctuations.
  */
 router.get('/indices', async (_req: Request, res: Response) => {
   try {
     const indices = MOCK_INDICES.map(i => ({
       symbol: i.symbol,
       name: i.name,
+      region: i.region,
       price: +(i.price * (1 + (Math.random() - 0.5) * 0.02)).toFixed(2),
       change: +(i.change * (1 + (Math.random() - 0.5) * 0.1)).toFixed(2),
       changePercent: +(i.changePercent * (1 + (Math.random() - 0.1) * 0.1)).toFixed(2),
@@ -188,6 +209,38 @@ router.get('/indices', async (_req: Request, res: Response) => {
     res.json(indices);
   } catch {
     res.json(MOCK_INDICES.map(i => ({ ...i, high: i.price * 1.01, low: i.price * 0.99, volume: 0 })));
+  }
+});
+
+/**
+ * GET /api/global-markets/indices/:region
+ * Returns indices filtered by region ('us', 'europe', 'asia').
+ */
+router.get('/indices/:region', async (req: Request, res: Response) => {
+  const region = (req.params.region as string).toLowerCase();
+  const validRegions = ['us', 'europe', 'asia'];
+  if (!validRegions.includes(region)) {
+    res.status(400).json({ error: `Invalid region '${region}'. Valid: ${validRegions.join(', ')}` });
+    return;
+  }
+  try {
+    const filtered = MOCK_INDICES.filter(i => i.region === region);
+    const indices = filtered.map(i => ({
+      symbol: i.symbol,
+      name: i.name,
+      region: i.region,
+      price: +(i.price * (1 + (Math.random() - 0.5) * 0.02)).toFixed(2),
+      change: +(i.change * (1 + (Math.random() - 0.5) * 0.1)).toFixed(2),
+      changePercent: +(i.changePercent * (1 + (Math.random() - 0.1) * 0.1)).toFixed(2),
+      high: +(i.price * 1.01).toFixed(2),
+      low: +(i.price * 0.99).toFixed(2),
+      volume: Math.floor(Math.random() * 1000000000) + 500000000,
+    }));
+    res.json(indices);
+  } catch {
+    res.json(MOCK_INDICES.filter(i => i.region === region).map(i => ({
+      ...i, high: i.price * 1.01, low: i.price * 0.99, volume: 0,
+    })));
   }
 });
 

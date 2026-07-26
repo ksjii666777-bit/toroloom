@@ -16,3 +16,7 @@ export { telegramApi } from './telegram';
 export { brokerProxyApi } from './brokerProxy';
 export { snapTradeApi } from './snaptrade';
 export { angelConnectApi } from './angelConnect';
+export { forexApi } from './forex';
+export { commoditiesApi } from './commodities';
+export { bondsApi } from './bonds';
+export { getFuturesCurve } from './futuresCurve';

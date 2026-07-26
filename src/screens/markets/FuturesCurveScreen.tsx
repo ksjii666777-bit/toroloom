@@ -20,10 +20,10 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  Dimensions, Platform,
+  Dimensions, Platform, ActivityIndicator,
 } from 'react-native';
 import Svg, {
   Path, Line, Circle, Text as SvgText, Defs,
@@ -31,7 +31,9 @@ import Svg, {
 } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { getFuturesCurve } from '../../services/api';
 import type { FuturesCurveData, FuturesCurvePoint } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -172,6 +174,7 @@ function FuturesCurveChart({
   data: FuturesCurveData;
   colors: any;
 }) {
+  const { t } = useT();
   const chartW = SCREEN_WIDTH - SPACING.xl * 2 - 2;
   const chartH = CHART_HEIGHT;
   const plotW = chartW - CHART_PADDING.left - CHART_PADDING.right;
@@ -280,7 +283,7 @@ function FuturesCurveChart({
           fontWeight="700"
           textAnchor="middle"
         >
-          Spot
+          {t('futuresCurve.spot')}
         </SvgText>
 
         {/* Futures curve line */}
@@ -365,7 +368,7 @@ function FuturesCurveChart({
           textAnchor="end"
           fontWeight="700"
         >
-          {isContango ? '▲ CONTANGO' : '▼ BACKWARDATION'}
+          {isContango ? t('futuresCurve.contangoBadge') : t('futuresCurve.backwardationBadge')}
         </SvgText>
       </Svg>
     </View>
@@ -540,13 +543,51 @@ const tableStyles = StyleSheet.create({
 
 export default function FuturesCurveScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [selectedSymbol, setSelectedSymbol] = useState<SymbolKey>('NIFTY');
+  const [apiData, setApiData] = useState<Record<string, FuturesCurveData> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const data = useMemo(() => FUTURES_CURVE_DATA[selectedSymbol]!, [selectedSymbol]);
+  // Fetch from backend API on mount
+  useEffect(() => {
+    let mounted = true;
+    setIsLoading(true);
+
+    Promise.all(
+      SYMBOLS.map(async (sym) => {
+        try {
+          const { data } = await getFuturesCurve(sym);
+          return { symbol: sym, data };
+        } catch {
+          return null;
+        }
+      }),
+    ).then((results) => {
+      if (!mounted) return;
+      const map: Record<string, FuturesCurveData> = {};
+      for (const r of results) {
+        if (r) map[r.symbol] = r.data;
+      }
+      if (Object.keys(map).length > 0) {
+        setApiData(map);
+      }
+      setIsLoading(false);
+    });
+
+    return () => { mounted = false; };
+  }, []);
+
+  // Use API data if available, fall back to inline mock
+  const data = useMemo(() => {
+    if (apiData && apiData[selectedSymbol]) {
+      return apiData[selectedSymbol]!;
+    }
+    return FUTURES_CURVE_DATA[selectedSymbol]!;
+  }, [selectedSymbol, apiData]);
 
   const isContango = data.isContango;
   const curveColor = isContango ? '#00C853' : '#FF5252';
-  const curveLabel = isContango ? 'Contango' : 'Backwardation';
+  const curveLabel = isContango ? t('futuresCurve.contango') : t('futuresCurve.backwardation');
   const curveEmoji = isContango ? '📈' : '📉';
 
   const handleSymbolChange = useCallback((sym: SymbolKey) => {
@@ -566,9 +607,9 @@ export default function FuturesCurveScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Futures Curve</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('futuresCurve.title')}</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              Price curve across expiry months
+              {t('futuresCurve.subtitle')}
             </Text>
           </View>
         </View>
@@ -611,8 +652,8 @@ export default function FuturesCurveScreen({ navigation }: any) {
             </Text>
             <Text style={[styles.statusDesc, { color: colors.textSecondary }]}>
               {isContango
-                ? 'Futures prices are higher than spot price — upward sloping curve. Market expects higher prices in future.'
-                : 'Futures prices are lower than spot price — downward sloping curve. Market expects lower prices in future.'}
+                ? t('futuresCurve.contangoAnalysis')
+                : t('futuresCurve.backwardationAnalysis')}
             </Text>
           </View>
         </View>
@@ -621,19 +662,19 @@ export default function FuturesCurveScreen({ navigation }: any) {
         <View style={styles.statsRow}>
           <StatCard
             icon={curveEmoji}
-            label="Curve Type"
+            label={t('futuresCurve.curveType')}
             value={curveLabel}
             color={curveColor}
           />
           <StatCard
             icon="🎯"
-            label="Spot Price"
+            label={t('futuresCurve.spotPrice')}
             value={`₹${(data.spotPrice / 1000).toFixed(1)}K`}
             color="#FFC107"
           />
           <StatCard
             icon="📊"
-            label="Near-Month"
+            label={t('futuresCurve.nearMonth')}
             value={`₹${(nearContract.price / 1000).toFixed(1)}K`}
             color="#3B82F6"
           />
@@ -642,19 +683,19 @@ export default function FuturesCurveScreen({ navigation }: any) {
         <View style={styles.statsRow}>
           <StatCard
             icon="📏"
-            label="Curve Slope"
+            label={t('futuresCurve.curveSlope')}
             value={`${isContango ? '+' : ''}${data.slope}/mth`}
             color={curveColor}
           />
           <StatCard
             icon="📈"
-            label="Total OI"
+            label={t('futuresCurve.totalOi')}
             value={`${(data.totalOpenInterest / 10000000).toFixed(1)}Cr`}
             color="#8B5CF6"
           />
           <StatCard
             icon="🔷"
-            label="Max OI Expiry"
+            label={t('futuresCurve.maxOiExpiry')}
             value={data.maxOiExpiry}
             color="#00E676"
           />
@@ -664,7 +705,7 @@ export default function FuturesCurveScreen({ navigation }: any) {
         <View style={[styles.chartCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={styles.chartHeader}>
             <Text style={[styles.chartTitle, { color: colors.text }]}>
-              {selectedSymbol} Futures Curve
+              {selectedSymbol} {t('futuresCurve.title')}
             </Text>
             <View style={[styles.curveBadge, { backgroundColor: curveColor + '20' }]}>
               <Text style={[styles.curveBadgeText, { color: curveColor }]}>
@@ -678,15 +719,15 @@ export default function FuturesCurveScreen({ navigation }: any) {
         {/* ── Data Table ── */}
         <View style={[styles.tableCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Text style={[styles.tableTitle, { color: colors.text }]}>
-            Contract-wise Details
+            {t('futuresCurve.contractDetails')}
           </Text>
 
           {/* Column headers */}
           <View style={[styles.tableHeader, { borderBottomColor: colors.divider, backgroundColor: colors.bgInput }]}>
-            <Text style={[styles.headerCell, { color: colors.textMuted }]}>Expiry</Text>
-            <Text style={[styles.headerCell, { color: colors.textMuted }]}>Price</Text>
-            <Text style={[styles.headerCell, { color: colors.textMuted }]}>Basis</Text>
-            <Text style={[styles.headerCell, { color: colors.textMuted }]}>OI</Text>
+            <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.expiry')}</Text>
+            <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.price')}</Text>
+            <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.basis')}</Text>
+            <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.oi')}</Text>
           </View>
 
           {data.points.map((point, i) => (
@@ -704,7 +745,7 @@ export default function FuturesCurveScreen({ navigation }: any) {
         {/* ── Analysis Section ── */}
         <View style={[styles.analysisCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Text style={[styles.analysisTitle, { color: colors.text }]}>
-            📋 Curve Analysis
+            {t('futuresCurve.analysisTitle')}
           </Text>
 
           <View style={[styles.insightRow, { borderBottomColor: colors.divider }]}>
@@ -712,11 +753,11 @@ export default function FuturesCurveScreen({ navigation }: any) {
               <View style={[styles.insightDotInner, { backgroundColor: curveColor }]} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.insightLabel, { color: colors.text }]}>Curve Shape</Text>
+              <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.curveShape')}</Text>
               <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
                 {isContango
-                  ? `Upward sloping — ${selectedSymbol} futures trade at a premium to spot across all expiries.`
-                  : `Downward sloping — ${selectedSymbol} futures trade at a discount to spot.`}
+                  ? t('futuresCurve.curveShapeContango', { symbol: selectedSymbol })
+                  : t('futuresCurve.curveShapeBackwardation', { symbol: selectedSymbol })}
               </Text>
             </View>
           </View>
@@ -726,12 +767,11 @@ export default function FuturesCurveScreen({ navigation }: any) {
               <View style={[styles.insightDotInner, { backgroundColor: '#3B82F6' }]} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.insightLabel, { color: colors.text }]}>Basis Analysis</Text>
+              <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.basisAnalysis')}</Text>
               <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
-                Near-month basis: {nearContract.basis >= 0 ? '+' : ''}{nearContract.basis.toFixed(1)} pts ({(nearContract.basisPercent >= 0 ? '+' : '') + nearContract.basisPercent.toFixed(2)}%).
                 {isContango
-                  ? ' Positive basis indicates cost of carry (interest + storage).'
-                  : ' Negative basis suggests near-term supply concerns.'}
+                  ? t('futuresCurve.nearMonthBasis', { sign: nearContract.basis >= 0 ? '+' : '', basis: nearContract.basis.toFixed(1), percent: (nearContract.basisPercent >= 0 ? '+' : '') + nearContract.basisPercent.toFixed(2) })
+                  : t('futuresCurve.nearMonthBasisBack', { sign: nearContract.basis >= 0 ? '+' : '', basis: nearContract.basis.toFixed(1), percent: (nearContract.basisPercent >= 0 ? '+' : '') + nearContract.basisPercent.toFixed(2) })}
               </Text>
             </View>
           </View>
@@ -741,12 +781,12 @@ export default function FuturesCurveScreen({ navigation }: any) {
               <View style={[styles.insightDotInner, { backgroundColor: '#8B5CF6' }]} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.insightLabel, { color: colors.text }]}>Open Interest</Text>
+              <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.openInterest')}</Text>
               <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
-                Total OI: {(data.totalOpenInterest / 10000000).toFixed(1)} Cr shares. Max OI in {data.maxOiExpiry} contract.
+                {t('futuresCurve.totalOiText', { oi: (data.totalOpenInterest / 10000000).toFixed(1), expiry: data.maxOiExpiry })}
                 {isContango
-                  ? ' Higher OI in far-month suggests rollover activity.'
-                  : ' Higher OI in near-month suggests active trading.'}
+                  ? t('futuresCurve.oiRolloverContango')
+                  : t('futuresCurve.oiActiveTrading')}
               </Text>
             </View>
           </View>
@@ -756,10 +796,9 @@ export default function FuturesCurveScreen({ navigation }: any) {
               <View style={[styles.insightDotInner, { backgroundColor: '#FFC107' }]} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.insightLabel, { color: colors.text }]}>Slope</Text>
+              <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.slope')}</Text>
               <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
-                Curve slope: {isContango ? '+' : ''}{data.slope} pts per month.
-                Total basis change from near to far month: {totalBasisChange >= 0 ? '+' : ''}{totalBasisChange.toFixed(1)} pts.
+                {t('futuresCurve.slopeText', { sign: isContango ? '+' : '', pts: String(data.slope), totalSign: totalBasisChange >= 0 ? '+' : '', total: totalBasisChange.toFixed(1) })}
               </Text>
             </View>
           </View>
@@ -769,12 +808,12 @@ export default function FuturesCurveScreen({ navigation }: any) {
         <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="information-circle" size={18} color={colors.primary} />
           <View style={{ flex: 1 }}>
-            <Text style={[styles.infoTitle, { color: colors.text }]}>What is the Futures Curve?</Text>
+            <Text style={[styles.infoTitle, { color: colors.text }]}>{t('futuresCurve.whatIsFuturesCurve')}</Text>
             <Text style={[styles.infoText, { color: colors.textMuted }]}>
-              The futures curve plots futures contract prices against their expiry dates.{'\n\n'}
-              <Text style={{ fontWeight: '700' }}>Contango</Text>: Upward slope — futures cost more than spot (normal market).{'\n'}
-              <Text style={{ fontWeight: '700' }}>Backwardation</Text>: Downward slope — futures cost less than spot (rare, often signals stress).{'\n\n'}
-              Curve steepness reflects cost of carry, market sentiment, and supply/demand expectations.
+              {t('futuresCurve.whatIsDesc')}{'\n\n'}
+              <Text style={{ fontWeight: '700' }}>{t('futuresCurve.contango')}</Text>: {t('futuresCurve.contangoDesc')}{'\n'}
+              <Text style={{ fontWeight: '700' }}>{t('futuresCurve.backwardation')}</Text>: {t('futuresCurve.backwardationDesc')}{'\n\n'}
+              {t('futuresCurve.curveSteepnessDesc')}
             </Text>
           </View>
         </View>

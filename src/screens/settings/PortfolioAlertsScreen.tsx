@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useNotificationStore, isInQuietHours, PortfolioAlertKind } from '../../store/notificationStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
@@ -119,6 +120,7 @@ const HOLDING_KINDS: PortfolioAlertKind[] = ['holding_day_gain_pct', 'holding_pn
 
 export default function PortfolioAlertsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     portfolioAlertRules,
@@ -168,7 +170,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
 
   const handleConfirmStocks = useCallback(() => {
     if (selectedStockIds.length === 0) {
-      Alert.alert('No Holdings Selected', 'Please select at least one holding.');
+      Alert.alert(t('portfolioAlerts.noHoldings'), t('portfolioAlerts.noHoldingsDesc'));
       return;
     }
 
@@ -215,8 +217,8 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
     });
 
     Alert.alert(
-      'Alert Added',
-      `${labelSuffix} ${config.label} alert created with ${config.defaultThreshold}${config.unit} threshold.`,
+      t('portfolioAlerts.alertAdded'),
+      `${t('portfolioAlerts.alertAddedDesc')} ${labelSuffix} ${config.label} ${t('portfolioAlerts.withThreshold')} ${config.defaultThreshold}${config.unit}.`,
     );
   }, [selectedStockIds, holdings, stockPickerForRule, pendingKind, portfolioAlertRules, addPortfolioAlertRule, updatePortfolioAlertRule]);
 
@@ -248,7 +250,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
       badge: true,
     });
 
-    Alert.alert('Alert Added', `${config.label} alert has been created with default threshold of ${config.defaultThreshold}${config.unit}.`);
+    Alert.alert(t('portfolioAlerts.alertAdded'), `${config.label} ${t('portfolioAlerts.alertAddedDefault')} ${config.defaultThreshold}${config.unit}.`);
   }, [addPortfolioAlertRule, portfolioAlertRules, handleToggleRule, openStockPicker]);
 
   const handleTestAlert = useCallback((rule: typeof portfolioAlertRules[0]) => {
@@ -298,11 +300,11 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
 
   const handleRemoveRule = useCallback((ruleId: string, label: string) => {
     Alert.alert(
-      'Remove Alert',
-      `Remove the "${label}" alert rule?`,
+      t('portfolioAlerts.removeAlert'),
+      `${t('portfolioAlerts.removeAlertDesc')} "${label}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove', style: 'destructive', onPress: () => removePortfolioAlertRule(ruleId) },
+        { text: t('app.cancel'), style: 'cancel' },
+        { text: t('portfolioAlerts.remove'), style: 'destructive', onPress: () => removePortfolioAlertRule(ruleId) },
       ],
     );
   }, [removePortfolioAlertRule]);
@@ -335,9 +337,8 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
             <Text style={styles.alertLabel}>
               {isHoldingKind && rule.symbols?.length ? `${rule.symbols[0]}${rule.symbols.length > 1 ? ` +${rule.symbols.length - 1}` : ''} ${config.label}` : config.label}
             </Text>
-            <Text style={styles.alertDesc}>
-              {isHoldingKind && rule.symbols?.length
-                ? `${rule.symbols.length} holding${rule.symbols.length > 1 ? 's' : ''} watched · ${config.desc}`
+            <Text style={styles.alertDesc}>                {isHoldingKind && rule.symbols?.length
+                ? `${rule.symbols.length} ${t('portfolioAlerts.holding')}${rule.symbols.length > 1 ? 's' : ''} ${t('portfolioAlerts.watched')} · ${config.desc}`
                 : config.desc}
             </Text>
           </View>
@@ -415,16 +416,16 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                   color={rule.badge ? '#6C63FF' : colors.textMuted}
                 />
                 <Text style={[styles.badgeText, { color: rule.badge ? '#6C63FF' : colors.textMuted }]}>
-                  Badge
+                  {t('portfolioAlerts.badge')}
                 </Text>
               </Pressable>
     <Pressable onPress={() => handleTestAlert(rule)}>
                 <Ionicons name="flask-outline" size={14} color={colors.primary} />
-                <Text style={styles.testText}>Test Alert</Text>
+                <Text style={styles.testText}>{t('portfolioAlerts.testAlert')}</Text>
               </Pressable>
     <Pressable onPress={() => handleRemoveRule(rule.id, rule.label)}>
                 <Ionicons name="trash-outline" size={14} color={colors.danger} />
-                <Text style={styles.removeText}>Remove</Text>
+                <Text style={styles.removeText}>{t('portfolioAlerts.remove')}</Text>
               </Pressable>
             </View>
           </>
@@ -446,8 +447,8 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={styles.headerInfo}>
-            <Text style={styles.title}>Portfolio Alerts</Text>
-            <Text style={styles.subtitle}>Real-time P&L and holding movement alerts</Text>
+            <Text style={styles.title}>{t('portfolioAlerts.title')}</Text>
+            <Text style={styles.subtitle}>{t('portfolioAlerts.subtitle')}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -456,22 +457,22 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
         {/* Active Alerts */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
-            Active Alerts ({enabledRules.length})
+            {t('portfolioAlerts.activeAlerts')} ({enabledRules.length})
           </Text>
           {enabledRules.length > 0 ? (
             enabledRules.map(renderAlertCard)
           ) : (
             <View style={styles.emptyCard}>
               <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
-              <Text style={styles.emptyTitle}>No Active Alerts</Text>
-              <Text style={styles.emptyDesc}>Toggle on alerts below to get notified</Text>
+              <Text style={styles.emptyTitle}>{t('portfolioAlerts.noActiveAlerts')}</Text>
+              <Text style={styles.emptyDesc}>{t('portfolioAlerts.noActiveAlertsDesc')}</Text>
             </View>
           )}
         </View>
 
         {/* Add Alert Types */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Add Alert Rules</Text>
+          <Text style={styles.sectionTitle}>{t('portfolioAlerts.addAlertRules')}</Text>
           <View style={styles.addGrid}>
             {ALERT_KINDS.map((config) => {
               const exists = portfolioAlertRules.some(r => r.kind === config.kind && r.enabled);
@@ -490,7 +491,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                   {exists && (
                     <View style={styles.addedBadge}>
                       <Ionicons name="checkmark-circle" size={14} color={colors.marketUp} />
-                      <Text style={styles.addedBadgeText}>Active</Text>
+                      <Text style={styles.addedBadgeText}>{t('portfolioAlerts.active')}</Text>
                     </View>
                   )}
                 </Pressable>
@@ -502,7 +503,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
         {/* Disabled Alerts */}
         {disabledRules.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Paused Alerts ({disabledRules.length})</Text>
+            <Text style={styles.sectionTitle}>{t('portfolioAlerts.pausedAlerts')} ({disabledRules.length})</Text>
             {disabledRules.map(renderAlertCard)}
           </View>
         )}
@@ -512,11 +513,11 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
           <View style={styles.section}>
             <View style={styles.historyHeader}>
               <Text style={styles.sectionTitle}>
-                Trigger History ({alertTriggerHistory.length})
+                {t('portfolioAlerts.triggerHistory')} ({alertTriggerHistory.length})
               </Text>
               <Pressable onPress={clearAlertTriggerHistory} style={styles.historyClearBtn}>
                 <Ionicons name="trash-outline" size={14} color={colors.danger} />
-                <Text style={styles.historyClearText}>Clear</Text>
+                <Text style={styles.historyClearText}>{t('portfolioAlerts.clear')}</Text>
               </Pressable>
             </View>
             {alertTriggerHistory.slice(0, 50).map((entry, i) => {

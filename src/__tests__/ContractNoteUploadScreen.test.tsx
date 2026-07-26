@@ -115,6 +115,143 @@ const batchPartialResult: BatchParseResult = {
 // ── Import the component ────────────────────────────────────
 import ContractNoteUploadScreen from '../screens/reports/ContractNoteUploadScreen';
 
+// ==================== Mock useT hook ====================
+const app: Record<string, string> = {
+    'done': 'Done',
+    'error': 'Something went wrong',
+};
+const errors: Record<string, string> = {
+    'unknown': 'An unknown error occurred.',
+};
+const reports: Record<string, string> = {
+    'batchComplete': 'Batch Parse Complete',
+    'batchFailed': 'Batch upload failed.',
+    'batchProcessing': 'Batch Processing',
+    'batchResults': 'Batch Results',
+    'batchSummary': 'Processed {{total}} file(s). {{succeeded}} succeeded, {{failed}} failed. No trades were extracted.',
+    'batchUpload': 'Batch Upload (Multi)',
+    'batchUploadSub': 'Select multiple PDFs to process at once',
+    'buys': 'Buys',
+    'contractNote': 'Contract Note',
+    'contractNoteParser': 'Contract Note Parser',
+    'contractNoteParserSub': 'Upload broker PDF or paste text to extract trades',
+    'dedup': 'Deduplicated {{count}} duplicate trade(s)',
+    'deselectAll': 'Deselect All',
+    'emptyMsg': 'Please paste your contract note text first.',
+    'emptyTitle': 'Empty',
+    'exportAllCSV': 'Export All CSV',
+    'exportCsv': 'Export CSV',
+    'exportFailed': 'Export Failed',
+    'exportFailedMsg': 'Could not export CSV. Please try again.',
+    'exportFailedUnexpected': 'Export failed unexpectedly.',
+    'exportSelected': 'Export Selected ({{count}})',
+    'exporting': 'Exporting...',
+    'extractedViaServer': 'Extracted via server',
+    'extractingText': 'Extracting text and identifying trades',
+    'localFallback': 'Local fallback parse',
+    'merged': 'Merged',
+    'mergedTrades': 'Merged Trades ({{count}})',
+    'moreChars': '... ({{count}} more characters)',
+    'moreTrades': '+{{count}} more trade(s)',
+    'noTradesDoc': 'Could not extract any trades from this document.',
+    'noTradesFound': 'No Trades Found',
+    'noTradesPasted': 'Could not extract any trades from the pasted text. Make sure it contains broker contract note data.',
+    'openingPicker': 'Opening file picker...',
+    'pageCount': '{{count}} page(s)',
+    'parseFailed': 'Parse Failed',
+    'parsePastedFailed': 'Failed to parse pasted text.',
+    'parseText': 'Parse Text',
+    'parsedTrades': 'Parsed Trades',
+    'parsingIncomplete': 'Parsing Incomplete',
+    'parsingNote': 'Parsing contract note...',
+    'pastePlaceholder': 'Paste your contract note text here...',
+    'pasteText': 'Paste Contract Note Text',
+    'pasteTextSub': 'Copy-paste from your broker\'s email or portal',
+    'perFileBreakdown': 'Per-File Breakdown',
+    'price': 'Price',
+    'processingFile': 'Processing file {{current}}/{{total}} — {{filename}}',
+    'qty': 'Qty',
+    'raw': 'Raw',
+    'rawText': 'Raw Text ({{count}} chars)',
+    'resultSummary': '{{succeeded}} succeeded · {{failed}} failed · {{total}} total',
+    'selectAll': 'Select All',
+    'selectFiles': 'Select',
+    'selectPDFs': 'Select multiple PDF files...',
+    'sells': 'Sells',
+    'symbol': 'Symbol',
+    'tradeCount': '{{count}} trade(s)',
+    'trades': 'Trades',
+    'tradesExtracted': 'Trades Extracted',
+    'tryAgain': 'Try Again',
+    'type': 'Type',
+    'uploadPDF': 'Upload PDF Contract Note',
+    'uploadPDFSub': 'Select a PDF from your device',
+};
+
+const translations: Record<string, any> = {
+  app,
+  errors,
+  reports,
+};
+
+
+function resolveT(key: string, params?: Record<string, any>): string {
+  const parts = key.split('.');
+  const rootNs = parts[0];
+  const subKey = parts.slice(1).join('.');
+
+  const obj = translations[rootNs];
+  if (!obj) {
+    const parts2 = key.split('.');
+    const lastSeg = parts2[parts2.length - 1] || key;
+    return lastSeg
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (s: string) => s.toUpperCase())
+      .trim();
+  }
+
+  if (params && params.count !== undefined && params.count !== 1) {
+    const pluralKey = subKey + '_plural';
+    if (pluralKey in obj && typeof obj[pluralKey] === 'string') {
+      let result: string = obj[pluralKey];
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+      return result;
+    }
+  }
+
+  if (subKey in obj && typeof obj[subKey] === 'string') {
+    let result: string = obj[subKey];
+    if (params) {
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+    }
+    return result;
+  }
+
+  const lastSeg = parts[parts.length - 1] || key;
+  return lastSeg
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s: string) => s.toUpperCase())
+    .trim();
+}
+
+
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+  default: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
+
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockPickAndParse.mockResolvedValue(successResult);

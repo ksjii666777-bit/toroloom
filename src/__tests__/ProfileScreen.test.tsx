@@ -75,6 +75,116 @@ vi.mock('../store/kycStore', () => ({
 
 import ProfileScreen from '../screens/profile/ProfileScreen';
 
+// ==================== Mock useT hook ====================
+const funds: Record<string, string> = {
+    'addFunds': 'Add Funds',
+    'transfer': 'Transfer',
+};const kyc: Record<string, string> = {
+    'title': 'KYC Verification',
+    'verified': 'Verified',
+    'panVerification': 'PAN Verification',
+    'aadhaarVerification': 'Aadhaar Verification',
+    'kycCompleted': 'Complete KYC',
+    'digilocker': 'DigiLocker',
+    'bankLinking': 'Bank Linking',
+};
+const profile: Record<string, string> = {
+    'accountDetails': 'Account Details',
+    'accountDetailsSub': 'Your trading account information',
+    'addBankAccount': 'Add Bank Account',
+    'availableBalance': 'Available Balance',
+    'banksLinked': '{{count}} account(s) linked',
+    'changePassword': 'Change Password',
+    'changePasswordSub': 'Update your login password',
+    'editProfile': 'Edit Profile',
+    'editProfileSub': 'Name, email, phone',
+    'ifsc': 'IFSC',
+    'kycAndBanks': 'KYC & Banks',
+    'kycHelperText': 'Tap on a step to start verification. Complete all 4 steps to finish KYC.',
+    'kycStatus': 'KYC Status',
+    'kycVerified': 'KYC Verified',
+    'lifetimeXp': 'Lifetime XP',
+    'linkedBanks': 'Linked Bank Accounts',
+    'logout': 'Log Out',
+    'notificationPreferences': 'Notification Preferences',
+    'notificationPrefsSub': 'Manage alerts and updates',
+    'personalInformation': 'Personal Information',
+    'primary': 'Primary',
+    'profileKyc': 'Profile & KYC',
+    'title': 'Profile',
+    'upiSettings': 'UPI Settings',
+    'withdraw': 'Withdraw',
+    'dpId': 'DP ID',
+    'panVerification': 'PAN Verification',
+    'aadhaarVerification': 'Aadhaar Verification',
+    'digilocker': 'DigiLocker',
+    'bankLinking': 'Bank Linking',
+};
+
+const translations: Record<string, any> = {
+  funds,
+  kyc,
+  profile,
+};
+
+
+function resolveT(key: string, params?: Record<string, any>): string {
+  const parts = key.split('.');
+  const rootNs = parts[0];
+  const subKey = parts.slice(1).join('.');
+
+  const obj = translations[rootNs];
+  if (!obj) {
+    const parts2 = key.split('.');
+    const lastSeg = parts2[parts2.length - 1] || key;
+    return lastSeg
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (s: string) => s.toUpperCase())
+      .trim();
+  }
+
+  if (params && params.count !== undefined && params.count !== 1) {
+    const pluralKey = subKey + '_plural';
+    if (pluralKey in obj && typeof obj[pluralKey] === 'string') {
+      let result: string = obj[pluralKey];
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+      return result;
+    }
+  }
+
+  if (subKey in obj && typeof obj[subKey] === 'string') {
+    let result: string = obj[subKey];
+    if (params) {
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+    }
+    return result;
+  }
+
+  const lastSeg = parts[parts.length - 1] || key;
+  return lastSeg
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s: string) => s.toUpperCase())
+    .trim();
+}
+
+
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+  default: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
+
+
 // ==================== Helpers ====================
 
 function advanceAndRender(ms: number) {

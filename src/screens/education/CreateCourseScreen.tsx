@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { useT } from '../../hooks/useT';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -21,6 +22,7 @@ const THUMBNAIL_OPTIONS = ['📚', '📊', '📈', '💰', '🎯', '🧠', '🏦
 export default function CreateCourseScreen({ route, navigation }: any) {
   const { courseId } = route.params || {};
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     myCourses, editingCourse, saveCourse, setEditingCourse,
@@ -78,7 +80,7 @@ export default function CreateCourseScreen({ route, navigation }: any) {
   if (!course) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: colors.textMuted }}>Course not found</Text>
+        <Text style={{ color: colors.textMuted }}>{t('education.courseNotFound')}</Text>
       </View>
     );
   }
@@ -93,28 +95,28 @@ export default function CreateCourseScreen({ route, navigation }: any) {
   const handlePublish = () => {
     doSave();
     if (!title.trim()) {
-      Alert.alert('Missing Title', 'Please add a course title before publishing.');
+      Alert.alert(t('education.missingTitle'), t('education.missingTitleMsg'));
       return;
     }
     if (lessons.length === 0) {
-      Alert.alert('No Lessons', 'Please add at least one lesson before publishing.');
+      Alert.alert(t('education.noLessons'), t('education.noLessonsMsg'));
       return;
     }
     // Check that all lessons have titles
     const emptyLessons = lessons.filter(l => !l.title.trim());
     if (emptyLessons.length > 0) {
-      Alert.alert('Incomplete Lessons',
-        `${emptyLessons.length} lesson(s) are missing titles. Please complete them first.`);
+      Alert.alert(t('education.incompleteLessons'),
+        t('education.incompleteLessonsMsg', { count: emptyLessons.length }));
       return;
     }
 
     Alert.alert(
-      'Submit for Review',
-      'Your course will be reviewed before publishing. Continue?',
+      t('education.submitForReviewTitle'),
+      t('education.submitForReviewMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
-          text: 'Submit',
+          text: t('education.submit'),
           onPress: () => {
             submitForReview(course.id);
             navigation.goBack();
@@ -146,38 +148,38 @@ export default function CreateCourseScreen({ route, navigation }: any) {
               <Ionicons name="close" size={24} color={colors.text} />
             </AnimatedPressable>
             <Text style={styles.headerTitle}>
-              {title.trim() || 'New Course'}
+              {title.trim() || t('education.createCourseTitle')}
             </Text>
             <AnimatedPressable onPress={handlePublish} haptic="medium" scaleTo={0.92}>
               <View style={styles.publishBtn}>
-                <Text style={styles.publishBtnText}>Submit</Text>
+                <Text style={styles.publishBtnText}>{t('education.submit')}</Text>
               </View>
             </AnimatedPressable>
           </View>
           <Text style={styles.headerSubtitle}>
-            {course.publishStatus === 'published' ? 'Published' :
-             course.submittedForReview ? 'Under Review' : 'Draft'}
+            {course.publishStatus === 'published' ? t('education.published') :
+             course.submittedForReview ? t('education.underReview') : t('education.draft')}
           </Text>
         </View>
 
         {/* ── Basic Info ── */}
         <Animated.View entering={FadeInDown.springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Info</Text>
+          <Text style={styles.sectionTitle}>{t('education.basicInfo')}</Text>
 
-          <Text style={styles.inputLabel}>Course Title</Text>
+          <Text style={styles.inputLabel}>{t('education.courseTitle')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="e.g., Advanced Options Strategies"
+            placeholder={t('education.courseTitlePlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={title}
             onChangeText={setTitle}
             maxLength={100}
           />
 
-          <Text style={styles.inputLabel}>Description</Text>
+          <Text style={styles.inputLabel}>{t('education.description')}</Text>
           <TextInput
             style={[styles.textInput, styles.textArea]}
-            placeholder="Describe what students will learn..."
+            placeholder={t('education.descriptionPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={description}
             onChangeText={setDescription}
@@ -187,7 +189,7 @@ export default function CreateCourseScreen({ route, navigation }: any) {
           />
 
           {/* Thumbnail Picker */}
-          <Text style={styles.inputLabel}>Icon / Thumbnail</Text>
+          <Text style={styles.inputLabel}>{t('education.iconThumbnail')}</Text>
           <View style={styles.thumbnailRow}>
             {THUMBNAIL_OPTIONS.map(emoji => (
               <AnimatedPressable
@@ -212,9 +214,9 @@ export default function CreateCourseScreen({ route, navigation }: any) {
 
         {/* ── Level & Category ── */}
         <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Level & Category</Text>
+          <Text style={styles.sectionTitle}>{t('education.levelCategory')}</Text>
 
-          <Text style={styles.inputLabel}>Difficulty</Text>
+          <Text style={styles.inputLabel}>{t('education.difficulty')}</Text>
           <View style={styles.chipRow}>
             {COURSE_LEVELS.map(level => (
               <AnimatedPressable
@@ -234,14 +236,14 @@ export default function CreateCourseScreen({ route, navigation }: any) {
                     styles.levelChipText,
                     selectedLevel === level && { color: colors.primary },
                   ]}>
-                    {level.charAt(0).toUpperCase() + level.slice(1)}
+                    {t('education.' + level)}
                   </Text>
                 </View>
               </AnimatedPressable>
             ))}
           </View>
 
-          <Text style={styles.inputLabel}>Category</Text>
+          <Text style={styles.inputLabel}>{t('education.category')}</Text>
           <View style={styles.chipRow}>
             {COURSE_CATEGORIES.map(cat => (
               <AnimatedPressable
@@ -268,10 +270,10 @@ export default function CreateCourseScreen({ route, navigation }: any) {
             ))}
           </View>
 
-          <Text style={styles.inputLabel}>Tags (comma separated)</Text>
+          <Text style={styles.inputLabel}>{t('education.tagsCommaSeparated')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="e.g., options, derivatives, hedging"
+            placeholder={t('education.tagsPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={tagsText}
             onChangeText={setTagsText}
@@ -281,11 +283,11 @@ export default function CreateCourseScreen({ route, navigation }: any) {
         {/* ── Lessons ── */}
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Lessons ({lessons.length})</Text>
+            <Text style={styles.sectionTitle}>{t('education.lessonsLabel')} ({lessons.length})</Text>
             <AnimatedPressable onPress={handleAddLesson} haptic="light" scaleTo={0.92}>
               <View style={styles.addLessonBtn}>
                 <Ionicons name="add" size={18} color="#fff" />
-                <Text style={styles.addLessonBtnText}>Add Lesson</Text>
+                <Text style={styles.addLessonBtnText}>{t('education.addLesson')}</Text>
               </View>
             </AnimatedPressable>
           </View>
@@ -293,7 +295,7 @@ export default function CreateCourseScreen({ route, navigation }: any) {
           {lessons.length === 0 ? (
             <View style={styles.emptyLessons}>
               <Ionicons name="document-text-outline" size={40} color={colors.textMuted} />
-              <Text style={styles.emptyLessonsText}>No lessons yet. Tap "Add Lesson" to start.</Text>
+              <Text style={styles.emptyLessonsText}>{t('education.noLessonsYet')}</Text>
             </View>
           ) : (
             lessons.map((lesson, idx) => (
@@ -310,9 +312,9 @@ export default function CreateCourseScreen({ route, navigation }: any) {
                   onToggleExpand={() => toggleExpandLesson(lesson.id)}
                   onUpdate={(updates) => updateLesson(course.id, lesson.id, updates)}
                   onRemove={() => {
-                    Alert.alert('Remove Lesson', `Delete "${lesson.title || 'Untitled Lesson'}"?`, [
-                      { text: 'Cancel', style: 'cancel' },
-                      { text: 'Delete', style: 'destructive', onPress: () => removeLesson(course.id, lesson.id) },
+                    Alert.alert(t('education.removeLesson'), t('education.removeLessonConfirm', { title: lesson.title || t('education.untitledLesson') }), [
+                      { text: t('app.cancel'), style: 'cancel' },
+                      { text: t('app.delete'), style: 'destructive', onPress: () => removeLesson(course.id, lesson.id) },
                     ]);
                   }}
                   onAddQuiz={() => addQuizToLesson(course.id, lesson.id)}
@@ -333,7 +335,7 @@ export default function CreateCourseScreen({ route, navigation }: any) {
           <AnimatedPressable onPress={doSave} haptic="medium" scaleTo={0.97}>
             <View style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
               <Ionicons name="save-outline" size={20} color="#fff" />
-              <Text style={styles.actionBtnText}>Save Draft</Text>
+              <Text style={styles.actionBtnText}>{t('education.saveDraft')}</Text>
             </View>
           </AnimatedPressable>
         </View>
@@ -368,6 +370,7 @@ function LessonEditor({
   colors: any;
   styles: any;
 }) {
+  const { t } = useT();
   const hasQuiz = !!lesson.quiz;
 
   return (
@@ -380,14 +383,14 @@ function LessonEditor({
           </View>
           <View style={styles.lessonHeaderInfo}>
             <Text style={styles.lessonTitle} numberOfLines={1}>
-              {lesson.title || 'Untitled Lesson'}
+              {lesson.title || t('education.untitledLesson')}
             </Text>
             <View style={styles.lessonMeta}>
               <Text style={styles.lessonMetaText}>{lesson.duration}</Text>
               {hasQuiz && (
                 <View style={styles.quizBadgeSmall}>
                   <Ionicons name="help-circle" size={10} color="#FFC107" />
-                  <Text style={styles.quizBadgeSmallText}>Quiz</Text>
+                  <Text style={styles.quizBadgeSmallText}>{t('education.quiz')}</Text>
                 </View>
               )}
             </View>
@@ -403,32 +406,32 @@ function LessonEditor({
       {/* Expanded editor */}
       {isExpanded && (
         <Animated.View entering={FadeInDown.springify()} style={styles.lessonEditor}>
-          <Text style={styles.inputLabel}>Lesson Title</Text>
+          <Text style={styles.inputLabel}>{t('education.lessonTitle')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="Lesson title"
+            placeholder={t('education.lessonTitlePlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={lesson.title}
             onChangeText={(val) => onUpdate({ title: val })}
           />
 
-          <Text style={styles.inputLabel}>Duration</Text>
+          <Text style={styles.inputLabel}>{t('education.duration')}</Text>
           <View style={styles.durationRow}>
             <TextInput
               style={[styles.textInput, { flex: 1 }]}
-              placeholder="e.g., 15"
+              placeholder={t('education.durationPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={lesson.duration.replace(' min', '')}
               onChangeText={(val) => onUpdate({ duration: val ? `${val} min` : '0 min' })}
               keyboardType="number-pad"
             />
-            <Text style={styles.durationSuffix}>min</Text>
+            <Text style={styles.durationSuffix}>{t('education.minAbbr')}</Text>
           </View>
 
-          <Text style={styles.inputLabel}>Content</Text>
+          <Text style={styles.inputLabel}>{t('education.content')}</Text>
           <TextInput
             style={[styles.textInput, styles.contentArea]}
-            placeholder="Write your lesson content here..."
+            placeholder={t('education.contentPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={lesson.content}
             onChangeText={(val) => onUpdate({ content: val })}
@@ -436,10 +439,10 @@ function LessonEditor({
             numberOfLines={6}
           />
 
-          <Text style={styles.inputLabel}>Video URL (optional)</Text>
+          <Text style={styles.inputLabel}>{t('education.videoUrl')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="https://example.com/video.mp4"
+            placeholder={t('education.videoUrlPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={lesson.videoUrl || ''}
             onChangeText={(val) => onUpdate({ videoUrl: val })}
@@ -462,7 +465,7 @@ function LessonEditor({
               <AnimatedPressable onPress={onAddQuiz} haptic="light" scaleTo={0.94}>
                 <View style={styles.addQuizBtn}>
                   <Ionicons name="help-circle-outline" size={18} color={colors.primary} />
-                  <Text style={styles.addQuizBtnText}>Add Quiz</Text>
+                  <Text style={styles.addQuizBtnText}>{t('education.addQuiz')}</Text>
                 </View>
               </AnimatedPressable>
             )}
@@ -472,7 +475,7 @@ function LessonEditor({
           <AnimatedPressable onPress={onRemove} haptic="warning" scaleTo={0.94}>
             <View style={styles.removeLessonBtn}>
               <Ionicons name="trash-outline" size={16} color={colors.danger} />
-              <Text style={styles.removeLessonText}>Remove Lesson</Text>
+              <Text style={styles.removeLessonText}>{t('education.removeLesson')}</Text>
             </View>
           </AnimatedPressable>
         </Animated.View>
@@ -495,13 +498,14 @@ function QuizEditor({
   colors: any;
   styles: any;
 }) {
+  const { t } = useT();
   return (
     <View style={styles.quizEditor}>
       <View style={styles.quizHeader}>
         <View style={styles.quizHeaderLeft}>
           <Ionicons name="help-circle" size={18} color="#FFC107" />
           <Text style={styles.quizTitle}>{quiz.title}</Text>
-          <Text style={styles.quizCount}>({quiz.questions.length} questions)</Text>
+          <Text style={styles.quizCount}>({t('education.questions', { count: quiz.questions.length })})</Text>
         </View>
         <AnimatedPressable onPress={onRemoveQuiz} haptic="warning" scaleTo={0.88}>
           <Ionicons name="close-circle" size={20} color={colors.danger} />
@@ -511,7 +515,7 @@ function QuizEditor({
       {quiz.questions.map((q, qIdx) => (
         <View key={q.id} style={styles.questionCard}>
           <View style={styles.questionHeader}>
-            <Text style={styles.questionLabel}>Question {qIdx + 1}</Text>
+            <Text style={styles.questionLabel}>{t('education.questionLabel', { num: qIdx + 1 })}</Text>
             <AnimatedPressable onPress={() => onRemoveQuestion(q.id)} haptic="light" scaleTo={0.88}>
               <Ionicons name="trash-outline" size={14} color={colors.danger} />
             </AnimatedPressable>
@@ -519,7 +523,7 @@ function QuizEditor({
 
           <TextInput
             style={styles.textInput}
-            placeholder="Type your question here..."
+            placeholder={t('education.questionPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={q.question}
             onChangeText={(val) => onUpdateQuestion(q.id, { question: val })}
@@ -544,7 +548,7 @@ function QuizEditor({
               </AnimatedPressable>
               <TextInput
                 style={[styles.textInput, styles.optionInput]}
-                placeholder={`Option ${optIdx + 1}`}
+                placeholder={t('education.optionPlaceholder', { num: optIdx + 1 })}
                 placeholderTextColor={colors.textMuted}
                 value={opt}
                 onChangeText={(val) => {
@@ -556,10 +560,10 @@ function QuizEditor({
             </View>
           ))}
 
-          <Text style={[styles.inputLabel, { marginTop: SPACING.sm }]}>Explanation (optional)</Text>
+          <Text style={[styles.inputLabel, { marginTop: SPACING.sm }]}>{t('education.explanation')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="Explain why this answer is correct..."
+            placeholder={t('education.explanationPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={q.explanation}
             onChangeText={(val) => onUpdateQuestion(q.id, { explanation: val })}
@@ -570,7 +574,7 @@ function QuizEditor({
       <AnimatedPressable onPress={onAddQuestion} haptic="light" scaleTo={0.94}>
         <View style={styles.addQuestionBtn}>
           <Ionicons name="add-circle-outline" size={16} color={colors.primary} />
-          <Text style={styles.addQuestionBtnText}>Add Question</Text>
+          <Text style={styles.addQuestionBtnText}>{t('education.addQuestion')}</Text>
         </View>
       </AnimatedPressable>
     </View>

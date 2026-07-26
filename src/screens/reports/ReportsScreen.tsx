@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { useAuthStore } from '../../store/authStore';
@@ -31,6 +32,7 @@ type ReportTab = 'pnl' | 'performance' | 'tax' | 'holdings' | 'history';
 
 export default function ReportsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { holdings, trades } = usePortfolioStore();
   const { getAnalytics } = usePortfolioAnalyticsStore();
@@ -88,7 +90,7 @@ export default function ReportsScreen({ navigation }: any) {
     );
 
     Alert.alert(
-      `Add Alert for ${h.symbol}`,
+      t('reports.addAlertFor', { symbol: h.symbol }),
       `Current: ${h.pnlPercent >= 0 ? '+' : ''}${h.pnlPercent.toFixed(1)}% P&L · ${h.dayChangePercent >= 0 ? '+' : ''}${h.dayChangePercent.toFixed(1)}% today`,
       [
         hasDayAlert
@@ -106,7 +108,7 @@ export default function ReportsScreen({ navigation }: any) {
                   stockIds: [h.stockId],
                   symbols: [h.symbol],
                 });
-                Alert.alert('Alert Added', `Day gain alert created for ${h.symbol}.`);
+                Alert.alert(t('reports.alertAdded'), t('reports.dayGainAlertCreated', { symbol: h.symbol }));
               },
             },
         hasPnLAlert
@@ -124,10 +126,10 @@ export default function ReportsScreen({ navigation }: any) {
                   stockIds: [h.stockId],
                   symbols: [h.symbol],
                 });
-                Alert.alert('Alert Added', `P&L alert created for ${h.symbol}.`);
+                Alert.alert(t('reports.alertAdded'), t('reports.pnlAlertCreated', { symbol: h.symbol }));
               },
             },
-        { text: 'Cancel', style: 'cancel' as const },
+        { text: t('app.cancel'), style: 'cancel' as const },
       ],
     );
   }, [portfolioAlertRules, addPortfolioAlertRule, quickAddDayGainThreshold, quickAddPnLThreshold]);
@@ -164,19 +166,19 @@ export default function ReportsScreen({ navigation }: any) {
 
       if (result.success) {
         Alert.alert(
-          'Report Exported',
-          `Your portfolio report has been exported as ${format.toUpperCase()} and saved.`,
-          [{ text: 'OK' }],
+          t('reports.reportExported'),
+          t('reports.reportExportedMsg', { format: format.toUpperCase() }),
+          [{ text: t('app.ok') }],
         );
       } else {
         Alert.alert(
-          'Export Failed',
-          result.error || 'Could not export the report. Please try again.',
-          [{ text: 'OK' }],
+          t('reports.exportFailed'),
+          result.error || t('reports.exportFailedMsg'),
+          [{ text: t('app.ok') }],
         );
       }
     } catch (_err) {
-      Alert.alert('Export Error', 'An unexpected error occurred during export.');
+      Alert.alert(t('reports.exportError'), t('reports.exportErrorMsg'));
     } finally {
       setExporting(false);
     }
@@ -190,18 +192,18 @@ export default function ReportsScreen({ navigation }: any) {
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <View style={styles.titleRow}>
-            <Text style={styles.title}>Analytics</Text>
+            <Text style={styles.title}>{t('reports.analytics')}</Text>
             {isLive && (
               <View style={styles.liveBadge}>
                 <View style={styles.liveDot} />
-                <Text style={styles.liveBadgeText}>LIVE</Text>
+                <Text style={styles.liveBadgeText}>{t('reports.live')}</Text>
               </View>
             )}
           </View>
           <Text style={styles.subtitle}>
             {isLive && lastUpdated
               ? `Updated ${new Date(lastUpdated).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
-              : 'Advanced portfolio intelligence'
+              : t('reports.subtitle')
             }
           </Text>
         </View>
@@ -247,13 +249,13 @@ export default function ReportsScreen({ navigation }: any) {
             <Text style={{
               ...FONTS.semiBold, fontSize: FONTS.size.md, color: '#FFFFFF',
             }}>
-              Contract Note Parser
+              {t('reports.contractNoteParser')}
             </Text>
             <Text style={{
               ...FONTS.regular, fontSize: FONTS.size.xs,
               color: 'rgba(255,255,255,0.5)', marginTop: 2,
             }}>
-              Upload broker PDFs to extract trades
+              {t('reports.contractNoteParserSub')}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
@@ -263,13 +265,13 @@ export default function ReportsScreen({ navigation }: any) {
         <View style={styles.snapshotCard}>
           <View style={styles.snapshotTop}>
             <View>
-              <Text style={styles.snapshotLabel}>Portfolio Value</Text>
+              <Text style={styles.snapshotLabel}>{t('reports.portfolioValue')}</Text>
               <Text style={styles.snapshotValue}>
                 {formatCurrency(holdings.reduce((s, h) => s + h.currentValue, 0))}
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={styles.snapshotLabel}>Total Return</Text>
+              <Text style={styles.snapshotLabel}>{t('reports.totalReturn')}</Text>
               <View style={styles.snapshotReturnRow}>
                 <Text style={[styles.snapshotReturn, { color: m.totalReturn >= 0 ? colors.marketUp : colors.marketDown }]}>
                   {formatPercent(m.totalReturnPercent)}
@@ -292,22 +294,22 @@ export default function ReportsScreen({ navigation }: any) {
           <View style={styles.snapshotGrid}>
             <View style={styles.snapshotItem}>
               <Text style={styles.snapshotItemValue}>{m.winRate.toFixed(0)}%</Text>
-              <Text style={styles.snapshotItemLabel}>Win Rate</Text>
+              <Text style={styles.snapshotItemLabel}>{t('reports.winRate')}</Text>
             </View>
             <View style={styles.snapshotDivider} />
             <View style={styles.snapshotItem}>
               <Text style={styles.snapshotItemValue}>{m.sharpeRatio.toFixed(1)}</Text>
-              <Text style={styles.snapshotItemLabel}>Sharpe</Text>
+              <Text style={styles.snapshotItemLabel}>{t('reports.sharpe')}</Text>
             </View>
             <View style={styles.snapshotDivider} />
             <View style={styles.snapshotItem}>
               <Text style={styles.snapshotItemValue}>{formatPercent(m.maxDrawdownPercent)}</Text>
-              <Text style={styles.snapshotItemLabel}>Max DD</Text>
+              <Text style={styles.snapshotItemLabel}>{t('reports.maxDD')}</Text>
             </View>
             <View style={styles.snapshotDivider} />
             <View style={styles.snapshotItem}>
               <Text style={styles.snapshotItemValue}>{holdings.length}</Text>
-              <Text style={styles.snapshotItemLabel}>Holdings</Text>
+              <Text style={styles.snapshotItemLabel}>{t('reports.holdings')}</Text>
             </View>
           </View>
         </View>
@@ -315,11 +317,11 @@ export default function ReportsScreen({ navigation }: any) {
         {/* ── Tab Switcher ───────────────────────────────────── */}
         <View style={styles.tabRow}>
           {([
-            { key: 'pnl', label: 'P&L', icon: 'trending-up' },
-            { key: 'performance', label: 'Performance', icon: 'stats-chart' },
-            { key: 'tax', label: 'Tax', icon: 'document-text' },
-            { key: 'holdings', label: 'Holdings', icon: 'pie-chart' },
-            { key: 'history', label: 'History', icon: 'time-outline' },
+            { key: 'pnl', label: t('reports.tabPnl'), icon: 'trending-up' },
+            { key: 'performance', label: t('reports.tabPerformance'), icon: 'stats-chart' },
+            { key: 'tax', label: t('reports.tabTax'), icon: 'document-text' },
+            { key: 'holdings', label: t('reports.tabHoldings'), icon: 'pie-chart' },
+            { key: 'history', label: t('reports.tabHistory'), icon: 'time-outline' },
           ] as const).map(tab => (
             <TouchableOpacity
               key={tab.key}
@@ -344,7 +346,7 @@ export default function ReportsScreen({ navigation }: any) {
         {activeTab === 'pnl' && (
           <>
             {/* P&L Chart */}
-            <Text style={styles.sectionTitle}>P&L Over Time</Text>
+            <Text style={styles.sectionTitle}>{t('reports.pnlOverTime')}</Text>
             <PnLChart
               data={analytics.pnlHistory}
               timeframe={chartTimeframe}
@@ -356,28 +358,28 @@ export default function ReportsScreen({ navigation }: any) {
             {/* P&L Summary Cards */}
             <View style={styles.pnlSummaryRow}>
               <View style={styles.pnlSummaryCard}>
-                <Text style={styles.pnlSummaryLabel}>Realized P&L</Text>
+                <Text style={styles.pnlSummaryLabel}>{t('reports.realizedPnl')}</Text>
                 <Text style={[styles.pnlSummaryValue, { color: m.realizedPnl >= 0 ? '#00E676' : '#FF5252' }]}>
                   {m.realizedPnl >= 0 ? '+' : ''}{formatCurrency(m.realizedPnl, true)}
                 </Text>
-                <Text style={styles.pnlSummarySub}>From closed positions</Text>
+                <Text style={styles.pnlSummarySub}>{t('reports.fromClosed')}</Text>
               </View>
               <View style={styles.pnlSummaryCard}>
-                <Text style={styles.pnlSummaryLabel}>Unrealized P&L</Text>
+                <Text style={styles.pnlSummaryLabel}>{t('reports.unrealizedPnl')}</Text>
                 <Text style={[styles.pnlSummaryValue, { color: m.unrealizedPnl >= 0 ? '#00E676' : '#FF5252' }]}>
                   {m.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(m.unrealizedPnl, true)}
                 </Text>
-                <Text style={styles.pnlSummarySub}>From open positions</Text>
+                <Text style={styles.pnlSummarySub}>{t('reports.fromOpen')}</Text>
               </View>
             </View>
 
             {/* Day P&L */}
-            <Card title="Today's Performance">
+            <Card title={t('reports.todaysPerformance')}>
               <View style={styles.dayPnlRow}>
                 <View style={styles.dayPnlItem}>
                   <Ionicons name="sunny-outline" size={20} color={colors.warning} />
                   <View style={{ marginLeft: SPACING.md }}>
-                    <Text style={styles.dayPnlLabel}>Day Change</Text>
+                    <Text style={styles.dayPnlLabel}>{t('reports.dayChange')}</Text>
                     <Text style={[styles.dayPnlValue, { color: m.dayChange >= 0 ? colors.marketUp : colors.marketDown }]}>
                       {m.dayChange >= 0 ? '+' : ''}{formatCurrency(m.dayChange, true)}
                     </Text>
@@ -386,7 +388,7 @@ export default function ReportsScreen({ navigation }: any) {
                 <View style={styles.dayPnlItem}>
                   <Ionicons name="trending-up-outline" size={20} color={colors.primary} />
                   <View style={{ marginLeft: SPACING.md }}>
-                    <Text style={styles.dayPnlLabel}>Day Return</Text>
+                    <Text style={styles.dayPnlLabel}>{t('reports.dayReturn')}</Text>
                     <Text style={[styles.dayPnlValue, { color: m.dayChangePercent >= 0 ? colors.marketUp : colors.marketDown }]}>
                       {formatPercent(m.dayChangePercent)}
                     </Text>
@@ -397,7 +399,7 @@ export default function ReportsScreen({ navigation }: any) {
 
             {/* Monthly Returns */}
             {analytics.monthlyReturns.length > 0 && (
-              <Card title="Monthly Returns">
+              <Card title={t('reports.monthlyReturns')}>
                 {analytics.monthlyReturns.slice(-6).map((mr, i) => (
                   <View key={i}>
                     <View style={styles.monthlyRow}>
@@ -432,15 +434,15 @@ export default function ReportsScreen({ navigation }: any) {
         {activeTab === 'performance' && (
           <>
             {/* Key Risk/Return Metrics */}
-            <Text style={styles.sectionTitle}>Risk & Return</Text>
+            <Text style={styles.sectionTitle}>{t('reports.riskAndReturn')}</Text>
             <View style={styles.perfGrid}>
               {[
-                { icon: 'cash', label: 'Total Return', value: formatCurrency(m.totalReturn, true), color: m.totalReturn >= 0 ? colors.marketUp : colors.marketDown },
-                { icon: 'analytics', label: 'Return %', value: formatPercent(m.totalReturnPercent), color: m.totalReturnPercent >= 0 ? colors.marketUp : colors.marketDown },
-                { icon: 'trophy', label: 'Sharpe Ratio', value: m.sharpeRatio.toFixed(2), color: m.sharpeRatio >= 1 ? colors.marketUp : m.sharpeRatio >= 0 ? colors.warning : colors.marketDown },
-                { icon: 'trending-down', label: 'Max Drawdown', value: formatPercent(m.maxDrawdownPercent), color: colors.danger },
-                { icon: 'flag', label: 'Profit Factor', value: m.profitFactor.toFixed(2), color: m.profitFactor >= 2 ? colors.marketUp : m.profitFactor >= 1 ? colors.warning : colors.marketDown },
-                { icon: 'calendar', label: 'Avg Holding', value: `${m.avgHoldingDays}d`, color: colors.text },
+                { icon: 'cash', label: t('reports.totalReturn'), value: formatCurrency(m.totalReturn, true), color: m.totalReturn >= 0 ? colors.marketUp : colors.marketDown },
+                { icon: 'analytics', label: t('reports.returnPercent'), value: formatPercent(m.totalReturnPercent), color: m.totalReturnPercent >= 0 ? colors.marketUp : colors.marketDown },
+                { icon: 'trophy', label: t('reports.sharpeRatio'), value: m.sharpeRatio.toFixed(2), color: m.sharpeRatio >= 1 ? colors.marketUp : m.sharpeRatio >= 0 ? colors.warning : colors.marketDown },
+                { icon: 'trending-down', label: t('reports.maxDrawdown'), value: formatPercent(m.maxDrawdownPercent), color: colors.danger },
+                { icon: 'flag', label: t('reports.profitFactor'), value: m.profitFactor.toFixed(2), color: m.profitFactor >= 2 ? colors.marketUp : m.profitFactor >= 1 ? colors.warning : colors.marketDown },
+                { icon: 'calendar', label: t('reports.avgHolding'), value: `${m.avgHoldingDays}d`, color: colors.text },
               ].map((item, i) => (
                 <View key={i}
                   style={styles.perfCard}>
@@ -454,58 +456,58 @@ export default function ReportsScreen({ navigation }: any) {
             </View>
 
             {/* Trade Statistics */}
-            <Card title="Trade Statistics">
+            <Card title={t('reports.tradeStatistics')}>
               <View style={styles.tradeStatRow}>
                 <View style={styles.tradeStatItem}>
                   <Text style={styles.tradeStatNum}>{m.totalTrades}</Text>
-                  <Text style={styles.tradeStatLabel}>Total</Text>
+                  <Text style={styles.tradeStatLabel}>{t('reports.total')}</Text>
                 </View>
                 <View style={styles.tradeStatDivider} />
                 <View style={styles.tradeStatItem}>
                   <Text style={[styles.tradeStatNum, { color: colors.marketUp }]}>{m.winningTrades}</Text>
-                  <Text style={styles.tradeStatLabel}>Wins</Text>
+                  <Text style={styles.tradeStatLabel}>{t('reports.wins')}</Text>
                 </View>
                 <View style={styles.tradeStatDivider} />
                 <View style={styles.tradeStatItem}>
                   <Text style={[styles.tradeStatNum, { color: colors.marketDown }]}>{m.losingTrades}</Text>
-                  <Text style={styles.tradeStatLabel}>Losses</Text>
+                  <Text style={styles.tradeStatLabel}>{t('reports.losses')}</Text>
                 </View>
                 <View style={styles.tradeStatDivider} />
                 <View style={styles.tradeStatItem}>
                   <Text style={styles.tradeStatNum}>{m.winRate.toFixed(0)}%</Text>
-                  <Text style={styles.tradeStatLabel}>Win Rate</Text>
+                  <Text style={styles.tradeStatLabel}>{t('reports.winRate')}</Text>
                 </View>
               </View>
             </Card>
 
             {/* Detailed Metrics */}
-            <Card title="Detailed Metrics">
-              <MetricRow label="Average Win" value={formatCurrency(m.avgWin, true)} valueColor={colors.marketUp} />
+            <Card title={t('reports.detailedMetrics')}>
+              <MetricRow label={t('reports.averageWin')} value={formatCurrency(m.avgWin, true)} valueColor={colors.marketUp} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Average Loss" value={formatCurrency(m.avgLoss, true)} valueColor={colors.marketDown} />
+              <MetricRow label={t('reports.averageLoss')} value={formatCurrency(m.avgLoss, true)} valueColor={colors.marketDown} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Profit Factor" value={m.profitFactor.toFixed(2)}
+              <MetricRow label={t('reports.profitFactor')} value={m.profitFactor.toFixed(2)}
                 valueColor={m.profitFactor >= 2 ? colors.marketUp : m.profitFactor >= 1 ? colors.warning : colors.marketDown} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Best Trade" value={formatCurrency(m.bestTrade, true)} valueColor={colors.marketUp} />
+              <MetricRow label={t('reports.bestTrade')} value={formatCurrency(m.bestTrade, true)} valueColor={colors.marketUp} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Worst Trade" value={formatCurrency(m.worstTrade, true)} valueColor={colors.marketDown} />
+              <MetricRow label={t('reports.worstTrade')} value={formatCurrency(m.worstTrade, true)} valueColor={colors.marketDown} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Max Consecutive Wins" value={String(m.consecutiveWins)} valueColor={colors.marketUp} />
+              <MetricRow label={t('reports.maxConsecutiveWins')} value={String(m.consecutiveWins)} valueColor={colors.marketUp} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Max Consecutive Losses" value={String(m.consecutiveLosses)} valueColor={colors.marketDown} />
+              <MetricRow label={t('reports.maxConsecutiveLosses')} value={String(m.consecutiveLosses)} valueColor={colors.marketDown} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Avg Holding Period" value={`${m.avgHoldingDays} days`} />
+              <MetricRow label={t('reports.avgHoldingPeriod')} value={`${m.avgHoldingDays} days`} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Realized P&L" value={formatCurrency(m.realizedPnl, true)}
+              <MetricRow label={t('reports.realizedPnl')} value={formatCurrency(m.realizedPnl, true)}
                 valueColor={m.realizedPnl >= 0 ? colors.marketUp : colors.marketDown} />
               <View style={styles.metricDivider} />
-              <MetricRow label="Unrealized P&L" value={formatCurrency(m.unrealizedPnl, true)}
+              <MetricRow label={t('reports.unrealizedPnl')} value={formatCurrency(m.unrealizedPnl, true)}
                 valueColor={m.unrealizedPnl >= 0 ? colors.marketUp : colors.marketDown} />
             </Card>
 
             {/* Investment Overview Progress */}
-            <Card title="Investment Overview">
+            <Card title={t('reports.investmentOverview')}>
               {(() => {
                 const invested = holdings.reduce((s, h) => s + h.totalInvested, 0) || 623500;
                 const current = holdings.reduce((s, h) => s + h.currentValue, 0) || 673739;
@@ -514,12 +516,12 @@ export default function ReportsScreen({ navigation }: any) {
                   <>
                     <View style={styles.investOverviewRow}>
                       <View style={styles.investOverviewItem}>
-                        <Text style={styles.investOverviewLabel}>Invested</Text>
+                        <Text style={styles.investOverviewLabel}>{t('reports.invested')}</Text>
                         <Text style={styles.investOverviewValue}>{formatCurrency(invested, true)}</Text>
                       </View>
                       <Ionicons name="arrow-forward" size={18} color={colors.textMuted} />
                       <View style={styles.investOverviewItem}>
-                        <Text style={styles.investOverviewLabel}>Current</Text>
+                        <Text style={styles.investOverviewLabel}>{t('reports.current')}</Text>
                         <Text style={styles.investOverviewValue}>{formatCurrency(current, true)}</Text>
                       </View>
                     </View>
@@ -545,20 +547,20 @@ export default function ReportsScreen({ navigation }: any) {
         {activeTab === 'tax' && (
           <>
             {/* Tax Summary */}
-            <Text style={styles.sectionTitle}>Capital Gains Tax Summary</Text>
+            <Text style={styles.sectionTitle}>{t('reports.capitalGainsSummary')}</Text>
             <View style={styles.taxSummaryCard}>
               <View style={styles.taxIconRow}>
                 <View style={styles.taxIconCircle}>
                   <Ionicons name="document-text" size={28} color={colors.warning} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.taxSummaryTitle}>FY 2025-26 Estimated</Text>
-                  <Text style={styles.taxSummarySub}>Based on trade history & holding periods</Text>
+                  <Text style={styles.taxSummaryTitle}>{t('reports.fyEstimated')}</Text>
+                  <Text style={styles.taxSummarySub}>{t('reports.basedOnTradeHistory')}</Text>
                 </View>
               </View>
 
               <View style={styles.taxAmountRow}>
-                <Text style={styles.taxAmountLabel}>Estimated Tax Liability</Text>
+                <Text style={styles.taxAmountLabel}>{t('reports.estimatedTaxLiability')}</Text>
                 <Text style={[styles.taxAmountValue, { color: cg.totalEstimatedTax > 0 ? colors.warning : colors.marketUp }]}>
                   {formatCurrency(cg.totalEstimatedTax, true)}
                 </Text>
@@ -571,14 +573,14 @@ export default function ReportsScreen({ navigation }: any) {
                 <View style={[styles.taxCardIcon, { backgroundColor: '#FFC10720' }]}>
                   <Ionicons name="time-outline" size={22} color={colors.warning} />
                 </View>
-                <Text style={styles.taxCardTitle}>Short-Term</Text>
+                <Text style={styles.taxCardTitle}>{t('reports.shortTerm')}</Text>
                 <Text style={[styles.taxCardAmount, { color: cg.shortTerm.gains >= 0 ? colors.marketUp : colors.marketDown }]}>
                   {cg.shortTerm.gains >= 0 ? '+' : ''}{formatCurrency(cg.shortTerm.gains, true)}
                 </Text>
                 <Text style={styles.taxCardDetail}>{cg.shortTerm.count} trades · {cg.shortTerm.taxRate}% tax</Text>
                 <View style={styles.taxCardLine} />
                 <View style={styles.taxCardRow}>
-                  <Text style={styles.taxCardLabel}>Est. Tax</Text>
+                  <Text style={styles.taxCardLabel}>{t('reports.estTax')}</Text>
                   <Text style={[styles.taxCardValue, { color: colors.warning }]}>
                     {formatCurrency(cg.shortTerm.estimatedTax, true)}
                   </Text>
@@ -588,24 +590,24 @@ export default function ReportsScreen({ navigation }: any) {
                 <View style={[styles.taxCardIcon, { backgroundColor: '#00C85320' }]}>
                   <Ionicons name="infinite-outline" size={22} color={colors.marketUp} />
                 </View>
-                <Text style={styles.taxCardTitle}>Long-Term</Text>
+                <Text style={styles.taxCardTitle}>{t('reports.longTerm')}</Text>
                 <Text style={[styles.taxCardAmount, { color: cg.longTerm.gains >= 0 ? colors.marketUp : colors.marketDown }]}>
                   {cg.longTerm.gains >= 0 ? '+' : ''}{formatCurrency(cg.longTerm.gains, true)}
                 </Text>
                 <Text style={styles.taxCardDetail}>{cg.longTerm.count} trades · {cg.longTerm.taxRate}% tax</Text>
                 <View style={styles.taxCardLine} />
                 <View style={styles.taxCardRow}>
-                  <Text style={styles.taxCardLabel}>Exempt (₹1L)</Text>
+                  <Text style={styles.taxCardLabel}>{t('reports.exempt')}</Text>
                   <Text style={styles.taxCardValue}>{formatCurrency(cg.longTerm.exemptLimit, true)}</Text>
                 </View>
                 <View style={styles.taxCardRow}>
-                  <Text style={styles.taxCardLabel}>Taxable</Text>
+                  <Text style={styles.taxCardLabel}>{t('reports.taxable')}</Text>
                   <Text style={[styles.taxCardValue, { color: cg.longTerm.taxableGains > 0 ? colors.warning : colors.marketUp }]}>
                     {formatCurrency(cg.longTerm.taxableGains, true)}
                   </Text>
                 </View>
                 <View style={styles.taxCardRow}>
-                  <Text style={styles.taxCardLabel}>Est. Tax</Text>
+                  <Text style={styles.taxCardLabel}>{t('reports.estTax')}</Text>
                   <Text style={[styles.taxCardValue, { color: colors.warning }]}>
                     {formatCurrency(cg.longTerm.estimatedTax, true)}
                   </Text>
@@ -614,18 +616,18 @@ export default function ReportsScreen({ navigation }: any) {
             </View>
 
             {/* Tax Rules Info */}
-            <Card title="Tax Rules (India FY 2025-26)">
+            <Card title={t('reports.taxRules')}>
               <View style={styles.taxInfoRow}>
                 <Ionicons name="information-circle" size={18} color={colors.primary} />
                 <Text style={styles.taxInfoText}>
-                  STCG on equity: 15% if held ≤12 months
+                  {t('reports.stcgRule')}
                 </Text>
               </View>
               <View style={styles.taxInfoDivider} />
               <View style={styles.taxInfoRow}>
                 <Ionicons name="information-circle" size={18} color={colors.marketUp} />
                 <Text style={styles.taxInfoText}>
-                  LTCG on equity: 10% above ₹1L if held &gt;12 months
+                  {t('reports.ltcgRule')}
                 </Text>
               </View>
               <View style={styles.taxInfoDivider} />
@@ -638,16 +640,14 @@ export default function ReportsScreen({ navigation }: any) {
             </Card>
 
             {/* Tax Saving Tip */}
-            <Card title="Tax Saving Tips">
+            <Card title={t('reports.taxSavingTips')}>
               <View style={styles.taxTipRow}>
                 <View style={styles.taxTipIcon}>
                   <Ionicons name="bulb" size={20} color={colors.warning} />
                 </View>
                 <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.taxTipTitle}>Tax Harvesting</Text>
-                  <Text style={styles.taxTipDesc}>
-                    If your LTCG is close to ₹1L, consider selling and repurchasing to reset your cost basis without paying any tax.
-                  </Text>
+                  <Text style={styles.taxTipTitle}>{t('reports.taxHarvesting')}</Text>
+                  <Text style={styles.taxTipDesc}>{t('reports.taxHarvestingTip')}</Text>
                 </View>
               </View>
               <View style={styles.taxTipDivider} />
@@ -656,9 +656,9 @@ export default function ReportsScreen({ navigation }: any) {
                   <Ionicons name="shield-checkmark" size={20} color={colors.marketUp} />
                 </View>
                 <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.taxTipTitle}>Section 80C — ELSS</Text>
+                  <Text style={styles.taxTipTitle}>{t('reports.section80c')}</Text>
                   <Text style={styles.taxTipDesc}>
-                    Invest up to ₹1.5L in ELSS mutual funds for tax deduction under Section 80C. 3-year lock-in period applies.
+                    {t('reports.section80cTip')}
                   </Text>
                 </View>
               </View>
@@ -672,7 +672,7 @@ export default function ReportsScreen({ navigation }: any) {
         {activeTab === 'holdings' && (
           <>
             {/* Sector Allocation */}
-            <Text style={styles.sectionTitle}>Sector Allocation</Text>
+            <Text style={styles.sectionTitle}>{t('reports.sectorAllocation')}</Text>
             <View style={styles.sectorCard}>
               {analytics.sectorAllocation.map((sector, i) => (
                 <View key={sector.sector}>
@@ -709,7 +709,7 @@ export default function ReportsScreen({ navigation }: any) {
             </View>
 
             {/* Holdings List */}
-            <Text style={styles.sectionTitle}>Holdings</Text>
+            <Text style={styles.sectionTitle}>{t('reports.holdings')}</Text>
             {holdings.length > 0 ? (
               holdings.map(h => (
                 <TouchableOpacity
@@ -751,8 +751,8 @@ export default function ReportsScreen({ navigation }: any) {
               <Card>
                 <View style={styles.emptyState}>
                   <Ionicons name="briefcase-outline" size={48} color={colors.textMuted} />
-                  <Text style={styles.emptyTitle}>No Holdings</Text>
-                  <Text style={styles.emptySubtitle}>Start investing to see your holdings here</Text>
+                  <Text style={styles.emptyTitle}>{t('reports.noHoldings')}</Text>
+                  <Text style={styles.emptySubtitle}>{t('reports.noHoldingsSub')}</Text>
                 </View>
               </Card>
             )}
@@ -765,7 +765,7 @@ export default function ReportsScreen({ navigation }: any) {
         {activeTab === 'history' && (
           <>
             {/* History Chart — longer timeframes */}
-            <Text style={styles.sectionTitle}>Historical P&L</Text>
+            <Text style={styles.sectionTitle}>{t('reports.historicalPnl')}</Text>
             <PnLChart
               data={analytics.pnlHistory}
               timeframe={histPeriod}
@@ -818,11 +818,11 @@ export default function ReportsScreen({ navigation }: any) {
 
               return (
                 <>
-                  <Text style={styles.sectionTitle}>Period Comparison</Text>
+                  <Text style={styles.sectionTitle}>{t('reports.periodComparison')}</Text>
                   <View style={styles.histCardsRow}>
                     {/* Current Period */}
                     <View style={styles.histPeriodCard}>
-                      <Text style={styles.histPeriodLabel}>Current Period</Text>
+                      <Text style={styles.histPeriodLabel}>{t('reports.currentPeriod')}</Text>
                       <Text style={styles.histPeriodDate}>
                         {new Date(currentPeriod[0].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} — {new Date(currentPeriod[currentPeriod.length - 1].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </Text>
@@ -832,23 +832,23 @@ export default function ReportsScreen({ navigation }: any) {
                         <Text style={[styles.histMetricValue, { color: cpReturn >= 0 ? colors.marketUp : colors.marketDown }]}>
                           {cpReturn >= 0 ? '+' : ''}{formatCurrency(cpReturn, true)}
                         </Text>
-                        <Text style={styles.histMetricLabel}>Return</Text>
+                        <Text style={styles.histMetricLabel}>{t('reports.return')}</Text>
                       </View>
                       <View style={styles.histMetricRow}>
                         <Ionicons name="pulse" size={16} color={colors.warning} />
                         <Text style={[styles.histMetricValue, { color: colors.warning }]}>{cpVol.toFixed(1)}%</Text>
-                        <Text style={styles.histMetricLabel}>Volatility</Text>
+                        <Text style={styles.histMetricLabel}>{t('reports.volatility')}</Text>
                       </View>
                       <View style={styles.histMetricRow}>
                         <Ionicons name="checkmark-circle" size={16} color={colors.marketUp} />
                         <Text style={[styles.histMetricValue, { color: colors.marketUp }]}>{cpWin.wins}/{cpWin.total}</Text>
-                        <Text style={styles.histMetricLabel}>Win Days</Text>
+                        <Text style={styles.histMetricLabel}>{t('reports.winDays')}</Text>
                       </View>
                     </View>
 
                     {/* Previous Period */}
                     <View style={styles.histPeriodCard}>
-                      <Text style={styles.histPeriodLabel}>Previous Period</Text>
+                      <Text style={styles.histPeriodLabel}>{t('reports.previousPeriod')}</Text>
                       <Text style={styles.histPeriodDate}>
                         {new Date(previousPeriod[0].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} — {new Date(previousPeriod[previousPeriod.length - 1].date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </Text>
@@ -858,17 +858,17 @@ export default function ReportsScreen({ navigation }: any) {
                         <Text style={[styles.histMetricValue, { color: ppReturn >= 0 ? colors.marketUp : colors.marketDown }]}>
                           {ppReturn >= 0 ? '+' : ''}{formatCurrency(ppReturn, true)}
                         </Text>
-                        <Text style={styles.histMetricLabel}>Return</Text>
+                        <Text style={styles.histMetricLabel}>{t('reports.return')}</Text>
                       </View>
                       <View style={styles.histMetricRow}>
                         <Ionicons name="pulse" size={16} color={colors.warning} />
                         <Text style={[styles.histMetricValue, { color: colors.warning }]}>{ppVol.toFixed(1)}%</Text>
-                        <Text style={styles.histMetricLabel}>Volatility</Text>
+                        <Text style={styles.histMetricLabel}>{t('reports.volatility')}</Text>
                       </View>
                       <View style={styles.histMetricRow}>
                         <Ionicons name="checkmark-circle" size={16} color={colors.marketUp} />
                         <Text style={[styles.histMetricValue, { color: colors.marketUp }]}>{ppWin.wins}/{ppWin.total}</Text>
-                        <Text style={styles.histMetricLabel}>Win Days</Text>
+                        <Text style={styles.histMetricLabel}>{t('reports.winDays')}</Text>
                       </View>
                     </View>
                   </View>
@@ -876,21 +876,21 @@ export default function ReportsScreen({ navigation }: any) {
                   {/* Comparison Delta Bar */}
                   <View style={styles.histDeltaRow}>
                     <View style={styles.histDeltaItem}>
-                      <Text style={styles.histDeltaLabel}>Return Change</Text>
+                      <Text style={styles.histDeltaLabel}>{t('reports.returnChange')}</Text>
                       <Text style={[styles.histDeltaValue, { color: cpReturn >= ppReturn ? colors.marketUp : colors.marketDown }]}>
                         {cpReturn >= ppReturn ? '+' : ''}{formatCurrency(cpReturn - ppReturn, true)}
                       </Text>
                     </View>
                     <View style={styles.histDeltaDivider} />
                     <View style={styles.histDeltaItem}>
-                      <Text style={styles.histDeltaLabel}>Volatility Change</Text>
+                      <Text style={styles.histDeltaLabel}>{t('reports.volatilityChange')}</Text>
                       <Text style={[styles.histDeltaValue, { color: cpVol <= ppVol ? colors.marketUp : colors.marketDown }]}>
                         {cpVol >= ppVol ? '+' : ''}{(cpVol - ppVol).toFixed(1)}%
                       </Text>
                     </View>
                     <View style={styles.histDeltaDivider} />
                     <View style={styles.histDeltaItem}>
-                      <Text style={styles.histDeltaLabel}>Win Rate Change</Text>
+                      <Text style={styles.histDeltaLabel}>{t('reports.winRateChange')}</Text>
                       <Text style={[styles.histDeltaValue, { color: (cpWin.wins / cpWin.total) >= (ppWin.wins / ppWin.total) ? colors.marketUp : colors.marketDown }]}>
                         {((cpWin.wins / cpWin.total) - (ppWin.wins / ppWin.total) >= 0 ? '+' : '')}{(((cpWin.wins / cpWin.total) - (ppWin.wins / ppWin.total)) * 100).toFixed(1)}%
                       </Text>
@@ -925,7 +925,7 @@ export default function ReportsScreen({ navigation }: any) {
 
               return (
                 <>
-                  <Text style={styles.sectionTitle}>Yearly Returns</Text>
+                  <Text style={styles.sectionTitle}>{t('reports.yearlyReturns')}</Text>
                   <View style={styles.yearlyCard}>
                     {years.map(([year, data], i) => {
                       const isPos = data.return >= 0;
@@ -946,7 +946,7 @@ export default function ReportsScreen({ navigation }: any) {
                               <Text style={[styles.yearReturn, { color: isPos ? colors.marketUp : colors.marketDown }]}>
                                 {isPos ? '+' : ''}{formatCurrency(data.return, true)}
                               </Text>
-                              <Text style={styles.yearMonths}>{data.months} months</Text>
+                              <Text style={styles.yearMonths}>{data.months} {t('reports.months')}</Text>
                             </View>
                           </View>
                           {/* Yearly performance bar */}
@@ -980,39 +980,39 @@ export default function ReportsScreen({ navigation }: any) {
               const winRatePct = totalDays > 0 ? (positiveDays / totalDays * 100).toFixed(0) : '0';
 
               return (
-                <Card title="Full Period Summary">
+                <Card title={t('reports.fullPeriodSummary')}>
                   <View style={styles.histSummaryGrid}>
                     <View style={styles.histSummaryItem}>
                       <Ionicons name="cash-outline" size={20} color={totalReturnOverPeriod >= 0 ? colors.marketUp : colors.marketDown} style={{ marginBottom: 4 }} />
                       <Text style={[styles.histSummaryValue, { color: totalReturnOverPeriod >= 0 ? colors.marketUp : colors.marketDown }]}>
                         {totalReturnOverPeriod >= 0 ? '+' : ''}{formatCurrency(totalReturnOverPeriod, true)}
                       </Text>
-                      <Text style={styles.histSummaryLabel}>Total P&L</Text>
+                      <Text style={styles.histSummaryLabel}>{t('reports.totalPnl')}</Text>
                     </View>
                     <View style={styles.histSummaryItem}>
                       <Ionicons name="arrow-up-circle" size={20} color={colors.marketUp} style={{ marginBottom: 4 }} />
                       <Text style={[styles.histSummaryValue, { color: colors.marketUp }]}>{formatCurrency(peak, true)}</Text>
-                      <Text style={styles.histSummaryLabel}>Peak</Text>
+                      <Text style={styles.histSummaryLabel}>{t('reports.peak')}</Text>
                     </View>
                     <View style={styles.histSummaryItem}>
                       <Ionicons name="arrow-down-circle" size={20} color={colors.marketDown} style={{ marginBottom: 4 }} />
                       <Text style={[styles.histSummaryValue, { color: colors.marketDown }]}>{formatCurrency(trough, true)}</Text>
-                      <Text style={styles.histSummaryLabel}>Trough</Text>
+                      <Text style={styles.histSummaryLabel}>{t('reports.trough')}</Text>
                     </View>
                     <View style={styles.histSummaryItem}>
                       <Ionicons name="resize" size={20} color={colors.warning} style={{ marginBottom: 4 }} />
                       <Text style={[styles.histSummaryValue, { color: colors.warning }]}>{formatCurrency(range, true)}</Text>
-                      <Text style={styles.histSummaryLabel}>Range</Text>
+                      <Text style={styles.histSummaryLabel}>{t('reports.range')}</Text>
                     </View>
                     <View style={styles.histSummaryItem}>
                       <Ionicons name="checkmark-done" size={20} color={colors.marketUp} style={{ marginBottom: 4 }} />
                       <Text style={[styles.histSummaryValue, { color: colors.marketUp }]}>{positiveDays}/{totalDays}</Text>
-                      <Text style={styles.histSummaryLabel}>Positive Days</Text>
+                      <Text style={styles.histSummaryLabel}>{t('reports.positiveDays')}</Text>
                     </View>
                     <View style={styles.histSummaryItem}>
                       <Ionicons name="analytics" size={20} color={colors.primary} style={{ marginBottom: 4 }} />
                       <Text style={[styles.histSummaryValue, { color: colors.primary }]}>{winRatePct}%</Text>
-                      <Text style={styles.histSummaryLabel}>Day Win Rate</Text>
+                      <Text style={styles.histSummaryLabel}>{t('reports.dayWinRate')}</Text>
                     </View>
                   </View>
                 </Card>
@@ -1033,8 +1033,8 @@ export default function ReportsScreen({ navigation }: any) {
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>Export Report</Text>
-            <Text style={styles.modalSubtitle}>Choose a format to download your portfolio report</Text>
+            <Text style={styles.modalTitle}>{t('reports.exportReport')}</Text>
+            <Text style={styles.modalSubtitle}>{t('reports.exportSubtitle')}</Text>
 
             <TouchableOpacity
               style={styles.exportOption}
@@ -1045,8 +1045,8 @@ export default function ReportsScreen({ navigation }: any) {
                 <Ionicons name="document-text" size={22} color={colors.primary} />
               </View>
               <View style={styles.exportOptionText}>
-                <Text style={styles.exportOptionLabel}>PDF Report</Text>
-                <Text style={styles.exportOptionDesc}>Styled report with tables &amp; charts — perfect for printing or sharing</Text>
+                <Text style={styles.exportOptionLabel}>{t('reports.pdfReport')}</Text>
+                <Text style={styles.exportOptionDesc}>{t('reports.pdfReportDesc')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
@@ -1060,8 +1060,8 @@ export default function ReportsScreen({ navigation }: any) {
                 <Ionicons name="grid" size={22} color={colors.accent} />
               </View>
               <View style={styles.exportOptionText}>
-                <Text style={styles.exportOptionLabel}>CSV (Spreadsheet)</Text>
-                <Text style={styles.exportOptionDesc}>Raw data for Excel, Google Sheets, or other analysis tools</Text>
+                <Text style={styles.exportOptionLabel}>{t('reports.csvSpreadsheet')}</Text>
+                <Text style={styles.exportOptionDesc}>{t('reports.csvDesc')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
@@ -1070,7 +1070,7 @@ export default function ReportsScreen({ navigation }: any) {
               style={styles.exportCancel}
               onPress={() => setShowExportModal(false)}
             >
-              <Text style={styles.exportCancelText}>Cancel</Text>
+              <Text style={styles.exportCancelText}>{t('app.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

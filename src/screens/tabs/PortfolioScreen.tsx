@@ -346,7 +346,7 @@ export default function PortfolioScreen({ navigation }: any) {
                     </View>
                     <View style={styles.dividendSummaryRight}>
                       <Text style={[styles.dividendSummaryQty, { color: colors.textSecondary }]}>{d.quantity} {t('portfolio.shares')}</Text>
-                      <Text style={[styles.dividendSummaryAmount, { color: colors.marketUp }]}>+₹{d.annualAmount.toFixed(0)}/yr</Text>
+                      <Text style={[styles.dividendSummaryAmount, { color: colors.marketUp }]}>+₹{d.annualAmount.toFixed(0)}{t('portfolio.annualYield')}</Text>
                     </View>
                   </View>
                 ))}
@@ -474,7 +474,7 @@ export default function PortfolioScreen({ navigation }: any) {
               <View style={{ flex: 1 }}>
                 <Text style={[styles.analyticsCtaTitle, { color: colors.text }]}>{t('portfolio.advancedAnalytics')}</Text>
                 <Text style={[styles.analyticsCtaSub, { color: colors.textSecondary }]}>
-                  P&L charts · Sharpe: {a.sharpeRatio.toFixed(1)} · Win rate: {a.winRate.toFixed(0)}% · Tax reports
+                  {t('portfolio.pnlCharts')} · Sharpe: {a.sharpeRatio.toFixed(1)} · {t('portfolio.winRate')}: {a.winRate.toFixed(0)}% · {t('portfolio.taxReports')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />

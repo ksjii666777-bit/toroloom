@@ -25,6 +25,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useBiometricStore } from '../../store/biometricStore';
 import { useAuthStore } from '../../store/authStore';
 import { biometricAuth } from '../../services/biometricService';
@@ -35,6 +36,7 @@ import Card from '../../components/ui/Card';
 
 export default function SecuritySettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   const {
@@ -71,9 +73,9 @@ export default function SecuritySettingsScreen({ navigation }: any) {
       // Turning ON — first check if biometrics are available
       if (!biometricAvailable) {
         Alert.alert(
-          'Biometrics Not Available',
+          t('security.biometricsNotAvailable'),
           `${biometricLabel} is not set up on this device.\n\nTo enable:\n${biometricLabel === 'Face ID' ? 'Settings → Face ID & Passcode → Enroll Face' : 'Settings → Security → Fingerprint → Add fingerprint'}`,
-          [{ text: 'OK' }],
+          [{ text: t('app.ok') }],
         );
         return;
       }
@@ -81,12 +83,12 @@ export default function SecuritySettingsScreen({ navigation }: any) {
       // Verify with biometric before enabling
       triggerHaptic(ImpactFeedbackStyle.Medium);
       const result = await biometricAuth.authenticate(
-        `Enable ${biometricLabel} to unlock Toroloom`,
+        t('security.enableBioToUnlock', { biometric: biometricLabel }),
         true,
       );
 
       if (!result.success) {
-        Alert.alert('Verification Failed', result.error || 'Could not verify your identity.');
+        Alert.alert(t('security.verificationFailed'), result.error || t('security.verifyFailedMsg'));
         return;
       }
     }
@@ -103,14 +105,14 @@ export default function SecuritySettingsScreen({ navigation }: any) {
   const handleTestBiometric = async () => {
     triggerHaptic(ImpactFeedbackStyle.Medium);
     const result = await biometricAuth.authenticate(
-      `Verify your identity with ${biometricLabel}`,
+      t('security.verifyIdentityWith', { biometric: biometricLabel }),
       true,
     );
 
     if (result.success) {
-      Alert.alert('✅ Verified', `${biometricLabel} authentication successful!`);
+      Alert.alert(t('security.verified'), t('security.bioAuthSuccessful', { biometric: biometricLabel }));
     } else if (result.error !== 'Authentication cancelled') {
-      Alert.alert('❌ Failed', result.error || 'Authentication failed');
+      Alert.alert(t('security.failed'), result.error || t('security.authFailed'));
     }
   };
 
@@ -126,17 +128,17 @@ export default function SecuritySettingsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View>
-            <Text style={styles.title}>Security</Text>
+            <Text style={styles.title}>{t('security.title')}</Text>
             <Text style={styles.subtitle}>
-              Biometric authentication settings
+              {t('security.biometricSettings')}
             </Text>
           </View>
         </View>
 
         {/* Device Status Card */}
         <Card
-          title="Device Status"
-          subtitle="Your device's biometric capabilities"
+          title={t('security.deviceStatus')}
+          subtitle={t('security.deviceStatusSub')}
         >
           <View style={styles.statusRow}>
             <View style={[styles.statusIcon, {
@@ -153,15 +155,15 @@ export default function SecuritySettingsScreen({ navigation }: any) {
             <View style={styles.statusInfo}>
               <Text style={[styles.statusLabel, { color: colors.text }]}>
                 {isChecking
-                  ? 'Checking...'
+                  ? t('status.loading')
                   : biometricAvailable
-                    ? `${biometricLabel} Available`
-                    : `${biometricLabel} Not Available`}
+                    ? t('security.biometricAvailable', { biometric: biometricLabel })
+                    : t('security.biometricNotAvailable', { biometric: biometricLabel })}
               </Text>
               <Text style={[styles.statusDesc, { color: colors.textMuted }]}>
                 {biometricAvailable
-                  ? `Your device supports ${biometricLabel} authentication`
-                  : `Set up ${biometricLabel} in your device settings to enable`}
+                  ? t('security.deviceSupports', { biometric: biometricLabel })
+                  : t('security.setupToEnable', { biometric: biometricLabel })}
               </Text>
             </View>
           </View>
@@ -187,7 +189,7 @@ export default function SecuritySettingsScreen({ navigation }: any) {
               >
                 <Ionicons name="play" size={14} color={colors.primary} />
                 <Text style={[styles.testBtnText, { color: colors.primary }]}>
-                  Test
+                  {t('security.test')}
                 </Text>
               </TouchableOpacity>
             )}
@@ -196,8 +198,8 @@ export default function SecuritySettingsScreen({ navigation }: any) {
 
         {/* App Unlock Setting */}
         <Card
-          title="App Unlock"
-          subtitle={`Require ${biometricLabel} to unlock the app`}
+          title={t('security.appUnlock')}
+          subtitle={t('security.appUnlockSub', { biometric: biometricLabel })}
           style={{ marginTop: SPACING.md }}
         >
           <View style={styles.settingRow}>
@@ -210,13 +212,13 @@ export default function SecuritySettingsScreen({ navigation }: any) {
               <View style={{ flex: 1 }}>
                 <Text style={[styles.settingLabel, { color: colors.text }]}>
                   {enabled
-                    ? `${biometricLabel} Lock is ON`
-                    : `${biometricLabel} Lock is OFF`}
+                    ? t('security.lockOn', { biometric: biometricLabel })
+                    : t('security.lockOff', { biometric: biometricLabel })}
                 </Text>
                 <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
                   {enabled
-                    ? `App will require ${biometricLabel} when opened from background`
-                    : 'App will open without authentication'}
+                    ? t('security.requireWhenBg', { biometric: biometricLabel })
+                    : t('security.noAuth')}
                 </Text>
               </View>
             </View>
@@ -232,8 +234,8 @@ export default function SecuritySettingsScreen({ navigation }: any) {
 
         {/* Trade Confirmation Setting */}
         <Card
-          title="Trade Confirmation"
-          subtitle={`Require ${biometricLabel} before placing orders`}
+          title={t('security.tradeConfirmation')}
+          subtitle={t('security.requireBioBefore', { biometric: biometricLabel })}
           style={{ marginTop: SPACING.md }}
         >
           <View style={styles.settingRow}>
@@ -246,13 +248,13 @@ export default function SecuritySettingsScreen({ navigation }: any) {
               <View style={{ flex: 1 }}>
                 <Text style={[styles.settingLabel, { color: colors.text }]}>
                   {requireForTrades
-                    ? 'Confirm Trades with Biometrics'
-                    : 'No biometric confirmation for trades'}
+                    ? t('security.confirmTradesBio')
+                    : t('security.noBioConfirmation')}
                 </Text>
                 <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
                   {requireForTrades
-                    ? `Require ${biometricLabel} before executing buy/sell orders`
-                    : 'Orders will be placed without biometric confirmation'}
+                    ? t('security.requireBioExecuting', { biometric: biometricLabel })
+                    : t('security.ordersWithoutBio')}
                 </Text>
               </View>
             </View>
@@ -272,7 +274,7 @@ export default function SecuritySettingsScreen({ navigation }: any) {
             }]}>
               <Ionicons name="warning" size={16} color={colors.marketDown} />
               <Text style={[styles.warningText, { color: colors.marketDown }]}>
-                Trade confirmation is disabled. Orders can be placed without biometric verification.
+                {t('security.tradeConfirmWarning')}
               </Text>
             </View>
           )}
@@ -280,39 +282,36 @@ export default function SecuritySettingsScreen({ navigation }: any) {
 
         {/* Info Card */}
         <Card
-          title="How It Works"
-          subtitle="About biometric authentication"
+          title={t('security.howItWorks')}
+          subtitle={t('security.howItWorksSub')}
           style={{ marginTop: SPACING.md }}
         >
           <View style={styles.infoRow}>
             <Ionicons name="phone-portrait" size={20} color={colors.textMuted} />
             <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              Uses your device's built-in {biometricLabel.toLowerCase()} sensor.
-              Biometric data never leaves your device.
+              {t('security.usesBuiltIn', { biometric: biometricLabel.toLowerCase() })}
             </Text>
           </View>
           <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.infoRow}>
             <Ionicons name="shield-checkmark" size={20} color={colors.textMuted} />
             <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              When enabled, the app locks when sent to background and requires
-              authentication to resume.
+              {t('security.whenEnabled')}
             </Text>
           </View>
           <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.infoRow}>
             <Ionicons name="trending-up" size={20} color={colors.textMuted} />
             <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              Trade confirmation adds an extra security layer before placing
-              buy/sell orders.
+              {t('security.tradeAddSecurity')}
             </Text>
           </View>
         </Card>
 
         {/* Audit Log Section */}
         <Card
-          title="Audit Log"
-          subtitle="Login history & session management"
+          title={t('security.auditLog')}
+          subtitle={t('security.auditLogSub')}
           style={{ marginTop: SPACING.md }}
         >
           <AnimatedPressable
@@ -327,10 +326,10 @@ export default function SecuritySettingsScreen({ navigation }: any) {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.settingLabel, { color: colors.text }]}>
-                    Security Audit Log
+                    {t('security.securityAuditLog')}
                   </Text>
                   <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                    Review login history & manage active sessions
+                    {t('security.reviewLoginHistory')}
                   </Text>
                 </View>
               </View>
@@ -341,8 +340,8 @@ export default function SecuritySettingsScreen({ navigation }: any) {
 
         {/* Two-Factor Authentication Section */}
         <Card
-          title="Two-Factor Authentication"
-          subtitle="Add an extra layer of security"
+          title={t('security.twoFactor')}
+          subtitle={t('security.twoFactorSub')}
           style={{ marginTop: SPACING.md }}
         >
           <AnimatedPressable
@@ -357,10 +356,10 @@ export default function SecuritySettingsScreen({ navigation }: any) {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.settingLabel, { color: colors.text }]}>
-                    Two-Factor Authentication
+                    {t('security.twoFactor')}
                   </Text>
                   <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                    TOTP-based 2FA via authenticator app
+                    {t('security.totpBased')}
                   </Text>
                 </View>
               </View>
@@ -370,10 +369,9 @@ export default function SecuritySettingsScreen({ navigation }: any) {
           </AnimatedPressable>
         </Card>
 
-          {/* Developer Section */}
-        <Card
-          title="Developer"
-          subtitle="Admin tools & settings"
+          {/* Developer Section */}          <Card
+          title={t('security.developer')}
+          subtitle={t('security.developerSub')}
           style={{ marginTop: SPACING.md }}
         >
           <View style={styles.settingRow}>
@@ -389,12 +387,12 @@ export default function SecuritySettingsScreen({ navigation }: any) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.settingLabel, { color: colors.text }]}>
-                  Admin Mode
+                  {t('security.adminMode')}
                 </Text>
                 <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
                   {isAdmin
-                    ? 'Coupon Manager & admin tools are visible in the menu'
-                    : 'Enable to access admin tools & Coupon Manager'}
+                    ? t('security.adminModeEnabled')
+                    : t('security.adminModeDisabled')}
                 </Text>
               </View>
             </View>
@@ -416,7 +414,7 @@ export default function SecuritySettingsScreen({ navigation }: any) {
             }]}>
               <Ionicons name="warning" size={16} color={colors.warning} />
               <Text style={[styles.warningText, { color: colors.warning }]}>
-                Admin mode is enabled. Coupon Manager and other admin tools are accessible from the More menu.
+                {t('security.adminModeWarning')}
               </Text>
             </View>
           )}

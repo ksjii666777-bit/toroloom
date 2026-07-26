@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNotificationStore } from '../store/notificationStore';
 import { useTheme } from '../context/ThemeContext';
+import { useT } from '../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../constants/theme';
 import { formatRelativeTime } from '../utils/formatters';
 import Card from '../components/ui/Card';
@@ -25,18 +26,9 @@ const NOTIFICATION_ICONS: Record<string, { icon: string; color: string }> = {
   sentiment_alert: { icon: 'pulse', color: '#8B5CF6' },
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  price_alert: 'Price Alert',
-  trade: 'Trade',
-  educational: 'Learning',
-  news: 'News',
-  system: 'System',
-  portfolio_alert: 'Portfolio Alert',
-  sentiment_alert: 'Sentiment Alert',
-};
-
 export default function NotificationsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const {
     notifications,
     preferences,
@@ -72,7 +64,7 @@ export default function NotificationsScreen({ navigation }: any) {
     filteredNotifications.forEach(n => {
       const notifDate = new Date(n.timestamp).toDateString();
       const key = notifDate === today
-        ? 'Today'
+        ? t('time.today')
         : new Date(n.timestamp).toLocaleDateString('en-IN', {
             weekday: 'long',
             month: 'short',
@@ -83,22 +75,22 @@ export default function NotificationsScreen({ navigation }: any) {
     });
 
     return Object.entries(grouped).map(([title, data]) => ({ title, data }));
-  }, [filteredNotifications]);
+  }, [filteredNotifications, t]);
 
   const tabs = [
-    { key: 'all', label: 'All', icon: 'notifications' },
-    { key: 'alerts', label: 'Alerts', icon: 'trending-up' },
-    { key: 'trades', label: 'Trades', icon: 'swap-horizontal' },
-    { key: 'learning', label: 'Learning', icon: 'school' },
+    { key: 'all', label: t('notifications.tabAll'), icon: 'notifications' },
+    { key: 'alerts', label: t('notifications.tabAlerts'), icon: 'trending-up' },
+    { key: 'trades', label: t('notifications.tabTrades'), icon: 'swap-horizontal' },
+    { key: 'learning', label: t('notifications.tabLearning'), icon: 'school' },
   ] as const;
 
   const handleClearAll = () => {
     Alert.alert(
-      'Clear All Notifications',
-      'Are you sure you want to remove all notifications?',
+      t('notifications.clearAllTitle'),
+      t('notifications.clearAllMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', style: 'destructive', onPress: clearAll },
+        { text: t('app.cancel'), style: 'cancel' },
+        { text: t('notifications.clear'), style: 'destructive', onPress: clearAll },
       ],
     );
   };
@@ -123,9 +115,9 @@ export default function NotificationsScreen({ navigation }: any) {
           navigation.navigate(screen, notification.data || {});
         }}
         onLongPress={() => {
-          Alert.alert('Notification', 'Remove this notification?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Remove', style: 'destructive', onPress: () => removeNotification(notification.id) },
+          Alert.alert(t('notifications.removeTitle'), t('notifications.removeMsg'), [
+            { text: t('app.cancel'), style: 'cancel' },
+            { text: t('notifications.remove'), style: 'destructive', onPress: () => removeNotification(notification.id) },
           ]);
         }}
       >
@@ -147,7 +139,7 @@ export default function NotificationsScreen({ navigation }: any) {
           <View style={styles.notifFooter}>
             <View style={[styles.typeBadge, { backgroundColor: meta.color + '20' }]}>
               <Text style={[styles.typeLabel, { color: meta.color }]}>
-                {TYPE_LABELS[notification.type] || notification.type}
+                {t(`notifications.${notification.type === 'price_alert' ? 'typePriceAlert' : notification.type === 'portfolio_alert' ? 'typePortfolioAlert' : notification.type === 'sentiment_alert' ? 'typeSentimentAlert' : notification.type === 'educational' ? 'typeEducational' : notification.type === 'trade' ? 'typeTrade' : notification.type === 'news' ? 'typeNews' : notification.type === 'system' ? 'typeSystem' : 'type' + notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}`) || notification.type}
               </Text>
             </View>
             {!notification.read && <View style={styles.unreadDot} />}
@@ -400,11 +392,11 @@ export default function NotificationsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View>
-            <Text style={styles.headerTitle}>Notifications</Text>
+            <Text style={styles.headerTitle}>{t('notifications.title')}</Text>
             <Text style={styles.headerSubtitle}>
               {unreadCountLocal > 0
-                ? `${unreadCountLocal} unread notification${unreadCountLocal > 1 ? 's' : ''}`
-                : 'All caught up! ✅'}
+                ? t('notifications.unread', { count: unreadCountLocal })
+                : t('notifications.allCaughtUp')}
             </Text>
           </View>
           <View style={styles.headerActions}>
@@ -446,13 +438,13 @@ export default function NotificationsScreen({ navigation }: any) {
         {/* Price Alert Rules */}
         {activeTab === 'all' && priceAlertRules.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Active Price Alerts</Text>
+            <Text style={styles.sectionTitle}>{t('notifications.activePriceAlerts')}</Text>
             {priceAlertRules.filter(r => !r.triggered).map(rule => (
               <View key={rule.id} style={styles.alertRuleCard}>
                 <View style={styles.alertRuleInfo}>
                   <Text style={styles.alertRuleSymbol}>{rule.symbol}</Text>
                   <Text style={styles.alertRuleTarget}>
-                    {rule.direction === 'above' ? '⬆ Above' : '⬇ Below'} ₹{rule.targetPrice.toFixed(2)}
+                    {rule.direction === 'above' ? t('notifications.above') : t('notifications.below')} ₹{rule.targetPrice.toFixed(2)}
                   </Text>
                 </View>
                 <Pressable
@@ -469,13 +461,13 @@ export default function NotificationsScreen({ navigation }: any) {
         {/* Notification Preferences (inline settings) */}
         {activeTab === 'all' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notification Preferences</Text>
+            <Text style={styles.sectionTitle}>{t('notifications.preferences')}</Text>
             <Card>
               {([
-                { key: 'priceAlerts' as const, label: 'Price Alerts', icon: 'trending-up', color: '#FFC107', desc: 'Stock price movements & targets' },
-                { key: 'tradeConfirmations' as const, label: 'Trade Confirmations', icon: 'swap-horizontal', color: '#00C853', desc: 'Buy/sell order updates' },
-                { key: 'educationalReminders' as const, label: 'Learning Reminders', icon: 'school', color: '#6C63FF', desc: 'Course & quiz notifications' },
-                { key: 'systemUpdates' as const, label: 'System Updates', icon: 'settings', color: '#6E6E9A', desc: 'KYC, account & app updates' },
+                { key: 'priceAlerts' as const, label: t('notifications.priceAlerts'), icon: 'trending-up', color: '#FFC107', desc: t('notifications.prefPriceAlertsDesc') },
+                { key: 'tradeConfirmations' as const, label: t('notifications.tradeConfirmations'), icon: 'swap-horizontal', color: '#00C853', desc: t('notifications.prefTradeConfirmationsDesc') },
+                { key: 'educationalReminders' as const, label: t('notifications.prefEducationalReminders'), icon: 'school', color: '#6C63FF', desc: t('notifications.prefEducationalRemindersDesc') },
+                { key: 'systemUpdates' as const, label: t('notifications.systemUpdates'), icon: 'settings', color: '#6E6E9A', desc: t('notifications.prefSystemUpdatesDesc') },
               ] as const).map(item => (
                 <View key={item.key} style={styles.prefItem}>
                   <View style={[styles.prefIcon, { backgroundColor: item.color + '20' }]}>
@@ -500,8 +492,8 @@ export default function NotificationsScreen({ navigation }: any) {
                   <Ionicons name="speedometer" size={18} color="#FFC107" />
                 </View>
                 <View style={styles.prefInfo}>
-                  <Text style={styles.prefLabel}>Alert Threshold</Text>
-                  <Text style={styles.prefDesc}>{preferences.priceAlertThreshold}% price change</Text>
+                  <Text style={styles.prefLabel}>{t('notifications.alertThreshold')}</Text>
+                  <Text style={styles.prefDesc}>{t('notifications.priceChange', { percent: preferences.priceAlertThreshold })}</Text>
                 </View>
               </View>
             </Card>
@@ -519,11 +511,11 @@ export default function NotificationsScreen({ navigation }: any) {
         ) : (
           <View style={styles.emptyState}>
             <Ionicons name="notifications-off-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>No Notifications</Text>
+            <Text style={styles.emptyTitle}>{t('notifications.noNotifications')}</Text>
             <Text style={styles.emptyDesc}>
               {activeTab === 'all'
-                ? "You're all caught up! Notifications will appear here."
-                : `No ${activeTab} notifications yet.`}
+                ? t('notifications.caughtUpMsg')
+                : t('notifications.noTabNotifications', { tab: activeTab })}
             </Text>
           </View>
         )}

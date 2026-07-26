@@ -137,6 +137,88 @@ vi.mock('../../constants/mockData', () => {
 
 import CourseDetailScreen from '../screens/education/CourseDetailScreen';
 
+// ==================== Mock useT hook ====================
+const education: Record<string, string> = {
+    'aboutThisCourse': 'About this Course',
+    'completed': 'Completed',
+    'continueLearning': 'Continue Learning',
+    'courseNotFound': 'Course not found',
+    'courseProgress': 'Course Progress',
+    'duration': 'Duration',
+    'enrolled': 'enrolled',
+    'getCertificate': '🎓 Get Certificate',
+    'lessonDone': 'Done',
+    'lessonQuiz': 'Quiz',
+    'lessonsProgress': 'Lessons ({{completed}}/{{total}})',
+    'nextLesson': 'Next Lesson',
+    'rating': 'rating',
+    'remainingCount': 'Remaining',
+    'startCourse': 'Start Course',
+    'viewCertificate': 'View Certificate',
+};
+
+const translations: Record<string, any> = {
+  education,
+};
+
+
+function resolveT(key: string, params?: Record<string, any>): string {
+  const parts = key.split('.');
+  const rootNs = parts[0];
+  const subKey = parts.slice(1).join('.');
+
+  const obj = translations[rootNs];
+  if (!obj) {
+    const parts2 = key.split('.');
+    const lastSeg = parts2[parts2.length - 1] || key;
+    return lastSeg
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (s: string) => s.toUpperCase())
+      .trim();
+  }
+
+  if (params && params.count !== undefined && params.count !== 1) {
+    const pluralKey = subKey + '_plural';
+    if (pluralKey in obj && typeof obj[pluralKey] === 'string') {
+      let result: string = obj[pluralKey];
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+      return result;
+    }
+  }
+
+  if (subKey in obj && typeof obj[subKey] === 'string') {
+    let result: string = obj[subKey];
+    if (params) {
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+    }
+    return result;
+  }
+
+  const lastSeg = parts[parts.length - 1] || key;
+  return lastSeg
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s: string) => s.toUpperCase())
+    .trim();
+}
+
+
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+  default: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
+
+
 // ==================== Helpers ====================
 
 function advanceAndRender(ms: number) {

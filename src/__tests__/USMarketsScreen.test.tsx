@@ -24,6 +24,8 @@ vi.mock('../services/api/globalMarkets', () => ({
     getStocks: vi.fn().mockResolvedValue(null),
     getIndices: vi.fn().mockResolvedValue(null),
     getCrypto: vi.fn().mockResolvedValue(null),
+    getEuropeanStocks: vi.fn().mockResolvedValue(null),
+    getAsianStocks: vi.fn().mockResolvedValue(null),
   },
 }));
 
@@ -207,9 +209,9 @@ describe('USMarketsScreen — Search Functionality', () => {
     });
     await advanceAndFlush();
 
-    // The stocks tab should render at least one stock name
-    const techSector = getByText(/Technology/);
-    expect(techSector).not.toBeNull();
+    // The stocks tab should render stock symbols from mock data
+    const stockSymbol = getByText('AAPL');
+    expect(stockSymbol).not.toBeNull();
   });
 });
 

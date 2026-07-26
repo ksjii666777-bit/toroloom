@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -18,6 +19,7 @@ const CHART_HEIGHT = 160;
 
 export default function LumpsumCalculator() {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
@@ -76,7 +78,7 @@ export default function LumpsumCalculator() {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Ionicons name="briefcase" size={20} color={colors.accent} />
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Lumpsum Calculator</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.lumpsum')}</Text>
         </View>
         <TouchableOpacity onPress={handleClear} style={[styles.clearBtn, { backgroundColor: colors.bgCard }]}>
           <Ionicons name="refresh" size={18} color={colors.textMuted} />
@@ -91,17 +93,17 @@ export default function LumpsumCalculator() {
       >
         {/* Result Card */}
         <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.maturityLabel, { color: colors.textMuted }]}>Maturity Amount</Text>
+          <Text style={[styles.maturityLabel, { color: colors.textMuted }]}>{t('calculators.maturityValue')}</Text>
           <Text style={[styles.maturityAmount, { color: colors.text }]}>{formatCurrency(maturityAmount)}</Text>
 
           <View style={[styles.resultRow, { borderTopColor: colors.divider }]}>
             <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>Principal</Text>
+              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
               <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
             </View>
             <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>Est. Returns</Text>
+              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.totalReturns')}</Text>
               <Text style={[styles.resultValue, { color: colors.accent }]}>{formatCurrency(estimatedReturns)}</Text>
             </View>
           </View>
@@ -110,7 +112,7 @@ export default function LumpsumCalculator() {
         {/* Growth Chart */}
         {yearlyData.length > 0 && (
           <View style={[styles.chartCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Yearly Growth</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.yearlyGrowth')}</Text>
             <View style={styles.chartContainer}>
               <View style={styles.chartBars}>
                 {yearlyData.map((d) => {
@@ -139,11 +141,11 @@ export default function LumpsumCalculator() {
               <View style={[styles.legendRow, { borderTopColor: colors.divider }]}>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: colors.primary, opacity: 0.8 }]} />
-                  <Text style={[styles.legendText, { color: colors.textMuted }]}>Portfolio Value</Text>
+                  <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('calculators.portfolioValue')}</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: colors.textMuted, opacity: 0.3 }]} />
-                  <Text style={[styles.legendText, { color: colors.textMuted }]}>Principal</Text>
+                  <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
                 </View>
               </View>
             </View>
@@ -152,10 +154,10 @@ export default function LumpsumCalculator() {
 
         {/* Inputs */}
         <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Investment Details</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.investmentDetails')}</Text>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Lumpsum Amount (₹)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.lumpsumAmount')}</Text>
             <TextInput
               style={[styles.input, inputStyle(investment)]}
               value={investment}
@@ -180,7 +182,7 @@ export default function LumpsumCalculator() {
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Expected Return (% p.a.)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.expectedReturnLabel')}</Text>
             <TextInput
               style={[styles.input, inputStyle(expectedReturn)]}
               value={expectedReturn}
@@ -203,7 +205,7 @@ export default function LumpsumCalculator() {
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Investment Period (Years)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.investmentPeriod')}</Text>
             <TextInput
               style={[styles.input, inputStyle(tenureYears)]}
               value={tenureYears}
@@ -229,7 +231,7 @@ export default function LumpsumCalculator() {
         {/* Summary */}
         {maturityAmount > 0 && (
           <View style={[styles.summaryCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Summary</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.quickSummary')}</Text>
             <View style={styles.summaryRow}>
               <Ionicons name="analytics-outline" size={18} color={colors.textMuted} />
               <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
@@ -241,7 +243,7 @@ export default function LumpsumCalculator() {
               </Text>
             </View>
             <View style={[styles.summaryRatio, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.ratioLabel, { color: colors.textMuted }]}>Wealth Growth Factor</Text>
+              <Text style={[styles.ratioLabel, { color: colors.textMuted }]}>{t('calculators.wealthGrowthFactor')}</Text>
               <Text style={[styles.ratioValue, { color: colors.accent }]}>
                 {principal > 0 ? `${(maturityAmount / principal).toFixed(2)}x` : '—'}
               </Text>
@@ -253,7 +255,7 @@ export default function LumpsumCalculator() {
         <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="information-circle-outline" size={16} color={colors.primary} style={{ marginRight: 8 }} />
           <Text style={[styles.infoText, { color: colors.textMuted }]}>
-            Returns shown are estimated based on the expected rate of return. Actual returns may vary based on market conditions.
+            {t('calculators.sipInfo')}
           </Text>
         </View>
       </ScrollView>

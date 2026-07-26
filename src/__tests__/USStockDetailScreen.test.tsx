@@ -9,6 +9,38 @@
  * ============================================================================
  */
 
+// Mock FullscreenChartModal to avoid StatusBar.setHidden issue
+vi.mock('../components/stock/FullscreenChartModal', () => ({
+  default: 'FullscreenChartModalMock',
+}));
+
+// Mock patternSettingsStore to prevent Zustand subscription loop
+const patternSettings = {
+  minConfidence: 50, enabledPatterns: [], lookback: 0, hydrated: true,
+};
+vi.mock('../store/patternSettingsStore', () => {
+  const ALL_PATTERNS = [
+    'head_and_shoulders',
+    'inverse_head_and_shoulders',
+    'double_top',
+    'double_bottom',
+    'bull_flag',
+    'bear_flag',
+    'ascending_triangle',
+    'descending_triangle',
+    'symmetrical_triangle',
+  ];
+  const LOOKBACK_OPTIONS = [0, 50, 100, 200, 500];
+  return {
+    usePatternSettingsStore: vi.fn((sel?: any) => {
+      const state = patternSettings;
+      return sel ? sel(state) : state;
+    }),
+    ALL_PATTERNS,
+    LOOKBACK_OPTIONS,
+  };
+});
+
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
@@ -67,12 +99,14 @@ vi.mock('../context/ThemeContext', () => ({
   }),
 }));
 
+const marketStoreState = { stocks: mockStocks };
 vi.mock('../store/marketStore', () => ({
-  useMarketStore: vi.fn(() => ({ stocks: mockStocks })),
+  useMarketStore: vi.fn(() => marketStoreState),
 }));
 
+const portfolioStoreState = { buyStock: vi.fn() };
 vi.mock('../store/portfolioStore', () => ({
-  usePortfolioStore: vi.fn(() => ({ buyStock: vi.fn() })),
+  usePortfolioStore: vi.fn(() => portfolioStoreState),
 }));
 
 const currentWatchlists: Array<{
@@ -81,17 +115,19 @@ const currentWatchlists: Array<{
   { id: 'w1', name: 'My Watchlist', stocks: [mockStocks[0], mockStocks[3], mockStocks[7]], createdAt: '2025-01-10' },
 ];
 
+const watchlistStoreState = {
+  watchlists: currentWatchlists,
+  isInWatchlist: mockIsInWatchlist,
+  addToWatchlist: mockAddToWatchlist,
+  removeFromWatchlist: mockRemoveFromWatchlist,
+};
 vi.mock('../store/watchlistStore', () => ({
-  useWatchlistStore: vi.fn(() => ({
-    watchlists: currentWatchlists,
-    isInWatchlist: mockIsInWatchlist,
-    addToWatchlist: mockAddToWatchlist,
-    removeFromWatchlist: mockRemoveFromWatchlist,
-  })),
+  useWatchlistStore: vi.fn(() => watchlistStoreState),
 }));
 
+const aiStoreState = { insights: [] };
 vi.mock('../store/aiStore', () => ({
-  useAIStore: vi.fn(() => ({ insights: [] })),
+  useAIStore: vi.fn(() => aiStoreState),
 }));
 
 vi.mock('../hooks/useRealtimePrice', () => ({
@@ -107,14 +143,6 @@ import { useRealtimePrice } from '../hooks/useRealtimePrice';
 
 function advanceAndRender(ms: number) {
   act(() => { vi.advanceTimersByTime(ms); });
-}
-
-async function flushMicrotasks() {
-  await act(async () => {
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
-  });
 }
 
 // ==================== Global beforeEach ====================

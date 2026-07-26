@@ -28,6 +28,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import Svg, { Polyline } from 'react-native-svg';
@@ -113,12 +114,13 @@ function SourceBadge({ source, isDetecting, connected }: {
   isDetecting: boolean;
   connected: boolean;
 }) {
+  const { t } = useT();
   // Initial detection phase
   if (isDetecting) {
     return (
       <View style={[styles.connBadge, { backgroundColor: '#FFC10720', borderColor: '#FFC10740' }]}>
         <View style={[styles.connDot, { backgroundColor: '#FFC107' }]} />
-        <Text style={[styles.connText, { color: '#FFC107' }]}>Scanning…</Text>
+        <Text style={[styles.connText, { color: '#FFC107' }]}>{t('commodityMarkets.scanning')}</Text>
       </View>
     );
   }
@@ -136,7 +138,7 @@ function SourceBadge({ source, isDetecting, connected }: {
         <Text style={[styles.connText, {
           color: connected ? '#00E676' : '#FF5252',
         }]}>
-          {connected ? 'Live' : 'Offline'}
+          {connected ? t('commodityMarkets.live') : t('commodityMarkets.offline')}
         </Text>
       </View>
     );
@@ -147,7 +149,7 @@ function SourceBadge({ source, isDetecting, connected }: {
     return (
       <View style={[styles.connBadge, { backgroundColor: '#6C63FF20', borderColor: '#6C63FF40' }]}>
         <View style={[styles.connDot, { backgroundColor: '#6C63FF' }]} />
-        <Text style={[styles.connText, { color: '#6C63FF' }]}>Mock</Text>
+        <Text style={[styles.connText, { color: '#6C63FF' }]}>{t('commodityMarkets.mock')}</Text>
       </View>
     );
   }
@@ -156,7 +158,7 @@ function SourceBadge({ source, isDetecting, connected }: {
   return (
     <View style={[styles.connBadge, { backgroundColor: '#FF525220', borderColor: '#FF525240' }]}>
       <View style={[styles.connDot, { backgroundColor: '#FF5252' }]} />
-      <Text style={[styles.connText, { color: '#FF5252' }]}>Offline</Text>
+      <Text style={[styles.connText, { color: '#FF5252' }]}>{t('commodityMarkets.offline')}</Text>
     </View>
   );
 }
@@ -168,6 +170,7 @@ function SourceBadge({ source, isDetecting, connected }: {
 function CommodityCard({ item, isExpanded, onPress, colors }: {
   item: CommodityAsset; isExpanded: boolean; onPress: () => void; colors: any;
 }) {
+  const { t } = useT();
   const isUp = item.change >= 0;
   const chartData = useMemo(() => generatePriceHistory(item.price), [item.price]);
 
@@ -214,11 +217,11 @@ function CommodityCard({ item, isExpanded, onPress, colors }: {
         <View style={styles.categoryRow}>
           <View style={[styles.categoryBadge, { backgroundColor: item.category === 'metals' ? '#FFC10720' : item.category === 'energy' ? '#FF525220' : '#8BC34A20' }]}>
             <Text style={[styles.categoryText, { color: item.category === 'metals' ? '#FFC107' : item.category === 'energy' ? '#FF5252' : '#8BC34A' }]}>
-              {item.category === 'metals' ? 'Precious/Base Metal' : item.category === 'energy' ? 'Energy' : 'Agriculture'}
+              {item.category === 'metals' ? t('commodityMarkets.preciousBaseMetal') : item.category === 'energy' ? t('commodityMarkets.catEnergy') : t('commodityMarkets.catAgriculture')}
             </Text>
           </View>
           {item.inrPrice && (
-            <Text style={[styles.inrPrice, { color: colors.textMuted }]}>MCX: ₹{item.inrPrice.toLocaleString('en-IN')}</Text>
+            <Text style={[styles.inrPrice, { color: colors.textMuted }]}>{t('commodityMarkets.mcxPrefix')} ₹{item.inrPrice.toLocaleString('en-IN')}</Text>
           )}
         </View>
 
@@ -227,13 +230,13 @@ function CommodityCard({ item, isExpanded, onPress, colors }: {
           <MiniSparkline data={chartData} w={120} h={32} />
           <View style={styles.rangeCol}>
             <View style={styles.rangeRow}>
-              <Text style={[styles.rangeLabel, { color: colors.textMuted }]}>H:</Text>
+              <Text style={[styles.rangeLabel, { color: colors.textMuted }]}>{t('commodityMarkets.dayHigh')}</Text>
               <Text style={[styles.rangeValue, { color: colors.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
                 {item.dayHigh.toFixed(item.price < 10 ? 2 : 1)}
               </Text>
             </View>
             <View style={styles.rangeRow}>
-              <Text style={[styles.rangeLabel, { color: colors.textMuted }]}>L:</Text>
+              <Text style={[styles.rangeLabel, { color: colors.textMuted }]}>{t('commodityMarkets.dayLow')}</Text>
               <Text style={[styles.rangeValue, { color: colors.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
                 {item.dayLow.toFixed(item.price < 10 ? 2 : 1)}
               </Text>
@@ -243,7 +246,7 @@ function CommodityCard({ item, isExpanded, onPress, colors }: {
 
         {/* 52W Range */}
         <View style={styles.weekRangeContainer}>
-          <Text style={[styles.weekRangeLabel, { color: colors.textMuted }]}>52W Range</Text>
+          <Text style={[styles.weekRangeLabel, { color: colors.textMuted }]}>{t('commodityMarkets.week52Range')}</Text>
           <View style={styles.weekRangeBar}>
             <View style={[styles.weekRangeFill, {
               width: `${Math.min(100, Math.max(0, ((item.price - item.week52Low) / (item.week52High - item.week52Low)) * 100))}%`,
@@ -261,10 +264,10 @@ function CommodityCard({ item, isExpanded, onPress, colors }: {
           <View style={[styles.expandedContent, { backgroundColor: colors.bgInput }]}>
             <View style={styles.expandedGrid}>
               {[
-                { label: 'Change %', value: `${isUp ? '+' : ''}${item.changePercent.toFixed(2)}%`, color: isUp ? '#00E676' : '#FF5252' },
-                { label: 'Volatility', value: `${item.volatility?.toFixed(1) || 'N/A'}%` },
-                { label: 'Day Range', value: `$${item.dayLow.toFixed(1)} - $${item.dayHigh.toFixed(1)}` },
-                { label: 'MCX India', value: item.inrPrice ? `₹${item.inrPrice.toLocaleString('en-IN')}` : 'N/A' },
+                { label: t('commodityMarkets.expandedChangePercent'), value: `${isUp ? '+' : ''}${item.changePercent.toFixed(2)}%`, color: isUp ? '#00E676' : '#FF5252' },
+                { label: t('commodityMarkets.expandedVolatility'), value: `${item.volatility?.toFixed(1) || 'N/A'}%` },
+                { label: t('commodityMarkets.expandedDayRange'), value: `$${item.dayLow.toFixed(1)} - $${item.dayHigh.toFixed(1)}` },
+                { label: t('commodityMarkets.expandedMcxIndia'), value: item.inrPrice ? `₹${item.inrPrice.toLocaleString('en-IN')}` : 'N/A' },
               ].map((i, idx) => (
                 <View key={idx} style={styles.expandedItem}>
                   <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{i.label}</Text>
@@ -332,6 +335,7 @@ function CommodityPriceCalculatorModal({
   commodities: CommodityAsset[];
   colors: any;
 }) {
+  const { t } = useT();
   const [selectedId, setSelectedId] = useState('gold');
   const [quantityStr, setQuantityStr] = useState('1');
 
@@ -355,8 +359,8 @@ function CommodityPriceCalculatorModal({
           {/* Header */}
           <View style={styles.modalHeader}>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Price Calculator</Text>
-              <Text style={[styles.modalSubtitle, { color: colors.textMuted }]}>Commodity value in INR</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('commodityMarkets.calcTitle')}</Text>
+              <Text style={[styles.modalSubtitle, { color: colors.textMuted }]}>{t('commodityMarkets.calcSubtitle')}</Text>
             </View>
             <Pressable onPress={onClose} style={[styles.modalCloseBtn, { backgroundColor: colors.bgInput }]}>
               <Ionicons name="close" size={20} color={colors.text} />
@@ -395,7 +399,7 @@ function CommodityPriceCalculatorModal({
           </View>
 
           {/* Quantity Input */}
-          <Text style={[styles.calcLabel, { color: colors.textMuted }]}>Quantity ({selected.unit})</Text>
+          <Text style={[styles.calcLabel, { color: colors.textMuted }]}>{t('commodityMarkets.calcQuantity')} ({selected.unit})</Text>
           <View style={[styles.calcInputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
             <TextInput
               style={[styles.calcInput, { color: colors.text }]}
@@ -412,7 +416,7 @@ function CommodityPriceCalculatorModal({
           <View style={styles.calcResultsGrid}>
             {/* USD Value */}
             <View style={[styles.calcResultCard, { backgroundColor: '#3B82F615', borderColor: '#3B82F630' }]}>
-              <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>USD Value</Text>
+              <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>{t('commodityMarkets.calcUsdValue')}</Text>
               <Text style={[styles.calcResultValue, { color: '#3B82F6' }]}>
                 ${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </Text>
@@ -420,7 +424,7 @@ function CommodityPriceCalculatorModal({
 
             {/* INR Value (approx) */}
             <View style={[styles.calcResultCard, { backgroundColor: '#FF993315', borderColor: '#FF993330' }]}>
-              <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>INR Value (approx)</Text>
+              <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>{t('commodityMarkets.calcInrValue')}</Text>
               <Text style={[styles.calcResultValue, { color: '#FF9933' }]}>
                 ₹{inrValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </Text>
@@ -429,7 +433,7 @@ function CommodityPriceCalculatorModal({
             {/* MCX India */}
             {mcxValue > 0 && (
               <View style={[styles.calcResultCard, { backgroundColor: selected.color + '15', borderColor: selected.color + '30' }]}>
-                <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>MCX India (1 unit)</Text>
+                <Text style={[styles.calcResultLabel, { color: colors.textMuted }]}>{t('commodityMarkets.calcMcxUnit')}</Text>
                 <Text style={[styles.calcResultValue, { color: selected.color }]}>
                   ₹{selected.inrPrice!.toLocaleString('en-IN')}
                 </Text>
@@ -441,7 +445,7 @@ function CommodityPriceCalculatorModal({
           <View style={[styles.calcNote, { backgroundColor: colors.bgInput }]}>
             <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
             <Text style={[styles.calcNoteText, { color: colors.textMuted }]}>
-              INR values are approximate using ₹83.45/USD. Actual MCX prices may differ due to local demand, duties, and exchange fees.
+              {t('commodityMarkets.calcNote')}
             </Text>
           </View>
         </ScrollView>
@@ -458,6 +462,8 @@ type TabKey = 'all' | 'metals' | 'energy' | 'agriculture' | 'summary';
 
 export default function CommodityMarketsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
+  // ── Live prices handled by useCommodityPrices WebSocket hook below ──
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -520,8 +526,8 @@ export default function CommodityMarketsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Commodities</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>Global Markets Dashboard</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('commodityMarkets.title')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('commodityMarkets.subtitle')}</Text>
           </View>
           {/* Calculator button */}
           <Pressable
@@ -537,11 +543,11 @@ export default function CommodityMarketsScreen({ navigation }: any) {
         {/* Tabs */}
         <View style={styles.tabRow}>
           {[
-            { key: 'all' as TabKey, label: 'All', icon: 'apps' },
-            { key: 'metals' as TabKey, label: 'Metals', icon: 'diamond' },
-            { key: 'energy' as TabKey, label: 'Energy', icon: 'flame' },
-            { key: 'agriculture' as TabKey, label: 'Agri', icon: 'leaf' },
-            { key: 'summary' as TabKey, label: 'Summary', icon: 'stats-chart' },
+            { key: 'all' as TabKey, label: t('commodityMarkets.tabAll'), icon: 'apps' },
+            { key: 'metals' as TabKey, label: t('commodityMarkets.tabMetals'), icon: 'diamond' },
+            { key: 'energy' as TabKey, label: t('commodityMarkets.tabEnergy'), icon: 'flame' },
+            { key: 'agriculture' as TabKey, label: t('commodityMarkets.tabAgri'), icon: 'leaf' },
+            { key: 'summary' as TabKey, label: t('commodityMarkets.tabSummary'), icon: 'stats-chart' },
           ].map(tab => {
             const isActive = activeTab === tab.key;
             return (
@@ -563,7 +569,7 @@ export default function CommodityMarketsScreen({ navigation }: any) {
             <Ionicons name="search" size={16} color={colors.textMuted} />
             <TextInput
               style={[styles.searchInput, { color: colors.text }]}
-              placeholder="Search commodities..."
+              placeholder={t('commodityMarkets.searchPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -582,7 +588,7 @@ export default function CommodityMarketsScreen({ navigation }: any) {
         {(activeTab !== 'summary') && (
           <View>
             <Text style={[styles.resultCount, { color: colors.textMuted }]}>
-              {filteredItems.length} commodity{filteredItems.length !== 1 ? 'ies' : ''}
+              {t('commodityMarkets.commodityCount', { count: filteredItems.length })}
             </Text>
             {filteredItems.length > 0 ? (
               filteredItems.map((item, i) => (
@@ -591,8 +597,8 @@ export default function CommodityMarketsScreen({ navigation }: any) {
             ) : (
               <View style={styles.emptyState}>
                 <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No commodities found</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>Try adjusting search</Text>
+                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('commodityMarkets.noCommoditiesFound')}</Text>
+                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('commodityMarkets.adjustSearch')}</Text>
               </View>
             )}
           </View>
@@ -604,10 +610,10 @@ export default function CommodityMarketsScreen({ navigation }: any) {
             {/* Overview Cards */}
             <View style={styles.summaryGrid}>
               {[
-                { label: 'Total', value: summaryStats.total.toString(), icon: '📊', color: '#6C63FF' },
-                { label: 'Gainers', value: summaryStats.gainers.toString(), icon: '📈', color: '#00E676' },
-                { label: 'Losers', value: summaryStats.losers.toString(), icon: '📉', color: '#FF5252' },
-                { label: 'Metals', value: summaryStats.metalsCount.toString(), icon: '💎', color: '#FFC107' },
+                { label: t('commodityMarkets.total'), value: summaryStats.total.toString(), icon: '📊', color: '#6C63FF' },
+                { label: t('commodityMarkets.gainers'), value: summaryStats.gainers.toString(), icon: '📈', color: '#00E676' },
+                { label: t('commodityMarkets.losers'), value: summaryStats.losers.toString(), icon: '📉', color: '#FF5252' },
+                { label: t('commodityMarkets.metalsShort'), value: summaryStats.metalsCount.toString(), icon: '💎', color: '#FFC107' },
               ].map((stat) => (
                 <View key={stat.label} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
                   <Text style={{ fontSize: 20 }}>{stat.icon}</Text>
@@ -619,11 +625,11 @@ export default function CommodityMarketsScreen({ navigation }: any) {
 
             {/* Category Performance */}
             <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Category Performance</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('commodityMarkets.categoryPerformance')}</Text>
               {[
-                { label: '💎 Precious Metals', value: summaryStats.metalsAvgChg, icon: '💎' },
-                { label: '🛢️ Energy', value: summaryStats.energyAvgChg, icon: '🛢️' },
-                { label: '🌾 Agriculture', value: summaryStats.agriAvgChg, icon: '🌾' },
+                { label: t('commodityMarkets.preciousMetals'), value: summaryStats.metalsAvgChg, icon: '💎' },
+                { label: t('commodityMarkets.energyLabel'), value: summaryStats.energyAvgChg, icon: '🛢️' },
+                { label: t('commodityMarkets.agricultureLabel'), value: summaryStats.agriAvgChg, icon: '🌾' },
               ].map((cat) => (
                 <React.Fragment key={cat.label}>
                   <View style={styles.catRow}>
@@ -645,7 +651,7 @@ export default function CommodityMarketsScreen({ navigation }: any) {
 
             {/* All Commodities List in Summary */}
             <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>All Commodities</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('commodityMarkets.allCommodities')}</Text>
               {COMMODITIES.map((c, i) => {
                 const isUp = c.changePercent >= 0;
                 return (
@@ -675,9 +681,9 @@ export default function CommodityMarketsScreen({ navigation }: any) {
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="information-circle" size={18} color={colors.primary} />
               <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>Commodity Trading in India</Text>
+                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('commodityMarkets.commodityTradingIndia')}</Text>
                 <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  Commodities are traded on MCX (Multi Commodity Exchange) and NCDEX. Key contracts: Gold (1kg), Silver (30kg), Crude Oil (100 barrels). Trading hours: 9:00 AM - 11:30 PM. International prices are in USD; MCX prices are in INR. STT on commodity futures: 0.01%.
+                  {t('commodityMarkets.commodityTradingIndiaDesc')}
                 </Text>
               </View>
             </View>

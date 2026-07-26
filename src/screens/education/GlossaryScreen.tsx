@@ -12,6 +12,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { glossaryTerms } from '../../constants/glossaryData';
 import type { GlossaryTerm } from '../../types';
@@ -64,6 +65,7 @@ function groupByCategory(terms: GlossaryTerm[]): { type: 'category'; category: s
 
 export default function GlossaryScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -200,7 +202,7 @@ export default function GlossaryScreen({ navigation }: any) {
 
             {/* Detailed definition */}
             <View style={styles.detailSection}>
-              <Text style={styles.detailSectionTitle}>Detailed Explanation</Text>
+              <Text style={styles.detailSectionTitle}>{t('education.detailedExplanation')}</Text>
               <Text style={styles.detailParagraph}>{selectedTerm.detailedDefinition}</Text>
             </View>
 
@@ -210,7 +212,7 @@ export default function GlossaryScreen({ navigation }: any) {
                 <View style={styles.detailRow}>
                   <Ionicons name="chatbubble-ellipses-outline" size={14} color="#FFAB40" />
                   <Text style={[styles.detailSectionTitle, { color: '#FFAB40', fontSize: 12 }]}>
-                    Example
+                    {t('education.example')}
                   </Text>
                 </View>
                 <Text style={[styles.exampleText, { color: colors.textSecondary }]}>
@@ -222,7 +224,7 @@ export default function GlossaryScreen({ navigation }: any) {
             {/* Tags */}
             {selectedTerm.tags && selectedTerm.tags.length > 0 && (
               <View style={styles.detailSection}>
-                <Text style={styles.detailSectionTitle}>Tags</Text>
+                <Text style={styles.detailSectionTitle}>{t('education.tags')}</Text>
                 <View style={styles.tagsRow}>
                   {selectedTerm.tags.map((tag, i) => (
                     <View key={i} style={[styles.tag, { backgroundColor: colors.textMuted + '15' }]}>
@@ -236,7 +238,7 @@ export default function GlossaryScreen({ navigation }: any) {
             {/* Related terms */}
             {selectedTerm.relatedTerms && selectedTerm.relatedTerms.length > 0 && (
               <View style={styles.detailSection}>
-                <Text style={styles.detailSectionTitle}>Related Terms</Text>
+                <Text style={styles.detailSectionTitle}>{t('education.relatedTerms')}</Text>
                 <View style={styles.relatedRow}>
                   {selectedTerm.relatedTerms.map((relId) => {
                     const relTerm = glossaryTerms.find(t => t.id === relId);
@@ -268,7 +270,7 @@ export default function GlossaryScreen({ navigation }: any) {
                   color="#FF5252"
                 />
                 <Text style={[styles.detailActionText, { color: '#FF5252' }]}>
-                  {favorites.has(selectedTerm.id) ? 'Remove Bookmark' : 'Bookmark'}
+                  {favorites.has(selectedTerm.id) ? t('education.removeBookmark') : t('education.bookmark')}
                 </Text>
               </Pressable>
             </View>
@@ -296,8 +298,8 @@ export default function GlossaryScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <View style={styles.headerTextContainer}>
-          <Text style={styles.title}>Financial Glossary</Text>
-          <Text style={styles.subtitle}>{glossaryTerms.length} terms</Text>
+          <Text style={styles.title}>{t('education.financialGlossary')}</Text>
+          <Text style={styles.subtitle}>{t('education.termsCount', { count: glossaryTerms.length })}</Text>
         </View>
         <Pressable onPress={() => setShowFilters(!showFilters)} style={styles.filterBtn}>
           <Ionicons
@@ -313,7 +315,7 @@ export default function GlossaryScreen({ navigation }: any) {
         <Ionicons name="search" size={18} color={colors.textMuted} />
         <TextInput
           style={[styles.searchInput, { color: colors.text }]}
-          placeholder="Search terms, categories, or tags..."
+          placeholder={t('education.searchGlossary')}
           placeholderTextColor={colors.textMuted}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -332,14 +334,14 @@ export default function GlossaryScreen({ navigation }: any) {
         <Animated.View entering={FadeInDown.springify()} style={styles.filterBar}>
           {/* Sort toggle */}
           <View style={styles.filterRow}>
-            <Text style={styles.filterLabel}>Sort by</Text>
+            <Text style={styles.filterLabel}>{t('education.sortBy')}</Text>
             <View style={styles.sortToggle}>
               <Pressable
                 style={[styles.sortBtn, sortBy === 'alpha' && { backgroundColor: colors.primary + '20' }]}
                 onPress={() => setSortBy('alpha')}
               >
                 <Text style={[styles.sortBtnText, { color: sortBy === 'alpha' ? colors.primary : colors.textMuted }]}>
-                  A–Z
+                  {t('education.sortAZ')}
                 </Text>
               </Pressable>
               <Pressable
@@ -347,7 +349,7 @@ export default function GlossaryScreen({ navigation }: any) {
                 onPress={() => setSortBy('category')}
               >
                 <Text style={[styles.sortBtnText, { color: sortBy === 'category' ? colors.primary : colors.textMuted }]}>
-                  Category
+                  {t('education.sortCategory')}
                 </Text>
               </Pressable>
             </View>
@@ -361,7 +363,7 @@ export default function GlossaryScreen({ navigation }: any) {
             >
               <Ionicons name={showFavorites ? 'heart' : 'heart-outline'} size={16} color="#FF5252" />
               <Text style={[styles.favToggleText, showFavorites && { color: '#FF5252' }]}>
-                Bookmarks ({favorites.size})
+                {t('education.bookmarks', { count: favorites.size })}
               </Text>              </Pressable>
           </View>
 
@@ -372,7 +374,7 @@ export default function GlossaryScreen({ navigation }: any) {
               onPress={() => setSelectedCategory(null)}
             >
               <Text style={[styles.categoryChipText, !selectedCategory && { color: colors.primary }]}>
-                All
+                {t('education.all')}
               </Text>              </Pressable>
             {categories.map(cat => (
               <Pressable
@@ -402,7 +404,7 @@ export default function GlossaryScreen({ navigation }: any) {
       {/* Results count */}
       <View style={styles.resultInfo}>
         <Text style={styles.resultCount}>
-          {filteredTerms.length} {filteredTerms.length === 1 ? 'term' : 'terms'} found
+          {t('education.termsFound', { count: filteredTerms.length })}
         </Text>
       </View>
 
@@ -416,12 +418,12 @@ export default function GlossaryScreen({ navigation }: any) {
           <View style={styles.emptyState}>
             <Ionicons name="search-outline" size={48} color={colors.textMuted} />
             <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
-              No terms found
+              {t('education.noTermsFound')}
             </Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
               {showFavorites
-                ? 'Save bookmarks by long-pressing any term'
-                : 'Try a different search or clear filters'}
+                ? t('education.bookmarkHint')
+                : t('education.clearFilterHint')}
             </Text>
           </View>
         ) : (
@@ -433,7 +435,7 @@ export default function GlossaryScreen({ navigation }: any) {
                     {group.type === 'alpha' ? group.letter : group.category[0]}
                   </Text>
                 </View>
-                <Text style={styles.groupTitle}>{group.type === 'alpha' ? `Letter ${group.letter}` : group.category}</Text>
+                <Text style={styles.groupTitle}>{group.type === 'alpha' ? t('education.letter', { letter: group.letter }) : group.category}</Text>
                 <Text style={styles.groupCount}>{group.terms.length}</Text>
               </View>
               {group.terms.map((term, i) => renderTermCard(term, i))}

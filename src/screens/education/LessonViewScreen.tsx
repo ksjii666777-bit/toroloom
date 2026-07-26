@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions, Animated } f
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 
@@ -18,6 +19,7 @@ const { width } = Dimensions.get('window');
 export default function LessonViewScreen({ route, navigation }: any) {
   const { lessonId, courseId } = route.params;
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     currentLesson, fetchLesson, markLessonComplete, lessonProgress,
@@ -117,7 +119,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
   if (!lesson) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }}>Lesson not found</Text>
+        <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }}>{t('education.lessonNotFound')}</Text>
       </View>
     );
   }
@@ -129,8 +131,8 @@ export default function LessonViewScreen({ route, navigation }: any) {
         <Animated.View style={[styles.autoAdvanceOverlay, { opacity: fadeAnim }]}>
           <View style={styles.autoAdvanceCard}>
             <Ionicons name="checkmark-circle" size={48} color="#00C853" />
-            <Text style={styles.autoAdvanceTitle}>🎉 Lesson Complete!</Text>
-            <Text style={styles.autoAdvanceSub}>Moving to next lesson...</Text>
+            <Text style={styles.autoAdvanceTitle}>{t('education.lessonComplete')}</Text>
+            <Text style={styles.autoAdvanceSub}>{t('education.movingToNext')}</Text>
           </View>
         </Animated.View>
       )}
@@ -141,7 +143,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={styles.headerInfo}>
-            <Text style={styles.headerLessonNum}>Lesson {currentIndex + 1} of {courseLessons.length}</Text>
+            <Text style={styles.headerLessonNum}>{t('education.lessonOfTotal', { current: currentIndex + 1, total: courseLessons.length })}</Text>
             <Text style={styles.headerTitle} numberOfLines={1}>{lesson.title}</Text>
           </View>
           {isCompleted && (
@@ -158,13 +160,13 @@ export default function LessonViewScreen({ route, navigation }: any) {
           {hasVideo && (
             <>
               <Ionicons name="videocam" size={14} color={colors.primary} />
-              <Text style={styles.lessonMetaText}>Video Lesson</Text>
+              <Text style={styles.lessonMetaText}>{t('education.videoLesson')}</Text>
             </>
           )}
           {lesson.quiz && (
             <>
               <Ionicons name="help-circle-outline" size={14} color={colors.textMuted} />
-              <Text style={styles.lessonMetaText}>Includes Quiz</Text>
+              <Text style={styles.lessonMetaText}>{t('education.includesQuiz')}</Text>
             </>
           )}
         </View>
@@ -192,7 +194,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
         {hasVideo && videoCompleted && !isCompleted && (
           <View style={styles.videoCompleteBanner}>
             <Ionicons name="checkmark-circle" size={20} color="#00C853" />
-            <Text style={styles.videoCompleteText}>Video fully watched! +25 XP</Text>
+            <Text style={styles.videoCompleteText}>{t('education.videoCompleteXp')}</Text>
           </View>
         )}
 
@@ -206,7 +208,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
             <View style={styles.contentSection}>
               <View style={styles.contentSectionHeader}>
                 <Ionicons name="bulb-outline" size={18} color="#FFC107" />
-                <Text style={styles.contentSectionTitle}>Key Takeaways</Text>
+                <Text style={styles.contentSectionTitle}>{t('education.keyTakeaways')}</Text>
               </View>
               <View style={styles.takeaways}>
                 {[
@@ -225,7 +227,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
             <View style={styles.contentSection}>
               <View style={styles.contentSectionHeader}>
                 <Ionicons name="book-outline" size={18} color="#6C63FF" />
-                <Text style={styles.contentSectionTitle}>Summary</Text>
+                <Text style={styles.contentSectionTitle}>{t('education.summary')}</Text>
               </View>
               <Text style={styles.contentBody}>
                 This lesson covered the fundamental concepts that form the building blocks of
@@ -245,8 +247,8 @@ export default function LessonViewScreen({ route, navigation }: any) {
             <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.quizGradient}>
               <Ionicons name="help-circle" size={24} color={colors.white} />
               <View>
-                <Text style={styles.quizBtnTitle}>Test Your Knowledge</Text>
-                <Text style={styles.quizBtnSub}>{lesson.quiz.questions.length} questions</Text>
+                <Text style={styles.quizBtnTitle}>{t('education.testKnowledge')}</Text>
+                <Text style={styles.quizBtnSub}>{t('education.questions', { count: lesson.quiz.questions.length })}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
             </LinearGradient>
@@ -254,7 +256,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
         )}
 
         {showQuiz && lesson.quiz && !quizResult && (
-          <Card title={lesson.quiz.title} subtitle="Test your understanding" noPadding>
+          <Card title={lesson.quiz.title} subtitle={t('education.testUnderstanding')} noPadding>
             <View style={styles.quizComponentWrapper}>
               <QuizComponent
                 quiz={lesson.quiz}
@@ -276,7 +278,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
           >
             <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.completeGradient}>
               <Ionicons name="checkmark-circle" size={22} color={colors.white} />
-              <Text style={styles.completeText}>Mark as Complete</Text>
+              <Text style={styles.completeText}>{t('education.markComplete')}</Text>
             </LinearGradient>
           </Pressable>
         )}
@@ -293,7 +295,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
           >
             <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
               <Ionicons name="analytics" size={20} color={colors.white} />
-              <Text style={styles.continueText}>View Detailed Results</Text>
+              <Text style={styles.continueText}>{t('education.viewDetailedResults')}</Text>
             </LinearGradient>
           </Pressable>
         )}
@@ -302,7 +304,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
         {autoAdvancing && (
           <View style={styles.autoAdvanceInline}>
             <Ionicons name="hourglass-outline" size={16} color="#00C853" />
-            <Text style={styles.autoAdvanceInlineText}>Auto-advancing to next lesson...</Text>
+            <Text style={styles.autoAdvanceInlineText}>{t('education.autoAdvancing')}</Text>
           </View>
         )}
 
@@ -319,7 +321,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
             >
               <Ionicons name="chevron-back" size={18} color={colors.text} />
               <View>
-                <Text style={styles.navLabel}>Previous</Text>
+                <Text style={styles.navLabel}>{t('education.previous')}</Text>
                 <Text style={styles.navLessonTitle} numberOfLines={1}>{prevLesson.title}</Text>
               </View>
             </Pressable>
@@ -334,7 +336,7 @@ export default function LessonViewScreen({ route, navigation }: any) {
               }}
             >
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={[styles.navLabel, { textAlign: 'right' }]}>Next</Text>
+                <Text style={[styles.navLabel, { textAlign: 'right' }]}>{t('education.next')}</Text>
                 <Text style={[styles.navLessonTitle, { textAlign: 'right' }]} numberOfLines={1}>{nextLesson.title}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.text} />

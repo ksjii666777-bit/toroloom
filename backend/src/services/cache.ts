@@ -160,4 +160,12 @@ export const CACHE_TTL = {
   BULK_QUOTES: 10_000,    // 10 seconds
   OHLC: 600_000,          // 10 minutes
   SEARCH: 300_000,        // 5 minutes
+
+  // Advanced Markets (API-backed data)
+  FOREX_RATES: 300_000,          // 5 minutes — Frankfurter API (no key, but rate-limit courtesy)
+  FOREX_PAIR: 300_000,           // 5 minutes
+  COMMODITIES_ALL: 300_000,      // 5 minutes — API Ninjas (rate-limit conscious)
+  COMMODITY_SINGLE: 300_000,     // 5 minutes
+  BONDS_ALL: 600_000,            // 10 minutes — mock data, no external API cost
+  BONDS_SUMMARY: 600_000,        // 10 minutes
 } as const;

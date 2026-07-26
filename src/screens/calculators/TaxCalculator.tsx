@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -25,6 +26,7 @@ type HoldingPeriod = 'stcg' | 'ltcg';
 
 export default function TaxCalculator() {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
@@ -102,7 +104,7 @@ export default function TaxCalculator() {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Ionicons name="receipt" size={20} color={colors.secondary} />
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Tax Calculator</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.tax')}</Text>
         </View>
         <TouchableOpacity onPress={handleClear} style={[styles.clearBtn, { backgroundColor: colors.bgCard }]}>
           <Ionicons name="refresh" size={18} color={colors.textMuted} />
@@ -117,14 +119,14 @@ export default function TaxCalculator() {
       >
         {/* Holding Period Toggle */}
         <View style={[styles.toggleCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Holding Period</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.holdingPeriod')}</Text>
           <View style={[styles.toggleRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <TouchableOpacity
               style={[styles.toggleOption, isSTCG && { backgroundColor: colors.danger }]}
               onPress={() => setHoldingPeriod('stcg')}
             >
               <Text style={[styles.toggleText, { color: isSTCG ? colors.white : colors.textMuted }]}>
-                STCG (≤12 months)
+                {t('calculators.stcg')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -132,14 +134,14 @@ export default function TaxCalculator() {
               onPress={() => setHoldingPeriod('ltcg')}
             >
               <Text style={[styles.toggleText, { color: !isSTCG ? colors.white : colors.textMuted }]}>
-                LTCG (&gt;12 months)
+                {t('calculators.ltcg')}
               </Text>
             </TouchableOpacity>
           </View>
           <Text style={[styles.hintText, { color: colors.textMuted }]}>
             {isSTCG
-              ? 'Short-term: Equity held ≤12 months — taxed at 20%'
-              : 'Long-term: Equity held >12 months — taxed at 10% on gains over ₹1L'}
+              ? t('calculators.stcgDesc')
+              : t('calculators.ltcgDesc')}
           </Text>
         </View>
 
@@ -147,11 +149,11 @@ export default function TaxCalculator() {
         <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
           <View style={styles.resultHeader}>
             <Text style={[styles.resultLabel, { color: colors.textMuted }]}>
-              {isSTCG ? 'Short-Term Capital Gains' : 'Long-Term Capital Gains'}
+              {isSTCG ? t('calculators.shortTermGains') : t('calculators.longTermGains')}
             </Text>
             <View style={[styles.profitBadge, { backgroundColor: isProfit ? colors.accent + '20' : colors.danger + '20' }]}>
               <Text style={[styles.profitBadgeText, { color: isProfit ? colors.accent : colors.danger }]}>
-                {isProfit ? 'PROFIT' : 'LOSS'}
+                {isProfit ? t('calculators.profit') : t('calculators.loss')}
               </Text>
             </View>
           </View>
@@ -164,44 +166,44 @@ export default function TaxCalculator() {
           {/* Tax Breakdown */}
           <View style={styles.taxBreakdown}>
             <View style={styles.taxRow}>
-              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>Gross Profit</Text>
+              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.grossProfit')}</Text>
               <Text style={[styles.taxValue, { color: colors.text }]}>{formatCurrency(grossProfit)}</Text>
             </View>
             {!isSTCG && (
               <View style={styles.taxRow}>
-                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>LTCG Exemption</Text>
+                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.ltcgExemption')}</Text>
                 <Text style={[styles.taxValue, { color: colors.text }]}>-{formatCurrency(LTCG_EXEMPTION)}</Text>
               </View>
             )}
             <View style={styles.taxRow}>
-              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>Taxable Gains</Text>
+              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.taxableGains')}</Text>
               <Text style={[styles.taxValue, { color: colors.text }]}>{formatCurrency(taxableGains)}</Text>
             </View>
             <View style={[styles.taxDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.taxRow}>
-              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>Tax ({isSTCG ? '20%' : '10%'})</Text>
+              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.taxAmount', { rate: isSTCG ? '20' : '10' })}</Text>
               <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(taxAmount)}</Text>
             </View>
             {surchargeAmount > 0 && (
               <View style={styles.taxRow}>
-                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>Surcharge (10%)</Text>
+                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.surcharge')}</Text>
                 <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(surchargeAmount)}</Text>
               </View>
             )}
             <View style={styles.taxRow}>
-              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>Health & Edu Cess (4%)</Text>
+              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.cess')}</Text>
               <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(cessAmount)}</Text>
             </View>
             <View style={[styles.taxDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.taxRow}>
-              <Text style={[styles.taxLabelBold, { color: colors.text }]}>Total Tax Liability</Text>
+              <Text style={[styles.taxLabelBold, { color: colors.text }]}>{t('calculators.totalTaxLiability')}</Text>
               <Text style={[styles.taxValueBold, { color: colors.danger }]}>{formatCurrency(totalTaxLiability)}</Text>
             </View>
           </View>
 
           {isProfit && totalTaxLiability > 0 && (
             <View style={[styles.effectiveRate, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.effectiveLabel, { color: colors.textMuted }]}>Effective Tax Rate</Text>
+              <Text style={[styles.effectiveLabel, { color: colors.textMuted }]}>{t('calculators.effectiveTaxRate')}</Text>
               <Text style={[styles.effectiveValue, { color: colors.text }]}>{effectiveTaxRate}%</Text>
             </View>
           )}
@@ -210,7 +212,7 @@ export default function TaxCalculator() {
           <View style={[styles.proceedsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Ionicons name="cash-outline" size={18} color={colors.primary} />
             <View style={styles.proceedsContent}>
-              <Text style={[styles.proceedsLabel, { color: colors.textMuted }]}>Net Proceeds (after tax)</Text>
+              <Text style={[styles.proceedsLabel, { color: colors.textMuted }]}>{t('calculators.netProceeds')}</Text>
               <Text style={[styles.proceedsValue, { color: colors.text }]}>
                 {formatCurrency(grossProfit - totalTaxLiability)}
               </Text>
@@ -220,10 +222,10 @@ export default function TaxCalculator() {
 
         {/* Inputs */}
         <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Trade Details</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.tradeDetails')}</Text>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Purchase Price (₹ per share)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.purchasePrice')}</Text>
             <TextInput
               style={[styles.input, inputStyle(purchasePrice)]}
               value={purchasePrice}
@@ -235,7 +237,7 @@ export default function TaxCalculator() {
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Sale Price (₹ per share)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.salePrice')}</Text>
             <TextInput
               style={[styles.input, inputStyle(salePrice)]}
               value={salePrice}
@@ -247,7 +249,7 @@ export default function TaxCalculator() {
           </View>
 
           <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Quantity (Shares)</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.quantity')}</Text>
             <TextInput
               style={[styles.input, inputStyle(quantity)]}
               value={quantity}
@@ -273,26 +275,26 @@ export default function TaxCalculator() {
         {/* Summary */}
         {grossProfit !== 0 && (
           <View style={[styles.summaryCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Investment Summary</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.investmentSummary')}</Text>
             <View style={styles.summaryRow}>
               <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>Total Investment</Text>
+                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.totalInvestment')}</Text>
                 <Text style={[styles.summaryItemValue, { color: colors.text }]}>{formatCurrency(totalInvestment)}</Text>
               </View>
               <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>Total Sale Value</Text>
+                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.totalSaleValue')}</Text>
                 <Text style={[styles.summaryItemValue, { color: colors.text }]}>{formatCurrency(totalSaleValue)}</Text>
               </View>
             </View>
             <View style={[styles.summaryRow]}>
               <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>Quantity</Text>
+                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.quantityLabel')}</Text>
                 <Text style={[styles.summaryItemValue, { color: colors.text }]}>{qty} shares</Text>
               </View>
               <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>Holding</Text>
+                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.holding')}</Text>
                 <Text style={[styles.summaryItemValue, { color: isSTCG ? colors.danger : colors.accent }]}>
-                  {isSTCG ? 'Short Term' : 'Long Term'}
+                  {isSTCG ? t('calculators.shortTerm') : t('calculators.longTerm')}
                 </Text>
               </View>
             </View>
@@ -303,8 +305,7 @@ export default function TaxCalculator() {
         <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="information-circle-outline" size={16} color={colors.secondary} style={{ marginRight: 8 }} />
           <Text style={[styles.infoText, { color: colors.textMuted }]}>
-            Tax calculations follow Indian income tax rules for FY 2025-26 (equity with STT paid). 
-            Surcharge and cess are estimated. Consult a CA for exact tax planning.
+            {t('calculators.taxInfo')}
           </Text>
         </View>
       </ScrollView>

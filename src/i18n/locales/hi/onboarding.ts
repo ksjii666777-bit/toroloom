@@ -1,0 +1,14 @@
+// Auto-generated from hi.ts — onboarding namespace
+export default {
+    title: 'Toroloom में आपका स्वागत है',
+    step1Title: 'अपना पोर्टफोलियो ट्रैक करें',
+    step1Desc: 'सुंदर चार्ट और विश्लेषण के साथ रीयल-टाइम में अपने निवेश पर नज़र रखें',
+    step2Title: 'AI-संचालित अंतर्दृष्टि',
+    step2Desc: 'बुद्धिमान बाज़ार विश्लेषण और व्यक्तिगत ट्रेडिंग सिफारिशें प्राप्त करें',
+    step3Title: 'मल्टी-ब्रोकर सपोर्ट',
+    step3Desc: 'Zerodha, Angel One, या Groww कनेक्ट करें — सब एक जगह',
+    getStarted: 'शुरू करें',
+    next: 'अगला',
+    skip: 'छोड़ें',
+    done: 'हो गया',
+};

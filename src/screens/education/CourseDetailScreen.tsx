@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 
@@ -22,6 +23,7 @@ const levelGradients: Record<string, readonly [string, string]> = {
 export default function CourseDetailScreen({ route, navigation }: any) {
   const { courseId } = route.params;
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { fetchLesson, markLessonComplete, lessonProgress } = useEducationStore();
   const { addXp } = useGamificationStore();
@@ -36,7 +38,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
   if (!course) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }}>Course not found</Text>
+        <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }}>{t('education.courseNotFound')}</Text>
       </View>
     );
   }
@@ -83,7 +85,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
         {/* Progress Section */}
         <Card style={styles.progressCard}>
           <View style={styles.progressHeader}>
-            <Text style={styles.progressTitle}>Course Progress</Text>
+            <Text style={styles.progressTitle}>{t('education.courseProgress')}</Text>
             <Text style={styles.progressPercent}>{progress}%</Text>
           </View>
           <View style={styles.progressBarBg}>
@@ -92,32 +94,32 @@ export default function CourseDetailScreen({ route, navigation }: any) {
           <View style={styles.progressStats}>
             <View style={styles.progressStat}>
               <Text style={styles.progressStatValue}>{completedCount}</Text>
-              <Text style={styles.progressStatLabel}>Completed</Text>
+              <Text style={styles.progressStatLabel}>{t('education.completed')}</Text>
             </View>
             <View style={styles.progressStatDivider} />
             <View style={styles.progressStat}>
               <Text style={styles.progressStatValue}>{course.lessons - completedCount}</Text>
-              <Text style={styles.progressStatLabel}>Remaining</Text>
+              <Text style={styles.progressStatLabel}>{t('education.remainingCount')}</Text>
             </View>
             <View style={styles.progressStatDivider} />
             <View style={styles.progressStat}>
               <Text style={styles.progressStatValue}>{course.duration}</Text>
-              <Text style={styles.progressStatLabel}>Duration</Text>
+              <Text style={styles.progressStatLabel}>{t('education.duration')}</Text>
             </View>
           </View>
         </Card>
 
         {/* Course Info */}
-        <Card title="About this Course" style={styles.infoCard}>
+        <Card title={t('education.aboutThisCourse')} style={styles.infoCard}>
           <Text style={styles.infoText}>{course.description}</Text>
           <View style={styles.infoStats}>
             <View style={styles.infoStat}>
               <Ionicons name="people-outline" size={16} color={colors.textMuted} />
-              <Text style={styles.infoStatText}>{course.enrolledCount.toLocaleString()} enrolled</Text>
+              <Text style={styles.infoStatText}>{course.enrolledCount.toLocaleString()} {t('education.enrolled')}</Text>
             </View>
             <View style={styles.infoStat}>
               <Ionicons name="star" size={16} color="#FFC107" />
-              <Text style={styles.infoStatText}>{course.rating} rating</Text>
+              <Text style={styles.infoStatText}>{course.rating} {t('education.rating')}</Text>
             </View>
           </View>
         </Card>
@@ -125,7 +127,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
         {/* Lessons List */}
         <View style={styles.lessonsSection}>
           <Text style={styles.lessonsSectionTitle}>
-            Lessons ({completedCount}/{course.lessons})
+            {t('education.lessonsProgress', { completed: completedCount, total: course.lessons })}
           </Text>
 
           {lessons.map((lesson, index) => {
@@ -165,13 +167,13 @@ export default function CourseDetailScreen({ route, navigation }: any) {
                       {isCompleted && (
                         <View style={styles.completedTag}>
                           <Ionicons name="checkmark" size={10} color="#00C853" />
-                          <Text style={styles.completedText}>Done</Text>
+                          <Text style={styles.completedText}>{t('education.lessonDone')}</Text>
                         </View>
                       )}
                       {lesson.quiz && (
                         <View style={styles.quizTag}>
                           <Ionicons name="help-circle" size={10} color="#6C63FF" />
-                          <Text style={styles.quizTagText}>Quiz</Text>
+                          <Text style={styles.quizTagText}>{t('education.lessonQuiz')}</Text>
                         </View>
                       )}
                     </View>
@@ -183,7 +185,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
                 {/* "Resume" badge on next incomplete lesson */}
                 {isNext && !isCompleted && (
                   <View style={styles.nextBadge}>
-                    <Text style={styles.nextBadgeText}>Next Lesson</Text>
+                    <Text style={styles.nextBadgeText}>{t('education.nextLesson')}</Text>
                   </View>
                 )}
               </Pressable>
@@ -200,7 +202,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
             <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
               <Ionicons name="play" size={20} color={colors.white} />
               <Text style={styles.continueText}>
-                {completedCount === 0 ? 'Start Course' : 'Continue Learning'}
+                {completedCount === 0 ? t('education.startCourse') : t('education.continueLearning')}
               </Text>
             </LinearGradient>
           </Pressable>
@@ -215,7 +217,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
             <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
               <Ionicons name={certificate ? 'ribbon' : 'ribbon-outline'} size={20} color={colors.white} />
               <Text style={styles.continueText}>
-                {certificate ? 'View Certificate' : '🎓 Get Certificate'}
+                {certificate ? t('education.viewCertificate') : t('education.getCertificate')}
               </Text>
             </LinearGradient>
           </Pressable>

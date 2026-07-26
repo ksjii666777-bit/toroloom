@@ -54,6 +54,61 @@ vi.mock('../context/ThemeContext', () => ({
   }),
 }));
 
+vi.mock('../hooks/useT', () => ({
+  useT: function() {
+    const translations = {
+      'commodityMarkets.title': 'Commodities',
+      'commodityMarkets.subtitle': 'Global Markets Dashboard',
+      'commodityMarkets.scanning': 'Scanning…',
+      'commodityMarkets.live': 'Live',
+      'commodityMarkets.offline': 'Offline',
+      'commodityMarkets.mock': 'Mock',
+      'commodityMarkets.tabAll': 'All',
+      'commodityMarkets.tabMetals': 'Metals',
+      'commodityMarkets.tabEnergy': 'Energy',
+      'commodityMarkets.tabAgri': 'Agri',
+      'commodityMarkets.tabSummary': 'Summary',
+      'commodityMarkets.searchPlaceholder': 'Search commodities...',
+      'commodityMarkets.commodityCount': '1 commodity',
+      'commodityMarkets.noCommoditiesFound': 'No commodities found',
+      'commodityMarkets.adjustSearch': 'Try adjusting search',
+      'commodityMarkets.total': 'Total',
+      'commodityMarkets.gainers': 'Gainers',
+      'commodityMarkets.losers': 'Losers',
+      'commodityMarkets.metalsShort': 'Metals',
+      'commodityMarkets.categoryPerformance': 'Category Performance',
+      'commodityMarkets.preciousMetals': '💎 Precious Metals',
+      'commodityMarkets.catEnergy': 'Energy',
+      'commodityMarkets.catAgriculture': 'Agriculture',
+      'commodityMarkets.allCommodities': 'All Commodities',
+      'commodityMarkets.commodityTradingIndia': 'Commodity Trading in India',
+      'commodityMarkets.commodityTradingIndiaDesc': 'Commodities trading info.',
+      'commodityMarkets.dayHigh': 'H:',
+      'commodityMarkets.dayLow': 'L:',
+      'commodityMarkets.week52Range': '52W Range',
+      'commodityMarkets.mcxPrefix': 'MCX:',
+      'commodityMarkets.preciousBaseMetal': 'Precious/Base Metal',
+      'commodityMarkets.expandedChangePercent': 'Change %',
+      'commodityMarkets.expandedVolatility': 'Volatility',
+      'commodityMarkets.expandedDayRange': 'Day Range',
+      'commodityMarkets.expandedMcxIndia': 'MCX India',
+      'commodityMarkets.calcTitle': 'Price Calculator',
+      'commodityMarkets.calcSubtitle': 'Commodity value in INR',
+      'commodityMarkets.calcQuantity': 'Quantity',
+      'commodityMarkets.calcUsdValue': 'USD Value',
+      'commodityMarkets.calcInrValue': 'INR Value (approx)',
+      'commodityMarkets.calcMcxUnit': 'MCX India (1 unit)',
+      'commodityMarkets.calcNote': 'INR values are approximate.',
+    };
+    return {
+      t: function(key: string) {
+        if (translations[key as keyof typeof translations]) return translations[key as keyof typeof translations];
+        return key.split('.').pop() || key;
+      }
+    };
+  }
+}));
+
 vi.mock('../hooks/useCommodityPrices', () => ({
   useCommodityPrices: () => ({
     prices: {},

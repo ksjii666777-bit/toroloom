@@ -22,6 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { mockLearningPaths } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -29,6 +30,7 @@ const { width } = Dimensions.get('window');
 
 export default function LearningPathsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { lessonProgress, courses } = useEducationStore();
   const [refreshing, setRefreshing] = React.useState(false);
@@ -87,8 +89,8 @@ export default function LearningPathsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerText}>
-            <Text style={styles.title}>Learning Paths</Text>
-            <Text style={styles.subtitle}>Curated sequences to master the markets</Text>
+            <Text style={styles.title}>{t('education.learningPaths')}</Text>
+            <Text style={styles.subtitle}>{t('education.learningPathsSubtitle')}</Text>
           </View>
         </View>
 
@@ -102,22 +104,22 @@ export default function LearningPathsScreen({ navigation }: any) {
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryValue}>{mockLearningPaths.length}</Text>
-              <Text style={styles.summaryLabel}>Paths</Text>
+              <Text style={styles.summaryLabel}>{t('education.paths')}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
               <Text style={styles.summaryValue}>{mockLearningPaths.reduce((s, p) => s + p.courseIds.length, 0)}</Text>
-              <Text style={styles.summaryLabel}>Courses</Text>
+              <Text style={styles.summaryLabel}>{t('education.title')}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
               <Text style={styles.summaryValue}>{mockLearningPaths.reduce((s, p) => s + p.totalLessons, 0)}</Text>
-              <Text style={styles.summaryLabel}>Lessons</Text>
+              <Text style={styles.summaryLabel}>{t('education.lessonsLabel')}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
               <Text style={styles.summaryValue}>{(mockLearningPaths.reduce((s, p) => s + p.enrolledCount, 0) / 1000).toFixed(0)}K</Text>
-              <Text style={styles.summaryLabel}>Learners</Text>
+              <Text style={styles.summaryLabel}>{t('education.learners')}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -158,7 +160,7 @@ export default function LearningPathsScreen({ navigation }: any) {
                     />
                   </View>
                   <Text style={styles.pathProgressText}>
-                    {path.completedCourses}/{path.totalCourses} courses · {path.progress}% complete
+                    {t('education.coursesProgress', { completed: path.completedCourses, total: path.totalCourses, percent: path.progress })}
                   </Text>
                 </LinearGradient>
 
@@ -176,7 +178,7 @@ export default function LearningPathsScreen({ navigation }: any) {
                     </View>
                     <View style={styles.pathStat}>
                       <Ionicons name="book-outline" size={14} color={colors.textMuted} />
-                      <Text style={styles.pathStatText}>{path.totalLessons} lessons</Text>
+                      <Text style={styles.pathStatText}>{t('education.lessonsCount', { count: path.totalLessons })}</Text>
                     </View>
                     <View style={styles.pathStat}>
                       <Ionicons name="people-outline" size={14} color={colors.textMuted} />
@@ -208,7 +210,7 @@ export default function LearningPathsScreen({ navigation }: any) {
                   {/* CTA */}
                   <View style={styles.ctaRow}>
                     <Text style={[styles.ctaText, { color: lvl.color }]}>
-                      {path.progress > 0 ? 'Continue Path →' : 'Start Path →'}
+                      {path.progress > 0 ? t('education.continuePath') : t('education.startPath')}
                     </Text>
                     <Ionicons name="arrow-forward-circle" size={20} color={lvl.color} />
                   </View>

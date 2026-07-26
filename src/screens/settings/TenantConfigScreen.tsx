@@ -26,6 +26,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../../store/subscriptionStore';
 import {
   DEFAULT_FEATURE_MATRIX,
@@ -42,6 +43,7 @@ const TIERS: SubscriptionTier[] = ['free', 'pro', 'elite'];
 
 export default function TenantConfigScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // ── Load existing tenant config (reactive subscription) ──
@@ -89,15 +91,15 @@ export default function TenantConfigScreen({ navigation }: any) {
   // ── Build and save ───────────────────────────────────────
   const handleSave = useCallback(async () => {
     if (!id.trim()) {
-      Alert.alert('Validation Error', 'Tenant ID is required.');
+      Alert.alert(t('tenantConfig.validationError'), t('tenantConfig.idRequired'));
       return;
     }
     if (!name.trim()) {
-      Alert.alert('Validation Error', 'Tenant name is required.');
+      Alert.alert(t('tenantConfig.validationError'), t('tenantConfig.nameRequired'));
       return;
     }
     if (!domain.trim()) {
-      Alert.alert('Validation Error', 'Tenant domain is required.');
+      Alert.alert(t('tenantConfig.validationError'), t('tenantConfig.domainRequired'));
       return;
     }
 
@@ -145,20 +147,20 @@ export default function TenantConfigScreen({ navigation }: any) {
     await configureTenant(config);
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert('Saved ✅', `Tenant "${config.name}" configured successfully.`, [
-      { text: 'OK', onPress: () => navigation.goBack() },
+    Alert.alert(t('app.saved'), `${t('tenantConfig.savedSuccess')} "${config.name}".`, [
+      { text: t('app.ok'), onPress: () => navigation.goBack() },
     ]);
   }, [id, name, domain, primaryColor, featureOverrides, pricingOverrides, razorpayKeyId, razorpayKeySecret, configureTenant, navigation]);
 
   // ── Reset form to defaults ───────────────────────────────
   const handleReset = useCallback(() => {
     Alert.alert(
-      'Reset Tenant Config',
-      'This will clear all tenant overrides and revert to default behavior.',
+      t('tenantConfig.resetTitle'),
+      t('tenantConfig.resetDesc'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
-          text: 'Reset',
+          text: t('tenantConfig.reset'),
           style: 'destructive',
           onPress: async () => {
             setId('');
@@ -175,7 +177,7 @@ export default function TenantConfigScreen({ navigation }: any) {
               domain: 'toroloom.app',
             });
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            Alert.alert('Reset Complete', 'Tenant config has been reset to defaults.');
+            Alert.alert(t('tenantConfig.resetComplete'), t('tenantConfig.resetCompleteDesc'));
           },
         },
       ]
@@ -192,7 +194,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             <Ionicons name="chevron-back" size={24} color={colors.text} />
           </View>
         </AnimatedPressable>
-        <Text style={styles.title}>Tenant Config</Text>
+        <Text style={styles.title}>{t('tenantConfig.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -201,47 +203,47 @@ export default function TenantConfigScreen({ navigation }: any) {
         contentContainerStyle={styles.scrollContent}
       >
         {/* ── Tenant Identity ──────────────────────────────── */}
-        <Card title="Tenant Identity" style={styles.sectionCard}>
-          <Text style={styles.fieldLabel}>Tenant ID</Text>
+        <Card title={t('tenantConfig.tenantIdentity')} style={styles.sectionCard}>
+          <Text style={styles.fieldLabel}>{t('tenantConfig.tenantId')}</Text>
           <TextInput
             style={styles.input}
             value={id}
             onChangeText={setId}
-            placeholder="e.g. broker_x"
+            placeholder={t('tenantConfig.tenantIdPlaceholder')}
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
             {...({ id: 'tenant-id', name: 'tenantId' } as { id: string; name: string })}
           />
 
-          <Text style={styles.fieldLabel}>Tenant Name</Text>
+          <Text style={styles.fieldLabel}>{t('tenantConfig.tenantName')}</Text>
           <TextInput
             style={styles.input}
             value={name}
             onChangeText={setName}
-            placeholder="e.g. BrokerX"
+            placeholder={t('tenantConfig.tenantNamePlaceholder')}
             placeholderTextColor={colors.textMuted}
             {...({ id: 'tenant-name', name: 'tenantName' } as { id: string; name: string })}
           />
 
-          <Text style={styles.fieldLabel}>Domain</Text>
+          <Text style={styles.fieldLabel}>{t('tenantConfig.domain')}</Text>
           <TextInput
             style={styles.input}
             value={domain}
             onChangeText={setDomain}
-            placeholder="e.g. brokerx.toroloom.app"
+            placeholder={t('tenantConfig.domainPlaceholder')}
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
             {...({ id: 'tenant-domain', name: 'domain' } as { id: string; name: string })}
           />
 
-          <Text style={styles.fieldLabel}>Primary Color (hex)</Text>
+          <Text style={styles.fieldLabel}>{t('tenantConfig.primaryColor')}</Text>
           <TextInput
             style={styles.input}
             value={primaryColor}
             onChangeText={setPrimaryColor}
-            placeholder="e.g. #FF6600"
+            placeholder={t('tenantConfig.primaryColorPlaceholder')}
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             {...({ id: 'tenant-primary-color', name: 'primaryColor' } as { id: string; name: string })}
@@ -249,10 +251,9 @@ export default function TenantConfigScreen({ navigation }: any) {
         </Card>
 
         {/* ── Feature Overrides ────────────────────────────── */}
-        <Card title="Feature Overrides" style={styles.sectionCard}>
+        <Card title={t('tenantConfig.featureOverrides')} style={styles.sectionCard}>
           <Text style={styles.helpText}>
-            Override the subscription tier required for each feature. Choose
-            "Default" to keep the original tier from the matrix.
+            {t('tenantConfig.featureOverridesDesc')}
           </Text>
           <View style={styles.overrideList}>
             {(Object.keys(DEFAULT_FEATURE_MATRIX) as SubscriptionFeature[]).map((feature) => {
@@ -263,7 +264,7 @@ export default function TenantConfigScreen({ navigation }: any) {
                   <View style={styles.overrideInfo}>
                     <Text style={styles.overrideLabel}>{meta.label}</Text>
                     <Text style={styles.overrideDefault}>
-                      Default: <Text style={{ color: colors.primary }}>{meta.minTier}</Text>
+                      {t('tenantConfig.default')}: <Text style={{ color: colors.primary }}>{meta.minTier}</Text>
                       {currentOverride && currentOverride !== 'default' && (
                         <Text style={{ color: colors.marketUp }}>
                           {' → '}{currentOverride}
@@ -323,10 +324,9 @@ export default function TenantConfigScreen({ navigation }: any) {
         </Card>
 
         {/* ── Plan Pricing Overrides ───────────────────────── */}
-        <Card title="Plan Pricing Overrides" style={styles.sectionCard}>
+        <Card title={t('tenantConfig.planPricingOverrides')} style={styles.sectionCard}>
           <Text style={styles.helpText}>
-            Set custom pricing per plan. Leave blank to keep the default price
-            from the plan definition.
+            {t('tenantConfig.planPricingOverridesDesc')}
           </Text>
           {SUBSCRIPTION_PLANS.filter((p) => p.tier !== 'free').map((plan) => {
             const values = pricingOverrides[plan.id] ?? { monthly: '', yearly: '' };
@@ -338,7 +338,7 @@ export default function TenantConfigScreen({ navigation }: any) {
                 </View>
                 <View style={styles.pricingRow}>
                   <View style={styles.pricingField}>
-                    <Text style={styles.pricingLabel}>Monthly (₹)</Text>
+                    <Text style={styles.pricingLabel}>{t('tenantConfig.monthly')}</Text>
                     <TextInput
                       style={styles.pricingInput}
                       value={values.monthly}
@@ -355,7 +355,7 @@ export default function TenantConfigScreen({ navigation }: any) {
                     />
                   </View>
                   <View style={styles.pricingField}>
-                    <Text style={styles.pricingLabel}>Yearly (₹)</Text>
+                    <Text style={styles.pricingLabel}>{t('tenantConfig.yearly')}</Text>
                     <TextInput
                       style={styles.pricingInput}
                       value={values.yearly}
@@ -378,30 +378,29 @@ export default function TenantConfigScreen({ navigation }: any) {
         </Card>
 
         {/* ── Razorpay Keys ────────────────────────────────── */}
-        <Card title="Razorpay Config" style={styles.sectionCard}>
+        <Card title={t('tenantConfig.razorpayConfig')} style={styles.sectionCard}>
           <Text style={styles.helpText}>
-            Configure per-tenant Razorpay keys so subscription revenue routes to
-            the tenant's account. Leave blank to use the global Toroloom keys.
+            {t('tenantConfig.razorpayConfigDesc')}
           </Text>
 
-          <Text style={styles.fieldLabel}>Key ID</Text>
+          <Text style={styles.fieldLabel}>{t('tenantConfig.keyId')}</Text>
           <TextInput
             style={styles.input}
             value={razorpayKeyId}
             onChangeText={setRazorpayKeyId}
-            placeholder="e.g. rzp_live_xxxxxxxx"
+            placeholder={t('tenantConfig.keyIdPlaceholder')}
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
             {...({ id: 'tenant-razorpay-key-id', name: 'razorpayKeyId' } as { id: string; name: string })}
           />
 
-          <Text style={styles.fieldLabel}>Key Secret</Text>
+          <Text style={styles.fieldLabel}>{t('tenantConfig.keySecret')}</Text>
           <TextInput
             style={styles.input}
             value={razorpayKeySecret}
             onChangeText={setRazorpayKeySecret}
-            placeholder="Enter key secret"
+            placeholder={t('tenantConfig.keySecretPlaceholder')}
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
@@ -415,7 +414,7 @@ export default function TenantConfigScreen({ navigation }: any) {
           <AnimatedPressable onPress={handleSave} haptic="medium" scaleTo={0.97}>
             <View style={styles.saveBtn}>
               <Ionicons name="checkmark-circle" size={20} color={colors.white} />
-              <Text style={styles.saveBtnText}>Save Tenant Config</Text>
+              <Text style={styles.saveBtnText}>{t('tenantConfig.saveBtn')}</Text>
             </View>
           </AnimatedPressable>
 
@@ -423,7 +422,7 @@ export default function TenantConfigScreen({ navigation }: any) {
             <AnimatedPressable onPress={handleReset} haptic="warning" scaleTo={0.97}>
               <View style={styles.resetBtn}>
                 <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                <Text style={styles.resetBtnText}>Reset to Default</Text>
+                <Text style={styles.resetBtnText}>{t('tenantConfig.resetToDefault')}</Text>
               </View>
             </AnimatedPressable>
           )}
@@ -431,22 +430,22 @@ export default function TenantConfigScreen({ navigation }: any) {
 
         {/* ── Preview: Current Config Summary ──────────────── */}
         {existingConfig && existingConfig.id !== 'default' && (
-          <Card title="Active Config" style={styles.sectionCard}>
+          <Card title={t('tenantConfig.activeConfig')} style={styles.sectionCard}>
             <Text style={styles.configLine}>
-              <Text style={styles.configLabel}>ID: </Text>
+              <Text style={styles.configLabel}>{t('tenantConfig.id')}: </Text>
               {existingConfig.id}
             </Text>
             <Text style={styles.configLine}>
-              <Text style={styles.configLabel}>Name: </Text>
+              <Text style={styles.configLabel}>{t('tenantConfig.name')}: </Text>
               {existingConfig.name}
             </Text>
             <Text style={styles.configLine}>
-              <Text style={styles.configLabel}>Domain: </Text>
+              <Text style={styles.configLabel}>{t('tenantConfig.domain')}: </Text>
               {existingConfig.domain}
             </Text>
             {existingConfig.primaryColor && (
               <View style={styles.configRow}>
-                <Text style={styles.configLabel}>Primary Color: </Text>
+                <Text style={styles.configLabel}>{t('tenantConfig.primaryColor')}: </Text>
                 <View
                   style={[styles.colorSwatch, { backgroundColor: existingConfig.primaryColor }]}
                 />
@@ -457,19 +456,19 @@ export default function TenantConfigScreen({ navigation }: any) {
             )}
             {existingConfig.featureOverrides && (
               <Text style={styles.configLine}>
-                <Text style={styles.configLabel}>Feature Overrides: </Text>
+                <Text style={styles.configLabel}>{t('tenantConfig.featureOverrides')}: </Text>
                 {Object.keys(existingConfig.featureOverrides).length} feature(s)
               </Text>
             )}
             {existingConfig.razorpay?.keyId && (
               <Text style={styles.configLine}>
-                <Text style={styles.configLabel}>Razorpay: </Text>
+                <Text style={styles.configLabel}>{t('tenantConfig.razorpay')}: </Text>
                 Configured ({existingConfig.razorpay.keyId.slice(0, 12)}...)
               </Text>
             )}
             {existingConfig.razorpay?.pricing && (
               <Text style={styles.configLine}>
-                <Text style={styles.configLabel}>Pricing Overrides: </Text>
+                <Text style={styles.configLabel}>{t('tenantConfig.pricingOverrides')}: </Text>
                 {Object.keys(existingConfig.razorpay.pricing).length} plan(s)
               </Text>
             )}

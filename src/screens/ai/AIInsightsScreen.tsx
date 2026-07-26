@@ -7,8 +7,10 @@ import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constant
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { formatCurrency } from '../../utils/formatters';
+import { useT } from '../../hooks/useT';
 
 export default function AIInsightsScreen({ _navigation }: any) {
+  const { t } = useT();
   const { insights } = useAIStore();
 
   const getTypeColor = (type: string) => {
@@ -31,8 +33,8 @@ export default function AIInsightsScreen({ _navigation }: any) {
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>AI Insights</Text>
-          <Text style={styles.subtitle}>Powered by advanced market analysis</Text>
+          <Text style={styles.title}>{t('ai.title')}</Text>
+          <Text style={styles.subtitle}>{t('ai.insightsSubtitle')}</Text>
         </View>
 
         {/* Market Overview */}
@@ -40,20 +42,17 @@ export default function AIInsightsScreen({ _navigation }: any) {
           <View style={styles.overviewRow}>
             <Ionicons name="bulb" size={28} color={COLORS.white} />
             <View style={styles.overviewText}>
-              <Text style={styles.overviewTitle}>AI Market Overview</Text>
+              <Text style={styles.overviewTitle}>{t('ai.marketOverview')}</Text>
               <Text style={styles.overviewSub}>
-                {insights.filter(i => i.type === 'bullish').length} bullish · {insights.filter(i => i.type === 'bearish').length} bearish · {insights.filter(i => i.type === 'neutral').length} neutral
+                {insights.filter(i => i.type === 'bullish').length} {t('ai.bullish').toLowerCase()} · {insights.filter(i => i.type === 'bearish').length} {t('ai.bearish').toLowerCase()} · {insights.filter(i => i.type === 'neutral').length} {t('ai.neutral').toLowerCase()}
               </Text>
             </View>
           </View>
-          <Text style={styles.overviewNote}>
-            Our AI analyzes technical indicators, fundamental data, and market sentiment to generate insights.
-            Always do your own research before trading.
-          </Text>
+          <Text style={styles.overviewNote}>{t('ai.insightDisclaimer')}</Text>
         </Card>
 
         {/* Insights List */}
-        <Text style={styles.sectionTitle}>Stock Analysis</Text>
+        <Text style={styles.sectionTitle}>{t('ai.stockAnalysis')}</Text>
         {insights.map(insight => (
           <Pressable key={insight.id} style={styles.insightCard}>
             <View style={styles.insightHeader}>
@@ -73,20 +72,20 @@ export default function AIInsightsScreen({ _navigation }: any) {
             <Text style={styles.insightAnalysis} numberOfLines={3}>{insight.analysis}</Text>
 
             <View style={styles.confidenceRow}>
-              <Badge label={`${insight.confidence}% Confidence`} variant={insight.confidence > 75 ? 'success' : 'warning'} />
+              <Badge label={t('ai.confidence', { value: insight.confidence })} variant={insight.confidence > 75 ? 'success' : 'warning'} />
               <Text style={styles.insightTime}>{new Date(insight.timestamp).toLocaleDateString()}</Text>
             </View>
 
             {insight.targets.length > 0 && (
               <View style={styles.targetsRow}>
-                {insight.targets.map((t, i) => (
+                {insight.targets.map((target, i) => (
                   <View key={`insight_${i}`} style={styles.targetItem}>
-                    <Text style={styles.targetLabel}>Target {i + 1}</Text>
-                    <Text style={styles.targetValue}>{formatCurrency(t.target)}</Text>
+                    <Text style={styles.targetLabel}>{t('ai.target', { num: i + 1 })}</Text>
+                    <Text style={styles.targetValue}>{formatCurrency(target.target)}</Text>
                     <View style={styles.targetBar}>
-                      <View style={[styles.targetFill, { width: `${t.probability}%` }]} />
+                      <View style={[styles.targetFill, { width: `${target.probability}%` }]} />
                     </View>
-                    <Text style={styles.targetProb}>{t.probability}% probability</Text>
+                    <Text style={styles.targetProb}>{t('ai.probability', { value: target.probability })}</Text>
                   </View>
                 ))}
               </View>

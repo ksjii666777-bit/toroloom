@@ -206,7 +206,7 @@ describe('useForexRates', () => {
       await Promise.resolve();
     });
 
-    let lastResult = results[results.length - 1];
+    const lastResult = results[results.length - 1];
 
     // Clear the fetch mock and call refresh
     const fetchMock = vi.spyOn(globalThis, 'fetch');

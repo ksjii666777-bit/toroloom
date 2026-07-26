@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useT } from '../../hooks/useT';
 import Svg, { Path, Circle, Defs, LinearGradient as SvgGradientDef, Stop } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { useSocialStore } from '../../store/socialStore';
@@ -33,21 +34,21 @@ const { width } = Dimensions.get('window');
 
 // ─── Sort/Period Options ────────────────────────────────────────────────────
 
-const SORT_OPTIONS: { key: LeaderboardSort; label: string; icon: string }[] = [
-  { key: 'pnl', label: 'P&L', icon: 'cash' },
-  { key: 'returns', label: 'Returns', icon: 'trending-up' },
-  { key: 'winRate', label: 'Win Rate', icon: 'checkmark-circle' },
-  { key: 'followers', label: 'Followers', icon: 'people' },
-  { key: 'trades', label: 'Trades', icon: 'swap-horizontal' },
+const SORT_OPTIONS: { key: LeaderboardSort; label: string; icon: string; tKey: string }[] = [
+  { key: 'pnl', label: 'P&L', icon: 'cash', tKey: 'social.sortPnl' },
+  { key: 'returns', label: 'Returns', icon: 'trending-up', tKey: 'social.sortReturns' },
+  { key: 'winRate', label: 'Win Rate', icon: 'checkmark-circle', tKey: 'social.sortWinRate' },
+  { key: 'followers', label: 'Followers', icon: 'people', tKey: 'social.sortFollowers' },
+  { key: 'trades', label: 'Trades', icon: 'swap-horizontal', tKey: 'social.sortTrades' },
 ];
 
-const PERIOD_OPTIONS: { key: LeaderboardPeriod; label: string }[] = [
-  { key: '1W', label: '1W' },
-  { key: '1M', label: '1M' },
-  { key: '3M', label: '3M' },
-  { key: '6M', label: '6M' },
-  { key: '1Y', label: '1Y' },
-  { key: 'ALL', label: 'All' },
+const PERIOD_OPTIONS: { key: LeaderboardPeriod; label: string; tKey: string }[] = [
+  { key: '1W', label: '1W', tKey: 'social.period1W' },
+  { key: '1M', label: '1M', tKey: 'social.period1M' },
+  { key: '3M', label: '3M', tKey: 'social.period3M' },
+  { key: '6M', label: '6M', tKey: 'social.period6M' },
+  { key: '1Y', label: '1Y', tKey: 'social.period1Y' },
+  { key: 'ALL', label: 'All', tKey: 'social.periodAll' },
 ];
 
 // ─── Deterministic Sparkline Data ──────────────────────────────────────────
@@ -126,6 +127,7 @@ const PODIUM_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32'];
 const PODIUM_ICONS = ['trophy', 'medal', 'medal-outline'];
 
 function LeaderboardPodium({ topThree, onPress }: { topThree: LeaderboardEntry[]; onPress: (id: string) => void }) {
+  const { t } = useT();
   const { colors } = useTheme();
 
   if (topThree.length < 3) return null;
@@ -173,7 +175,7 @@ function LeaderboardPodium({ topThree, onPress }: { topThree: LeaderboardEntry[]
                 +{trader.totalPnlPercent.toFixed(1)}%
               </Text>
               <Text style={podiumStyles.followers}>
-                {(trader.followers / 1000).toFixed(1)}K followers
+                {t('social.followersK', { count: (trader.followers / 1000).toFixed(1) })}
               </Text>
 
               {/* Rank badge */}
@@ -240,13 +242,14 @@ const podiumStyles = StyleSheet.create({
 // ─── Copy Allocation Modal ──────────────────────────────────────────────────
 
 function CopyAllocationModal({
-  visible, onClose, trader, onConfirm,
+    visible, onClose, trader, onConfirm,
 }: {
   visible: boolean;
   onClose: () => void;
   trader: TraderProfile | null;
   onConfirm: (allocationPercent: number, investmentAmount: number) => void;
 }) {
+  const { t } = useT();
   const { colors } = useTheme();
   const [allocation, setAllocation] = useState(50);
   const [investment, setInvestment] = useState('250000');
@@ -284,9 +287,9 @@ function CopyAllocationModal({
               <Text style={[allocStyles.avatarSmallText, { color: colors.primary }]}>{trader.name[0]}</Text>
             </View>
             <View style={allocStyles.headerInfo}>
-              <Text style={[allocStyles.headerTitle, { color: colors.text }]}>Copy {trader.name}</Text>
+              <Text style={[allocStyles.headerTitle, { color: colors.text }]}>{t('social.copyTitle', { name: trader.name })}</Text>
               <Text style={[allocStyles.headerSub, { color: colors.textSecondary }]}>
-                {trader.strategy.replace(/_/g, ' · ')} · {trader.winRate.toFixed(0)}% win rate
+                {t('social.traderStrategy', { strategy: trader.strategy.replace(/_/g, ' · '), winRate: trader.winRate.toFixed(0) })}
               </Text>
             </View>
           </View>
@@ -294,7 +297,7 @@ function CopyAllocationModal({
           {/* Allocation Slider */}
           <View style={allocStyles.section}>
             <View style={allocStyles.sectionHeader}>
-              <Text style={[allocStyles.sectionLabel, { color: colors.text }]}>Allocation</Text>
+              <Text style={[allocStyles.sectionLabel, { color: colors.text }]}>{t('social.allocation')}</Text>
               <Text style={[allocStyles.sectionValue, { color: colors.primary }]}>{allocation}%</Text>
             </View>
             <View style={allocStyles.sliderRow}>
@@ -331,7 +334,7 @@ function CopyAllocationModal({
           {/* Investment Amount */}
           <View style={allocStyles.section}>
             <View style={allocStyles.sectionHeader}>
-              <Text style={[allocStyles.sectionLabel, { color: colors.text }]}>Investment Amount</Text>
+              <Text style={[allocStyles.sectionLabel, { color: colors.text }]}>{t('social.investmentAmount')}</Text>
             </View>
             <View style={[allocStyles.inputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <Text style={[allocStyles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
@@ -340,7 +343,7 @@ function CopyAllocationModal({
                 value={investment}
                 onChangeText={setInvestment}
                 keyboardType="number-pad"
-                placeholder="Enter amount"
+                placeholder={t('social.enterAmount')}
                 placeholderTextColor={colors.textMuted}
               />
             </View>
@@ -349,15 +352,15 @@ function CopyAllocationModal({
           {/* Summary */}
           <View style={[allocStyles.summary, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={allocStyles.summaryRow}>
-              <Text style={[allocStyles.summaryLabel, { color: colors.textSecondary }]}>Copy amount</Text>
+              <Text style={[allocStyles.summaryLabel, { color: colors.textSecondary }]}>{t('social.copyAmount')}</Text>
               <Text style={[allocStyles.summaryValue, { color: colors.text }]}>₹{copyAmount.toLocaleString()}</Text>
             </View>
             <View style={allocStyles.summaryRow}>
-              <Text style={[allocStyles.summaryLabel, { color: colors.textSecondary }]}>Max per trade</Text>
+              <Text style={[allocStyles.summaryLabel, { color: colors.textSecondary }]}>{t('social.maxPerTrade')}</Text>
               <Text style={[allocStyles.summaryValue, { color: colors.text }]}>₹{Math.round(copyAmount * 0.25).toLocaleString()}</Text>
             </View>
             <View style={allocStyles.summaryRow}>
-              <Text style={[allocStyles.summaryLabel, { color: colors.textSecondary }]}>Est. monthly cost</Text>
+              <Text style={[allocStyles.summaryLabel, { color: colors.textSecondary }]}>{t('social.estMonthlyCost')}</Text>
               <Text style={[allocStyles.summaryValue, { color: colors.warning }]}>₹{Math.round(copyAmount * 0.003).toLocaleString()}</Text>
             </View>
           </View>
@@ -365,14 +368,14 @@ function CopyAllocationModal({
           {/* Actions */}
           <View style={allocStyles.actions}>
             <TouchableOpacity style={[allocStyles.cancelBtn, { borderColor: colors.border }]} onPress={onClose}>
-              <Text style={[allocStyles.cancelText, { color: colors.textMuted }]}>Cancel</Text>
+              <Text style={[allocStyles.cancelText, { color: colors.textMuted }]}>{t('app.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[allocStyles.confirmBtn, { backgroundColor: colors.primary }]}
               onPress={() => onConfirm(allocation, investAmount)}
             >
               <Ionicons name="copy-outline" size={18} color={colors.white} />
-              <Text style={[allocStyles.confirmText, { color: colors.white }]}>Start Copying</Text>
+              <Text style={[allocStyles.confirmText, { color: colors.white }]}>{t('social.startCopying')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -454,6 +457,7 @@ const allocStyles = StyleSheet.create({
 // ─── Main Screen ────────────────────────────────────────────────────────────
 
 export default function SocialTradingScreen({ navigation }: any) {
+  const { t } = useT();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -498,7 +502,7 @@ export default function SocialTradingScreen({ navigation }: any) {
   // ── Copy Trading Start ──────────────────────────────────────────────
   const handleStartCopy = useCallback((trader: TraderProfile) => {
     if (!hasSocialAccess) {
-      Alert.alert('Premium Feature', 'Social & Copy Trading requires an Elite subscription. Upgrade to follow and copy top traders.');
+      Alert.alert(t('subscription.upgradeRequired'), t('social.premiumDesc'));
       return;
     }
     setSelectedTrader(trader);
@@ -604,7 +608,7 @@ export default function SocialTradingScreen({ navigation }: any) {
           </View>
           <View style={styles.cardStatItem}>
             <Text style={[styles.cardStatValue, { color: colors.marketUp }]}>+{trader.monthlyReturn.toFixed(1)}%</Text>
-            <Text style={styles.cardStatLabel}>Monthly</Text>
+            <Text style={styles.cardStatLabel}>{t('social.monthlyStat')}</Text>
           </View>
         </View>
 
@@ -622,7 +626,7 @@ export default function SocialTradingScreen({ navigation }: any) {
             >
               <Ionicons name="copy-outline" size={16} color={colors.white} />
               <Text style={styles.cardCopyBtnText}>
-                {isCopyingTrader ? 'Already Copying' : `Copy ${trader.name}`}
+                {isCopyingTrader ? t('social.alreadyCopying') : t('social.copyTitle', { name: trader.name })}
               </Text>
             </LinearGradient>
         </AnimatedPressable>
@@ -649,7 +653,7 @@ export default function SocialTradingScreen({ navigation }: any) {
             <Text style={[styles.crPnl, { color: relation.totalPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
               {relation.totalPnl >= 0 ? '+' : ''}₹{relation.totalPnl.toLocaleString()}
             </Text>
-            <Text style={styles.crActive}>{relation.activeTrades} active</Text>
+            <Text style={styles.crActive}>{relation.activeTrades} {t('social.activeLabel')}</Text>
           </View>
         </View>
 
@@ -697,15 +701,15 @@ export default function SocialTradingScreen({ navigation }: any) {
                 color={relation.isPaused ? colors.marketUp : colors.textMuted}
               />
               <Text style={[styles.crActionText, { color: relation.isPaused ? colors.marketUp : colors.textMuted }]}>
-                {relation.isPaused ? 'Resume' : 'Pause'}
+                {relation.isPaused ? t('social.resume') : t('social.pause')}
               </Text>
             </View>
           </AnimatedPressable>
           <AnimatedPressable
             onPress={() => {
-              Alert.alert('Stop Copy Trading', `Stop copying ${relation.traderName}? Open positions will be closed.`, [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Stop', style: 'destructive', onPress: () => stopCopyTrading(relation.traderId) },
+              Alert.alert(t('social.stopCopyTitle'), t('social.stopCopyMsg', { name: relation.traderName }), [
+                { text: t('app.cancel'), style: 'cancel' },
+                { text: t('social.stopLabel'), style: 'destructive', onPress: () => stopCopyTrading(relation.traderId) },
               ]);
             }}
             haptic="warning"
@@ -713,7 +717,7 @@ export default function SocialTradingScreen({ navigation }: any) {
           >
             <View style={[styles.crActionBtn, { borderColor: colors.danger + '40' }]}>
               <Ionicons name="close-circle-outline" size={16} color={colors.danger} />
-              <Text style={[styles.crActionText, { color: colors.danger }]}>Stop</Text>
+              <Text style={[styles.crActionText, { color: colors.danger }]}>{t('social.stopLabel')}</Text>
             </View>
           </AnimatedPressable>
         </View>
@@ -735,9 +739,9 @@ export default function SocialTradingScreen({ navigation }: any) {
           <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.premiumIconContainer}>
             <Ionicons name="people" size={48} color={colors.white} />
           </LinearGradient>
-          <Text style={styles.premiumTitle}>Social & Copy Trading</Text>
+          <Text style={styles.premiumTitle}>{t('social.premiumTitle')}</Text>
           <Text style={styles.premiumDesc}>
-            Follow and copy India's top traders automatically. Requires Elite subscription.
+            {t('social.premiumDesc')}
           </Text>
           <AnimatedPressable
             onPress={() => navigation.navigate('Subscription')}
@@ -746,7 +750,7 @@ export default function SocialTradingScreen({ navigation }: any) {
           >
             <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.upgradeBtn}>
               <Ionicons name="diamond" size={20} color={colors.white} />
-              <Text style={styles.upgradeBtnText}>Upgrade to Elite</Text>
+              <Text style={styles.upgradeBtnText}>{t('social.upgradeToElite')}</Text>
             </LinearGradient>
           </AnimatedPressable>
         </View>
@@ -760,17 +764,17 @@ export default function SocialTradingScreen({ navigation }: any) {
       <View style={styles.header}>          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Social Trading</Text>
+          <Text style={styles.title}>{t('social.title')}</Text>
           <View style={{ width: 40 }} />
       </View>
 
       {/* Tab Bar */}
       <View style={styles.tabBar}>
         {[
-          { key: 'leaderboard' as const, label: 'Leaderboard', icon: 'trophy' },
-          { key: 'following' as const, label: 'Following', icon: 'people', badge: followingTraders.length },
-          { key: 'copy' as const, label: 'Copy Trading', icon: 'copy', badge: copyRelations.length },
-          { key: 'search' as const, label: 'Search', icon: 'search' },
+          { key: 'leaderboard' as const, label: t('social.leaderboard'), icon: 'trophy' },
+          { key: 'following' as const, label: t('social.following'), icon: 'people', badge: followingTraders.length },
+          { key: 'copy' as const, label: t('social.copyTrading'), icon: 'copy', badge: copyRelations.length },
+          { key: 'search' as const, label: t('app.search'), icon: 'search' },
         ].map(tab => (
           <TouchableOpacity
             key={tab.key}
@@ -821,7 +825,7 @@ export default function SocialTradingScreen({ navigation }: any) {
                     color={leaderboardSort === opt.key ? colors.white : colors.textMuted}
                   />
                   <Text style={[styles.sortChipText, leaderboardSort === opt.key && styles.sortChipTextActive]}>
-                    {opt.label}
+                    {t(opt.tKey)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -836,7 +840,7 @@ export default function SocialTradingScreen({ navigation }: any) {
                 onPress={() => setLeaderboardPeriod(opt.key)}
               >
                 <Text style={[styles.periodText, leaderboardPeriod === opt.key && styles.periodTextActive]}>
-                  {opt.label}
+                  {t(opt.tKey)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -852,9 +856,9 @@ export default function SocialTradingScreen({ navigation }: any) {
           {followingTraders.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="people-outline" size={48} color={colors.textMuted} />
-              <Text style={styles.emptyTitle}>No Followed Traders</Text>
+              <Text style={styles.emptyTitle}>{t('social.noFollowedTraders')}</Text>
               <Text style={styles.emptyDesc}>
-                Browse the leaderboard and follow traders to see their updates here.
+                {t('social.followingEmptyDesc')}
               </Text>
             </View>
           ) : (
@@ -864,13 +868,13 @@ export default function SocialTradingScreen({ navigation }: any) {
                 <View style={styles.copySummaryRow}>
                   <View style={styles.copySummaryItem}>
                     <Text style={styles.copySummaryValue}>{followingTraders.length}</Text>
-                    <Text style={styles.copySummaryLabel}>Following</Text>
+                    <Text style={styles.copySummaryLabel}>{t('social.following')}</Text>
                   </View>
                   <View style={styles.copySummaryItem}>
                     <Text style={styles.copySummaryValue}>
                       {followingTraders.reduce((s, t) => s + t.totalTrades, 0)}
                     </Text>
-                    <Text style={styles.copySummaryLabel}>Total Trades</Text>
+                    <Text style={styles.copySummaryLabel}>{t('social.totalTrades')}</Text>
                   </View>
                   <View style={styles.copySummaryItem}>
                     <Text style={[styles.copySummaryValue, {
@@ -878,13 +882,13 @@ export default function SocialTradingScreen({ navigation }: any) {
                     }]}>
                       +{(((followingTraders.reduce((s, t) => s + t.totalPnl, 0)) / followingTraders.reduce((s, t) => s + 1, 0)) / 100000).toFixed(1)}%
                     </Text>
-                    <Text style={styles.copySummaryLabel}>Avg Return</Text>
+                    <Text style={styles.copySummaryLabel}>{t('social.avgReturn')}</Text>
                   </View>
                   <View style={styles.copySummaryItem}>
                     <Text style={styles.copySummaryValue}>
                       {(followingTraders.reduce((s, t) => s + t.followers, 0) / 1000).toFixed(0)}K
                     </Text>
-                    <Text style={styles.copySummaryLabel}>Combined Reach</Text>
+                    <Text style={styles.copySummaryLabel}>{t('social.combinedReach')}</Text>
                   </View>
                 </View>
               </Card>
@@ -928,19 +932,19 @@ export default function SocialTradingScreen({ navigation }: any) {
                       <Text style={[styles.cardStatValue, { color: trader.totalPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
                         +{trader.totalPnlPercent.toFixed(1)}%
                       </Text>
-                      <Text style={styles.cardStatLabel}>Returns</Text>
+                      <Text style={styles.cardStatLabel}>{t('social.returns')}</Text>
                     </View>
                     <View style={styles.cardStatItem}>
                       <Text style={[styles.cardStatValue, { color: colors.primary }]}>{trader.winRate.toFixed(0)}%</Text>
-                      <Text style={styles.cardStatLabel}>Win Rate</Text>
+                      <Text style={styles.cardStatLabel}>{t('social.winRate')}</Text>
                     </View>
                     <View style={styles.cardStatItem}>
                       <Text style={[styles.cardStatValue, { color: colors.text }]}>{(trader.followers / 1000).toFixed(1)}K</Text>
-                      <Text style={styles.cardStatLabel}>Followers</Text>
+                      <Text style={styles.cardStatLabel}>{t('social.followers')}</Text>
                     </View>
                     <View style={styles.cardStatItem}>
                       <Text style={[styles.cardStatValue, { color: colors.marketUp }]}>+{trader.monthlyReturn.toFixed(1)}%</Text>
-                      <Text style={styles.cardStatLabel}>Monthly</Text>
+                      <Text style={styles.cardStatLabel}>{t('social.monthlyStat')}</Text>
                     </View>
                   </View>
                 </View>
@@ -955,9 +959,9 @@ export default function SocialTradingScreen({ navigation }: any) {
           {copyRelations.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="copy-outline" size={48} color={colors.textMuted} />
-              <Text style={styles.emptyTitle}>No Copy Trading Yet</Text>
+              <Text style={styles.emptyTitle}>{t('social.noCopyYet')}</Text>
               <Text style={styles.emptyDesc}>
-                Browse the leaderboard and start copying top traders automatically.
+                {t('social.copyEmptyDesc')}
               </Text>
             </View>
           ) : (
@@ -967,13 +971,13 @@ export default function SocialTradingScreen({ navigation }: any) {
                 <View style={styles.copySummaryRow}>
                   <View style={styles.copySummaryItem}>
                     <Text style={styles.copySummaryValue}>{copyRelations.length}</Text>
-                    <Text style={styles.copySummaryLabel}>Active Copy</Text>
+                    <Text style={styles.copySummaryLabel}>{t('social.activeCopy')}</Text>
                   </View>
                   <View style={styles.copySummaryItem}>
                     <Text style={styles.copySummaryValue}>
                       {copyRelations.reduce((s, r) => s + r.activeTrades, 0)}
                     </Text>
-                    <Text style={styles.copySummaryLabel}>Open Trades</Text>
+                    <Text style={styles.copySummaryLabel}>{t('social.openTrades')}</Text>
                   </View>
                   <View style={styles.copySummaryItem}>
                     <Text style={[styles.copySummaryValue, {
@@ -981,13 +985,13 @@ export default function SocialTradingScreen({ navigation }: any) {
                     }]}>
                       ₹{(copyRelations.reduce((s, r) => s + r.totalPnl, 0) / 1000).toFixed(1)}K
                     </Text>
-                    <Text style={styles.copySummaryLabel}>Total P&L</Text>
+                    <Text style={styles.copySummaryLabel}>{t('social.totalPnl')}</Text>
                   </View>
                   <View style={styles.copySummaryItem}>
                     <Text style={styles.copySummaryValue}>
                       ₹{(copyRelations.reduce((s, r) => s + r.investmentAmount, 0) / 100000).toFixed(1)}L
                     </Text>
-                    <Text style={styles.copySummaryLabel}>Invested</Text>
+                    <Text style={styles.copySummaryLabel}>{t('social.invested')}</Text>
                   </View>
                 </View>
               </Card>
@@ -1004,7 +1008,7 @@ export default function SocialTradingScreen({ navigation }: any) {
             <Ionicons name="search" size={18} color={colors.textMuted} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search traders by name, strategy, stock..."
+              placeholder={t('social.searchPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={searchTraders}
@@ -1022,17 +1026,17 @@ export default function SocialTradingScreen({ navigation }: any) {
             {searchResults.length === 0 && searchQuery.length > 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>No Traders Found</Text>
-                <Text style={styles.emptyDesc}>Try a different name or strategy.</Text>
+                <Text style={styles.emptyTitle}>{t('social.noTradersFound')}</Text>
+                <Text style={styles.emptyDesc}>{t('social.searchEmptyDesc')}</Text>
               </View>
             ) : searchResults.length > 0 ? (
               searchResults.map(trader => renderTraderCard(trader))
             ) : (
               <View style={styles.emptyState}>
                 <Ionicons name="telescope-outline" size={48} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>Discover Top Traders</Text>
+                <Text style={styles.emptyTitle}>{t('social.discoverTitle')}</Text>
                 <Text style={styles.emptyDesc}>
-                  Search for traders by name, trading strategy, or stocks they trade.
+                  {t('social.discoverDesc')}
                 </Text>
               </View>
             )}

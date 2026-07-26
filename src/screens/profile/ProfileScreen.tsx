@@ -14,11 +14,11 @@ import Badge from '../../components/ui/Badge';
 Dimensions.get('window');
 
 const kycSteps = [
-  { key: 'pan', label: 'PAN Verification', icon: 'card-outline', done: false },
-  { key: 'aadhaar', label: 'Aadhaar Verification', icon: 'finger-print-outline', done: false },
-  { key: 'digilocker', label: 'DigiLocker', icon: 'cloud-done-outline', done: false },
-  { key: 'bank', label: 'Bank Linking', icon: 'business-outline', done: false },
-  { key: 'complete', label: 'Complete KYC', icon: 'shield-checkmark-outline', done: false },
+  { key: 'pan', label: 'kyc.panVerification', icon: 'card-outline', done: false },
+  { key: 'aadhaar', label: 'kyc.aadhaarVerification', icon: 'finger-print-outline', done: false },
+  { key: 'digilocker', label: 'kyc.digilocker', icon: 'cloud-done-outline', done: false },
+  { key: 'bank', label: 'kyc.bankLinking', icon: 'business-outline', done: false },
+  { key: 'complete', label: 'kyc.kycCompleted', icon: 'shield-checkmark-outline', done: false },
 ];
 
 // Step screen mapping
@@ -96,14 +96,14 @@ export default function ProfileScreen({ navigation }: any) {
 
 
   const accountDetails = [
-    { label: 'Account Type', value: 'Individual (Non-DP)' },
-    { label: 'Trading Account', value: 'TOR12345678' },
-    { label: 'DP ID', value: 'IN300123 | CDSL' },
-    { label: 'Broker', value: 'Toroloom Securities' },
-    { label: 'Account Opened', value: user?.createdAt ? formatDate(user.createdAt) : '15 Jan 2024' },
-    { label: 'PAN', value: user?.panNumber || 'ABCDE1234F' },
-    { label: 'Email', value: user?.email || 'user@email.com' },
-    { label: 'Phone', value: user?.phone || '+91 98765 43210' },
+    { label: 'accountType', value: 'Individual (Non-DP)' },
+    { label: 'tradingAccount', value: 'TOR12345678' },
+    { label: 'dpId', value: 'IN300123 | CDSL' },
+    { label: 'broker', value: 'Toroloom Securities' },
+    { label: 'accountOpened', value: user?.createdAt ? formatDate(user.createdAt) : '15 Jan 2024' },
+    { label: 'pan', value: user?.panNumber || 'ABCDE1234F' },
+    { label: 'email', value: user?.email || 'user@email.com' },
+    { label: 'phone', value: user?.phone || '+91 98765 43210' },
   ];
 
   const bankDetails = [
@@ -145,7 +145,7 @@ export default function ProfileScreen({ navigation }: any) {
             <View style={styles.bannerStatDivider} />
             <View style={styles.bannerStat}>
               <Text style={styles.bannerStatValue}>{userLevel.totalXp.toLocaleString()} XP</Text>
-              <Text style={styles.bannerStatLabel}>Lifetime XP</Text>
+              <Text style={styles.bannerStatLabel}>{t('profile.lifetimeXp')}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -153,10 +153,10 @@ export default function ProfileScreen({ navigation }: any) {
         {/* Quick Actions */}
         <View style={styles.quickActionsGrid}>
           {[
-            { icon: 'add-circle', label: 'Add Funds', color: '#00C853', gradient: GRADIENTS.success },
+            { icon: 'add-circle', label: t('funds.addFunds'), color: '#00C853', gradient: GRADIENTS.success },
             { icon: 'arrow-up-circle', label: t('profile.withdraw'), color: '#FF1744', gradient: GRADIENTS.danger },
             { icon: 'swap-horizontal', label: t('funds.transfer'), color: '#6C63FF', gradient: GRADIENTS.primary },
-            { icon: 'qr-code', label: 'UPI Settings', color: '#00D2FF', gradient: GRADIENTS.accent },
+            { icon: 'qr-code', label: t('profile.upiSettings'), color: '#00D2FF', gradient: GRADIENTS.accent },
           ].map((action, idx) => (
             <TouchableOpacity key={idx} style={styles.quickAction}>
               <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
@@ -181,18 +181,18 @@ export default function ProfileScreen({ navigation }: any) {
             onPress={() => setActiveTab('kyc')}
           >
             <Ionicons name="shield-checkmark-outline" size={16} color={activeTab === 'kyc' ? colors.white : colors.textMuted} />
-            <Text style={[styles.toggleText, activeTab === 'kyc' && styles.toggleTextActive]}>KYC & Banks</Text>
+            <Text style={[styles.toggleText, activeTab === 'kyc' && styles.toggleTextActive]}>{t('profile.kycAndBanks')}</Text>
           </TouchableOpacity>
         </View>
 
         {activeTab === 'profile' ? (
           <>
             {/* Account Details */}
-            <Card title="Account Details" subtitle="Your trading account information">
+            <Card title={t('profile.accountDetails')} subtitle={t('profile.accountDetailsSub')}>
               <View style={styles.detailsList}>
                 {accountDetails.map((item, _i) => (
                   <View key={item.label} style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{item.label}</Text>
+                    <Text style={styles.detailLabel}>{t(`profile.${item.label}`)}</Text>
                     <Text style={styles.detailValue}>{item.value}</Text>
                   </View>
                 ))}
@@ -200,14 +200,14 @@ export default function ProfileScreen({ navigation }: any) {
             </Card>
 
             {/* Personal Info */}
-            <Card title="Personal Information" style={{ marginTop: SPACING.md }}>
+            <Card title={t('profile.personalInformation')} style={{ marginTop: SPACING.md }}>
               <TouchableOpacity style={styles.menuRow}>
                 <View style={[styles.menuIconBox, { backgroundColor: '#6C63FF20' }]}>
                   <Ionicons name="person" size={18} color="#6C63FF" />
                 </View>
                 <View style={styles.menuRowInfo}>
-                  <Text style={styles.menuRowLabel}>Edit Profile</Text>
-                  <Text style={styles.menuRowSub}>Name, email, phone</Text>
+                  <Text style={styles.menuRowLabel}>{t('profile.editProfile')}</Text>
+                  <Text style={styles.menuRowSub}>{t('profile.editProfileSub')}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
               </TouchableOpacity>
@@ -217,8 +217,8 @@ export default function ProfileScreen({ navigation }: any) {
                   <Ionicons name="lock-closed" size={18} color="#00D2FF" />
                 </View>
                 <View style={styles.menuRowInfo}>
-                  <Text style={styles.menuRowLabel}>Change Password</Text>
-                  <Text style={styles.menuRowSub}>Update your login password</Text>
+                  <Text style={styles.menuRowLabel}>{t('profile.changePassword')}</Text>
+                  <Text style={styles.menuRowSub}>{t('profile.changePasswordSub')}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
               </TouchableOpacity>
@@ -228,8 +228,8 @@ export default function ProfileScreen({ navigation }: any) {
                   <Ionicons name="notifications" size={18} color="#FFC107" />
                 </View>
                 <View style={styles.menuRowInfo}>
-                  <Text style={styles.menuRowLabel}>Notification Preferences</Text>
-                  <Text style={styles.menuRowSub}>Manage alerts and updates</Text>
+                  <Text style={styles.menuRowLabel}>{t('profile.notificationPreferences')}</Text>
+                  <Text style={styles.menuRowSub}>{t('profile.notificationPrefsSub')}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
               </TouchableOpacity>
@@ -292,7 +292,7 @@ export default function ProfileScreen({ navigation }: any) {
                         ? { color: colors.text }
                         : {},
                     ]}>
-                      {step.label}
+                      {t(step.label)}
                     </Text>
                     {step.done && (
                       <Ionicons name="checkmark" size={16} color={colors.success} />
@@ -306,12 +306,12 @@ export default function ProfileScreen({ navigation }: any) {
               {/* Helper text */}
               {completedStepsCount < 4 && (
                 <Text style={styles.kycHelperText}>
-                  Tap on a step to start verification. Complete all 4 steps to finish KYC.
+                  {t('profile.kycHelperText')}
                 </Text>
               )}
             </Card>
 
-            {/* Linked Bank Accounts */}                <Card title="Linked Bank Accounts" subtitle={`${bankDetails.length} account(s) linked`}>
+            {/* Linked Bank Accounts */}                <Card title={t('profile.linkedBanks')} subtitle={t('profile.banksLinked', { count: bankDetails.length })}>
               {bankDetails.map((bank, i) => (
                 <View key={i}>
                   <View style={styles.bankCard}>
@@ -322,10 +322,10 @@ export default function ProfileScreen({ navigation }: any) {
                       <View style={styles.bankInfo}>
                         <View style={styles.bankNameRow}>
                           <Text style={styles.bankName}>{bank.bank}</Text>
-                          {bank.primary && <Badge label="Primary" variant="primary" />}
+                          {bank.primary && <Badge label={t('profile.primary')} variant="primary" />}
                         </View>
                         <Text style={styles.bankAccount}>{bank.account} · {bank.type}</Text>
-                        <Text style={styles.bankIfsc}>IFSC: {bank.ifsc}</Text>
+                        <Text style={styles.bankIfsc}>{t('profile.ifsc')}: {bank.ifsc}</Text>
                       </View>
                     </View>
                   </View>
@@ -341,7 +341,7 @@ export default function ProfileScreen({ navigation }: any) {
                 })}
               >
                 <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
-                <Text style={styles.addBankText}>Add Bank Account</Text>
+                <Text style={styles.addBankText}>{t('profile.addBankAccount')}</Text>
               </TouchableOpacity>
             </Card>
           </>

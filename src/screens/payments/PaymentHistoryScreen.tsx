@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../../store/subscriptionStore';
 import type { SubscriptionPayment } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -92,6 +93,7 @@ function formatTransactionDate(iso: string): { date: string; time: string } {
 // ─── PaymentRow Component ────────────────────────────────────────────────────
 
 function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayment; colors: any; styles: any }) {
+  const { t } = useT();
   const [expanded, setExpanded] = useState(false);
   const statusCfg = STATUS_CONFIG[payment.status] || STATUS_CONFIG.pending;
   const { date, time } = formatTransactionDate(payment.timestamp);
@@ -126,7 +128,7 @@ function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayme
 
         <View style={s.paymentInfo}>
           <Text style={s.paymentPlanName}>{payment.planName}</Text>
-          <Text style={s.paymentPlanType}>{payment.billingPeriod === 'monthly' ? 'Monthly' : 'Yearly'} · via {payment.method === 'razorpay' ? 'Razorpay' : payment.method === 'upi_autopay' ? 'UPI AutoPay' : 'Coupon'}</Text>
+          <Text style={s.paymentPlanType}>{payment.billingPeriod === 'monthly' ? t('paymentHistory.monthly') : t('paymentHistory.yearly')} · {t('paymentHistory.via')} {payment.method === 'razorpay' ? 'Razorpay' : payment.method === 'upi_autopay' ? 'UPI AutoPay' : 'Coupon'}</Text>
         </View>
 
         <View style={s.paymentRight}>
@@ -150,25 +152,25 @@ function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayme
           <View style={s.detailDivider} />
 
           <View style={s.detailRow}>
-            <Text style={s.detailLabel}>Date</Text>
+            <Text style={s.detailLabel}>{t('paymentHistory.date')}</Text>
             <Text style={s.detailValue}>{date} at {time}</Text>
           </View>
 
           <View style={s.detailRow}>
-            <Text style={s.detailLabel}>Transaction ID</Text>
+            <Text style={s.detailLabel}>{t('paymentHistory.transactionId')}</Text>
             <Text style={[s.detailValue, { fontFamily: 'monospace' }]}>{payment.transactionId}</Text>
           </View>
 
           {payment.invoiceId && (
             <View style={s.detailRow}>
-              <Text style={s.detailLabel}>Invoice</Text>
+              <Text style={s.detailLabel}>{t('paymentHistory.invoice')}</Text>
               <Text style={s.detailValue}>{payment.invoiceId}</Text>
             </View>
           )}
 
           {payment.couponCode && (
             <View style={s.detailRow}>
-              <Text style={s.detailLabel}>Coupon</Text>
+              <Text style={s.detailLabel}>{t('paymentHistory.coupon')}</Text>
               <View style={s.detailCouponBadge}>
                 <Ionicons name="pricetag" size={10} color={colors.marketUp} />
                 <Text style={[s.detailValue, { color: colors.marketUp }]}>{payment.couponCode}</Text>
@@ -178,7 +180,7 @@ function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayme
 
           {payment.discountApplied && payment.discountApplied > 0 && (
             <View style={s.detailRow}>
-              <Text style={s.detailLabel}>Discount</Text>
+              <Text style={s.detailLabel}>{t('paymentHistory.discount')}</Text>
               <Text style={[s.detailValue, { color: colors.marketUp }]}>
                 -₹{payment.discountApplied.toLocaleString('en-IN')}
               </Text>
@@ -186,7 +188,7 @@ function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayme
           )}
 
           <View style={s.detailRow}>
-            <Text style={s.detailLabel}>Amount Charged</Text>
+            <Text style={s.detailLabel}>{t('paymentHistory.amountCharged')}</Text>
             <Text style={[s.detailValue, { ...FONTS.semiBold, fontSize: FONTS.size.md }]}>
               ₹{(payment.amount - (payment.discountApplied || 0)).toLocaleString('en-IN')}
             </Text>
@@ -198,25 +200,23 @@ function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayme
               <AnimatedPressable onPress={handleShare} haptic="light" scaleTo={0.95}>
                 <View style={s.detailActionBtn}>
                   <Ionicons name="share-outline" size={14} color={colors.primary} />
-                  <Text style={s.detailActionText}>Share Receipt</Text>
+                  <Text style={s.detailActionText}>{t('paymentHistory.shareReceipt')}</Text>
                 </View>
               </AnimatedPressable>
             )}
 
-            {payment.status === 'failed' && (
-              <AnimatedPressable onPress={() => Alert.alert('Retry Payment', 'Payment retry will be initiated.')} haptic="light" scaleTo={0.95}>
+            {payment.status === 'failed' && (                <AnimatedPressable onPress={() => Alert.alert(t('paymentHistory.retryPayment'), t('paymentHistory.retryPaymentDesc'))} haptic="light" scaleTo={0.95}>
                 <View style={[s.detailActionBtn, { borderColor: colors.danger + '30' }]}>
                   <Ionicons name="refresh" size={14} color={colors.danger} />
-                  <Text style={[s.detailActionText, { color: colors.danger }]}>Retry Payment</Text>
+                  <Text style={[s.detailActionText, { color: colors.danger }]}>{t('paymentHistory.retryPayment')}</Text>
                 </View>
               </AnimatedPressable>
             )}
 
-            {payment.invoiceId && (
-              <AnimatedPressable onPress={() => Alert.alert('Download Invoice', `Invoice ${payment.invoiceId} will be downloaded.`)} haptic="light" scaleTo={0.95}>
+            {payment.invoiceId && (                <AnimatedPressable onPress={() => Alert.alert(t('paymentHistory.downloadInvoice'), `${t('paymentHistory.downloadInvoiceDesc')} ${payment.invoiceId}`)} haptic="light" scaleTo={0.95}>
                 <View style={s.detailActionBtn}>
                   <Ionicons name="download-outline" size={14} color={colors.primary} />
-                  <Text style={s.detailActionText}>Download Invoice</Text>
+                  <Text style={s.detailActionText}>{t('paymentHistory.downloadInvoice')}</Text>
                 </View>
               </AnimatedPressable>
             )}
@@ -231,6 +231,7 @@ function PaymentRow({ payment, colors, styles: s }: { payment: SubscriptionPayme
 
 export default function PaymentHistoryScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { paymentHistory, subscription } = useSubscriptionStore();
@@ -279,7 +280,7 @@ export default function PaymentHistoryScreen({ navigation }: any) {
             <Ionicons name="chevron-back" size={24} color={colors.text} />
           </View>
         </AnimatedPressable>
-        <Text style={styles.title}>Payment History</Text>
+        <Text style={styles.title}>{t('paymentHistory.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -290,7 +291,7 @@ export default function PaymentHistoryScreen({ navigation }: any) {
         {/* Summary Card */}
         <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summaryCard}>
           <View style={styles.summaryTop}>
-            <Text style={styles.summaryTopLabel}>Total Spent</Text>
+            <Text style={styles.summaryTopLabel}>{t('paymentHistory.totalSpent')}</Text>
             <Text style={styles.summaryTopValue}>
               ₹{stats.totalSpent.toLocaleString('en-IN')}
             </Text>
@@ -299,23 +300,23 @@ export default function PaymentHistoryScreen({ navigation }: any) {
             <View style={styles.summaryStat}>
               <Ionicons name="checkmark-circle" size={14} color="#00E676" />
               <Text style={[styles.summaryStatValue, { color: '#00E676' }]}>{stats.completed}</Text>
-              <Text style={styles.summaryStatLabel}>Paid</Text>
+              <Text style={styles.summaryStatLabel}>{t('paymentHistory.paid')}</Text>
             </View>
             <View style={styles.summaryStat}>
               <Ionicons name="time-outline" size={14} color="#FFAB40" />
               <Text style={[styles.summaryStatValue, { color: '#FFAB40' }]}>{stats.pending}</Text>
-              <Text style={styles.summaryStatLabel}>Pending</Text>
+              <Text style={styles.summaryStatLabel}>{t('paymentHistory.pending')}</Text>
             </View>
             <View style={styles.summaryStat}>
               <Ionicons name="close-circle" size={14} color="#FF5252" />
               <Text style={[styles.summaryStatValue, { color: '#FF5252' }]}>{stats.failed}</Text>
-              <Text style={styles.summaryStatLabel}>Failed</Text>
+              <Text style={styles.summaryStatLabel}>{t('paymentHistory.failed')}</Text>
             </View>
             {stats.totalDiscounts > 0 && (
               <View style={styles.summaryStat}>
                 <Ionicons name="pricetag" size={14} color="#00E676" />
                 <Text style={[styles.summaryStatValue, { color: '#00E676' }]}>₹{stats.totalDiscounts.toLocaleString('en-IN')}</Text>
-                <Text style={styles.summaryStatLabel}>Saved</Text>
+                <Text style={styles.summaryStatLabel}>{t('paymentHistory.saved')}</Text>
               </View>
             )}
           </View>
@@ -330,7 +331,7 @@ export default function PaymentHistoryScreen({ navigation }: any) {
               onPress={() => setFilter(tab)}
             >
               <Text style={[styles.filterTabText, filter === tab && styles.filterTabTextActive]}>
-                {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'all' ? t('paymentHistory.all') : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -340,9 +341,9 @@ export default function PaymentHistoryScreen({ navigation }: any) {
         {filteredPayments.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>No Payments Found</Text>
+            <Text style={styles.emptyTitle}>{t('paymentHistory.noPayments')}</Text>
             <Text style={styles.emptySubtitle}>
-              {filter === 'all' ? 'Your subscription payments will appear here' : `No ${filter} payments yet`}
+              {filter === 'all' ? t('paymentHistory.noPaymentsDesc') : `${t('paymentHistory.noFilteredPayments')} ${filter} ${t('paymentHistory.paymentsYet')}`}
             </Text>
           </View>
         ) : (
@@ -358,10 +359,8 @@ export default function PaymentHistoryScreen({ navigation }: any) {
           <View style={styles.infoRow}>
             <Ionicons name="shield-checkmark" size={18} color={colors.primary} />
             <View style={styles.infoContent}>
-              <Text style={styles.infoTitle}>Secure Payments</Text>
-              <Text style={styles.infoText}>
-                All transactions are processed securely through Razorpay. Your payment details are encrypted and never stored on our servers.
-              </Text>
+              <Text style={styles.infoTitle}>{t('paymentHistory.securePayments')}</Text>
+              <Text style={styles.infoText}>{t('paymentHistory.securePaymentsDesc')}</Text>
             </View>
           </View>
         </Card>

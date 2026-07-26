@@ -23,6 +23,7 @@ import {
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
@@ -59,6 +60,7 @@ type TabKey = 'opportunities' | 'losses' | 'simulator';
 
 export default function TaxHarvestingCalendarScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabKey>('opportunities');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [useSample, setUseSample] = useState(false);
@@ -152,8 +154,8 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Tax Harvesting</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>Capital Gains Optimization</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('taxHarvesting.title')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('taxHarvesting.subtitle')}</Text>
           </View>
           <View style={[styles.fyBadge, { backgroundColor: colors.primary + '20' }]}>
             <Text style={[styles.fyText, { color: colors.primary }]}>{summary.fiscalYear}</Text>
@@ -167,37 +169,37 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             <Text style={[styles.summaryValue, { color: '#00E676' }]}>
               ₹{(summary.estimatedTaxSavings / 1000).toFixed(1)}K
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Tax Saved</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.taxSaved')}</Text>
           </View>
           <View style={[styles.summaryCard, { borderColor: summary.estimatedTaxLiability > 0 ? '#FF525230' : '#00E67630' }]}>
             <Text style={styles.summaryIcon}>📋</Text>
             <Text style={[styles.summaryValue, { color: summary.estimatedTaxLiability > 0 ? '#FF5252' : '#00E676' }]}>
               ₹{(summary.estimatedTaxLiability / 1000).toFixed(1)}K
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Est. Tax Due</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.estTaxDue')}</Text>
           </View>
           <View style={[styles.summaryCard, { borderColor: '#8B5CF630' }]}>
             <Text style={styles.summaryIcon}>📊</Text>
             <Text style={[styles.summaryValue, { color: '#8B5CF6' }]}>
               ₹{(summary.totalRealizedLosses / 1000).toFixed(1)}K
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Realized Losses</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.realizedLosses')}</Text>
           </View>
           <View style={[styles.summaryCard, { borderColor: '#3B82F630' }]}>
             <Text style={styles.summaryIcon}>🎯</Text>
             <Text style={[styles.summaryValue, { color: '#3B82F6' }]}>
               {opportunities.length}
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Opportunities</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.opportunities')}</Text>
           </View>
         </View>
 
         {/* Tabs */}
         <View style={styles.tabRow}>
           {[
-            { key: 'opportunities' as TabKey, label: 'Opportunities', icon: 'leaf' },
-            { key: 'losses' as TabKey, label: 'Realized Losses', icon: 'trending-down' },
-            { key: 'simulator' as TabKey, label: 'Simulator', icon: 'flask' },
+            { key: 'opportunities' as TabKey, label: t('taxHarvesting.tabOpportunities'), icon: 'leaf' },
+            { key: 'losses' as TabKey, label: t('taxHarvesting.tabLosses'), icon: 'trending-down' },
+            { key: 'simulator' as TabKey, label: t('taxHarvesting.tabSimulator'), icon: 'flask' },
           ].map(tab => {
             const isActive = activeTab === tab.key;
             return (
@@ -219,7 +221,7 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
         {!useSample && realHoldings.length === 0 && (
           <Pressable onPress={handleUseSample} style={[styles.sampleBtn, { backgroundColor: colors.primary + '15' }]}>
             <Ionicons name="flask" size={16} color={colors.primary} />
-            <Text style={[styles.sampleBtnText, { color: colors.primary }]}>Use Sample Portfolio</Text>
+            <Text style={[styles.sampleBtnText, { color: colors.primary }]}>{t('taxHarvesting.useSample')}</Text>
           </Pressable>
         )}
 
@@ -233,7 +235,7 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
               <View style={[styles.insightsCard, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '25' }]}>
                 <View style={styles.insightsHeader}>
                   <Ionicons name="bulb" size={18} color={colors.primary} />
-                  <Text style={[styles.insightsTitle, { color: colors.text }]}>Key Insights</Text>
+                  <Text style={[styles.insightsTitle, { color: colors.text }]}>{t('taxHarvesting.keyInsights')}</Text>
                 </View>
                 {summary.insights.map((insight, i) => (
                   <View key={i} style={[styles.insightRow, i < summary.insights.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
@@ -248,10 +250,10 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             {harvestNow.length > 0 && (
               <View>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  <Text style={{ color: '#00E676' }}>●</Text> Harvest Now ({harvestNow.length})
+                  <Text style={{ color: '#00E676' }}>●</Text> {t('taxHarvesting.harvestNow', { count: harvestNow.length })}
                 </Text>
                 <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-                  These holdings with unrealized losses should be harvested before year-end
+                  {t('taxHarvesting.harvestNowSub')}
                 </Text>
                 {harvestNow.map((opp, i) => (
                   <OpportunityCard key={opp.id} opp={opp} index={i} isExpanded={expandedId === opp.id} onPress={() => handleToggleExpand(opp.id)} colors={colors} />
@@ -263,10 +265,10 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             {waitLongTerm.length > 0 && (
               <View style={{ marginTop: SPACING.lg }}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  <Text style={{ color: '#FFC107' }}>●</Text> Wait for Long-Term ({waitLongTerm.length})
+                  <Text style={{ color: '#FFC107' }}>●</Text> {t('taxHarvesting.waitLong', { count: waitLongTerm.length })}
                 </Text>
                 <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-                  Consider holding until they cross the 1-year boundary for LTCG treatment
+                  {t('taxHarvesting.waitLongSub')}
                 </Text>
                 {waitLongTerm.slice(0, 5).map((opp, i) => (
                   <OpportunityCard key={opp.id} opp={opp} index={i} isExpanded={expandedId === opp.id} onPress={() => handleToggleExpand(opp.id)} colors={colors} />
@@ -276,8 +278,8 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
 
             {/* Tax Calendar */}
             <View style={{ marginTop: SPACING.lg }}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>📅 Tax Calendar</Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Key dates for FY 2025-26</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('taxHarvesting.taxCalendar')}</Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('taxHarvesting.taxCalendarSub')}</Text>
               <View style={[styles.calendarCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 {taxCalendar.map((event, i) => (
                   <View key={i} style={[styles.calRow, i < taxCalendar.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
@@ -301,9 +303,9 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             {/* Filter chips */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
               {[
-                { key: 'all' as const, label: 'All Losses' },
-                { key: 'short_term' as const, label: 'Short-Term' },
-                { key: 'long_term' as const, label: 'Long-Term' },
+                { key: 'all' as const, label: t('taxHarvesting.allLosses') },
+                { key: 'short_term' as const, label: t('taxHarvesting.shortTerm') },
+                { key: 'long_term' as const, label: t('taxHarvesting.longTerm') },
               ].map(f => {
                 const isActive = selectedLossType === f.key;
                 return (
@@ -319,7 +321,7 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             </ScrollView>
 
             <Text style={[styles.resultCount, { color: colors.textMuted }]}>
-              {filteredLosses.length} realized loss{filteredLosses.length !== 1 ? 'es' : ''} · ₹{(filteredLosses.reduce((s, r) => s + r.loss, 0) / 1000).toFixed(1)}K total
+              {t('taxHarvesting.resultCount', { count: filteredLosses.length, value: (filteredLosses.reduce((s, r) => s + r.loss, 0) / 1000).toFixed(1) })}
             </Text>
 
             {filteredLosses.length > 0 ? (
@@ -329,8 +331,8 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             ) : (
               <View style={styles.emptyState}>
                 <Ionicons name="checkmark-circle" size={48} color="#00E676" />
-                <Text style={[styles.emptyTitle, { color: colors.text }]}>No realized losses</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>All your closed trades were profitable!</Text>
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('taxHarvesting.noLosses')}</Text>
+                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('taxHarvesting.noLossesDesc')}</Text>
               </View>
             )}
 
@@ -338,21 +340,21 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="information-circle" size={18} color={colors.primary} />
               <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>Loss Carry Forward</Text>
+                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('taxHarvesting.lossCarryForward')}</Text>
                 <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  Unused capital losses can be carried forward for up to 8 assessment years. Short-term losses can offset any capital gains. Long-term losses can only offset long-term capital gains.
+                  {t('taxHarvesting.lossCarryForwardDesc')}
                 </Text>
               </View>
             </View>
 
             {/* STCG vs LTCL rules */}
             <View style={[styles.rulesCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.rulesTitle, { color: colors.text }]}>📋 Tax Rules (India FY 2025-26)</Text>
+              <Text style={[styles.rulesTitle, { color: colors.text }]}>{t('taxHarvesting.taxRules')}</Text>
               {[
-                { label: 'STCL → STCG + LTCG', desc: 'Short-term losses offset both', color: '#00E676' },
-                { label: 'LTCL → LTCG only', desc: 'Long-term losses limited to LTCG', color: '#FFC107' },
-                { label: 'Carry forward', desc: '8 assessment years', color: '#3B82F6' },
-                { label: 'Wash sale', desc: 'No buying 30 days before/after', color: '#FF5252' },
+                { label: t('taxHarvesting.ruleSTCL'), desc: t('taxHarvesting.ruleSTCLDesc'), color: '#00E676' },
+                { label: t('taxHarvesting.ruleLTCL'), desc: t('taxHarvesting.ruleLTCLDesc'), color: '#FFC107' },
+                { label: t('taxHarvesting.ruleCarryForward'), desc: t('taxHarvesting.ruleCarryForwardDesc'), color: '#3B82F6' },
+                { label: t('taxHarvesting.ruleWashSale'), desc: t('taxHarvesting.ruleWashSaleDesc'), color: '#FF5252' },
               ].map((rule, i) => (
                 <View key={i} style={styles.ruleRow}>
                   <View style={[styles.ruleDot, { backgroundColor: rule.color }]} />
@@ -369,9 +371,9 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             ════════════════════════════════════ */}
         {activeTab === 'simulator' && (
           <View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>📊 What-If Harvesting Simulator</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('taxHarvesting.simTitle')}</Text>
             <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-              Adjust quantities to harvest and see how your tax bill changes
+              {t('taxHarvesting.simSub')}
             </Text>
 
             {harvestNow.length > 0 ? (
@@ -383,7 +385,7 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
                       <Text style={[styles.simLoss, { color: '#FF5252' }]}>-₹{(opp.unrealizedLoss / 1000).toFixed(1)}K</Text>
                     </View>
                     <View style={styles.simRow}>
-                      <Text style={[styles.simLabel, { color: colors.textMuted }]}>Qty to harvest (max {opp.quantity}):</Text>
+                      <Text style={[styles.simLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simQtyLabel', { count: opp.quantity })}</Text>
                       <TextInput
                         style={[styles.simInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.bgInput }]}
                         keyboardType="number-pad"
@@ -404,7 +406,7 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
                     </View>
                     {harvestQty[opp.id] > 0 && (
                       <Text style={[styles.simSubtext, { color: colors.textSecondary }]}>
-                        Savings: ₹{((harvestQty[opp.id] / opp.quantity) * opp.potentialTaxSaved / 1000).toFixed(2)}K
+                        {t('taxHarvesting.simSavings', { value: ((harvestQty[opp.id] / opp.quantity) * opp.potentialTaxSaved / 1000).toFixed(2) })}
                       </Text>
                     )}
                   </View>
@@ -415,33 +417,33 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
                   style={[styles.simulateBtn, { backgroundColor: colors.primary }]}
                 >
                   <Ionicons name="flask" size={18} color={colors.white} />
-                  <Text style={styles.simulateBtnText}>Run Simulation</Text>
+                  <Text style={styles.simulateBtnText}>{t('taxHarvesting.simRunBtn')}</Text>
                 </Pressable>
 
                 {showResults && simulatorResult && (
                   <View style={[styles.simResultsCard, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '25' }]}>
-                    <Text style={[styles.simResultsTitle, { color: colors.text }]}>Simulation Results</Text>
+                    <Text style={[styles.simResultsTitle, { color: colors.text }]}>{t('taxHarvesting.simResults')}</Text>
                     <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>Loss Harvested</Text>
+                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simLossHarvested')}</Text>
                       <Text style={[styles.simResultsValue, { color: '#FF5252' }]}>-₹{(simulatorResult.totalLossHarvested / 1000).toFixed(1)}K</Text>
                     </View>
                     <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>Tax Saved</Text>
+                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simTaxSaved')}</Text>
                       <Text style={[styles.simResultsValue, { color: '#00E676' }]}>₹{(simulatorResult.totalTaxSaved / 1000).toFixed(1)}K</Text>
                     </View>
                     <View style={styles.simDivider} />
                     <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>Original Tax</Text>
+                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simOriginalTax')}</Text>
                       <Text style={[styles.simResultsValue, { color: '#FF5252' }]}>₹{(simulatorResult.originalTax / 1000).toFixed(1)}K</Text>
                     </View>
                     <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>New Tax</Text>
+                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simNewTax')}</Text>
                       <Text style={[styles.simResultsValue, { color: simulatorResult.newTax <= 0 ? '#00E676' : '#FFC107' }]}>
-                        {simulatorResult.newTax <= 0 ? '₹0 (Fully Offset!)' : `₹${(simulatorResult.newTax / 1000).toFixed(1)}K`}
+                        {simulatorResult.newTax <= 0 ? t('taxHarvesting.simFullyOffset') : `₹${(simulatorResult.newTax / 1000).toFixed(1)}K`}
                       </Text>
                     </View>
                     <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>Savings %</Text>
+                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simSavingsPct')}</Text>
                       <Text style={[styles.simResultsValue, { color: '#00E676' }]}>
                         {simulatorResult.originalTax > 0
                           ? `${((simulatorResult.totalTaxSaved / simulatorResult.originalTax) * 100).toFixed(0)}%`
@@ -454,19 +456,19 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
             ) : (
               <View style={styles.emptyState}>
                 <Ionicons name="checkmark-circle" size={48} color="#00E676" />
-                <Text style={[styles.emptyTitle, { color: colors.text }]}>No harvesting needed</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>All your holdings are in profit!</Text>
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('taxHarvesting.simNoHarvest')}</Text>
+                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('taxHarvesting.simNoHarvestDesc')}</Text>
               </View>
             )}
 
             {/* Methodology */}
             <View style={[styles.methodCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.methodTitle, { color: colors.text }]}>How It Works</Text>
+              <Text style={[styles.methodTitle, { color: colors.text }]}>{t('taxHarvesting.methodTitle')}</Text>
               {[
-                { icon: '🔍', step: 'Scan', desc: 'We analyze your holdings for unrealized losses and closed trades for realized losses.' },
-                { icon: '📊', step: 'Calculate', desc: 'ST losses offset both STCG & LTCG. LT losses offset LTCG only. ₹1L LTCG exemption applied.' },
-                { icon: '💰', step: 'Optimize', desc: 'Harvest losses before year-end (31 Mar) to reduce taxable gains. Watch for wash sale rules (30 day window).' },
-                { icon: '📅', step: 'Carry Forward', desc: 'Unused losses carry forward 8 years. No need to harvest if you have no gains to offset.' },
+                { icon: '🔍', step: t('taxHarvesting.methodScan'), desc: t('taxHarvesting.methodScanDesc') },
+                { icon: '📊', step: t('taxHarvesting.methodCalculate'), desc: t('taxHarvesting.methodCalculateDesc') },
+                { icon: '💰', step: t('taxHarvesting.methodOptimize'), desc: t('taxHarvesting.methodOptimizeDesc') },
+                { icon: '📅', step: t('taxHarvesting.methodCarryForward'), desc: t('taxHarvesting.methodCarryForwardDesc') },
               ].map((item, i) => (
                 <View key={i} style={[styles.methodRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
                   <Text style={{ fontSize: 24 }}>{item.icon}</Text>
@@ -493,6 +495,7 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
 function OpportunityCard({ opp, index, isExpanded, onPress, colors }: {
   opp: TaxHarvestOpportunity; index: number; isExpanded: boolean; onPress: () => void; colors: any;
 }) {
+  const { t } = useT();
   const isUp = opp.recommendation === 'harvest_now';
   const color = recColor(opp.recommendation);
 
@@ -525,7 +528,7 @@ function OpportunityCard({ opp, index, isExpanded, onPress, colors }: {
             <Text style={[styles.oppMeta, { color: colors.textMuted }]}>Qty: {opp.quantity}</Text>
             <View style={[styles.oppRecBadge, { backgroundColor: color + '20' }]}>
               <Text style={[styles.oppRecText, { color }]}>
-                {opp.recommendation === 'harvest_now' ? 'Harvest Now' : opp.recommendation === 'wait_long_term' ? 'Wait' : 'Avoid'}
+                {opp.recommendation === 'harvest_now' ? t('taxHarvesting.oppHarvestNow') : opp.recommendation === 'wait_long_term' ? t('taxHarvesting.oppWait') : t('taxHarvesting.oppAvoid')}
               </Text>
             </View>
           </View>
@@ -542,12 +545,12 @@ function OpportunityCard({ opp, index, isExpanded, onPress, colors }: {
             <View style={[styles.oppExpanded, { backgroundColor: colors.bgInput }]}>
               <View style={styles.oppExpandedGrid}>
                 {[
-                  { label: 'Buy Price', value: `₹${opp.buyPrice.toFixed(2)}` },
-                  { label: 'Current', value: `₹${opp.currentPrice.toFixed(2)}` },
-                  { label: 'Tax Saved', value: `₹${(opp.potentialTaxSaved / 1000).toFixed(1)}K`, color: '#00E676' },
-                  { label: 'Holding', value: `${opp.holdingDays}d` },
-                  { label: 'To LTCG', value: opp.daysToLongTerm > 0 ? `${opp.daysToLongTerm}d` : '✓ LTCG', color: opp.daysToLongTerm <= 0 ? '#00E676' : undefined },
-                  { label: 'Offsets', value: opp.offsetsType === 'both' ? 'STCG + LTCG' : 'LTCG Only', color: opp.offsetsType === 'both' ? '#00E676' : '#FFC107' },
+                  { label: t('taxHarvesting.oppBuyPrice'), value: `₹${opp.buyPrice.toFixed(2)}` },
+                  { label: t('taxHarvesting.oppCurrent'), value: `₹${opp.currentPrice.toFixed(2)}` },
+                  { label: t('taxHarvesting.oppTaxSaved'), value: `₹${(opp.potentialTaxSaved / 1000).toFixed(1)}K`, color: '#00E676' },
+                  { label: t('taxHarvesting.oppHolding'), value: `${opp.holdingDays}d` },
+                  { label: t('taxHarvesting.oppToLTCG'), value: opp.daysToLongTerm > 0 ? t('taxHarvesting.oppDays', { count: opp.daysToLongTerm }) : t('taxHarvesting.oppLtcgReached'), color: opp.daysToLongTerm <= 0 ? '#00E676' : undefined },
+                  { label: t('taxHarvesting.oppOffsets'), value: opp.offsetsType === 'both' ? t('taxHarvesting.oppOffsetsBoth') : t('taxHarvesting.oppOffsetsLtcg'), color: opp.offsetsType === 'both' ? '#00E676' : '#FFC107' },
                 ].map((item, i) => (
                   <View key={i} style={styles.oppExpandedItem}>
                     <Text style={[styles.oppExpandedLabel, { color: colors.textMuted }]}>{item.label}</Text>
@@ -558,7 +561,7 @@ function OpportunityCard({ opp, index, isExpanded, onPress, colors }: {
               {opp.washSaleRisk && (
                 <View style={[styles.washAlert, { backgroundColor: '#FF525215', borderColor: '#FF525230' }]}>
                   <Ionicons name="warning" size={14} color="#FF5252" />
-                  <Text style={[styles.washAlertText, { color: '#FF5252' }]}>Wash sale risk — recent buy within 30 days</Text>
+                  <Text style={[styles.washAlertText, { color: '#FF5252' }]}>{t('taxHarvesting.oppWashSale')}</Text>
                 </View>
               )}
             </View>
@@ -576,6 +579,7 @@ function OpportunityCard({ opp, index, isExpanded, onPress, colors }: {
 function LossCard({ loss, index, isExpanded, onPress, colors }: {
   loss: RealizedLoss; index: number; isExpanded: boolean; onPress: () => void; colors: any;
 }) {
+  const { t } = useT();
   const isST = loss.holdingType === 'short_term';
 
   return (
@@ -587,7 +591,7 @@ function LossCard({ loss, index, isExpanded, onPress, colors }: {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
                 <View style={[styles.lossTypeBadge, { backgroundColor: isST ? '#FFC10720' : '#FF525220' }]}>
                   <Text style={[styles.lossTypeText, { color: isST ? '#FFC107' : '#FF5252' }]}>
-                    {isST ? 'ST' : 'LT'}
+                    {isST ? t('taxHarvesting.lossAbbrST') : t('taxHarvesting.lossAbbrLT')}
                   </Text>
                 </View>
                 <Text style={[styles.lossSymbol, { color: colors.text }]}>{loss.symbol}</Text>
@@ -606,10 +610,10 @@ function LossCard({ loss, index, isExpanded, onPress, colors }: {
             <View style={[styles.lossExpanded, { backgroundColor: colors.bgInput }]}>
               <View style={styles.oppExpandedGrid}>
                 {[
-                  { label: 'Loss', value: `₹${loss.loss.toFixed(2)}`, color: '#FF5252' },
-                  { label: 'Type', value: isST ? 'Short-Term' : 'Long-Term' },
-                  { label: 'Offsets', value: isST ? 'STCG + LTCG' : 'LTCG Only', color: isST ? '#00E676' : '#FFC107' },
-                  { label: 'Quantity', value: loss.quantity.toString() },
+                  { label: t('taxHarvesting.lossLabel'), value: `₹${loss.loss.toFixed(2)}`, color: '#FF5252' },
+                  { label: t('taxHarvesting.typeLabel'), value: isST ? t('taxHarvesting.shortTerm') : t('taxHarvesting.longTerm') },
+                  { label: t('taxHarvesting.oppOffsets'), value: isST ? t('taxHarvesting.oppOffsetsBoth') : t('taxHarvesting.oppOffsetsLtcg'), color: isST ? '#00E676' : '#FFC107' },
+                  { label: t('taxHarvesting.quantity'), value: loss.quantity.toString() },
                 ].map((item, i) => (
                   <View key={i} style={styles.oppExpandedItem}>
                     <Text style={[styles.oppExpandedLabel, { color: colors.textMuted }]}>{item.label}</Text>

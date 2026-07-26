@@ -24,6 +24,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import QRCode from 'react-native-qrcode-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { authApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -37,6 +38,7 @@ type FlowStep = 'loading' | 'setup' | 'verify' | 'backup_codes' | 'manage';
 
 export default function TwoFactorSetupScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [flowStep, setFlowStep] = useState<FlowStep>('loading');
@@ -79,7 +81,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
       setFlowStep('setup');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: any) {
-      setError(err?.body?.error || err?.message || 'Failed to generate 2FA setup');
+      setError(err?.body?.error || err?.message || t('twoFactor.failedToGenerate'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsLoading(false);
@@ -91,7 +93,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
     const code = verificationCode.trim();
     if (code.length !== 6 || !/^\d{6}$/.test(code)) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Invalid Code', 'Please enter the full 6-digit code from your authenticator app.');
+      Alert.alert(t('twoFactor.invalidCode'), t('twoFactor.invalidCodeDesc'));
       return;
     }
 
@@ -106,11 +108,11 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
         setFlowStep('backup_codes');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
-        setError(result.message || 'Invalid code. Please try again.');
+        setError(result.message || t('twoFactor.invalidCodeTryAgain'));
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err: any) {
-      setError(err?.body?.error || err?.message || 'Verification failed');
+      setError(err?.body?.error || err?.message || t('twoFactor.verificationFailed'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsLoading(false);
@@ -127,7 +129,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
   const handleConfirmDisable = useCallback(async () => {
     const code = disableCodeInput.trim();
     if (!code) {
-      setError('Please enter a verification code.');
+      setError(t('twoFactor.enterVerificationCode'));
       return;
     }
 
@@ -142,10 +144,10 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
         setFlowStep('setup');
         setSetupData(null);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert('2FA Disabled', 'Two-factor authentication has been disabled for your account.');
+        Alert.alert(t('twoFactor.disabled'), t('twoFactor.disabledDesc'));
       }
     } catch (err: any) {
-      setError(err?.body?.error || err?.message || 'Failed to disable 2FA');
+      setError(err?.body?.error || err?.message || t('twoFactor.failedToDisable'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsLoading(false);
@@ -155,12 +157,12 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
   // ── Regenerate Backup Codes ─────────────────────────────────────
   const handleRegenerateCodes = useCallback(async () => {
     Alert.alert(
-      'Regenerate Backup Codes',
-      'This will invalidate all your current backup codes. New codes will be generated. Continue?',
+      t('twoFactor.regenerateCodes'),
+      t('twoFactor.regenerateCodesDesc'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
-          text: 'Regenerate',
+          text: t('twoFactor.regenerate'),
           style: 'destructive',
           onPress: async () => {
             setIsLoading(true);
@@ -173,7 +175,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               }
             } catch (err: any) {
-              setError(err?.body?.error || err?.message || 'Failed to regenerate codes');
+              setError(err?.body?.error || err?.message || t('twoFactor.failedToRegenerate'));
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             } finally {
               setIsLoading(false);
@@ -213,7 +215,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
   const renderLoadingStep = () => (
     <View style={styles.loadingContainer}>
       <Ionicons name="shield-checkmark" size={48} color={colors.primary} />
-      <Text style={styles.loadingText}>Loading 2FA status...</Text>
+      <Text style={styles.loadingText}>{t('twoFactor.loading')}</Text>
     </View>
   );
 
@@ -225,18 +227,15 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
           <View style={styles.heroIcon}>
             <Ionicons name="shield-checkmark" size={36} color={colors.primary} />
           </View>
-          <Text style={styles.heroTitle}>Two-Factor Authentication</Text>
-          <Text style={styles.heroDesc}>
-            Add an extra layer of security to your account. Every time you log in,
-            you'll need your password and a 6-digit code from your authenticator app.
-          </Text>
+          <Text style={styles.heroTitle}>{t('twoFactor.title')}</Text>
+          <Text style={styles.heroDesc}>{t('twoFactor.desc')}</Text>
         </View>
 
         <View style={styles.benefitsSection}>
           {[
-            'Protects against unauthorized access',
-            'Works with Google Authenticator, Authy, or similar',
-            'Backup codes provided for emergency access',
+            t('twoFactor.benefit1'),
+            t('twoFactor.benefit2'),
+            t('twoFactor.benefit3'),
           ].map((benefit, i) => (
             <View key={i} style={styles.benefitRow}>
               <Ionicons name="checkmark-circle" size={16} color={colors.success} />
@@ -256,7 +255,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
         >
           <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
             <Ionicons name="shield-checkmark" size={22} color={colors.white} />
-            <Text style={styles.actionBtnText}>{isLoading ? 'Generating...' : 'Set Up Two-Factor Auth'}</Text>
+            <Text style={styles.actionBtnText}>{isLoading ? t('twoFactor.generating') : t('twoFactor.setUp')}</Text>
           </LinearGradient>
         </AnimatedPressable>
       )}
@@ -265,10 +264,8 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
       {setupData && (
         <>
           <Card style={styles.qrCard}>
-            <Text style={styles.qrTitle}>Scan with Authenticator App</Text>
-            <Text style={styles.qrSubtitle}>
-              Open Google Authenticator, Authy, or any TOTP app and scan this QR code.
-            </Text>
+            <Text style={styles.qrTitle}>{t('twoFactor.scanQr')}</Text>
+            <Text style={styles.qrSubtitle}>{t('twoFactor.scanQrDesc')}</Text>
 
             <View style={styles.qrContainer}>
               <View style={[styles.qrBorder, { borderColor: colors.primary + '30' }]}>
@@ -285,19 +282,17 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
             <TouchableOpacity
               style={styles.manualToggle}
               onPress={() => Alert.alert(
-                'Manual Setup Key',
-                `If you can't scan the QR code, enter this key manually in your authenticator app:\n\n${setupData.secret}\n\nAccount: Toroloom\nType: Time-based (TOTP)`,
+                t('twoFactor.manualKeyTitle'),
+                `${t('twoFactor.manualKeyDesc')}\n\n${setupData.secret}\n\n${t('twoFactor.manualKeyAccount')}: Toroloom\n${t('twoFactor.manualKeyType')}: Time-based (TOTP)`,
               )}
             >
               <Ionicons name="key-outline" size={16} color={colors.primary} />
-              <Text style={styles.manualToggleText}>Can't scan? Enter key manually</Text>
+              <Text style={styles.manualToggleText}>{t('twoFactor.manualEntry')}</Text>
             </TouchableOpacity>
           </Card>
 
           {/* Code Input */}
-          <Text style={[styles.inputLabel, { marginBottom: SPACING.sm }]}>
-            Enter the 6-digit code from your authenticator app:
-          </Text>
+          <Text style={[styles.inputLabel, { marginBottom: SPACING.sm }]}>{t('twoFactor.enterCode')}</Text>
           <View style={styles.otpRow}>
             {codeDigits.map((digit, index) => (
               <TouchableOpacity
@@ -340,8 +335,8 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
 
           <Text style={styles.otpHint}>
             {verificationCode.length === 0
-              ? 'Enter the 6-digit code shown in your authenticator app'
-              : `${verificationCode.length}/6 digits entered`}
+              ? t('twoFactor.codeHint')
+              : `${t('twoFactor.digitsEntered')} ${verificationCode.length}/6`}
           </Text>
 
           {/* Verify Button */}
@@ -354,7 +349,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
           >
             <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
               <Ionicons name="shield-checkmark" size={22} color={colors.white} />
-              <Text style={styles.actionBtnText}>{isLoading ? 'Verifying...' : 'Verify & Enable 2FA'}</Text>
+              <Text style={styles.actionBtnText}>{isLoading ? t('twoFactor.verifying') : t('twoFactor.verifyAndEnable')}</Text>
             </LinearGradient>
           </AnimatedPressable>
         </>
@@ -372,25 +367,20 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
           <View style={[styles.successIcon, { backgroundColor: colors.success + '20' }]}>
             <Ionicons name="shield-checkmark" size={48} color={colors.success} />
           </View>
-          <Text style={styles.successTitle}>2FA Enabled ✓</Text>
-          <Text style={styles.successSubtitle}>
-            Two-factor authentication is now active for your account.
-          </Text>
+          <Text style={styles.successTitle}>{t('twoFactor.enabled')}</Text>
+          <Text style={styles.successSubtitle}>{t('twoFactor.enabledDesc')}</Text>
         </View>
       </Card>
 
       {/* Backup Codes */}
       <Card
-        title="Backup Codes"
-        subtitle="Save these one-time recovery codes in a secure place"
+        title={t('twoFactor.backupCodes')}
+        subtitle={t('twoFactor.backupCodesSub')}
         style={{ marginTop: SPACING.md }}
       >
         <View style={[styles.warningBox, { backgroundColor: '#FFC10715', borderColor: '#FFC10730' }]}>
           <Ionicons name="warning" size={18} color="#FFC107" />
-          <Text style={styles.warningText}>
-            Each code can only be used once. Store them safely — if you lose access to
-            your authenticator app, these are the only way to regain access to your account.
-          </Text>
+          <Text style={styles.warningText}>{t('twoFactor.backupCodesWarning')}</Text>
         </View>
 
         <View style={[styles.codesGrid, { backgroundColor: colors.bgInput }]}>
@@ -406,7 +396,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
         <View style={styles.codesActions}>
           <TouchableOpacity style={styles.codeActionBtn} onPress={handleCopyCodes}>
             <Ionicons name="share-outline" size={18} color={colors.primary} />
-            <Text style={styles.codeActionText}>Share / Copy</Text>
+            <Text style={styles.codeActionText}>{t('twoFactor.shareCopy')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -420,14 +410,14 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
           <LinearGradient colors={backupCodesSaved ? GRADIENTS.success : GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
             <Ionicons name={backupCodesSaved ? 'checkmark-circle' : 'shield-checkmark'} size={20} color={colors.white} />
             <Text style={styles.continueBtnText}>
-              {backupCodesSaved ? 'Saved Securely — Go to Settings' : 'I\'ve Saved My Backup Codes'}
+              {backupCodesSaved ? t('twoFactor.savedGoToSettings') : t('twoFactor.savedBackupCodes')}
             </Text>
           </LinearGradient>
         </AnimatedPressable>
 
         {backupCodesSaved && (
           <TouchableOpacity style={styles.dismissBtn} onPress={() => navigation.goBack()}>
-            <Text style={styles.dismissBtnText}>Done</Text>
+            <Text style={styles.dismissBtnText}>{t('twoFactor.done')}</Text>
           </TouchableOpacity>
         )}
       </Card>
@@ -443,17 +433,15 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
             <Ionicons name="shield-checkmark" size={36} color={colors.success} />
           </View>
           <View style={styles.statusInfo}>
-            <Text style={styles.statusTitle}>2FA is Active</Text>
-            <Text style={styles.statusSubtitle}>
-              Your account is protected with two-factor authentication.
-            </Text>
+            <Text style={styles.statusTitle}>{t('twoFactor.isActive')}</Text>
+            <Text style={styles.statusSubtitle}>{t('twoFactor.isActiveDesc')}</Text>
           </View>
         </View>
 
         <View style={styles.statusBadgeRow}>
           <View style={[styles.statusBadge, { backgroundColor: colors.success + '15' }]}>
             <Ionicons name="checkmark-circle" size={14} color={colors.success} />
-            <Text style={[styles.statusBadgeText, { color: colors.success }]}>Enabled</Text>
+            <Text style={[styles.statusBadgeText, { color: colors.success }]}>{t('twoFactor.enabled')}</Text>
           </View>
           {status?.setupAt && (
             <Text style={styles.statusDate}>
@@ -464,7 +452,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
       </Card>
 
       {/* Actions */}
-      <Card title="Manage 2FA" style={{ marginTop: SPACING.md }}>
+      <Card title={t('twoFactor.manage')} style={{ marginTop: SPACING.md }}>
         {/* View Backup Codes */}
         <TouchableOpacity
           style={styles.manageRow}
@@ -487,8 +475,8 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
             <Ionicons name="key" size={20} color="#FFC107" />
           </View>
           <View style={styles.manageInfo}>
-            <Text style={styles.manageLabel}>View Backup Codes</Text>
-            <Text style={styles.manageSub}>See remaining backup codes</Text>
+            <Text style={styles.manageLabel}>{t('twoFactor.viewBackupCodes')}</Text>
+            <Text style={styles.manageSub}>{t('twoFactor.viewBackupCodesSub')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </TouchableOpacity>
@@ -501,8 +489,8 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
             <Ionicons name="refresh" size={20} color={colors.primary} />
           </View>
           <View style={styles.manageInfo}>
-            <Text style={styles.manageLabel}>Regenerate Backup Codes</Text>
-            <Text style={styles.manageSub}>Invalidate old codes and create new ones</Text>
+            <Text style={styles.manageLabel}>{t('twoFactor.regenerateCodes')}</Text>
+            <Text style={styles.manageSub}>{t('twoFactor.regenerateCodesSub')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </TouchableOpacity>
@@ -515,34 +503,33 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
             <Ionicons name="shield-outline" size={20} color={colors.danger} />
           </View>
           <View style={styles.manageInfo}>
-            <Text style={[styles.manageLabel, { color: colors.danger }]}>Disable Two-Factor Auth</Text>
-            <Text style={styles.manageSub}>Requires current code for verification</Text>
+            <Text style={[styles.manageLabel, { color: colors.danger }]}>{t('twoFactor.disable')}</Text>
+            <Text style={styles.manageSub}>{t('twoFactor.disableSub')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </TouchableOpacity>
       </Card>
 
       {/* Info */}
-      <Card title="How It Works" style={{ marginTop: SPACING.md }}>
+      <Card title={t('twoFactor.howItWorks')} style={{ marginTop: SPACING.md }}>
         <View style={styles.infoRow}>
           <Ionicons name="phone-portrait" size={18} color={colors.textMuted} />
           <Text style={styles.infoText}>
-            When logging in, you'll enter your password followed by a 6-digit code
-            from your authenticator app.
+            {t('twoFactor.howItWorks1')}
           </Text>
         </View>
         <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
         <View style={styles.infoRow}>
           <Ionicons name="key" size={18} color={colors.textMuted} />
           <Text style={styles.infoText}>
-            Backup codes can be used once each if you lose access to your authenticator app.
+            {t('twoFactor.howItWorks2')}
           </Text>
         </View>
         <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
         <View style={styles.infoRow}>
           <Ionicons name="refresh" size={18} color={colors.textMuted} />
           <Text style={styles.infoText}>
-            You can regenerate backup codes at any time. Old codes will be invalidated.
+            {t('twoFactor.howItWorks3')}
           </Text>
         </View>
       </Card>
@@ -560,7 +547,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Two-Factor Auth</Text>
+          <Text style={styles.title}>{t('twoFactor.title')}</Text>
         </View>
 
         {flowStep === 'loading' && renderLoadingStep()}
@@ -582,17 +569,15 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
             <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
               <View style={styles.modalHeader}>
                 <Ionicons name="shield-outline" size={32} color={colors.danger} />
-                <Text style={styles.modalTitle}>Disable 2FA</Text>
-                <Text style={styles.modalSubtitle}>
-                  Enter a code from your authenticator app or a backup code to confirm.
-                </Text>
+                <Text style={styles.modalTitle}>{t('twoFactor.disable')}</Text>
+                <Text style={styles.modalSubtitle}>{t('twoFactor.disableModalDesc')}</Text>
               </View>
 
               <TextInput
                 style={[styles.modalInput, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
                 value={disableCodeInput}
                 onChangeText={(t) => { setDisableCodeInput(t); setError(null); }}
-                placeholder="Enter code"
+                placeholder={t('twoFactor.enterCode')}
                 placeholderTextColor={colors.textMuted}
                 autoCapitalize="characters"
                 autoCorrect={false}
@@ -609,7 +594,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
                   onPress={() => { setDisableCodeModal(false); setDisableCodeInput(''); setError(null); }}
                   disabled={isLoading}
                 >
-                  <Text style={[styles.modalBtnText, { color: colors.textMuted }]}>Cancel</Text>
+                  <Text style={[styles.modalBtnText, { color: colors.textMuted }]}>{t('app.cancel')}</Text>
                 </TouchableOpacity>
                 <AnimatedPressable
                   onPress={handleConfirmDisable}
@@ -619,7 +604,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
                   style={{ flex: 1, opacity: disableCodeInput.trim() && !isLoading ? 1 : 0.5 }}
                 >
                   <LinearGradient colors={GRADIENTS.danger} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.modalActionBtn}>
-                    <Text style={styles.modalActionBtnText}>{isLoading ? 'Disabling...' : 'Disable 2FA'}</Text>
+                    <Text style={styles.modalActionBtnText}>{isLoading ? t('twoFactor.disabling') : t('twoFactor.disable2fa')}</Text>
                   </LinearGradient>
                 </AnimatedPressable>
               </View>

@@ -48,6 +48,41 @@ vi.mock('../components/ui/Card', () => ({
   default: 'Card',
 }));
 
+vi.mock('../hooks/useT', () => ({
+  useT: function() {
+    const translations: Record<string, string> = {
+      'paymentHistory.title': 'Payment History',
+      'paymentHistory.totalSpent': 'Total Spent',
+      'paymentHistory.paid': 'Paid',
+      'paymentHistory.pending': 'Pending',
+      'paymentHistory.failed': 'Failed',
+      'paymentHistory.saved': 'Saved',
+      'paymentHistory.all': 'All',
+      'paymentHistory.noPayments': 'No Payments Found',
+      'paymentHistory.noPaymentsDesc': 'Your subscription payments will appear here',
+      'paymentHistory.noFilteredPayments': 'No',
+      'paymentHistory.paymentsYet': 'payments yet',
+      'paymentHistory.securePayments': 'Secure Payments',
+      'paymentHistory.securePaymentsDesc': 'All transactions are processed securely through Razorpay.',
+      'paymentHistory.monthly': 'Monthly',
+      'paymentHistory.yearly': 'Yearly',
+      'paymentHistory.via': 'via',
+      'paymentHistory.shareReceipt': 'Share Receipt',
+      'paymentHistory.retryPayment': 'Retry Payment',
+      'paymentHistory.downloadInvoice': 'Download Invoice',
+      'paymentHistory.date': 'Date',
+      'paymentHistory.transactionId': 'Transaction ID',
+      'paymentHistory.invoice': 'Invoice',
+      'paymentHistory.coupon': 'Coupon',
+      'paymentHistory.discount': 'Discount',
+      'paymentHistory.amountCharged': 'Amount Charged',
+    };
+    return {
+      t: function(key: string) { return translations[key] || key; },
+    };
+  },
+}));
+
 // ==================== Imports ====================
 
 import TestRenderer from 'react-test-renderer';

@@ -440,11 +440,17 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
 
         {/* Action Buttons */}
         <Animated.View entering={FadeInUp.duration(700)} style={styles.actionRow}>
-          <Pressable style={[styles.actionBtn, { backgroundColor: colors.marketUp }]}>
+          <Pressable
+            onPress={() => nav.navigate('CryptoTrading')}
+            style={[styles.actionBtn, { backgroundColor: colors.marketUp }]}
+          >
             <Ionicons name="cart" size={18} color="#fff" />
             <Text style={styles.actionBtnText}>Buy {data.symbol}</Text>
           </Pressable>
-          <Pressable style={[styles.actionBtn, { backgroundColor: colors.marketDown }]}>
+          <Pressable
+            onPress={() => nav.navigate('CryptoTrading')}
+            style={[styles.actionBtn, { backgroundColor: colors.marketDown }]}
+          >
             <Ionicons name="arrow-down" size={18} color="#fff" />
             <Text style={styles.actionBtnText}>Sell {data.symbol}</Text>
           </Pressable>

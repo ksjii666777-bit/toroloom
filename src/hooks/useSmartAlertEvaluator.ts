@@ -229,7 +229,7 @@ export function useSmartAlertEvaluator(): SmartAlertEvaluatorState {
       // the cache would wipe all price history on every alert toggle.
       // The cache is garbage-collected when the hook unmounts naturally.
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []); // Stable — never re-creates interval, always calls latest via ref
 
   return state;

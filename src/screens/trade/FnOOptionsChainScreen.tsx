@@ -27,6 +27,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useFnoStore, ChainSide } from '../../store/fnoStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatCompactNumber } from '../../utils/formatters';
@@ -39,6 +40,7 @@ const POPULAR_SYMBOLS = ['NIFTY', 'BANKNIFTY', 'RELIANCE', 'HDFCBANK', 'INFY', '
 
 export default function FnOOptionsChainScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const {
@@ -126,8 +128,8 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
       return (
         <View style={styles.emptyState}>
           <Ionicons name="options-outline" size={48} color={colors.textMuted} />
-          <Text style={styles.emptyTitle}>No Data</Text>
-          <Text style={styles.emptySubtitle}>Select a symbol and expiry to view the option chain</Text>
+          <Text style={styles.emptyTitle}>{t('trading.noData')}</Text>
+          <Text style={styles.emptySubtitle}>{t('trading.selectSymbolExpiry')}</Text>
         </View>
       );
     }
@@ -145,17 +147,17 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
           <View style={styles.chainHeaderCe}>
             {chainSide !== 'PE' && (
               <Text style={[styles.chainHeaderText, { color: colors.marketUp }]}>
-                CALLS (CE)
+                {t('trading.calls')}
               </Text>
             )}
           </View>
           <View style={styles.chainHeaderStrike}>
-            <Text style={[styles.chainHeaderStrikeText, { color: colors.text }]}>Strike</Text>
+            <Text style={[styles.chainHeaderStrikeText, { color: colors.text }]}>{t('trading.strike')}</Text>
           </View>
           <View style={styles.chainHeaderPe}>
             {chainSide !== 'CE' && (
               <Text style={[styles.chainHeaderText, { color: colors.marketDown }]}>
-                PUTS (PE)
+                {t('trading.puts')}
               </Text>
             )}
           </View>
@@ -203,10 +205,10 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                       </Text>
                       <View style={styles.contractMeta}>
                         <Text style={[styles.oiText, { color: colors.textMuted }]}>
-                          OI {formatCompactNumber(row.ce.openInterest)}
+                          {t('trading.oi')} {formatCompactNumber(row.ce.openInterest)}
                         </Text>
                         <Text style={[styles.volumeText, { color: colors.textMuted }]}>
-                          Vol {formatCompactNumber(row.ce.volume)}
+                          {t('trading.volume')} {formatCompactNumber(row.ce.volume)}
                         </Text>
                       </View>
                     </>
@@ -225,7 +227,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                 </Text>
                 {isATM && (
                   <View style={[styles.atmBadge, { backgroundColor: colors.primary + '20' }]}>
-                    <Text style={[styles.atmBadgeText, { color: colors.primary }]}>ATM</Text>
+                    <Text style={[styles.atmBadgeText, { color: colors.primary }]}>{t('trading.atm')}</Text>
                   </View>
                 )}
               </View>
@@ -288,8 +290,8 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
       return (
         <View style={styles.emptyState}>
           <Ionicons name="trending-up-outline" size={48} color={colors.textMuted} />
-          <Text style={styles.emptyTitle}>No Futures Contracts</Text>
-          <Text style={styles.emptySubtitle}>Select a symbol to view futures data</Text>
+          <Text style={styles.emptyTitle}>{t('trading.noFuturesContracts')}</Text>
+          <Text style={styles.emptySubtitle}>{t('trading.selectSymbolFutures')}</Text>
         </View>
       );
     }
@@ -297,10 +299,10 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
     return (
       <>
         <View style={styles.futuresHeader}>
-          <Text style={[styles.futuresHeaderText, { color: colors.textMuted }]}>Contract</Text>
-          <Text style={[styles.futuresHeaderText, { color: colors.textMuted }]}>LTP</Text>
-          <Text style={[styles.futuresHeaderText, { color: colors.textMuted }]}>OI</Text>
-          <Text style={[styles.futuresHeaderText, { color: colors.textMuted }]}>Basis</Text>
+          <Text style={[styles.futuresHeaderText, { color: colors.textMuted }]}>{t('trading.contract')}</Text>
+          <Text style={[styles.futuresHeaderText, { color: colors.textMuted }]}>{t('trading.ltp')}</Text>
+          <Text style={[styles.futuresHeaderText, { color: colors.textMuted }]}>{t('trading.oi')}</Text>
+          <Text style={[styles.futuresHeaderText, { color: colors.textMuted }]}>{t('trading.basis')}</Text>
         </View>
         {futures.map((f: FutureContract) => {
           const days = Math.ceil((new Date(f.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -310,8 +312,8 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               style={({pressed}) => [[styles.futuresCard, { borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
               onPress={() => {
                 Alert.alert(
-                  'Trade Futures',
-                  `${f.symbol}\nLTP: ₹${f.price.toFixed(2)} | Lot: ${f.lotSize}\nExpiry: ${new Date(f.expiryDate).toLocaleDateString('en-IN')} (${days}d)`,
+                  t('trading.tradeFutures'),
+                  `${f.symbol}\n${t('trading.ltp')}: ₹${f.price.toFixed(2)} | ${t('trading.lotSize')}: ${f.lotSize}\n${t('trading.expiry')}: ${new Date(f.expiryDate).toLocaleDateString('en-IN')} (${days}d)`,
                 );
               }}
             >
@@ -321,7 +323,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                 </Text>
                 <Text style={[styles.futuresExpiry, { color: colors.textMuted }]}>
                   {new Date(f.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                  {' · Lot '}{f.lotSize}
+                  {' · '}{t('trading.lotSize')} {f.lotSize}
                 </Text>
               </View>
               <View style={styles.futuresPrice}>
@@ -338,7 +340,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                 <Text style={[styles.futuresOiValue, { color: colors.text }]}>
                   {formatCompactNumber(f.openInterest)}
                 </Text>
-                <Text style={[styles.futuresOiLabel, { color: colors.textMuted }]}>OI</Text>
+                <Text style={[styles.futuresOiLabel, { color: colors.textMuted }]}>{t('trading.oi')}</Text>
               </View>
               <View style={styles.futuresBasis}>
                 <Text style={[styles.futuresBasisValue, {
@@ -373,8 +375,8 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
       return (
         <View style={styles.emptyState}>
           <Ionicons name="folder-open-outline" size={48} color={colors.textMuted} />
-          <Text style={styles.emptyTitle}>No F&O Positions</Text>
-          <Text style={styles.emptySubtitle}>Your open futures and options positions will appear here</Text>
+          <Text style={styles.emptyTitle}>{t('trading.noFnoPositions')}</Text>
+          <Text style={styles.emptySubtitle}>{t('trading.noFnoPositionsDesc')}</Text>
         </View>
       );
     }
@@ -409,7 +411,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                     <Text style={[styles.positionTypeText, {
                       color: isLong ? colors.marketUp : colors.marketDown,
                     }]}>
-                      {isLong ? 'LONG' : 'SHORT'}
+                      {isLong ? t('trading.long') : t('trading.short')}
                     </Text>
                   </View>
                   <Text style={[styles.positionSymbol, { color: colors.text }]}>
@@ -435,25 +437,25 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
 
               <View style={styles.positionDetails}>
                 <View style={styles.positionDetail}>
-                  <Text style={[styles.positionLabel, { color: colors.textMuted }]}>Qty</Text>
+                  <Text style={[styles.positionLabel, { color: colors.textMuted }]}>{t('trading.qty')}</Text>
                   <Text style={[styles.positionValue, { color: colors.text }]}>
                     {pos.quantity} lot{pos.quantity > 1 ? 's' : ''}
                   </Text>
                 </View>
                 <View style={styles.positionDetail}>
-                  <Text style={[styles.positionLabel, { color: colors.textMuted }]}>Entry</Text>
+                  <Text style={[styles.positionLabel, { color: colors.textMuted }]}>{t('trading.entry')}</Text>
                   <Text style={[styles.positionValue, { color: colors.text }]}>
                     {formatCurrency(pos.entryPrice, true)}
                   </Text>
                 </View>
                 <View style={styles.positionDetail}>
-                  <Text style={[styles.positionLabel, { color: colors.textMuted }]}>LTP</Text>
+                  <Text style={[styles.positionLabel, { color: colors.textMuted }]}>{t('trading.ltp')}</Text>
                   <Text style={[styles.positionValue, { color: colors.text }]}>
                     {formatCurrency(pos.currentPrice, true)}
                   </Text>
                 </View>
                 <View style={styles.positionDetail}>
-                  <Text style={[styles.positionLabel, { color: colors.textMuted }]}>P&L%</Text>
+                  <Text style={[styles.positionLabel, { color: colors.textMuted }]}>{t('trading.pnlPercent')}</Text>
                   <Text style={[styles.positionValue, {
                     color: isPositive ? colors.marketUp : colors.marketDown,
                   }]}>
@@ -478,7 +480,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Place Order</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('trading.placeOrder')}</Text>
             <Pressable onPress={closeOrderModal}>
               <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
@@ -510,25 +512,25 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
           {/* Greeks Preview */}
           <View style={styles.greeksPreview}>
             <View style={styles.greekItem}>
-              <Text style={[styles.greekLabel, { color: colors.textMuted }]}>Delta</Text>
+              <Text style={[styles.greekLabel, { color: colors.textMuted }]}>{t('trading.greeks.delta')}</Text>
               <Text style={[styles.greekValue, { color: colors.text }]}>{selectedContract.delta.toFixed(2)}</Text>
             </View>
             <View style={styles.greekItem}>
-              <Text style={[styles.greekLabel, { color: colors.textMuted }]}>Gamma</Text>
+              <Text style={[styles.greekLabel, { color: colors.textMuted }]}>{t('trading.greeks.gamma')}</Text>
               <Text style={[styles.greekValue, { color: colors.text }]}>{selectedContract.gamma.toFixed(4)}</Text>
             </View>
             <View style={styles.greekItem}>
-              <Text style={[styles.greekLabel, { color: colors.textMuted }]}>Theta</Text>
+              <Text style={[styles.greekLabel, { color: colors.textMuted }]}>{t('trading.greeks.theta')}</Text>
               <Text style={[styles.greekValue, { color: colors.marketDown }]}>{selectedContract.theta.toFixed(2)}</Text>
             </View>
             <View style={styles.greekItem}>
-              <Text style={[styles.greekLabel, { color: colors.textMuted }]}>Vega</Text>
+              <Text style={[styles.greekLabel, { color: colors.textMuted }]}>{t('trading.greeks.vega')}</Text>
               <Text style={[styles.greekValue, { color: colors.text }]}>{selectedContract.vega.toFixed(2)}</Text>
             </View>
           </View>
 
           {/* Quantity Selector */}
-          <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>Lots</Text>
+          <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>{t('trading.lots')}</Text>
           <View style={styles.qtySelector}>
             <Pressable
               style={[styles.qtyBtn, { borderColor: colors.border }]}
@@ -554,11 +556,11 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
           {/* Total Premium */}
           <View style={[styles.totalRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View>
-              <Text style={[styles.totalLabel, { color: colors.textMuted }]}>Total Premium</Text>
+              <Text style={[styles.totalLabel, { color: colors.textMuted }]}>{t('trading.totalPremium')}</Text>
               <Text style={[styles.totalValue, { color: colors.text }]}>{formatCurrency(totalPremium, true)}</Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={[styles.totalLabel, { color: colors.textMuted }]}>Per Unit</Text>
+              <Text style={[styles.totalLabel, { color: colors.textMuted }]}>{t('trading.perUnit')}</Text>
               <Text style={[styles.totalValue, { color: colors.textSecondary }]}>{formatCurrency(selectedContract.ltp, true)}</Text>
             </View>
           </View>
@@ -569,7 +571,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               style={[styles.modalActionBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
               onPress={closeOrderModal}
             >
-              <Text style={[styles.modalActionText, { color: colors.text }]}>Cancel</Text>
+              <Text style={[styles.modalActionText, { color: colors.text }]}>{t('trading.cancel')}</Text>
             </Pressable>
             <Pressable
               style={[styles.modalActionBtn, {
@@ -579,7 +581,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                 placeOrder();
                 Alert.alert(
                   'Order Placed ✅',
-                  `${orderType === 'buy' ? 'Bought' : 'Sold'} ${orderQuantity} lot(s) ${selectedSymbol} ${selectedContract.strike} ${selectedContract.type} @ ${formatCurrency(selectedContract.ltp, true)}`,
+                  `${orderType === 'buy' ? t('trading.bought') : t('trading.sold')} ${orderQuantity} ${t('trading.lots').toLowerCase()} ${selectedSymbol} ${selectedContract.strike} ${selectedContract.type} @ ${formatCurrency(selectedContract.ltp, true)}`,
                 );
                 closeOrderModal();
               }}
@@ -606,7 +608,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
         <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={[styles.title, { color: colors.text }]}>F&O Trading</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('trading.fno')}</Text>
         <Pressable onPress={() => navigation.navigate('StrategyBuilder')} style={styles.strategyBtn}>
           <Ionicons name="git-branch" size={20} color={colors.primary} />
         </Pressable>
@@ -639,7 +641,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
       {/* Spot Price Banner */}
       {spotPrice > 0 && (
         <View style={[styles.spotBanner, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.spotLabel, { color: colors.textMuted }]}>{selectedSymbol} Spot</Text>
+          <Text style={[styles.spotLabel, { color: colors.textMuted }]}>{selectedSymbol} {t('trading.spot')}</Text>
           <Text style={[styles.spotPriceText, { color: colors.text }]}>
             {formatCurrency(spotPrice, true)}
           </Text>
@@ -648,25 +650,25 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               <View style={styles.spotDivider} />
               <View style={styles.spotStats}>
                 <View style={styles.spotStat}>
-                  <Text style={[styles.spotStatLabel, { color: colors.textMuted }]}>PCR</Text>
+                  <Text style={[styles.spotStatLabel, { color: colors.textMuted }]}>{t('trading.pcr')}</Text>
                   <Text style={[styles.spotStatValue, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
                     {optionChain.pcr.toFixed(2)}
                   </Text>
                 </View>
                 <View style={styles.spotStat}>
-                  <Text style={[styles.spotStatLabel, { color: colors.textMuted }]}>Max Pain</Text>
+                  <Text style={[styles.spotStatLabel, { color: colors.textMuted }]}>{t('trading.maxPain')}</Text>
                   <Text style={[styles.spotStatValue, { color: colors.text }]}>
                     {formatCurrency(optionChain.maxPain, true)}
                   </Text>
                 </View>
                 <View style={styles.spotStat}>
-                  <Text style={[styles.spotStatLabel, { color: colors.textMuted }]}>CE OI</Text>
+                  <Text style={[styles.spotStatLabel, { color: colors.textMuted }]}>CE {t('trading.oi')}</Text>
                   <Text style={[styles.spotStatValue, { color: colors.marketUp }]}>
                     {formatCompactNumber(optionChain.totalCEOi)}
                   </Text>
                 </View>
                 <View style={styles.spotStat}>
-                  <Text style={[styles.spotStatLabel, { color: colors.textMuted }]}>PE OI</Text>
+                  <Text style={[styles.spotStatLabel, { color: colors.textMuted }]}>PE {t('trading.oi')}</Text>
                   <Text style={[styles.spotStatValue, { color: colors.marketDown }]}>
                     {formatCompactNumber(optionChain.totalPEOi)}
                   </Text>
@@ -680,9 +682,9 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
       {/* View Tabs */}
       <View style={[styles.viewTabs, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
         {([
-          { key: 'option-chain', label: 'Option Chain', icon: 'options' },
-          { key: 'futures', label: 'Futures', icon: 'trending-up' },
-          { key: 'positions', label: 'Positions', icon: 'briefcase' },
+          { key: 'option-chain', label: t('trading.optionChain'), icon: 'options' },
+          { key: 'futures', label: t('trading.futures'), icon: 'trending-up' },
+          { key: 'positions', label: t('trading.positions'), icon: 'briefcase' },
         ] as const).map(tab => (
           <Pressable
             key={tab.key}
@@ -755,7 +757,7 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
                       styles.sideTabText,
                       { color: chainSide === side ? colors.primary : colors.textMuted },
                     ]}>
-                      {side === 'both' ? 'All' : side}
+                      {side === 'both' ? t('trading.all') : side}
                     </Text>
                   </Pressable>
                 ))}

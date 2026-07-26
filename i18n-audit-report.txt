@@ -1,0 +1,2059 @@
+========================================================================
+  Toroloom -- I18N Conversion Audit Report
+========================================================================
+
+  [  ] src\components\AnimatedScaleButton.tsx
+         Component: AnimatedScaleButton  |  Namespace: app
+         [..] Text content (1):
+            - "Click me"
+  [  ] src\components\BiometricUnlockOverlay.tsx
+         Component: BiometricUnlockOverlay  |  Namespace: app
+         [..] Text content (3):
+            - "Toroloom"
+            - "Biometric authentication required"
+            - "Retry"
+  [  ] src\components\CandlestickChart.tsx
+         Component: CandlestickChart  |  Namespace: app
+         [..] Text content (4):
+            - "Loading chart data..."
+            - "No chart data available"
+            - "Reset"
+            - "Reset"
+  [  ] src\components\chart\DrawingTools.tsx
+         Component: DrawingTools  |  Namespace: app
+         [..] Text content (3):
+            - "Delete"
+            - "Cancel"
+            - "Done"
+         [..] Title/subtitle props (1):
+            - "Type your annotation..."
+  [  ] src\components\chart\SkiaCandlestickChart.tsx
+         Component: SkiaCandlestickChart  |  Namespace: app
+         [..] Text content (1):
+            - "No chart data available"
+  [  ] src\components\chart\TickModeIndicator.tsx
+         Component: TickModeIndicator  |  Namespace: app
+         [..] Text content (1):
+            - "TICK"
+  [  ] src\components\fno\BacktestPanel.tsx
+         Component: BacktestPanel  |  Namespace: trading
+         [..] Text content (6):
+            - "Equity Curve"
+            - "Running backtest..."
+            - "Backtest Strategy"
+            - "Simulate against historical data to see win rate, Sharpe ratio & drawd..."
+            - "Run Backtest"
+            - "Backtest Results"
+  [  ] src\components\fno\CompareStrategiesPanel.tsx
+         Component: CompareStrategiesPanel  |  Namespace: trading
+         [..] Text content (8):
+            - "Equity Curve Comparison"
+            - "Compare Strategies"
+            - "Clear All"
+            - "P&L"
+            - "Win Rate"
+            - "Sharpe"
+            - "Metric Comparison"
+            - "Period Analysis"
+  [  ] src\components\fno\GreeksPanel.tsx
+         Component: GreeksPanel  |  Namespace: trading
+         [..] Text content (4):
+            - "Greeks"
+            - "Analyze strategy to see Greeks"
+            - "Greeks"
+            - "Directional Bias"
+  [  ] src\components\fno\OptionsScannerPanel.tsx
+         Component: OptionsScannerPanel  |  Namespace: trading
+         [..] Text content (11):
+            - "Apply"
+            - "OI Concentration"
+            - "CE OI"
+            - "PE OI"
+            - "Analyzing market conditions..."
+            - "No Data"
+            - "Insufficient Data"
+            - "Market Signals"
+            ... +3 more
+         [..] Title/subtitle props (3):
+            - "Put-Call Ratio"
+            - "Max Pain"
+            - "Bias Signals"
+  [  ] src\components\fno\PriceTrendChart.tsx
+         Component: PriceTrendChart  |  Namespace: trading
+         [..] Text content (2):
+            - "Loading price data..."
+            - "No Price Data"
+  [  ] src\components\fno\RiskRewardCharts.tsx
+         Component: RiskRewardCharts  |  Namespace: trading
+         [..] Text content (12):
+            - "Drawdown Analysis"
+            - "Max Depth"
+            - "Episodes"
+            - "Avg Depth"
+            - "Longest (days)"
+            - "Win / Loss Distribution"
+            - "R:R Ratio"
+            - "Win / Loss"
+            ... +4 more
+  [  ] src\components\fno\StrategyCanvas.tsx
+         Component: StrategyCanvas  |  Namespace: trading
+         [..] Text content (4):
+            - "No Strategy Data"
+            - "Max Profit"
+            - "Max Loss"
+            - "Risk/Reward"
+  [  ] src\components\IronLockOverlay.tsx
+         Component: IronLockOverlay  |  Namespace: app
+         [..] Text content (4):
+            - "Lockdown lifts in"
+            - "Trigger Loss"
+            - "Limit Breached"
+            - "Status"
+  [  ] src\components\nfo\InvestNfoModal.tsx
+         Component: InvestNfoModal  |  Namespace: app
+         [..] Text content (4):
+            - "Invest in NFO"
+            - "Quick Select"
+            - "Custom Amount"
+            - "Asset Allocation"
+         [..] Alert titles (3):
+            - "Minimum Investment"
+            - "Maximum Investment"
+            - "Application Submitted ✅"
+  [  ] src\components\PnLChart.tsx
+         Component: PnLChart  |  Namespace: app
+         [..] Text content (2):
+            - "Not enough data for chart"
+            - "LIVE"
+  [  ] src\components\PortfolioHolding.tsx
+         Component: PortfolioHolding  |  Namespace: portfolio
+         [..] Text content (4):
+            - "Avg Cost"
+            - "LTP"
+            - "Invested"
+            - "Current"
+  [  ] src\components\quiz\QuizComponent.tsx
+         Component: QuizComponent  |  Namespace: app
+         [..] Text content (7):
+            - "Score"
+            - "Correct"
+            - "Wrong"
+            - "Skipped"
+            - "Time"
+            - "Previous"
+            - "Next"
+  [  ] src\components\stock\AIInsightCard.tsx
+         Component: AIInsightCard  |  Namespace: ai
+         [..] Text content (5):
+            - "AI Analysis"
+            - "Powered by Deep Learning"
+            - "Confidence"
+            - "Target Levels"
+            - "View Full Analysis"
+  [  ] src\components\stock\BottomActionBar.tsx
+         Component: BottomActionBar  |  Namespace: app
+         [..] Text content (3):
+            - "LTP"
+            - "Sell"
+            - "Buy"
+  [  ] src\components\stock\PatternSettingsModal.tsx
+         Component: PatternSettingsModal  |  Namespace: profile
+         [..] Text content (6):
+            - "Pattern Settings"
+            - "Lookback Period"
+            - "Pattern Types"
+            - "All"
+            - "None"
+            - "Apply Settings"
+         [..] Title/subtitle props (1):
+            - "Min Confidence"
+  [  ] src\components\stock\PatternSummary.tsx
+         Component: PatternSummary  |  Namespace: app
+         [..] Text content (1):
+            - "Detected Patterns"
+  [  ] src\components\stock\PeerComparison.tsx
+         Component: PeerComparison  |  Namespace: app
+         [..] Text content (6):
+            - "Peer Comparison"
+            - "Symbol"
+            - "P/E"
+            - "M.Cap"
+            - "Chg%"
+            - "YOU"
+  [  ] src\components\stock\SectorContext.tsx
+         Component: SectorContext  |  Namespace: app
+         [..] Text content (4):
+            - "Sector Context"
+            - "Stocks"
+            - "Best"
+            - "Worst"
+  [  ] src\components\StockChart.tsx
+         Component: StockChart  |  Namespace: app
+         [..] Text content (1):
+            - "No chart data available"
+  [  ] src\components\TechnicalIndicators.tsx
+         Component: TechnicalIndicators  |  Namespace: app
+         [..] Text content (6):
+            - "Not enough data"
+            - "RSI (14)"
+            - "Not enough data"
+            - "MACD (12,26,9)"
+            - "Not enough data"
+            - "Bollinger (20,2)"
+  [  ] src\components\ui\AnimatedPressable.stories.tsx
+         Component: DemoCard  |  Namespace: app
+         [..] Text content (1):
+            - "Custom Radius (20)"
+         [..] Title/subtitle props (16):
+            - "Default Pressable"
+            - "With Highlight"
+            - "Custom Highlight"
+            - "Green overlay instead of default blue"
+            - "Aggressive Scale (0.85)"
+            - "Subtle Scale (0.98)"
+            - "Disabled"
+            - "No Haptic"
+            ... +8 more
+  [  ] src\components\ui\Badge.stories.tsx
+         Component: Unknown  |  Namespace: app
+         [..] Text content (6):
+            - "Small"
+            - "Medium"
+            - "Subscription is active"
+            - "Awaiting approval"
+            - "Plan has expired"
+            - "Not yet published"
+         [..] Title/subtitle props (16):
+            - "Primary"
+            - "Active"
+            - "Expired"
+            - "Pending"
+            - "Updated"
+            - "Draft"
+            - "Small"
+            - "Medium"
+            ... +8 more
+  [  ] src\components\ui\Button.stories.tsx
+         Component: Unknown  |  Namespace: app
+         [..] Title/subtitle props (14):
+            - "Download Report"
+            - "Custom Gradient"
+            - "Primary"
+            - "Secondary"
+            - "Outline"
+            - "Ghost"
+            - "Danger"
+            - "Success"
+            ... +6 more
+  [  ] src\components\ui\Card.stories.tsx
+         Component: Unknown  |  Namespace: app
+         [..] Text content (4):
+            - "Total Invested"
+            - "Current Value"
+            - "Total Returns"
+            - "Full-bleed area"
+         [..] Title/subtitle props (6):
+            - "Upgrade to Pro"
+            - "Basic Card"
+            - "Default styling"
+            - "Gradient Card"
+            - "Subtle brand gradient"
+            - "Animated Card"
+         [..] Card titles (3):
+            - "Default styling"
+            - "Subtle brand gradient"
+            - "Animated Card"
+  [  ] src\components\ui\Input.stories.tsx
+         Component: Unknown  |  Namespace: app
+         [..] Title/subtitle props (14):
+            - "Full Name"
+            - "Enter your full name"
+            - "Default Input"
+            - "No value, no focus"
+            - "With Value"
+            - "Enter text"
+            - "Email Input"
+            - "email@example.com"
+            ... +6 more
+  [  ] src\components\ui\MetallicShieldSVG.stories.tsx
+         Component: Unknown  |  Namespace: app
+         [..] Text content (1):
+            - "Upgrade to Premium"
+  [  ] src\components\ui\OfflineBanner.tsx
+         Component: OfflineBanner  |  Namespace: app
+         [..] Text content (3):
+            - "Data Freshness"
+            - "Pending Sync"
+            - "Clear offline cache"
+  [  ] src\components\ui\OptimizedImage.tsx
+         Component: OptimizedImage  |  Namespace: app
+         [..] Text content (1):
+            - "Tap to retry"
+  [  ] src\components\ui\SyncConflictModal.stories.tsx
+         Component: generateConflict  |  Namespace: app
+         [..] Text content (1):
+            - "Open Modal"
+  [  ] src\components\ui\SyncConflictModal.tsx
+         Component: SyncConflictModal  |  Namespace: app
+         [..] Text content (6):
+            - "Sync Conflicts"
+            - "Dismiss"
+            - "Retry"
+            - "Keep"
+            - "Dismiss All"
+            - "Retry All"
+  [  ] src\components\ui\SyncStatusIndicator.tsx
+         Component: SyncStatusIndicator  |  Namespace: app
+         [..] Text content (1):
+            - "Sync"
+  [  ] src\components\ui\ToroloomLogo.stories.tsx
+         Component: Unknown  |  Namespace: app
+         [..] Text content (2):
+            - "Toroloom"
+            - "Powered by Toroloom"
+  [  ] src\components\UpgradePromptModal.tsx
+         Component: UpgradePromptModal  |  Namespace: app
+         [..] Text content (5):
+            - "Upgrade Required"
+            - "Current"
+            - "Not available"
+            - "Required"
+            - "Unlocked"
+         [..] Title/subtitle props (1):
+            - "Maybe Later"
+  [  ] src\components\video\VideoLessonPlayer.tsx
+         Component: VideoLessonPlayer  |  Namespace: education
+         [..] Text content (1):
+            - "Transcript"
+  [  ] src\components\widgets\BaseWidget.tsx
+         Component: BaseWidget  |  Namespace: app
+         [..] Text content (4):
+            - "Size"
+            - "Actions"
+            - "Hide Widget"
+            - "Remove Widget"
+         [..] Alert titles (1):
+            - "Remove Widget"
+  [  ] src\components\widgets\HoldingsWidget.tsx
+         Component: HoldingsWidget  |  Namespace: app
+         [..] Text content (1):
+            - "No holdings yet"
+  [  ] src\components\widgets\PnLWidget.tsx
+         Component: PnLWidget  |  Namespace: app
+         [..] Text content (5):
+            - "Day"
+            - "Total Return"
+            - "Day Change"
+            - "Realized"
+            - "Unrealized"
+  [  ] src\components\widgets\RecentTradesWidget.tsx
+         Component: RecentTradesWidget  |  Namespace: trading
+         [..] Text content (1):
+            - "No trades yet"
+  [  ] src\components\widgets\RiskMetricsWidget.tsx
+         Component: RiskMetricsWidget  |  Namespace: risk
+         [..] Text content (3):
+            - "Sharpe"
+            - "Win Rate"
+            - "Drawdown"
+         [..] Title/subtitle props (6):
+            - "Sharpe Ratio"
+            - "Sortino Ratio"
+            - "Win Rate"
+            - "Max Drawdown"
+            - "Profit Factor"
+            - "Avg Holding"
+  [  ] src\components\widgets\SectorAllocationWidget.tsx
+         Component: SectorAllocationWidget  |  Namespace: app
+         [..] Text content (2):
+            - "No sector data"
+            - "Total invested across"
+  [  ] src\components\widgets\WidgetGrid.tsx
+         Component: WidgetGrid  |  Namespace: app
+         [..] Text content (3):
+            - "No Widgets Yet"
+            - "Browse Widgets"
+            - "Add Widget"
+  [  ] src\screens\achievements\AchievementsScreen.tsx
+         Component: AchievementsScreen  |  Namespace: app
+         [..] Text content (11):
+            - "Achievements"
+            - "Total Badges"
+            - "Unlocked"
+            - "Locked"
+            - "Completion"
+            - "All Badges"
+            - "Upcoming Challenges"
+            - "Requirement"
+            ... +3 more
+  [OK] src\screens\admin\AdminDashboardScreen.tsx (AdminDashboardScreen) -- 20 leftover strings
+  [  ] src\screens\admin\AdminKYCScreen.tsx
+         Component: AdminKYCScreen  |  Namespace: kyc
+         [..] Text content (2):
+            - "KYC Queue"
+            - "All Clear!"
+         [..] Title/subtitle props (1):
+            - "Search by name or email..."
+         [..] Alert titles (2):
+            - "Approve KYC"
+            - "Reject KYC"
+  [  ] src\screens\admin\AdminUserManagementScreen.tsx
+         Component: AdminUserManagementScreen  |  Namespace: profile
+         [..] Text content (6):
+            - "Phone"
+            - "Joined"
+            - "Last Active"
+            - "Total P&L"
+            - "User Management"
+            - "No users found"
+         [..] Title/subtitle props (1):
+            - "Search by name, email, or phone..."
+  [  ] src\screens\ai\AIChatScreen.tsx
+         Component: AIChatScreen  |  Namespace: community
+         [..] Text content (3):
+            - "AI Assistant"
+            - "Portfolio & Market Q&A"
+            - "Analyzing your portfolio..."
+         [..] Title/subtitle props (1):
+            - "Ask about your portfolio..."
+  [  ] src\screens\ai\AIInsightsScreen.tsx
+         Component: AIInsightsScreen  |  Namespace: ai
+         [..] Text content (4):
+            - "AI Insights"
+            - "Powered by advanced market analysis"
+            - "AI Market Overview"
+            - "Stock Analysis"
+  [  ] src\screens\ai\AITradeAssistantScreen.tsx
+         Component: AITradeAssistantScreen  |  Namespace: trading
+         [..] Text content (32):
+            - "AI Trade Assistant"
+            - "Intelligent position sizing & risk analysis"
+            - "Stock"
+            - "Trade Parameters"
+            - "Buy"
+            - "Sell"
+            - "Quantity"
+            - "Position Cost"
+            ... +24 more
+         [..] Alert titles (1):
+            - "Place Order"
+  [  ] src\screens\ai\BatchAnalysisScreen.tsx
+         Component: BatchAnalysisScreen  |  Namespace: ai
+         [..] Text content (6):
+            - "Batch Analysis"
+            - "Quick add:"
+            - "Bullish"
+            - "Bearish"
+            - "Neutral"
+            - "Total"
+         [..] Title/subtitle props (2):
+            - "Enter Stock Symbols"
+            - "e.g. RELIANCE, TCS, HDFCBANK, INFY"
+         [..] Card titles (1):
+            - "Enter Stock Symbols"
+  [  ] src\screens\ai\EarningsCallScreen.tsx
+         Component: EarningsCallScreen  |  Namespace: ai
+         [..] Text content (26):
+            - "No earnings data available"
+            - "Earnings Call"
+            - "AI-powered quarterly summaries"
+            - "AI Confidence"
+            - "Pre-Market"
+            - "Day Change"
+            - "Volume Surge"
+            - "Key Metrics"
+            ... +18 more
+         [..] Title/subtitle props (6):
+            - "Revenue"
+            - "Net Profit"
+            - "EPS"
+            - "EBITDA"
+            - "Operating Margin"
+            - "Net Margin"
+  [  ] src\screens\ai\LiveFeedScreen.tsx
+         Component: LiveFeedScreen  |  Namespace: ai
+         [..] Text content (3):
+            - "Frequency"
+            - "Live Sentiment Feed"
+            - "No Events"
+         [..] Title/subtitle props (1):
+            - "Search by symbol, name, or message..."
+  [  ] src\screens\ai\SentimentAlertScreen.tsx
+         Component: SentimentAlertScreen  |  Namespace: ai
+         [..] Text content (12):
+            - "Triggered"
+            - "New Sentiment Alert"
+            - "Stock"
+            - "Add Alert Rule"
+            - "Sentiment Alerts"
+            - "Rules"
+            - "History"
+            - "No Active Rules"
+            ... +4 more
+         [..] Alert titles (1):
+            - "Remove Rule"
+  [  ] src\screens\ai\SentimentAnalysisScreen.tsx
+         Component: SentimentAnalysisScreen  |  Namespace: ai
+         [..] Text content (14):
+            - "Bearish"
+            - "Bullish"
+            - "Today"
+            - "No sentiment data available"
+            - "Sentiment Analysis"
+            - "News + social media sentiment"
+            - "Source Breakdown"
+            - "Confidence"
+            ... +6 more
+         [..] Title/subtitle props (4):
+            - "News"
+            - "Social"
+            - "Analyst"
+            - "AI" score={selectedSentiment.sourceBreakdown.aiScore} color="
+  [OK] src\screens\alerts\SmartPriceAlertsScreen.tsx (SmartPriceAlertsScreen) -- 3 leftover strings
+  [  ] src\screens\analytics\CapitalGainsScreen.tsx
+         Component: CapitalGainsScreen  |  Namespace: ai
+         [..] Text content (15):
+            - "Capital Gains"
+            - "Loading tax data..."
+            - "Retry"
+            - "STCG (15%)"
+            - "LTCG (10%)"
+            - "Total Tax"
+            - "Taxable Gains"
+            - "STCG Tax (15%)"
+            ... +7 more
+         [..] Title/subtitle props (9):
+            - "Tax Breakdown"
+            - "STCG"
+            - "LTCG"
+            - "Realized"
+            - "Unrealized"
+            - "Estimated Tax Liability"
+            - "Portfolio Capital Gains"
+            - "Tax Optimization Tips"
+            ... +1 more
+         [..] Card titles (5):
+            - "Tax Breakdown"
+            - "Estimated Tax Liability"
+            - "Portfolio Capital Gains"
+            - "Tax Optimization Tips"
+            - "Tax Rules (India FY 2025-26)"
+  [  ] src\screens\analytics\CorrelationMatrixScreen.tsx
+         Component: CorrelationMatrixScreen  |  Namespace: app
+         [..] Text content (7):
+            - "Correlation Matrix"
+            - "Asset-to-asset correlation heatmap"
+            - "No Portfolio Data"
+            - "Use Sample Portfolio"
+            - "Diversification Score"
+            - "Average Cross-Correlation"
+            - "Highly Correlated Pairs (&gt;0.7)"
+         [..] Title/subtitle props (8):
+            - "No Holdings Found"
+            - "Correlation Heatmap"
+            - "Tap a cell for details"
+            - "Diversification Assessment"
+            - "High Correlation Pairs"
+            - "Assets that move closely together"
+            - "Recommendations"
+            - "All Asset Pairs"
+         [..] Card titles (6):
+            - "No Holdings Found"
+            - "Tap a cell for details"
+            - "Diversification Assessment"
+            - "Assets that move closely together"
+            - "Recommendations"
+            - "All Asset Pairs"
+  [  ] src\screens\analytics\DividendTrackerScreen.tsx
+         Component: DividendTrackerScreen  |  Namespace: app
+         [..] Text content (8):
+            - "Live"
+            - "Estimated"
+            - "Dividend Tracker"
+            - "No Upcoming Dividends"
+            - "No Dividend History"
+            - "Top Dividend Payers"
+            - "Annual Breakdown"
+            - "Dividend Income Notes"
+         [..] Title/subtitle props (8):
+            - "Annual Income"
+            - "Estimated this year"
+            - "Portfolio Yield"
+            - "Div / Portfolio Value"
+            - "Yield on Cost"
+            - "Div / Total Cost"
+            - "Monthly Avg"
+            - "Per month"
+  [  ] src\screens\analytics\FactorAnalysisScreen.tsx
+         Component: FactorAnalysisScreen  |  Namespace: app
+         [..] Text content (22):
+            - "Factor Analysis"
+            - "Momentum, Value, Size, Quality & Volatility"
+            - "No Holdings Found"
+            - "Use Sample Portfolio"
+            - "Dominant Style"
+            - "Stock"
+            - "Wt%"
+            - "Mom"
+            ... +14 more
+         [..] Title/subtitle props (8):
+            - "No Portfolio Data"
+            - "Factor Exposures"
+            - "Your portfolio vs Nifty 50 benchmark"
+            - "Stock Factor Contributions"
+            - "How each stock contributes to factor scores"
+            - "Key Insights"
+            - "Recommendations"
+            - "Methodology"
+         [..] Card titles (6):
+            - "No Portfolio Data"
+            - "Your portfolio vs Nifty 50 benchmark"
+            - "How each stock contributes to factor scores"
+            - "Key Insights"
+            - "Recommendations"
+            - "Methodology"
+  [  ] src\screens\analytics\MonteCarloSimulationScreen.tsx
+         Component: MonteCarloSimulationScreen  |  Namespace: app
+         [..] Text content (16):
+            - "Monte Carlo"
+            - "Quick Presets:"
+            - "Total Invested"
+            - "Median Final Value"
+            - "Median Return"
+            - "Median (50th)"
+            - "Probability of Profit"
+            - "Chance of Loss"
+            ... +8 more
+         [..] Title/subtitle props (7):
+            - "Portfolio Parameters"
+            - "Investment Summary"
+            - "Portfolio Growth Projection"
+            - "Percentile ranges over time"
+            - "Distribution Analysis"
+            - "What This Means"
+            - "Parameters Used"
+         [..] Card titles (6):
+            - "Portfolio Parameters"
+            - "Investment Summary"
+            - "Percentile ranges over time"
+            - "Distribution Analysis"
+            - "What This Means"
+            - "Parameters Used"
+  [  ] src\screens\analytics\PortfolioAnalyticsDashboardScreen.tsx
+         Component: PortfolioAnalyticsDashboardScreen  |  Namespace: portfolio
+         [..] Text content (13):
+            - "Portfolio Analytics"
+            - "Performance Summary"
+            - "Total Return"
+            - "Realized P&L"
+            - "Realized"
+            - "Unrealized"
+            - "Unrealized"
+            - "Dashboard Widgets"
+            ... +5 more
+  [  ] src\screens\analytics\PortfolioRebalancingScreen.tsx
+         Component: PortfolioRebalancingScreen  |  Namespace: portfolio
+         [..] Text content (13):
+            - "Portfolio Rebalancing"
+            - "Target Profile"
+            - "Analyzing portfolio..."
+            - "Deviations"
+            - "Avg Deviation"
+            - "Trade Amount"
+            - "Current vs Target Allocation"
+            - "Perfect Allocation!"
+            ... +5 more
+  [  ] src\screens\analytics\TaxHarvestingCalendarScreen.tsx
+         Component: TaxHarvestingCalendarScreen  |  Namespace: app
+         [..] Text content (22):
+            - "Tax Harvesting"
+            - "Capital Gains Optimization"
+            - "Tax Saved"
+            - "Est. Tax Due"
+            - "Realized Losses"
+            - "Opportunities"
+            - "Use Sample Portfolio"
+            - "Key Insights"
+            ... +14 more
+  [  ] src\screens\broker\BrokerConnectScreen.tsx
+         Component: BrokerConnectScreen  |  Namespace: profile
+         [..] Text content (14):
+            - "Checking connection status..."
+            - "Connect Broker"
+            - "Disconnect"
+            - "Choose Your Broker"
+            - "OAuth Secure"
+            - "Enter your API credentials"
+            - "API Key"
+            - "API Secret"
+            ... +6 more
+         [..] Title/subtitle props (5):
+            - "Enter your API key"
+            - "Enter your API secret"
+            - "Enter your Angel One Client ID"
+            - "Trading password"
+            - "Enter your Groww access token"
+         [..] Alert titles (8):
+            - "Connection Failed"
+            - "OAuth Unavailable"
+            - "Connection Failed"
+            - "Limited Connection"
+            - "Connection Failed"
+            - "Disconnect Broker"
+            - "Error"
+            - "Connection Error"
+  [  ] src\screens\broker\ConnectBrokerView.tsx
+         Component: ConnectBrokerView  |  Namespace: profile
+         [..] Text content (20):
+            - "Connect Broker"
+            - "O AUTH 2.0"
+            - "SECURE"
+            - "Connected"
+            - "Disconnect"
+            - "Choose Your Broker"
+            - "SnapTrade OAuth Gateway"
+            - "Connect Angel One"
+            ... +12 more
+         [..] Title/subtitle props (3):
+            - "Your Angel One client code"
+            - "Your Angel One trading password"
+            - "Base32 secret from SmartAPI portal"
+         [..] Alert titles (8):
+            - "Connection Failed"
+            - "Connection Failed"
+            - "Unavailable"
+            - "Required Fields"
+            - "Connection Failed"
+            - "❌ API Error"
+            - "Disconnect Broker"
+            - "Session Sync Failed"
+  [  ] src\screens\calculators\CurrencyConverterScreen.tsx
+         Component: CurrencyConverterScreen  |  Namespace: calculators
+         [..] Text content (7):
+            - "Currency Converter"
+            - "Real-time cross rates"
+            - "From"
+            - "Converted Amount"
+            - "Save Conversion"
+            - "Recent"
+            - "Quick Reference"
+  [  ] src\screens\calculators\EMICalculator.tsx
+         Component: EMICalculator  |  Namespace: calculators
+         [..] Text content (13):
+            - "EMI Calculator"
+            - "Monthly EMI"
+            - "Principal"
+            - "Interest Payable"
+            - "Total Payment"
+            - "Breakdown"
+            - "per month"
+            - "Principal"
+            ... +5 more
+         [..] Title/subtitle props (3):
+            - "e.g. 5000000"
+            - "e.g. 9"
+            - "e.g. 60"
+  [  ] src\screens\calculators\LumpsumCalculator.tsx
+         Component: LumpsumCalculator  |  Namespace: calculators
+         [..] Text content (12):
+            - "Lumpsum Calculator"
+            - "Maturity Amount"
+            - "Principal"
+            - "Est. Returns"
+            - "Yearly Growth"
+            - "Portfolio Value"
+            - "Principal"
+            - "Investment Details"
+            ... +4 more
+         [..] Title/subtitle props (3):
+            - "e.g. 500000"
+            - "e.g. 12"
+            - "e.g. 5"
+  [  ] src\screens\calculators\SIPCalculator.tsx
+         Component: SIPCalculator  |  Namespace: calculators
+         [..] Text content (12):
+            - "SIP Calculator"
+            - "Maturity Amount"
+            - "Total Invested"
+            - "Est. Returns"
+            - "Yearly Growth"
+            - "Portfolio Value"
+            - "Invested"
+            - "Investment Details"
+            ... +4 more
+         [..] Title/subtitle props (3):
+            - "e.g. 10000"
+            - "e.g. 12"
+            - "e.g. 10"
+  [  ] src\screens\calculators\StepUpSipScreen.tsx
+         Component: StepUpSipScreen  |  Namespace: calculators
+         [..] Text content (10):
+            - "Step-Up SIP"
+            - "No Active SIPs"
+            - "Step-Up Active"
+            - "Disable Step-Up"
+            - "Why Step-Up SIP?"
+            - "Increase by (%)"
+            - "Frequency"
+            - "Now"
+            ... +2 more
+         [..] Title/subtitle props (1):
+            - "e.g. 10"
+         [..] Alert titles (3):
+            - "Invalid Percent"
+            - "Step-Up Enabled"
+            - "Disable Step-Up?"
+  [  ] src\screens\calculators\TaxCalculator.tsx
+         Component: TaxCalculator  |  Namespace: calculators
+         [..] Text content (17):
+            - "Tax Calculator"
+            - "Holding Period"
+            - "Gross Profit"
+            - "LTCG Exemption"
+            - "Taxable Gains"
+            - "Surcharge (10%)"
+            - "Health & Edu Cess (4%)"
+            - "Total Tax Liability"
+            ... +9 more
+         [..] Title/subtitle props (3):
+            - "e.g. 1500"
+            - "e.g. 1850"
+            - "e.g. 100"
+  [  ] src\screens\chat\ChatRoomListScreen.tsx
+         Component: ChatRoomListScreen  |  Namespace: community
+         [..] Text content (2):
+            - "Chat Rooms"
+            - "No rooms found"
+         [..] Title/subtitle props (1):
+            - "Search rooms..."
+  [  ] src\screens\chat\ChatRoomScreen.tsx
+         Component: ChatRoomScreen  |  Namespace: community
+         [..] Text content (3):
+            - "No messages yet"
+            - "Trade Idea"
+            - "Alert"
+         [..] Title/subtitle props (1):
+            - "Type a message..."
+  [  ] src\screens\community\CommunityScreen.tsx
+         Component: CommunityScreen  |  Namespace: community
+         [..] Text content (2):
+            - "Community"
+            - "Trending Topics"
+         [..] Title/subtitle props (3):
+            - "Share your thoughts with the community..."
+            - "Cancel"
+            - "Post"
+  [  ] src\screens\community\PostDetailScreen.tsx
+         Component: PostDetailScreen  |  Namespace: community
+         [..] Text content (4):
+            - "Post not found"
+            - "Go Back"
+            - "Post"
+            - "Copied"
+         [..] Title/subtitle props (1):
+            - "Add a comment..."
+  [  ] src\screens\education\CertificateScreen.tsx
+         Component: CertificateScreen  |  Namespace: education
+         [..] Text content (17):
+            - "No certificates yet"
+            - "Browse Courses"
+            - "Learning Stats"
+            - "Certificates"
+            - "Lessons Done"
+            - "Distinctions"
+            - "Generating your certificate..."
+            - "Certificate"
+            ... +9 more
+         [..] Alert titles (4):
+            - "🎉 Certificate Generated!"
+            - "Error"
+            - "Error"
+            - "Error"
+  [OK] src\screens\education\CommunityCoursesScreen.tsx (CommunityCoursesScreen) -- 1 leftover strings
+  [  ] src\screens\education\CreateCourseScreen.tsx
+         Component: CreateCourseScreen  |  Namespace: education
+         [..] Text content (23):
+            - "Course not found"
+            - "Submit"
+            - "Basic Info"
+            - "Course Title"
+            - "Description"
+            - "Icon / Thumbnail"
+            - "Level & Category"
+            - "Difficulty"
+            ... +15 more
+         [..] Title/subtitle props (9):
+            - "e.g., Advanced Options Strategies"
+            - "Describe what students will learn..."
+            - "e.g., options, derivatives, hedging"
+            - "Lesson title"
+            - "e.g., 15"
+            - "Write your lesson content here..."
+            - "https://example.com/video.mp4"
+            - "Type your question here..."
+            ... +1 more
+         [..] Alert titles (5):
+            - "Missing Title"
+            - "No Lessons"
+            - "Incomplete Lessons"
+            - "Submit for Review"
+            - "Remove Lesson"
+  [OK] src\screens\education\MyCoursesScreen.tsx (MyCoursesScreen) -- 1 leftover strings
+  [  ] src\screens\funds\AddFundsScreen.tsx
+         Component: AddFundsScreen  |  Namespace: app
+         [..] Text content (13):
+            - "Funds Added Successfully!"
+            - "Transaction ID"
+            - "Payment Method"
+            - "New Balance"
+            - "Done"
+            - "View Transaction History"
+            - "Add Funds"
+            - "Current Balance"
+            ... +5 more
+         [..] Title/subtitle props (1):
+            - "Enter custom amount"
+         [..] Alert titles (3):
+            - "Minimum Amount"
+            - "Maximum Amount"
+            - "Payment Failed"
+  [  ] src\screens\funds\FundsDashboardScreen.tsx
+         Component: FundsDashboardScreen  |  Namespace: app
+         [..] Text content (17):
+            - "Funds Dashboard"
+            - "Available Balance"
+            - "Total Added"
+            - "Withdrawn"
+            - "Net Addition"
+            - "Transactions"
+            - "This Month"
+            - "Added"
+            ... +9 more
+  [  ] src\screens\funds\TransactionHistoryScreen.tsx
+         Component: TransactionHistoryScreen  |  Namespace: app
+         [..] Text content (14):
+            - "Transaction History"
+            - "Total Added"
+            - "Total Withdrawn"
+            - "Net Addition"
+            - "Transactions"
+            - "Adds"
+            - "Withdrawals"
+            - "No Transactions"
+            ... +6 more
+  [  ] src\screens\funds\TransferScreen.tsx
+         Component: TransferScreen  |  Namespace: app
+         [..] Text content (11):
+            - "Transfer Initiated!"
+            - "Transaction ID"
+            - "From"
+            - "Done"
+            - "Transfer"
+            - "Receiving Account"
+            - "From"
+            - "Transfer To"
+            ... +3 more
+         [..] Title/subtitle props (1):
+            - "Enter transfer amount"
+         [..] Alert titles (4):
+            - "Minimum Amount"
+            - "Insufficient Balance"
+            - "Same Account"
+            - "Confirm Transfer"
+  [  ] src\screens\funds\UPIScreen.tsx
+         Component: UPIScreen  |  Namespace: app
+         [..] Text content (18):
+            - "Payment Successful!"
+            - "Transaction ID"
+            - "From"
+            - "Remaining Balance"
+            - "View Transaction History"
+            - "Done"
+            - "UPI Payment"
+            - "Paying from"
+            ... +10 more
+         [..] Title/subtitle props (3):
+            - "Enter UPI ID (e.g., name@bank)"
+            - "Enter UPI ID (e.g., name@bank)"
+            - "Enter amount"
+         [..] Alert titles (9):
+            - "Invalid UPI ID"
+            - "Enter Amount"
+            - "Limit Exceeded"
+            - "Insufficient Balance"
+            - "Confirm Payment"
+            - "Payment Failed"
+            - "Invalid UPI ID"
+            - "UPI ID Added"
+            ... +1 more
+  [  ] src\screens\funds\WithdrawScreen.tsx
+         Component: WithdrawScreen  |  Namespace: app
+         [..] Text content (15):
+            - "Withdrawal Initiated!"
+            - "Transaction ID"
+            - "Bank Account"
+            - "New Balance"
+            - "Done"
+            - "View Transaction History"
+            - "Withdraw Funds"
+            - "Available Balance"
+            ... +7 more
+         [..] Title/subtitle props (1):
+            - "Enter withdrawal amount"
+         [..] Alert titles (3):
+            - "Minimum Amount"
+            - "Insufficient Balance"
+            - "Confirm Withdrawal"
+  [OK] src\screens\indicators\CustomIndicatorEditorScreen.tsx (CustomIndicatorEditorScreen) -- 16 leftover strings
+  [OK] src\screens\indicators\CustomIndicatorManagerScreen.tsx (CustomIndicatorManagerScreen) -- 5 leftover strings
+  [  ] src\screens\ipos\IPODashboardScreen.tsx
+         Component: IPODashboardScreen  |  Namespace: app
+         [..] Text content (31):
+            - "Price Band"
+            - "Lot"
+            - "Min Invest"
+            - "GMP"
+            - "Expected Listing"
+            - "Apply via UPI"
+            - "Lots"
+            - "Shares"
+            ... +23 more
+         [..] Title/subtitle props (1):
+            - "e.g., name@hdfc"
+         [..] Alert titles (4):
+            - "Invalid UPI ID"
+            - "Invalid Lots"
+            - "Application Submitted ✅"
+            - "Error"
+  [  ] src\screens\ipos\IPODetailScreen.tsx
+         Component: IPODetailScreen  |  Namespace: ai
+         [..] Text content (15):
+            - "IPO not found"
+            - "Go back"
+            - "Issue Size"
+            - "Fresh Issue"
+            - "OFS"
+            - "Total Shares"
+            - "Expected Listing"
+            - "Registrar"
+            ... +7 more
+         [..] Title/subtitle props (23):
+            - "Price Band"
+            - "Lot Size"
+            - "Min Invest"
+            - "Issue Details"
+            - "Subscription"
+            - "QIB"
+            - "HNI"
+            - "Retail"
+            ... +15 more
+         [..] Alert titles (3):
+            - "Invalid Lots"
+            - "Application Submitted ✅"
+            - "Error"
+  [  ] src\screens\journal\BehavioralJournalScreen.tsx
+         Component: BehavioralJournalScreen  |  Namespace: app
+         [..] Text content (9):
+            - "Performance Overview"
+            - "Streak Metrics"
+            - "Emotional State Breakdown"
+            - "No entries yet"
+            - "Most Common Mistakes"
+            - "No mistakes! Great trading."
+            - "Improvement Tip"
+            - "Behavioural Journal"
+            ... +1 more
+         [..] Title/subtitle props (8):
+            - "Win Rate"
+            - "Avg P&L"
+            - "Profit Factor"
+            - "Plan Compliance"
+            - "Max Win Streak"
+            - "Max Loss Streak"
+            - "Max Drawdown"
+            - "Total Trades"
+  [  ] src\screens\kyc\AadhaarVerificationScreen.tsx
+         Component: AadhaarVerificationScreen  |  Namespace: kyc
+         [..] Text content (9):
+            - "Aadhaar eKYC"
+            - "Enter Aadhaar Number"
+            - "OTP expired. Request new OTP"
+            - "Your Aadhaar has been verified successfully via UIDAI"
+            - "Aadhaar Number"
+            - "Year of Birth"
+            - "Gender"
+            - "State"
+            ... +1 more
+         [..] Title/subtitle props (1):
+            - "XXXX XXXX XXXX"
+         [..] Alert titles (2):
+            - "Invalid Aadhaar"
+            - "Consent Required"
+  [  ] src\screens\kyc\BankLinkingScreen.tsx
+         Component: BankLinkingScreen  |  Namespace: kyc
+         [..] Text content (25):
+            - "Format:"
+            - "HDFC0001234"
+            - "Enter IFSC Code"
+            - "Account Number"
+            - "Account Holder Name"
+            - "Account holder name matches bank records"
+            - "Bank"
+            - "Branch"
+            ... +17 more
+         [..] Title/subtitle props (4):
+            - "HDFC0001234"
+            - "Enter account number"
+            - "As per bank records"
+            - "Primary"
+         [..] Alert titles (4):
+            - "Invalid IFSC"
+            - "Invalid Account"
+            - "Invalid Name"
+            - "Remove Bank Account"
+  [  ] src\screens\kyc\DigiLockerScreen.tsx
+         Component: DigiLockerScreen  |  Namespace: kyc
+         [..] Text content (4):
+            - "DigiLocker"
+            - "Verify via DigiLocker"
+            - "Benefits"
+            - "Complete Verification"
+         [..] Alert titles (1):
+            - "DigiLocker Consent"
+  [  ] src\screens\kyc\PanVerificationScreen.tsx
+         Component: PanVerificationScreen  |  Namespace: kyc
+         [..] Text content (12):
+            - "PAN Verification"
+            - "Format:"
+            - "ABCDE1234F"
+            - "Enter PAN Number"
+            - "Your PAN has been verified successfully"
+            - "PAN Number"
+            - "Name on PAN"
+            - "Category"
+            ... +4 more
+         [..] Title/subtitle props (1):
+            - "ABCDE1234F"
+         [..] Alert titles (1):
+            - "Invalid PAN"
+  [  ] src\screens\markets\BondDashboardScreen.tsx
+         Component: BondDashboardScreen  |  Namespace: market
+         [..] Text content (18):
+            - "Coupon"
+            - "YTM"
+            - "Maturity"
+            - "Price"
+            - "Tax-Free"
+            - "Face Value"
+            - "Issue Size"
+            - "Maturity"
+            ... +10 more
+  [  ] src\screens\markets\CommodityMarketsScreen.tsx
+         Component: CommodityMarketsScreen  |  Namespace: market
+         [..] Text content (14):
+            - "Mock"
+            - "Offline"
+            - "Price Calculator"
+            - "Commodity value in INR"
+            - "USD Value"
+            - "INR Value (approx)"
+            - "MCX India (1 unit)"
+            - "Commodities"
+            ... +6 more
+         [..] Title/subtitle props (1):
+            - "Search commodities..."
+  [  ] src\screens\markets\CurrencyMarketsScreen.tsx
+         Component: CurrencyMarketsScreen  |  Namespace: market
+         [..] Text content (14):
+            - "RBI Reference Rate"
+            - "Currency Converter"
+            - "Real-time cross rates"
+            - "From"
+            - "Converted Amount"
+            - "Save Conversion"
+            - "Recent"
+            - "Currency Markets"
+            ... +6 more
+         [..] Title/subtitle props (1):
+            - "Search pairs..."
+  [  ] src\screens\markets\FuturesCurveScreen.tsx
+         Component: FuturesCurveScreen  |  Namespace: market
+         [..] Text content (11):
+            - "Futures Curve"
+            - "Expiry"
+            - "Price"
+            - "Basis"
+            - "Curve Shape"
+            - "Basis Analysis"
+            - "Open Interest"
+            - "Slope"
+            ... +3 more
+         [..] Title/subtitle props (6):
+            - "Curve Type"
+            - "Spot Price"
+            - "Near-Month"
+            - "Curve Slope"
+            - "Total OI"
+            - "Max OI Expiry"
+  [  ] src\screens\markets\SectorDetailScreen.tsx
+         Component: SectorDetailScreen  |  Namespace: market
+         [..] Text content (8):
+            - "Avg Change"
+            - "Stocks"
+            - "Gainers"
+            - "Losers"
+            - "Flat"
+            - "Best"
+            - "Worst"
+            - "All Stocks"
+  [  ] src\screens\markets\USMarketsScreen.tsx
+         Component: USMarketsScreen  |  Namespace: market
+         [..] Text content (7):
+            - "US Markets"
+            - "Global Markets Hub"
+            - "Global Markets"
+            - "US Market Hours"
+            - "European Market Hours"
+            - "Asia-Pacific Market Hours"
+            - "Live"
+         [..] Title/subtitle props (1):
+            - "Search symbols..."
+  [  ] src\screens\mutual-funds\FundDetailScreen.tsx
+         Component: FundDetailScreen  |  Namespace: ai
+         [..] Text content (12):
+            - "Fund not found"
+            - "Go Back"
+            - "NAV"
+            - "AUM"
+            - "Min Investment"
+            - "Expense Ratio"
+            - "Fund Manager"
+            - "Mr. Sharma"
+            ... +4 more
+         [..] Title/subtitle props (4):
+            - "Returns"
+            - "NAV History"
+            - "Sector Allocation"
+            - "Fund Details"
+         [..] Alert titles (5):
+            - "Invest"
+            - "Success"
+            - "Start SIP"
+            - "SIP Started"
+            - "SIP Started"
+         [..] Card titles (4):
+            - "Returns"
+            - "NAV History"
+            - "Sector Allocation"
+            - "Fund Details"
+  [  ] src\screens\mutual-funds\MutualFundsScreen.tsx
+         Component: MutualFundsScreen  |  Namespace: app
+         [..] Text content (23):
+            - "Mutual Funds"
+            - "All"
+            - "NAV"
+            - "Invest"
+            - "Start SIP"
+            - "Total Invested"
+            - "Current Value"
+            - "Returns"
+            ... +15 more
+         [..] Title/subtitle props (2):
+            - "Enter amount"
+            - "Enter amount"
+         [..] Alert titles (5):
+            - "Invalid Amount"
+            - "Success"
+            - "SIP Started"
+            - "Invalid Amount"
+            - "SIP Updated"
+  [  ] src\screens\news\EconomicCalendarScreen.tsx
+         Component: EconomicCalendarScreen  |  Namespace: app
+         [..] Text content (2):
+            - "Economic Calendar"
+            - "No Events"
+  [  ] src\screens\news\IPOCalendarScreen.tsx
+         Component: IPOCalendarScreen  |  Namespace: app
+         [..] Text content (20):
+            - "IPO Calendar"
+            - "Dashboard"
+            - "Timeline"
+            - "Market Stats"
+            - "Total IPOs"
+            - "Active"
+            - "Upcoming"
+            - "Listed"
+            ... +12 more
+  [  ] src\screens\news\NewsFeedScreen.tsx
+         Component: NewsFeedScreen  |  Namespace: app
+         [..] Text content (7):
+            - "Market News"
+            - "BREAKING"
+            - "Trending"
+            - "Sentiment"
+            - "Clear"
+            - "No articles found"
+            - "Read Now"
+         [..] Title/subtitle props (1):
+            - "Search news, symbols, sources..."
+  [  ] src\screens\nfo\NFODashboardScreen.tsx
+         Component: NFODashboardScreen  |  Namespace: app
+         [..] Text content (15):
+            - "Min Invest"
+            - "Expense"
+            - "Target"
+            - "Invest Now"
+            - "Invested"
+            - "NAV"
+            - "Current"
+            - "NFO Dashboard"
+            ... +7 more
+  [  ] src\screens\nfo\NFODetailScreen.tsx
+         Component: NFODetailScreen  |  Namespace: ai
+         [..] Text content (13):
+            - "NFO not found"
+            - "Go back"
+            - "Fund Manager"
+            - "Benchmark"
+            - "Entry Load"
+            - "Exit Load"
+            - "Min Investment"
+            - "Rating"
+            ... +5 more
+         [..] Title/subtitle props (19):
+            - "Min Invest"
+            - "Expense"
+            - "Target"
+            - "Investment Objective"
+            - "Investment Strategy"
+            - "Asset Allocation"
+            - "Performance Projections"
+            - "Key Details"
+            ... +11 more
+  [  ] src\screens\onboarding\OnboardingScreen.tsx
+         Component: OnboardingScreen  |  Namespace: app
+         [..] Text content (10):
+            - "Your Portfolio Allocation"
+            - "Buy"
+            - "Sell"
+            - "Qty"
+            - "Total"
+            - "Tap to Connect Your Broker"
+            - "Connected"
+            - "Sync"
+            ... +2 more
+  [  ] src\screens\payments\PaymentHistoryScreen.tsx
+         Component: PaymentHistoryScreen  |  Namespace: app
+         [..] Text content (17):
+            - "Date"
+            - "Transaction ID"
+            - "Invoice"
+            - "Coupon"
+            - "Discount"
+            - "Amount Charged"
+            - "Share Receipt"
+            - "Retry Payment"
+            ... +9 more
+         [..] Alert titles (2):
+            - "Retry Payment"
+            - "Download Invoice"
+  [  ] src\screens\quiz\QuizResultScreen.tsx
+         Component: QuizResultScreen  |  Namespace: app
+         [..] Text content (10):
+            - "Quiz Results"
+            - "PASSED"
+            - "Correct"
+            - "Wrong"
+            - "Skipped"
+            - "Time"
+            - "View Course Certificate"
+            - "See your progress & earn your certificate"
+            ... +2 more
+  [  ] src\screens\referral\ReferralScreen.tsx
+         Component: ReferralScreen  |  Namespace: app
+         [..] Text content (3):
+            - "Refer & Earn"
+            - "Copy"
+            - "No Referrals Yet"
+         [..] Title/subtitle props (3):
+            - "How It Works"
+            - "Earn rewards in 3 simple steps"
+            - "Rewards History"
+         [..] Alert titles (5):
+            - "Copied!"
+            - "WhatsApp Not Found"
+            - "Telegram Not Found"
+            - "Invite via Phone Number"
+            - "Invite Sent!"
+         [..] Card titles (2):
+            - "Earn rewards in 3 simple steps"
+            - "Rewards History"
+  [  ] src\screens\reports\ContractNoteUploadScreen.tsx
+         Component: ContractNoteUploadScreen  |  Namespace: app
+         [..] Text content (29):
+            - "Contract Note Parser"
+            - "Upload PDF Contract Note"
+            - "Batch Upload (Multi)"
+            - "Paste Contract Note Text"
+            - "Parse Text"
+            - "Parsing contract note..."
+            - "Batch Processing"
+            - "Batch Results"
+            ... +21 more
+         [..] Title/subtitle props (1):
+            - "Paste your contract note text here..."
+         [..] Alert titles (14):
+            - "Parse Failed"
+            - "Error"
+            - "Batch Parse Complete"
+            - "Error"
+            - "Empty"
+            - "No Trades Found"
+            - "Error"
+            - "Export Failed"
+            ... +6 more
+  [  ] src\screens\reports\ReportsScreen.tsx
+         Component: ReportsScreen  |  Namespace: app
+         [..] Text content (62):
+            - "Analytics"
+            - "LIVE"
+            - "Portfolio Value"
+            - "Total Return"
+            - "Win Rate"
+            - "Sharpe"
+            - "Max DD"
+            - "Holdings"
+            ... +54 more
+         [..] Title/subtitle props (18):
+            - "Today's Performance"
+            - "Monthly Returns"
+            - "Trade Statistics"
+            - "Detailed Metrics"
+            - "Average Win"
+            - "Average Loss"
+            - "Profit Factor"
+            - "Best Trade"
+            ... +10 more
+         [..] Alert titles (5):
+            - "Alert Added"
+            - "Alert Added"
+            - "Report Exported"
+            - "Export Failed"
+            - "Export Error"
+         [..] Card titles (8):
+            - "Today's Performance"
+            - "Monthly Returns"
+            - "Trade Statistics"
+            - "Detailed Metrics"
+            - "Investment Overview"
+            - "Tax Rules (India FY 2025-26)"
+            - "Tax Saving Tips"
+            - "Full Period Summary"
+  [  ] src\screens\settings\AdminCouponManagementScreen.tsx
+         Component: AdminCouponManagementScreen  |  Namespace: profile
+         [..] Text content (23):
+            - "DISABLED"
+            - "EXPIRED"
+            - "Coupon Type"
+            - "Active"
+            - "Cancel"
+            - "Loading usage data..."
+            - "No Usage Data"
+            - "Overview"
+            ... +15 more
+         [..] Title/subtitle props (1):
+            - "Uses Over Time (Monthly)"
+         [..] Alert titles (5):
+            - "Export Failed"
+            - "Access Denied"
+            - "Delete Coupon"
+            - "Error"
+            - "Seed Default Coupons"
+  [  ] src\screens\settings\AdminCourseReviewScreen.tsx
+         Component: AdminCourseReviewScreen  |  Namespace: education
+         [..] Text content (18):
+            - "Course Reviews"
+            - "Review and manage user-submitted courses"
+            - "Pending"
+            - "Approved"
+            - "Rejected"
+            - "Total"
+            - "Featured"
+            - "Description"
+            ... +10 more
+         [..] Title/subtitle props (1):
+            - "Explain why the course is being rejected..."
+         [..] Alert titles (8):
+            - "Access Denied"
+            - "Approve Course"
+            - "✅ Published"
+            - "Reject Course"
+            - "Notes Required"
+            - "❌ Rejected"
+            - "⭐ Updated"
+            - "Notes Required"
+  [  ] src\screens\settings\AISettingsScreen.tsx
+         Component: AISettingsScreen  |  Namespace: profile
+         [..] Text content (7):
+            - "AI Settings"
+            - "Retry"
+            - "Available Providers"
+            - "Active"
+            - "Status"
+            - "Model"
+            - "Endpoint"
+         [..] Title/subtitle props (4):
+            - "Test AI Provider"
+            - "Verify your AI provider is working correctly"
+            - "About AI Providers"
+            - "How AI insights are generated"
+         [..] Alert titles (2):
+            - "✅ AI Connection Works!"
+            - "❌ Connection Test Failed"
+         [..] Card titles (2):
+            - "Verify your AI provider is working correctly"
+            - "How AI insights are generated"
+  [  ] src\screens\settings\AvailableCouponsScreen.tsx
+         Component: AvailableCouponsScreen  |  Namespace: profile
+         [..] Text content (4):
+            - "EXPIRED"
+            - "Use This Coupon"
+            - "Available Coupons"
+            - "No Coupons Available"
+  [  ] src\screens\settings\BackgroundSyncSettingsScreen.tsx
+         Component: BackgroundSyncSettingsScreen  |  Namespace: profile
+         [..] Text content (6):
+            - "Background Sync"
+            - "Enable Background Sync"
+            - "Sync Interval"
+            - "Portfolio holdings & trades"
+            - "Watchlist stocks"
+            - "Open orders status"
+  [  ] src\screens\settings\CouponHistoryScreen.tsx
+         Component: CouponHistoryScreen  |  Namespace: profile
+         [..] Text content (7):
+            - "My Coupons"
+            - "Loading coupon history..."
+            - "No Coupons Used Yet"
+            - "View Premium Plans"
+            - "Total Saved"
+            - "Coupons Used"
+            - "Usage History"
+  [  ] src\screens\settings\NotificationPreferencesScreen.tsx
+         Component: NotificationPreferencesScreen  |  Namespace: profile
+         [..] Text content (11):
+            - "Notification Preferences"
+            - "Control how and when you get notified"
+            - "Price Alert Threshold"
+            - "Price Change Threshold"
+            - "Quiet Hours"
+            - "Quiet Hours"
+            - "From"
+            - "Email Notifications"
+            ... +3 more
+         [..] Alert titles (1):
+            - "Reset Preferences"
+  [  ] src\screens\settings\PortfolioAlertsScreen.tsx
+         Component: PortfolioAlertsScreen  |  Namespace: profile
+         [..] Text content (19):
+            - "Threshold"
+            - "Test Alert"
+            - "Remove"
+            - "Portfolio Alerts"
+            - "Real-time P&L and holding movement alerts"
+            - "No Active Alerts"
+            - "Toggle on alerts below to get notified"
+            - "Add Alert Rules"
+            ... +11 more
+         [..] Alert titles (5):
+            - "No Holdings Selected"
+            - "Alert Added"
+            - "Alert Added"
+            - "🧪 Test Alert Fired"
+            - "Remove Alert"
+  [OK] src\screens\settings\RazorpayWebhookHealthScreen.tsx (RazorpayWebhookHealthScreen) -- 20 leftover strings
+  [  ] src\screens\settings\RiskSettingsScreen.tsx
+         Component: RiskSettingsScreen  |  Namespace: profile
+         [..] Text content (19):
+            - "Risk Settings"
+            - "Financial Bodyguard controls"
+            - "Lockdown lifts in"
+            - "Trigger Loss"
+            - "Breached"
+            - "Limits"
+            - "Status"
+            - "Realized P&L"
+            ... +11 more
+         [..] Title/subtitle props (8):
+            - "Risk Limits"
+            - "Configure your Financial Bodyguard"
+            - "Trade Action Check"
+            - "Check if actions are allowed"
+            - "Daily P&L Status"
+            - "Today's trading activity"
+            - "Lockdown Status"
+            - "Reset Daily P&L"
+         [..] Alert titles (2):
+            - "Settings Frozen"
+            - "Settings Frozen"
+         [..] Card titles (4):
+            - "Configure your Financial Bodyguard"
+            - "Check if actions are allowed"
+            - "Today's trading activity"
+            - "Lockdown Status"
+  [  ] src\screens\settings\SecurityAuditLogScreen.tsx
+         Component: SecurityAuditLogScreen  |  Namespace: profile
+         [..] Text content (6):
+            - "Failed"
+            - "Current"
+            - "Log Out This Device"
+            - "Audit Log"
+            - "Last Login"
+            - "Stay Secure"
+         [..] Title/subtitle props (7):
+            - "Total Logins"
+            - "Successful"
+            - "Failed"
+            - "Active Devices"
+            - "All"
+            - "Successful"
+            - "Failed"
+         [..] Alert titles (4):
+            - "Log Out Device"
+            - "✅ Done"
+            - "Log Out All Other Devices"
+            - "✅ Done"
+  [OK] src\screens\settings\SubscriptionAnalyticsScreen.tsx (SubscriptionAnalyticsScreen) -- 22 leftover strings
+  [  ] src\screens\settings\SubscriptionScreen.tsx
+         Component: SubscriptionScreen  |  Namespace: profile
+         [..] Text content (17):
+            - "Premium"
+            - "ENDING SOON"
+            - "Monthly"
+            - "Yearly"
+            - "Have a coupon code?"
+            - "View available coupons"
+            - "My used coupons"
+            - "CURRENT PLAN"
+            ... +9 more
+         [..] Title/subtitle props (2):
+            - "Enter coupon code"
+            - "Compare Plans"
+         [..] Alert titles (2):
+            - "Cancel Subscription"
+            - "Disable UPI AutoPay"
+         [..] Card titles (1):
+            - "Compare Plans"
+  [  ] src\screens\settings\TelegramConnectScreen.tsx
+         Component: TelegramConnectScreen  |  Namespace: profile
+         [..] Text content (15):
+            - "Connect Telegram"
+            - "Checking connection status..."
+            - "Connect Telegram"
+            - "Get Trading Alerts on Telegram"
+            - "Connected"
+            - "Send Test Message"
+            - "Unlink Telegram"
+            - "Your Link Code"
+            ... +7 more
+         [..] Alert titles (7):
+            - "Error"
+            - "Copied!"
+            - "✅ Sent!"
+            - "⚠️ Failed"
+            - "Error"
+            - "Unlink Telegram?"
+            - "Error"
+  [  ] src\screens\settings\TenantConfigScreen.tsx
+         Component: TenantConfigScreen  |  Namespace: profile
+         [..] Text content (16):
+            - "Tenant Config"
+            - "Tenant ID"
+            - "Tenant Name"
+            - "Domain"
+            - "Primary Color (hex)"
+            - "Key ID"
+            - "Key Secret"
+            - "Save Tenant Config"
+            ... +8 more
+         [..] Title/subtitle props (11):
+            - "Tenant Identity"
+            - "e.g. broker_x"
+            - "e.g. BrokerX"
+            - "e.g. brokerx.toroloom.app"
+            - "e.g. #FF6600"
+            - "Feature Overrides"
+            - "Plan Pricing Overrides"
+            - "Razorpay Config"
+            ... +3 more
+         [..] Alert titles (6):
+            - "Validation Error"
+            - "Validation Error"
+            - "Validation Error"
+            - "Saved ✅"
+            - "Reset Tenant Config"
+            - "Reset Complete"
+         [..] Card titles (5):
+            - "Tenant Identity"
+            - "Feature Overrides"
+            - "Plan Pricing Overrides"
+            - "Razorpay Config"
+            - "Active Config"
+  [  ] src\screens\settings\TwoFactorSetupScreen.tsx
+         Component: TwoFactorSetupScreen  |  Namespace: profile
+         [..] Text content (16):
+            - "Loading 2FA status..."
+            - "Two-Factor Authentication"
+            - "Scan with Authenticator App"
+            - "Can't scan? Enter key manually"
+            - "Share / Copy"
+            - "Done"
+            - "Enabled"
+            - "View Backup Codes"
+            ... +8 more
+         [..] Title/subtitle props (5):
+            - "Backup Codes"
+            - "Save these one-time recovery codes in a secure place"
+            - "Manage 2FA"
+            - "How It Works"
+            - "Enter code"
+         [..] Alert titles (4):
+            - "Invalid Code"
+            - "2FA Disabled"
+            - "Regenerate Backup Codes"
+            - "Manual Setup Key"
+         [..] Card titles (3):
+            - "Save these one-time recovery codes in a secure place"
+            - "Manage 2FA"
+            - "How It Works"
+  [  ] src\screens\settings\VoiceSettingsScreen.tsx
+         Component: VoiceSettingsScreen  |  Namespace: profile
+         [..] Text content (2):
+            - "Voice Settings"
+            - "AI Companion voice preferences"
+         [..] Title/subtitle props (10):
+            - "Voice Announcements"
+            - "Enable or disable AI voice alerts"
+            - "Speech Rate"
+            - "How fast the AI speaks"
+            - "Voice Pitch"
+            - "High or low voice tone"
+            - "Test Voice"
+            - "Tap to hear a message"
+            ... +2 more
+         [..] Card titles (5):
+            - "Enable or disable AI voice alerts"
+            - "How fast the AI speaks"
+            - "High or low voice tone"
+            - "Tap to hear a message"
+            - "Events that trigger voice announcements"
+  [  ] src\screens\snaptrade\SnapTradeConnectScreen.tsx
+         Component: SnapTradeConnectScreen  |  Namespace: trading
+         [..] Text content (9):
+            - "SnapTrade"
+            - "Connected"
+            - "Portfolio"
+            - "Trade"
+            - "Disconnect Broker"
+            - "SnapTrade OAuth Gateway"
+            - "Select your broker"
+            - "Connect"
+            ... +1 more
+  [  ] src\screens\snaptrade\SnapTradeOrderScreen.tsx
+         Component: SnapTradeOrderScreen  |  Namespace: trading
+         [..] Text content (24):
+            - "Order Placed!"
+            - "Symbol"
+            - "Action"
+            - "Type"
+            - "Quantity"
+            - "Price"
+            - "Done"
+            - "US Stock Order"
+            ... +16 more
+         [..] Title/subtitle props (1):
+            - "e.g. AAPL"
+         [..] Alert titles (1):
+            - "Order Failed"
+  [  ] src\screens\snaptrade\SnapTradePortfolioScreen.tsx
+         Component: SnapTradePortfolioScreen  |  Namespace: trading
+         [..] Text content (10):
+            - "US Portfolio"
+            - "No Broker Connected"
+            - "Connect Broker"
+            - "US Portfolio"
+            - "Total Portfolio Value"
+            - "Holdings"
+            - "Accounts"
+            - "Buying Power"
+            ... +2 more
+  [  ] src\screens\social\CopyAnalyticsScreen.tsx
+         Component: CopyAnalyticsScreen  |  Namespace: app
+         [..] Text content (22):
+            - "Arun Kumar"
+            - "Neha Singh"
+            - "Copy Analytics"
+            - "Total Invested"
+            - "Total P&L"
+            - "Return"
+            - "Active Copy"
+            - "Paused"
+            ... +14 more
+         [..] Title/subtitle props (5):
+            - "P&L Over Time"
+            - "P&L by Trader"
+            - "Monthly Returns Comparison"
+            - "Per-Trader Performance"
+            - "Risk & Performance Metrics"
+         [..] Card titles (5):
+            - "P&L Over Time"
+            - "P&L by Trader"
+            - "Monthly Returns Comparison"
+            - "Per-Trader Performance"
+            - "Risk & Performance Metrics"
+  [  ] src\screens\social\CreatePollScreen.tsx
+         Component: CreatePollScreen  |  Namespace: app
+         [..] Text content (9):
+            - "Create Poll"
+            - "Publish"
+            - "Question"
+            - "Add"
+            - "Category"
+            - "Duration"
+            - "Tags (optional)"
+            - "Comma separated keywords for discoverability"
+            ... +1 more
+         [..] Title/subtitle props (2):
+            - "Ask the community something..."
+            - "e.g., nifty, outlook, strategy"
+         [..] Alert titles (2):
+            - "Incomplete"
+            - "Poll Created!"
+  [  ] src\screens\social\PollsScreen.tsx
+         Component: PollsScreen  |  Namespace: app
+         [..] Text content (9):
+            - "Community Polls"
+            - "Vote on market polls and share your views"
+            - "Total"
+            - "Active"
+            - "Closed"
+            - "My Votes"
+            - "Create Poll"
+            - "No polls found"
+            ... +1 more
+         [..] Alert titles (5):
+            - "Already Voted"
+            - "Close Poll"
+            - "Delete Poll"
+            - "No Actions"
+            - "Poll Options"
+  [  ] src\screens\social\RevenueDashboardScreen.tsx
+         Component: RevenueDashboardScreen  |  Namespace: app
+         [..] Text content (16):
+            - "Revenue Dashboard"
+            - "Track your creator earnings"
+            - "Net Earnings"
+            - "Paid Out"
+            - "Pending Balance"
+            - "Total Fees"
+            - "Earnings by Source"
+            - "Monthly Earnings"
+            ... +8 more
+         [..] Title/subtitle props (1):
+            - "Enter amount"
+         [..] Alert titles (1):
+            - "Payout Requested"
+  [  ] src\screens\social\SocialTradingScreen.tsx
+         Component: SocialTradingScreen  |  Namespace: trading
+         [..] Text content (35):
+            - "Allocation"
+            - "Min: 10%"
+            - "Max: 100%"
+            - "Investment Amount"
+            - "Copy amount"
+            - "Max per trade"
+            - "Est. monthly cost"
+            - "Cancel"
+            ... +27 more
+         [..] Title/subtitle props (3):
+            - "Enter amount"
+            - "Copy"
+            - "Search traders by name, strategy, stock..."
+         [..] Alert titles (2):
+            - "Premium Feature"
+            - "Stop Copy Trading"
+  [  ] src\screens\social\TraderProfileScreen.tsx
+         Component: TraderProfileScreen  |  Namespace: trading
+         [..] Text content (14):
+            - "Performance Analytics"
+            - "OPEN"
+            - "Running"
+            - "Trader not found"
+            - "Go Back"
+            - "Verified"
+            - "P&L History"
+            - "Top Stocks"
+            ... +6 more
+         [..] Alert titles (1):
+            - "Premium Feature"
+  [OK] src\screens\stock\CompanyFundamentalsScreen.tsx (CompanyFundamentalsScreen) -- 55 leftover strings
+  [  ] src\screens\stock\CryptoDetailScreen.tsx
+         Component: CryptoDetailScreen  |  Namespace: ai
+         [..] Text content (4):
+            - "Retry"
+            - "Website"
+            - "Price Change"
+            - "Key Statistics"
+         [..] Title/subtitle props (5):
+            - "Market Cap"
+            - "Circulating Supply"
+            - "Total Supply"
+            - "Max Supply"
+            - "All-Time High"
+  [  ] src\screens\stock\GlobalStockDetailScreen.tsx
+         Component: GlobalStockDetailScreen  |  Namespace: ai
+         [..] Text content (2):
+            - "Live"
+            - "Key Statistics"
+         [..] Title/subtitle props (6):
+            - "Market Cap"
+            - "P/E Ratio"
+            - "P/B Ratio"
+            - "Dividend Yield"
+            - "Volume"
+            - "Exchange"
+  [OK] src\screens\stock\StockDetailScreen.tsx (StockDetailScreen) -- 4 leftover strings
+  [  ] src\screens\stock\StockScreenerScreen.tsx
+         Component: StockScreenerScreen  |  Namespace: app
+         [..] Text content (19):
+            - "Stock Screener"
+            - "Filter stocks by multiple criteria"
+            - "Clear"
+            - "Clear All"
+            - "Save"
+            - "Load"
+            - "Sort by"
+            - "Export"
+            ... +11 more
+         [..] Title/subtitle props (10):
+            - "Price Range"
+            - "P/E Ratio"
+            - "Day Change %"
+            - "Dividend Yield"
+            - "Minimum Dividend %"
+            - "Sector"
+            - "Market Cap"
+            - "Volume"
+            ... +2 more
+         [..] Alert titles (3):
+            - "Delete Preset"
+            - "Sharing Unavailable"
+            - "Export Failed"
+  [  ] src\screens\stock\USStockDetailScreen.tsx
+         Component: USStockDetailScreen  |  Namespace: ai
+         [..] Text content (3):
+            - "Live"
+            - "Key Statistics"
+            - "Related ETFs"
+         [..] Title/subtitle props (5):
+            - "Market Cap"
+            - "P/E Ratio"
+            - "P/B Ratio"
+            - "Dividend Yield"
+            - "Volume"
+  [  ] src\screens\support\HelpScreen.tsx
+         Component: HelpScreen  |  Namespace: app
+         [..] Text content (13):
+            - "Help & Support"
+            - "We're here to help you"
+            - "Quick Help"
+            - "Contact Us"
+            - "Frequently Asked Questions"
+            - "Loading articles..."
+            - "No results found"
+            - "App Version"
+            ... +5 more
+         [..] Title/subtitle props (1):
+            - "Search help articles..."
+  [  ] src\screens\tabs\LearnScreen.tsx
+         Component: LearnScreen  |  Namespace: home
+         [..] Text content (16):
+            - "Learning Hub"
+            - "Master the markets, one lesson at a time"
+            - "Continue Learning"
+            - "Paths"
+            - "Courses"
+            - "Lessons"
+            - "Learners"
+            - "Create"
+            ... +8 more
+  [OK] src\screens\tabs\WatchlistScreen.tsx (WatchlistScreen) -- 8 leftover strings
+  [OK] src\screens\trade\FnOOptionsChainScreen.tsx (FnOOptionsChainScreen) -- 1 leftover strings
+  [  ] src\screens\trade\OpenOrdersScreen.tsx
+         Component: OpenOrdersScreen  |  Namespace: trading
+         [..] Text content (12):
+            - "Open Orders"
+            - "Buy Orders"
+            - "Sell Orders"
+            - "Qty"
+            - "Type"
+            - "Value"
+            - "Modify"
+            - "Cancel"
+            ... +4 more
+         [..] Title/subtitle props (3):
+            - "Enter new price"
+            - "Enter new quantity"
+            - "Cancel"
+         [..] Alert titles (5):
+            - "Cancel Order"
+            - "Cancelled"
+            - "Invalid Price"
+            - "Invalid Quantity"
+            - "Modified"
+  [  ] src\screens\trade\StrategyPerformanceScreen.tsx
+         Component: StrategyPerformanceScreen  |  Namespace: trading
+         [..] Text content (2):
+            - "Strategy Performance"
+            - "No Data Yet"
+  [  ] src\screens\trade\TradeHistoryScreen.tsx
+         Component: TradeHistoryScreen  |  Namespace: trading
+         [..] Text content (5):
+            - "Trade History"
+            - "Open"
+            - "Total Buys"
+            - "Total Sells"
+            - "No Trades Found"
+         [..] Title/subtitle props (1):
+            - "Search by symbol or name..."
+  [OK] src\screens\trading\AlgoTradingScreen.tsx (AlgoTradingScreen) -- 30 leftover strings
+  [  ] src\screens\widgets\WidgetGalleryScreen.tsx
+         Component: WidgetGalleryScreen  |  Namespace: app
+         [..] Text content (1):
+            - "Widget Gallery"
+         [..] Alert titles (1):
+            - "✅ Widget Added"
+
+------------------------------------------------------------------------
+  Summary
+     Already converted:     38
+     Needs conversion:      146
+     Total hardcoded strings: 2056
+------------------------------------------------------------------------
+
+  Top screens needing most work:
+      1. src\screens\reports\ReportsScreen.tsx (93 strings)
+      2. src\screens\reports\ContractNoteUploadScreen.tsx (44 strings)
+      3. src\screens\ipos\IPODetailScreen.tsx (41 strings)
+      4. src\screens\social\SocialTradingScreen.tsx (40 strings)
+      5. src\screens\settings\TenantConfigScreen.tsx (38 strings)
+      6. src\screens\education\CreateCourseScreen.tsx (37 strings)
+      7. src\screens\analytics\FactorAnalysisScreen.tsx (36 strings)
+      8. src\screens\ipos\IPODashboardScreen.tsx (36 strings)
+      9. src\screens\ai\AITradeAssistantScreen.tsx (33 strings)
+     10. src\screens\kyc\BankLinkingScreen.tsx (33 strings)
+     11. src\screens\settings\RiskSettingsScreen.tsx (33 strings)
+     12. src\screens\ai\EarningsCallScreen.tsx (32 strings)
+     13. src\screens\nfo\NFODetailScreen.tsx (32 strings)
+     14. src\screens\social\CopyAnalyticsScreen.tsx (32 strings)
+     15. src\screens\stock\StockScreenerScreen.tsx (32 strings)

@@ -6,6 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import {
   useRiskStore, selectIsLockdownActive, selectCanTrade,
   selectExitOnlyMode, selectDailyPnL, selectDailyLossPercent,
@@ -20,6 +21,7 @@ Dimensions.get('window');
 
 export default function RiskSettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const store = useRiskStore();
   const [activeTab, setActiveTab] = useState<'limits' | 'status'>('limits');
@@ -40,11 +42,11 @@ export default function RiskSettingsScreen({ navigation }: any) {
   }, []);
 
   const formatTimeRemaining = () => {
-    if (!lockdown.liftsAt) return 'N/A';
+    if (!lockdown.liftsAt) return t('app.na');
     const lifts = new Date(lockdown.liftsAt).getTime();
     const now = Date.now();
     const diff = lifts - now;
-    if (diff <= 0) return 'Lifting soon';
+    if (diff <= 0) return t('riskSettings.liftingSoon');
     const hrs = Math.floor(diff / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
     return `${hrs}h ${mins}m`;
@@ -53,7 +55,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
   const toggleLimit = async (key: keyof typeof limits, current: boolean) => {
     const result = await updateLimits({ [key]: !current } as Partial<import('../../store/riskStore').RiskLimits>);
     if (!result.success) {
-      Alert.alert('Settings Frozen', result.message);
+      Alert.alert(t('riskSettings.settingsFrozenTitle'), result.message);
     }
   };
 
@@ -62,7 +64,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
     const newVal = Math.max(0, current + delta);
     const result = await updateLimits({ [key]: newVal } as Partial<import('../../store/riskStore').RiskLimits>);
     if (!result.success) {
-      Alert.alert('Settings Frozen', result.message);
+      Alert.alert(t('riskSettings.settingsFrozenTitle'), result.message);
     }
   };
 
@@ -155,8 +157,8 @@ export default function RiskSettingsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View>
-            <Text style={styles.title}>Risk Settings</Text>
-            <Text style={styles.subtitle}>Financial Bodyguard controls</Text>
+            <Text style={styles.title}>{t('riskSettings.title')}</Text>
+            <Text style={styles.subtitle}>{t('riskSettings.subtitle')}</Text>
           </View>
         </View>
 
@@ -166,29 +168,29 @@ export default function RiskSettingsScreen({ navigation }: any) {
             <View style={styles.lockdownRow}>
               <Ionicons name="shield-checkmark" size={28} color={colors.white} />
               <View style={styles.lockdownInfo}>
-                <Text style={styles.lockdownTitle}>🔒 Financial Bodyguard Active</Text>
+                <Text style={styles.lockdownTitle}>{t('riskSettings.bodyguardActive')}</Text>
                 <Text style={styles.lockdownDesc}>
-                  {lockdown.status === 'cooldown' ? 'Cooldown period' : 'Exit-only mode'} — only SQUARE OFF orders permitted
+                  {lockdown.status === 'cooldown' ? t('riskSettings.cooldownPeriod') : t('riskSettings.exitOnlyMode')} — {t('riskSettings.squareOffOnly')}
                 </Text>
               </View>
             </View>
             <View style={styles.lockdownDetails}>
               <View style={styles.lockdownDetail}>
-                <Text style={styles.lockdownDetailLabel}>Lockdown lifts in</Text>
+                <Text style={styles.lockdownDetailLabel}>{t('riskSettings.lockdownLiftsIn')}</Text>
                 <Text style={styles.lockdownDetailValue}>{formatTimeRemaining()}</Text>
               </View>
               <View style={styles.lockdownDetailDivider} />
               <View style={styles.lockdownDetail}>
-                <Text style={styles.lockdownDetailLabel}>Trigger Loss</Text>
+                <Text style={styles.lockdownDetailLabel}>{t('riskSettings.triggerLoss')}</Text>
                 <Text style={styles.lockdownDetailValue}>
                   {lockdown.triggerLoss ? formatCurrency(lockdown.triggerLoss) : '—'}
                 </Text>
               </View>
               <View style={styles.lockdownDetailDivider} />
               <View style={styles.lockdownDetail}>
-                <Text style={styles.lockdownDetailLabel}>Breached</Text>
+                <Text style={styles.lockdownDetailLabel}>{t('riskSettings.breached')}</Text>
                 <Text style={styles.lockdownDetailValue}>
-                  {lockdown.breachedLimit === 'daily_loss' ? '₹ Limit' : '% Limit'}
+                  {lockdown.breachedLimit === 'daily_loss' ? t('riskSettings.rupeeLimit') : t('riskSettings.percentLimit')}
                 </Text>
               </View>
             </View>
@@ -202,14 +204,14 @@ export default function RiskSettingsScreen({ navigation }: any) {
             onPress={() => setActiveTab('limits')}
           >
             <Ionicons name="options-outline" size={16} color={activeTab === 'limits' ? colors.white : colors.textMuted} />
-            <Text style={[styles.toggleText, activeTab === 'limits' && styles.toggleTextActive]}>Limits</Text>
+            <Text style={[styles.toggleText, activeTab === 'limits' && styles.toggleTextActive]}>{t('riskSettings.limits')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.toggleBtn, activeTab === 'status' && styles.toggleBtnActive]}
             onPress={() => setActiveTab('status')}
           >
             <Ionicons name="shield-checkmark-outline" size={16} color={activeTab === 'status' ? colors.white : colors.textMuted} />
-            <Text style={[styles.toggleText, activeTab === 'status' && styles.toggleTextActive]}>Status</Text>
+            <Text style={[styles.toggleText, activeTab === 'status' && styles.toggleTextActive]}>{t('riskSettings.status')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -219,14 +221,12 @@ export default function RiskSettingsScreen({ navigation }: any) {
             {settingsFrozen && (
               <View style={styles.frozenBanner}>
                 <Ionicons name="lock-closed" size={18} color="#FFC107" />
-                <Text style={styles.frozenText}>
-                  Risk settings are frozen during active lockdown. Settings will unlock automatically.
-                </Text>
+                <Text style={styles.frozenText}>{t('riskSettings.settingsFrozenDesc')}</Text>
               </View>
             )}
 
             {/* Risk Limits */}
-            <Card title="Risk Limits" subtitle="Configure your Financial Bodyguard">
+            <Card title={t('riskSettings.riskLimits')} subtitle={t('riskSettings.riskLimitsSubtitle')}>
               <View style={styles.limitsList}>
                 {riskLimitsConfig.map((item, i) => (
                   <View key={item.key}>
@@ -235,8 +235,8 @@ export default function RiskSettingsScreen({ navigation }: any) {
                         <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={item.color} />
                       </View>
                       <View style={styles.limitInfo}>
-                        <Text style={styles.limitLabel}>{item.label}</Text>
-                        <Text style={styles.limitDesc}>{item.description}</Text>
+                        <Text style={styles.limitLabel}>{t('riskSettings.' + item.key)}</Text>
+                        <Text style={styles.limitDesc}>{t('riskSettings.' + item.key + 'Desc')}</Text>
                       </View>
                       {item.type === 'number' ? (
                         <View style={styles.limitControls}>
@@ -275,7 +275,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
             </Card>
 
             {/* Action Check */}
-            <Card title="Trade Action Check" subtitle="Check if actions are allowed" style={{ marginTop: SPACING.md }}>
+            <Card title={t('riskSettings.tradeActionCheck')} subtitle={t('riskSettings.tradeActionCheckSub')} style={{ marginTop: SPACING.md }}>
               <View style={styles.checksList}>
                 {tradeChecks.map(check => {
                   const result = checkActionAllowed(check.action);
@@ -283,7 +283,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
                     <View key={check.action} style={styles.checkRow}>
                       <View style={styles.checkLeft}>
                         <Ionicons name={check.icon as keyof typeof Ionicons.glyphMap} size={18} color={result.allowed ? '#00C853' : '#FF1744'} />
-                        <Text style={styles.checkLabel}>{check.label}</Text>
+                        <Text style={styles.checkLabel}>{t('riskSettings.' + check.action.toLowerCase())}</Text>
                       </View>
                       <View style={[styles.checkBadge, { backgroundColor: result.allowed ? '#00C85320' : '#FF174420' }]}>
                         <Ionicons
@@ -292,7 +292,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
                           color={result.allowed ? '#00C853' : '#FF1744'}
                         />
                         <Text style={[styles.checkText, { color: result.allowed ? '#00C853' : '#FF1744' }]}>
-                          {result.allowed ? 'Allowed' : 'Blocked'}
+                          {result.allowed ? t('riskSettings.allowed') : t('riskSettings.blocked')}
                         </Text>
                       </View>
                     </View>
@@ -304,17 +304,17 @@ export default function RiskSettingsScreen({ navigation }: any) {
         ) : (
           <>
             {/* Daily MTM Status */}
-            <Card title="Daily P&L Status" subtitle="Today's trading activity">
+            <Card title={t('riskSettings.dailyPnLStatus')} subtitle={t('riskSettings.dailyPnLSub')}>
               <View style={styles.mtmHeader}>
                 <View style={styles.mtmMain}>
-                  <Text style={styles.mtmLabel}>Realized P&L</Text>
+                  <Text style={styles.mtmLabel}>{t('riskSettings.realizedPnL')}</Text>
                   <Text style={[styles.mtmValue, { color: today.realizedPnL >= 0 ? '#00C853' : '#FF1744' }]}>
                     {today.realizedPnL >= 0 ? '+' : ''}{formatCurrency(today.realizedPnL)}
                   </Text>
                 </View>
                 <View style={styles.mtmDivider} />
                 <View style={styles.mtmMain}>
-                  <Text style={styles.mtmLabel}>Unrealized P&L</Text>
+                  <Text style={styles.mtmLabel}>{t('riskSettings.unrealizedPnL')}</Text>
                   <Text style={[styles.mtmValue, { color: today.unrealizedPnL >= 0 ? '#00C853' : '#FF1744' }]}>
                     {today.unrealizedPnL >= 0 ? '+' : ''}{formatCurrency(today.unrealizedPnL)}
                   </Text>
@@ -323,30 +323,30 @@ export default function RiskSettingsScreen({ navigation }: any) {
 
               <View style={styles.mtmStats}>
                 <View style={styles.mtmStat}>
-                  <Text style={styles.mtmStatLabel}>Total P&L</Text>
+                  <Text style={styles.mtmStatLabel}>{t('riskSettings.totalPnL')}</Text>
                   <Text style={[styles.mtmStatValue, { color: dailyPnL >= 0 ? '#00C853' : '#FF1744' }]}>
                     {dailyPnL >= 0 ? '+' : ''}{formatCurrency(dailyPnL, true)}
                   </Text>
                 </View>
                 <View style={styles.mtmStat}>
-                  <Text style={styles.mtmStatLabel}>Loss %</Text>
+                  <Text style={styles.mtmStatLabel}>{t('riskSettings.lossPercent')}</Text>
                   <Text style={[styles.mtmStatValue, { color: dailyPnL >= 0 ? colors.text : '#FF1744' }]}>
                     {(dailyLossPct).toFixed(2)}%
                   </Text>
                 </View>
                 <View style={styles.mtmStat}>
-                  <Text style={styles.mtmStatLabel}>Trades</Text>
+                  <Text style={styles.mtmStatLabel}>{t('riskSettings.trades')}</Text>
                   <Text style={styles.mtmStatValue}>{today.tradeCount}</Text>
                 </View>
                 <View style={styles.mtmStat}>
-                  <Text style={styles.mtmStatLabel}>Charges</Text>
+                  <Text style={styles.mtmStatLabel}>{t('riskSettings.charges')}</Text>
                   <Text style={styles.mtmStatValue}>{formatCurrency(today.totalCharges, true)}</Text>
                 </View>
               </View>
 
               {/* Progress toward limits */}
               <View style={styles.limitProgressSection}>
-                <Text style={styles.limitProgressTitle}>Loss Limit Progress</Text>
+                <Text style={styles.limitProgressTitle}>{t('riskSettings.lossLimitProgress')}</Text>
                 <View style={styles.limitProgress}>
                   <View style={styles.limitProgressInfo}>
                     <Text style={styles.limitProgressLabel}>
@@ -386,23 +386,23 @@ export default function RiskSettingsScreen({ navigation }: any) {
               </View>
 
               <View style={styles.portfolioValueInfo}>
-                <Text style={styles.portfolioValueLabel}>Portfolio Value at Open</Text>
+                <Text style={styles.portfolioValueLabel}>{t('riskSettings.portfolioValueAtOpen')}</Text>
                 <Text style={styles.portfolioValueAmount}>{formatCurrency(portfolioValueAtOpen, true)}</Text>
               </View>
             </Card>
 
             {/* Lockdown History */}
-            <Card title="Lockdown Status" style={{ marginTop: SPACING.md }}>
+            <Card title={t('riskSettings.lockdownStatus')} style={{ marginTop: SPACING.md }}>
               <View style={styles.lockdownInfoRow}>
-                <Text style={styles.lockdownInfoLabel}>Status</Text>
+                <Text style={styles.lockdownInfoLabel}>{t('riskSettings.status')}</Text>
                 <Badge
-                  label={lockdown.status === 'none' ? 'Normal' : lockdown.status === 'active' ? 'Active' : 'Cooldown'}
+                  label={lockdown.status === 'none' ? t('riskSettings.normal') : lockdown.status === 'active' ? t('riskSettings.active') : t('riskSettings.cooldown')}
                   variant={lockdown.status === 'none' ? 'success' : 'danger'}
                 />
               </View>
               {lockdown.triggeredAt && (
                 <View style={styles.lockdownInfoRow}>
-                  <Text style={styles.lockdownInfoLabel}>Triggered At</Text>
+                  <Text style={styles.lockdownInfoLabel}>{t('riskSettings.triggeredAt')}</Text>
                   <Text style={styles.lockdownInfoValue}>
                     {new Date(lockdown.triggeredAt).toLocaleString()}
                   </Text>
@@ -410,21 +410,21 @@ export default function RiskSettingsScreen({ navigation }: any) {
               )}
               {lockdown.liftsAt && (
                 <View style={styles.lockdownInfoRow}>
-                  <Text style={styles.lockdownInfoLabel}>Lifts At</Text>
+                  <Text style={styles.lockdownInfoLabel}>{t('riskSettings.liftsAt')}</Text>
                   <Text style={styles.lockdownInfoValue}>
                     {new Date(lockdown.liftsAt).toLocaleString()}
                   </Text>
                 </View>
               )}
               <View style={styles.lockdownInfoRow}>
-                <Text style={styles.lockdownInfoLabel}>Settings Frozen</Text>
-                <Badge label={settingsFrozen ? 'Yes' : 'No'} variant={settingsFrozen ? 'danger' : 'success'} />
+                <Text style={styles.lockdownInfoLabel}>{t('riskSettings.settingsFrozen')}</Text>
+                <Badge label={settingsFrozen ? t('app.yes') : t('app.no')} variant={settingsFrozen ? 'danger' : 'success'} />
               </View>
             </Card>
 
             {/* Reset Daily */}
             <Button
-              title="Reset Daily P&L"
+              title={t('riskSettings.resetDailyPnL')}
               onPress={() => resetDaily()}
               variant="outline"
               style={{ marginTop: SPACING.lg }}

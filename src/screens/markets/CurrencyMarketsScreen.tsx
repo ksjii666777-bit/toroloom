@@ -14,7 +14,7 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
   TextInput, Platform, Dimensions,
@@ -22,6 +22,7 @@ import {
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Svg, { Polyline } from 'react-native-svg';
 import type { CurrencyPair } from '../../types';
@@ -32,6 +33,7 @@ import {
   type RecentConversion,
 } from '../../utils/currencyConverter';
 import { useLiveConversion } from '../../hooks/useLiveConversion';
+import { forexApi } from '../../services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -39,19 +41,8 @@ const { width } = Dimensions.get('window');
 // INLINE MOCK DATA
 // ══════════════════════════════════════════════════════════════
 
-const CURRENCY_PAIRS: CurrencyPair[] = [
-  { id: 'usdinr',   pair: 'USD/INR', baseCurrency: 'USD', quoteCurrency: 'INR', name: 'US Dollar / Indian Rupee', rate: 83.45, change: -0.12, changePercent: -0.14, dayHigh: 83.62, dayLow: 83.38, week52High: 84.15, week52Low: 82.75, isRbiReference: true, region: 'major', icon: '💵', color: '#3B82F6', trend: 'RBI intervention keeps USD/INR range-bound. FII inflows supporting rupee.', volatility: 4.2 },
-  { id: 'eurinr',   pair: 'EUR/INR', baseCurrency: 'EUR', quoteCurrency: 'INR', name: 'Euro / Indian Rupee', rate: 90.78, change: 0.35, changePercent: 0.39, dayHigh: 90.92, dayLow: 90.45, week52High: 92.50, week52Low: 88.20, isRbiReference: true, region: 'major', icon: '💶', color: '#0052CC', trend: 'EUR strengthening on ECB hawkish stance.', volatility: 5.8 },
-  { id: 'gbpinr',   pair: 'GBP/INR', baseCurrency: 'GBP', quoteCurrency: 'INR', name: 'British Pound / Indian Rupee', rate: 106.20, change: 0.65, changePercent: 0.62, dayHigh: 106.45, dayLow: 105.55, week52High: 108.80, week52Low: 103.40, isRbiReference: true, region: 'major', icon: '💷', color: '#FF5252', trend: 'Pound supported by UK services PMI.', volatility: 6.5 },
-  { id: 'jpyinr',   pair: 'JPY/INR', baseCurrency: 'JPY', quoteCurrency: 'INR', name: 'Japanese Yen / Indian Rupee', rate: 0.54, change: -0.002, changePercent: -0.37, dayHigh: 0.545, dayLow: 0.538, week52High: 0.58, week52Low: 0.51, isRbiReference: false, region: 'major', icon: '💴', color: '#FFC107', trend: 'Yen under pressure from BoJ ultra-loose policy.', volatility: 8.2 },
-  { id: 'sgdinr',   pair: 'SGD/INR', baseCurrency: 'SGD', quoteCurrency: 'INR', name: 'Singapore Dollar / Indian Rupee', rate: 61.80, change: 0.15, changePercent: 0.24, dayHigh: 61.95, dayLow: 61.62, week52High: 63.20, week52Low: 60.10, isRbiReference: false, region: 'asian', icon: '🇸🇬', color: '#00E676', trend: 'SGD stable on MAS policy.', volatility: 3.5 },
-  { id: 'cnyinr',   pair: 'CNY/INR', baseCurrency: 'CNY', quoteCurrency: 'INR', name: 'Chinese Yuan / Indian Rupee', rate: 11.52, change: -0.04, changePercent: -0.35, dayHigh: 11.58, dayLow: 11.48, week52High: 12.10, week52Low: 11.30, isRbiReference: false, region: 'asian', icon: '🇨🇳', color: '#FF6B6B', trend: 'Yuan weakness on China economic slowdown.', volatility: 6.1 },
-  { id: 'hkdInr',   pair: 'HKD/INR', baseCurrency: 'HKD', quoteCurrency: 'INR', name: 'Hong Kong Dollar / Indian Rupee', rate: 10.68, change: -0.02, changePercent: -0.19, dayHigh: 10.72, dayLow: 10.65, week52High: 11.00, week52Low: 10.40, isRbiReference: false, region: 'asian', icon: '🇭🇰', color: '#8B5CF6', trend: 'HKD pegged to USD, mirroring USD/INR.', volatility: 2.8 },
-  { id: 'thbinr',   pair: 'THB/INR', baseCurrency: 'THB', quoteCurrency: 'INR', name: 'Thai Baht / Indian Rupee', rate: 2.28, change: 0.01, changePercent: 0.44, dayHigh: 2.30, dayLow: 2.27, week52High: 2.45, week52Low: 2.20, isRbiReference: false, region: 'asian', icon: '🇹🇭', color: '#06B6D4', trend: 'Baht supported by tourism recovery.', volatility: 4.5 },
-  { id: 'eurusd',   pair: 'EUR/USD', baseCurrency: 'EUR', quoteCurrency: 'USD', name: 'Euro / US Dollar', rate: 1.0875, change: 0.0045, changePercent: 0.42, dayHigh: 1.0890, dayLow: 1.0830, week52High: 1.1200, week52Low: 1.0600, isRbiReference: false, region: 'other', icon: '💶', color: '#0052CC', trend: 'EUR/USD testing resistance.', volatility: 7.5 },
-  { id: 'gbpusd',   pair: 'GBP/USD', baseCurrency: 'GBP', quoteCurrency: 'USD', name: 'British Pound / US Dollar', rate: 1.2730, change: 0.0080, changePercent: 0.63, dayHigh: 1.2750, dayLow: 1.2650, week52High: 1.3200, week52Low: 1.2400, isRbiReference: false, region: 'other', icon: '💷', color: '#FF5252', trend: 'Cable rallying on hawkish BoE.', volatility: 8.8 },
-  { id: 'usdjpy',   pair: 'USD/JPY', baseCurrency: 'USD', quoteCurrency: 'JPY', name: 'US Dollar / Japanese Yen', rate: 154.80, change: 0.50, changePercent: 0.32, dayHigh: 155.20, dayLow: 154.30, week52High: 162.00, week52Low: 140.00, isRbiReference: false, region: 'other', icon: '💴', color: '#FFC107', trend: 'USD/JPY elevated on rate differential.', volatility: 10.2 },
-];
+// ── FALLBACK DATA (used when backend API is unavailable) ──────────────
+const FALLBACK_PAIRS: CurrencyPair[] = forexApi.getFallbackPairs();
 
 // ══════════════════════════════════════════════════════════════
 // HELPER: generate mock rate history
@@ -103,6 +94,7 @@ function CurrencyCard({ currency, isExpanded, onPress, colors }: {
   onPress: () => void;
   colors: any;
 }) {
+  const { t } = useT();
   const isUp = currency.change >= 0;
   const chartData = useMemo(() => generateRateHistory(currency.rate), [currency.rate]);
 
@@ -138,11 +130,11 @@ function CurrencyCard({ currency, isExpanded, onPress, colors }: {
           <MiniSparkline data={chartData} width={120} height={32} />
           <View style={styles.dayRangeCol}>
             <View style={styles.dayRangeRow}>
-              <Text style={[styles.rangeLabel, { color: colors.textMuted }]}>H:</Text>
+              <Text style={[styles.rangeLabel, { color: colors.textMuted }]}>{t('currencyMarkets.dayHigh')}</Text>
               <Text style={[styles.rangeValue, { color: colors.text }]}>{currency.dayHigh.toFixed(2)}</Text>
             </View>
             <View style={styles.dayRangeRow}>
-              <Text style={[styles.rangeLabel, { color: colors.textMuted }]}>L:</Text>
+              <Text style={[styles.rangeLabel, { color: colors.textMuted }]}>{t('currencyMarkets.dayLow')}</Text>
               <Text style={[styles.rangeValue, { color: colors.text }]}>{currency.dayLow.toFixed(2)}</Text>
             </View>
           </View>
@@ -150,7 +142,7 @@ function CurrencyCard({ currency, isExpanded, onPress, colors }: {
 
         {/* 52W Range */}
         <View style={styles.weekRangeContainer}>
-          <Text style={[styles.weekRangeLabel, { color: colors.textMuted }]}>52W Range</Text>
+          <Text style={[styles.weekRangeLabel, { color: colors.textMuted }]}>{t('currencyMarkets.week52Range')}</Text>
           <View style={styles.weekRangeBar}>
             <View style={[styles.weekRangeFill, {
               width: `${Math.min(100, Math.max(0, ((currency.rate - currency.week52Low) / (currency.week52High - currency.week52Low)) * 100))}%`,
@@ -167,7 +159,7 @@ function CurrencyCard({ currency, isExpanded, onPress, colors }: {
         {currency.isRbiReference && (
           <View style={[styles.rbiBadge, { backgroundColor: '#3B82F615' }]}>
             <Ionicons name="shield-checkmark" size={12} color="#3B82F6" />
-            <Text style={[styles.rbiText, { color: '#3B82F6' }]}>RBI Reference Rate</Text>
+            <Text style={[styles.rbiText, { color: '#3B82F6' }]}>{t('currencyMarkets.rbiReference')}</Text>
           </View>
         )}
 
@@ -176,12 +168,12 @@ function CurrencyCard({ currency, isExpanded, onPress, colors }: {
           <View style={[styles.expandedContent, { backgroundColor: colors.bgInput }]}>
             <View style={styles.expandedGrid}>
               {[
-                { label: 'Open', value: (currency.rate - currency.change).toFixed(currency.rate < 1 ? 4 : 2) },
-                { label: 'Change', value: `${isUp ? '+' : ''}${currency.change.toFixed(4)}`, color: isUp ? '#00E676' : '#FF5252' },
-                { label: '52W High', value: currency.week52High.toFixed(2) },
-                { label: '52W Low', value: currency.week52Low.toFixed(2) },
-                { label: 'Volatility', value: `${(currency.volatility ?? 0).toFixed(1)}%` },
-                { label: 'Region', value: currency.region.charAt(0).toUpperCase() + currency.region.slice(1) },
+                { label: t('currencyMarkets.expandedOpen'), value: (currency.rate - currency.change).toFixed(currency.rate < 1 ? 4 : 2) },
+                { label: t('currencyMarkets.expandedChange'), value: `${isUp ? '+' : ''}${currency.change.toFixed(4)}`, color: isUp ? '#00E676' : '#FF5252' },
+                { label: t('currencyMarkets.expanded52WHigh'), value: currency.week52High.toFixed(2) },
+                { label: t('currencyMarkets.expanded52WLow'), value: currency.week52Low.toFixed(2) },
+                { label: t('currencyMarkets.expandedVolatility'), value: `${(currency.volatility ?? 0).toFixed(1)}%` },
+                { label: t('currencyMarkets.expandedRegion'), value: currency.region.charAt(0).toUpperCase() + currency.region.slice(1) },
               ].map((item, i) => (
                 <View key={i} style={styles.expandedItem}>
                   <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{item.label}</Text>
@@ -212,6 +204,7 @@ export function CurrencyConverterModal({
   onClose: () => void;
   colors: any;
 }) {
+  const { t } = useT();
   const [fromCode, setFromCode] = useState('USD');
   const [toCode, setToCode] = useState('INR');
   const [amountStr, setAmountStr] = useState('1');
@@ -263,7 +256,7 @@ export function CurrencyConverterModal({
         <View style={styles.modalHeader}>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Currency Converter</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('currencyMarkets.converterTitle')}</Text>
               {/* Live / Mock badge */}
               <View style={[styles.liveBadge, {
                 backgroundColor: isLive ? '#00E67620' : '#FF525220',
@@ -275,11 +268,11 @@ export function CurrencyConverterModal({
                 <Text style={[styles.liveBadgeText, {
                   color: isLive ? '#00E676' : '#FF5252',
                 }]}>
-                  {ratesLoading ? 'Loading…' : isLive ? 'Live' : 'Mock'}
+                  {ratesLoading ? t('currencyMarkets.loading') : isLive ? t('currencyMarkets.live') : t('currencyMarkets.mock')}
                 </Text>
               </View>
             </View>
-            <Text style={[styles.modalSubtitle, { color: colors.textMuted }]}>Real-time cross rates</Text>
+            <Text style={[styles.modalSubtitle, { color: colors.textMuted }]}>{t('currencyMarkets.converterSubtitle')}</Text>
             {lastUpdated && (
               <Text style={[styles.modalUpdatedText, { color: colors.textMuted }]}>
                 Updated {new Intl.DateTimeFormat('en-IN', { hour: '2-digit', minute: '2-digit' }).format(lastUpdated)}
@@ -311,7 +304,7 @@ export function CurrencyConverterModal({
         </View>
 
         {/* From Currency Picker */}
-        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>From</Text>
+        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyMarkets.converterFrom')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
           {CURRENCIES.map(cur => {
             const selected = fromCode === cur.code;
@@ -356,7 +349,7 @@ export function CurrencyConverterModal({
         </View>
 
         {/* To Currency Picker */}
-        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>To</Text>
+        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyMarkets.converterTo')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
           {selectableCurrencies.map(cur => {
             const selected = toCode === cur.code;
@@ -392,7 +385,7 @@ export function CurrencyConverterModal({
           <View style={styles.convResultHeader}>
             <Text style={{ fontSize: 28 }}>{toCurrency.icon}</Text>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.convResultLabel, { color: colors.textMuted }]}>Converted Amount</Text>
+              <Text style={[styles.convResultLabel, { color: colors.textMuted }]}>{t('currencyMarkets.convertedAmount')}</Text>
               <Text style={[styles.convResultValue, { color: toCurrency.color }]}>
                 {toCurrency.symbol}{result.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
               </Text>
@@ -417,13 +410,13 @@ export function CurrencyConverterModal({
           style={[styles.convConvertBtn, { backgroundColor: amount <= 0 ? colors.textMuted + '60' : colors.primary, opacity: amount <= 0 ? 0.5 : 1 }]}
         >
           <Ionicons name="bookmark" size={16} color="#fff" />
-          <Text style={styles.convConvertText}>Save Conversion</Text>
+          <Text style={styles.convConvertText}>{t('currencyMarkets.saveConversion')}</Text>
         </Pressable>
 
         {/* Recent Conversions */}
         {recentConversions.length > 0 && (
           <View style={styles.convRecentSection}>
-            <Text style={[styles.convRecentTitle, { color: colors.text }]}>Recent</Text>
+            <Text style={[styles.convRecentTitle, { color: colors.text }]}>{t('currencyMarkets.recent')}</Text>
             {recentConversions.map((conv, i) => {
               const fC = getCurrency(conv.from);
               const tC = getCurrency(conv.to);
@@ -470,14 +463,23 @@ type TabKey = 'inr' | 'crosses' | 'summary';
 
 export default function CurrencyMarketsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabKey>('inr');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [regionFilter, setRegionFilter] = useState<string | null>(null);
   const [converterVisible, setConverterVisible] = useState(false);
+  const [pairsData, setPairsData] = useState<CurrencyPair[]>(FALLBACK_PAIRS);
+
+  // ── Fetch from backend API, fall back to static data ──────────────
+  useEffect(() => {
+    forexApi.getRates().then(data => {
+      if (data.length > 0) setPairsData(data);
+    });
+  }, []);
 
   const filteredPairs = useMemo(() => {
-    let pairs = [...CURRENCY_PAIRS];
+    let pairs = [...pairsData];
     if (activeTab === 'inr') pairs = pairs.filter(p => p.quoteCurrency === 'INR');
     else if (activeTab === 'crosses') pairs = pairs.filter(p => p.quoteCurrency !== 'INR');
     if (regionFilter) pairs = pairs.filter(p => p.region === regionFilter);
@@ -489,17 +491,17 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
   }, [activeTab, regionFilter, searchQuery]);
 
   const summaryStats = useMemo(() => {
-    const inrPairs = CURRENCY_PAIRS.filter(p => p.quoteCurrency === 'INR');
+    const inrPairs = pairsData.filter(p => p.quoteCurrency === 'INR');
     const avgChg = inrPairs.reduce((s, p) => s + p.changePercent, 0) / inrPairs.length;
     const avgVol = inrPairs.reduce((s, p) => s + (p.volatility ?? 0), 0) / inrPairs.length;
     return {
-      total: CURRENCY_PAIRS.length,
+      total: pairsData.length,
       inr: inrPairs.length,
-      rbiRef: CURRENCY_PAIRS.filter(p => p.isRbiReference).length,
+      rbiRef: pairsData.filter(p => p.isRbiReference).length,
       avgInrChange: avgChg,
       avgInrVol: avgVol,
     };
-  }, []);
+  }, [pairsData]);
 
   const handlePress = useCallback((id: string) => {
     setExpandedId(prev => prev === id ? null : id);
@@ -513,8 +515,8 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Currency Markets</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>Forex Rates & Analysis</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('currencyMarkets.title')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('currencyMarkets.subtitle')}</Text>
           </View>
           <Pressable
             onPress={() => setConverterVisible(true)}
@@ -527,9 +529,9 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
         {/* Tabs */}
         <View style={styles.tabRow}>
           {[
-            { key: 'inr' as TabKey, label: 'INR Pairs', icon: 'cash' },
-            { key: 'crosses' as TabKey, label: 'Crosses', icon: 'swap-horizontal' },
-            { key: 'summary' as TabKey, label: 'Summary', icon: 'stats-chart' },
+            { key: 'inr' as TabKey, label: t('currencyMarkets.tabInrPairs'), icon: 'cash' },
+            { key: 'crosses' as TabKey, label: t('currencyMarkets.tabCrosses'), icon: 'swap-horizontal' },
+            { key: 'summary' as TabKey, label: t('currencyMarkets.tabSummary'), icon: 'stats-chart' },
           ].map(tab => {
             const isActive = activeTab === tab.key;
             return (
@@ -551,7 +553,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
             <Ionicons name="search" size={16} color={colors.textMuted} />
             <TextInput
               style={[styles.searchInput, { color: colors.text }]}
-              placeholder="Search pairs..."
+              placeholder={t('currencyMarkets.searchPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -568,10 +570,10 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
         {activeTab !== 'summary' && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
             {[
-              { key: null as string | null, label: 'All' },
-              { key: 'major', label: 'Major' },
-              { key: 'asian', label: 'Asian' },
-              { key: 'other', label: 'Other' },
+              { key: null as string | null, label: t('currencyMarkets.filterAll') },
+              { key: 'major', label: t('currencyMarkets.filterMajor') },
+              { key: 'asian', label: t('currencyMarkets.filterAsian') },
+              { key: 'other', label: t('currencyMarkets.filterOther') },
             ].map(f => {
               const isActive = regionFilter === f.key;
               return (
@@ -593,7 +595,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
         {(activeTab === 'inr' || activeTab === 'crosses') && (
           <View>
             <Text style={[styles.resultCount, { color: colors.textMuted }]}>
-              {filteredPairs.length} pair{filteredPairs.length !== 1 ? 's' : ''}
+              {t('currencyMarkets.pairCount', { count: filteredPairs.length })}
             </Text>
             {filteredPairs.length > 0 ? (
               filteredPairs.map(pair => (
@@ -602,8 +604,8 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
             ) : (
               <View style={styles.emptyState}>
                 <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No pairs found</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>Try adjusting search</Text>
+                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('currencyMarkets.noPairsFound')}</Text>
+                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('currencyMarkets.adjustSearch')}</Text>
               </View>
             )}
           </View>
@@ -614,10 +616,10 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
           <View>
             <View style={styles.summaryGrid}>
               {[
-                { label: 'Total Pairs', value: summaryStats.total.toString(), icon: '🔄', color: '#6C63FF' },
-                { label: 'INR Pairs', value: summaryStats.inr.toString(), icon: '🇮🇳', color: '#3B82F6' },
-                { label: 'Avg INR Chg', value: `${(summaryStats.avgInrChange >= 0 ? '+' : '') + summaryStats.avgInrChange.toFixed(2)}%`, icon: '📈', color: summaryStats.avgInrChange >= 0 ? '#00E676' : '#FF5252' },
-                { label: 'Avg Volatility', value: `${summaryStats.avgInrVol.toFixed(1)}%`, icon: '🌊', color: '#FFC107' },
+                { label: t('currencyMarkets.totalPairs'), value: summaryStats.total.toString(), icon: '🔄', color: '#6C63FF' },
+                { label: t('currencyMarkets.inrPairs'), value: summaryStats.inr.toString(), icon: '🇮🇳', color: '#3B82F6' },
+                { label: t('currencyMarkets.avgInrChg'), value: `${(summaryStats.avgInrChange >= 0 ? '+' : '') + summaryStats.avgInrChange.toFixed(2)}%`, icon: '📈', color: summaryStats.avgInrChange >= 0 ? '#00E676' : '#FF5252' },
+                { label: t('currencyMarkets.avgVolatility'), value: `${summaryStats.avgInrVol.toFixed(1)}%`, icon: '🌊', color: '#FFC107' },
               ].map((stat, i) => (
                 <View key={stat.label} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
                   <Text style={styles.summaryIcon}>{stat.icon}</Text>
@@ -629,9 +631,9 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
 
             {/* INR Overview */}
             <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>INR Pairs Overview</Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Currency pairs vs Indian Rupee</Text>
-              {CURRENCY_PAIRS.filter(p => p.quoteCurrency === 'INR').map((pair, i) => {
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('currencyMarkets.inrOverview')}</Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('currencyMarkets.inrOverviewSub')}</Text>
+              {pairsData.filter(p => p.quoteCurrency === 'INR').map((pair, i) => {
                 const isUp = pair.changePercent >= 0;
                 return (
                   <View key={pair.id} style={[styles.inrRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
@@ -646,7 +648,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
                       <Text style={[styles.inrChange, { color: isUp ? '#00E676' : '#FF5252' }]}>
                         {isUp ? '+' : ''}{pair.changePercent.toFixed(2)}%
                       </Text>
-                      <Text style={[styles.inrVol, { color: colors.textMuted }]}>Vol: {(pair.volatility ?? 0).toFixed(1)}%</Text>
+                      <Text style={[styles.inrVol, { color: colors.textMuted }]}>{t('currencyMarkets.volLabel', { vol: (pair.volatility ?? 0).toFixed(1) })}</Text>
                     </View>
                   </View>
                 );
@@ -657,9 +659,9 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="information-circle" size={18} color={colors.primary} />
               <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>Indian Forex Market</Text>
+                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('currencyMarkets.forexInfo')}</Text>
                 <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  RBI publishes reference rates for USD, EUR, GBP, JPY daily at 12:00 PM IST. Market hours: 9:00 AM - 5:00 PM IST. Key factors: FII flows, crude oil, RBI policy. India holds ~$650B forex reserves.
+                  {t('currencyMarkets.forexInfoDesc')}
                 </Text>
               </View>
             </View>

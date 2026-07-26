@@ -6,6 +6,7 @@ import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -55,6 +56,7 @@ function statusLabel(status: string): string {
 
 export default function MyCoursesScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     myCourses, deleteCourse, duplicateCourse, submitForReview,
@@ -98,11 +100,11 @@ export default function MyCoursesScreen({ navigation }: any) {
 
     if (course.publishStatus === 'draft') {
       options.push({
-        label: 'Submit for Review',
+        label: t('education.submitForReview'),
         onPress: () => {
           if (!course.title || course.lessonsCount === 0) {
-            Alert.alert('Cannot Submit',
-              'Please add a title and at least one lesson before submitting for review.');
+            Alert.alert(t('education.cannotSubmit'),
+              t('education.cannotSubmitMsg'));
             return;
           }
           submitForReview(course.id);
@@ -111,38 +113,36 @@ export default function MyCoursesScreen({ navigation }: any) {
     }
     if (course.publishStatus === 'published') {
       options.push({
-        label: 'Archive Course',
+        label: t('education.archiveCourse'),
         onPress: () => archiveCourse(course.id),
       });
     }
     if (course.publishStatus === 'archived') {
       options.push({
-        label: 'Restore Course',
+        label: t('education.restoreCourse'),
         onPress: () => unarchiveCourse(course.id),
       });
     }
-    options.push({
-      label: 'Duplicate',
+    options.push({        label: t('education.duplicate'),
       onPress: () => duplicateCourse(course.id),
     });
-    options.push({
-      label: 'Delete',
+    options.push({        label: t('education.delete'),
       onPress: () => {
         Alert.alert(
-          'Delete Course',
-          `Are you sure you want to delete "${course.title || 'Untitled Course'}"? This action cannot be undone.`,
+          t('education.deleteCourse'),
+          t('education.deleteCourseConfirm', { title: course.title || t('education.untitledCourse') }),
           [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => deleteCourse(course.id) },
+            { text: t('app.cancel'), style: 'cancel' },
+            { text: t('education.delete'), style: 'destructive', onPress: () => deleteCourse(course.id) },
           ]
         );
       },
     });
 
-    Alert.alert(course.title || 'Course Options', undefined, options.map(o => ({
+    Alert.alert(course.title || t('education.courseOptions'), undefined, options.map(o => ({
       text: o.label,
       onPress: o.onPress,
-      style: o.label === 'Delete' ? 'destructive' as const : 'default' as const,
+      style: o.label === t('education.delete') ? 'destructive' as const : 'default' as const,
     })));
   }, [submitForReview, archiveCourse, unarchiveCourse, duplicateCourse, deleteCourse]);
 
@@ -151,27 +151,27 @@ export default function MyCoursesScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>My Courses</Text>
-          <Text style={styles.subtitle}>Create and manage your own courses</Text>
+          <Text style={styles.title}>{t('education.myCourses')}</Text>
+          <Text style={styles.subtitle}>{t('education.createManageSubtitle')}</Text>
         </View>
 
         {/* Stats Bar */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{stats.totalCourses}</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel}>{t('education.total')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.publishedCourses}</Text>
-            <Text style={styles.statLabel}>Published</Text>
+            <Text style={styles.statLabel}>{t('education.published')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: '#6C63FF' }]}>{stats.draftCourses}</Text>
-            <Text style={styles.statLabel}>Drafts</Text>
+            <Text style={styles.statLabel}>{t('education.drafts')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: '#3B82F6' }]}>{stats.totalEnrollments}</Text>
-            <Text style={styles.statLabel}>Students</Text>
+            <Text style={styles.statLabel}>{t('education.students')}</Text>
           </View>
         </View>
 
@@ -179,7 +179,7 @@ export default function MyCoursesScreen({ navigation }: any) {
         <AnimatedPressable onPress={handleCreateCourse} haptic="medium" scaleTo={0.97}>
           <View style={styles.createBtn}>
             <Ionicons name="add-circle" size={24} color="#fff" />
-            <Text style={styles.createBtnText}>Create New Course</Text>
+            <Text style={styles.createBtnText}>{t('education.createNewCourse')}</Text>
           </View>
         </AnimatedPressable>
 
@@ -230,9 +230,9 @@ export default function MyCoursesScreen({ navigation }: any) {
         {sortedCourses.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="school-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>No courses yet</Text>
+            <Text style={styles.emptyTitle}>{t('education.noCoursesYet')}</Text>
             <Text style={styles.emptySubtitle}>
-              Tap "Create New Course" to start{'\n'}building your first course!
+              {t('education.noCoursesSubtitle')}
             </Text>
           </View>
         ) : (
@@ -260,7 +260,7 @@ export default function MyCoursesScreen({ navigation }: any) {
 }
 
 function CourseCard({
-  course, onEdit, onMore, colors, styles,
+    course, onEdit, onMore, colors, styles,
 }: {
   course: UserGeneratedCourse;
   onEdit: () => void;
@@ -268,7 +268,8 @@ function CourseCard({
   colors: any;
   styles: any;
 }) {
-  const [grad1, grad2] = statusGradient(course.publishStatus);
+  const { t } = useT();
+    const [grad1, grad2] = statusGradient(course.publishStatus);
 
   return (
     <View style={styles.courseCard}>
@@ -279,13 +280,13 @@ function CourseCard({
         </View>
         <View style={styles.courseCardInfo}>
           <Text style={styles.courseTitle} numberOfLines={1}>
-            {course.title || 'Untitled Course'}
+            {course.title || t('education.untitledCourse')}
           </Text>
           <Text style={styles.courseDesc} numberOfLines={2}>
-            {course.description || 'No description yet'}
+            {course.description || t('education.noDescription')}
           </Text>
           <View style={styles.courseMetaRow}>
-            <Text style={styles.courseMeta}>{course.lessonsCount} lessons</Text>
+            <Text style={styles.courseMeta}>{t('education.lessonsCount', { count: course.lessonsCount })}</Text>
             <Text style={styles.courseMeta}> · </Text>
             <Text style={styles.courseMeta}>{course.duration}</Text>
           </View>
@@ -305,7 +306,7 @@ function CourseCard({
             {statusLabel(course.publishStatus)}
           </Text>
           {course.submittedForReview && course.publishStatus === 'draft' && (
-            <Text style={[styles.statusText, { color: '#FFC107', fontSize: 10 }]}> · Pending</Text>
+            <Text style={[styles.statusText, { color: '#FFC107', fontSize: 10 }]}> · {t('education.pending')}</Text>
           )}
         </View>
 
@@ -340,6 +341,7 @@ function ReviewStatusSection({
   styles: any;
   navigation: any;
 }) {
+  const { t } = useT();
   // Derive review status categories
   const pendingReview = useMemo(() =>
     courses.filter(c => c.submittedForReview && c.publishStatus === 'draft'),
@@ -377,7 +379,7 @@ function ReviewStatusSection({
           <View style={[styles.reviewChip, { backgroundColor: '#FFC107' + '20', borderColor: '#FFC107' + '50' }]}>
             <View style={[styles.reviewChipDot, { backgroundColor: '#FFC107' }]} />
             <Text style={[styles.reviewChipText, { color: '#FFC107' }]}>
-              {pendingReview.length} Pending
+              {pendingReview.length} {t('education.pending')}
             </Text>
           </View>
         )}
@@ -385,7 +387,7 @@ function ReviewStatusSection({
           <View style={[styles.reviewChip, { backgroundColor: '#00C853' + '20', borderColor: '#00C853' + '50' }]}>
             <View style={[styles.reviewChipDot, { backgroundColor: '#00C853' }]} />
             <Text style={[styles.reviewChipText, { color: '#00C853' }]}>
-              {approved.length} Approved
+              {approved.length} {t('education.approved')}
             </Text>
           </View>
         )}
@@ -393,7 +395,7 @@ function ReviewStatusSection({
           <View style={[styles.reviewChip, { backgroundColor: '#FF5252' + '20', borderColor: '#FF5252' + '50' }]}>
             <View style={[styles.reviewChipDot, { backgroundColor: '#FF5252' }]} />
             <Text style={[styles.reviewChipText, { color: '#FF5252' }]}>
-              {rejected.length} Rejected
+              {rejected.length} {t('education.rejected')}
             </Text>
           </View>
         )}
@@ -403,14 +405,14 @@ function ReviewStatusSection({
       {pendingReview.length > 0 && (
         <View style={styles.reviewGroup}>
           <Text style={styles.reviewGroupTitle}>
-            🟡 Pending Review
+            {t('education.pendingReview')}
           </Text>
           {pendingReview.map(course => (
             <View key={course.id} style={[styles.reviewCourseCard, { borderLeftColor: '#FFC107' }]}>
               <View style={styles.reviewCourseRow}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.reviewCourseTitle}>{course.title}</Text>
-                  <Text style={styles.reviewCourseMeta}>{course.lessonsCount} lessons</Text>
+                  <Text style={styles.reviewCourseMeta}>{t('education.lessonsCount', { count: course.lessonsCount })}</Text>
                 </View>
                 <AnimatedPressable
                   onPress={() => navigation.navigate('CreateCourse', { courseId: course.id })}
@@ -422,7 +424,7 @@ function ReviewStatusSection({
                   </View>
                 </AnimatedPressable>
               </View>
-              <Text style={styles.reviewCourseDate}>Submitted {formatRelativeTime(course.updatedAt)}</Text>
+              <Text style={styles.reviewCourseDate}>{t('education.submitted')} {formatRelativeTime(course.updatedAt)}</Text>
             </View>
           ))}
         </View>
@@ -432,7 +434,7 @@ function ReviewStatusSection({
       {rejected.length > 0 && (
         <View style={styles.reviewGroup}>
           <Text style={styles.reviewGroupTitle}>
-            ❌ Rejected — Needs Changes
+            {t('education.needsChanges')}
           </Text>
           {rejected.map(course => (
             <View key={course.id} style={[styles.reviewCourseCard, { borderLeftColor: '#FF5252' }]}>

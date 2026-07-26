@@ -19,13 +19,16 @@ const mockGoBack = vi.fn();
 const mockGenerateCertificate = vi.fn();
 
 // Mutable store state
-var mockCertificates: any[] = [];
-var mockCourses: any[] = [];
-var mockIsGenerating = false;
-var mockAlertCalls: any[] = [];
+let mockCertificates: any[] = [];
+let mockCourses: any[] = [];
+let mockIsGenerating = false;
+let mockAlertCalls: any[] = [];
 
 // Exposed share mock — set by react-native factory during import resolution
 // IMPORTANT: no '= null' init, or it will overwrite the factory's value!
+// Must use `var` (not `let`/`const`) because vi.mock factories are hoisted
+// and need access to this variable BEFORE its module-level declaration.
+// eslint-disable-next-line no-var
 var exposedShare: any;
 
 // ==================== vi.mock Factories ====================
@@ -51,14 +54,14 @@ vi.mock('../context/ThemeContext', () => ({
 }));
 
 vi.mock('../store/educationStore', function() {
-  var fn = vi.fn(function(selector) {
-    var state = {
+  const fn = vi.fn(function(selector) {
+    const state = {
       certificates: mockCertificates,
       courses: mockCourses,
       isGeneratingCertificate: mockIsGenerating,
       generateCertificate: mockGenerateCertificate,
       isCourseComplete: function(courseId: string) {
-        for (var i = 0; i < mockCourses.length; i++) {
+        for (let i = 0; i < mockCourses.length; i++) {
           if (mockCourses[i].id === courseId && mockCourses[i].progress === 100) return true;
         }
         return false;
@@ -74,7 +77,7 @@ vi.mock('../store/educationStore', function() {
   (fn as any).getState = function() {
     return {
       isCourseComplete: function(courseId: string) {
-        for (var i = 0; i < mockCourses.length; i++) {
+        for (let i = 0; i < mockCourses.length; i++) {
           if (mockCourses[i].id === courseId && mockCourses[i].progress === 100) return true;
         }
         return false;
@@ -86,56 +89,57 @@ vi.mock('../store/educationStore', function() {
 
 vi.mock('../store/authStore', () => ({
   useAuthStore: vi.fn(function(selector) {
-    var state = { user: { name: 'Test Student' } };
+    const state = { user: { name: 'Test Student' } };
     return selector ? selector(state) : state;
   }),
 }));
 
 vi.mock('../hooks/useT', () => ({
   useT: function() {
-    var translations: Record<string, string> = {
+    const translations: Record<string, string> = {
       'education.certificatesTitle': 'Certificates',
       'education.certificate': 'Certificate',
       'education.noCertificatesYet': 'No certificates yet',
-      'education.noCertificatesDesc': 'Complete a course to earn your first certificate',
-      'education.coursesReady': 'Courses Ready for Certificate',
+      'education.noCertificatesDesc': 'Complete all lessons in a course to earn your completion certificate.',
+      'education.coursesReadyForCert': 'Courses Ready for Certificate',
       'education.browseCourses': 'Browse Courses',
       'education.yourCertificates': 'Your Certificates',
-      'education.coursesCompleted': '{count} course completed',
-      'education.coursesCompleted_plural': '{count} courses completed',
       'education.learningStats': 'Learning Stats',
       'education.lessonsDone': 'Lessons Done',
       'education.distinctions': 'Distinctions',
-      'education.gradeDistinction': 'Distinction',
-      'education.gradeMerit': 'Merit',
       'education.completed': 'Completed',
-      'education.certGenerated': 'Certificate Generated!',
-      'education.certGeneratedMsg': 'Certificate for {name} is ready!',
-      'education.certError': 'Error',
-      'education.certGenerateError': 'Failed to generate certificate',
-      'education.pdfError': 'PDF generation failed',
       'education.generatingCertificate': 'Generating your certificate...',
-      'education.ofCompletion': 'Of Completion',
-      'education.thisCertifies': 'This certifies that',
-      'education.hasCompleted': 'has successfully completed',
+      'education.ofCompletion': 'OF COMPLETION',
+      'education.thisCertifies': 'This is to certify that',
+      'education.hasCompleted': 'has successfully completed the course',
       'education.withDistinction': 'With Distinction',
       'education.withMerit': 'With Merit',
-      'education.lessonsStat': 'Lessons',
+      'education.lessonsLabel': 'lessons',
+      'education.a': 'Distinction',
+      'education.b': 'Merit',
+      'education.c': 'Completed',
       'education.issuedOn': 'Issued On',
       'education.quizScore': 'Quiz Score',
-      'education.serialN': 'Serial No: {num}',
-      'education.footerText': 'Verified by Toroloom',
+      'education.serialNo': 'Serial No',
+      'education.toroloomTagline': 'Toroloom — AI-Powered Trading & Investment Platform',
       'education.pdfGenerated': 'PDF generated successfully',
       'education.pdfNotGenerated': 'PDF not yet generated',
       'education.sharePdf': 'Share PDF',
       'education.generateSharePdf': 'Generate & Share PDF',
       'education.openPdf': 'Open PDF',
       'education.view': 'View',
+      'education.certificateGenerated': '🎉 Certificate Generated!',
+      'education.certificateGeneratedDesc': 'Your certificate for',
+      'education.certificateViewShare': 'is ready. You can view or share it as a PDF.',
+      'education.certificateGenerateError': 'Could not generate certificate. Make sure the course is complete.',
+      'education.pdfGenerateError': 'Could not generate PDF. Please try again.',
+      'education.pdfOpenError': 'Could not open PDF file.',
+      'app.error': 'Error',
     };
     return {
       t: function(key: string, params: Record<string, string>) {
         if (params) {
-          var r = translations[key] || key;
+          let r = translations[key] || key;
           Object.keys(params).forEach(function(k) { r = r.replace('{' + k + '}', String(params[k])); });
           return r;
         }
@@ -184,7 +188,7 @@ vi.mock('@react-navigation/native', () => ({
 
 // Mock react-native — provide all needed exports, override Share and Alert
 vi.mock('react-native', function() {
-  var shareImpl = { share: vi.fn().mockResolvedValue({ action: 'sharedAction' }) };
+  const shareImpl = { share: vi.fn().mockResolvedValue({ action: 'sharedAction' }) };
   exposedShare = shareImpl;
   return {
     View: 'View', Text: 'Text', ScrollView: 'Scroll', TouchableOpacity: 'Touchable',
@@ -210,7 +214,7 @@ import CertificateScreen from '../screens/education/CertificateScreen';
 
 // ==================== Mock Data ====================
 
-var mockCertA = {
+const mockCertA = {
   id: 'cert_1', courseId: 'c1', courseTitle: 'Stock Market Basics',
   userName: 'Test Student', completedLessons: 8, totalLessons: 8,
   grade: 'A', quizScore: 95, quizPercent: 95,
@@ -218,7 +222,7 @@ var mockCertA = {
   pdfUri: 'file://cert-1.pdf',
 };
 
-var mockCertB = {
+const mockCertB = {
   id: 'cert_2', courseId: 'c2', courseTitle: 'Technical Analysis Mastery',
   userName: 'Test Student', completedLessons: 8, totalLessons: 8,
   grade: 'B', quizScore: 82, quizPercent: 82,
@@ -226,13 +230,13 @@ var mockCertB = {
   pdfUri: undefined,
 };
 
-var mockCourseComplete = {
+const mockCourseComplete = {
   id: 'c3', title: 'Mutual Funds & SIP', description: 'Master mutual fund investing.',
   thumbnail: '💰', duration: '4 hours', lessons: 6, progress: 100,
   level: 'beginner', category: 'Funds', rating: 4.6, enrolledCount: 100,
 };
 
-var mockCourseIncomplete = {
+const mockCourseIncomplete = {
   id: 'c4', title: 'Advanced Trading', description: 'Learn advanced trading.',
   thumbnail: '📊', duration: '3 hours', lessons: 5, progress: 30,
   level: 'advanced', category: 'Trading', rating: 4.5, enrolledCount: 50,
@@ -258,21 +262,21 @@ describe('CertificateScreen — Empty State', function() {
   });
 
   it('renders without crashing', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.toJSON()).not.toBeNull();
   });
 
   it('renders the certificates title in header', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Certificates')).toBeDefined();
   });
 
   it('renders empty state when no certificates exist', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('No certificates yet')).toBeDefined();
@@ -280,14 +284,14 @@ describe('CertificateScreen — Empty State', function() {
   });
 
   it('renders Browse Courses button in empty state', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Browse Courses')).toBeDefined();
   });
 
   it('navigates to Learn when Browse Courses is pressed', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Browse Courses')); });
@@ -313,21 +317,21 @@ describe('CertificateScreen — Eligible Courses in Empty State', function() {
   });
 
   it('shows eligible section when completed courses without cert exist', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Courses Ready for Certificate')).toBeDefined();
   });
 
   it('shows eligible course title', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Mutual Funds & SIP')).toBeDefined();
   });
 
   it('shows eligible course metadata', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText(/6 lessons/)).toBeDefined();
@@ -340,7 +344,7 @@ describe('CertificateScreen — Eligible Courses in Empty State', function() {
       userName: 'Test Student', completedLessons: 6, totalLessons: 6,
       grade: 'A', issuedAt: '2026-03-01T00:00:00.000Z', serialNumber: 'SN-003', pdfUri: undefined,
     });
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Mutual Funds & SIP')); });
@@ -349,7 +353,7 @@ describe('CertificateScreen — Eligible Courses in Empty State', function() {
 
   it('hides eligible section when completed course already has a certificate', function() {
     mockCertificates = [{ ...mockCertA, courseId: 'c3' }];
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     // Has 1 cert, so renders list view, not empty state
@@ -360,7 +364,7 @@ describe('CertificateScreen — Eligible Courses in Empty State', function() {
 
   it('shows error alert when generate returns null', async function() {
     mockGenerateCertificate.mockResolvedValue(null);
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Mutual Funds & SIP')); });
@@ -390,14 +394,14 @@ describe('CertificateScreen — Certificate List', function() {
   });
 
   it('renders Your Certificates section title', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Your Certificates')).toBeDefined();
   });
 
   it('renders certificate course titles', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Stock Market Basics')).toBeDefined();
@@ -405,7 +409,7 @@ describe('CertificateScreen — Certificate List', function() {
   });
 
   it('renders grade badges', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Distinction')).toBeDefined();
@@ -413,7 +417,7 @@ describe('CertificateScreen — Certificate List', function() {
   });
 
   it('renders serial numbers for each certificate', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('#SN-001')).toBeDefined();
@@ -421,14 +425,14 @@ describe('CertificateScreen — Certificate List', function() {
   });
 
   it('renders lesson completion stats', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('8/8 lessons')).toBeDefined();
   });
 
   it('renders quiz percentages', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Quiz: 95%')).toBeDefined();
@@ -436,15 +440,15 @@ describe('CertificateScreen — Certificate List', function() {
   });
 
   it('renders certificate dates', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    var dates = result.getAllByText('Jan 15, 2026');
+    const dates = result.getAllByText('Jan 15, 2026');
     expect(dates.length).toBeGreaterThan(0);
   });
 
   it('renders Learning Stats card', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Learning Stats')).toBeDefined();
@@ -454,14 +458,14 @@ describe('CertificateScreen — Certificate List', function() {
   });
 
   it('renders header count badge', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('2')).toBeDefined();
   });
 
   it('opens certificate preview when a card is pressed', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -489,7 +493,7 @@ describe('CertificateScreen — Certificate Preview', function() {
   });
 
   it('shows recipient name in preview', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -497,7 +501,7 @@ describe('CertificateScreen — Certificate Preview', function() {
   });
 
   it('shows course title in preview', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -505,7 +509,7 @@ describe('CertificateScreen — Certificate Preview', function() {
   });
 
   it('shows With Distinction grade badge for grade A', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -514,7 +518,7 @@ describe('CertificateScreen — Certificate Preview', function() {
 
   it('shows With Merit grade badge for grade B', function() {
     mockCertificates = [mockCertB];
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Technical Analysis Mastery')); });
@@ -522,17 +526,17 @@ describe('CertificateScreen — Certificate Preview', function() {
   });
 
   it('shows lesson stats in preview', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('8/8')).toBeDefined();
-    expect(result.getByText('Lessons')).toBeDefined();
+    expect(result.getByText('lessons')).toBeDefined();
     expect(result.getByText('Issued On')).toBeDefined();
   });
 
   it('shows quiz score in preview', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -541,7 +545,7 @@ describe('CertificateScreen — Certificate Preview', function() {
   });
 
   it('shows serial number in preview', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -568,7 +572,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
 
   it('shows PDF generated status when pdfUri exists', function() {
     mockCertificates = [mockCertA];
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -577,7 +581,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
 
   it('shows PDF not generated status when no pdfUri', function() {
     mockCertificates = [mockCertB];
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Technical Analysis Mastery')); });
@@ -586,7 +590,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
 
   it('shows Share PDF text when pdfUri exists', function() {
     mockCertificates = [mockCertA];
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -595,7 +599,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
 
   it('shows Generate & Share PDF text when pdfUri is empty', function() {
     mockCertificates = [mockCertB];
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Technical Analysis Mastery')); });
@@ -604,7 +608,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
 
   it('calls Share.share when Share PDF is pressed (pdfUri exists)', async function() {
     mockCertificates = [mockCertA];
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -616,7 +620,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
 
   it('includes course title and serial in share content', async function() {
     mockCertificates = [mockCertA];
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
@@ -647,7 +651,7 @@ describe('CertificateScreen — Generating Overlay', function() {
   });
 
   it('shows generating overlay when isGeneratingCertificate is true', function() {
-    var result = render(
+    const result = render(
       <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(result.getByText('Generating your certificate...')).toBeDefined();

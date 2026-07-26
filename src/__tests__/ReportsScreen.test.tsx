@@ -139,6 +139,188 @@ vi.mock('../store/portfolioAnalyticsStore', () => ({
 // ── Import the component ────────────────────────────────────
 import ReportsScreen from '../screens/reports/ReportsScreen';
 
+// ==================== Mock useT hook ====================
+const app: Record<string, string> = {
+    'cancel': 'Cancel',
+    'ok': 'OK',
+};
+const reports: Record<string, string> = {
+    'addAlertFor': 'Add alert for {symbol}',
+    'alertAdded': 'Alert Added',
+    'analytics': 'Analytics',
+    'averageLoss': 'Average Loss',
+    'averageWin': 'Average Win',
+    'avgHolding': 'Avg Holding',
+    'avgHoldingPeriod': 'Avg Holding Period',
+    'basedOnTradeHistory': 'Based On Trade History',
+    'bestTrade': 'Best Trade',
+    'capitalGainsSummary': 'Capital Gains Tax Summary',
+    'emptyHoldings': 'Start investing to see your holdings here',
+    'contractNoteParser': 'Contract Note Parser',
+    'contractNoteParserSub': 'Upload broker PDFs to extract trades',
+    'csvDesc': 'Csv Desc',
+    'csvSpreadsheet': 'Csv Spreadsheet',
+    'current': 'Current',
+    'currentPeriod': 'Current Period',
+    'dayChange': 'Day Change',
+    'dayGainAlertCreated': 'Day gain alert created for {symbol}',
+    'dayReturn': 'Day Return',
+    'dayWinRate': 'Day Win Rate',
+    'detailedMetrics': 'Detailed Metrics',
+    'estTax': 'Est Tax',
+    'estimatedTaxLiability': 'Estimated Tax Liability',
+    'exempt': 'Exempt',
+    'exportError': 'Export Error',
+    'exportErrorMsg': 'An error occurred while exporting.',
+    'exportFailed': 'Export Failed',
+    'exportFailedMsg': 'Could not export CSV. Please try again.',
+    'exportReport': 'Export Report',
+    'exportSubtitle': 'Export Subtitle',
+    'fromClosed': 'From closed positions',
+    'fromOpen': 'From open positions',
+    'fullPeriodSummary': 'Full Period Summary',
+    'fyEstimated': 'Fy Estimated',
+    'historicalPnl': 'Historical Pnl',
+    'holdings': 'Holdings',
+    'invested': 'Invested',
+    'investmentOverview': 'Investment Overview',
+    'live': 'LIVE',
+    'longTerm': 'Long-Term',
+    'losses': 'Losses',
+    'ltcgRule': 'Ltcg Rule',
+    'maxConsecutiveLosses': 'Max Consecutive Losses',
+    'maxConsecutiveWins': 'Max Consecutive Wins',
+    'maxDD': 'Max DD',
+    'maxDrawdown': 'Max Drawdown',
+    'monthlyReturns': 'Monthly Returns',
+    'months': 'Months',
+    'noHoldings': 'No Holdings',
+    'noHoldingsSub': 'Start investing to see your holdings here',
+    'pdfReport': 'Pdf Report',
+    'pdfReportDesc': 'Pdf Report Desc',
+    'peak': 'Peak',
+    'periodComparison': 'Period Comparison',
+    'pnlAlertCreated': 'P&L alert created for {symbol}',
+    'pnlOverTime': 'P&L Over Time',
+    'portfolioValue': 'Portfolio Value',
+    'positiveDays': 'Positive Days',
+    'previousPeriod': 'Previous Period',
+    'profitFactor': 'Profit Factor',
+    'range': 'Range',
+    'realizedPnl': 'Realized P&L',
+    'reportExported': 'Report Exported',
+    'reportExportedMsg': 'Report exported as {format}',
+    'return': 'Return',
+    'returnChange': 'Return Change',
+    'returnPercent': 'Return %',
+    'riskAndReturn': 'Risk & Return',
+    'section80cTip': 'Section80c Tip',
+    'sectorAllocation': 'Sector Allocation',
+    'sharpe': 'Sharpe',
+    'sharpeRatio': 'Sharpe Ratio',
+    'shortTerm': 'Short-Term',
+    'stcgRule': 'Stcg Rule',
+    'subtitle': 'Advanced portfolio intelligence',
+    'tabHistory': 'History',
+    'tabHoldings': 'Holdings',
+    'tabPerformance': 'Performance',
+    'tabPnl': 'P&L',
+    'tabTax': 'Tax',
+    'taxHarvesting': 'Tax Harvesting',
+    'taxHarvestingTip': 'Tax Harvesting Tip',
+    'taxRules': 'Tax Rules (India FY 2025-26)',
+    'taxSavingTips': 'Tax Saving Tips',
+    'taxable': 'Taxable',
+    'todaysPerformance': 'Today\'s Performance',
+    'total': 'Total',
+    'totalPnl': 'Total Pnl',
+    'totalReturn': 'Total Return',
+    'tradeStatistics': 'Trade Statistics',
+    'trough': 'Trough',
+    'unrealizedPnl': 'Unrealized P&L',
+    'volatility': 'Volatility',
+    'volatilityChange': 'Volatility Change',
+    'winDays': 'Win Days',
+    'winRate': 'Win Rate',
+    'winRateChange': 'Win Rate Change',
+    'wins': 'Wins',
+    'worstTrade': 'Worst Trade',
+    'yearlyReturns': 'Yearly Returns',
+    'capitalGains': 'Capital Gains Tax Summary',
+    'section80c': 'Section 80C — ELSS',
+    'taxSavingTipsTitle': 'Tax Saving Tips',
+    'tradeStats': 'Trade Statistics',
+    'taxReport': 'Tax Report',
+};
+
+const performanceChart: Record<string, string> = {
+    'emptyHoldings': 'Start investing to see your holdings here',
+};
+
+const translations: Record<string, any> = {
+  app,
+  reports,
+  performanceChart,
+};
+
+
+function resolveT(key: string, params?: Record<string, any>): string {
+  const parts = key.split('.');
+  const rootNs = parts[0];
+  const subKey = parts.slice(1).join('.');
+
+  const obj = translations[rootNs];
+  if (!obj) {
+    const parts2 = key.split('.');
+    const lastSeg = parts2[parts2.length - 1] || key;
+    return lastSeg
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (s: string) => s.toUpperCase())
+      .trim();
+  }
+
+  if (params && params.count !== undefined && params.count !== 1) {
+    const pluralKey = subKey + '_plural';
+    if (pluralKey in obj && typeof obj[pluralKey] === 'string') {
+      let result: string = obj[pluralKey];
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+      return result;
+    }
+  }
+
+  if (subKey in obj && typeof obj[subKey] === 'string') {
+    let result: string = obj[subKey];
+    if (params) {
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+    }
+    return result;
+  }
+
+  const lastSeg = parts[parts.length - 1] || key;
+  return lastSeg
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s: string) => s.toUpperCase())
+    .trim();
+}
+
+
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+  default: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
+
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockPortfolioState = {

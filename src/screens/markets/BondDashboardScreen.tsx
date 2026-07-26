@@ -14,7 +14,7 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -28,27 +28,16 @@ import {
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { mockBonds } from '../../constants/mockData';
 import type { Bond } from '../../types';
+import { bondsApi } from '../../services/api';
 
 const { width } = Dimensions.get('window');
 
 // ─── Tab config ──────────────────────────────────────────────
 type TabKey = 'govt' | 'corporate' | 'taxfree' | 'summary';
-
-interface TabConfig {
-  key: TabKey;
-  label: string;
-  icon: string;
-}
-
-const TABS: TabConfig[] = [
-  { key: 'govt',     label: 'Govt',     icon: 'shield-checkmark' },
-  { key: 'corporate',label: 'Corporate', icon: 'business' },
-  { key: 'taxfree',  label: 'Tax-Free',  icon: 'leaf' },
-  { key: 'summary',  label: 'Summary',   icon: 'stats-chart' },
-];
 
 // ─── Rating colors ──────────────────────────────────────────
 const RATING_COLORS: Record<string, string> = {
@@ -83,6 +72,7 @@ function BondRow({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const fmtPct = (v: number) => `${v.toFixed(2)}%`;
   const fmtCr = (v: number) => `₹${(v / 1000).toFixed(0)}K Cr`;
   const maturityDate = new Date(bond.maturityDate).toLocaleDateString('en-IN', {
@@ -108,21 +98,21 @@ function BondRow({
         {/* Metrics row */}
         <View style={styles.bondMetrics}>
           <View style={styles.bondMetric}>
-            <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Coupon</Text>
+            <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('bondDashboard.coupon')}</Text>
             <Text style={[styles.metricValue, { color: colors.text }]}>{fmtPct(bond.couponRate)}</Text>
           </View>
           <View style={styles.bondMetric}>
-            <Text style={[styles.metricLabel, { color: colors.textMuted }]}>YTM</Text>
+            <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('bondDashboard.ytm')}</Text>
             <Text style={[styles.metricValue, { color: yieldUp ? '#FF5252' : '#00E676' }]}>
               {fmtPct(bond.yieldToMaturity)}
             </Text>
           </View>
           <View style={styles.bondMetric}>
-            <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Maturity</Text>
+            <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('bondDashboard.maturity')}</Text>
             <Text style={[styles.metricValue, { color: colors.text }]}>{bond.yearsToMaturity.toFixed(1)}y</Text>
           </View>
           <View style={styles.bondMetric}>
-            <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Price</Text>
+            <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('bondDashboard.price')}</Text>
             <Text style={[styles.metricValue, { color: colors.text }]}>
               ₹{bond.currentPrice.toFixed(2)}
             </Text>
@@ -137,11 +127,11 @@ function BondRow({
             color={yieldUp ? '#FF5252' : '#00E676'}
           />
           <Text style={[styles.yieldChangeText, { color: yieldUp ? '#FF5252' : '#00E676' }]}>
-            Yield {yieldUp ? '+' : ''}{bond.yieldChangeBps} bps today
+            {t('bondDashboard.yieldChange', { dir: yieldUp ? '+' : '', bps: bond.yieldChangeBps })}
           </Text>
           {!bond.isTaxable && (
             <View style={[styles.taxFreeBadge, { backgroundColor: '#00E67620' }]}>
-              <Text style={[styles.taxFreeText, { color: '#00E676' }]}>Tax-Free</Text>
+              <Text style={[styles.taxFreeText, { color: '#00E676' }]}>{t('bondDashboard.taxFree')}</Text>
             </View>
           )}
         </View>
@@ -152,26 +142,26 @@ function BondRow({
             <Text style={[styles.expandedDesc, { color: colors.textSecondary }]}>{bond.description}</Text>
             <View style={styles.expandedGrid}>
               <View style={styles.expandedItem}>
-                <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Face Value</Text>
+                <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('bondDashboard.faceValue')}</Text>
                 <Text style={[styles.expandedValue, { color: colors.text }]}>₹{bond.faceValue}</Text>
               </View>
               <View style={styles.expandedItem}>
-                <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Issue Size</Text>
+                <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('bondDashboard.issueSize')}</Text>
                 <Text style={[styles.expandedValue, { color: colors.text }]}>{fmtCr(bond.issueSize)}</Text>
               </View>
               <View style={styles.expandedItem}>
-                <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Maturity</Text>
+                <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('bondDashboard.maturity')}</Text>
                 <Text style={[styles.expandedValue, { color: colors.text }]}>{maturityDate}</Text>
               </View>
               <View style={styles.expandedItem}>
-                <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Listed</Text>
+                <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('bondDashboard.listed')}</Text>
                 <Text style={[styles.expandedValue, { color: bond.isListed ? '#00E676' : colors.textMuted }]}>
-                  {bond.isListed ? 'Yes' : 'No'}
+                  {bond.isListed ? t('bondDashboard.yes') : t('bondDashboard.no')}
                 </Text>
               </View>
               {bond.sector && (
                 <View style={styles.expandedItem}>
-                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Sector</Text>
+                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('bondDashboard.sector')}</Text>
                   <Text style={[styles.expandedValue, { color: colors.text }]}>{bond.sector}</Text>
                 </View>
               )}
@@ -189,14 +179,31 @@ function BondRow({
 
 export default function BondDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
+  const [bondData, setBondData] = useState<Bond[]>(mockBonds);
   const [activeTab, setActiveTab] = useState<TabKey>('govt');
+
+  // Tab config (inside component for t() access)
+  const TABS = useMemo(() => [
+    { key: 'govt' as TabKey,      label: t('bondDashboard.govt'),     icon: 'shield-checkmark' },
+    { key: 'corporate' as TabKey, label: t('bondDashboard.corporate'), icon: 'business' },
+    { key: 'taxfree' as TabKey,   label: t('bondDashboard.taxFreeTab'),  icon: 'leaf' },
+    { key: 'summary' as TabKey,   label: t('bondDashboard.summary'),   icon: 'stats-chart' },
+  ], [t]);
+
+  // ── Fetch bonds from backend API with fallback to mockBonds ────────
+  useEffect(() => {
+    bondsApi.getAll().then(data => {
+      if (data.length > 0) setBondData(data);
+    });
+  }, []);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
   // Filter bonds by tab
   const filteredBonds = useMemo(() => {
-    let bonds = [...mockBonds];
+    let bonds = [...bondData];
 
     // Tab filter
     if (activeTab === 'govt') {
@@ -225,9 +232,9 @@ export default function BondDashboardScreen({ navigation }: any) {
 
   // Summary stats
   const summaryStats = useMemo(() => {
-    const govtBonds = mockBonds.filter(b => b.category === 'government' || b.category === 'state');
-    const corpTaxable = mockBonds.filter(b => b.category === 'corporate' && b.isTaxable);
-    const taxFree = mockBonds.filter(b => b.category === 'corporate' && !b.isTaxable);
+    const govtBonds = bondData.filter(b => b.category === 'government' || b.category === 'state');
+    const corpTaxable = bondData.filter(b => b.category === 'corporate' && b.isTaxable);
+    const taxFree = bondData.filter(b => b.category === 'corporate' && !b.isTaxable);
 
     const avgYTM = (bonds: Bond[]) =>
       bonds.length > 0 ? bonds.reduce((s, b) => s + b.yieldToMaturity, 0) / bonds.length : 0;
@@ -246,7 +253,7 @@ export default function BondDashboardScreen({ navigation }: any) {
   // Yield curve data
   const yieldCurve = useMemo(() => {
     const buckets: Record<string, { yield: number; count: number }> = {};
-    for (const b of mockBonds) {
+    for (const b of bondData) {
       const key = yearsToBucket(b.yearsToMaturity);
       if (!buckets[key]) buckets[key] = { yield: 0, count: 0 };
       buckets[key].yield += b.yieldToMaturity;
@@ -262,15 +269,22 @@ export default function BondDashboardScreen({ navigation }: any) {
 
   // Corporate sector categories
   const corpSectors = useMemo(() => {
-    const sectors = new Set(mockBonds.filter(b => b.category === 'corporate' && b.sector).map(b => b.sector!));
-    return ['All', ...Array.from(sectors)];
-  }, []);
+    const sectors = new Set(bondData.filter(b => b.category === 'corporate' && b.sector).map(b => b.sector!));
+    return [t('bondDashboard.all'), ...Array.from(sectors)];
+  }, [t]);
 
   const handleBondPress = useCallback((id: string) => {
     setExpandedId(prev => prev === id ? null : id);
   }, []);
 
   const fmtPct = (v: number) => `${v.toFixed(2)}%`;
+
+  // Search placeholder based on active tab
+  const searchPlaceholder = useMemo(() => {
+    if (activeTab === 'govt') return t('bondDashboard.searchGovt');
+    if (activeTab === 'taxfree') return t('bondDashboard.searchTaxFree');
+    return t('bondDashboard.searchCorporate');
+  }, [activeTab, t]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -280,8 +294,8 @@ export default function BondDashboardScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={styles.headerTitles}>
-            <Text style={[styles.title, { color: colors.text }]}>Bond Dashboard</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>Fixed Income Marketplace</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('bondDashboard.title')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('bondDashboard.subtitle')}</Text>
           </View>
         </View>
 
@@ -311,7 +325,7 @@ export default function BondDashboardScreen({ navigation }: any) {
             <Ionicons name="search" size={16} color={colors.textMuted} />
             <TextInput
               style={[styles.searchInput, { color: colors.text }]}
-              placeholder={`Search ${activeTab === 'govt' ? 'government bonds' : activeTab === 'taxfree' ? 'tax-free bonds' : 'corporate bonds'}...`}
+              placeholder={searchPlaceholder}
               placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -328,11 +342,11 @@ export default function BondDashboardScreen({ navigation }: any) {
         {activeTab === 'corporate' && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
             {corpSectors.map(s => {
-              const isActive = filterCategory === s || (s === 'All' && !filterCategory);
+              const isActive = filterCategory === s || (s === t('bondDashboard.all') && !filterCategory);
               return (
                 <Pressable
                   key={s}
-                  onPress={() => setFilterCategory(s === 'All' ? null : s)}
+                  onPress={() => setFilterCategory(s === t('bondDashboard.all') ? null : s)}
                   style={[styles.filterChip, { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary + '40' : colors.border }]}
                 >
                   <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textMuted }]}>{s}</Text>
@@ -352,7 +366,7 @@ export default function BondDashboardScreen({ navigation }: any) {
           <Animated.View entering={FadeInDown.duration(300)}>
             <View style={styles.resultCountRow}>
               <Text style={[styles.resultCount, { color: colors.textMuted }]}>
-                {filteredBonds.length} bond{filteredBonds.length !== 1 ? 's' : ''}
+                {t('bondDashboard.bondCount', { count: filteredBonds.length })}
               </Text>
             </View>
             {filteredBonds.length > 0 ? (
@@ -367,8 +381,8 @@ export default function BondDashboardScreen({ navigation }: any) {
             ) : (
               <View style={styles.emptyState}>
                 <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No bonds found</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>Try adjusting your search or filters</Text>
+                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('bondDashboard.noBondsFound')}</Text>
+                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('bondDashboard.adjustSearch')}</Text>
               </View>
             )}
           </Animated.View>
@@ -380,10 +394,10 @@ export default function BondDashboardScreen({ navigation }: any) {
             {/* Overview Cards */}
             <View style={styles.summaryGrid}>
               {[
-                { label: 'Total Bonds', value: summaryStats.all.toString(), icon: '📊', color: '#6C63FF' },
-                { label: 'Avg Govt YTM', value: fmtPct(summaryStats.govt.avgYTM), icon: '🏛️', color: '#3B82F6' },
-                { label: 'Avg Corp YTM', value: fmtPct(summaryStats.corp.avgYTM), icon: '🏢', color: '#00E676' },
-                { label: 'Avg Tax-Free', value: fmtPct(summaryStats.taxfree.avgYTM), icon: '🌿', color: '#FFC107' },
+                { label: t('bondDashboard.totalBonds'), value: summaryStats.all.toString(), icon: '📊', color: '#6C63FF' },
+                { label: t('bondDashboard.avgGovtYtm'), value: fmtPct(summaryStats.govt.avgYTM), icon: '🏛️', color: '#3B82F6' },
+                { label: t('bondDashboard.avgCorpYtm'), value: fmtPct(summaryStats.corp.avgYTM), icon: '🏢', color: '#00E676' },
+                { label: t('bondDashboard.avgTaxFreeYtm'), value: fmtPct(summaryStats.taxfree.avgYTM), icon: '🌿', color: '#FFC107' },
               ].map((stat, i) => (
                 <Animated.View key={stat.label} entering={FadeInUp.duration(300).delay(i * 60)} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
                   <Text style={styles.summaryIcon}>{stat.icon}</Text>
@@ -395,8 +409,8 @@ export default function BondDashboardScreen({ navigation }: any) {
 
             {/* Yield Curve */}
             <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Yield Curve</Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Average YTM by maturity bucket</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.yieldCurve')}</Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('bondDashboard.yieldCurveSub')}</Text>
               <View style={styles.yieldCurveContent}>
                 {yieldCurve.map((pt, i) => {
                   const maxYield = Math.max(...yieldCurve.map(p => p.avgYield), 1);
@@ -415,18 +429,18 @@ export default function BondDashboardScreen({ navigation }: any) {
 
             {/* Category Breakdown */}
             <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Category Breakdown</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.categoryBreakdown')}</Text>
               {[
-                { label: 'Government Bonds', icon: '🏛️', count: summaryStats.govt.count, avgCoupon: summaryStats.govt.avgCoupon, color: '#3B82F6' },
-                { label: 'State Bonds (SDLs)', icon: '🏙️', count: 2, avgCoupon: 7.32, color: '#6C63FF' },
-                { label: 'Corporate Bonds', icon: '🏢', count: summaryStats.corp.count, avgCoupon: summaryStats.corp.avgCoupon, color: '#00E676' },
-                { label: 'Tax-Free Bonds', icon: '🌿', count: summaryStats.taxfree.count, avgCoupon: summaryStats.taxfree.avgCoupon, color: '#FFC107' },
+                { label: t('bondDashboard.govtBonds'), icon: '🏛️', count: summaryStats.govt.count, avgCoupon: summaryStats.govt.avgCoupon, color: '#3B82F6' },
+                { label: t('bondDashboard.stateBonds'), icon: '🏙️', count: 2, avgCoupon: 7.32, color: '#6C63FF' },
+                { label: t('bondDashboard.corpBonds'), icon: '🏢', count: summaryStats.corp.count, avgCoupon: summaryStats.corp.avgCoupon, color: '#00E676' },
+                { label: t('bondDashboard.taxFreeBonds'), icon: '🌿', count: summaryStats.taxfree.count, avgCoupon: summaryStats.taxfree.avgCoupon, color: '#FFC107' },
               ].map((cat, i) => (
                 <View key={cat.label} style={[styles.catRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
                   <Text style={styles.catIcon}>{cat.icon}</Text>
                   <View style={styles.catInfo}>
                     <Text style={[styles.catLabel, { color: colors.text }]}>{cat.label}</Text>
-                    <Text style={[styles.catCount, { color: colors.textMuted }]}>{cat.count} bonds</Text>
+                    <Text style={[styles.catCount, { color: colors.textMuted }]}>{t('bondDashboard.bondCount', { count: cat.count })}</Text>
                   </View>
                   <Text style={[styles.catYield, { color: cat.color }]}>{fmtPct(cat.avgCoupon)}</Text>
                 </View>
@@ -437,11 +451,9 @@ export default function BondDashboardScreen({ navigation }: any) {
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="information-circle" size={18} color={colors.primary} />
               <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>About Bond Markets</Text>
+                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('bondDashboard.aboutBondMarkets')}</Text>
                 <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  Indian bond market size is ~₹200 lakh crore. G-Secs form 60% of the market. 
-                  Corporate bonds offer higher yields than G-Secs with additional credit risk. 
-                  Tax-free bonds provide coupon income exempt from income tax, making them attractive for high-tax-bracket investors.
+                  {t('bondDashboard.aboutBondMarketsDesc')}
                 </Text>
               </View>
             </View>

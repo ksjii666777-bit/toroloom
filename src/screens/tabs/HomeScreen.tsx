@@ -988,21 +988,21 @@ function QuickAddAlertForm({
   }, [selectedSymbol, sensitivity, direction, availableStocks, onAdd]);
 
   const sensOptions: { key: SentimentAlertSensitivity; label: string; desc: string; color: string }[] = [
-    { key: 'low', label: 'Low', desc: '25pt+', color: '#10B981' },
-    { key: 'medium', label: 'Med', desc: '15pt+', color: '#F59E0B' },
-    { key: 'high', label: 'High', desc: '10pt+', color: '#EF4444' },
+    { key: 'low', label: t('alerts.sensitivityLow'), desc: t('alerts.sensitivityLowDesc'), color: '#10B981' },
+    { key: 'medium', label: t('alerts.sensitivityMed'), desc: t('alerts.sensitivityMedDesc'), color: '#F59E0B' },
+    { key: 'high', label: t('alerts.sensitivityHigh'), desc: t('alerts.sensitivityHighDesc'), color: '#EF4444' },
   ];
 
   const dirOptions: { key: SentimentAlertDirection; label: string; icon: string }[] = [
-    { key: 'improving', label: 'Up', icon: 'trending-up' },
-    { key: 'deteriorating', label: 'Down', icon: 'trending-down' },
-    { key: 'both', label: 'Both', icon: 'swap-vertical' },
+    { key: 'improving', label: t('alerts.directionUp'), icon: 'trending-up' },
+    { key: 'deteriorating', label: t('alerts.directionDown'), icon: 'trending-down' },
+    { key: 'both', label: t('alerts.directionBoth'), icon: 'swap-vertical' },
   ];
 
   return (
     <>
       {/* Stock Picker */}
-      <Text style={[styles.qamLabel, { color: colors.textSecondary }]}>{t('watchlist.name')}</Text>
+      <Text style={[styles.qamLabel, { color: colors.textSecondary }]}>{t('alerts.selectStock')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.qamStockRow}>
         {availableStocks.map(s => {
           const isActive = s.symbol === selectedSymbol;
@@ -1024,7 +1024,7 @@ function QuickAddAlertForm({
       </ScrollView>
 
       {/* Sensitivity */}
-      <Text style={[styles.qamLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Sensitivity</Text>
+      <Text style={[styles.qamLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>{t('alerts.sensitivity')}</Text>
       <View style={styles.qamOptRow}>
         {sensOptions.map(opt => {
           const isActive = sensitivity === opt.key;
@@ -1045,7 +1045,7 @@ function QuickAddAlertForm({
       </View>
 
       {/* Direction */}
-      <Text style={[styles.qamLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Direction</Text>
+      <Text style={[styles.qamLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>{t('alerts.direction')}</Text>
       <View style={styles.qamOptRow}>
         {dirOptions.map(opt => {
           const isActive = direction === opt.key;
@@ -1073,7 +1073,7 @@ function QuickAddAlertForm({
         </TouchableOpacity>
         <TouchableOpacity style={styles.qamAddBtn} onPress={handleAdd}>
           <Ionicons name="add-circle" size={18} color="#FFF" />
-          <Text style={styles.qamAddText}>Add Rule</Text>
+          <Text style={styles.qamAddText}>{t('alerts.addRule')}</Text>
         </TouchableOpacity>
       </View>
     </>

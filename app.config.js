@@ -13,7 +13,7 @@
 const baseConfig = require('./app.json');
 
 const APP_VARIANT = process.env.APP_VARIANT || 'production';
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://toroloom-production.up.railway.app/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://toroloom-production.up.railway.app/api';  // ← Railway deploy
 const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN || '';
 
 // Variant-specific config

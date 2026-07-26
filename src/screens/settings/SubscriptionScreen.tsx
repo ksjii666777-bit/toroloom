@@ -5,6 +5,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, withDelay, with
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../../store/subscriptionStore';
 import type { SubscriptionFeature, SubscriptionTier } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -19,6 +20,7 @@ const CARD_WIDTH = (width - SPACING.xl * 2 - CARD_GAP * 2) / 3;
 
 export default function SubscriptionScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { subscription, isLoading, initiateUpgrade, cancelSubscription, isInTrial,
     trialDaysRemaining, hasTrialAvailable, couponInput: _couponInput, couponResult, isApplyingCoupon,
@@ -137,15 +139,15 @@ export default function SubscriptionScreen({ navigation }: any) {
     const displayPrice = discounted.final;
 
     Alert.alert(
-      `Upgrade to ${plan.name}`,
+      `${t('subscription.upgradeTo')} ${plan.name}`,
       (couponResult?.valid
-        ? `Original: ₹${discounted.original.toLocaleString('en-IN')}/mo\nDiscount: -₹${discounted.discount.toLocaleString('en-IN')}/mo\n`
+        ? `${t('subscription.original')}: ₹${discounted.original.toLocaleString('en-IN')}/mo\n${t('subscription.discount')}: -₹${discounted.discount.toLocaleString('en-IN')}/mo\n`
         : '') +
-      `You'll be charged ₹${displayPrice.toLocaleString('en-IN')}${isYearly ? '/yr' : '/mo'}. Cancel anytime.`,
+      `${t('subscription.willBeCharged')} ₹${displayPrice.toLocaleString('en-IN')}${isYearly ? '/yr' : '/mo'}. ${t('subscription.cancelAnytime')}.`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
-          text: `Upgrade — ₹${displayPrice.toLocaleString('en-IN')}${isYearly ? '/yr' : '/mo'}`,
+          text: `${t('subscription.upgrade')} — ₹${displayPrice.toLocaleString('en-IN')}${isYearly ? '/yr' : '/mo'}`,
           onPress: async () => {
             await initiateUpgrade(plan, isYearly ? 'yearly' : 'monthly');
           },
@@ -156,12 +158,12 @@ export default function SubscriptionScreen({ navigation }: any) {
 
   const handleCancel = useCallback(() => {
     Alert.alert(
-      'Cancel Subscription',
-      'Your premium features will remain active until the end of the billing period. After that, you\'ll be downgraded to the Free plan.',
+      t('subscription.cancelSubscription'),
+      t('subscription.cancelSubscriptionDesc'),
       [
-        { text: 'Keep Premium', style: 'cancel' },
+        { text: t('subscription.keepPremium'), style: 'cancel' },
         {
-          text: 'Cancel Subscription',
+          text: t('subscription.cancelSubscription'),
           style: 'destructive',
           onPress: async () => {
             await cancelSubscription();
@@ -175,12 +177,12 @@ export default function SubscriptionScreen({ navigation }: any) {
   const handleAutopayToggle = useCallback(() => {
     if (subscription.isAutoPayEnabled && subscription.upiMandate) {
       Alert.alert(
-        'Disable UPI AutoPay',
-        'Recurring payments will be stopped. Your current benefits remain active until the end of the billing period.',
+        t('subscription.disableUpiAutopay'),
+        t('subscription.disableUpiAutopayDesc'),
         [
-          { text: 'Keep AutoPay', style: 'cancel' },
+          { text: t('subscription.keepAutopay'), style: 'cancel' },
           {
-            text: 'Disable',
+            text: t('subscription.disable'),
             style: 'destructive',
             onPress: async () => {
               if (subscription.upiMandate) {
@@ -222,7 +224,7 @@ export default function SubscriptionScreen({ navigation }: any) {
             <Ionicons name="chevron-back" size={24} color={colors.text} />
           </View>
         </AnimatedPressable>
-        <Text style={styles.title}>Premium</Text>
+        <Text style={styles.title}>{t('subscription.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -236,19 +238,19 @@ export default function SubscriptionScreen({ navigation }: any) {
             <Ionicons name="diamond" size={48} color={colors.white} />
             <Text style={styles.heroTitle}>
               {tenantConfig && tenantConfig.id !== 'default'
-                ? `Unlock ${tenantConfig.name} Premium`
-                : 'Unlock Toroloom Premium'}
+                ? t('subscription.unlockTenantPremium').replace('{name}', tenantConfig.name)
+                : t('subscription.unlockPremium')}
             </Text>
             <Text style={styles.heroSubtitle}>
               {isPaidUser
-                ? `You're on the ${currentPlan?.name} plan. Enjoy premium features!`
-                : 'Get AI insights, advanced analytics, and more.'}
+                ? t('subscription.onPlan').replace('{plan}', currentPlan?.name || '')
+                : t('subscription.getPremium')}
             </Text>
             {tenantConfig && tenantConfig.id !== 'default' && (
-              <Text style={styles.tenantBranding}>Powered by {tenantConfig.name}</Text>
+              <Text style={styles.tenantBranding}>{t('subscription.poweredBy')} {tenantConfig.name}</Text>
             )}
             {isPaidUser && (
-              <Badge label={currentPlan?.name || 'Premium'} variant="primary" />
+              <Badge label={currentPlan?.name || t('subscription.premium')} variant="primary" />
             )}
           </LinearGradient>
         </View>
@@ -263,19 +265,18 @@ export default function SubscriptionScreen({ navigation }: any) {
                 </View>
                 <View style={styles.trialInfo}>
                   <Text style={styles.trialTitle}>
-                    {trialDaysRemaining > 0
-                      ? `${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left in trial`
-                      : 'Trial ended'}
+                    {trialDaysRemaining > 0                          ? `${trialDaysRemaining} ${t('subscription.day')}${trialDaysRemaining !== 1 ? 's' : ''} ${t('subscription.leftInTrial')}`
+                      : t('subscription.trialEnded')}
                   </Text>
                   <Text style={styles.trialSubtitle}>
                     {trialDaysRemaining > 0
-                      ? `Your ${currentPlan?.name} trial ends on ${subscription.trialEndDate ? new Date(subscription.trialEndDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}`
-                      : 'Subscribe now to keep premium features'}
+                      ? `${t('subscription.yourTrialEnds')} ${currentPlan?.name} ${subscription.trialEndDate ? new Date(subscription.trialEndDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}`
+                      : t('subscription.subscribeToKeep')}
                   </Text>
                 </View>
                 {trialDaysRemaining <= 3 && trialDaysRemaining > 0 && (
                   <View style={styles.trialBadgeUrgent}>
-                    <Text style={styles.trialBadgeUrgentText}>ENDING SOON</Text>
+                    <Text style={styles.trialBadgeUrgentText}>{t('subscription.endingSoon')}</Text>
                   </View>
                 )}
               </View>
@@ -295,7 +296,7 @@ export default function SubscriptionScreen({ navigation }: any) {
               scaleTo={0.95}
             >
               <View style={[styles.billingOption, !isYearly && styles.billingOptionActive]}>
-                <Text style={[styles.billingText, !isYearly && styles.billingTextActive]}>Monthly</Text>
+                <Text style={[styles.billingText, !isYearly && styles.billingTextActive]}>{t('subscription.monthly')}</Text>
               </View>
             </AnimatedPressable>
             <AnimatedPressable
@@ -304,7 +305,7 @@ export default function SubscriptionScreen({ navigation }: any) {
               scaleTo={0.95}
             >
               <View style={[styles.billingOption, isYearly && styles.billingOptionActive]}>
-                <Text style={[styles.billingText, isYearly && styles.billingTextActive]}>Yearly</Text>
+                <Text style={[styles.billingText, isYearly && styles.billingTextActive]}>{t('subscription.yearly')}</Text>
               </View>
             </AnimatedPressable>
           </View>
@@ -318,21 +319,21 @@ export default function SubscriptionScreen({ navigation }: any) {
                 <AnimatedPressable onPress={() => setShowCouponInput(true)} haptic="light" scaleTo={0.97}>
                   <View style={styles.couponToggle}>
                     <Ionicons name="pricetag-outline" size={16} color={colors.primary} />
-                    <Text style={styles.couponToggleText}>Have a coupon code?</Text>
+                    <Text style={styles.couponToggleText}>{t('subscription.haveCoupon')}</Text>
                     <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                   </View>
                 </AnimatedPressable>
                 <AnimatedPressable onPress={() => navigation.navigate('AvailableCoupons')} haptic="light" scaleTo={0.97}>
                   <View style={[styles.couponToggle, { marginTop: 8, borderStyle: 'solid', borderColor: colors.primary + '30' }]}>
                     <Ionicons name="pricetag" size={16} color={colors.primary} />
-                    <Text style={styles.couponToggleText}>View available coupons</Text>
+                    <Text style={styles.couponToggleText}>{t('subscription.viewCoupons')}</Text>
                     <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                   </View>
                 </AnimatedPressable>
                 <AnimatedPressable onPress={() => navigation.navigate('CouponHistory')} haptic="light" scaleTo={0.97}>
                   <View style={[styles.couponToggle, { marginTop: 8, borderColor: colors.textMuted + '20' }]}>
                     <Ionicons name="receipt-outline" size={16} color={colors.textSecondary} />
-                    <Text style={[styles.couponToggleText, { color: colors.textSecondary }]}>My used coupons</Text>
+                    <Text style={[styles.couponToggleText, { color: colors.textSecondary }]}>{t('subscription.myCoupons')}</Text>
                     <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                   </View>
                 </AnimatedPressable>
@@ -346,8 +347,8 @@ export default function SubscriptionScreen({ navigation }: any) {
                       <Text style={styles.couponAppliedCode}>{couponResult.code}</Text>
                       <Text style={styles.couponAppliedDesc}>
                         {couponResult.type === 'free_trial'
-                          ? `${couponResult.trialDays}-day free trial`
-                          : `₹${couponResult.discountAmount.toLocaleString('en-IN')} off`}
+                          ?                    `${couponResult.trialDays}${t('subscription.dayFreeTrial')}`
+                      : `${t('subscription.rupeeOff')} ${couponResult.discountAmount.toLocaleString('en-IN')}`}
                       </Text>
                     </View>
                   </View>
@@ -362,7 +363,7 @@ export default function SubscriptionScreen({ navigation }: any) {
                   style={styles.couponInput}
                   value={couponCode}
                   onChangeText={(v) => { setCouponCode(v.toUpperCase()); setCouponInput(v); }}
-                  placeholder="Enter coupon code"
+                  placeholder={t('subscription.enterCoupon')}
                   placeholderTextColor={colors.textMuted}
                   autoCapitalize="characters"
                   autoCorrect={false}
@@ -378,7 +379,7 @@ export default function SubscriptionScreen({ navigation }: any) {
                     style={[styles.couponApplyBtn, isApplyingCoupon && { opacity: 0.7 }]}
                   >
                     <Text style={styles.couponApplyText}>
-                      {isApplyingCoupon ? '...' : 'Apply'}
+                      {isApplyingCoupon ? '...' : t('subscription.apply')}
                     </Text>
                   </LinearGradient>
                 </AnimatedPressable>
@@ -484,7 +485,7 @@ export default function SubscriptionScreen({ navigation }: any) {
 
                   {isCurrent && (
                     <View style={styles.currentLabel}>
-                      <Text style={styles.currentLabelText}>CURRENT PLAN</Text>
+                      <Text style={styles.currentLabelText}>{t('subscription.currentPlan')}</Text>
                     </View>
                   )}
                 </Animated.View>
@@ -506,7 +507,7 @@ export default function SubscriptionScreen({ navigation }: any) {
               </View>
               <View style={styles.statusInfo}>
                 <Text style={styles.statusTitle}>
-                  {subscription.autoRenew ? 'Active — Auto-Renew On' : 'Cancelled'}
+                  {subscription.autoRenew ? t('subscription.activeAutoRenew') : t('subscription.cancelled')}
                 </Text>
                 <Text style={styles.statusSubtitle}>
                   {subscription.autoRenew
@@ -519,13 +520,13 @@ export default function SubscriptionScreen({ navigation }: any) {
               {subscription.autoRenew ? (
                 <AnimatedPressable onPress={handleCancel} haptic="warning" scaleTo={0.97}>
                   <View style={styles.cancelBtn}>
-                    <Text style={styles.cancelBtnText}>Cancel Auto-Renew</Text>
+                    <Text style={styles.cancelBtnText}>{t('subscription.cancelAutoRenew')}</Text>
                   </View>
                 </AnimatedPressable>
               ) : (
                 <AnimatedPressable onPress={() => initiateUpgrade(SUBSCRIPTION_PLANS.find(p => p.id === subscription.planId)!)} haptic="medium" scaleTo={0.97}>
                   <View style={styles.renewBtn}>
-                    <Text style={styles.renewBtnText}>Renew Subscription</Text>
+                    <Text style={styles.renewBtnText}>{t('subscription.renew')}</Text>
                   </View>
                 </AnimatedPressable>
               )}
@@ -548,12 +549,11 @@ export default function SubscriptionScreen({ navigation }: any) {
                 style={styles.trialCtaBtn}
               >
                 <Ionicons name="timer-outline" size={20} color={colors.warning} />
-                <Text style={styles.trialCtaBtnText}>
-                  Start Free Trial — 7 Days Free
+                <Text style={styles.trialCtaBtnText}>                  {t('subscription.startFreeTrial')}
                 </Text>
-              </LinearGradient>
-            </AnimatedPressable>
-            <Text style={styles.trialCtaSubtext}>No charges. Cancel anytime.</Text>
+            </LinearGradient>
+          </AnimatedPressable>
+            <Text style={styles.trialCtaSubtext}>{t('subscription.noCharges')}</Text>
           </View>
         )}
 
@@ -573,7 +573,7 @@ export default function SubscriptionScreen({ navigation }: any) {
                 style={[styles.ctaBtn, isLoading && styles.ctaBtnLoading]}
               >
                 {isLoading ? (
-                  <Text style={styles.ctaBtnText}>Processing...</Text>
+                  <Text style={styles.ctaBtnText}>{t('subscription.processing')}</Text>
                 ) : (
                   <>
                     <Ionicons
@@ -583,8 +583,8 @@ export default function SubscriptionScreen({ navigation }: any) {
                     />
                     <Text style={styles.ctaBtnText}>
                       {selectedPlanId === 'plan_free'
-                        ? 'Select a plan to upgrade'
-                        : `Upgrade to ${SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId)?.name}`}
+                        ? t('subscription.selectPlan')
+                        : `${t('subscription.upgradeTo')} ${SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId)?.name}`}
                     </Text>
                   </>
                 )}
@@ -592,7 +592,7 @@ export default function SubscriptionScreen({ navigation }: any) {
             </AnimatedPressable>
 
             <Text style={styles.secureText}>
-              <Ionicons name="lock-closed" size={12} color={colors.textMuted} /> Secure payment via Razorpay
+              <Ionicons name="lock-closed" size={12} color={colors.textMuted} /> {t('subscription.securePayment')}
             </Text>
           </View>
         )}
@@ -602,30 +602,28 @@ export default function SubscriptionScreen({ navigation }: any) {
           <Card style={styles.autopayCard}>
             <View style={styles.autopayHeader}>
               <Ionicons name="qr-code" size={22} color={colors.primary} />
-              <Text style={styles.autopayTitle}>UPI AutoPay</Text>
+              <Text style={styles.autopayTitle}>{t('subscription.upiAutopay')}</Text>
             </View>
-            <Text style={styles.autopayDesc}>
-              Set up recurring payments via UPI so your subscription never lapses.
-            </Text>
+            <Text style={styles.autopayDesc}>{t('subscription.upiAutopayDesc')}</Text>
             <View style={styles.autopayStatus}>
               {subscription.isAutoPayEnabled && subscription.upiMandate ? (
                 <>
                   <View style={styles.autopayStatusRow}>
                     <Ionicons name="checkmark-circle" size={18} color={colors.marketUp} />
                     <Text style={styles.autopayStatusText}>
-                      AutoPay active — {subscription.upiMandate.upiId}
+                      {t('subscription.autopayActive')} — {subscription.upiMandate.upiId}
                     </Text>
                   </View>
                   {subscription.upiMandate.nextChargeDate && (
                     <Text style={styles.autopayNextDate}>
-                      Next charge: {new Date(subscription.upiMandate.nextChargeDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {t('subscription.nextCharge')}: {new Date(subscription.upiMandate.nextChargeDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </Text>
                   )}
                 </>
               ) : (
                 <View style={styles.autopayStatusRow}>
                   <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-                  <Text style={[styles.autopayStatusText, { color: colors.textMuted }]}>AutoPay not set up</Text>
+                  <Text style={[styles.autopayStatusText, { color: colors.textMuted }]}>{t('subscription.autopayNotSet')}</Text>
                 </View>
               )}
             </View>
@@ -640,7 +638,7 @@ export default function SubscriptionScreen({ navigation }: any) {
                   color={subscription.isAutoPayEnabled ? colors.danger : colors.primary}
                 />
                 <Text style={[styles.autopayBtnText, subscription.isAutoPayEnabled && { color: colors.danger }]}>
-                  {subscription.isAutoPayEnabled ? 'Disable AutoPay' : 'Set Up AutoPay'}
+                  {subscription.isAutoPayEnabled ? t('subscription.disableAutopay') : t('subscription.setUpAutopay')}
                 </Text>
               </View>
             </AnimatedPressable>
@@ -658,11 +656,11 @@ export default function SubscriptionScreen({ navigation }: any) {
               <View style={styles.paymentHistoryLeft}>
                 <Ionicons name="receipt-outline" size={22} color={colors.primary} />
                 <View>
-                  <Text style={styles.paymentHistoryTitle}>Payment History</Text>
+                  <Text style={styles.paymentHistoryTitle}>{t('subscription.paymentHistory')}</Text>
                   <Text style={styles.paymentHistorySubtitle}>
                     {(subscription.payments?.length || 0) > 0
-                      ? `${subscription.payments?.length} payment${subscription.payments?.length !== 1 ? 's' : ''} recorded`
-                      : 'View all subscription transactions'}
+                      ? `${subscription.payments?.length} ${t('subscription.payment')}${subscription.payments?.length !== 1 ? 's' : ''} ${t('subscription.recorded')}`
+                      : t('subscription.viewTransactions')}
                   </Text>
                 </View>
               </View>
@@ -675,10 +673,8 @@ export default function SubscriptionScreen({ navigation }: any) {
         {showAutopayModal && (
           <View style={styles.autopayModalOverlay}>
             <View style={[styles.autopayModal, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-              <Text style={styles.autopayModalTitle}>Set Up UPI AutoPay</Text>
-              <Text style={styles.autopayModalDesc}>
-                Enable recurring payments via UPI. You'll be prompted to authenticate via your UPI app.
-              </Text>
+              <Text style={styles.autopayModalTitle}>{t('subscription.setUpUpiAutopay')}</Text>
+              <Text style={styles.autopayModalDesc}>{t('subscription.setUpUpiAutopayDesc')}</Text>
               <View style={styles.autopayModalOptions}>
                 {[{ id: 'rahul@hdfc', label: 'HDFC Bank' }, { id: 'rahul@paytm', label: 'Paytm' }, { id: 'rahul@icici', label: 'ICICI Bank' }].map((opt) => (
                   <AnimatedPressable
@@ -707,14 +703,14 @@ export default function SubscriptionScreen({ navigation }: any) {
                 haptic="light"
                 scaleTo={0.97}
               >
-                <Text style={styles.autopayModalCancel}>Cancel</Text>
+                <Text style={styles.autopayModalCancel}>{t('app.cancel')}</Text>
               </AnimatedPressable>
             </View>
           </View>
         )}
 
         {/* Feature Comparison Table */}
-        <Card title="Compare Plans" style={styles.comparisonCard}>
+        <Card title={t('subscription.comparePlans')} style={styles.comparisonCard}>
           {(Object.keys(effectiveMatrix) as SubscriptionFeature[]).map((featureKey, i) => {
             const meta = effectiveMatrix[featureKey];
             const tiers: SubscriptionTier[] = ['free', 'pro', 'elite'];
@@ -741,12 +737,8 @@ export default function SubscriptionScreen({ navigation }: any) {
 
         {/* Payment Info */}
         <View style={styles.paymentInfo}>
-          <Text style={styles.paymentInfoText}>
-            Payments are processed securely through Razorpay. Your payment information is encrypted and never stored on our servers.
-          </Text>
-          <Text style={styles.paymentInfoText}>
-            You can cancel anytime from this screen. Cancellations take effect at the end of the current billing period.
-          </Text>
+          <Text style={styles.paymentInfoText}>{t('subscription.paymentInfo1')}</Text>
+          <Text style={styles.paymentInfoText}>{t('subscription.paymentInfo2')}</Text>
         </View>
 
         <View style={{ height: 100 }} />

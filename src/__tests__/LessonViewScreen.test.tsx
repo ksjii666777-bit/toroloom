@@ -113,8 +113,8 @@ vi.mock('../components/quiz/QuizComponent', () => ({
 // Uses string component names ('View', 'Text', 'Pressable') - no require('react-native') needed
 vi.mock('../components/video/VideoLessonPlayer', () => ({
   default: function MockVideoPlayer(props: any) {
-    var R = require('react');
-    var children = [];
+    const R = require('react');
+    const children = [];
     if (props.onDownload && !props.isDownloaded && !props.isDownloading) {
       children.push(R.createElement('Pressable', {
         onPress: props.onDownload, key: 'dl',

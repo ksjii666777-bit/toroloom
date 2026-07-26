@@ -339,7 +339,7 @@ export default function MarketsScreen({ navigation }: any) {
                 >
                   <View style={[styles.sectorChip, selectedSector === sector && styles.sectorChipActive]}>
                     <Text style={[styles.sectorText, selectedSector === sector && styles.sectorTextActive]}>
-                      {sector}
+                      {sector === ALL_SECTOR ? t('market.allSectors') : sector}
                     </Text>
                   </View>
                 </AnimatedPressable>

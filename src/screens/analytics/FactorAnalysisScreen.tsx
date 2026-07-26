@@ -27,6 +27,7 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { useT } from '../../hooks/useT';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { computeFactorAnalysis, FACTOR_META } from '../../services/factorAnalysis';
@@ -41,6 +42,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function FactorAnalysisScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const holdings = usePortfolioStore(s => s.holdings);
@@ -97,8 +99,8 @@ export default function FactorAnalysisScreen({ navigation }: any) {
             </View>
           </AnimatedPressable>
           <View style={styles.headerContent}>
-            <Text style={styles.title}>Factor Analysis</Text>
-            <Text style={styles.subtitle}>Momentum, Value, Size, Quality & Volatility</Text>
+            <Text style={styles.title}>{t('factorAnalysis.title')}</Text>
+            <Text style={styles.subtitle}>{t('factorAnalysis.subtitle')}</Text>
           </View>
         </View>
 
@@ -112,7 +114,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
           >
             <Ionicons name="information-circle" size={18} color="#6C63FF" />
             <Text style={styles.infoText}>
-              Factor analysis breaks down your portfolio into five key investment factors. Scores range from 0–100. The dashed line shows the benchmark (Nifty 50 average).
+              {t('factorAnalysis.infoText')}
             </Text>
           </LinearGradient>
         </Animated.View>
@@ -132,7 +134,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
             >
               <Ionicons name="analytics" size={22} color="#fff" />
               <Text style={styles.runBtnText}>
-                {result ? 'Re-analyze Factors' : 'Analyze Factors'}
+                {result ? t('factorAnalysis.reanalyzeFactors') : t('factorAnalysis.analyzeFactors')}
               </Text>
             </LinearGradient>
           </AnimatedPressable>
@@ -141,12 +143,12 @@ export default function FactorAnalysisScreen({ navigation }: any) {
         {/* ── No Holdings State ────────────────────────────── */}
         {!hasHoldings && (
           <Animated.View entering={FadeInUp.delay(100).springify()}>
-            <Card title="No Portfolio Data" style={styles.sectionCard}>
+            <Card title={t('factorAnalysis.noPortfolioData')} style={styles.sectionCard}>
               <View style={styles.emptyContent}>
                 <Ionicons name="analytics-outline" size={64} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>No Holdings Found</Text>
+                <Text style={styles.emptyTitle}>{t('factorAnalysis.noHoldingsFound')}</Text>
                 <Text style={styles.emptyDesc}>
-                  Add stocks to your portfolio to see factor analysis. You can also use a sample portfolio to try this feature.
+                  {t('factorAnalysis.noHoldingsDesc')}
                 </Text>
                 <AnimatedPressable
                   onPress={handleUseMock}
@@ -154,7 +156,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
                   scaleTo={0.95}
                   style={styles.mockBtn}
                 >
-                  <Text style={styles.mockBtnText}>Use Sample Portfolio</Text>
+                  <Text style={styles.mockBtnText}>{t('factorAnalysis.useSample')}</Text>
                 </AnimatedPressable>
               </View>
             </Card>
@@ -173,13 +175,13 @@ export default function FactorAnalysisScreen({ navigation }: any) {
                 style={styles.styleBadge}
               >
                 <Ionicons name="flag" size={16} color="#6C63FF" />
-                <Text style={styles.styleBadgeLabel}>Dominant Style</Text>
+                <Text style={styles.styleBadgeLabel}>{t('factorAnalysis.dominantStyle')}</Text>
                 <Text style={styles.styleBadgeValue}>{result.dominantStyle}</Text>
               </LinearGradient>
             </View>
 
             {/* ── Factor Exposure Bars ─────────────────────── */}
-            <Card title="Factor Exposures" subtitle="Your portfolio vs Nifty 50 benchmark" style={styles.sectionCard}>
+            <Card title={t('factorAnalysis.factorExposures')} subtitle={t('factorAnalysis.factorExposuresSub')} style={styles.sectionCard}>
               <View style={styles.factorsList}>
                 {result.factors.map((factor, i) => (
                   <AnimatedPressable
@@ -218,7 +220,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
                             },
                           ]}>
                             {factor.tilt === 'overweight' ? '▲ +' : factor.tilt === 'underweight' ? '▼ −' : '● '}
-                            {factor.tilt === 'overweight' ? 'Over' : factor.tilt === 'underweight' ? 'Under' : 'Neutral'}
+                            {factor.tilt === 'overweight' ? t('factorAnalysis.over') : factor.tilt === 'underweight' ? t('factorAnalysis.under') : t('factorAnalysis.neutral')}
                           </Text>
                         </View>
                       </View>
@@ -246,7 +248,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
                         </View>
                         <View style={styles.scoreLabels}>
                           <Text style={styles.scoreText}>{factor.score}</Text>
-                          <Text style={styles.benchmarkText}>B: {factor.benchmark}</Text>
+                          <Text style={styles.benchmarkText}>{t('factorAnalysis.benchmarkPrefix', { value: factor.benchmark })}</Text>
                         </View>
                       </View>
 
@@ -264,8 +266,8 @@ export default function FactorAnalysisScreen({ navigation }: any) {
 
             {/* ── Stock Contributions ───────────────────────── */}
             <Card
-              title="Stock Factor Contributions"
-              subtitle="How each stock contributes to factor scores"
+              title={t('factorAnalysis.stockContributions')}
+              subtitle={t('factorAnalysis.stockContributionsSub')}
               style={styles.sectionCard}
               rightAction={
                 result.stockContributions.length > 3 ? (
@@ -276,7 +278,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
                     style={styles.showAllBtn}
                   >
                     <Text style={styles.showAllBtnText}>
-                      {showAllStocks ? 'Show Less' : `All (${result.stockContributions.length})`}
+                      {showAllStocks ? t('factorAnalysis.showLess') : t('factorAnalysis.allCount', { count: result.stockContributions.length })}
                     </Text>
                   </AnimatedPressable>
                 ) : undefined
@@ -285,8 +287,8 @@ export default function FactorAnalysisScreen({ navigation }: any) {
               <View style={styles.contributionsList}>
                 {/* Table header */}
                 <View style={styles.contribHeader}>
-                  <Text style={styles.contribHeaderCell}>Stock</Text>
-                  <Text style={styles.contribHeaderCell}>Wt%</Text>
+                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.stockHeader')}</Text>
+                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.wtHeader')}</Text>
                   <Text style={styles.contribHeaderCell}>Mom</Text>
                   <Text style={styles.contribHeaderCell}>Val</Text>
                   <Text style={styles.contribHeaderCell}>Size</Text>
@@ -328,7 +330,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
             </Card>
 
             {/* ── Insights ──────────────────────────────────── */}
-            <Card title="Key Insights" style={styles.sectionCard}>
+            <Card title={t('factorAnalysis.keyInsights')} style={styles.sectionCard}>
               <View style={styles.insightsList}>
                 {result.insights.map((insight, i) => (
                   <Animated.View
@@ -348,7 +350,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
             </Card>
 
             {/* ── Recommendations ───────────────────────────── */}
-            <Card title="Recommendations" style={styles.sectionCard}>
+            <Card title={t('factorAnalysis.recommendations')} style={styles.sectionCard}>
               <View style={styles.recommendationsList}>
                 {result.recommendations.map((rec, i) => (
                   <Animated.View
@@ -366,45 +368,45 @@ export default function FactorAnalysisScreen({ navigation }: any) {
             </Card>
 
             {/* ── Methodology ───────────────────────────────── */}
-            <Card title="Methodology" style={styles.sectionCard}>
+            <Card title={t('factorAnalysis.methodology')} style={styles.sectionCard}>
               <View style={styles.methodContent}>
                 <View style={styles.methodRow}>
                   <Text style={styles.methodIcon}>📈</Text>
                   <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>Momentum Factor</Text>
-                    <Text style={styles.methodDesc}>Price trend strength, sector momentum, and holding period analysis</Text>
+                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodMomentumTitle')}</Text>
+                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodMomentumDesc')}</Text>
                   </View>
                 </View>
                 <View style={styles.methodDivider} />
                 <View style={styles.methodRow}>
                   <Text style={styles.methodIcon}>💎</Text>
                   <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>Value Factor</Text>
-                    <Text style={styles.methodDesc}>P/E ratio, P/B ratio, and dividend yield relative to sector averages</Text>
+                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodValueTitle')}</Text>
+                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodValueDesc')}</Text>
                   </View>
                 </View>
                 <View style={styles.methodDivider} />
                 <View style={styles.methodRow}>
                   <Text style={styles.methodIcon}>📏</Text>
                   <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>Size Factor</Text>
-                    <Text style={styles.methodDesc}>Market capitalization: large-cap, mid-cap, and small-cap exposure</Text>
+                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodSizeTitle')}</Text>
+                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodSizeDesc')}</Text>
                   </View>
                 </View>
                 <View style={styles.methodDivider} />
                 <View style={styles.methodRow}>
                   <Text style={styles.methodIcon}>✨</Text>
                   <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>Quality Factor</Text>
-                    <Text style={styles.methodDesc}>Sector profitability, earnings stability, and P&L performance</Text>
+                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodQualityTitle')}</Text>
+                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodQualityDesc')}</Text>
                   </View>
                 </View>
                 <View style={styles.methodDivider} />
                 <View style={styles.methodRow}>
                   <Text style={styles.methodIcon}>🛡️</Text>
                   <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>Low Volatility Factor</Text>
-                    <Text style={styles.methodDesc}>Sector volatility profile, price stability, and drawdown resilience</Text>
+                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodVolatilityTitle')}</Text>
+                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodVolatilityDesc')}</Text>
                   </View>
                 </View>
               </View>

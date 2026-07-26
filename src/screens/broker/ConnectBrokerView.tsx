@@ -37,6 +37,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useT } from '../../hooks/useT';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -136,6 +137,7 @@ const BROKERS: BrokerMeta[] = [
 
 export default function ConnectBrokerView({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -252,7 +254,7 @@ export default function ConnectBrokerView({ navigation }: any) {
           showConnectedSuccess();
         }
       } catch (err: any) {
-        Alert.alert('Connection Failed', err.message || 'Failed to complete SnapTrade OAuth.');
+        Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedOAuth'));
       } finally {
         setIsConnectingSnapTrade(false);
       }
@@ -300,10 +302,10 @@ export default function ConnectBrokerView({ navigation }: any) {
           // On completion, SnapTrade redirects back to toroloom://snaptrade/callback?authorizationId=xxx
           await Linking.openURL(linkResult.oauthUrl);
         } else {
-          throw new Error('No OAuth URL received from SnapTrade');
+          throw new Error(t('brokerConnect.noOauthUrl'));
         }
       } catch (err: any) {
-        Alert.alert('Connection Failed', err.message || 'Failed to connect via SnapTrade.');
+        Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedSnapTrade'));
         setIsConnectingSnapTrade(false);
       }
       // Don't set isConnectingSnapTrade = false here — the deep link callback will handle it
@@ -336,7 +338,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         // Small delay so the state updates before SecureSessionSync mounts
         setTimeout(() => setShowSessionSync(true), 100);
       } else {
-        Alert.alert('Unavailable', `${broker.label} connection is not yet available via Zero-API Gateway.`);
+        Alert.alert(t('brokerConnect.unavailable'), t('brokerConnect.gatewayUnavailable', { broker: broker.label }));
       }
     },
     [openSnapTradeConnect],
@@ -362,7 +364,7 @@ export default function ConnectBrokerView({ navigation }: any) {
   // ── Angel One SmartAPI Connect ──────────────────────────────
   const handleSmartApiConnect = useCallback(async () => {
     if (!smartApiClientId.trim() || !smartApiPassword.trim() || !smartApiTotp.trim()) {
-      Alert.alert('Required Fields', 'Please fill in all fields: Client ID, Password, and TOTP Secret.');
+      Alert.alert(t('brokerConnect.requiredFields'), t('brokerConnect.fillFields'));
       return;
     }
 
@@ -382,7 +384,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         showConnectedSuccess();
       }
     } catch (err: any) {
-      Alert.alert('Connection Failed', err.message || 'Failed to connect Angel One. Check your credentials.');
+      Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedAngel'));
     } finally {
       setIsConnectingSmartApi(false);
     }
@@ -436,7 +438,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         result = await brokerProxyApi.getHoldings(connectedBroker);
       }
 
-      const title = result.success ? '✅ API Success' : '❌ API Failed';
+      const title = result.success ? t('brokerConnect.apiSuccess') : t('brokerConnect.apiFailed');
       const body = [
         `Broker: ${connectedBroker.toUpperCase()}`,
         result.success
@@ -446,7 +448,7 @@ export default function ConnectBrokerView({ navigation }: any) {
 
       Alert.alert(title, body);
     } catch (err: any) {
-      Alert.alert('❌ API Error', err.message || 'Unexpected error during API request.');
+      Alert.alert(t('brokerConnect.apiError'), err.message || t('brokerConnect.unexpectedApiError'));
     } finally {
       setIsTestingProxy(false);
     }
@@ -458,12 +460,12 @@ export default function ConnectBrokerView({ navigation }: any) {
       const isSmartApi = connectedLabel?.includes('SmartAPI');
 
       Alert.alert(
-        'Disconnect Broker',
-        'Are you sure you want to disconnect? Your session data will be removed.',
+        t('brokerConnect.disconnectTitle'),
+        t('brokerConnect.disconnectMsg'),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('app.cancel'), style: 'cancel' },
           {
-            text: 'Disconnect',
+            text: t('brokerConnect.disconnect'),
             style: 'destructive',
             onPress: async () => {
               // SmartAPI: disconnect via backend
@@ -489,7 +491,7 @@ export default function ConnectBrokerView({ navigation }: any) {
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={NEON_CYAN} />
         <Text style={[styles.loadingText, { color: 'rgba(255,255,255,0.5)' }]}>
-          Checking connection status...
+          {t('brokerConnect.checkingStatus')}
         </Text>
       </View>
     );
@@ -503,9 +505,9 @@ export default function ConnectBrokerView({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </AnimatedPressable>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Connect Broker</Text>
+          <Text style={styles.headerTitle}>{t('brokerConnect.title')}</Text>
           <Text style={styles.headerSubtitle}>
-            1-tap OAuth — powered by SnapTrade
+            {t('brokerConnect.subtitle')}
           </Text>
         </View>
       </View>
@@ -515,15 +517,15 @@ export default function ConnectBrokerView({ navigation }: any) {
         <Animated.View style={[styles.statusPillsRow, { opacity: fadeAnim }]}>
           <View style={styles.statusPill}>
             <Text style={styles.statusPillIcon}>✓</Text>
-            <Text style={styles.statusPillText}>O AUTH 2.0</Text>
+            <Text style={styles.statusPillText}>{t('brokerConnect.oAuth')}</Text>
           </View>
           <View style={styles.statusPill}>
             <Text style={styles.statusPillIcon}>★</Text>
-            <Text style={styles.statusPillText}>20+ BROKERS</Text>
+            <Text style={styles.statusPillText}>{t('brokerConnect.brokers')}</Text>
           </View>
           <View style={[styles.statusPill, styles.statusPillOutline]}>
             <Ionicons name="shield-checkmark" size={10} color="#00F2FE" />
-            <Text style={[styles.statusPillText, { color: '#00F2FE' }]}>SECURE</Text>
+            <Text style={[styles.statusPillText, { color: '#00F2FE' }]}>{t('brokerConnect.secure')}</Text>
           </View>
         </Animated.View>
 
@@ -536,9 +538,9 @@ export default function ConnectBrokerView({ navigation }: any) {
                   <Ionicons name="checkmark-circle" size={24} color="#00D2FF" />
                 </View>
                 <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.glassCardTitle}>Connected</Text>
+                  <Text style={styles.glassCardTitle}>{t('brokerConnect.connected')}</Text>
                   <Text style={styles.glassCardSubtitle}>
-                    {connectedLabel} · Secure Session Active
+                    {connectedLabel} · {t('brokerConnect.secureSessionActive')}
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -554,12 +556,12 @@ export default function ConnectBrokerView({ navigation }: any) {
                       <ActivityIndicator size="small" color="#00F2FE" />
                     ) : (
                       <Text style={[styles.glassBtnText, { color: '#00F2FE' }]}>
-                        Test API
+                        {t('brokerConnect.testApi')}
                       </Text>
                     )}
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleDisconnect(connectedBroker)} style={styles.glassBtn}>
-                    <Text style={styles.glassBtnText}>Disconnect</Text>
+                    <Text style={styles.glassBtnText}>{t('brokerConnect.disconnect')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -569,11 +571,11 @@ export default function ConnectBrokerView({ navigation }: any) {
 
         {/* Section Title */}
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          <Text style={styles.sectionTitle}>Choose Your Broker</Text>
+          <Text style={styles.sectionTitle}>{t('brokerConnect.chooseBroker')}</Text>
           <Text style={styles.sectionSubtitle}>
             {connectedBroker
-              ? 'Switch to a different broker below'
-              : 'Select a broker — no API keys needed'}
+              ? t('brokerConnect.switchBroker')
+              : t('brokerConnect.selectBroker')}
           </Text>
         </Animated.View>
 
@@ -629,7 +631,7 @@ export default function ConnectBrokerView({ navigation }: any) {
                     <View style={styles.syncMethodBadge}>
                       <Ionicons name="wifi" size={10} color="rgba(255,255,255,0.7)" />
                       <Text style={styles.syncMethodText}>
-                        {isConnected ? 'Session Active' : 'OAuth Connect'}
+                        {isConnected ? t('brokerConnect.sessionActive') : t('brokerConnect.oauthConnect')}
                       </Text>
                     </View>
 
@@ -658,7 +660,7 @@ export default function ConnectBrokerView({ navigation }: any) {
                           isConnected && styles.connectBadgeTextConnected,
                         ]}
                       >
-                        {isConnected ? 'Connected' : 'Tap to Connect'}
+                        {isConnected ? t('brokerConnect.connected') : t('brokerConnect.tapToConnect')}
                       </Text>
                     </View>
                   </LinearGradient>
@@ -676,10 +678,9 @@ export default function ConnectBrokerView({ navigation }: any) {
                 <Ionicons name="shield-checkmark" size={18} color="#00D2FF" />
               </View>
               <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                <Text style={styles.glassCardTitle}>SnapTrade OAuth Gateway</Text>
+                <Text style={styles.glassCardTitle}>{t('brokerConnect.snapTradeOauthTitle')}</Text>
                 <Text style={styles.glassCardSubtitle}>
-                  Connect your Zerodha, Angel One, Dhan, Upstox, Groww, or Interactive Brokers
-                  account with 1-tap OAuth. Your credentials are never shared with us.
+                  {t('brokerConnect.snapTradeDesc')}
                 </Text>
               </View>
             </View>
@@ -698,8 +699,8 @@ export default function ConnectBrokerView({ navigation }: any) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.angelOptionsContainer}>
-            <Text style={styles.angelOptionsTitle}>Connect Angel One</Text>
-            <Text style={styles.angelOptionsSubtitle}>Choose your connection method</Text>
+            <Text style={styles.angelOptionsTitle}>{t('brokerConnect.connectAngel')}</Text>
+            <Text style={styles.angelOptionsSubtitle}>{t('brokerConnect.chooseMethod')}</Text>
 
             {/* SmartAPI Option */}
             <TouchableOpacity
@@ -714,15 +715,15 @@ export default function ConnectBrokerView({ navigation }: any) {
                   <Ionicons name="code-slash" size={22} color="#FF6B00" />
                 </View>
                 <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.angelOptionTitle}>SmartAPI (Official)</Text>
+                  <Text style={styles.angelOptionTitle}>{t('brokerConnect.smartApi')}</Text>
                   <Text style={styles.angelOptionDesc}>
-                    Use official Angel One SmartAPI. Most reliable — real holdings, positions & trades.
+                    {t('brokerConnect.smartApiDesc')}
                   </Text>
                 </View>
               </View>
               <View style={styles.angelOptionBadgeRow}>
                 <View style={[styles.angelOptionBadge, { backgroundColor: 'rgba(16,185,129,0.2)' }]}>
-                  <Text style={[styles.angelOptionBadgeText, { color: '#10B981' }]}>✅ Most Reliable</Text>
+                  <Text style={[styles.angelOptionBadgeText, { color: '#10B981' }]}>{t('brokerConnect.mostReliable')}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -740,15 +741,15 @@ export default function ConnectBrokerView({ navigation }: any) {
                   <Ionicons name="wifi" size={22} color="#00F2FE" />
                 </View>
                 <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.angelOptionTitle}>Zero-API Sync</Text>
+                  <Text style={styles.angelOptionTitle}>{t('brokerConnect.zeroApiSync')}</Text>
                   <Text style={styles.angelOptionDesc}>
-                    No credentials needed. Login via WebView — session auto-extracted.
+                    {t('brokerConnect.zeroApiDesc')}
                   </Text>
                 </View>
               </View>
               <View style={styles.angelOptionBadgeRow}>
                 <View style={[styles.angelOptionBadge, { backgroundColor: 'rgba(0,242,254,0.12)' }]}>
-                  <Text style={[styles.angelOptionBadgeText, { color: '#00F2FE' }]}>🔒 No Credentials</Text>
+                  <Text style={[styles.angelOptionBadgeText, { color: '#00F2FE' }]}>{t('brokerConnect.noCredentials')}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -757,7 +758,7 @@ export default function ConnectBrokerView({ navigation }: any) {
               onPress={() => setShowAngelOptions(false)}
               style={styles.angelOptionCancel}
             >
-              <Text style={styles.angelOptionCancelText}>Cancel</Text>
+              <Text style={styles.angelOptionCancelText}>{t('brokerConnect.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -784,7 +785,7 @@ export default function ConnectBrokerView({ navigation }: any) {
             <TouchableOpacity onPress={() => setShowSmartApiForm(false)} style={styles.webViewBack}>
               <Ionicons name="close" size={24} color="#FFFFFF" />
             </TouchableOpacity>
-            <Text style={styles.webViewTitle}>Angel One SmartAPI</Text>
+            <Text style={styles.webViewTitle}>{t('brokerConnect.angelSmartApiTitle')}</Text>
             <View style={{ width: 24 }} />
           </View>
 
@@ -793,21 +794,20 @@ export default function ConnectBrokerView({ navigation }: any) {
               <View style={[styles.smartApiIconCircle, { backgroundColor: 'rgba(255,107,0,0.15)' }]}>
                 <Ionicons name="code-slash" size={32} color="#FF6B00" />
               </View>
-              <Text style={styles.smartApiFormTitle}>Connect Angel One</Text>
+              <Text style={styles.smartApiFormTitle}>{t('brokerConnect.connectAngel')}</Text>
               <Text style={styles.smartApiFormSubtitle}>
-                Enter your Angel One SmartAPI credentials. These are sent securely to our server
-                and used only to fetch your portfolio data.
+                {t('brokerConnect.enterCredentials')}
               </Text>
             </View>
 
             {/* Client ID */}
             <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>Client ID</Text>
+              <Text style={styles.smartApiFieldLabel}>{t('brokerConnect.clientId')}</Text>
               <View style={[styles.smartApiInputContainer, smartApiClientId ? styles.smartApiInputFocused : null]}>
                 <Ionicons name="person-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
                 <TextInput
                   style={styles.smartApiInput}
-                  placeholder="Your Angel One client code"
+                  placeholder={t('brokerConnect.clientCodePlaceholder')}
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   value={smartApiClientId}
                   onChangeText={setSmartApiClientId}
@@ -819,12 +819,12 @@ export default function ConnectBrokerView({ navigation }: any) {
 
             {/* Password */}
             <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>Password</Text>
+              <Text style={styles.smartApiFieldLabel}>{t('brokerConnect.password')}</Text>
               <View style={[styles.smartApiInputContainer, smartApiPassword ? styles.smartApiInputFocused : null]}>
                 <Ionicons name="lock-closed-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
                 <TextInput
                   style={styles.smartApiInput}
-                  placeholder="Your Angel One trading password"
+                  placeholder={t('brokerConnect.passwordPlaceholder')}
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   value={smartApiPassword}
                   onChangeText={setSmartApiPassword}
@@ -836,12 +836,12 @@ export default function ConnectBrokerView({ navigation }: any) {
 
             {/* TOTP Secret */}
             <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>TOTP Secret</Text>
+              <Text style={styles.smartApiFieldLabel}>{t('brokerConnect.totpSecret')}</Text>
               <View style={[styles.smartApiInputContainer, smartApiTotp ? styles.smartApiInputFocused : null]}>
                 <Ionicons name="key-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
                 <TextInput
                   style={styles.smartApiInput}
-                  placeholder="Base32 secret from SmartAPI portal"
+                  placeholder={t('brokerConnect.totpPlaceholder')}
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   value={smartApiTotp}
                   onChangeText={setSmartApiTotp}
@@ -850,7 +850,7 @@ export default function ConnectBrokerView({ navigation }: any) {
                 />
               </View>
               <Text style={styles.smartApiFieldHint}>
-                Get this from smartapi.angelbroking.com → My Profile → TOTP Secret
+                {t('brokerConnect.totpHint')}
               </Text>
             </View>
 
@@ -872,7 +872,7 @@ export default function ConnectBrokerView({ navigation }: any) {
                 {isConnectingSmartApi ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.smartApiConnectText}>Connect to Angel One</Text>
+                  <Text style={styles.smartApiConnectText}>{t('brokerConnect.connectToAngel')}</Text>
                 )}
               </LinearGradient>
             </TouchableOpacity>
@@ -881,8 +881,7 @@ export default function ConnectBrokerView({ navigation }: any) {
             <View style={styles.smartApiInfoCard}>
               <Ionicons name="information-circle-outline" size={18} color="rgba(255,255,255,0.4)" />
               <Text style={styles.smartApiInfoText}>
-                Your credentials are used only to authenticate with Angel One SmartAPI and are
-                never stored permanently. Session expires after 30 minutes of inactivity.
+                {t('brokerConnect.credentialInfo')}
               </Text>
             </View>
           </ScrollView>
@@ -910,9 +909,9 @@ export default function ConnectBrokerView({ navigation }: any) {
             <TouchableOpacity onPress={() => setShowSessionSync(false)} style={styles.webViewBack}>
               <Ionicons name="close" size={24} color="#FFFFFF" />
             </TouchableOpacity>
-            <Text style={styles.webViewTitle}>Connect {selectedBroker?.label}</Text>
+            <Text style={styles.webViewTitle}>{t('brokerConnect.connectBroker', { name: selectedBroker?.label })}</Text>
             <TouchableOpacity onPress={() => setShowSessionSync(false)}>
-              <Text style={{ color: '#00F2FE', fontSize: 13, fontWeight: '600' }}>Cancel</Text>
+              <Text style={{ color: '#00F2FE', fontSize: 13, fontWeight: '600' }}>{t('brokerConnect.cancelWebview')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -923,7 +922,7 @@ export default function ConnectBrokerView({ navigation }: any) {
               onSessionCaptured={handleSessionCaptured}
               onError={(error) => {
                 setShowSessionSync(false);
-                Alert.alert('Session Sync Failed', error);
+                Alert.alert(t('brokerConnect.sessionSyncFailed'), error);
               }}
               onClose={() => setShowSessionSync(false)}
             />
@@ -943,9 +942,9 @@ export default function ConnectBrokerView({ navigation }: any) {
             >
               <Ionicons name="checkmark" size={40} color="#fff" />
             </LinearGradient>
-            <Text style={styles.successTitle}>Connected!</Text>
+            <Text style={styles.successTitle}>{t('brokerConnect.successConnected')}</Text>
             <Text style={styles.successSubtitle}>
-              Your {connectedLabel} session is now securely stored.
+              {t('brokerConnect.successStored', { broker: connectedLabel || '' })}
             </Text>
           </Animated.View>
         </View>

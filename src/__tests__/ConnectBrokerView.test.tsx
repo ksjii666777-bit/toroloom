@@ -67,6 +67,36 @@ vi.mock('../components/ui/AnimatedPressable', () => ({
   default: 'AnimatedPressable',
 }));
 
+// Mock useT to return English text for brokerConnect keys so existing test assertions work
+const brokerConnectTranslations: Record<string, string> = {
+  'brokerConnect.title': 'Connect Broker',
+  'brokerConnect.subtitle': '1-tap OAuth — powered by SnapTrade',
+  'brokerConnect.oAuth': 'O AUTH 2.0',
+  'brokerConnect.brokers': '20+ BROKERS',
+  'brokerConnect.secure': 'SECURE',
+  'brokerConnect.connected': 'Connected',
+  'brokerConnect.secureSessionActive': 'Secure Session Active',
+  'brokerConnect.testApi': 'Test API',
+  'brokerConnect.disconnect': 'Disconnect',
+  'brokerConnect.chooseBroker': 'Choose Your Broker',
+  'brokerConnect.switchBroker': 'Switch to a different broker below',
+  'brokerConnect.selectBroker': 'Select a broker — no API keys needed',
+  'brokerConnect.sessionActive': 'Session Active',
+  'brokerConnect.oauthConnect': 'OAuth Connect',
+  'brokerConnect.tapToConnect': 'Tap to Connect',
+  'brokerConnect.snapTradeOauthTitle': 'SnapTrade OAuth Gateway',
+  'brokerConnect.snapTradeDesc': 'Connect your Zerodha, Angel One, Dhan, Upstox, Groww, or Interactive Brokers account with 1-tap OAuth. Your credentials are never shared with us.',
+  'brokerConnect.checkingStatus': 'Checking connection status...',
+};
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: (key: string) => brokerConnectTranslations[key] || key,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
 vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({
     colors: {

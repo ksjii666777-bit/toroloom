@@ -14,6 +14,7 @@ import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useAuthStore } from '../../store/authStore';
@@ -36,22 +37,10 @@ const ORDER_TYPES: OrderType[] = ['MARKET', 'LIMIT', 'SL', 'SL-M'];
 const PRODUCT_TYPES: ProductType[] = ['CNC', 'MIS', 'NRML'];
 const QUICK_QTYS = [10, 50, 100, 'Max'] as const;
 
-const ORDER_TYPE_DESCRIPTIONS: Record<OrderType, string> = {
-  MARKET: 'Buy/Sell at current market price',
-  LIMIT: 'Execute only at your specified price or better',
-  SL: 'Convert to market order when trigger price is hit',
-  'SL-M': 'Market order that activates at trigger price',
-};
-
-const PRODUCT_DESCRIPTIONS: Record<ProductType, string> = {
-  CNC: 'Delivery — settle with actual shares',
-  MIS: 'Intraday — square off by EOD',
-  NRML: 'Normal — for futures & options',
-};
-
 export default function PlaceOrderScreen({ route, navigation }: any) {
   const { stockId, symbol: paramSymbol, tradeType: initialTradeType = 'buy' } = route.params ?? {};
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const { stocks } = useMarketStore();
@@ -135,7 +124,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         },
       );
       if (result && !result.allowed) {
-        return result.message || 'Order blocked by risk engine. Check your limits.';
+        return result.message || t('trading.riskEngineBlocked');
       }
       return null; // All good
     } catch {
@@ -150,7 +139,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
 
     // Validate trigger price for SL/SL-M orders
     if ((orderType === 'SL' || orderType === 'SL-M') && triggerPriceNum <= 0) {
-      Alert.alert('Trigger Price Required', 'Please enter a trigger price for Stop Loss orders.');
+      Alert.alert(t('trading.triggerPriceRequiredTitle'), t('trading.triggerPriceRequiredMsg'));
       return;
     }
 
@@ -158,15 +147,16 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
     const { enabled: bioEnabled, requireForTrades } = useBiometricStore.getState();
     if (bioEnabled && requireForTrades) {
       const bioLabel = await biometricAuth.getBiometricLabel();
-      const result = await biometricAuth.authenticate(
-        `Confirm ${tradeType === 'buy' ? 'Buy' : 'Sell'} order with ${bioLabel}`,
-        true,
-      );
+      const bioMessage = t('trading.bioConfirm', {
+        action: tradeType === 'buy' ? t('trading.buy') : t('trading.sell'),
+        label: bioLabel,
+      });
+      const result = await biometricAuth.authenticate(bioMessage, true);
 
       if (!result.success) {
         setIsProcessing(false);
         if (result.error !== 'Authentication cancelled') {
-          Alert.alert('Order Cancelled', result.error || 'Biometric verification failed.');
+          Alert.alert(t('trading.orderCancelled'), result.error || t('trading.biometricFailed'));
         }
         return;
       }
@@ -179,7 +169,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
       const validationError = await preValidateOrder();
       if (validationError) {
         setIsProcessing(false);
-        Alert.alert('Order Blocked', validationError);
+        Alert.alert(t('trading.orderBlocked'), validationError);
         return;
       }
 
@@ -195,7 +185,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
       } else {
         if (!existingHolding) {
           setIsProcessing(false);
-          Alert.alert('Error', 'No holding found to sell.');
+          Alert.alert(t('trading.error'), t('trading.errorNoHolding'));
           return;
         }
         await sellStock(existingHolding.id, qtyNum, displayPrice, orderOptions);
@@ -207,26 +197,26 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
       setIsProcessing(false);
 
       // Broker-specific error messages
-      let errorMsg = 'There was an error placing your order. Please try again.';
+      let errorMsg = t('trading.errorGeneric');
       const msg = (err?.message || err?.error || '').toLowerCase();
 
       if (msg.includes('margin') || msg.includes('insufficient balance')) {
-        errorMsg = 'Insufficient margin. Please reduce quantity or add funds.';
+        errorMsg = t('trading.errorInsufficientMargin');
       } else if (msg.includes('position') || msg.includes('holdings')) {
-        errorMsg = 'Insufficient holdings to sell. Check your portfolio.';
+        errorMsg = t('trading.errorInsufficientHoldings');
       } else if (msg.includes('limit') || msg.includes('max')) {
-        errorMsg = 'Position limit exceeded. You have reached the maximum allowed quantity.';
+        errorMsg = t('trading.errorLimitExceeded');
       } else if (msg.includes('reject')) {
-        errorMsg = 'Order rejected by broker. Check your trading settings.';
+        errorMsg = t('trading.errorRejected');
       } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout')) {
-        errorMsg = 'Network error. Your order may not have been placed. Please check your open orders.';
+        errorMsg = t('trading.errorNetwork');
       } else if (msg.includes('authenticate') || msg.includes('session') || msg.includes('token')) {
-        errorMsg = 'Broker session expired. Please reconnect your broker.';
+        errorMsg = t('trading.errorSessionExpired');
       } else if (err instanceof ApiError && err.status) {
-        errorMsg = `Broker error (${err.status}): ${err.message}`;
+        errorMsg = t('trading.errorBroker', { status: err.status, message: err.message });
       }
 
-      Alert.alert('Order Failed', errorMsg);
+      Alert.alert(t('trading.orderFailed'), errorMsg);
     }
   }, [canPlaceOrder, tradeType, stock, qtyNum, displayPrice, existingHolding,
       buyStock, sellStock, orderType, productType, triggerPriceNum, preValidateOrder]);
@@ -253,11 +243,11 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Ionicons name="alert-circle" size={48} color={colors.textMuted} />
         <Text style={[styles.stockSymbol, { marginTop: SPACING.md, color: colors.textMuted }]}>
-          Stock not found
+          {t('trading.stockNotFound')}
         </Text>
         <AnimatedPressable onPress={() => navigation.goBack()}>
           <View style={{ marginTop: SPACING.xl, paddingHorizontal: SPACING.xxl, paddingVertical: SPACING.md, backgroundColor: colors.primary, borderRadius: BORDER_RADIUS.full }}>
-            <Text style={{ color: colors.white, ...FONTS.medium, fontSize: FONTS.size.md }}>Go Back</Text>
+            <Text style={{ color: colors.white, ...FONTS.medium, fontSize: FONTS.size.md }}>{t('trading.goBack')}</Text>
           </View>
         </AnimatedPressable>
       </View>
@@ -268,13 +258,13 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
     <>
       {/* Estimated Total */}
       <View style={styles.summaryRow}>
-        <Text style={styles.summaryLabel}>Estimated Total</Text>
+        <Text style={styles.summaryLabel}>{t('trading.estimatedTotal')}</Text>
         <Text style={styles.summaryValue}>{formatCurrency(estimatedTotal)}</Text>
       </View>
 
       {/* Estimated Charges */}
       <View style={styles.summaryRow}>
-        <Text style={styles.summaryLabel}>Est. Charges (brokerage + taxes)</Text>
+        <Text style={styles.summaryLabel}>{t('trading.estCharges')}</Text>
         <Text style={styles.summaryValueMuted}>{formatCurrency(charges)}</Text>
       </View>
 
@@ -283,7 +273,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
 
       {/* Grand Total */}
       <View style={styles.summaryRow}>
-        <Text style={styles.grandTotalLabel}>Grand Total</Text>
+        <Text style={styles.grandTotalLabel}>{t('trading.grandTotal')}</Text>
         <Text style={styles.grandTotalValue}>{formatCurrency(grandTotal)}</Text>
       </View>
 
@@ -301,8 +291,8 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
             color: isBalanceSufficient ? colors.marketUp : colors.marketDown,
           }]}>
             {isBalanceSufficient
-              ? `Available: ${formatCurrency(availableBalance)}`
-              : `Insufficient balance — need ${formatCurrency(grandTotal - availableBalance)} more`
+              ? t('trading.balanceAvailable', { amount: formatCurrency(availableBalance) })
+              : t('trading.insufficientBalance', { amount: formatCurrency(grandTotal - availableBalance) })
             }
           </Text>
         </View>
@@ -324,7 +314,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
             <Ionicons name="close" size={24} color={colors.white} />
           </Pressable>
           <Text style={styles.headerTitle} testID="headerTitle">
-            {tradeType === 'buy' ? 'Buy' : 'Sell'} Securities
+            {tradeType === 'buy' ? t('trading.buySecurities') : t('trading.sellSecurities')}
           </Text>
           <View style={{ width: 44 }} />
         </View>
@@ -373,7 +363,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
               color={tradeType === 'buy' ? colors.white : colors.marketUp}
             />
             <Text style={[styles.toggleText, tradeType === 'buy' && styles.toggleTextActive]}>
-              Buy
+              {t('trading.buy')}
             </Text>
           </Pressable>
           <Pressable
@@ -387,14 +377,14 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
               color={tradeType === 'sell' ? colors.white : colors.marketDown}
             />
             <Text style={[styles.toggleText, tradeType === 'sell' && styles.toggleTextActive]}>
-              Sell
+              {t('trading.sell')}
             </Text>
           </Pressable>
         </View>
 
         {/* Order Type Selector */}
         <View style={{ marginBottom: SPACING.lg }}>
-          <Text style={styles.sectionLabel}>Order Type</Text>
+          <Text style={styles.sectionLabel}>{t('trading.orderType')}</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -413,12 +403,12 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
               </Pressable>
             ))}
           </ScrollView>
-          <Text style={styles.chipDescription}>{ORDER_TYPE_DESCRIPTIONS[orderType]}</Text>
+          <Text style={styles.chipDescription}>{t(`trading.${orderType.toLowerCase() === 'sl' ? 'stopLossDesc' : orderType.toLowerCase() === 'sl-m' ? 'stopLossMarketDesc' : orderType.toLowerCase() + 'Desc'}`)}</Text>
         </View>
 
         {/* Product Type Selector */}
         <View style={{ marginBottom: SPACING.lg }}>
-          <Text style={styles.sectionLabel}>Product Type</Text>
+          <Text style={styles.sectionLabel}>{t('trading.productType')}</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -437,16 +427,16 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
               </Pressable>
             ))}
           </ScrollView>
-          <Text style={styles.chipDescription}>{PRODUCT_DESCRIPTIONS[productType]}</Text>
+          <Text style={styles.chipDescription}>{t(`trading.${productType.toLowerCase()}Desc`)}</Text>
         </View>
 
         {/* Quantity Input */}
         <View style={styles.inputSection}>
           <Text style={styles.sectionLabel}>
-            Quantity
+            {t('trading.quantity')}
             {tradeType === 'sell' && ownedQuantity > 0 && (
               <Text style={{ color: colors.textMuted, fontWeight: '400' }}>
-                {' '}(Owned: {ownedQuantity})
+                {' '}{t('trading.owned', { count: ownedQuantity })}
               </Text>
             )}
           </Text>
@@ -488,7 +478,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
                 onPress={() => handleQuickQty(qty)}
               >
                   <Text style={[styles.quickQtyText, isActive && styles.quickQtyTextActive]}>
-                    {qty === 'Max' ? 'Max' : qty}
+                    {qty === 'Max' ? t('trading.max') : qty}
                   </Text>
                 </Pressable>
               );
@@ -499,7 +489,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         {/* Price Input (for Limit / SL / SL-M) */}
         {(orderType === 'LIMIT' || orderType === 'SL' || orderType === 'SL-M') && (
           <View style={styles.inputSection}>
-            <Text style={styles.sectionLabel}>Limit Price (₹)</Text>
+            <Text style={styles.sectionLabel}>{t('trading.limitPrice')}</Text>
             <TextInput
               style={styles.priceInput}
               value={limitPrice}
@@ -514,18 +504,18 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         {/* Trigger Price (for SL / SL-M) */}
         {(orderType === 'SL' || orderType === 'SL-M') && (
           <View style={styles.inputSection}>
-            <Text style={styles.sectionLabel}>Trigger Price (₹)</Text>
+            <Text style={styles.sectionLabel}>{t('trading.triggerPrice')}</Text>
             <TextInput
               style={styles.priceInput}
               value={triggerPrice}
               onChangeText={setTriggerPrice}
               keyboardType="decimal-pad"
-              placeholder="Enter trigger price"
+              placeholder={t('trading.enterTriggerPrice')}
               placeholderTextColor={colors.textMuted}
             />
             {!isTriggerValid && qtyNum > 0 && (
               <Text style={{ color: colors.marketDown, fontSize: FONTS.size.xs, marginTop: 4 }}>
-                Trigger price is required for Stop Loss orders
+                {t('trading.triggerPriceRequired')}
               </Text>
             )}
           </View>
@@ -534,20 +524,20 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         {/* Order Summary Card */}
         {qtyNum > 0 && (
           <Animated.View style={[detailStyles[0], styles.summaryCard]}>
-            <Text style={styles.summaryCardTitle}>Order Summary</Text>
+            <Text style={styles.summaryCardTitle}>{t('trading.orderSummary')}</Text>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Order Type</Text>
+              <Text style={styles.summaryLabel}>{t('trading.orderType')}</Text>
               <Text style={styles.summaryValue}>
-                {orderType === 'MARKET' ? 'Market' : orderType}
+                {orderType === 'MARKET' ? t('trading.market') : orderType}
                 {' · '}{productType}
               </Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Quantity</Text>
-              <Text style={styles.summaryValue}>{qtyNum} shares</Text>
+              <Text style={styles.summaryLabel}>{t('trading.quantity')}</Text>
+              <Text style={styles.summaryValue}>{qtyNum} {t('trading.shares')}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Price per share</Text>
+              <Text style={styles.summaryLabel}>{t('trading.pricePerShare')}</Text>
               <Text style={styles.summaryValue}>{formatCurrency(displayPrice)}</Text>
             </View>
             {orderCostSummary}
@@ -565,7 +555,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         <View style={styles.bottomRow}>
           <View style={styles.bottomLeft}>
             <Text style={styles.bottomLabel}>
-              {qtyNum > 0 ? 'Total' : 'Available Balance'}
+              {qtyNum > 0 ? t('trading.total') : t('trading.availableBalance')}
             </Text>
             <Text style={styles.bottomAmount}>
               {qtyNum > 0 ? formatCurrency(grandTotal) : formatCurrency(availableBalance)}
@@ -573,8 +563,8 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
           </View>
           <Button
             title={isProcessing
-              ? 'Processing...'
-              : `${tradeType === 'buy' ? 'Buy' : 'Sell'} ${qtyNum > 0 ? qtyNum : ''} ${stock.symbol}`
+              ? t('trading.processing')
+              : `${tradeType === 'buy' ? t('trading.buy') : t('trading.sell')} ${qtyNum > 0 ? qtyNum : ''} ${stock.symbol}`
             }
             onPress={handlePlaceOrder}
             variant={tradeType === 'buy' ? 'primary' : 'danger'}
@@ -602,29 +592,29 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
             </View>
 
             <Text style={styles.confirmTitle}>
-              Order Placed Successfully!
+              {t('trading.orderPlacedSuccessfully')}
             </Text>
             <Text style={styles.confirmSubtitle}>
-              {tradeType === 'buy' ? 'Bought' : 'Sold'} {qtyNum} shares of {stock.symbol}
+              {tradeType === 'buy' ? t('trading.bought') : t('trading.sold')} {qtyNum} {t('trading.shares')} {t('trading.of')} {stock.symbol}
             </Text>
 
             <View style={styles.confirmDetails}>
               <View style={styles.confirmDetailRow}>
-                <Text style={styles.confirmDetailLabel}>Order Type</Text>
+                <Text style={styles.confirmDetailLabel}>{t('trading.orderType')}</Text>
                 <Text style={styles.confirmDetailValue}>
-                  {orderType === 'MARKET' ? 'Market' : orderType} · {productType}
+                  {orderType === 'MARKET' ? t('trading.market') : orderType} · {productType}
                 </Text>
               </View>
               <View style={styles.confirmDetailRow}>
-                <Text style={styles.confirmDetailLabel}>Price</Text>
+                <Text style={styles.confirmDetailLabel}>{t('trading.price')}</Text>
                 <Text style={styles.confirmDetailValue}>{formatCurrency(displayPrice)}</Text>
               </View>
               <View style={styles.confirmDetailRow}>
-                <Text style={styles.confirmDetailLabel}>Total</Text>
+                <Text style={styles.confirmDetailLabel}>{t('trading.total')}</Text>
                 <Text style={styles.confirmDetailValue}>{formatCurrency(grandTotal)}</Text>
               </View>
               <View style={styles.confirmDetailRow}>
-                <Text style={styles.confirmDetailLabel}>Time</Text>
+                <Text style={styles.confirmDetailLabel}>{t('trading.time')}</Text>
                 <Text style={styles.confirmDetailValue}>
                   {new Date().toLocaleTimeString('en-IN')}
                 </Text>
@@ -632,7 +622,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
             </View>
 
             <Button
-              title="Done"
+              title={t('trading.done')}
               onPress={handleConfirmationClose}
               variant={tradeType === 'buy' ? 'success' : 'primary'}
               size="large"

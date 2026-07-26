@@ -36,7 +36,7 @@ const mockPrebuiltStrategies = [
   { id: 'long_call', name: 'Long Call', description: 'Buy a call option. Limited risk, unlimited profit.', riskCategory: 'moderate', isBullish: true, isBearish: false, isNeutral: false, legs: [{ type: 'CE', action: 'buy', count: 1 }] },
   { id: 'long_put', name: 'Long Put', description: 'Buy a put option. Limited risk, unlimited profit potential.', riskCategory: 'moderate', isBullish: false, isBearish: true, isNeutral: false, legs: [{ type: 'PE', action: 'buy', count: 1 }] },
   { id: 'bull_call_spread', name: 'Bull Call Spread', description: 'Buy ATM call + Sell OTM call. Defined risk/reward.', riskCategory: 'low', isBullish: true, isBearish: false, isNeutral: false, legs: [{ type: 'CE', action: 'buy', count: 1 }, { type: 'CE', action: 'sell', count: 1 }] },
-  { id: 'iron_condor', name: 'Iron Condor', description: 'Range-bound strategy with defined risk.', riskCategory: 'low', isBullish: false, isBearish: false, isNeutral: true, legs: [{ type: 'PE', action: 'sell', count: 1 }, { type: 'PE', action: 'buy', count: 1 }, { type: 'CE', action: 'sell', count: 1 }, { type: 'CE', action: 'buy', count: 1 }] },
+  { id: 'iron_condor', name: 'Iron Condor', description: 'Range-bound strategy with defined risk. 4 legs.', riskCategory: 'low', isBullish: false, isBearish: false, isNeutral: true, legs: [{ type: 'PE', action: 'sell', count: 1 }, { type: 'PE', action: 'buy', count: 1 }, { type: 'CE', action: 'sell', count: 1 }, { type: 'CE', action: 'buy', count: 1 }] },
 ];
 
 const mockStrategyResult = {

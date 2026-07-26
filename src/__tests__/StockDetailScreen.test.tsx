@@ -15,6 +15,49 @@ import { mockStocks, mockAIInsights } from '../constants/mockData';
 
 // ==================== Mocks (hoisted) ====================
 
+// ==================== useT mock (hoisted) ====================
+const { resolveT } = vi.hoisted(() => {
+  const app: Record<string, string> = {
+    'close': 'Close',
+  };
+  const status: Record<string, string> = {
+    'live': 'Live',
+    'offline': 'Offline',
+  };
+  const translations: Record<string, any> = { app, status };
+
+  function resolveT(key: string, params?: Record<string, any>): string {
+    const parts = key.split('.');
+    const rootNs = parts[0];
+    const subKey = parts.slice(1).join('.');
+    const obj = translations[rootNs];
+    if (!obj) {
+      const parts2 = key.split('.');
+      const lastSeg = parts2[parts2.length - 1] || key;
+      return lastSeg.replace(/([A-Z])/g, ' $1').replace(/^./, (s: string) => s.toUpperCase()).trim();
+    }
+    if (params && params.count !== undefined && params.count !== 1) {
+      const pluralKey = subKey + '_plural';
+      if (pluralKey in obj && typeof obj[pluralKey] === 'string') {
+        let result: string = obj[pluralKey];
+        result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+        return result;
+      }
+    }
+    if (subKey in obj && typeof obj[subKey] === 'string') {
+      let result: string = obj[subKey];
+      if (params) {
+        result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+      }
+      return result;
+    }
+    const lastSeg = parts[parts.length - 1] || key;
+    return lastSeg.replace(/([A-Z])/g, ' $1').replace(/^./, (s: string) => s.toUpperCase()).trim();
+  }
+
+  return { resolveT };
+});
+
 const mockNavigate = vi.fn();
 const mockBuyStock = vi.fn();
 const mockAddToWatchlist = vi.fn();
@@ -56,16 +99,14 @@ vi.mock('../context/ThemeContext', () => ({
   }),
 }));
 
+const marketStoreState = { stocks: mockStocks };
 vi.mock('../store/marketStore', () => ({
-  useMarketStore: vi.fn(() => ({
-    stocks: mockStocks,
-  })),
+  useMarketStore: vi.fn(() => marketStoreState),
 }));
 
+const portfolioStoreState = { buyStock: mockBuyStock };
 vi.mock('../store/portfolioStore', () => ({
-  usePortfolioStore: vi.fn(() => ({
-    buyStock: mockBuyStock,
-  })),
+  usePortfolioStore: vi.fn(() => portfolioStoreState),
 }));
 
 const currentWatchlists: Array<{
@@ -82,36 +123,79 @@ const currentWatchlists: Array<{
   },
 ];
 
+// Stable reference for useRealtimePrice to prevent max depth error
+const realtimePriceState = {
+  currentPrice: 2890.50,
+  priceChange: 45.20,
+  priceChangePercent: 1.59,
+  candleHistory: [
+    { date: '2025-05-20', open: 2850, high: 2910, low: 2840, close: 2890, volume: 12000000 },
+    { date: '2025-05-21', open: 2890, high: 2930, low: 2870, close: 2905, volume: 11500000 },
+    { date: '2025-05-22', open: 2905, high: 2950, low: 2880, close: 2890, volume: 13000000 },
+    { date: '2025-05-23', open: 2890, high: 2910, low: 2860, close: 2890, volume: 11000000 },
+  ],
+  isConnected: true,
+  isPositive: true,
+  loadHistory: mockLoadHistory,
+};
+
+const watchlistStoreState = {
+  watchlists: currentWatchlists,
+  isInWatchlist: mockIsInWatchlist,
+  addToWatchlist: mockAddToWatchlist,
+  removeFromWatchlist: mockRemoveFromWatchlist,
+};
 vi.mock('../store/watchlistStore', () => ({
-  useWatchlistStore: vi.fn(() => ({
-    watchlists: currentWatchlists,
-    isInWatchlist: mockIsInWatchlist,
-    addToWatchlist: mockAddToWatchlist,
-    removeFromWatchlist: mockRemoveFromWatchlist,
-  })),
+  useWatchlistStore: vi.fn(() => watchlistStoreState),
 }));
 
+const aiStoreState = { insights: mockAIInsights };
 vi.mock('../store/aiStore', () => ({
-  useAIStore: vi.fn(() => ({
-    insights: mockAIInsights,
-  })),
+  useAIStore: vi.fn(() => aiStoreState),
 }));
 
 vi.mock('../hooks/useRealtimePrice', () => ({
-  useRealtimePrice: vi.fn(() => ({
-    currentPrice: 2890.50,
-    priceChange: 45.20,
-    priceChangePercent: 1.59,
-    candleHistory: [
-      { date: '2025-05-20', open: 2850, high: 2910, low: 2840, close: 2890, volume: 12000000 },
-      { date: '2025-05-21', open: 2890, high: 2930, low: 2870, close: 2905, volume: 11500000 },
-      { date: '2025-05-22', open: 2905, high: 2950, low: 2880, close: 2890, volume: 13000000 },
-      { date: '2025-05-23', open: 2890, high: 2910, low: 2860, close: 2890, volume: 11000000 },
-    ],
-    isConnected: true,
-    isPositive: true,
-    loadHistory: mockLoadHistory,
-  })),
+  useRealtimePrice: vi.fn(() => realtimePriceState),
+}));
+
+
+
+// Mock FullscreenChartModal to avoid StatusBar.setHidden issue
+vi.mock('../components/stock/FullscreenChartModal', () => ({
+  default: 'FullscreenChartModalMock',
+}));
+
+// Mock patternSettingsStore to prevent Zustand subscription loop
+const patternSettings = {
+  minConfidence: 50, enabledPatterns: [], lookback: 0, hydrated: true,
+};
+vi.mock('../store/patternSettingsStore', () => {
+  const ALL_PATTERNS = [
+    'head_and_shoulders',
+    'inverse_head_and_shoulders',
+    'double_top',
+    'double_bottom',
+    'bull_flag',
+    'bear_flag',
+    'ascending_triangle',
+    'descending_triangle',
+    'symmetrical_triangle',
+  ];
+  const LOOKBACK_OPTIONS = [0, 50, 100, 200, 500];
+  return {
+    usePatternSettingsStore: vi.fn((sel?: any) => {
+      const state = patternSettings;
+      return sel ? sel(state) : state;
+    }),
+    ALL_PATTERNS,
+    LOOKBACK_OPTIONS,
+  };
+});
+
+// Mock useT hook — resolveT comes from vi.hoisted() above
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({ t: resolveT, language: 'en', isHindi: false, toggleLanguage: vi.fn() }),
+  default: () => ({ t: resolveT, language: 'en', isHindi: false, toggleLanguage: vi.fn() }),
 }));
 
 // ==================== Imports ====================
@@ -709,3 +793,6 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
     }
   });
 });
+
+
+

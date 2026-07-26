@@ -19,6 +19,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { mockLearningPaths } from '../../constants/mockData';
 import { mockCourses, mockLessons } from '../../constants/mockData';
@@ -29,6 +30,7 @@ const { width } = Dimensions.get('window');
 export default function LearningPathDetailScreen({ navigation, route }: any) {
   const { pathId } = route.params;
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { lessonProgress } = useEducationStore();
 
@@ -60,9 +62,9 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
 
   // Level config
   const levelConfig: Record<string, { label: string; color: string }> = {
-    beginner: { label: 'Beginner', color: '#00E676' },
-    intermediate: { label: 'Intermediate', color: '#6C63FF' },
-    advanced: { label: 'Advanced', color: '#FF5252' },
+    beginner: { label: t('education.beginner'), color: '#00E676' },
+    intermediate: { label: t('education.intermediate'), color: '#6C63FF' },
+    advanced: { label: t('education.advanced'), color: '#FF5252' },
   };
 
   const handleCoursePress = useCallback((courseId: string) => {
@@ -86,9 +88,9 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>Path not found</Text>
+        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('education.pathNotFound')}</Text>
         <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={[styles.backBtnText, { color: colors.primary }]}>Go Back</Text>
+          <Text style={[styles.backBtnText, { color: colors.primary }]}>{t('education.goBack')}</Text>
         </Pressable>
       </View>
     );
@@ -132,31 +134,31 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
           <View style={styles.heroStats}>
             <View style={styles.heroStat}>
               <Text style={styles.heroStatValue}>{path.totalLessons}</Text>
-              <Text style={styles.heroStatLabel}>Lessons</Text>
+              <Text style={styles.heroStatLabel}>{t('education.lessons')}</Text>
             </View>
             <View style={styles.heroStatDivider} />
             <View style={styles.heroStat}>
               <Text style={styles.heroStatValue}>{path.courseIds.length}</Text>
-              <Text style={styles.heroStatLabel}>Courses</Text>
+              <Text style={styles.heroStatLabel}>{t('education.title')}</Text>
             </View>
             <View style={styles.heroStatDivider} />
             <View style={styles.heroStat}>
               <Text style={styles.heroStatValue}>{path.totalDuration}</Text>
-              <Text style={styles.heroStatLabel}>Duration</Text>
+              <Text style={styles.heroStatLabel}>{t('education.duration')}</Text>
             </View>
           </View>
 
           {/* Overall Progress */}
           <View style={styles.heroProgressContainer}>
             <View style={styles.heroProgressRow}>
-              <Text style={styles.heroProgressLabel}>Overall Progress</Text>
+              <Text style={styles.heroProgressLabel}>{t('education.overallProgress')}</Text>
               <Text style={styles.heroProgressPercent}>{pathProgress.percent}%</Text>
             </View>
             <View style={styles.heroProgressBarBg}>
               <View style={[styles.heroProgressBarFill, { width: `${pathProgress.percent}%` }]} />
             </View>
             <Text style={styles.heroProgressDetail}>
-              {pathProgress.completedCourses}/{pathProgress.totalCourses} courses completed
+              {t('education.coursesCompleted', { completed: pathProgress.completedCourses, total: pathProgress.totalCourses })}
             </Text>
           </View>
         </LinearGradient>
@@ -165,7 +167,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Ionicons name="people-outline" size={18} color={colors.primary} />
-            <Text style={styles.sectionTitle}>Who Is This For?</Text>
+            <Text style={styles.sectionTitle}>{t('education.whoIsThisFor')}</Text>
           </View>
           <Text style={styles.sectionText}>{path.targetAudience}</Text>
         </View>
@@ -174,7 +176,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Ionicons name="trophy-outline" size={18} color={colors.warning} />
-            <Text style={styles.sectionTitle}>Skills You'll Gain</Text>
+            <Text style={styles.sectionTitle}>{t('education.skillsYouGain')}</Text>
           </View>
           <View style={styles.skillsGrid}>
             {path.skillsGained.map((skill, i) => (
@@ -190,7 +192,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Ionicons name="library-outline" size={18} color={colors.primary} />
-            <Text style={styles.sectionTitle}>Courses in This Path</Text>
+            <Text style={styles.sectionTitle}>{t('education.coursesInPath')}</Text>
             <Text style={styles.sectionCount}>{pathCourses.length}</Text>
           </View>
 
@@ -286,7 +288,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
               color={colors.white}
             />
             <Text style={styles.startBtnText}>
-              {pathProgress.percent > 0 ? 'Continue Learning' : 'Start This Path'}
+              {pathProgress.percent > 0 ? t('education.continueLearning') : t('education.startThisPath')}
             </Text>
           </LinearGradient>
         </Pressable>

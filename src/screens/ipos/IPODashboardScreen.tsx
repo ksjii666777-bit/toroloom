@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useT } from '../../hooks/useT';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
@@ -23,28 +24,28 @@ type DashboardTab = 'active' | 'myapps';
 
 type IPOFilter = 'all' | 'open' | 'upcoming' | 'closed' | 'listed';
 
-const FILTERS: { key: IPOFilter; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: 'apps' },
-  { key: 'open', label: 'Open', icon: 'pricetag' },
-  { key: 'upcoming', label: 'Upcoming', icon: 'calendar' },
-  { key: 'closed', label: 'Closed', icon: 'lock-closed' },
-  { key: 'listed', label: 'Listed', icon: 'checkmark-circle' },
+const FILTERS: { key: IPOFilter; label: string; icon: string; tKey: string }[] = [
+  { key: 'all', label: 'All', icon: 'apps', tKey: 'ipos.filterAll' },
+  { key: 'open', label: 'Open', icon: 'pricetag', tKey: 'ipos.filterOpen' },
+  { key: 'upcoming', label: 'Upcoming', icon: 'calendar', tKey: 'ipos.filterUpcoming' },
+  { key: 'closed', label: 'Closed', icon: 'lock-closed', tKey: 'ipos.filterClosed' },
+  { key: 'listed', label: 'Listed', icon: 'checkmark-circle', tKey: 'ipos.filterListed' },
 ];
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  open: { label: 'Open Now', color: '#00E676', bgColor: '#00E67620' },
-  upcoming: { label: 'Upcoming', color: '#3B82F6', bgColor: '#3B82F620' },
-  closed: { label: 'Closed', color: '#FFAB40', bgColor: '#FFAB4020' },
-  listing_today: { label: 'Listing Today', color: '#8B5CF6', bgColor: '#8B5CF620' },
-  listed: { label: 'Listed', color: '#64748B', bgColor: '#64748B20' },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; tKey: string }> = {
+  open: { label: 'Open Now', color: '#00E676', bgColor: '#00E67620', tKey: 'ipos.statusOpen' },
+  upcoming: { label: 'Upcoming', color: '#3B82F6', bgColor: '#3B82F620', tKey: 'ipos.statusUpcoming' },
+  closed: { label: 'Closed', color: '#FFAB40', bgColor: '#FFAB4020', tKey: 'ipos.statusClosed' },
+  listing_today: { label: 'Listing Today', color: '#8B5CF6', bgColor: '#8B5CF620', tKey: 'ipos.statusListingToday' },
+  listed: { label: 'Listed', color: '#64748B', bgColor: '#64748B20', tKey: 'ipos.statusListed' },
 };
 
-const APPLICATION_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; icon: string }> = {
-  pending: { label: 'Pending', color: '#FFAB40', bgColor: '#FFAB4020', icon: 'time-outline' },
-  submitted: { label: 'Submitted', color: '#3B82F6', bgColor: '#3B82F620', icon: 'send-outline' },
-  pending_allotment: { label: 'Awaiting Allotment', color: '#8B5CF6', bgColor: '#8B5CF620', icon: 'hourglass-outline' },
-  allotted: { label: 'Allotted ✅', color: '#00E676', bgColor: '#00E67620', icon: 'checkmark-circle' },
-  not_allotted: { label: 'Not Allotted', color: '#FF5252', bgColor: '#FF525220', icon: 'close-circle' },
+const APPLICATION_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; icon: string; tKey: string }> = {
+  pending: { label: 'Pending', color: '#FFAB40', bgColor: '#FFAB4020', icon: 'time-outline', tKey: 'ipos.appPending' },
+  submitted: { label: 'Submitted', color: '#3B82F6', bgColor: '#3B82F620', icon: 'send-outline', tKey: 'ipos.appSubmitted' },
+  pending_allotment: { label: 'Awaiting Allotment', color: '#8B5CF6', bgColor: '#8B5CF620', icon: 'hourglass-outline', tKey: 'ipos.appAwaitingAllotment' },
+  allotted: { label: 'Allotted ✅', color: '#00E676', bgColor: '#00E67620', icon: 'checkmark-circle', tKey: 'ipos.appAllotted' },
+  not_allotted: { label: 'Not Allotted', color: '#FF5252', bgColor: '#FF525220', icon: 'close-circle', tKey: 'ipos.appNotAllotted' },
 };
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
@@ -65,11 +66,12 @@ function formatCompact(num: number): string {
 // ──── Status Badge ─────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useT();
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.upcoming;
   return (
     <View style={[badgeStyles.badge, { backgroundColor: config.bgColor }]}>
       <View style={[badgeStyles.dot, { backgroundColor: config.color }]} />
-      <Text style={[badgeStyles.label, { color: config.color }]}>{config.label}</Text>
+      <Text style={[badgeStyles.label, { color: config.color }]}>{t(config.tKey)}</Text>
     </View>
   );
 }
@@ -86,11 +88,12 @@ const badgeStyles = StyleSheet.create({
 // ──── App Status Badge ─────────────────────────────────────────────────────
 
 function AppStatusBadge({ status }: { status: string }) {
+  const { t } = useT();
   const config = APPLICATION_STATUS_CONFIG[status] || APPLICATION_STATUS_CONFIG.pending;
   return (
     <View style={[appBadgeStyles.badge, { backgroundColor: config.bgColor, borderColor: config.color + '30' }]}>
       <Ionicons name={config.icon as any} size={12} color={config.color} />
-      <Text style={[appBadgeStyles.label, { color: config.color }]}>{config.label}</Text>
+      <Text style={[appBadgeStyles.label, { color: config.color }]}>{t(config.tKey)}</Text>
     </View>
   );
 }
@@ -112,6 +115,7 @@ function IPOCard({
   ipo: IPOItem; onPress: () => void; onApply?: () => void;
   onBookmark: () => void; colors: any;
 }) {
+  const { t } = useT();
   const isHighSubscription = ipo.subscriptionTotal > 5;
   const gmpPositive = ipo.gmp > 0;
   const canApply = ipo.subscriptionStatus === 'open' || ipo.subscriptionStatus === 'listing_today';
@@ -145,17 +149,17 @@ function IPOCard({
         {/* Price & GMP Row */}
         <View style={cardStyles.priceRow}>
           <View style={cardStyles.priceItem}>
-            <Text style={[cardStyles.priceLabel, { color: colors.textMuted }]}>Price Band</Text>
+            <Text style={[cardStyles.priceLabel, { color: colors.textMuted }]}>{t('ipos.priceBand')}</Text>
             <Text style={[cardStyles.priceValue, { color: colors.text }]}>
               ₹{ipo.priceBand.min} – ₹{ipo.priceBand.max}
             </Text>
           </View>
           <View style={cardStyles.priceItem}>
-            <Text style={[cardStyles.priceLabel, { color: colors.textMuted }]}>Lot</Text>
-            <Text style={[cardStyles.priceValue, { color: colors.text }]}>{ipo.lotSize} shares</Text>
+            <Text style={[cardStyles.priceLabel, { color: colors.textMuted }]}>{t('ipos.lot')}</Text>
+            <Text style={[cardStyles.priceValue, { color: colors.text }]}>{ipo.lotSize} {t('ipos.shares')}</Text>
           </View>
           <View style={cardStyles.priceItem}>
-            <Text style={[cardStyles.priceLabel, { color: colors.textMuted }]}>Min Invest</Text>
+            <Text style={[cardStyles.priceLabel, { color: colors.textMuted }]}>{t('ipos.minInvest')}</Text>
             <Text style={[cardStyles.priceValue, { color: colors.text }]}>
               ₹{ipo.minInvestment.toLocaleString('en-IN')}
             </Text>
@@ -165,13 +169,13 @@ function IPOCard({
         {/* GMP */}
         <View style={[cardStyles.gmpRow, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
           <View style={cardStyles.gmpLeft}>
-            <Text style={[cardStyles.gmpLabel, { color: colors.textMuted }]}>GMP</Text>
+            <Text style={[cardStyles.gmpLabel, { color: colors.textMuted }]}>{t('ipos.gmp')}</Text>
             <Text style={[cardStyles.gmpValue, { color: gmpPositive ? colors.marketUp : colors.marketDown }]}>
               {gmpPositive ? '+' : ''}₹{ipo.gmp} ({gmpPositive ? '+' : ''}{ipo.gmpPercent.toFixed(1)}%)
             </Text>
           </View>
           <View style={cardStyles.gmpRight}>
-            <Text style={[cardStyles.gmpLabel, { color: colors.textMuted }]}>Expected Listing</Text>
+            <Text style={[cardStyles.gmpLabel, { color: colors.textMuted }]}>{t('ipos.expectedListing')}</Text>
             <Text style={[cardStyles.gmpValue, { color: colors.text }]}>
               ₹{ipo.expectedListingPrice} ({(ipo.expectedListingGain >= 0 ? '+' : '')}{ipo.expectedListingGain.toFixed(1)}%)
             </Text>
@@ -183,17 +187,17 @@ function IPOCard({
           <View style={cardStyles.subRow}>
             <View style={cardStyles.subLabelRow}>
               <Text style={[cardStyles.subLabel, { color: colors.textMuted }]}>
-                Subscription: {ipo.subscriptionTotal.toFixed(1)}x
+                {t('ipos.subscriptionLabel', { value: ipo.subscriptionTotal.toFixed(1) })}
               </Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Text style={[cardStyles.subLabel, { color: colors.textMuted, fontSize: 9 }]}>
-                  QIB: {ipo.subscriptionQIB.toFixed(1)}x
+                  {t('ipos.subQIB')}: {ipo.subscriptionQIB.toFixed(1)}x
                 </Text>
                 <Text style={[cardStyles.subLabel, { color: colors.textMuted, fontSize: 9 }]}>
-                  HNI: {ipo.subscriptionHNI.toFixed(1)}x
+                  {t('ipos.subHNI')}: {ipo.subscriptionHNI.toFixed(1)}x
                 </Text>
                 <Text style={[cardStyles.subLabel, { color: colors.textMuted, fontSize: 9 }]}>
-                  Ret: {ipo.subscriptionRetail.toFixed(1)}x
+                  {t('ipos.subRetail')}: {ipo.subscriptionRetail.toFixed(1)}x
                 </Text>
               </View>
             </View>
@@ -212,13 +216,13 @@ function IPOCard({
             <View style={cardStyles.dateItem}>
               <Ionicons name="calendar-outline" size={10} color={colors.textMuted} />
               <Text style={[cardStyles.dateText, { color: colors.textMuted }]}>
-                Open: {formatDate(ipo.openDate)}
+                {t('ipos.openLabel', { date: formatDate(ipo.openDate) })}
               </Text>
             </View>
             <View style={cardStyles.dateItem}>
               <Ionicons name="flag-outline" size={10} color={colors.textMuted} />
               <Text style={[cardStyles.dateText, { color: colors.textMuted }]}>
-                Listing: {formatDate(ipo.listingDate)}
+                {t('ipos.listingLabel', { date: formatDate(ipo.listingDate) })}
               </Text>
             </View>
           </View>
@@ -235,7 +239,7 @@ function IPOCard({
                 style={cardStyles.applyGradient}
               >
                 <Ionicons name="phone-portrait-outline" size={14} color="#0A0D14" />
-                <Text style={cardStyles.applyText}>Apply via UPI</Text>
+                <Text style={cardStyles.applyText}>{t('ipos.applyViaUPI')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           )}
@@ -294,6 +298,7 @@ const cardStyles = StyleSheet.create({
 function ApplicationCard({ app, colors }: {
   app: IPOApplication; colors: any;
 }) {
+  const { t } = useT();
   const config = APPLICATION_STATUS_CONFIG[app.status] || APPLICATION_STATUS_CONFIG.pending;
   const isPositive = app.status === 'allotted' && (app.listingGain || 0) >= 0;
 
@@ -314,22 +319,22 @@ function ApplicationCard({ app, colors }: {
       {/* Details */}
       <View style={[appCardStyles.details, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
         <View style={appCardStyles.detailItem}>
-          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>Lots</Text>
+          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>{t('ipos.lots')}</Text>
           <Text style={[appCardStyles.detailValue, { color: colors.text }]}>{app.bidLots}</Text>
         </View>
         <View style={[appCardStyles.detailDivider, { backgroundColor: colors.divider }]} />
         <View style={appCardStyles.detailItem}>
-          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>Shares</Text>
+          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>{t('ipos.sharesLabel')}</Text>
           <Text style={[appCardStyles.detailValue, { color: colors.text }]}>{app.bidQuantity}</Text>
         </View>
         <View style={[appCardStyles.detailDivider, { backgroundColor: colors.divider }]} />
         <View style={appCardStyles.detailItem}>
-          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>Price</Text>
+          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>{t('ipos.price')}</Text>
           <Text style={[appCardStyles.detailValue, { color: colors.text }]}>₹{app.bidPrice}</Text>
         </View>
         <View style={[appCardStyles.detailDivider, { backgroundColor: colors.divider }]} />
         <View style={appCardStyles.detailItem}>
-          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>Amount</Text>
+          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>{t('ipos.amount')}</Text>
           <Text style={[appCardStyles.detailValue, { color: colors.text }]}>
             {formatCompact(app.totalAmount)}
           </Text>
@@ -340,21 +345,21 @@ function ApplicationCard({ app, colors }: {
       {app.status === 'allotted' && app.sharesAllotted && (
         <View style={[appCardStyles.allotmentRow, { backgroundColor: '#00E67610', borderColor: '#00E67620' }]}>
           <View style={appCardStyles.allotItem}>
-            <Text style={[appCardStyles.allotLabel, { color: colors.textMuted }]}>Allotted</Text>
+            <Text style={[appCardStyles.allotLabel, { color: colors.textMuted }]}>{t('ipos.allottedLabel')}</Text>
             <Text style={[appCardStyles.allotValue, { color: colors.marketUp }]}>
               {app.sharesAllotted} shares
             </Text>
           </View>
           <View style={[appCardStyles.detailDivider, { backgroundColor: '#00E67620' }]} />
           <View style={appCardStyles.allotItem}>
-            <Text style={[appCardStyles.allotLabel, { color: colors.textMuted }]}>Listing Price</Text>
+            <Text style={[appCardStyles.allotLabel, { color: colors.textMuted }]}>{t('ipos.listingPriceLabel')}</Text>
             <Text style={[appCardStyles.allotValue, { color: colors.text }]}>
               ₹{app.listingPrice || '—'}
             </Text>
           </View>
           <View style={[appCardStyles.detailDivider, { backgroundColor: '#00E67620' }]} />
           <View style={appCardStyles.allotItem}>
-            <Text style={[appCardStyles.allotLabel, { color: colors.textMuted }]}>Gain</Text>
+            <Text style={[appCardStyles.allotLabel, { color: colors.textMuted }]}>{t('ipos.gain')}</Text>
             <Text style={[appCardStyles.allotValue, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
               {app.listingGain ? `${app.listingGain >= 0 ? '+' : ''}${app.listingGain.toFixed(1)}%` : '—'}
             </Text>
@@ -365,10 +370,10 @@ function ApplicationCard({ app, colors }: {
       {/* UPI & Date */}
       <View style={appCardStyles.footer}>
         <Text style={[appCardStyles.footerText, { color: colors.textMuted }]}>
-          UPI: {app.upiId}
+          {t('ipos.upiLabel', { id: app.upiId })}
         </Text>
         <Text style={[appCardStyles.footerText, { color: colors.textMuted }]}>
-          Applied: {formatDate(app.appliedAt)}
+          {t('ipos.appliedLabel', { date: formatDate(app.appliedAt) })}
         </Text>
       </View>
     </View>
@@ -415,6 +420,7 @@ function UPIApplyModal({
 }: {
   ipo: IPOItem | null; visible: boolean; onClose: () => void; colors: any;
 }) {
+  const { t } = useT();
   const applyForIPO = useIPOStore((s) => s.applyForIPO);
   const [bidLots, setBidLots] = useState(1);
   const [bidPrice, setBidPrice] = useState(0);
@@ -438,11 +444,11 @@ function UPIApplyModal({
 
   const handleSubmit = () => {
     if (!upiId.trim() || !upiId.includes('@')) {
-      Alert.alert('Invalid UPI ID', 'Please enter a valid UPI ID (e.g., name@bank)');
+      Alert.alert(t('ipos.invalidUpiTitle'), t('ipos.invalidUpiMsg'));
       return;
     }
     if (bidLots < 1 || bidLots > 100) {
-      Alert.alert('Invalid Lots', 'Minimum 1 lot, maximum 100 lots');
+      Alert.alert(t('ipos.invalidLotsTitle'), t('ipos.invalidLotsMsg'));
       return;
     }
 
@@ -450,12 +456,12 @@ function UPIApplyModal({
     try {
       applyForIPO(ipo, bidLots, bidPrice, upiId.trim());
       Alert.alert(
-        'Application Submitted ✅',
-        `${ipo.companyName}\n${bidLots} lot(s) • ${bidQuantity} shares\n₹${totalAmount.toLocaleString('en-IN')}\nUPI: ${upiId.trim()}`,
+        t('ipos.appSubmittedTitle'),
+        `${ipo.companyName}\n${bidLots} ${t('ipos.lotsSuffix')} • ${bidQuantity} ${t('ipos.shares')}\n₹${totalAmount.toLocaleString('en-IN')}\n${t('ipos.upiLabel', { id: upiId.trim() })}`,
       );
       onClose();
     } catch {
-      Alert.alert('Error', 'Failed to submit application. Please try again.');
+      Alert.alert(t('errors.unknown'), t('ipos.submitError'));
     } finally {
       setSubmitting(false);
     }
@@ -473,7 +479,7 @@ function UPIApplyModal({
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
-            <Text style={[modalStyles.title, { color: colors.text }]}>Apply via UPI</Text>
+            <Text style={[modalStyles.title, { color: colors.text }]}>{t('ipos.applyTitle')}</Text>
             <View style={{ width: 24 }} />
           </View>
 
@@ -486,13 +492,13 @@ function UPIApplyModal({
               <View style={{ flex: 1 }}>
                 <Text style={[modalStyles.companyName, { color: colors.text }]}>{ipo.companyName}</Text>
                 <Text style={[modalStyles.companyMeta, { color: colors.textMuted }]}>
-                  ₹{ipo.priceBand.min} – ₹{ipo.priceBand.max} · Lot: {ipo.lotSize} shares
+                  {t('ipos.priceBand')}: ₹{ipo.priceBand.min} – ₹{ipo.priceBand.max} · {t('ipos.lot')}: {ipo.lotSize} {t('ipos.shares')}
                 </Text>
               </View>
             </View>
 
             {/* Bid Lots */}
-            <Text style={[modalStyles.label, { color: colors.textSecondary }]}>Number of Lots</Text>
+            <Text style={[modalStyles.label, { color: colors.textSecondary }]}>{t('ipos.numberOfLots')}</Text>
             <View style={modalStyles.lotsRow}>
               {lotOptions.map((opt) => (
                 <TouchableOpacity
@@ -518,7 +524,7 @@ function UPIApplyModal({
 
             {/* Custom Lots */}
             <View style={[modalStyles.customRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-              <Text style={[modalStyles.customLabel, { color: colors.textMuted }]}>Custom</Text>
+              <Text style={[modalStyles.customLabel, { color: colors.textMuted }]}>{t('ipos.custom')}</Text>
               <TextInput
                 style={[modalStyles.customInput, { color: colors.text }]}
                 value={bidLots.toString()}
@@ -529,13 +535,11 @@ function UPIApplyModal({
                 keyboardType="numeric"
                 placeholderTextColor={colors.textMuted}
               />
-              <Text style={[modalStyles.customSuffix, { color: colors.textMuted }]}>lots</Text>
+              <Text style={[modalStyles.customSuffix, { color: colors.textMuted }]}>{t('ipos.lotsSuffix')}</Text>
             </View>
 
             {/* Bid Price */}
-            <Text style={[modalStyles.label, { color: colors.textSecondary }]}>
-              Bid Price (₹)
-            </Text>
+            <Text style={[modalStyles.label, { color: colors.textSecondary }]}>{t('ipos.bidPriceLabel')}</Text>
             <View style={modalStyles.priceRow}>
               <TouchableOpacity
                 style={[modalStyles.priceBtn, {
@@ -548,7 +552,7 @@ function UPIApplyModal({
                   color: bidPrice === ipo.priceBand.min ? '#FFFFFF' : colors.text,
                   fontWeight: bidPrice === ipo.priceBand.min ? '700' : '500',
                 }]}>
-                  Cut-off
+                  {t('ipos.cutOff')}
                 </Text>
                 <Text style={[modalStyles.priceSub, {
                   color: bidPrice === ipo.priceBand.min ? 'rgba(255,255,255,0.7)' : colors.textMuted,
@@ -567,7 +571,7 @@ function UPIApplyModal({
                   color: bidPrice === ipo.priceBand.max ? '#FFFFFF' : colors.text,
                   fontWeight: bidPrice === ipo.priceBand.max ? '700' : '500',
                 }]}>
-                  Higher
+                  {t('ipos.higher')}
                 </Text>
                 <Text style={[modalStyles.priceSub, {
                   color: bidPrice === ipo.priceBand.max ? 'rgba(255,255,255,0.7)' : colors.textMuted,
@@ -578,14 +582,14 @@ function UPIApplyModal({
             </View>
 
             {/* UPI ID */}
-            <Text style={[modalStyles.label, { color: colors.textSecondary }]}>UPI ID</Text>
+            <Text style={[modalStyles.label, { color: colors.textSecondary }]}>{t('ipos.upiIdLabel')}</Text>
             <View style={[modalStyles.upiRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <Ionicons name="phone-portrait-outline" size={18} color={colors.primary} />
               <TextInput
                 style={[modalStyles.upiInput, { color: colors.text }]}
                 value={upiId}
                 onChangeText={setUpiId}
-                placeholder="e.g., name@hdfc"
+                placeholder={t('ipos.upiPlaceholder')}
                 placeholderTextColor={colors.textMuted}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -595,24 +599,24 @@ function UPIApplyModal({
             {/* Summary */}
             <View style={[modalStyles.summary, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={modalStyles.summaryRow}>
-                <Text style={[modalStyles.summaryLabel, { color: colors.textMuted }]}>Lots</Text>
+                <Text style={[modalStyles.summaryLabel, { color: colors.textMuted }]}>{t('ipos.lots')}</Text>
                 <Text style={[modalStyles.summaryValue, { color: colors.text }]}>{bidLots}</Text>
               </View>
               <View style={[modalStyles.summaryDivider, { backgroundColor: colors.divider }]} />
               <View style={modalStyles.summaryRow}>
-                <Text style={[modalStyles.summaryLabel, { color: colors.textMuted }]}>Shares</Text>
+                <Text style={[modalStyles.summaryLabel, { color: colors.textMuted }]}>{t('ipos.sharesLabel')}</Text>
                 <Text style={[modalStyles.summaryValue, { color: colors.text }]}>
                   {bidQuantity.toLocaleString('en-IN')}
                 </Text>
               </View>
               <View style={[modalStyles.summaryDivider, { backgroundColor: colors.divider }]} />
               <View style={modalStyles.summaryRow}>
-                <Text style={[modalStyles.summaryLabel, { color: colors.textMuted }]}>Price per Share</Text>
+                <Text style={[modalStyles.summaryLabel, { color: colors.textMuted }]}>{t('ipos.pricePerShare')}</Text>
                 <Text style={[modalStyles.summaryValue, { color: colors.text }]}>₹{bidPrice}</Text>
               </View>
               <View style={[modalStyles.summaryDivider, { backgroundColor: colors.divider }]} />
               <View style={modalStyles.summaryRow}>
-                <Text style={[modalStyles.summaryLabel, { color: colors.textMuted }]}>Total Amount</Text>
+                <Text style={[modalStyles.summaryLabel, { color: colors.textMuted }]}>{t('ipos.totalAmount')}</Text>
                 <Text style={[modalStyles.summaryValue, { color: colors.primary, fontSize: 16 }]}>
                   {formatCompact(totalAmount)}
                 </Text>
@@ -634,7 +638,7 @@ function UPIApplyModal({
               >
                 <Ionicons name="checkmark-circle" size={20} color="#0A0D14" />
                 <Text style={modalStyles.submitText}>
-                  {submitting ? 'Submitting...' : `Apply for ${formatCompact(totalAmount)}`}
+                  {submitting ? t('ipos.submitting') : t('ipos.applyFor', { amount: formatCompact(totalAmount) })}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -643,7 +647,7 @@ function UPIApplyModal({
             <View style={[modalStyles.infoBox, { backgroundColor: '#3B82F610', borderColor: '#3B82F630' }]}>
               <Ionicons name="information-circle" size={14} color={colors.primary} />
               <Text style={[modalStyles.infoText, { color: colors.textMuted }]}>
-                Amount will be blocked in your UPI account. It will be debited only upon allotment.
+                {t('ipos.upiInfo')}
               </Text>
             </View>
 
@@ -776,6 +780,7 @@ const modalStyles = StyleSheet.create({
 
 export default function IPODashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { ipos, applications, toggleBookmark } = useIPOStore();
   const getApplicationStats = useIPOStore((s) => s.getApplicationStats);
@@ -811,11 +816,11 @@ export default function IPODashboardScreen({ navigation }: any) {
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={[styles.title, { color: colors.text }]}>IPO Dashboard</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('ipos.dashboard')}</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
               {counts.open > 0
-                ? `${counts.open} open · ${counts.upcoming} upcoming · ${counts.listed} listed`
-                : `${applications.length} applications tracked`}
+                ? t('ipos.subtitleSummary', { open: counts.open, upcoming: counts.upcoming, listed: counts.listed })
+                : t('ipos.appsTracked', { count: applications.length })}
             </Text>
           </View>
           <TouchableOpacity
@@ -838,7 +843,7 @@ export default function IPODashboardScreen({ navigation }: any) {
               color={activeTab === 'active' ? '#FFFFFF' : colors.textMuted}
             />
             <Text style={[styles.tabText, { color: activeTab === 'active' ? '#FFFFFF' : colors.textMuted }]}>
-              Active IPOs
+              {t('ipos.activeIPOs')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -851,7 +856,7 @@ export default function IPODashboardScreen({ navigation }: any) {
               color={activeTab === 'myapps' ? '#FFFFFF' : colors.textMuted}
             />
             <Text style={[styles.tabText, { color: activeTab === 'myapps' ? '#FFFFFF' : colors.textMuted }]}>
-              My Apps ({applications.length})
+              {t('ipos.myApps', { count: applications.length })}
             </Text>
           </TouchableOpacity>
         </View>
@@ -882,7 +887,7 @@ export default function IPODashboardScreen({ navigation }: any) {
                 <Text style={[styles.filterText, {
                   color: activeFilter === f.key ? '#FFFFFF' : colors.textSecondary,
                 }]}>
-                  {f.label}
+                  {t(f.tKey)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -892,9 +897,9 @@ export default function IPODashboardScreen({ navigation }: any) {
           {filteredIPOs.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="rocket-outline" size={48} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No IPOs found</Text>
+              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('ipos.noIPOs')}</Text>
               <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                Check back later for new IPOs
+                {t('ipos.noIPOsSub')}
               </Text>
             </View>
           ) : (
@@ -903,7 +908,7 @@ export default function IPODashboardScreen({ navigation }: any) {
               contentContainerStyle={styles.listContent}
             >
               <Text style={[styles.countText, { color: colors.textMuted }]}>
-                Showing {filteredIPOs.length} IPO{filteredIPOs.length !== 1 ? 's' : ''}
+                {t('ipos.showingCount', { count: filteredIPOs.length })}
               </Text>
               {filteredIPOs.map((ipo) => (
                 <IPOCard
@@ -931,32 +936,32 @@ export default function IPODashboardScreen({ navigation }: any) {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: SPACING.sm }}>
                 <View style={[styles.statChip, { backgroundColor: '#3B82F620', borderColor: '#3B82F640' }]}>
                   <Text style={[styles.statChipValue, { color: '#3B82F6' }]}>{stats.total}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Total</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.total')}</Text>
                 </View>
                 <View style={[styles.statChip, { backgroundColor: '#3B82F620', borderColor: '#3B82F640' }]}>
                   <Text style={[styles.statChipValue, { color: '#3B82F6' }]}>{stats.submitted}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Submitted</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appSubmitted')}</Text>
                 </View>
                 <View style={[styles.statChip, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
                   <Text style={[styles.statChipValue, { color: '#00E676' }]}>{stats.allotted}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Allotted</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appAllotted')}</Text>
                 </View>
                 <View style={[styles.statChip, { backgroundColor: '#FF525220', borderColor: '#FF525240' }]}>
                   <Text style={[styles.statChipValue, { color: '#FF5252' }]}>{stats.notAllotted}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Not Allotted</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appNotAllotted')}</Text>
                 </View>
                 <View style={[styles.statChip, { backgroundColor: '#FFAB4020', borderColor: '#FFAB4040' }]}>
                   <Text style={[styles.statChipValue, { color: '#FFAB40' }]}>
                     {formatCompact(stats.totalInvestment)}
                   </Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Invested</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.invested')}</Text>
                 </View>
                 {stats.profitFromAllotted > 0 && (
                   <View style={[styles.statChip, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
                     <Text style={[styles.statChipValue, { color: '#00E676' }]}>
                       +{formatCompact(stats.profitFromAllotted)}
                     </Text>
-                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Profit</Text>
+                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.profit')}</Text>
                   </View>
                 )}
               </ScrollView>
@@ -978,7 +983,7 @@ export default function IPODashboardScreen({ navigation }: any) {
                   <Text style={[styles.appFilterText, {
                     color: appFilter === f ? '#FFFFFF' : colors.textMuted,
                   }]}>
-                    {f === 'all' ? 'All' : f === 'submitted' ? 'Active' : f === 'allotted' ? '✅' : '❌'}
+                    {f === 'all' ? t('ipos.filterAll') : f === 'submitted' ? t('ipos.filterActive') : f === 'allotted' ? '✅' : '❌'}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -989,9 +994,9 @@ export default function IPODashboardScreen({ navigation }: any) {
           {filteredApps.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="document-text-outline" size={48} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No Applications</Text>
+              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('ipos.noApplications')}</Text>
               <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                Apply to an open IPO to see it here
+                {t('ipos.noAppsSub')}
               </Text>
             </View>
           ) : (
@@ -1000,7 +1005,7 @@ export default function IPODashboardScreen({ navigation }: any) {
               contentContainerStyle={styles.listContent}
             >
               <Text style={[styles.countText, { color: colors.textMuted }]}>
-                {filteredApps.length} application{filteredApps.length !== 1 ? 's' : ''}
+                {t('ipos.appCount', { count: filteredApps.length })}
               </Text>
               {filteredApps.map((app) => (
                 <ApplicationCard

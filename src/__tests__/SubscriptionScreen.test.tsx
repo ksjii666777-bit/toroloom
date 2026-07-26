@@ -58,6 +58,67 @@ vi.mock('../context/ThemeContext', () => ({
   }),
 }));
 
+vi.mock('../hooks/useT', () => ({
+  useT: function() {
+    const translations: Record<string, string> = {
+      'subscription.title': 'Go Premium',
+      'subscription.unlockPremium': 'Unlock Toroloom Premium',
+      'subscription.unlockTenantPremium': 'Unlock {name} Premium',
+      'subscription.getPremium': 'Get AI insights, advanced analytics, and more.',
+      'subscription.onPlan': "You're on the {plan} plan. Enjoy premium features!",
+      'subscription.poweredBy': 'Powered by',
+      'subscription.monthly': 'Monthly',
+      'subscription.yearly': 'Yearly',
+      'subscription.haveCoupon': 'Have a coupon code?',
+      'subscription.currentPlan': 'CURRENT PLAN',
+      'subscription.activeAutoRenew': 'Active — Auto-Renew On',
+      'subscription.cancelAutoRenew': 'Cancel Auto-Renew',
+      'subscription.selectPlan': 'Select a plan to upgrade',
+      'subscription.upgradeTo': 'Upgrade to',
+      'subscription.securePayment': 'Secure payment via Razorpay',
+      'subscription.comparePlans': 'Compare Plans',
+      'subscription.endingSoon': 'ENDING SOON',
+      'subscription.trialEnded': 'Trial ended',
+      'subscription.subscribeToKeep': 'Subscribe now to keep premium features',
+      'subscription.startFreeTrial': 'Start Free Trial — 7 Days Free',
+      'subscription.noCharges': 'No charges. Cancel anytime.',
+      'subscription.processing': 'Processing...',
+      'subscription.cancelled': 'Cancelled',
+      'subscription.renew': 'Renew Subscription',
+      'subscription.paymentHistory': 'Payment History',
+      'subscription.viewTransactions': 'View all subscription transactions',
+      'subscription.setUpUpiAutopay': 'Set Up UPI AutoPay',
+      'subscription.upiAutopay': 'UPI AutoPay',
+      'subscription.upiAutopayDesc': 'Set up recurring payments via UPI.',
+      'subscription.autopayNotSet': 'AutoPay not set up',
+      'subscription.disableAutopay': 'Disable AutoPay',
+      'subscription.setUpAutopay': 'Set Up AutoPay',
+      'subscription.paymentInfo1': 'Payments are processed securely through Razorpay.',
+      'subscription.paymentInfo2': 'You can cancel anytime from this screen.',
+      'subscription.keepPremium': 'Keep Premium',
+      'subscription.cancelSubscription': 'Cancel Subscription',
+      'subscription.disableUpiAutopay': 'Disable UPI AutoPay',
+      'subscription.keepAutopay': 'Keep AutoPay',
+      'subscription.disable': 'Disable',
+      'subscription.day': 'day',
+      'subscription.leftInTrial': 'left in trial',
+      'subscription.yourTrialEnds': 'Your',
+      'subscription.dayFreeTrial': '-day free trial',
+      'subscription.rupeeOff': '₹ off',
+    };
+    return {
+      t: function(key: string, params: Record<string, string>) {
+        if (params) {
+          let r = translations[key] || key;
+          Object.keys(params).forEach(function(k) { r = r.replace('{' + k + '}', String(params[k])); });
+          return r;
+        }
+        return translations[key] || key;
+      },
+    };
+  },
+}));
+
 // ==================== Imports ====================
 
 import { render, fireEvent } from './testUtils';

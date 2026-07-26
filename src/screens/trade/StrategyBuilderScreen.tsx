@@ -24,6 +24,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useFnoStore } from '../../store/fnoStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
@@ -47,6 +48,7 @@ const STRATEGY_TYPE_COLORS: Record<string, string> = {
 
 export default function StrategyBuilderScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const {
@@ -169,7 +171,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
 
     return (
       <View style={[styles.chartContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-        <Text style={[styles.chartTitle, { color: colors.text }]}>P&L Diagram</Text>
+        <Text style={[styles.chartTitle, { color: colors.text }]}>{t('trading.pnlDiagram')}</Text>
 
         {/* Chart */}
         <View style={[styles.chart, { height: CHART_HEIGHT }]}>
@@ -231,14 +233,14 @@ export default function StrategyBuilderScreen({ navigation }: any) {
   
     const riskLabel = strategyResult.maxLoss < 0
       ? Math.abs(strategyResult.maxLossPercent).toFixed(1)
-      : 'Limited';
+      : t('trading.limited');
 
     return (
-      <Card title="Strategy Analysis" style={styles.resultCard}>
+      <Card title={t('trading.strategyAnalysis')} style={styles.resultCard}>
         {/* Max Profit / Loss */}
         <View style={styles.resultRow}>
           <View style={[styles.resultBadge, { backgroundColor: '#00C85320', flex: 1 }]}>
-            <Text style={[styles.resultLabel, { color: colors.textMuted }]}>Max Profit</Text>
+            <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('trading.maxProfit')}</Text>
             <Text style={[styles.resultValue, { color: colors.marketUp }]}>
               +{formatCurrency(strategyResult.maxProfit, true)}
             </Text>
@@ -247,7 +249,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
             </Text>
           </View>
           <View style={[styles.resultBadge, { backgroundColor: '#FF174420', flex: 1 }]}>
-            <Text style={[styles.resultLabel, { color: colors.textMuted }]}>Max Loss</Text>
+            <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('trading.maxLoss')}</Text>
             <Text style={[styles.resultValue, { color: colors.marketDown }]}>
               {formatCurrency(strategyResult.maxLoss, true)}
             </Text>
@@ -261,7 +263,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
         {strategyResult.breakevenPoints.length > 0 && (
           <View style={styles.breakevenSection}>
             <Text style={[styles.breakevenLabel, { color: colors.textMuted }]}>
-              Breakeven{strategyResult.breakevenPoints.length > 1 ? ' Points' : ''}
+              {strategyResult.breakevenPoints.length > 1 ? t('trading.breakevenPoints') : t('trading.breakeven')}
             </Text>
             <View style={styles.breakevenRow}>
               {strategyResult.breakevenPoints.map((bp, i) => (
@@ -277,14 +279,14 @@ export default function StrategyBuilderScreen({ navigation }: any) {
 
         {/* Bias */}
         <View style={styles.biasSection}>
-          <Text style={[styles.biasLabel, { color: colors.textMuted }]}>Market Outlook</Text>
+          <Text style={[styles.biasLabel, { color: colors.textMuted }]}>{t('trading.marketOutlook')}</Text>
           <View style={styles.biasRow}>
             <Badge
-              label={strategyResult.isBullish ? 'Bullish 📈' : strategyResult.isBearish ? 'Bearish 📉' : 'Neutral ↔️'}
+              label={strategyResult.isBullish ? t('trading.bullish') : strategyResult.isBearish ? t('trading.bearish') : t('trading.neutral')}
               variant={strategyResult.isBullish ? 'success' : strategyResult.isBearish ? 'danger' : 'info'}
             />
             <Badge
-              label={`Risk: ${riskLabel}%`}
+              label={t('trading.riskPercent', { percent: riskLabel })}
               variant={Math.abs(strategyResult.maxLossPercent) > 20 ? 'danger' : 'warning'}
             />
           </View>
@@ -323,7 +325,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
         {/* Leg Details */}
         <View style={styles.legDetails}>
           <View style={styles.legField}>
-            <Text style={[styles.legFieldLabel, { color: colors.textMuted }]}>Strike</Text>
+            <Text style={[styles.legFieldLabel, { color: colors.textMuted }]}>{t('trading.strike')}</Text>
             <TextInput
               style={[styles.legFieldInput, { color: colors.text, borderColor: colors.border }]}
               value={String(leg.strike)}
@@ -332,7 +334,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
             />
           </View>
           <View style={styles.legField}>
-            <Text style={[styles.legFieldLabel, { color: colors.textMuted }]}>Premium</Text>
+            <Text style={[styles.legFieldLabel, { color: colors.textMuted }]}>{t('trading.premium')}</Text>
             <TextInput
               style={[styles.legFieldInput, { color: colors.text, borderColor: colors.border }]}
               value={String(leg.premium)}
@@ -341,7 +343,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
             />
           </View>
           <View style={styles.legField}>
-            <Text style={[styles.legFieldLabel, { color: colors.textMuted }]}>Lots</Text>
+            <Text style={[styles.legFieldLabel, { color: colors.textMuted }]}>{t('trading.lots')}</Text>
             <TextInput
               style={[styles.legFieldInput, { color: colors.text, borderColor: colors.border }]}
               value={String(leg.quantity)}
@@ -361,7 +363,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
           <Text style={[styles.legActionToggleText, {
             color: leg.action === 'buy' ? colors.marketUp : colors.marketDown,
           }]}>
-            Tap to {leg.action === 'buy' ? 'SELL' : 'BUY'}
+            {t('trading.tapTo', { action: leg.action === 'buy' ? 'SELL' : 'BUY' })}
           </Text>
         </TouchableOpacity>
       </View>
@@ -376,7 +378,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.title, { color: colors.text }]}>Strategy Builder</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('trading.strategyBuilder')}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
             {selectedStrategyName}
           </Text>
@@ -395,7 +397,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
       >
         {/* Spot Price */}
         <View style={[styles.spotPriceBar, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.spotPriceLabel, { color: colors.textMuted }]}>Underlying Price</Text>
+          <Text style={[styles.spotPriceLabel, { color: colors.textMuted }]}>{t('trading.underlyingPrice')}</Text>
           <TextInput
             style={[styles.spotPriceInput, { color: colors.text }]}
             value={String(Math.round(spotPrice))}
@@ -409,7 +411,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
           >
             <Ionicons name="flash" size={16} color={colors.white} />
             <Text style={[styles.analyzeBtnText, { color: colors.white }]}>
-              {strategyLoading ? '...' : 'Analyze'}
+              {strategyLoading ? t('status.loading') : t('trading.analyze')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -417,7 +419,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
         {/* Pre-built Strategy Templates */}
         {showPrebuilt && prebuiltStrategies.length > 0 && (
           <View style={styles.prebuiltSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Strategy Templates</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('trading.strategyTemplates')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.prebuiltScroll}>
               {prebuiltStrategies.map(s => {
                 const isSelected = selectedPrebuilt?.id === s.id;
@@ -450,7 +452,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
                     </Text>
                     <View style={styles.prebuiltMeta}>
                       <Text style={[styles.prebuiltLegs, { color: colors.textMuted }]}>
-                        {s.legs.length} leg{s.legs.length > 1 ? 's' : ''}
+                        {t('trading.oneLeg', { count: s.legs.length })}
                       </Text>
                       {s.isBullish && <Text style={[styles.prebuiltBias, { color: colors.marketUp }]}>📈</Text>}
                       {s.isBearish && <Text style={[styles.prebuiltBias, { color: colors.marketDown }]}>📉</Text>}
@@ -474,7 +476,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
             color={colors.textMuted}
           />
           <Text style={[styles.togglePrebuiltText, { color: colors.textMuted }]}>
-            {showPrebuilt ? 'Hide Templates' : 'Show Strategy Templates'}
+            {showPrebuilt ? t('trading.hideTemplates') : t('trading.showTemplates')}
           </Text>
         </TouchableOpacity>
 
@@ -482,7 +484,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
         {strategyLegs.length > 0 && (
           <View style={styles.legsSection}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Strategy Legs ({strategyLegs.length})
+              {t('trading.strategyLegs', { count: strategyLegs.length })}
             </Text>
             {strategyLegs.map(renderLegEditor)}
           </View>
@@ -492,7 +494,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
         <AnimatedPressable onPress={handleAddCustomLeg} haptic="light" scaleTo={0.97}>
           <View style={[styles.addLegBtn, { borderColor: colors.primary, backgroundColor: colors.primary + '10' }]}>
             <Ionicons name="add-circle" size={20} color={colors.primary} />
-            <Text style={[styles.addLegBtnText, { color: colors.primary }]}>Add Leg</Text>
+            <Text style={[styles.addLegBtnText, { color: colors.primary }]}>{t('trading.addLeg')}</Text>
           </View>
         </AnimatedPressable>
 
@@ -500,7 +502,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
         {strategyLegs.length > 0 && (
           <TouchableOpacity style={styles.clearBtn} onPress={clearStrategyLegs}>
             <Ionicons name="trash-outline" size={16} color={colors.danger} />
-            <Text style={[styles.clearBtnText, { color: colors.danger }]}>Clear All</Text>
+            <Text style={[styles.clearBtnText, { color: colors.danger }]}>{t('trading.clearAll')}</Text>
           </TouchableOpacity>
         )}
 
@@ -511,9 +513,9 @@ export default function StrategyBuilderScreen({ navigation }: any) {
         {!strategyResult && strategyLegs.length === 0 && (
           <View style={styles.emptyState}>
             <Ionicons name="shuffle-outline" size={64} color={colors.textMuted} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Strategy Defined</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('trading.noStrategyDefined')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              Choose a pre-built template above or add legs manually to build your strategy
+              {t('trading.noStrategyDesc')}
             </Text>
           </View>
         )}

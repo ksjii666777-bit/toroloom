@@ -22,6 +22,8 @@ import { configurePortfolioAlertStorage, configureBadgeCountPersistence } from '
 
 // Services
 import { configureMarketStack } from './services/marketstack';
+import { configureCommodityApi } from './services/commodityService';
+import { configureBondApi } from './services/bondService';
 import { configureTelegramBot, hydrateUserLinksFromStorage } from './services/telegramBot';
 
 // Routes
@@ -63,6 +65,10 @@ import kycRoutes from './routes/kyc';
 import twoFactorRoutes from './routes/twoFactor';
 import analyticsRoutes from './routes/analytics';
 import syncRoutes from './services/syncService';
+import globalStocksRoutes from './routes/globalStocks';
+import forexRoutes from './routes/forex';
+import commoditiesRoutes from './routes/commodities';
+import bondsRoutes from './routes/bonds';
 import { setWSS, getFailureCount, SEND_FAILURE_THRESHOLD } from './services/syncInvalidationBridge';
 
 // ============ Sentry Initialization ============
@@ -211,6 +217,14 @@ app.use('/api/broker-proxy', writeLimiter, brokerProxyRoutes);
 
 app.use('/api/sync', writeLimiter, authMiddleware, syncRoutes);
 
+// ── Global Stocks (Europe + Asia-Pacific) — 200 req / min ──────────
+app.use('/api/global-stocks', readLimiter, globalStocksRoutes);
+
+// ── Advanced Markets (Forex, Commodities, Bonds) — 200 req / min ──
+app.use('/api/forex', readLimiter, forexRoutes);
+app.use('/api/commodities', readLimiter, commoditiesRoutes);
+app.use('/api/bonds', readLimiter, bondsRoutes);
+
 // ── Analytics — 200 req / min — Redis-cached endpoints ─────────────────────
 app.use('/api/analytics', readLimiter, authMiddleware, requireSubscription('pro'), analyticsRoutes);
 
@@ -312,6 +326,8 @@ async function start(): Promise<http.Server> {
   // Prints warnings in development for missing optional config.
   // ── Configure external API services ────────────────────────────
   configureMarketStack({ marketstackKey: env.marketstackKey });
+  configureCommodityApi({ commodityApiKey: env.commodityApiKey });
+  configureBondApi({ fredApiKey: env.fredApiKey });
   configureTelegramBot({ token: env.telegramBotToken });
 
   const missingVars = validateRequiredEnv();

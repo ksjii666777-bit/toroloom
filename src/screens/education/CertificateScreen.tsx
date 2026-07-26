@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { useAuthStore } from '../../store/authStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -34,12 +35,13 @@ const gradeConfig: Record<CourseCertificate['grade'], { label: string; color: st
 
 export default function CertificateScreen({ navigation, route }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
   const { certificates, generateCertificate, isGeneratingCertificate, courses } = useEducationStore();
   const userName = useAuthStore(s => s.user?.name) || 'Student';
 
-  const [selectedCert, setSelectedCert] = useState<string | null>(null); // cert ID
+  const [selectedCert, setSelectedCert] = useState<string | null>(null);
   const [sharingId, setSharingId] = useState<string | null>(null);
   const [pdfUris, setPdfUris] = useState<Record<string, string>>({});
 
@@ -68,12 +70,12 @@ export default function CertificateScreen({ navigation, route }: any) {
     if (cert) {
       setSelectedCert(cert.id);
       Alert.alert(
-        '🎉 Certificate Generated!',
-        `Your certificate for "${cert.courseTitle}" is ready. You can view or share it as a PDF.`,
-        [{ text: 'View', onPress: () => setSelectedCert(cert.id) }]
+        t('education.certificateGenerated'),
+        `${t('education.certificateGeneratedDesc')} "${cert.courseTitle}". ${t('education.certificateViewShare')}`,
+        [{ text: t('education.view'), onPress: () => setSelectedCert(cert.id) }]
       );
     } else {
-      Alert.alert('Error', 'Could not generate certificate. Make sure the course is complete.');
+      Alert.alert(t('app.error'), t('education.certificateGenerateError'));
     }
   }, [generateCertificate, userName]);
 
@@ -87,7 +89,7 @@ export default function CertificateScreen({ navigation, route }: any) {
       const uri = await generateCertificatePDF(cert);
       setSharingId(null);
       if (!uri) {
-        Alert.alert('Error', 'Could not generate PDF. Please try again.');
+        Alert.alert(t('app.error'), t('education.pdfGenerateError'));
         return;
       }
       setPdfUris(prev => ({ ...prev, [cert.id]: uri }));
@@ -123,7 +125,7 @@ export default function CertificateScreen({ navigation, route }: any) {
           <Ionicons name={selectedCert ? 'close' : 'arrow-back'} size={20} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {selectedCert ? 'Certificate' : 'Certificates'}
+          {selectedCert ? t('education.certificate') : t('education.certificatesTitle')}
         </Text>
         {certificates.length > 0 && !selectedCert && (
           <Text style={[styles.headerCount, { color: colors.textMuted }]}>
@@ -154,16 +156,14 @@ export default function CertificateScreen({ navigation, route }: any) {
               <View style={[styles.emptyIconRing, { borderColor: colors.border }]}>
                 <Ionicons name="ribbon-outline" size={48} color={colors.textMuted} />
               </View>
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>No certificates yet</Text>
-              <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>
-                Complete all lessons in a course to earn your completion certificate.
-              </Text>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('education.noCertificatesYet')}</Text>
+              <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>{t('education.noCertificatesDesc')}</Text>
 
               {/* Eligible courses — computed in component body */}
               {eligible.length > 0 && (
                 <View style={{ width: '100%', marginTop: SPACING.xl }}>
                   <Text style={[styles.eligibleTitle, { color: colors.text }]}>
-                    Courses Ready for Certificate
+                    {t('education.coursesReadyForCert')}
                   </Text>
                   {eligible.map(course => (
                     <TouchableOpacity
@@ -176,7 +176,7 @@ export default function CertificateScreen({ navigation, route }: any) {
                         <View style={{ flex: 1 }}>
                           <Text style={[styles.eligibleName, { color: colors.text }]}>{course.title}</Text>
                           <Text style={[styles.eligibleLabel, { color: colors.textMuted }]}>
-                            {course.lessons} lessons · {course.duration}
+                            {course.lessons} {t('education.lessonsLabel')} · {course.duration}
                           </Text>
                         </View>
                       </View>
@@ -192,17 +192,17 @@ export default function CertificateScreen({ navigation, route }: any) {
                 onPress={() => nav.navigate('Learn' as never)}
               >
                 <Ionicons name="school-outline" size={18} color="#FFF" />
-                <Text style={styles.browseBtnText}>Browse Courses</Text>
+                <Text style={styles.browseBtnText}>{t('education.browseCourses')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             /* Certificate Cards */
             <View style={styles.certList}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Your Certificates
+                {t('education.yourCertificates')}
               </Text>
               <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
-                {certificates.length} course{certificates.length !== 1 ? 's' : ''} completed
+                {certificates.length} {t('education.course')}{certificates.length !== 1 ? 's' : ''} {t('education.completed')}
               </Text>
 
               {certificates.map((cert, index) => {
@@ -235,7 +235,7 @@ export default function CertificateScreen({ navigation, route }: any) {
                         </Text>
                         <View style={styles.certMeta}>
                           <View style={[styles.gradeBadge, { backgroundColor: grade.bg, borderColor: grade.color + '40' }]}>
-                            <Text style={[styles.gradeText, { color: grade.color }]}>{grade.label}</Text>
+                            <Text style={[styles.gradeText, { color: grade.color }]}>{t('education.' + cert.grade.toLowerCase())}</Text>
                           </View>
                           <Text style={[styles.certDate, { color: colors.textMuted }]}>
                             {formatDate(cert.issuedAt)}
@@ -243,7 +243,7 @@ export default function CertificateScreen({ navigation, route }: any) {
                         </View>
                         <View style={styles.certStats}>
                           <Text style={[styles.certStatText, { color: colors.textMuted }]}>
-                            {cert.completedLessons}/{cert.totalLessons} lessons
+                            {cert.completedLessons}/{cert.totalLessons} {t('education.lessonsLabel')}
                           </Text>
                           {cert.quizPercent !== undefined && (
                             <>
@@ -279,26 +279,25 @@ export default function CertificateScreen({ navigation, route }: any) {
               })}
 
               {/* Lifetime stats */}
-              <View style={[styles.statsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.statsTitle, { color: colors.text }]}>Learning Stats</Text>
+              <View style={[styles.statsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}><Text style={[styles.statsTitle, { color: colors.text }]}>{t('education.learningStats')}</Text>
                 <View style={styles.statsRow}>
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: colors.primary }]}>{certificates.length}</Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>Certificates</Text>
+                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.certificatesTitle')}</Text>
                   </View>
                   <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: colors.primary }]}>
                       {certificates.reduce((sum, c) => sum + c.completedLessons, 0)}
                     </Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>Lessons Done</Text>
+                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.lessonsDone')}</Text>
                   </View>
                   <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: colors.accent }]}>
                       {certificates.filter(c => c.grade === 'A').length}
                     </Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>Distinctions</Text>
+                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.distinctions')}</Text>
                   </View>
                 </View>
               </View>
@@ -309,7 +308,7 @@ export default function CertificateScreen({ navigation, route }: any) {
           {isGeneratingCertificate && (
             <View style={styles.generatingOverlay}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.generatingText, { color: colors.text }]}>Generating your certificate...</Text>
+              <Text style={[styles.generatingText, { color: colors.text }]}>{t('education.generatingCertificate')}</Text>
             </View>
           )}
         </ScrollView>
@@ -333,8 +332,9 @@ function CertificatePreview({
   onBack: () => void;
   sharing: boolean;
 }) {
+  const { t } = useT();
   const grade = gradeConfig[cert.grade];
-  const gradeLabel = cert.grade === 'A' ? 'With Distinction' : cert.grade === 'B' ? 'With Merit' : '';
+  const gradeLabel = cert.grade === 'A' ? t('education.withDistinction') : cert.grade === 'B' ? t('education.withMerit') : '';
   const insets = useSafeAreaInsets();
 
   return (
@@ -351,19 +351,19 @@ function CertificatePreview({
         <View style={[styles.previewCorner, styles.previewCornerBL, { borderBottomColor: colors.primary, borderLeftColor: colors.primary }]} />
         <View style={[styles.previewCorner, styles.previewCornerBR, { borderBottomColor: colors.primary, borderRightColor: colors.primary }]} />
 
-        <Text style={styles.previewTitle}>Certificate</Text>
-        <View style={[styles.previewLine, { backgroundColor: colors.primary + '60' }]} />          <Text style={styles.previewSubtitle}>OF COMPLETION</Text>
+        <Text style={styles.previewTitle}>{t('education.certificate')}</Text>
+        <View style={[styles.previewLine, { backgroundColor: colors.primary + '60' }]} />          <Text style={styles.previewSubtitle}>{t('education.ofCompletion')}</Text>
         <View style={[styles.previewDivider, { backgroundColor: colors.primary + '30' }]} />
 
-        <Text style={[styles.previewAwarded, { color: colors.textMuted }]}>This is to certify that</Text>
+        <Text style={[styles.previewAwarded, { color: colors.textMuted }]}>{t('education.thisCertifies')}</Text>
         <Text style={[styles.previewName, { color: colors.text }]}>{cert.userName}</Text>
 
-        <Text style={[styles.previewAwarded, { color: colors.textMuted }]}>has successfully completed the course</Text>
+        <Text style={[styles.previewAwarded, { color: colors.textMuted }]}>{t('education.hasCompleted')}</Text>
         <Text style={[styles.previewCourse, { color: colors.primary }]}>{cert.courseTitle}</Text>
 
         <View style={[styles.previewGradeBadge, { backgroundColor: grade.bg, borderColor: grade.color + '40' }]}>
           <Ionicons name="ribbon" size={14} color={grade.color} />
-          <Text style={[styles.previewGradeText, { color: grade.color }]}>{gradeLabel || 'Completed'}</Text>
+          <Text style={[styles.previewGradeText, { color: grade.color }]}>{gradeLabel || t('education.completed')}</Text>
         </View>
 
         <View style={styles.previewStats}>
@@ -371,14 +371,14 @@ function CertificatePreview({
             <Text style={[styles.previewStatValue, { color: colors.text }]}>
               {cert.completedLessons}/{cert.totalLessons}
             </Text>
-            <Text style={[styles.previewStatLabel, { color: colors.textMuted }]}>Lessons</Text>
+            <Text style={[styles.previewStatLabel, { color: colors.textMuted }]}>{t('education.lessonsLabel')}</Text>
           </View>
           <View style={[styles.previewStatDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.previewStatItem}>
             <Text style={[styles.previewStatValue, { color: colors.text }]}>
               {formatDate(cert.issuedAt)}
             </Text>
-            <Text style={[styles.previewStatLabel, { color: colors.textMuted }]}>Issued On</Text>
+            <Text style={[styles.previewStatLabel, { color: colors.textMuted }]}>{t('education.issuedOn')}</Text>
           </View>
           {cert.quizPercent !== undefined && (
             <>
@@ -387,17 +387,17 @@ function CertificatePreview({
                 <Text style={[styles.previewStatValue, { color: colors.text }]}>
                   {cert.quizPercent}%
                 </Text>
-                <Text style={[styles.previewStatLabel, { color: colors.textMuted }]}>Quiz Score</Text>
+                <Text style={[styles.previewStatLabel, { color: colors.textMuted }]}>{t('education.quizScore')}</Text>
               </View>
             </>
           )}
         </View>
 
         <Text style={[styles.previewSerial, { color: colors.textMuted }]}>
-          Serial No: {cert.serialNumber}
+          {t('education.serialNo')}: {cert.serialNumber}
         </Text>
         <Text style={[styles.previewFooterText, { color: colors.textMuted }]}>
-          Toroloom — AI-Powered Trading & Investment Platform
+          {t('education.toroloomTagline')}
         </Text>
       </View>
 
@@ -405,12 +405,12 @@ function CertificatePreview({
       {cert.pdfUri ? (
         <View style={[styles.pdfStatusCard, { backgroundColor: colors.success + '15', borderColor: colors.success + '30' }]}>
           <Ionicons name="checkmark-circle" size={18} color={colors.success} />
-          <Text style={[styles.pdfStatusText, { color: colors.success }]}>PDF generated successfully</Text>
+          <Text style={[styles.pdfStatusText, { color: colors.success }]}>{t('education.pdfGenerated')}</Text>
         </View>
       ) : (
         <View style={[styles.pdfStatusCard, { backgroundColor: colors.warning + '15', borderColor: colors.warning + '30' }]}>
           <Ionicons name="alert-circle" size={18} color={colors.warning} />
-          <Text style={[styles.pdfStatusText, { color: colors.warning }]}>PDF not yet generated</Text>
+          <Text style={[styles.pdfStatusText, { color: colors.warning }]}>{t('education.pdfNotGenerated')}</Text>
         </View>
       )}
 
@@ -427,7 +427,7 @@ function CertificatePreview({
             <>
               <Ionicons name="share-outline" size={20} color="#FFF" />
               <Text style={styles.previewActionText}>
-                {cert.pdfUri ? 'Share PDF' : 'Generate & Share PDF'}
+                {cert.pdfUri ? t('education.sharePdf') : t('education.generateSharePdf')}
               </Text>
             </>
           )}
@@ -440,12 +440,12 @@ function CertificatePreview({
               try {
                 await Linking.openURL(cert.pdfUri!);
               } catch {
-                Alert.alert('Error', 'Could not open PDF file.');
+                Alert.alert(t('app.error'), t('education.pdfOpenError'));
               }
             }}
           >
             <Ionicons name="document-text-outline" size={20} color={colors.text} />
-            <Text style={[styles.previewActionText, { color: colors.text }]}>Open PDF</Text>
+            <Text style={[styles.previewActionText, { color: colors.text }]}>{t('education.openPdf')}</Text>
           </TouchableOpacity>
         )}
       </View>

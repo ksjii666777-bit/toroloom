@@ -23,6 +23,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useAuthStore } from '../../store/authStore';
@@ -57,6 +58,7 @@ const RISK_BG: Record<RiskLevel, string> = {
 
 export default function AITradeAssistantScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { stocks } = useMarketStore();
   const { holdings } = usePortfolioStore();
@@ -149,17 +151,17 @@ export default function AITradeAssistantScreen({ navigation }: any) {
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color="#fff" />
           </Pressable>
-          <Text style={styles.headerTitle}>AI Trade Assistant</Text>
+          <Text style={styles.headerTitle}>{t('ai.tradeAssistant')}</Text>
           <View style={{ width: 40 }} />
         </View>
-        <Text style={styles.headerSub}>Intelligent position sizing & risk analysis</Text>
+        <Text style={styles.headerSub}>{t('ai.tradeAssistantSub')}</Text>
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
         {/* ─── Stock Selector ─── */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Stock</Text>
+          <Text style={styles.sectionLabel}>{t('ai.stock')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: SPACING.sm }}>
             {quickStocks.map(sym => (
@@ -176,7 +178,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
             <View style={[styles.stockInfo, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <View>
                 <Text style={styles.stockName}>{selectedStock.name}</Text>
-                <Text style={styles.stockMeta}>{selectedStock.sector} · P/E {selectedStock.pe.toFixed(1)} · 52W: ₹{selectedStock.low52}–₹{selectedStock.high52}</Text>
+                <Text style={styles.stockMeta}>{t('ai.stockMeta', { sector: selectedStock.sector, pe: selectedStock.pe.toFixed(1), low: selectedStock.low52, high: selectedStock.high52 })}</Text>
               </View>
               <Text style={[styles.stockPrice, {
                 color: selectedStock.isPositive ? colors.marketUp : colors.marketDown,
@@ -187,32 +189,32 @@ export default function AITradeAssistantScreen({ navigation }: any) {
 
         {/* ─── Trade Parameters ─── */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Trade Parameters</Text>
+          <Text style={styles.sectionLabel}>{t('ai.tradeParams')}</Text>
 
           {/* Buy/Sell Toggle */}
           <View style={styles.toggleRow}>
             <Pressable style={[styles.toggleBtn, tradeType === 'buy' && styles.toggleBuy]}
               onPress={() => setTradeType('buy')}>
               <Ionicons name="arrow-down" size={14} color={tradeType === 'buy' ? '#fff' : colors.marketUp} />
-              <Text style={[styles.toggleText, tradeType === 'buy' && styles.toggleTextActive]}>Buy</Text>
+              <Text style={[styles.toggleText, tradeType === 'buy' && styles.toggleTextActive]}>{t('ai.buy')}</Text>
             </Pressable>
             <Pressable style={[styles.toggleBtn, tradeType === 'sell' && styles.toggleSell]}
               onPress={() => setTradeType('sell')}>
               <Ionicons name="arrow-up" size={14} color={tradeType === 'sell' ? '#fff' : colors.marketDown} />
-              <Text style={[styles.toggleText, tradeType === 'sell' && styles.toggleTextActive]}>Sell</Text>
+              <Text style={[styles.toggleText, tradeType === 'sell' && styles.toggleTextActive]}>{t('ai.sell')}</Text>
             </Pressable>
           </View>
 
           {/* Quantity */}
           <View style={styles.inputGrid}>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Quantity</Text>
+              <Text style={styles.inputLabel}>{t('ai.quantity')}</Text>
               <TextInput style={[styles.input, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
                 value={quantity} onChangeText={v => { setQuantity(v); setShowResults(false); }}
                 keyboardType="numeric" placeholder="100" placeholderTextColor={colors.textMuted} />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Entry Price (₹)</Text>
+              <Text style={styles.inputLabel}>{t('ai.entryPrice')}</Text>
               <TextInput style={[styles.input, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
                 value={entryPrice} onChangeText={v => { setEntryPrice(v); setShowResults(false); }}
                 keyboardType="decimal-pad" placeholder={String(selectedStock?.price || '')}
@@ -221,40 +223,40 @@ export default function AITradeAssistantScreen({ navigation }: any) {
           </View>
 
           <View style={styles.costPreview}>
-            <Text style={styles.costLabel}>Position Cost</Text>
+            <Text style={styles.costLabel}>{t('ai.positionCost')}</Text>
             <Text style={styles.costValue}>{formatCurrency(positionCost)}</Text>
           </View>
         </View>
 
         {/* ─── Risk Profile ─── */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Risk Profile</Text>
+          <Text style={styles.sectionLabel}>{t('ai.riskProfile')}</Text>
           <View style={styles.profileRow}>
             {(['conservative', 'moderate', 'aggressive'] as RiskTolerance[]).map(r => (
               <Pressable key={r}
                 style={[styles.profileBtn, riskTolerance === r && styles.profileBtnActive]}
                 onPress={() => setRiskTolerance(r)}>
                 <Text style={[styles.profileLabel, riskTolerance === r && styles.profileLabelActive]}>
-                  {r === 'conservative' ? '🛡️ Conservative' : r === 'moderate' ? '⚖️ Moderate' : '🚀 Aggressive'}
+                  {r === 'conservative' ? t('ai.conservative') : r === 'moderate' ? t('ai.moderate') : t('ai.aggressive')}
                 </Text>
               </Pressable>
             ))}
           </View>
           <View style={[styles.profileDetails, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
             <View style={styles.profileDetailRow}>
-              <Text style={styles.profileDetailLabel}>Max risk per trade</Text>
-              <Text style={styles.profileDetailValue}>{profile.maxRiskPerTradePct}% of portfolio</Text>
+              <Text style={styles.profileDetailLabel}>{t('ai.maxRiskPerTrade')}</Text>
+              <Text style={styles.profileDetailValue}>{t('ai.pctOfPortfolio', { pct: profile.maxRiskPerTradePct })}</Text>
             </View>
             <View style={styles.profileDetailRow}>
-              <Text style={styles.profileDetailLabel}>Max position size</Text>
+              <Text style={styles.profileDetailLabel}>{t('ai.maxPositionSize')}</Text>
               <Text style={styles.profileDetailValue}>{profile.maxPositionSizePct}%</Text>
             </View>
             <View style={styles.profileDetailRow}>
-              <Text style={styles.profileDetailLabel}>Min risk/reward</Text>
+              <Text style={styles.profileDetailLabel}>{t('ai.minRiskReward')}</Text>
               <Text style={styles.profileDetailValue}>{profile.minRewardRiskRatio}:1</Text>
             </View>
             <View style={styles.profileDetailRow}>
-              <Text style={styles.profileDetailLabel}>Max positions</Text>
+              <Text style={styles.profileDetailLabel}>{t('ai.maxPositions')}</Text>
               <Text style={styles.profileDetailValue}>{profile.maxOpenPositions}</Text>
             </View>
           </View>
@@ -266,7 +268,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
           <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
             style={styles.analyzeBtn}>
             <Ionicons name="analytics" size={20} color="#fff" />
-            <Text style={styles.analyzeBtnText}>Analyze Trade</Text>
+            <Text style={styles.analyzeBtnText}>{t('ai.analyzeTrade')}</Text>
           </LinearGradient>
         </AnimatedPressable>
 
@@ -278,10 +280,10 @@ export default function AITradeAssistantScreen({ navigation }: any) {
               <View style={[styles.resultCard, { borderLeftColor: RISK_COLORS[riskResult.riskLevel], borderLeftWidth: 4 }]}>
                 <View style={styles.resultHeader}>
                   <Ionicons name="shield-checkmark" size={20} color={RISK_COLORS[riskResult.riskLevel]} />
-                  <Text style={styles.resultTitle}>Risk Assessment</Text>
+                  <Text style={styles.resultTitle}>{t('ai.riskAssessment')}</Text>
                   <View style={[styles.riskBadge, { backgroundColor: RISK_BG[riskResult.riskLevel] }]}>
                     <Text style={[styles.riskBadgeText, { color: RISK_COLORS[riskResult.riskLevel] }]}>
-                      {riskResult.riskScore}/100 · {riskResult.riskLevel.toUpperCase()}
+                      {t('ai.riskScore', { score: riskResult.riskScore, level: riskResult.riskLevel.toUpperCase() })}
                     </Text>
                   </View>
                 </View>
@@ -326,29 +328,29 @@ export default function AITradeAssistantScreen({ navigation }: any) {
               <View style={styles.resultCard}>
                 <View style={styles.resultHeader}>
                   <Ionicons name="calculator" size={20} color={colors.primary} />
-                  <Text style={styles.resultTitle}>Position Sizing</Text>
+                  <Text style={styles.resultTitle}>{t('ai.positionSizing')}</Text>
                 </View>
 
                 <View style={styles.sizingGrid}>
                   <View style={[styles.sizingBox, { backgroundColor: colors.bgInput }]}>
                     <Text style={styles.sizingValue}>{sizingResult.suggestedQuantity}</Text>
-                    <Text style={styles.sizingLabel}>Suggested Qty</Text>
+                    <Text style={styles.sizingLabel}>{t('ai.suggestedQty')}</Text>
                   </View>
                   <View style={[styles.sizingBox, { backgroundColor: colors.bgInput }]}>
                     <Text style={styles.sizingValue}>{formatCurrency(sizingResult.totalCost)}</Text>
-                    <Text style={styles.sizingLabel}>Total Cost</Text>
+                    <Text style={styles.sizingLabel}>{t('ai.totalCost')}</Text>
                   </View>
                   <View style={[styles.sizingBox, { backgroundColor: colors.bgInput }]}>
                     <Text style={[styles.sizingValue, { color: sizingResult.withinRiskLimits ? colors.marketUp : colors.marketDown }]}>
                       {sizingResult.portfolioUsagePct.toFixed(1)}%
                     </Text>
-                    <Text style={styles.sizingLabel}>Portfolio %</Text>
+                    <Text style={styles.sizingLabel}>{t('ai.portfolioPercent')}</Text>
                   </View>
                   <View style={[styles.sizingBox, { backgroundColor: colors.bgInput }]}>
                     <Text style={[styles.sizingValue, { color: colors.warning }]}>
                       {formatCurrency(sizingResult.riskAmount)}
                     </Text>
-                    <Text style={styles.sizingLabel}>At Risk</Text>
+                    <Text style={styles.sizingLabel}>{t('ai.atRisk')}</Text>
                   </View>
                 </View>
 
@@ -361,10 +363,10 @@ export default function AITradeAssistantScreen({ navigation }: any) {
                           { borderColor: colors.border }]}
                         onPress={() => handleUseSuggested(alt.quantity)}>
                         <Text style={[styles.altLabel, alt.label === 'Recommended' && styles.altLabelActive]}>
-                          {alt.label}
+                          {alt.label === 'Recommended' ? t('ai.recommended') : alt.label}
                         </Text>
                         <Text style={[styles.altQty, alt.label === 'Recommended' && styles.altQtyActive]}>
-                          {alt.quantity} shares
+                          {t('ai.shares', { qty: alt.quantity })}
                         </Text>
                       </Pressable>
                     ))}
@@ -386,10 +388,10 @@ export default function AITradeAssistantScreen({ navigation }: any) {
               <View style={styles.resultCard}>
                 <View style={styles.resultHeader}>
                   <Ionicons name="flag" size={20} color={colors.primary} />
-                  <Text style={styles.resultTitle}>Trade Plan</Text>
+                  <Text style={styles.resultTitle}>{t('ai.tradePlan')}</Text>
                   <View style={[styles.rrBadge, { backgroundColor: colors.primary + '20' }]}>
                     <Text style={[styles.rrBadgeText, { color: colors.primary }]}>
-                      R:R {tradePlan.riskRewardScore / 10}:1
+                      {t('ai.riskRewardRatio', { ratio: (tradePlan.riskRewardScore / 10).toFixed(1) })}
                     </Text>
                   </View>
                 </View>
@@ -398,59 +400,59 @@ export default function AITradeAssistantScreen({ navigation }: any) {
                 <View style={[styles.planSection, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
                   <View style={styles.planSectionHeader}>
                     <Ionicons name="shield" size={16} color={colors.marketDown} />
-                    <Text style={styles.planSectionTitle}>Recommended Stop-Loss</Text>
+                    <Text style={styles.planSectionTitle}>{t('ai.recommendedStopLoss')}</Text>
                   </View>
                   <View style={styles.planValues}>
                     <View style={styles.planValue}>
                       <Text style={[styles.planValueNum, { color: colors.marketDown }]}>
                         {formatCurrency(tradePlan.stopLoss.stopLossPrice)}
                       </Text>
-                      <Text style={styles.planValueLabel}>Price</Text>
+                      <Text style={styles.planValueLabel}>{t('ai.price')}</Text>
                     </View>
                     <View style={styles.planValue}>
                       <Text style={[styles.planValueNum, { color: colors.marketDown }]}>
                         {tradePlan.stopLoss.stopLossPercent.toFixed(1)}%
                       </Text>
-                      <Text style={styles.planValueLabel}>Below Entry</Text>
+                      <Text style={styles.planValueLabel}>{t('ai.belowEntry')}</Text>
                     </View>
                     <View style={styles.planValue}>
                       <Text style={[styles.planValueNum, { color: colors.warning }]}>
                         {formatCurrency(tradePlan.stopLoss.riskAmount * qtyNum)}
                       </Text>
-                      <Text style={styles.planValueLabel}>₹ at Risk</Text>
+                      <Text style={styles.planValueLabel}>{t('ai.rupeesAtRisk')}</Text>
                     </View>
                   </View>
                   <Text style={styles.planRationale}>{tradePlan.stopLoss.rationale}</Text>
                 </View>
 
                 {/* Targets */}
-                {tradePlan.targets.map((t, i) => (
+                {tradePlan.targets.map((target, i) => (
                   <View key={`assist_${i}`} style={[styles.planSection, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
                     <View style={styles.planSectionHeader}>
                       <Ionicons name="flag" size={16} color={colors.marketUp} />
-                      <Text style={styles.planSectionTitle}>Target {i + 1} ({t.type})</Text>
+                      <Text style={styles.planSectionTitle}>{t('ai.targetTitle', { num: i + 1, type: target.type })}</Text>
                       <View style={[styles.probBadge, { backgroundColor: colors.marketUp + '20' }]}>
-                        <Text style={[styles.probBadgeText, { color: colors.marketUp }]}>{t.probability}</Text>
+                        <Text style={[styles.probBadgeText, { color: colors.marketUp }]}>{target.probability}</Text>
                       </View>
                     </View>
                     <View style={styles.planValues}>
                       <View style={styles.planValue}>
                         <Text style={[styles.planValueNum, { color: colors.marketUp }]}>
-                          {formatCurrency(t.targetPrice)}
+                          {formatCurrency(target.targetPrice)}
                         </Text>
-                        <Text style={styles.planValueLabel}>Target Price</Text>
+                        <Text style={styles.planValueLabel}>{t('ai.targetPrice')}</Text>
                       </View>
                       <View style={styles.planValue}>
                         <Text style={[styles.planValueNum, { color: colors.marketUp }]}>
-                          +{t.returnPercent.toFixed(1)}%
+                          +{target.returnPercent.toFixed(1)}%
                         </Text>
-                        <Text style={styles.planValueLabel}>Return</Text>
+                        <Text style={styles.planValueLabel}>{t('ai.return')}</Text>
                       </View>
                       <View style={styles.planValue}>
                         <Text style={[styles.planValueNum, { color: colors.primary }]}>
-                          {t.riskRewardRatio.toFixed(1)}:1
+                          {target.riskRewardRatio.toFixed(1)}:1
                         </Text>
-                        <Text style={styles.planValueLabel}>R:R Ratio</Text>
+                        <Text style={styles.planValueLabel}>{t('ai.rrRatio')}</Text>
                       </View>
                     </View>
                   </View>
@@ -465,7 +467,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
               <View style={styles.resultCard}>
                 <View style={styles.resultHeader}>
                   <Ionicons name="pie-chart" size={20} color={colors.primary} />
-                  <Text style={styles.resultTitle}>Portfolio Impact</Text>
+                  <Text style={styles.resultTitle}>{t('ai.portfolioImpact')}</Text>
                   <View style={[styles.divScoreBadge, {
                     backgroundColor: impactResult.diversificationScore >= 60 ? colors.marketUp + '20' :
                       impactResult.diversificationScore >= 40 ? '#FFAB4020' : colors.marketDown + '20',
@@ -473,29 +475,29 @@ export default function AITradeAssistantScreen({ navigation }: any) {
                     <Text style={[styles.divScoreText, {
                       color: impactResult.diversificationScore >= 60 ? colors.marketUp :
                         impactResult.diversificationScore >= 40 ? '#FFAB40' : colors.marketDown,
-                    }]}>Score: {impactResult.diversificationScore}</Text>
+                    }]}>{t('ai.divScore', { score: impactResult.diversificationScore })}</Text>
                   </View>
                 </View>
 
                 <View style={styles.impactGrid}>
                   <View style={[styles.impactBox, { backgroundColor: colors.bgInput }]}>
-                    <Text style={styles.impactLabel}>Position Weight</Text>
+                    <Text style={styles.impactLabel}>{t('ai.positionWeight')}</Text>
                     <Text style={[styles.impactValue, { color: impactResult.positionWeight > 20 ? colors.warning : colors.text }]}>
                       {impactResult.positionWeight.toFixed(1)}%
                     </Text>
                   </View>
                   <View style={[styles.impactBox, { backgroundColor: colors.bgInput }]}>
-                    <Text style={styles.impactLabel}>New Balance</Text>
+                    <Text style={styles.impactLabel}>{t('ai.newBalance')}</Text>
                     <Text style={[styles.impactValue, {
                       color: impactResult.newBalance >= 0 ? colors.text : colors.marketDown,
                     }]}>{formatCurrency(impactResult.newBalance)}</Text>
                   </View>
                   <View style={[styles.impactBox, { backgroundColor: colors.bgInput }]}>
-                    <Text style={styles.impactLabel}>Portfolio Value</Text>
+                    <Text style={styles.impactLabel}>{t('ai.portfolioValue')}</Text>
                     <Text style={styles.impactValue}>{formatCurrency(impactResult.newPortfolioValue)}</Text>
                   </View>
                   <View style={[styles.impactBox, { backgroundColor: colors.bgInput }]}>
-                    <Text style={styles.impactLabel}>Sectors</Text>
+                    <Text style={styles.impactLabel}>{t('ai.sectors')}</Text>
                     <Text style={styles.impactValue}>{impactResult.sectorExposure.length}</Text>
                   </View>
                 </View>
@@ -530,12 +532,16 @@ export default function AITradeAssistantScreen({ navigation }: any) {
             <AnimatedPressable
               onPress={() => {
                 Alert.alert(
-                  'Place Order',
-                  `Navigate to order placement for ${selectedSymbol}?\n${qtyNum} shares @ ${formatCurrency(priceNum)}`,
+                  t('ai.placeOrder'),
+                  t('ai.orderPlacementMsg', {
+                    symbol: selectedSymbol,
+                    qty: qtyNum,
+                    price: formatCurrency(priceNum),
+                  }),
                   [
-                    { text: 'Cancel', style: 'cancel' },
+                    { text: t('app.cancel'), style: 'cancel' },
                     {
-                      text: 'Go to Order',
+                      text: t('ai.goToOrder'),
                       onPress: () => navigation.navigate('PlaceOrder', {
                         stockId: selectedStock?.id,
                         symbol: selectedSymbol,
@@ -557,7 +563,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
               >
                 <Ionicons name="cart" size={20} color="#fff" />
                 <Text style={styles.orderCtaText}>
-                  Place {tradeType === 'buy' ? 'Buy' : 'Sell'} Order · {qtyNum} shares @ {formatCurrency(priceNum)}
+                  {t('ai.placeOrderCta', { type: t(tradeType === 'buy' ? 'ai.buy' : 'ai.sell'), qty: qtyNum, price: formatCurrency(priceNum) })}
                 </Text>
               </LinearGradient>
             </AnimatedPressable>

@@ -1,3 +1,135 @@
+
+// ==================== Mock useT hook ====================
+const education = {
+  "myCourses": "My Courses",
+  "createManageSubtitle": "Create and manage your own courses",
+  "total": "Total",
+  "published": "Published",
+  "drafts": "Drafts",
+  "students": "Students",
+  "createNewCourse": "Create New Course",
+  "noCoursesYet": "No courses yet",
+  "noCoursesSubtitle": "Tap \"Create New Course\" to start building your first course!",
+  "submitForReview": "Submit for Review",
+  "cannotSubmit": "Cannot Submit",
+  "cannotSubmitMsg": "Please add a title and at least one lesson before submitting for review.",
+  "archiveCourse": "Archive Course",
+  "restoreCourse": "Restore Course",
+  "duplicate": "Duplicate",
+  "deleteCourse": "Delete Course",
+  "deleteCourseConfirm": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
+  "untitledCourse": "Untitled Course",
+  "noDescription": "No description yet",
+  "pending": "Pending",
+  "reviewStatus": "Review Status",
+  "pendingReview": "🟡 Pending Review",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "needsChanges": "❌ Rejected — Needs Changes",
+  "submitted": "Submitted",
+  "courseOptions": "Course Options",
+  "communityCourses": "Community Courses",
+  "communitySubtitle": "Discover courses created by fellow traders",
+  "searchCoursesCreators": "Search courses, creators, or topics...",
+  "featuredCourses": "Featured Courses",
+  "title": "Courses",
+  "allCommunityCourses": "All Community Courses",
+  "filteredResults": "Filtered ({{count}})",
+  "noCoursesFound": "No courses found",
+  "noCoursesMatch": "No courses match \"{{query}}\". Try a different search term.",
+  "noCommunityCourses": "No published community courses yet. Check back later!",
+  "enroll": "Enroll",
+  "byCreator": "by {{name}}",
+  "enrolled": "Enrolled",
+  "lessonsCount": "{{count}} lessons",
+  "courseNotFound": "Course not found",
+  "courseProgress": "Course Progress",
+  "completed": "Completed",
+  "remainingCount": "Remaining",
+  "aboutThisCourse": "About this Course",
+  "duration": "Duration",
+  "lessonsProgress": "Lessons ({{completed}}/{{total}})",
+  "lessonDone": "Done",
+  "lessonQuiz": "Quiz",
+  "nextLesson": "Next Lesson",
+  "startCourse": "Start Course",
+  "continueLearning": "Continue",
+  "viewCertificate": "View Certificate",
+  "getCertificate": "🎓 Get Certificate",
+  "rating": "rating",
+  "learningPaths": "Learning Paths",
+  "learningPathsSubtitle": "Curated sequences to master the markets",
+  "paths": "Paths",
+  "learners": "Learners",
+  "lessonsLabel": "Lessons",
+  "coursesProgress": "{{completed}}/{{total}} courses · {{percent}}% complete",
+  "continuePath": "Continue Path →",
+  "startPath": "Start Path →",
+  "sortCategory": "Category",
+  "allLevels": "All Levels",
+  "beginner": "Beginner",
+  "intermediate": "Intermediate",
+  "advanced": "Advanced"
+};
+
+function resolveT(key: string, params?: Record<string, any>): string {
+  const parts = key.split('.');
+  const rootNs = parts[0];
+  const subKey = parts.slice(1).join('.');
+  
+  const translations: Record<string, any> = { education };
+  const obj = translations[rootNs];
+  if (!obj) {
+    const parts2 = key.split('.');
+    const lastSeg = parts2[parts2.length - 1] || key;
+    return lastSeg
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (s: string) => s.toUpperCase())
+      .trim();
+  }
+  
+  // Check for plural variant FIRST when count !== 1
+  if (params && params.count !== undefined && params.count !== 1) {
+    const pluralKey = subKey + '_plural';
+    if (pluralKey in obj && typeof obj[pluralKey] === 'string') {
+      let result: string = obj[pluralKey];
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+      return result;
+    }
+  }
+  
+  // Fall back to singular
+  if (subKey in obj && typeof obj[subKey] === 'string') {
+    let result: string = obj[subKey];
+    if (params) {
+      result = result.replace(/\{\{(\w+)\}\}/g, (_: string, p: string) => String(params[p] ?? `{{${p}}}`));
+    }
+    return result;
+  }
+  
+  // Fallback: return last key segment as readable text
+  const lastSeg = subKey || key;
+  return lastSeg
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (s: string) => s.toUpperCase())
+    .trim();
+}
+
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+  default: () => ({
+    t: resolveT,
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from './testUtils';

@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useT } from '../../hooks/useT';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -37,6 +38,7 @@ type FlowStep = 'ifsc' | 'account' | 'verify' | 'linked' | 'manage';
 
 export default function BankLinkingScreen({ navigation, route }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const {
@@ -66,7 +68,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
   const handleVerifyIFSC = useCallback(async () => {
     if (!isIFSCFormatValid) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Invalid IFSC', 'IFSC must be 11 characters (e.g., HDFC0001234)');
+      Alert.alert(t('kyc.invalidIfscTitle'), t('kyc.invalidIfscMsg'));
       return;
     }
 
@@ -88,7 +90,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
 
       const match = mockIFSCDB[normalizedIFSC];
       if (!match) {
-        setError('IFSC code not found. Please check and try again.');
+        setError(t('kyc.ifscNotFound'));
         setIfscResult(null);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         return;
@@ -104,7 +106,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
       setFlowStep('account');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: any) {
-      setError(err?.message || 'IFSC verification failed');
+      setError(err?.message || t('kyc.ifscVerifyFailed'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsLoading(false);
@@ -115,12 +117,12 @@ export default function BankLinkingScreen({ navigation, route }: any) {
   const handleVerifyAccount = useCallback(async () => {
     if (!isAccountFormatValid) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Invalid Account', 'Account number must be 9-18 digits.');
+      Alert.alert(t('kyc.invalidAccountTitle'), t('kyc.invalidAccountMsg'));
       return;
     }
     if (!isNameValid) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Invalid Name', 'Please enter the account holder name (min 3 characters).');
+      Alert.alert(t('kyc.invalidNameTitle'), t('kyc.invalidNameMsg'));
       return;
     }
 
@@ -152,11 +154,11 @@ export default function BankLinkingScreen({ navigation, route }: any) {
         setFlowStep('verify');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
-        setError('Account holder name does not match bank records. Please verify and try again.');
+        setError(t('kyc.nameMismatch'));
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err: any) {
-      setError(err?.message || 'Account verification failed');
+      setError(err?.message || t('kyc.accountVerifyFailed'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsLoading(false);
@@ -190,7 +192,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
       markStepCompleted('bank');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: any) {
-      setError(err?.message || 'Failed to link bank account');
+      setError(err?.message || t('kyc.linkFailed'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsLoading(false);
@@ -200,12 +202,12 @@ export default function BankLinkingScreen({ navigation, route }: any) {
   // ── Manage Banks ────────────────────────────────────────────────
   const handleRemoveBank = useCallback((accountId: string) => {
     Alert.alert(
-      'Remove Bank Account',
-      'Are you sure you want to remove this bank account?',
+      t('kyc.removeBankTitle'),
+      t('kyc.removeBankMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t('kyc.removeBank'),
           style: 'destructive',
           onPress: () => {
             removeLinkedBank(accountId);
@@ -229,11 +231,11 @@ export default function BankLinkingScreen({ navigation, route }: any) {
   }, [navigation, route.params]);
 
   // ── Account Type Picker ─────────────────────────────────────────
-  const ACCOUNT_TYPES: { key: typeof accountType; label: string; icon: string }[] = [
-    { key: 'savings', label: 'Savings', icon: 'wallet-outline' },
-    { key: 'current', label: 'Current', icon: 'business-outline' },
-    { key: 'salary', label: 'Salary', icon: 'cash-outline' },
-    { key: 'other', label: 'Other', icon: 'ellipsis-horizontal-circle-outline' },
+  const ACCOUNT_TYPES: { key: typeof accountType; label: string; icon: string; tKey: string }[] = [
+    { key: 'savings', label: 'Savings', icon: 'wallet-outline', tKey: 'kyc.savings' },
+    { key: 'current', label: 'Current', icon: 'business-outline', tKey: 'kyc.current' },
+    { key: 'salary', label: 'Salary', icon: 'cash-outline', tKey: 'kyc.salary' },
+    { key: 'other', label: 'Other', icon: 'ellipsis-horizontal-circle-outline', tKey: 'kyc.other' },
   ];
 
   const renderIFSCStep = () => (
@@ -243,26 +245,25 @@ export default function BankLinkingScreen({ navigation, route }: any) {
         <View style={styles.infoRow}>
           <Ionicons name="information-circle" size={20} color={colors.primary} />
           <Text style={styles.infoText}>
-            Enter your bank's IFSC code to fetch bank and branch details.
-            IFSC is an 11-character code found on your cheque book or passbook.
+            {t('kyc.ifscInfo')}
           </Text>
         </View>
         <View style={styles.formatRow}>
-          <Text style={styles.formatLabel}>Format:</Text>
+          <Text style={styles.formatLabel}>{t('kyc.formatLabel')}</Text>
           <Text style={styles.formatExample}>HDFC0001234</Text>
         </View>
       </Card>
 
       {/* IFSC Input */}
       <View style={styles.inputSection}>
-        <Text style={styles.inputLabel}>Enter IFSC Code</Text>
+        <Text style={styles.inputLabel}>{t('kyc.enterIFSC')}</Text>
         <View style={[styles.inputContainer, { borderColor: error ? colors.danger : colors.border }]}>
           <Ionicons name="business" size={20} color={colors.primary} />
           <TextInput
             style={styles.input}
             value={ifscCode}
             onChangeText={(t) => { setIfscCode(t.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11)); setError(null); }}
-            placeholder="HDFC0001234"
+            placeholder={t('kyc.ifscPlaceholder')}
             placeholderTextColor={colors.textMuted}
             autoCapitalize="characters"
             maxLength={11}
@@ -283,8 +284,8 @@ export default function BankLinkingScreen({ navigation, route }: any) {
         </View>
         <Text style={styles.inputHint}>
           {ifscCode.length === 0
-            ? 'Enter your 11-character IFSC code'
-            : isIFSCFormatValid ? '✓ Valid IFSC format' : 'Invalid IFSC format'}
+            ? t('kyc.ifscHint')
+            : isIFSCFormatValid ? t('kyc.validFormat') : t('kyc.invalidFormat')}
         </Text>
       </View>
 
@@ -298,7 +299,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
       >
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
           <Ionicons name="search" size={20} color={colors.white} />
-          <Text style={styles.actionBtnText}>{isLoading ? 'Verifying...' : 'Verify IFSC'}</Text>
+          <Text style={styles.actionBtnText}>{isLoading ? t('kyc.verifying') : t('kyc.verifyIFSC')}</Text>
         </LinearGradient>
       </AnimatedPressable>
     </>
@@ -316,7 +317,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
             <View style={styles.bankInfoText}>
               <Text style={styles.bankInfoName}>{ifscResult.bankName}</Text>
               <Text style={styles.bankInfoBranch}>{ifscResult.branch}</Text>
-              <Text style={styles.bankInfoIfsc}>IFSC: {ifscResult.ifsc}</Text>
+              <Text style={styles.bankInfoIfsc}>{t('kyc.ifscLabel')}: {ifscResult.ifsc}</Text>
             </View>
           </View>
         </Card>
@@ -324,14 +325,14 @@ export default function BankLinkingScreen({ navigation, route }: any) {
 
       {/* Account Number */}
       <View style={styles.inputSection}>
-        <Text style={styles.inputLabel}>Account Number</Text>
+        <Text style={styles.inputLabel}>{t('kyc.accountNumber')}</Text>
         <View style={[styles.inputContainer, { borderColor: colors.border }]}>
           <Ionicons name="card-outline" size={20} color={colors.primary} />
           <TextInput
             style={styles.input}
             value={accountNumber}
             onChangeText={(t) => { setAccountNumber(t.replace(/\D/g, '').slice(0, 18)); setError(null); }}
-            placeholder="Enter account number"
+            placeholder={t('kyc.accountPlaceholder')}
             placeholderTextColor={colors.textMuted}
             keyboardType="number-pad"
             maxLength={18}
@@ -342,14 +343,14 @@ export default function BankLinkingScreen({ navigation, route }: any) {
 
       {/* Account Holder Name */}
       <View style={styles.inputSection}>
-        <Text style={styles.inputLabel}>Account Holder Name</Text>
+        <Text style={styles.inputLabel}>{t('kyc.accountHolderName')}</Text>
         <View style={[styles.inputContainer, { borderColor: colors.border }]}>
           <Ionicons name="person-outline" size={20} color={colors.primary} />
           <TextInput
             style={styles.input}
             value={accountHolderName}
             onChangeText={(t) => { setAccountHolderName(t); setError(null); }}
-            placeholder="As per bank records"
+            placeholder={t('kyc.namePlaceholder')}
             placeholderTextColor={colors.textMuted}
             autoCapitalize="words"
             autoCorrect={false}
@@ -368,7 +369,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
       >
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
           <Ionicons name="shield-checkmark" size={20} color={colors.white} />
-          <Text style={styles.actionBtnText}>{isLoading ? 'Verifying...' : 'Verify Account'}</Text>
+          <Text style={styles.actionBtnText}>{isLoading ? t('kyc.verifying') : t('kyc.verifyAccount')}</Text>
         </LinearGradient>
       </AnimatedPressable>
     </>
@@ -384,8 +385,8 @@ export default function BankLinkingScreen({ navigation, route }: any) {
               <Ionicons name="checkmark-circle" size={32} color={colors.success} />
             </View>
             <View style={styles.resultInfo}>
-              <Text style={styles.resultTitle}>Account Verified ✓</Text>
-              <Text style={styles.resultSubtitle}>Account holder name matches bank records</Text>
+              <Text style={styles.resultTitle}>{t('kyc.accountVerified')}</Text>
+              <Text style={styles.resultSubtitle}>{t('kyc.nameMatchesMsg')}</Text>
             </View>
           </View>
 
@@ -393,23 +394,23 @@ export default function BankLinkingScreen({ navigation, route }: any) {
 
           <View style={styles.resultDetails}>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Bank</Text>
+              <Text style={styles.resultLabel}>{t('kyc.bankLabel')}</Text>
               <Text style={styles.resultValue}>{ifscResult.bankName}</Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Branch</Text>
+              <Text style={styles.resultLabel}>{t('kyc.branchLabel')}</Text>
               <Text style={styles.resultValue}>{ifscResult.branch}</Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Account Number</Text>
+              <Text style={styles.resultLabel}>{t('kyc.accountLabel')}</Text>
               <Text style={styles.resultValue}>XXXX{accountResult.accountNumber.slice(-4)}</Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Account Holder</Text>
+              <Text style={styles.resultLabel}>{t('kyc.accountHolderLabel')}</Text>
               <Text style={styles.resultValue}>{accountResult.accountHolderName}</Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>IFSC</Text>
+              <Text style={styles.resultLabel}>{t('kyc.ifscLabel')}</Text>
               <Text style={styles.resultValue}>{ifscResult.ifsc}</Text>
             </View>
           </View>
@@ -417,7 +418,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
       )}
 
       {/* Account Type */}
-      <Text style={[styles.inputLabel, { marginTop: SPACING.lg, marginBottom: SPACING.sm }]}>Account Type</Text>
+      <Text style={[styles.inputLabel, { marginTop: SPACING.lg, marginBottom: SPACING.sm }]}>{t('kyc.accountType')}</Text>
       <View style={styles.accountTypeGrid}>
         {ACCOUNT_TYPES.map((type) => (
           <TouchableOpacity
@@ -437,7 +438,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
             <Text style={[
               styles.accountTypeLabel,
               accountType === type.key && { color: colors.primary },
-            ]}>{type.label}</Text>
+            ]}>              {t(type.tKey)}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -451,8 +452,8 @@ export default function BankLinkingScreen({ navigation, route }: any) {
           {isPrimary && <Ionicons name="star" size={14} color={colors.white} />}
         </View>
         <View style={styles.primaryInfo}>
-          <Text style={styles.primaryLabel}>Set as Primary Account</Text>
-          <Text style={styles.primarySub}>Withdrawals and settlements will use this account</Text>
+          <Text style={styles.primaryLabel}>{t('kyc.setAsPrimary')}</Text>
+          <Text style={styles.primarySub}>{t('kyc.primarySub')}</Text>
         </View>
       </TouchableOpacity>
 
@@ -466,7 +467,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
       >
         <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
           <Ionicons name="link" size={20} color={colors.white} />
-          <Text style={styles.actionBtnText}>{isLoading ? 'Linking...' : 'Link Bank Account'}</Text>
+          <Text style={styles.actionBtnText}>{isLoading ? t('kyc.linking') : t('kyc.linkBank')}</Text>
         </LinearGradient>
       </AnimatedPressable>
     </>
@@ -480,9 +481,9 @@ export default function BankLinkingScreen({ navigation, route }: any) {
             <View style={[styles.resultIcon, { backgroundColor: colors.success + '20' }]}>
               <Ionicons name="checkmark-circle" size={48} color={colors.success} />
             </View>
-            <Text style={styles.resultTitle}>Account Linked ✓</Text>
+            <Text style={styles.resultTitle}>{t('kyc.accountLinked')}</Text>
             <Text style={styles.resultSubtitle}>
-              Your {linkedAccount.bankName} account has been linked successfully
+              {t('kyc.linkedSuccess', { bank: linkedAccount.bankName })}
             </Text>
           </View>
 
@@ -490,15 +491,15 @@ export default function BankLinkingScreen({ navigation, route }: any) {
 
           <View style={styles.resultDetails}>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Bank</Text>
+              <Text style={styles.resultLabel}>{t('kyc.bankLabel')}</Text>
               <Text style={styles.resultValue}>{linkedAccount.bankName}</Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Account</Text>
+              <Text style={styles.resultLabel}>{t('kyc.accountLabel')}</Text>
               <Text style={styles.resultValue}>{linkedAccount.accountNumber}</Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Type</Text>
+              <Text style={styles.resultLabel}>{t('kyc.typeLabel')}</Text>
               <View style={[styles.accountTypeBadge, { backgroundColor: colors.primary + '15' }]}>
                 <Text style={[styles.accountTypeBadgeText, { color: colors.primary }]}>
                   {linkedAccount.accountType.charAt(0).toUpperCase() + linkedAccount.accountType.slice(1)}
@@ -508,7 +509,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
             {linkedAccount.isPrimary && (
               <View style={styles.primaryBadge}>
                 <Ionicons name="star" size={14} color="#FFC107" />
-                <Text style={styles.primaryBadgeText}>Primary Account</Text>
+                <Text style={styles.primaryBadgeText}>{t('kyc.primaryAccount')}</Text>
               </View>
             )}
           </View>
@@ -520,7 +521,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
             style={{ marginTop: SPACING.xl }}
           >
             <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
-              <Text style={styles.continueBtnText}>Done</Text>
+              <Text style={styles.continueBtnText}>{t('app.done')}</Text>
               <Ionicons name="arrow-forward" size={20} color={colors.white} />
             </LinearGradient>
           </AnimatedPressable>
@@ -530,7 +531,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
             style={styles.manageLink}
             onPress={() => setFlowStep('manage')}
           >
-            <Text style={styles.manageLinkText}>Manage Linked Banks</Text>
+            <Text style={styles.manageLinkText}>{t('kyc.manageLinkedBanks')}</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.primary} />
           </TouchableOpacity>
         </Card>
@@ -540,11 +541,11 @@ export default function BankLinkingScreen({ navigation, route }: any) {
 
   const renderManageStep = () => (
     <>
-      <Card title={`Linked Banks (${linkedBanks.length})`} style={{ marginBottom: SPACING.lg }}>
+      <Card title={t('kyc.linkedBanks', { count: linkedBanks.length })} style={{ marginBottom: SPACING.lg }}>
         {linkedBanks.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="business-outline" size={40} color={colors.textMuted} />
-            <Text style={styles.emptyText}>No bank accounts linked yet</Text>
+            <Text style={styles.emptyText}>{t('kyc.noBanksYet')}</Text>
           </View>
         ) : (
           linkedBanks.map((bank, i) => (
@@ -559,7 +560,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
                     {bank.isPrimary && <Badge label="Primary" variant="primary" size="small" />}
                   </View>
                   <Text style={styles.manageBankAccount}>{bank.accountNumber}</Text>
-                  <Text style={styles.manageBankIfsc}>IFSC: {bank.ifsc} · {bank.accountType.charAt(0).toUpperCase() + bank.accountType.slice(1)}</Text>
+                  <Text style={styles.manageBankIfsc}>{t('kyc.ifscWithType', { ifsc: bank.ifsc, type: bank.accountType.charAt(0).toUpperCase() + bank.accountType.slice(1) })}</Text>
                 </View>
               </View>
               <View style={styles.manageBankActions}>
@@ -569,7 +570,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
                     onPress={() => handleSetPrimary(bank.id)}
                   >
                     <Ionicons name="star-outline" size={16} color={colors.primary} />
-                    <Text style={styles.manageActionText}>Set Primary</Text>
+                    <Text style={styles.manageActionText}>{t('kyc.setPrimary')}</Text>
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
@@ -577,7 +578,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
                   onPress={() => handleRemoveBank(bank.id)}
                 >
                   <Ionicons name="trash-outline" size={16} color={colors.danger} />
-                  <Text style={[styles.manageActionText, { color: colors.danger }]}>Remove</Text>
+                  <Text style={[styles.manageActionText, { color: colors.danger }]}>{t('kyc.removeBank')}</Text>
                 </TouchableOpacity>
               </View>
               {i < linkedBanks.length - 1 && <View style={styles.divider} />}
@@ -601,12 +602,12 @@ export default function BankLinkingScreen({ navigation, route }: any) {
       >
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
           <Ionicons name="add-circle" size={20} color={colors.white} />
-          <Text style={styles.actionBtnText}>Link Another Account</Text>
+          <Text style={styles.actionBtnText}>{t('kyc.linkAnother')}</Text>
         </LinearGradient>
       </AnimatedPressable>
 
       <TouchableOpacity style={styles.doneBtn} onPress={handleContinue}>
-        <Text style={styles.doneBtnText}>Done</Text>
+        <Text style={styles.doneBtnText}>{t('app.done')}</Text>
       </TouchableOpacity>
     </>
   );
@@ -624,13 +625,13 @@ export default function BankLinkingScreen({ navigation, route }: any) {
           </TouchableOpacity>
           <View style={styles.headerInfo}>
             <Text style={styles.title}>
-              {flowStep === 'manage' ? 'Manage Banks' : 'Link Bank Account'}
+              {flowStep === 'manage' ? t('kyc.manageBanks') : t('kyc.bankLinkingTitle')}
             </Text>
             {flowStep !== 'manage' && (
               <Text style={styles.stepText}>
-                {flowStep === 'ifsc' ? 'Step 1 of 3 — IFSC' :
-                 flowStep === 'account' ? 'Step 2 of 3 — Account Details' :
-                 flowStep === 'verify' ? 'Step 3 of 3 — Confirm' : 'Complete'}
+                {flowStep === 'ifsc' ? t('kyc.step1') :
+                 flowStep === 'account' ? t('kyc.step2') :
+                 flowStep === 'verify' ? t('kyc.step3') : t('kyc.stepComplete')}
               </Text>
             )}
           </View>

@@ -1,0 +1,19 @@
+// Auto-generated from en.ts — community namespace
+export default {
+    title: 'Community',
+    subtitle: 'Connect with fellow traders',
+    posts: 'Posts',
+    likes: 'Likes',
+    comments: 'Comments',
+    share: 'Share',
+    post: 'Post',
+    writePost: 'Write a post...',
+    noPosts: 'No posts yet. Be the first to share!',
+    chat: 'Chat',
+    chatRooms: 'Chat Rooms',
+    messages: 'Messages',
+    typeMessage: 'Type a message...',
+    behavioralJournal: 'Behavioral Journal',
+    journalEntry: 'Journal Entry',
+    howAreYouFeeling: 'How are you feeling today?',
+};

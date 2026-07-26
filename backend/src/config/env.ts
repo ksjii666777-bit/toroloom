@@ -121,6 +121,12 @@ export const env = {
   /** MarketStack API key for real-time stock prices and market data */
   marketstackKey: process.env.MARKETSTACK_KEY || '',
 
+  /** API Ninjas key for commodity price data (https://api-ninjas.com) */
+  commodityApiKey: process.env.COMMODITY_API_KEY || '',
+
+  /** FRED API key for US Treasury yields and bond market data (https://fred.stlouisfed.org) */
+  fredApiKey: process.env.FRED_API_KEY || '',
+
   /** NewsAPI.org key for financial news articles */
   newsApiKey: process.env.NEWSAPI_KEY || '',
 

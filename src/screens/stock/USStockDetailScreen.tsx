@@ -14,14 +14,29 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions, ActivityIndicator } from 'react-native';
 import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { mockUSStocks, mockUSETFs } from '../../constants/mockData';
 import type { USStock } from '../../types';
+
+// ──── Helper: merge API quote into USStock mock ─────────────────
+function mergeApiToStock(stock: USStock, api: { price: number; change: number; changePercent: number; isPositive: boolean; volume?: string; high52?: number; low52?: number }): USStock {
+  return {
+    ...stock,
+    price: api.price,
+    change: api.change,
+    changePercent: api.changePercent,
+    isPositive: api.isPositive,
+    volume: api.volume ?? stock.volume,
+    high52: api.high52 ?? stock.high52,
+    low52: api.low52 ?? stock.low52,
+  };
+}
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - SPACING.xl * 2 - SPACING.lg * 2;
@@ -92,20 +107,58 @@ function StatRow({ label, value, highlightColor }: { label: string; value: strin
 // ──── Main Screen ──────────────────────────────────────────────────────────
 
 export default function USStockDetailScreen({ route, navigation }: any) {
-  const { stockId, symbol } = route.params || {};
+  const { stockId, symbol, source } = route.params || {};
   const { colors } = useTheme();
 
-  // Find the stock in mock data (support both US stocks and ETFs)
-  const stock = mockUSStocks.find(s => s.id === stockId || s.symbol === symbol) || mockUSStocks[0];
+  // Find mock stock first (fallback and structural data)
+  const mockStock = mockUSStocks.find(s => s.id === stockId || s.symbol === symbol) || mockUSStocks[0];
+
+  const [stock, setStock] = useState<USStock>(mockStock);
+  const [detailLoading, setDetailLoading] = useState(true);
+  const [usingLiveData, setUsingLiveData] = useState(false);
+
+  // Fetch live quote from backend on mount
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const apiStock = await globalMarketsApi.getQuote(mockStock.symbol);
+        if (!cancelled && apiStock) {
+          setStock(mergeApiToStock(mockStock, apiStock));
+          setUsingLiveData(true);
+        }
+      } catch {
+        // API failed — keep mock data (already set)
+      } finally {
+        if (!cancelled) setDetailLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [mockStock.symbol]);
+
   const relatedETFs = mockUSETFs.filter(
     e => e.category.toLowerCase().includes(stock.sector.toLowerCase()) ||
          e.name.toLowerCase().includes(stock.sector.toLowerCase()),
   ).slice(0, 3);
 
+  if (detailLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </Pressable>
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading {mockStock.symbol}...</Text>
+        </View>
+      </View>
+    );
+  }
+
   const isPositive = stock.isPositive;
   const exchangeColor = stock.exchange === 'NASDAQ' ? '#00E676' : stock.exchange === 'NYSE Arca' ? '#8B5CF6' : '#3B82F6';
-
-  // Format large numbers
   const formattedMarketCap = stock.marketCap;
 
   return (
@@ -117,13 +170,17 @@ export default function USStockDetailScreen({ route, navigation }: any) {
             <Ionicons name="arrow-back" size={22} color={colors.text} />
           </Pressable>
 
-          <View style={[styles.exchangeBadge, { backgroundColor: exchangeColor + '20' }]}>
-            <Ionicons
-              name={stock.exchange === 'NASDAQ' ? 'pulse' : 'business'}
-              size={12}
-              color={exchangeColor}
-            />
-            <Text style={[styles.exchangeText, { color: exchangeColor }]}>{stock.exchange}</Text>
+          <View style={styles.headerTags}>
+            {usingLiveData && (
+              <View style={[styles.liveBadge, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveBadgeText}>Live</Text>
+              </View>
+            )}
+            <View style={[styles.exchangeBadge, { backgroundColor: exchangeColor + '20' }]}>
+              <Ionicons name={stock.exchange === 'NASDAQ' ? 'pulse' : 'business'} size={12} color={exchangeColor} />
+              <Text style={[styles.exchangeText, { color: exchangeColor }]}>{stock.exchange}</Text>
+            </View>
           </View>
         </Animated.View>
 
@@ -232,6 +289,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  headerTags: {
+    flexDirection: 'row', gap: SPACING.sm, alignItems: 'center',
+  },
+  liveBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: SPACING.sm, paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.full, borderWidth: 1,
+  },
+  liveDot: {
+    width: 6, height: 6, borderRadius: 3, backgroundColor: '#00E676',
+  },
+  liveBadgeText: {
+    ...FONTS.semiBold, fontSize: 9, color: '#00E676',
+    textTransform: 'uppercase', letterSpacing: 0.5,
+  },
+
   exchangeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -298,6 +371,8 @@ const styles = StyleSheet.create({
   },
   statLabel: { ...FONTS.regular, fontSize: FONTS.size.sm },
   statValue: { ...FONTS.semiBold, fontSize: FONTS.size.sm },
+
+  loadingText: { ...FONTS.medium, fontSize: FONTS.size.sm, marginTop: SPACING.md },
 
   // ── About ──
   aboutText: { ...FONTS.regular, fontSize: FONTS.size.sm, lineHeight: 20 },

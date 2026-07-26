@@ -99,6 +99,7 @@ import LandscapeSettingsScreen from '../screens/settings/LandscapeSettingsScreen
 import CDNOptimizationScreen from '../screens/settings/CDNOptimizationScreen';
 import StockScreenerScreen from '../screens/stock/StockScreenerScreen';
 import USStockDetailScreen from '../screens/stock/USStockDetailScreen';
+import GlobalStockDetailScreen from '../screens/stock/GlobalStockDetailScreen';
 import CompanyFundamentalsScreen from '../screens/stock/CompanyFundamentalsScreen';
 import USMarketsScreen from '../screens/markets/USMarketsScreen';
 import BondDashboardScreen from '../screens/markets/BondDashboardScreen';
@@ -125,6 +126,12 @@ import RevenueDashboardScreen from '../screens/social/RevenueDashboardScreen';
 import FnOOptionsChainScreen from '../screens/trade/FnOOptionsChainScreen';
 import StrategyBuilderScreen from '../screens/trade/StrategyBuilderScreen';
 import StrategyPerformanceScreen from '../screens/trade/StrategyPerformanceScreen';
+import CryptoTradingScreen from '../screens/trade/CryptoTradingScreen';
+import USStocksTradingScreen from '../screens/trade/USStocksTradingScreen';
+import WealthDashboardScreen from '../screens/wealth/WealthDashboardScreen';
+import { GoalCreateScreen, GoalDetailScreen } from '../screens/wealth/GoalBasedInvestingScreen';
+import RetirementPlannerScreen from '../screens/wealth/RetirementPlannerScreen';
+import CryptoDetailScreen from '../screens/stock/CryptoDetailScreen';
 
 // Calculator Screens
 import SIPCalculator from '../screens/calculators/SIPCalculator';
@@ -142,6 +149,11 @@ import DigiLockerScreen from '../screens/kyc/DigiLockerScreen';
 import BankLinkingScreen from '../screens/kyc/BankLinkingScreen';
 import IronLockOverlay from '../components/IronLockOverlay';
 import UpgradePromptModal from '../components/UpgradePromptModal';
+
+// SnapTrade Screens
+import SnapTradeConnectScreen from '../screens/snaptrade/SnapTradeConnectScreen';
+import SnapTradePortfolioScreen from '../screens/snaptrade/SnapTradePortfolioScreen';
+import SnapTradeOrderScreen from '../screens/snaptrade/SnapTradeOrderScreen';
 import OfflineBanner from '../components/ui/OfflineBanner';
 import SyncStatusIndicator from '../components/ui/SyncStatusIndicator';
 import SyncConflictModal from '../components/ui/SyncConflictModal';
@@ -476,6 +488,7 @@ export default function AppNavigator() {
             <Stack.Screen name="CommodityMarkets" component={CommodityMarketsScreen} />
             <Stack.Screen name="FuturesCurve" component={FuturesCurveScreen} />
             <Stack.Screen name="USStockDetail" component={USStockDetailScreen} />
+            <Stack.Screen name="GlobalStockDetail" component={GlobalStockDetailScreen} />
             <Stack.Screen name="CompanyFundamentals" component={CompanyFundamentalsScreen} />
             <Stack.Screen name="Learn" component={LearnScreen} />
             <Stack.Screen name="Polls" component={PollsScreen} />
@@ -550,6 +563,13 @@ export default function AppNavigator() {
             <Stack.Screen name="Accessibility" component={AccessibilitySettingsScreen} />
             <Stack.Screen name="LandscapeMode" component={LandscapeSettingsScreen} />
             <Stack.Screen name="CDNOptimization" component={CDNOptimizationScreen} />
+            <Stack.Screen name="CryptoDetail" component={CryptoDetailScreen} />
+            <Stack.Screen name="WealthDashboard" component={WealthDashboardScreen} />
+            <Stack.Screen name="GoalCreate" component={GoalCreateScreen} />
+            <Stack.Screen name="GoalDetail" component={GoalDetailScreen} />
+            <Stack.Screen name="RetirementPlanner" component={RetirementPlannerScreen} />
+            <Stack.Screen name="USStocksTrading" component={USStocksTradingScreen} />
+            <Stack.Screen name="CryptoTrading" component={CryptoTradingScreen} />
             <Stack.Screen name="FnOOptionsChain" component={FnOOptionsChainScreen} />
             <Stack.Screen name="StrategyBuilder" component={StrategyBuilderScreen} />
             <Stack.Screen name="StrategyPerformance" component={StrategyPerformanceScreen} />
@@ -559,6 +579,9 @@ export default function AppNavigator() {
             <Stack.Screen name="EMICalculator" component={EMICalculator} />
             <Stack.Screen name="TaxCalculator" component={TaxCalculator} />
             <Stack.Screen name="CurrencyConverter" component={CurrencyConverterScreen} />
+            <Stack.Screen name="SnapTradeConnect" component={SnapTradeConnectScreen} />
+            <Stack.Screen name="SnapTradePortfolio" component={SnapTradePortfolioScreen} />
+            <Stack.Screen name="SnapTradeOrder" component={SnapTradeOrderScreen} />
             <Stack.Screen name="PanVerification" component={PanVerificationScreen} />
             <Stack.Screen name="AadhaarVerification" component={AadhaarVerificationScreen} />
             <Stack.Screen name="DigiLocker" component={DigiLockerScreen} />

@@ -22,6 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -40,22 +41,22 @@ const LEVEL_COLORS: Record<string, [string, string]> = {
   advanced: ['#FF5252', '#D50000'],
 };
 
-/** Format relative time string */
-function formatRelativeTime(dateStr: string): string {
+/** Format relative time string */  function formatRelativeTime(dateStr: string, t: any): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('time.justNow');
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('time.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return t('time.daysAgo', { count: days });
   if (days < 30) return `${Math.floor(days / 7)}w ago`;
   return `${Math.floor(days / 30)}mo ago`;
 }
 
 export default function CommunityCoursesScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     myCourses, enrolledCommunityCourseIds,
@@ -136,10 +137,10 @@ export default function CommunityCoursesScreen({ navigation }: any) {
             <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </AnimatedPressable>
-            <Text style={styles.title}>Community Courses</Text>
+            <Text style={styles.title}>{t('education.communityCourses')}</Text>
           </View>
           <Text style={styles.subtitle}>
-            Discover courses created by fellow traders
+            {t('education.communitySubtitle')}
           </Text>
         </View>
 
@@ -148,7 +149,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
           <Ionicons name="search" size={18} color={colors.textMuted} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search courses, creators, or topics..."
+            placeholder={t('education.searchCoursesCreators')}
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -173,23 +174,23 @@ export default function CommunityCoursesScreen({ navigation }: any) {
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
             <Text style={[styles.statValue, { color: colors.primary }]}>{allCommunityCourses.length}</Text>
-            <Text style={styles.statLabel}>Courses</Text>
+            <Text style={styles.statLabel}>{t('education.title')}</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
             <Text style={[styles.statValue, { color: colors.success }]}>{featured.length}</Text>
-            <Text style={styles.statLabel}>Featured</Text>
+            <Text style={styles.statLabel}>{t('education.featuredCourses')}</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
             <Text style={[styles.statValue, { color: colors.warning }]}>
               {enrolledCommunityCourseIds.length}
             </Text>
-            <Text style={styles.statLabel}>Enrolled</Text>
+            <Text style={styles.statLabel}>{t('education.enrolled')}</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
             <Text style={[styles.statValue, { color: colors.text }]}>
               {allCommunityCourses.reduce((s, c) => s + c.enrolledCount, 0)}
             </Text>
-            <Text style={styles.statLabel}>Students</Text>
+            <Text style={styles.statLabel}>{t('education.students')}</Text>
           </View>
         </View>
 
@@ -224,7 +225,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
                             : (LEVEL_COLORS[level]?.[0] ?? colors.primary),
                         },
                       ]}>
-                        {level === 'all' ? 'All Levels' : level.charAt(0).toUpperCase() + level.slice(1)}
+                        {level === 'all' ? t('education.allLevels') : level === 'beginner' ? t('education.beginner') : level === 'intermediate' ? t('education.intermediate') : t('education.advanced')}
                       </Text>
                     </View>
                   </AnimatedPressable>
@@ -233,7 +234,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
             </View>
 
             {/* Category Filter */}
-            <Text style={styles.filterLabel}>Category</Text>
+            <Text style={styles.filterLabel}>{t('education.sortCategory')}</Text>
             <View style={styles.chipRow}>
               {CATEGORIES.slice(0, 6).map(cat => {
                 const isActive = activeCategory === cat;
@@ -296,7 +297,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Ionicons name="star" size={18} color={colors.warning} />
-              <Text style={styles.sectionTitle}>Featured Courses</Text>
+              <Text style={styles.sectionTitle}>{t('education.featuredCourses')}</Text>
               <Text style={styles.sectionCount}>{featured.length}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -323,8 +324,8 @@ export default function CommunityCoursesScreen({ navigation }: any) {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
               {searchQuery ? `Results (${filteredCourses.length})` :
-               activeLevel !== 'all' || activeCategory !== 'All' ? `Filtered (${filteredCourses.length})` :
-               'All Community Courses'}
+               activeLevel !== 'all' || activeCategory !== 'All' ?                t('education.filteredResults', { count: filteredCourses.length }) :
+               t('education.allCommunityCourses')}
             </Text>
             {filteredCourses.length > 0 && (
               <Text style={styles.sectionCount}>{filteredCourses.length}</Text>
@@ -339,12 +340,12 @@ export default function CommunityCoursesScreen({ navigation }: any) {
                 color={colors.textMuted}
               />
               <Text style={styles.emptyTitle}>
-                {searchQuery ? 'No courses found' : 'No courses yet'}
+                {searchQuery ? t('education.noCoursesFound') : t('education.noCoursesYet')}
               </Text>
               <Text style={styles.emptySubtitle}>
                 {searchQuery
-                  ? `No courses match "${searchQuery}". Try a different search term.`
-                  : 'No published community courses yet. Check back later!'}
+                  ? t('education.noCoursesMatch', { query: searchQuery })
+                  : t('education.noCommunityCourses')}
               </Text>
             </View>
           ) : (
@@ -377,7 +378,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
 // ─── Featured Course Card ──────────────────────────────────────
 
 function FeaturedCourseCard({
-  course, isEnrolled, onEnrollToggle, colors, styles,
+    course, isEnrolled, onEnrollToggle, colors, styles,
 }: {
   course: UserGeneratedCourse;
   isEnrolled: boolean;
@@ -385,7 +386,8 @@ function FeaturedCourseCard({
   colors: any;
   styles: any;
 }) {
-  const levelGrad = LEVEL_COLORS[course.level] || ['#6C63FF', '#3B82F6'];
+  const { t } = useT();
+    const levelGrad = LEVEL_COLORS[course.level] || ['#6C63FF', '#3B82F6'];
 
   return (
     <LinearGradient
@@ -402,10 +404,8 @@ function FeaturedCourseCard({
           </View>
         )}
       </View>
-      <Text style={styles.featuredTitle} numberOfLines={2}>{course.title}</Text>
-      <Text style={styles.featuredCreator}>by {course.creatorName}</Text>
-      <View style={styles.featuredMeta}>
-        <Text style={styles.featuredMetaText}>{course.lessonsCount} lessons</Text>
+      <Text style={styles.featuredTitle} numberOfLines={2}>{course.title}</Text>              <Text style={styles.featuredCreator}>{t('education.byCreator', { name: course.creatorName })}</Text>
+      <View style={styles.featuredMeta}>                <Text style={styles.featuredMetaText}>{t('education.lessonsCount', { count: course.lessonsCount })}</Text>
         <Text style={styles.featuredMetaDot}> · </Text>
         <Text style={styles.featuredMetaText}>{course.duration}</Text>
       </View>
@@ -428,7 +428,7 @@ function FeaturedCourseCard({
               styles.enrollBadgeText,
               isEnrolled && styles.enrollBadgeTextActive,
             ]}>
-              {isEnrolled ? 'Enrolled' : 'Enroll'}
+              {isEnrolled ? t('education.enrolled') : t('education.enroll')}
             </Text>
           </View>
         </AnimatedPressable>
@@ -448,6 +448,7 @@ function CommunityCourseCard({
   colors: any;
   styles: any;
 }) {
+  const { t } = useT();
   const levelGrad = LEVEL_COLORS[course.level] || ['#6C63FF', '#3B82F6'];
 
   return (
@@ -462,15 +463,14 @@ function CommunityCourseCard({
           <Text style={styles.courseThumbText}>{course.thumbnail || '📚'}</Text>
         </LinearGradient>
         <View style={styles.courseInfo}>
-          <Text style={styles.courseTitle} numberOfLines={1}>{course.title}</Text>
-          <Text style={styles.creatorName}>by {course.creatorName}</Text>
+          <Text style={styles.courseTitle} numberOfLines={1}>{course.title}</Text>            <Text style={styles.creatorName}>{t('education.byCreator', { name: course.creatorName })}</Text>
           <View style={styles.courseMetaRow}>
             <View style={[styles.levelBadge, { backgroundColor: levelGrad[0] + '20', borderColor: levelGrad[0] + '40' }]}>
               <Text style={[styles.levelBadgeText, { color: levelGrad[0] }]}>
                 {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
               </Text>
             </View>
-            <Text style={styles.courseMeta}>{course.lessonsCount} lessons</Text>
+            <Text style={styles.courseMeta}>{t('education.lessonsCount', { count: course.lessonsCount })}</Text>
           </View>
           <Text style={styles.courseDesc} numberOfLines={2}>{course.description}</Text>
           <View style={styles.courseCardFooter}>
@@ -478,7 +478,7 @@ function CommunityCourseCard({
               <Ionicons name="people" size={12} color={colors.textMuted} />
               <Text style={styles.courseStatText}>{course.enrolledCount}</Text>
               <Text style={styles.courseStatDot}> · </Text>
-              <Text style={styles.courseStatText}>{formatRelativeTime(course.publishedAt || course.updatedAt)}</Text>
+              <Text style={styles.courseStatText}>{formatRelativeTime(course.publishedAt || course.updatedAt, t)}</Text>
             </View>
             <AnimatedPressable onPress={onEnrollToggle} haptic="medium" scaleTo={0.92}>
               <View style={[

@@ -595,6 +595,8 @@ router.get('/futures', (req: Request, res: Response) => {
       INFY: 1567.80,
       TCS: 3890.00,
       SBIN: 789.50,
+      FINNIFTY: 21234.50,
+      MIDCPNIFTY: 15678.90,
     };
     const spotPrice = spotPriceMap[symbol] || 1000;
     const expiries = generateExpiries();
@@ -603,6 +605,67 @@ router.get('/futures', (req: Request, res: Response) => {
     res.json({ symbol, spotPrice, futures });
   } catch (error: unknown) {
     res.status(500).json({ error: (error as Error).message || 'Failed to fetch futures' });
+  }
+});
+
+// GET /api/fno/futures-curve?symbol=NIFTY
+// Returns futures curve data matching the FuturesCurveData frontend type
+router.get('/futures-curve', (req: Request, res: Response) => {
+  try {
+    const symbol = (req.query.symbol as string) || 'NIFTY';
+    const spotPriceMap: Record<string, number> = {
+      NIFTY: 23456.80,
+      BANKNIFTY: 49234.10,
+      FINNIFTY: 21234.50,
+      MIDCPNIFTY: 15678.90,
+      SENSEX: 77123.45,
+    };
+    const spotPrice = spotPriceMap[symbol] || 1000;
+    const expiries = generateExpiries();
+
+    // Use the first 4 expiries for the curve
+    const curveExpiries = expiries.slice(0, 4);
+    const points = curveExpiries.map((expiry, i) => {
+      const daysToExpiry = expiry.daysToExpiry;
+      const annualRate = 0.065;
+      const basis = spotPrice * annualRate * (daysToExpiry / 365);
+      const price = spotPrice + basis;
+      const oiBase = 500000 + Math.random() * 1000000;
+
+      return {
+        expiryLabel: expiry.isMonthly ? expiry.date.split('T')[0].slice(0, 7).replace('-', '') : `W${i + 1}`,
+        expiryDate: expiry.date,
+        daysToExpiry,
+        price: Math.round(price * 100) / 100,
+        basis: Math.round(basis * 100) / 100,
+        basisPercent: Math.round((basis / spotPrice) * 10000) / 100,
+        openInterest: Math.round(oiBase + (Math.random() - 0.5) * oiBase * 0.2),
+        oiChange: Math.round((Math.random() - 0.45) * oiBase * 0.1),
+        volume: Math.round(100000 + Math.random() * 500000),
+      };
+    });
+
+    // Determine if contango (upward sloping)
+    const firstPrice = points[0]?.price || spotPrice;
+    const lastPrice = points[points.length - 1]?.price || spotPrice;
+    const isContango = lastPrice >= firstPrice;
+    const monthlySlope = points.length > 1 ? Math.round((lastPrice - firstPrice) / points.length) : 0;
+    const totalOpenInterest = points.reduce((s, p) => s + p.openInterest, 0);
+    const maxOiPoint = points.reduce((max, p) => (p.openInterest > (max?.openInterest ?? 0) ? p : max), points[0]);
+
+    const curveData = {
+      symbol,
+      spotPrice,
+      points,
+      isContango,
+      slope: monthlySlope,
+      totalOpenInterest,
+      maxOiExpiry: maxOiPoint?.expiryLabel || '',
+    };
+
+    res.json(curveData);
+  } catch (error: unknown) {
+    res.status(500).json({ error: (error as Error).message || 'Failed to fetch futures curve' });
   }
 });
 

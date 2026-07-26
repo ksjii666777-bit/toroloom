@@ -35,6 +35,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useT } from '../../hooks/useT';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -65,6 +66,7 @@ const GLASS_BORDER = 'rgba(255,255,255,0.08)';
 // ─── Component ─────────────────────────────────────────────────────────────
 
 export default function ContractNoteUploadScreen({ navigation, route }: any) {
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(), []);
 
@@ -110,12 +112,12 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert(
-          'Parse Failed',
-          result.error || 'Could not extract any trades from this document.',
+          t('reports.parseFailed'),
+          result.error || t('reports.noTradesDoc'),
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'An unexpected error occurred.');
+      Alert.alert(t('app.error'), error.message || t('errors.unknown'));
     } finally {
       setIsLoading(false);
     }
@@ -126,18 +128,17 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     // Clear previous single-file result to avoid loading state collision
     setParseResult(null);
     setBatchResult(null);
-    setIsLoading(true);
-    setBatchProgress('Opening file picker...');
+    setIsLoading(true);        setBatchProgress(t('reports.openingPicker'));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
       // Show a brief progress message before the picker opens
-      setBatchProgress('Select multiple PDF files...');
+      setBatchProgress(t('reports.selectPDFs'));
 
       const result = await pickAndParseBatchContractNotes({
         brokerFormat,
         onProgress: (current, total, filename) => {
-          setBatchProgress(`Processing file ${current}/${total} — ${filename}`);
+          setBatchProgress(t('reports.processingFile', { current, total, filename }));
         },
       });
       setBatchResult(result);
@@ -148,13 +149,13 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert(
-          'Batch Parse Complete',
-          `Processed ${result.totalFiles} file(s). ${result.succeeded} succeeded, ${result.failed} failed. No trades were extracted.`,
+          t('reports.batchComplete'),
+          t('reports.batchSummary', { total: result.totalFiles, succeeded: result.succeeded, failed: result.failed }),
         );
       }
     } catch (error: any) {
       setBatchProgress(null);
-      Alert.alert('Error', error.message || 'Batch upload failed.');
+      Alert.alert(t('errors.unknown'), error.message || t('reports.batchFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +164,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
   // ── Handle paste text ───────────────────────────────────────
   const handleParsePastedText = useCallback(() => {
     if (!pastedText.trim()) {
-      Alert.alert('Empty', 'Please paste your contract note text first.');
+      Alert.alert(t('reports.emptyTitle'), t('reports.emptyMsg'));
       return;
     }
 
@@ -179,12 +180,12 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert(
-          'No Trades Found',
-          result.error || 'Could not extract any trades from the pasted text. Make sure it contains broker contract note data.',
+          t('reports.noTradesFound'),
+          result.error || t('reports.noTradesPasted'),
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to parse pasted text.');
+      Alert.alert(t('errors.unknown'), error.message || t('reports.parsePastedFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -206,12 +207,12 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert(
-          'Export Failed',
-          result.error || 'Could not export CSV. Please try again.',
+          t('reports.exportFailed'),
+          result.error || t('reports.exportFailedMsg'),
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Export failed unexpectedly.');
+      Alert.alert(t('errors.unknown'), error.message || t('reports.exportFailedUnexpected'));
     } finally {
       setIsExporting(false);
     }
@@ -230,12 +231,12 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert(
-          'Export Failed',
-          result.error || 'Could not export CSV. Please try again.',
+          t('reports.exportFailed'),
+          result.error || t('reports.exportFailedMsg'),
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Export failed unexpectedly.');
+      Alert.alert(t('errors.unknown'), error.message || t('reports.exportFailedUnexpected'));
     } finally {
       setIsExporting(false);
     }
@@ -278,12 +279,12 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Alert.alert(
-          'Export Failed',
-          result.error || 'Could not export CSV. Please try again.',
+          t('reports.exportFailed'),
+          result.error || t('reports.exportFailedMsg'),
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Export failed unexpectedly.');
+      Alert.alert(t('errors.unknown'), error.message || t('reports.exportFailedUnexpected'));
     } finally {
       setIsExporting(false);
     }
@@ -310,9 +311,9 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </AnimatedPressable>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Contract Note Parser</Text>
+          <Text style={styles.headerTitle}>{t('reports.contractNoteParser')}</Text>
           <Text style={styles.headerSubtitle}>
-            Upload broker PDF or paste text to extract trades
+            {t('reports.contractNoteParserSub')}
           </Text>
         </View>
       </View>
@@ -340,9 +341,9 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                 <Ionicons name="document-attach" size={28} color={NEON_CYAN} />
               </View>
               <View style={styles.actionTextContainer}>
-                <Text style={styles.actionTitle}>Upload PDF Contract Note</Text>
+                <Text style={styles.actionTitle}>{t('reports.uploadPDF')}</Text>
                 <Text style={styles.actionSubtitle}>
-                  Select a PDF from your device
+                  {t('reports.uploadPDFSub')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.3)" />
@@ -366,9 +367,9 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                 <Ionicons name="layers" size={28} color="#6C63FF" />
               </View>
               <View style={styles.actionTextContainer}>
-                <Text style={styles.actionTitle}>Batch Upload (Multi)</Text>
+                <Text style={styles.actionTitle}>{t('reports.batchUpload')}</Text>
                 <Text style={styles.actionSubtitle}>
-                  Select multiple PDFs to process at once
+                  {t('reports.batchUploadSub')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.3)" />
@@ -394,9 +395,9 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                 <Ionicons name="clipboard" size={28} color="#FF8C00" />
               </View>
               <View style={styles.actionTextContainer}>
-                <Text style={styles.actionTitle}>Paste Contract Note Text</Text>
+                <Text style={styles.actionTitle}>{t('reports.pasteText')}</Text>
                 <Text style={styles.actionSubtitle}>
-                  Copy-paste from your broker's email or portal
+                  {t('reports.pasteTextSub')}
                 </Text>
               </View>
               <Ionicons
@@ -413,7 +414,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
               <View style={styles.pasteInputContainer}>
                 <TextInput
                   style={styles.pasteInput}
-                  placeholder="Paste your contract note text here..."
+                  placeholder={t('reports.pastePlaceholder')}
                   placeholderTextColor="rgba(255,255,255,0.3)"
                   multiline
                   numberOfLines={8}
@@ -437,7 +438,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                   {isLoading ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
-                    <Text style={styles.parseBtnText}>Parse Text</Text>
+                    <Text style={styles.parseBtnText}>{t('reports.parseText')}</Text>
                   )}
                 </LinearGradient>
               </TouchableOpacity>
@@ -449,9 +450,9 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
         {isLoading && !batchProgress && !batchResult && (
           <Animated.View style={[styles.loadingContainer, { opacity: fadeAnim }]}>
             <ActivityIndicator size="large" color={NEON_CYAN} />
-            <Text style={styles.loadingText}>Parsing contract note...</Text>
+            <Text style={styles.loadingText}>{t('reports.parsingNote')}</Text>
             <Text style={styles.loadingSubtext}>
-              Extracting text and identifying trades
+              {t('reports.extractingText')}
             </Text>
           </Animated.View>
         )}
@@ -462,7 +463,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
             <View style={styles.batchProgressIcon}>
               <Ionicons name="layers" size={32} color={NEON_CYAN} />
             </View>
-            <Text style={styles.loadingText}>Batch Processing</Text>
+            <Text style={styles.loadingText}>{t('reports.batchProcessing')}</Text>
             <Text style={styles.loadingSubtext}>{batchProgress}</Text>
             <View style={styles.batchProgressBar}>
               <View style={styles.batchProgressBarFill} />
@@ -481,9 +482,9 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                     <Ionicons name="layers" size={24} color="#6C63FF" />
                   </View>
                   <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                    <Text style={styles.resultTitle}>Batch Results</Text>
+                    <Text style={styles.resultTitle}>{t('reports.batchResults')}</Text>
                     <Text style={styles.resultSubtitle}>
-                      {batchResult.succeeded} succeeded · {batchResult.failed} failed · {batchResult.totalFiles} total
+                      {t('reports.resultSummary', { succeeded: batchResult.succeeded, failed: batchResult.failed, total: batchResult.totalFiles })}
                     </Text>
                   </View>
                   <TouchableOpacity onPress={handleClear} style={styles.clearBtn} testID="clearBtn">
@@ -495,25 +496,25 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                 <View style={styles.statsRow}>
                   <View style={styles.statItem}>
                     <Text style={styles.statValue}>{batchResult.mergedTrades.length}</Text>
-                    <Text style={styles.statLabel}>Merged</Text>
+                    <Text style={styles.statLabel}>{t('reports.merged')}</Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: '#10B981' }]}>
                       {batchResult.mergedTrades.filter(t => t.transaction_type === 'BUY').length}
                     </Text>
-                    <Text style={styles.statLabel}>Buys</Text>
+                    <Text style={styles.statLabel}>{t('reports.buys')}</Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: '#FF6B00' }]}>
                       {batchResult.mergedTrades.filter(t => t.transaction_type === 'SELL').length}
                     </Text>
-                    <Text style={styles.statLabel}>Sells</Text>
+                    <Text style={styles.statLabel}>{t('reports.sells')}</Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: '#6C63FF' }]}>
                       {batchResult.rawTradeCount}
                     </Text>
-                    <Text style={styles.statLabel}>Raw</Text>
+                    <Text style={styles.statLabel}>{t('reports.raw')}</Text>
                   </View>
                 </View>
 
@@ -522,7 +523,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                   <View style={styles.sourceRow}>
                     <Ionicons name="funnel" size={12} color="rgba(255,255,255,0.3)" />
                     <Text style={styles.sourceText}>
-                      Deduplicated {batchResult.rawTradeCount - batchResult.mergedTrades.length} duplicate trade(s)
+                      {t('reports.dedup', { count: batchResult.rawTradeCount - batchResult.mergedTrades.length })}
                     </Text>
                   </View>
                 )}
@@ -555,7 +556,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                       color="rgba(255,255,255,0.5)"
                     />
                     <Text style={styles.selectToggleText}>
-                      {isSelecting ? 'Done' : 'Select'}
+                      {isSelecting ? t('app.done') : t('reports.selectFiles')}
                     </Text>
                   </TouchableOpacity>
 
@@ -571,7 +572,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                         color="#6C63FF"
                       />
                       <Text style={styles.selectAllText}>
-                        {selectedFiles.size === batchResult.files.length ? 'Deselect All' : 'Select All'}
+                        {selectedFiles.size === batchResult.files.length ? t('reports.deselectAll') : t('reports.selectAll')}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -584,7 +585,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                   >
                     <Ionicons name="download-outline" size={14} color="#6C63FF" />
                     <Text style={styles.exportBtnText}>
-                      {isExporting ? 'Exporting...' : 'Export All CSV'}
+                      {isExporting ? t('reports.exporting') : t('reports.exportAllCSV')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -598,7 +599,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                   >
                     <Ionicons name="download-outline" size={14} color="#FFFFFF" />
                     <Text style={styles.exportSelectedBtnText}>
-                      {isExporting ? 'Exporting...' : `Export Selected (${selectedFiles.size})`}
+                      {isExporting ? t('reports.exporting') : t('reports.exportSelected', { count: selectedFiles.size })}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -607,7 +608,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
 
             {/* Per-File Breakdown */}
             <Text style={[styles.sectionTitle, { marginTop: SPACING.lg, marginBottom: SPACING.md, color: '#FFFFFF' }]}>
-              Per-File Breakdown
+              {t('reports.perFileBreakdown')}
             </Text>
             {batchResult.files.map((file, i) => (
               <View key={i} style={[styles.glassCard, { marginBottom: SPACING.sm }]}>
@@ -645,8 +646,8 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                         {file.filename}
                       </Text>
                       <Text style={styles.batchFileMeta}>
-                        {file.trades.length} trade(s)
-                        {file.pages ? ` · ${file.pages} page(s)` : ''}
+                        {t('reports.tradeCount', { count: file.trades.length })}
+                        {file.pages ? ` · ${t('reports.pageCount', { count: file.pages })}` : ''}
                         {file.brokerDetected ? ` · ${brokerLabel(file.brokerDetected)}` : ''}
                       </Text>
                     </View>
@@ -667,10 +668,10 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                         <>
                           {/* Mini table header */}
                           <View style={styles.tableHeader}>
-                            <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Symbol</Text>
-                            <Text style={[styles.tableHeaderCell, { flex: 0.6 }]}>Type</Text>
-                            <Text style={[styles.tableHeaderCell, { flex: 0.7, textAlign: 'right' }]}>Qty</Text>
-                            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Price</Text>
+                            <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>{t('reports.symbol')}</Text>
+                            <Text style={[styles.tableHeaderCell, { flex: 0.6 }]}>{t('reports.type')}</Text>
+                            <Text style={[styles.tableHeaderCell, { flex: 0.7, textAlign: 'right' }]}>{t('reports.qty')}</Text>
+                            <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>{t('reports.price')}</Text>
                           </View>
                           {file.trades.slice(0, 20).map((trade, j) => (
                             <View
@@ -700,7 +701,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                           ))}
                           {file.trades.length > 20 && (
                             <Text style={styles.batchFileMeta}>
-                              +{file.trades.length - 20} more trade(s)
+                              {t('reports.moreTrades', { count: file.trades.length - 20 })}
                             </Text>
                           )}
                         </>
@@ -716,13 +717,13 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
               <View style={[styles.glassCard, { marginTop: SPACING.md }]}>
                 <View style={styles.glassCardInner}>
                   <Text style={styles.tableTitle}>
-                    Merged Trades ({batchResult.mergedTrades.length})
+                    {t('reports.mergedTrades', { count: batchResult.mergedTrades.length })}
                   </Text>
                   <View style={styles.tableHeader}>
-                    <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Symbol</Text>
-                    <Text style={[styles.tableHeaderCell, { flex: 0.7 }]}>Type</Text>
-                    <Text style={[styles.tableHeaderCell, { flex: 0.8, textAlign: 'right' }]}>Qty</Text>
-                    <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Price</Text>
+                    <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>{t('reports.symbol')}</Text>
+                    <Text style={[styles.tableHeaderCell, { flex: 0.7 }]}>{t('reports.type')}</Text>
+                    <Text style={[styles.tableHeaderCell, { flex: 0.8, textAlign: 'right' }]}>{t('reports.qty')}</Text>
+                    <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>{t('reports.price')}</Text>
                   </View>
                   {batchResult.mergedTrades.map((trade, i) => (
                     <View
@@ -774,11 +775,11 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                   </View>
                   <View style={{ flex: 1, marginLeft: SPACING.md }}>
                     <Text style={styles.resultTitle}>
-                      {parseResult.success ? 'Trades Extracted' : 'Parsing Incomplete'}
+                      {parseResult.success ? t('reports.tradesExtracted') : t('reports.parsingIncomplete')}
                     </Text>
                     <Text style={styles.resultSubtitle}>
-                      {parseResult.filename || 'Contract Note'}
-                      {parseResult.pages ? ` · ${parseResult.pages} page(s)` : ''}
+                      {parseResult.filename || t('reports.contractNote')}
+                      {parseResult.pages ? ` · ${t('reports.pageCount', { count: parseResult.pages })}` : ''}
                     </Text>
                   </View>
                   <TouchableOpacity onPress={handleClear} style={styles.clearBtn} testID="clearBtn">
@@ -790,19 +791,19 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                 <View style={styles.statsRow}>
                   <View style={styles.statItem}>
                     <Text style={styles.statValue}>{parseResult.trades.length}</Text>
-                    <Text style={styles.statLabel}>Trades</Text>
+                    <Text style={styles.statLabel}>{t('reports.trades')}</Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: '#10B981' }]}>
                       {parseResult.trades.filter(t => t.transaction_type === 'BUY').length}
                     </Text>
-                    <Text style={styles.statLabel}>Buys</Text>
+                    <Text style={styles.statLabel}>{t('reports.buys')}</Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: '#FF6B00' }]}>
                       {parseResult.trades.filter(t => t.transaction_type === 'SELL').length}
                     </Text>
-                    <Text style={styles.statLabel}>Sells</Text>
+                    <Text style={styles.statLabel}>{t('reports.sells')}</Text>
                   </View>
 
                   {/* Broker Badge */}
@@ -825,7 +826,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                       color="rgba(255,255,255,0.3)"
                     />
                     <Text style={styles.sourceText}>
-                      {parseResult.source === 'backend' ? 'Extracted via server' : 'Local fallback parse'}
+                      {parseResult.source === 'backend' ? t('reports.extractedViaServer') : t('reports.localFallback')}
                     </Text>
                   </View>
                 )}
@@ -839,7 +840,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                   >
                     <Ionicons name="download-outline" size={14} color={NEON_CYAN} />
                     <Text style={[styles.exportBtnText, { color: NEON_CYAN }]}>
-                      {isExporting ? 'Exporting...' : 'Export CSV'}
+                      {isExporting ? t('reports.exporting') : t('reports.exportCsv')}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -850,14 +851,14 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
             {parseResult.trades.length > 0 && (
               <View style={[styles.glassCard, { marginTop: SPACING.md }]}>
                 <View style={styles.glassCardInner}>
-                  <Text style={styles.tableTitle}>Parsed Trades</Text>
+                  <Text style={styles.tableTitle}>{t('reports.parsedTrades')}</Text>
 
                   {/* Table Header */}
                   <View style={styles.tableHeader}>
-                    <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>Symbol</Text>
-                    <Text style={[styles.tableHeaderCell, { flex: 0.7 }]}>Type</Text>
-                    <Text style={[styles.tableHeaderCell, { flex: 0.8, textAlign: 'right' }]}>Qty</Text>
-                    <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Price</Text>
+                    <Text style={[styles.tableHeaderCell, { flex: 1.5 }]}>{t('reports.symbol')}</Text>
+                    <Text style={[styles.tableHeaderCell, { flex: 0.7 }]}>{t('reports.type')}</Text>
+                    <Text style={[styles.tableHeaderCell, { flex: 0.8, textAlign: 'right' }]}>{t('reports.qty')}</Text>
+                    <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>{t('reports.price')}</Text>
                   </View>
 
                   {/* Trade Rows */}
@@ -921,7 +922,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                     <Text style={styles.errorText}>{parseResult.error}</Text>
                   </View>
                   <TouchableOpacity onPress={handlePickPDF} style={styles.retryBtn}>
-                    <Text style={styles.retryBtnText}>Try Again</Text>
+                    <Text style={styles.retryBtnText}>{t('reports.tryAgain')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -937,13 +938,13 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
                         'Raw Extracted Text',
                         parseResult.rawText!.substring(0, 5000) +
                           (parseResult.rawText!.length > 5000
-                            ? `\n\n... (${parseResult.rawText!.length - 5000} more characters)`
+                            ? `\n\n${t('reports.moreChars', { count: parseResult.rawText!.length - 5000 })}`
                             : ''),
                       );
                     }}
                   >
                     <Text style={styles.rawTextTitle}>
-                      Raw Text ({parseResult.rawText.length} chars)
+                      {t('reports.rawText', { count: parseResult.rawText.length })}
                     </Text>
                     <Text style={styles.rawTextPreview} numberOfLines={3}>
                       {parseResult.rawText.substring(0, 200)}

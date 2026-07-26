@@ -1,0 +1,21 @@
+// Auto-generated from hi.ts — subscription namespace
+export default {
+    title: 'प्रीमियम लें',
+    free: 'फ्री',
+    pro: 'प्रो',
+    elite: 'एलीट',
+    currentPlan: 'वर्तमान योजना',
+    upgrade: 'अपग्रेड करें',
+    downgrade: 'डाउनग्रेड करें',
+    perMonth: '/माह',
+    features: 'सुविधाएँ',
+    subscribe: 'सब्सक्राइब करें',
+    subscribed: 'सब्सक्राइब किया',
+    cancelSubscription: 'सदस्यता रद्द करें',
+    upgradeRequired: 'अपग्रेड आवश्यक',
+    upgradeToAccess: 'इस सुविधा तक पहुंचने के लिए {{tier}} में अपग्रेड करें',
+    freeTier: 'बेसिक पोर्टफोलियो ट्रैकिंग, सीमित शिक्षा',
+    proTier: 'उन्नत विश्लेषण, AI अंतर्दृष्टि, असीमित वॉचलिस्ट',
+    eliteTier: 'रीयल-टाइम डेटा, सोशल ट्रेडिंग, API एक्सेस, टैक्स रिपोर्ट',
+    unlockTenantPremium: '{name} प्रीमियम अनलॉक करें',
+};

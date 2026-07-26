@@ -18,6 +18,78 @@ import { SkeletonBlock} from '../../components/ui/SkeletonLoader';
 const { width } = Dimensions.get('window');
 const BADGE_DISPLAY_COUNT = 8;
 
+// ── Menu label → profile.* key mapping ────────────────────────────────────
+const MENU_LABEL_KEYS: Record<string, string> = {
+  // Investments
+  'Fund Dashboard': 'profile.fundDashboard',
+  'Mutual Funds': 'profile.mutualFunds',
+  'My SIPs': 'profile.mySips',
+  'F&O Trading': 'profile.fnoTrading',
+  'Op. Strategies': 'profile.opStrategies',
+  'Trade History': 'profile.tradeHistory',
+  'Open Orders': 'profile.openOrders',
+  'Reports': 'profile.reports',
+  'Monte Carlo': 'profile.monteCarlo',
+  'Correlation': 'profile.correlation',
+  'Rebalance': 'profile.rebalance',
+  'Factor Analysis': 'profile.factorAnalysis',
+  'Strategy Perf.': 'profile.strategyPerf',
+  'US Markets': 'profile.usMarkets',
+  'US Portfolio': 'profile.usPortfolio',
+  'US Trade': 'profile.usTrade',
+  'Bonds': 'profile.bonds',
+  'Currency Markets': 'profile.currencyMarkets',
+  'Currency Converter': 'profile.currencyConverter',
+  'Tax Harvesting': 'profile.taxHarvesting',
+  'Dividends': 'profile.dividends',
+  'Commodities': 'profile.commodities',
+  'Futures Curve': 'profile.futuresCurve',
+  'Wealth Dashboard': 'profile.wealthDashboard',
+  'Crypto Trading': 'profile.cryptoTrading',
+  // Learn & Grow
+  'Courses': 'profile.courses',
+  'Community': 'profile.community',
+  'Revenue': 'profile.revenue',
+  'Community Polls': 'profile.communityPolls',
+  'Messages': 'profile.messages',
+  'AI Insights': 'profile.aiInsights',
+  'AI Assistant': 'profile.aiAssistant',
+  'Earnings Calls': 'profile.earningsCalls',
+  'Market News': 'profile.marketNews',
+  'NFO Dashboard': 'profile.nfoDashboard',
+  'IPO Calendar': 'profile.ipoCalendar',
+  'Economic Calendar': 'profile.economicCalendar',
+  'Financial Glossary': 'profile.financialGlossary',
+  'Trading Journal': 'profile.tradingJournal',
+  'Achievements': 'profile.achievements',
+  // Account
+  'Profile & KYC': 'profile.profileKyc',
+  'Refer & Earn': 'profile.referral',
+  'Go Premium': 'profile.goPremium',
+  'Payment History': 'profile.paymentHistory',
+  'Notifications': 'profile.notifications',
+  'Portfolio Alerts': 'profile.portfolioAlerts',
+  'Risk Settings': 'profile.riskSettings',
+  'Home Widget': 'profile.homeWidget',
+  'Connect Broker': 'profile.connectBroker',
+  'Telegram Alerts': 'profile.telegramAlerts',
+  'Replay Tour': 'profile.replayTour',
+  'Voice Settings': 'profile.voiceSettings',
+  'AI Settings': 'profile.aiSettings',
+  'Security': 'profile.security',
+  'Help & Support': 'profile.help',
+  'Tenant Config': 'profile.tenantConfig',
+  'Feature Flags': 'profile.featureFlags',
+  'A/B Tests': 'profile.abTests',
+  'Accessibility': 'profile.accessibility',
+  'Image Opt.': 'profile.imageOpt',
+  'Landscape': 'profile.landscape',
+  'API Keys': 'profile.apiKeys',
+  'Webhooks': 'profile.webhooks',
+  'Coupon Manager': 'profile.couponManager',
+  'Course Reviews': 'profile.courseReviews',
+};
+
 const menuItems = [
   { section: 'Investments', items: [
     { icon: 'wallet', label: 'Fund Dashboard', color: '#00C853', screen: 'FundsDashboard' },
@@ -34,13 +106,17 @@ const menuItems = [
     { icon: 'analytics', label: 'Factor Analysis', color: '#FFC107', screen: 'FactorAnalysis' },
     { icon: 'trending-up', label: 'Strategy Perf.', color: '#00C853', screen: 'StrategyPerformance' },
     { icon: 'globe', label: 'US Markets', color: '#3B82F6', screen: 'USMarkets' },
+    { icon: 'briefcase', label: 'US Portfolio', color: '#10B981', screen: 'SnapTradePortfolio' },
+    { icon: 'swap-horizontal', label: 'US Trade', color: '#00C853', screen: 'USStocksTrading' },
     { icon: 'pricetags', label: 'Bonds', color: '#00E676', screen: 'BondDashboard' },
     { icon: 'cash', label: 'Currency Markets', color: '#0052CC', screen: 'CurrencyMarkets' },
     { icon: 'calculator', label: 'Currency Converter', color: '#6C63FF', screen: 'CurrencyConverter' },
     { icon: 'leaf', label: 'Tax Harvesting', color: '#00E676', screen: 'TaxHarvesting' },
     { icon: 'cash', label: 'Dividends', color: '#00E676', screen: 'DividendTracker' },
+    { icon: 'diamond', label: 'Wealth Dashboard', color: '#6C63FF', screen: 'WealthDashboard' },
     { icon: 'flame', label: 'Commodities', color: '#FF6B00', screen: 'CommodityMarkets' },
     { icon: 'pulse', label: 'Futures Curve', color: '#6C63FF', screen: 'FuturesCurve' },
+    { icon: 'logo-bitcoin', label: 'Crypto Trading', color: '#F7931A', screen: 'CryptoTrading' },
   ]},
   { section: 'Learn & Grow', items: [
     { icon: 'school', label: 'Courses', color: '#00C853', screen: 'Learn' },
@@ -88,14 +164,6 @@ const menuItems = [
   ]},
 ];
 
-const quickActions = [
-  { icon: 'add-circle', label: 'Add Funds', gradient: GRADIENTS.success },
-  { icon: 'arrow-up-circle', label: 'Withdraw', gradient: GRADIENTS.danger },
-  { icon: 'swap-horizontal', label: 'Transfer', gradient: GRADIENTS.primary },
-  { icon: 'qr-code', label: 'UPI', gradient: GRADIENTS.accent },
-  { icon: 'moon', label: 'Dark Mode', gradient: ['#3B82F6', '#1D4ED8'] as const, screen: 'DarkMode' },
-];
-
 export default function MoreScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
@@ -117,7 +185,14 @@ export default function MoreScreen({ navigation }: any) {
     setTimeout(() => setRefreshing(false), 1500);
   }, []);
 
-  const { animatedStyles: qaStyles } = useStaggeredAnimation(quickActions.length, {
+  const qaActions = useMemo(() => [
+    { icon: 'add-circle', label: t('funds.addFunds'), gradient: GRADIENTS.success, screen: 'AddFunds' },
+    { icon: 'arrow-up-circle', label: t('profile.withdraw'), gradient: GRADIENTS.danger, screen: 'Withdraw' },
+    { icon: 'swap-horizontal', label: t('funds.transfer'), gradient: GRADIENTS.primary, screen: 'Transfer' },
+    { icon: 'qr-code', label: t('funds.upi'), gradient: GRADIENTS.accent, screen: 'UPI' },
+    { icon: 'moon', label: t('darkMode.dark'), gradient: ['#3B82F6', '#1D4ED8'] as const, screen: 'DarkMode' },
+  ], [t]);
+  const { animatedStyles: qaStyles } = useStaggeredAnimation(qaActions.length, {
     initialDelay: 100,
     staggerDelay: 80,
     duration: 400,
@@ -144,9 +219,9 @@ export default function MoreScreen({ navigation }: any) {
     duration: 300,
   });
 
-  const handleQuickAction = (label: string) => {
-    switch (label) {
-      case 'Add Funds':
+  const handleQuickAction = (screen: string, label: string) => {
+    switch (screen) {
+      case 'AddFunds':
         navigation.navigate('AddFunds');
         break;
       case 'Withdraw':
@@ -154,18 +229,19 @@ export default function MoreScreen({ navigation }: any) {
         break;
       case 'Transfer':
         navigation.navigate('Transfer');
-        break;        case 'UPI':
-          navigation.navigate('UPI');
-          break;
-        case 'Dark Mode':
-          navigation.navigate('DarkMode');
-          break;
-        default:
-          Alert.alert(
-            label,
-            `${label} feature is coming soon. We'll notify you when it's ready!`,
-            [{ text: 'OK' }]
-          );
+        break;
+      case 'UPI':
+        navigation.navigate('UPI');
+        break;
+      case 'DarkMode':
+        navigation.navigate('DarkMode');
+        break;
+      default:
+        Alert.alert(
+          label,
+          t('app.comingSoon'),
+          [{ text: t('app.ok') }]
+        );
     }
   };
 
@@ -249,9 +325,9 @@ export default function MoreScreen({ navigation }: any) {
 
         {/* Quick Actions — Glass Pillars */}
         <View style={styles.quickActionsRow}>
-          {quickActions.map((action, i) => (
+          {qaActions.map((action, i) => (
             <Animated.View key={`qa_${i}`} style={qaStyles[i]}>
-              <AnimatedPressable onPress={() => handleQuickAction(action.label)} haptic="light" scaleTo={0.92}>
+              <AnimatedPressable onPress={() => handleQuickAction(action.screen, action.label)} haptic="light" scaleTo={0.92}>
                 <View style={styles.qaCard}>
                   <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={20} color={action.gradient[0]} />
                   <Text style={styles.qaLabel}>{action.label}</Text>
@@ -287,7 +363,7 @@ export default function MoreScreen({ navigation }: any) {
         {visibleMenuItems.map((section, idx) => (
           <Animated.View key={`section_${idx}`} style={[styles.menuCardSection, menuSectionStyles[idx]]}>
             <View style={styles.menuCard}>
-              <Text style={styles.menuSectionTitle}>{section.section}</Text>
+              <Text style={styles.menuSectionTitle}>{t('profile.section' + section.section.replace(/ & /g, 'And'))}</Text>
               <View style={styles.menuGrid}>
                 {section.items.map((item, i) => (
                   <AnimatedPressable
@@ -295,12 +371,12 @@ export default function MoreScreen({ navigation }: any) {
                     onPress={() => {
                       if (item.screen === '__onboarding') {
                         Alert.alert(
-                          'Replay Tour',
-                          'This will restart the onboarding walkthrough. You can skip through it anytime.',
+                          t('profile.replayTour'),
+                          t('profile.replayTourConfirm'),
                           [
-                            { text: 'Cancel', style: 'cancel' },
+                            { text: t('app.cancel'), style: 'cancel' },
                             {
-                              text: 'Start Tour',
+                              text: t('profile.startTour'),
                               onPress: () => {
                                 triggerHaptic(ImpactFeedbackStyle.Medium);
                                 resetOnboarding();
@@ -319,7 +395,7 @@ export default function MoreScreen({ navigation }: any) {
                       <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
                         <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
                       </View>
-                      <Text style={styles.menuLabel}>{item.label}</Text>
+                      <Text style={styles.menuLabel}>{t(MENU_LABEL_KEYS[item.label] || item.label)}</Text>
                     </View>
                   </AnimatedPressable>
                 ))}

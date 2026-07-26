@@ -33,6 +33,8 @@ export interface MarketIndex {
   changePercent: number;
   isPositive: boolean;
   icon: string;
+  /** Region grouping: 'us', 'europe', 'asia' */
+  region?: 'us' | 'europe' | 'asia';
 }
 
 export interface Stock {
@@ -55,6 +57,14 @@ export interface Stock {
 
 export interface USStock extends Stock {
   exchange: 'NASDAQ' | 'NYSE' | 'NYSE Arca';
+}
+
+/** Stock on a European or Asia-Pacific exchange */
+export interface InternationalStock extends Stock {
+  exchange: string;
+  region: 'europe' | 'asia';
+  currency: 'EUR' | 'GBP' | 'CHF' | 'JPY' | 'HKD' | 'CNY' | 'AUD' | 'KRW' | 'SGD' | 'TWD' | 'THB' | 'USD' | 'INR';
+  country: string;
 }
 
 export interface USETF {

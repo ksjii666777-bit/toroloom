@@ -21,6 +21,57 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
 import CurrencyMarketsScreen from '../screens/markets/CurrencyMarketsScreen';
 
+// ── useT mock ────────────────────────────────────────────────────────────────────
+vi.mock('../hooks/useT', () => ({
+  useT: function() {
+    const translations: Record<string, string> = {
+      'currencyMarkets.title': 'Currency Markets',
+      'currencyMarkets.subtitle': 'Forex Rates & Analysis',
+      'currencyMarkets.tabInrPairs': 'INR Pairs',
+      'currencyMarkets.tabCrosses': 'Crosses',
+      'currencyMarkets.tabSummary': 'Summary',
+      'currencyMarkets.searchPlaceholder': 'Search pairs...',
+      'currencyMarkets.filterAll': 'All',
+      'currencyMarkets.filterMajor': 'Major',
+      'currencyMarkets.filterAsian': 'Asian',
+      'currencyMarkets.filterOther': 'Other',
+      'currencyMarkets.pairCount': '4 pairs',
+      'currencyMarkets.noPairsFound': 'No pairs found',
+      'currencyMarkets.adjustSearch': 'Try adjusting search',
+      'currencyMarkets.totalPairs': 'Total Pairs',
+      'currencyMarkets.inrPairs': 'INR Pairs',
+      'currencyMarkets.avgInrChg': 'Avg INR Chg',
+      'currencyMarkets.avgVolatility': 'Avg Volatility',
+      'currencyMarkets.inrOverview': 'INR Pairs Overview',
+      'currencyMarkets.inrOverviewSub': 'Currency pairs vs Indian Rupee',
+      'currencyMarkets.volLabel': 'Vol: 12.5%',
+      'currencyMarkets.forexInfo': 'Indian Forex Market',
+      'currencyMarkets.forexInfoDesc': 'RBI publishes reference rates for USD, EUR, GBP, JPY daily at 12:00 PM IST.',
+      'currencyMarkets.converterTitle': 'Currency Converter',
+      'currencyMarkets.converterSubtitle': 'Real-time cross rates',
+      'currencyMarkets.dayHigh': 'H:',
+      'currencyMarkets.dayLow': 'L:',
+      'currencyMarkets.week52Range': '52W Range',
+      'currencyMarkets.rbiReference': 'RBI Reference Rate',
+      'currencyMarkets.expandedOpen': 'Open',
+      'currencyMarkets.expandedChange': 'Change',
+      'currencyMarkets.expanded52WHigh': '52W High',
+      'currencyMarkets.expanded52WLow': '52W Low',
+      'currencyMarkets.expandedVolatility': 'Volatility',
+      'currencyMarkets.expandedRegion': 'Region',
+    };
+    return {
+      t: function(key: string, params?: Record<string, unknown>) {
+        if (params && params.count !== undefined) {
+          return String(params.count) + ' pairs';
+        }
+        if (translations[key]) return translations[key];
+        return key.split('.').pop() || key;
+      }
+    };
+  }
+}));
+
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
 vi.mock('@expo/vector-icons', () => {

@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { useT } from '../../hooks/useT';
 import { useTheme } from '../../context/ThemeContext';
 import { useIPOStore } from '../../store/ipoStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -43,6 +44,7 @@ function daysUntil(dateStr: string): number {
 
 export default function IPOCalendarScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
   const { ipos } = useIPOStore();
@@ -87,11 +89,11 @@ export default function IPOCalendarScreen({ navigation }: any) {
   }, [ipos]);
 
   const timelineSections: { key: string; label: string; icon: string; color: string; bgColor: string }[] = [
-    { key: 'listing_today', label: 'Listing Today', icon: 'rocket', color: '#8B5CF6', bgColor: '#8B5CF615' },
-    { key: 'open', label: 'Open Now', icon: 'pricetag', color: '#00E676', bgColor: '#00E67615' },
-    { key: 'upcoming', label: 'Upcoming', icon: 'calendar', color: '#3B82F6', bgColor: '#3B82F615' },
-    { key: 'closed', label: 'Closed', icon: 'lock-closed', color: '#FFAB40', bgColor: '#FFAB4015' },
-    { key: 'listed', label: 'Listed', icon: 'checkmark-circle', color: '#64748B', bgColor: '#64748B15' },
+    { key: 'listing_today', label: t('ipos.statusListingToday'), icon: 'rocket', color: '#8B5CF6', bgColor: '#8B5CF615' },
+    { key: 'open', label: t('ipos.statusOpen'), icon: 'pricetag', color: '#00E676', bgColor: '#00E67615' },
+    { key: 'upcoming', label: t('ipos.statusUpcoming'), icon: 'calendar', color: '#3B82F6', bgColor: '#3B82F615' },
+    { key: 'closed', label: t('ipos.statusClosed'), icon: 'lock-closed', color: '#FFAB40', bgColor: '#FFAB4015' },
+    { key: 'listed', label: t('ipos.statusListed'), icon: 'checkmark-circle', color: '#64748B', bgColor: '#64748B15' },
   ];
 
   return (
@@ -101,13 +103,13 @@ export default function IPOCalendarScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
           <Ionicons name="arrow-back" size={20} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>IPO Calendar</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>{t('ipos.calendarTitle')}</Text>
         <TouchableOpacity
           style={[styles.dashBtn, { backgroundColor: colors.primary + '20' }]}
           onPress={() => nav.navigate('IPODashboard' as never)}
         >
           <Ionicons name="grid-outline" size={16} color={colors.primary} />
-          <Text style={[styles.dashBtnText, { color: colors.primary }]}>Dashboard</Text>
+          <Text style={[styles.dashBtnText, { color: colors.primary }]}>{t('ipos.dashboard')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -118,14 +120,14 @@ export default function IPOCalendarScreen({ navigation }: any) {
           onPress={() => setActiveTab('timeline')}
         >
           <Ionicons name="calendar" size={14} color={activeTab === 'timeline' ? '#FFF' : colors.textMuted} />
-          <Text style={[styles.tabText, { color: activeTab === 'timeline' ? '#FFF' : colors.textMuted }]}>Timeline</Text>
+          <Text style={[styles.tabText, { color: activeTab === 'timeline' ? '#FFF' : colors.textMuted }]}>{t('ipos.calendarTabTimeline')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'stats' && { backgroundColor: colors.primary }]}
           onPress={() => setActiveTab('stats')}
         >
           <Ionicons name="analytics" size={14} color={activeTab === 'stats' ? '#FFF' : colors.textMuted} />
-          <Text style={[styles.tabText, { color: activeTab === 'stats' ? '#FFF' : colors.textMuted }]}>Market Stats</Text>
+          <Text style={[styles.tabText, { color: activeTab === 'stats' ? '#FFF' : colors.textMuted }]}>{t('ipos.calendarTabStats')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -140,24 +142,24 @@ export default function IPOCalendarScreen({ navigation }: any) {
             <View style={[styles.overviewBar, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={styles.overviewItem}>
                 <Text style={[styles.overviewValue, { color: colors.primary }]}>{ipos.length}</Text>
-                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Total IPOs</Text>
+                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.totalIpos')}</Text>
               </View>
               <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
               <View style={styles.overviewItem}>
                 <Text style={[styles.overviewValue, { color: '#00E676' }]}>
                   {grouped.open.length + grouped.listing_today.length}
                 </Text>
-                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Active</Text>
+                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.filterActive')}</Text>
               </View>
               <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
               <View style={styles.overviewItem}>
                 <Text style={[styles.overviewValue, { color: '#3B82F6' }]}>{grouped.upcoming.length}</Text>
-                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Upcoming</Text>
+                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.statusUpcoming')}</Text>
               </View>
               <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
               <View style={styles.overviewItem}>
                 <Text style={[styles.overviewValue, { color: colors.text }]}>{grouped.listed.length}</Text>
-                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Listed</Text>
+                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.statusListed')}</Text>
               </View>
             </View>
 
@@ -223,21 +225,21 @@ export default function IPOCalendarScreen({ navigation }: any) {
 
                             <View style={styles.timelineInfo}>
                               <View style={styles.timelineInfoRow}>
-                                <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>Band</Text>
+                                <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.priceBand')}</Text>
                                 <Text style={[styles.timelineInfoValue, { color: colors.text }]}>
                                   ₹{ipo.priceBand.min}–{ipo.priceBand.max}
                                 </Text>
                               </View>
                               {ipo.gmp > 0 && (
                                 <View style={styles.timelineInfoRow}>
-                                  <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>GMP</Text>
+                                  <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.gmp')}</Text>
                                   <Text style={[styles.timelineInfoValue, { color: '#00E676' }]}>
                                     +₹{ipo.gmp} ({ipo.gmpPercent.toFixed(1)}%)
                                   </Text>
                                 </View>
                               )}
                               <View style={styles.timelineInfoRow}>
-                                <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>Issue</Text>
+                                <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.issueSize')}</Text>
                                 <Text style={[styles.timelineInfoValue, { color: colors.text }]}>
                                   ₹{ipo.issueSize.toLocaleString('en-IN')} Cr
                                 </Text>
@@ -250,8 +252,8 @@ export default function IPOCalendarScreen({ navigation }: any) {
                                 <Ionicons name="time-outline" size={11} color={section.color} />
                                 <Text style={[styles.countdownText, { color: section.color }]}>
                                   {ipo.subscriptionStatus === 'open'
-                                    ? `${daysLeft}d left`
-                                    : `Opens in ${daysLeft}d`}
+                                    ? t('ipos.daysLeft', { count: daysLeft })
+                                    : t('ipos.opensIn', { count: daysLeft })}
                                 </Text>
                               </View>
                             )}
@@ -266,7 +268,7 @@ export default function IPOCalendarScreen({ navigation }: any) {
 
             {/* Monthly overview */}
             <View style={[styles.seasonCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.seasonTitle, { color: colors.text }]}>Monthly IPO Activity</Text>
+              <Text style={[styles.seasonTitle, { color: colors.text }]}>{t('ipos.monthlyActivity')}</Text>
               {seasonData.map((m, i) => (
                 <View key={m.month} style={[styles.seasonRow, i < seasonData.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
                   <Text style={[styles.seasonMonth, { color: colors.text }]}>{m.month}</Text>
@@ -292,14 +294,14 @@ export default function IPOCalendarScreen({ navigation }: any) {
                   <Ionicons name="rocket" size={20} color={colors.primary} />
                 </View>
                 <Text style={[styles.statValue, { color: colors.text }]}>{stats.totalIpos}</Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Total IPOs</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.totalIpos')}</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <View style={[styles.statIcon, { backgroundColor: '#00E67620' }]}>
                   <Ionicons name="calendar" size={20} color="#00E676" />
                 </View>
                 <Text style={[styles.statValue, { color: colors.text }]}>{stats.thisMonth}</Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>This Month</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.thisMonth')}</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <View style={[styles.statIcon, { backgroundColor: '#FFC10720' }]}>
@@ -308,7 +310,7 @@ export default function IPOCalendarScreen({ navigation }: any) {
                 <Text style={[styles.statValue, { color: colors.text }]}>
                   ₹{(stats.totalRaised / 1000).toFixed(1)}K Cr
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Total Raised</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.totalRaised')}</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <View style={[styles.statIcon, { backgroundColor: '#00E67620' }]}>
@@ -317,7 +319,7 @@ export default function IPOCalendarScreen({ navigation }: any) {
                 <Text style={[styles.statValue, { color: colors.text }]}>
                   {stats.avgGmp.toFixed(1)}%
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Avg GMP</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.avgGmp')}</Text>
               </View>
             </View>
 
@@ -333,28 +335,28 @@ export default function IPOCalendarScreen({ navigation }: any) {
                   <View style={styles.statusHeader}>
                     <StatusDot status={status} />
                     <Text style={[styles.statusTitle, { color: colors.text }]}>
-                      {status === 'open' ? 'Open IPOs' : status === 'upcoming' ? 'Upcoming IPOs' : 'Listed IPOs'}
+                      {status === 'open' ? t('ipos.openIpos') : status === 'upcoming' ? t('ipos.upcomingIpos') : t('ipos.listedIpos')}
                     </Text>
                     <Text style={[styles.statusCount, { color: colors.textMuted }]}>{items.length}</Text>
                   </View>
                   <View style={styles.statusRow}>
                     <View style={styles.statusStat}>
                       <Text style={[styles.statusStatValue, { color: colors.text }]}>{avgSub.toFixed(1)}x</Text>
-                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>Avg Sub</Text>
+                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgSub')}</Text>
                     </View>
                     <View style={[styles.statusDivider, { backgroundColor: colors.divider }]} />
                     <View style={styles.statusStat}>
                       <Text style={[styles.statusStatValue, { color: '#00E676' }]}>
                         {avgGmp > 0 ? `+${avgGmp.toFixed(1)}%` : '—'}
                       </Text>
-                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>Avg GMP</Text>
+                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgGmp')}</Text>
                     </View>
                     <View style={[styles.statusDivider, { backgroundColor: colors.divider }]} />
                     <View style={styles.statusStat}>
                       <Text style={[styles.statusStatValue, { color: colors.text }]}>
                         ₹{(items.reduce((s, i) => s + i.issueSize, 0) / items.length / 1000).toFixed(1)}K Cr
                       </Text>
-                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>Avg Size</Text>
+                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgSize')}</Text>
                     </View>
                   </View>
                 </View>
@@ -363,7 +365,7 @@ export default function IPOCalendarScreen({ navigation }: any) {
 
             {/* Monthly seasonality chart */}
             <View style={[styles.seasonCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.seasonTitle, { color: colors.text }]}>Raised by Month</Text>
+              <Text style={[styles.seasonTitle, { color: colors.text }]}>{t('ipos.raisedByMonth')}</Text>
               {seasonData.map((m, i) => (
                 <View key={m.month} style={[styles.seasonRow, i < seasonData.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
                   <Text style={[styles.seasonMonth, { color: colors.text }]}>{m.month}</Text>
