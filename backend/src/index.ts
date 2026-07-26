@@ -11,6 +11,7 @@
 
 import cluster from 'cluster';
 import os from 'os';
+import { BRAND } from './config/brandConfig';
 import { env } from './config/env';
 import { getStorageIfInitialized } from './services/storage';
 import { startPrimaryIPC, startWorkerIPC } from './services/clusterIPC';
@@ -28,7 +29,8 @@ const workerCount = Math.min(
 
 if (cluster.isPrimary && clusterEnabled) {
   // ──── Primary Process — Fork Workers ──────────────────────────────────
-  console.log(`\n🚀 Toroloom Backend Cluster — Primary [PID ${process.pid}]`);
+  console.log(`\n🚀 ${BRAND.appName} Backend Cluster — Primary [PID ${process.pid}]`);
+  console.log(`   Brand:      ${BRAND.appName}`);
   console.log(`   Workers:    ${workerCount} (of ${os.cpus().length} CPU cores)`);
   console.log(`   Mode:       ${env.broker.toUpperCase()} (${env.dataSource})`);
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}\n`);

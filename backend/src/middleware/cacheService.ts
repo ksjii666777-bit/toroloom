@@ -59,7 +59,7 @@ const AGGREGATE_TTL_SEC = 300; // 5 minutes
 /**
  * Cache key prefix — all keys are namespaced to avoid collisions.
  */
-const KEY_PREFIX = 'toroloom:cache:';
+const KEY_PREFIX = 'toroloom:cache:'; // Rebrand via scripts/rebrand.mjs --new-name="YourApp"
 
 /**
  * Key patterns used across the application.

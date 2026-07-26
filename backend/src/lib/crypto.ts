@@ -42,6 +42,7 @@ function getEncryptionKey(): Buffer {
       '           Set it in Railway Dashboard → Variables → ' + KEY_ENV,
     );
     // Dev-only fallback: NOT for production use
+    // (Rebrand via scripts/rebrand.mjs)
     const devKey = 'toroloom-dev-only-key-do-not-use-in-production';
     return crypto.scryptSync(devKey, 'toroloom-salt', 32);
   }

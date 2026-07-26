@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import http from 'http';
 import { env, validateRequiredEnv } from './config/env';
+import { BRAND } from './config/brandConfig';
 import { errorHandler } from './middleware/errorHandler';
 import { apiLimiter, authLimiter, writeLimiter, readLimiter, adminLimiter } from './middleware/rateLimiter';
 import { authMiddleware } from './middleware/auth';
@@ -366,7 +367,8 @@ async function start(): Promise<http.Server> {
   return new Promise((resolve) => {
     server.listen(env.port, () => {
       if (process.env.NODE_ENV !== 'test') {
-        console.log(`\n🚀 Toroloom Backend Server`);
+        console.log(`\n🚀 ${BRAND.appName} Backend Server`);
+        console.log(`   Brand:      ${BRAND.appName}`);
         console.log(`   Mode:       ${env.broker.toUpperCase()} (${env.dataSource})`);
         console.log(`   REST API:   http://localhost:${env.port}/api`);
         console.log(`   WebSocket:  ws://localhost:${env.port}/ws`);
