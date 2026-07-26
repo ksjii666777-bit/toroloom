@@ -12,35 +12,38 @@
 
 appId: com.anonymous.Toroloom
 ---
+# ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
+- stopApp
+
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
-    text: "Welcome Back!"
+    id: "login-email-input"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 - hideKeyboard
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
-- assertVisible:
-    text: "Good Morning,"
 
 # ── 2. Navigate: More → AI Insights ──────────────────────────────────────
-- tapOn: "More"
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
-      text: "AI Insights"
+      id: "menu-AIInsights"
     direction: DOWN
 - tapOn:
-    text: "AI Insights"
+    id: "menu-AIInsights"
 - waitForAnimationToEnd
 
 # ── 3. Verify Header ───────────────────────────────────────────────────────

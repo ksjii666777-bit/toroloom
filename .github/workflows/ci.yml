@@ -606,9 +606,10 @@ jobs:
   #   2. navigation/tabNavigation.yaml  — All 5 bottom tabs load correctly
   #   3. trade/placeOrder.yaml          — Full order placement: Buy/Sell toggle, order types, qty, confirm
   #   4. kyc/bankLinking.yaml           — 3-step bank linking: IFSC verify, account verify, link
-  #   5. stock/stockDetail.yaml         — Stock detail: chart, stats, sector context, AI analysis
-  #   6. settings/twoFactorSetup.yaml   — 2FA setup flow: QR, OTP entry, backup codes
+  #   5. stock/stockDetail.yaml         — Stock detail: chart, stats, sector context, AI analysis  #   6. settings/twoFactorSetup.yaml   — 2FA setup flow: QR, OTP entry, backup codes
   #   7. trade/fnoOptionsChain.yaml     — F&O Options Chain: strike grid, Greeks, expiry switch
+  #   8. ui/calculators.yaml            — SIP Calculator: inputs, calculate, verify results
+  #   9. ai/aiInsights.yaml             — AI Insights: market overview, stock analysis cards
   #
   # NOTE: Each flow starts fresh with its own login step. The flows must be
   # self-contained because Maestro does NOT reset app state between flows.
@@ -618,7 +619,7 @@ jobs:
     name: E2E — Critical Flows (PR)
     needs: [frontend]
     runs-on: macos-13
-    timeout-minutes: 35
+    timeout-minutes: 40
     continue-on-error: false
     strategy:
       fail-fast: false
@@ -657,7 +658,9 @@ jobs:
             .maestro/flows/kyc/bankLinking.yaml \
             .maestro/flows/stock/stockDetail.yaml \
             .maestro/flows/settings/twoFactorSetup.yaml \
-            .maestro/flows/trade/fnoOptionsChain.yaml; do
+            .maestro/flows/trade/fnoOptionsChain.yaml \
+            .maestro/flows/ui/calculators.yaml \
+            .maestro/flows/ai/aiInsights.yaml; do
             if [ -f "$f" ]; then
               echo "  ✓ $f"
             else
@@ -665,7 +668,7 @@ jobs:
               exit 1
             fi
           done
-          echo "All 7 PR flow files validated."
+          echo "All 9 PR flow files validated."
 
       - name: Verify E2E secrets are configured
         shell: bash
@@ -735,6 +738,8 @@ jobs:
                 .maestro/flows/stock/stockDetail.yaml \
                 .maestro/flows/settings/twoFactorSetup.yaml \
                 .maestro/flows/trade/fnoOptionsChain.yaml \
+                .maestro/flows/ui/calculators.yaml \
+                .maestro/flows/ai/aiInsights.yaml \
                 --app-id host.exp.exponent \
                 --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} \
                 --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
