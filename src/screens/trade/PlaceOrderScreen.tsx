@@ -261,6 +261,23 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         <Text style={styles.summaryLabel} testID="order-summary-est-total">{t('trading.estimatedTotal')}</Text>
         <Text style={styles.summaryValue}>{formatCurrency(estimatedTotal)}</Text>
       </View>
+
+      {/* Estimated Charges */}
+      <View style={styles.summaryRow}>
+        <Text style={styles.summaryLabel}>{t('trading.estCharges')}</Text>
+        <Text style={styles.summaryValueMuted}>{formatCurrency(charges)}</Text>
+      </View>
+
+      {/* Divider */}
+      <View style={styles.summaryDivider} />
+
+      {/* Grand Total */}
+      <View style={styles.summaryRow}>
+        <Text style={styles.grandTotalLabel}>{t('trading.grandTotal')}</Text>
+        <Text style={styles.grandTotalValue}>{formatCurrency(grandTotal)}</Text>
+      </View>
+
+      {/* Balance indicator */}
       {tradeType === 'buy' && (
         <View style={[styles.balanceIndicator, {
           backgroundColor: isBalanceSufficient ? '#00C85320' : '#FF174420',
