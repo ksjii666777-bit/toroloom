@@ -472,7 +472,12 @@ jobs:
   # For testing against dev builds locally, use:
   #   npx expo run:android && maestro test .maestro/flows
   #
-  # ── E2E — Maestro (Android) ─────────────────────────────────────────────
+  # ── E2E — Maestro (Android) Full Suite (master/main only) ────────────────
+  # Runs ALL 12 Maestro flows on the default branch for comprehensive coverage.
+  # Uses `continue-on-error: true` because full E2E is flaky in CI; failures
+  # are logged but don't block the build. For fast PR-level feedback, see the
+  # e2e-pr job below.
+  #
   # Uses macos-13 (Intel) runner for native HAXM hardware acceleration.
   # macOS GitHub runners support Android emulator acceleration via
   # Hypervisor.framework (Apple Silicon) or HAXM (Intel). macos-13 is
@@ -485,7 +490,7 @@ jobs:
   # ───────────────────────────────────────────────────────────────────────
   e2e:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
-    name: E2E — Maestro (Android)
+    name: E2E — Full Suite (master)
     runs-on: macos-13
     timeout-minutes: 60
     continue-on-error: true
@@ -527,9 +532,20 @@ jobs:
             echo "  ✓ $f"
           done
 
+      - name: Verify E2E secrets are configured
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.TEST_EMAIL }}" ] || [ -z "${{ secrets.TEST_PASSWORD }}" ]; then
+            echo "::error::TEST_EMAIL and/or TEST_PASSWORD secrets are not configured."
+            echo "::error::Go to: Settings → Secrets and variables → Actions → New repository secret"
+            echo "::error::Add both TEST_EMAIL and TEST_PASSWORD before running E2E tests."
+            exit 1
+          fi
+          echo "E2E secrets are configured."
+
       # Wrapped in Wandalen/wretry.action so if the emulator boot times out,
       # it is retried once automatically before failing the step.
-      - name: Boot Android emulator and run E2E tests (retry once on failure)
+      - name: Boot Android emulator and run E2E full suite (retry once on failure)
         uses: Wandalen/wretry.action@v3.1.0
         with:
           action: reactivecircus/android-emulator-runner@v2
@@ -537,35 +553,14 @@ jobs:
           attempt_delay: 5000
           with: |
             api-level: 34
-            # google_apis images include Google Play Services which Expo Go
-            # requires. google_atd images are lighter but may lack Play
-            # Services compatibility — stick with google_apis for safety.
             target: google_apis
-            # x86_64 with google_apis is the most reliably compatible
-            # combination on Intel macOS runners (macos-13) with HAXM
-            # acceleration. arm64-v8a can cause "adb: device not found"
-            # errors on some runner instances due to AVD corruption.
             arch: x86_64
             avd-name: Pixel_6_Pro
             emulator-boot-timeout: 900
-            # GPU mode swiftshader_indirect for headless CI (no display).
-            # -no-snapshot forces a cold boot every time to avoid stale
-            # snapshot corruption across retries. -accel on enables HAXM
-            # on Intel macOS runners for native virtualization speed.
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
             disable-animations: true
             script: |
-              # ── 1. Wait for device to appear ──
-              echo "Waiting for emulator device to appear..."
               adb wait-for-device
-              echo "Emulator device detected."
-
-              # ── 2. Wait for full boot completion ──
-              # sys.boot_completed=1 means the Android system is fully
-              # booted and the home screen is reachable. Without this
-              # check, adb may find the device while it's still in the
-              # boot animation, causing "adb: device not found" errors
-              # in subsequent steps.
               echo "Waiting for sys.boot_completed..."
               for i in $(seq 1 120); do
                 BOOT_COMPLETED=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
@@ -581,19 +576,13 @@ jobs:
                 fi
                 sleep 5
               done
-
-              # ── 3. Disable animations for reliable Maestro taps ──
               adb shell settings put global window_animation_scale 0.0
               adb shell settings put global transition_animation_scale 0.0
               adb shell settings put global animator_duration_scale 0.0
               echo "Animations disabled."
-
-              # ── 4. Start Expo dev server in background ──
               echo "Starting Expo dev server..."
               npx expo start --android 2>&1 | tee /tmp/expo.log &
               EXPO_PID=$!
-
-              # ── 5. Wait for Metro bundler to be ready ──
               echo "Waiting for Metro bundler..."
               timeout 180 bash -c '
                 until grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; do
@@ -603,14 +592,130 @@ jobs:
                 echo ""
                 echo "Expo/Metro server is ready!"
               '
-              # Give Expo a moment to push the app to the emulator
               sleep 15
+              echo "Running ALL Maestro E2E flows..."
+              maestro test .maestro/flows --app-id host.exp.exponent --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
 
-              # ── 6. Run Maestro tests ──
-              # Override appId from config.yaml (com.anonymous.Toroloom) to
-              # host.exp.exponent because CI uses Expo Go, not a dev build.
-              echo "Running Maestro E2E flows..."
-              maestro test .maestro/flows --app-id host.exp.exponent
+  # ── E2E — Maestro (Android) PR Smoke Test ───────────────────────────────
+  # Fast PR-level E2E: runs only the smoke test + login flow to catch
+  # critical regressions before merge. Blocks the build on failure
+  # (continue-on-error: false). Shorter timeout (15 min) vs the full
+  # suite (60 min) because only 1-2 flows are executed.
+  #
+  # Runs on every PR to master/main. Uses the same Android emulator
+  # setup as the full e2e job above, but only executes:
+  #   - .maestro/flows/smoke/smokeTest.yaml  (full app smoke test)
+  #
+  # The smoke test covers: Login → Home → Learn → Markets → More →
+  # Portfolio → Logout — the critical user journey. If any of these
+  # fail, the PR is blocked from merging.
+  # ───────────────────────────────────────────────────────────────────────
+  e2e-pr:
+    if: github.event_name == 'pull_request'
+    name: E2E — Smoke (PR)
+    needs: [frontend]
+    runs-on: macos-13
+    timeout-minutes: 15
+    continue-on-error: false
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Maestro CLI
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" -o /tmp/maestro_install.sh
+          if [ ! -s /tmp/maestro_install.sh ]; then
+            echo 'ERROR: Maestro install script download failed or is empty'
+            exit 1
+          fi
+          bash /tmp/maestro_install.sh
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+        shell: bash
+
+      - name: Validate Maestro smoke flow
+        run: |
+          maestro --version
+          echo "Checking smokeTest.yaml..."
+          if [ -f .maestro/flows/smoke/smokeTest.yaml ]; then
+            echo "  ✓ smokeTest.yaml found"
+          else
+            echo "  ✗ smokeTest.yaml not found!"
+            exit 1
+          fi
+
+      - name: Verify E2E secrets are configured
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.TEST_EMAIL }}" ] || [ -z "${{ secrets.TEST_PASSWORD }}" ]; then
+            echo "::error::TEST_EMAIL and/or TEST_PASSWORD secrets are not configured."
+            echo "::error::Go to: Settings → Secrets and variables → Actions → New repository secret"
+            echo "::error::Add both TEST_EMAIL and TEST_PASSWORD before running E2E tests."
+            exit 1
+          fi
+          echo "E2E secrets are configured."
+
+      - name: Boot Android emulator and run smoke test (retry once on failure)
+        uses: Wandalen/wretry.action@v3.1.0
+        with:
+          action: reactivecircus/android-emulator-runner@v2
+          attempt_limit: 2
+          attempt_delay: 5000
+          with: |
+            api-level: 34
+            target: google_apis
+            arch: x86_64
+            avd-name: Pixel_6_Pro
+            emulator-boot-timeout: 900
+            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
+            disable-animations: true
+            script: |
+              adb wait-for-device
+              echo "Waiting for sys.boot_completed..."
+              for i in $(seq 1 120); do
+                BOOT_COMPLETED=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
+                if [ "$BOOT_COMPLETED" = "1" ]; then
+                  echo "Boot completed!"
+                  break
+                fi
+                if [ $i -eq 120 ]; then
+                  echo "Timed out waiting for boot completion."
+                  adb devices -l
+                  adb shell getprop 2>/dev/null | head -20 || true
+                  exit 1
+                fi
+                sleep 5
+              done
+              adb shell settings put global window_animation_scale 0.0
+              adb shell settings put global transition_animation_scale 0.0
+              adb shell settings put global animator_duration_scale 0.0
+              echo "Animations disabled."
+              echo "Starting Expo dev server..."
+              npx expo start --android 2>&1 | tee /tmp/expo.log &
+              EXPO_PID=$!
+              echo "Waiting for Metro bundler..."
+              timeout 180 bash -c '
+                until grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; do
+                  sleep 5
+                  printf "."
+                done
+                echo ""
+                echo "Expo/Metro server is ready!"
+              '
+              sleep 15
+              echo "Running Maestro smoke test..."
+              maestro test .maestro/flows/smoke/smokeTest.yaml --app-id host.exp.exponent --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
 
   # ── Coverage badge deployment ────────────────────────────────────────────
   # Runs after frontend and backend (with their coverage data) finish.

@@ -295,7 +295,7 @@ export default function MoreScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>{t('profile.more')}</Text>
+          <Text style={styles.title} testID="more-title">{t('profile.more')}</Text>
         </View>
 
         {/* Profile Card */}

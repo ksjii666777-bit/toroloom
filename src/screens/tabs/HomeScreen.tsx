@@ -270,7 +270,7 @@ export default function HomeScreen({ navigation }: any) {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.greeting}>{greeting},</Text>
+              <Text style={styles.greeting} testID="home-greeting">{greeting},</Text>
               <View style={styles.greetingRow}>
                 <Text style={styles.userName}>{user?.name?.split(' ')[0] || t('home.investor')} 👋</Text>
                 <View style={[styles.marketStatusBadge, { backgroundColor: isMarketOpen ? '#00C85320' : '#FF174420' }]}>
@@ -306,7 +306,7 @@ export default function HomeScreen({ navigation }: any) {
           {/* Portfolio Summary Card — Glassmorphic */}
           <View style={styles.portfolioCardWrapper}>
             <View style={[styles.portfolioCard, { backgroundColor: 'rgba(0,230,118,0.04)', borderWidth: 1, borderColor: 'rgba(0,230,118,0.12)' }]}>
-              <Text style={styles.portfolioLabel}>{t('home.portfolioValue')}</Text>
+              <Text style={styles.portfolioLabel} testID="home-portfolio-label">{t('home.portfolioValue')}</Text>
               <Text style={styles.portfolioValue}>{formatLargeCurrency(displayInvested || 1250000)}</Text>
               <View style={styles.portfolioChange}>
                 <View style={[styles.changeChip, { backgroundColor: displayPnl >= 0 ? 'rgba(0,230,118,0.15)' : 'rgba(255,82,82,0.15)' }]}>
@@ -348,7 +348,7 @@ export default function HomeScreen({ navigation }: any) {
               { icon: 'pie-chart', label: t('home.sip'), screen: 'SIPCalculator', color: colors.primary },
               { icon: 'school', label: t('home.learn'), screen: 'Learn', color: colors.warning },
             ].map((item, i) => (
-              <AnimatedPressable key={i} onPress={() => navigation.navigate(item.screen)} haptic="light" scaleTo={0.92}>
+              <AnimatedPressable key={i} testID={`home-quick-${item.screen.toLowerCase()}`} onPress={() => navigation.navigate(item.screen)} haptic="light" scaleTo={0.92}>
                 <View style={styles.quickAction}>
                   <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }]}>
                     <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
@@ -446,7 +446,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Market Indices */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[1]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.marketIndices')}</Text>
+            <Text style={styles.sectionTitle} testID="home-section-market-indices">{t('home.marketIndices')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
               <Text style={styles.seeAll}>{t('app.seeAll')}</Text>
             </TouchableOpacity>
@@ -461,7 +461,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Sector Heatmap */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[2]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.sectorPerformance')}</Text>
+            <Text style={styles.sectionTitle} testID="home-section-sector-performance">{t('home.sectorPerformance')}</Text>
           </View>
           <View style={[styles.heatmapContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             {sectorPerformance.slice(0, 6).map((sector, i) => {
@@ -494,7 +494,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Quick Calculators */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[3]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.financialCalculators')}</Text>
+            <Text style={styles.sectionTitle} testID="home-section-calculators">{t('home.financialCalculators')}</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {[
@@ -562,7 +562,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Live Sentiment Feed */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[5]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.liveSentimentFeed')}</Text>
+            <Text style={styles.sectionTitle} testID="home-section-sentiment-feed">{t('home.liveSentimentFeed')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('SentimentAnalysis')}>
               <Text style={styles.seeAll}>{t('app.viewAll')}</Text>
             </TouchableOpacity>
@@ -785,7 +785,7 @@ export default function HomeScreen({ navigation }: any) {
         {topHoldings.length > 0 && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[8]]}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{t('home.topHoldings')}</Text>
+              <Text style={styles.sectionTitle} testID="home-section-top-holdings">{t('home.topHoldings')}</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Portfolio')}>
                 <Text style={styles.seeAll}>{t('home.allHoldings')}</Text>
               </TouchableOpacity>
@@ -827,7 +827,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Top Gainers */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[9]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.topGainers')}</Text>
+            <Text style={styles.sectionTitle} testID="home-section-top-gainers">{t('home.topGainers')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
               <Text style={styles.seeAll}>{t('app.viewAll')}</Text>
             </TouchableOpacity>
@@ -844,7 +844,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Top Losers */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[10]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.topLosers')}</Text>
+            <Text style={styles.sectionTitle} testID="home-section-top-losers">{t('home.topLosers')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
               <Text style={styles.seeAll}>{t('market.viewLosers')}</Text>
             </TouchableOpacity>
@@ -862,7 +862,7 @@ export default function HomeScreen({ navigation }: any) {
         {recentTrades.length > 0 && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[11]]}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{t('home.recentActivity')}</Text>
+              <Text style={styles.sectionTitle} testID="home-section-recent-activity">{t('home.recentActivity')}</Text>
               <TouchableOpacity onPress={() => navigation.navigate('TradeHistory')}>
                 <Text style={styles.seeAll}>{t('home.allTrades')}</Text>
               </TouchableOpacity>
@@ -895,7 +895,7 @@ export default function HomeScreen({ navigation }: any) {
         {/* Watchlist Preview */}
         <ReanimatedAnimated.View style={[styles.section, sectionStyles[12]]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('home.myWatchlist')}</Text>
+            <Text style={styles.sectionTitle} testID="home-section-watchlist">{t('home.myWatchlist')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Watchlist')}>
               <Text style={styles.seeAll}>{t('app.manage')}</Text>
             </TouchableOpacity>
@@ -915,7 +915,7 @@ export default function HomeScreen({ navigation }: any) {
         {latestNews.length > 0 && (
           <ReanimatedAnimated.View style={[styles.section, sectionStyles[13]]}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{t('home.marketNews')}</Text>
+              <Text style={styles.sectionTitle} testID="home-section-market-news">{t('home.marketNews')}</Text>
               <TouchableOpacity onPress={() => navigation.navigate('NewsFeed')}>
                 <Text style={styles.seeAll}>{t('home.allNews')}</Text>
               </TouchableOpacity>

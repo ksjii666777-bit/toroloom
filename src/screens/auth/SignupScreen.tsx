@@ -101,6 +101,7 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             autoCapitalize="words"
             id="signup-name"
             name="name"
+            testID="signup-name-input"
           />
 
           <Input
@@ -113,6 +114,7 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             autoCapitalize="none"
             id="signup-email"
             name="email"
+            testID="signup-email-input"
           />
 
           <Input
@@ -124,6 +126,7 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             keyboardType="phone-pad"
             id="signup-phone"
             name="phone"
+            testID="signup-phone-input"
           />
 
           <Input
@@ -135,6 +138,7 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             icon="lock-closed-outline"
             id="signup-password"
             name="password"
+            testID="signup-password-input"
           />
 
           <Input
@@ -147,6 +151,7 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             id="signup-confirm-password"
             name="confirmPassword"
             onSubmitEditing={handleSignup}
+            testID="signup-confirm-password-input"
           />
 
           {/* Terms */}
@@ -165,6 +170,7 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
             onPress={handleSignup}
             loading={isLoading}
             size="large"
+            testID="signup-btn"
           />
         </View>
 

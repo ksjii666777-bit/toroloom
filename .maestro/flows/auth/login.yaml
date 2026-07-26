@@ -3,22 +3,25 @@
 # =============================================================================
 # Tests the login screen: fills in email + password, taps "Log In", and
 # verifies the user lands on the Home screen.
+#
+# Uses testID-based targeting for i18n-independent robustness.
+# Falls back to text-based targeting for non-i18n elements (stock symbols).
 # =============================================================================
 
 appId: com.anonymous.Toroloom
 ---
-# Wait for the login screen to load
+# Wait for the login screen to load — target the app name text
 - assertVisible:
-    text: "Welcome Back!"
+    id: "login-email-input"
 
-# Fill in email field (targeted by placeholder text)
+# Fill in email field
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 
-# Fill in password field (targeted by placeholder text)
+# Fill in password field
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
 
 # Dismiss the keyboard so the Log In button is visible
@@ -26,13 +29,13 @@ appId: com.anonymous.Toroloom
 
 # Tap the "Log In" button
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 
 # Wait for navigation + home screen loading skeleton (600ms) + render
 - waitForAnimationToEnd:
     timeout: 30000
 
-# Navigate to the Home tab (More tab is the first/default tab after login)
+# Navigate to the Home tab
 - tapOn:
     text: "Home"
 
@@ -41,7 +44,5 @@ appId: com.anonymous.Toroloom
     timeout: 5000
 
 # Assert the Home screen is visible after login
-- assertVisible:
-    text: "Good Morning,"
 - assertVisible:
     text: "Markets"

@@ -98,8 +98,8 @@ export default function LearnScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Learning Hub</Text>
-          <Text style={styles.subtitle}>Master the markets, one lesson at a time</Text>
+          <Text style={styles.title} testID="learn-title">Learning Hub</Text>
+          <Text style={styles.subtitle} testID="learn-subtitle">Master the markets, one lesson at a time</Text>
         </View>
 
         {/* Continue Learning */}

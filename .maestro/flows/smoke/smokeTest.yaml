@@ -16,55 +16,55 @@ appId: com.anonymous.Toroloom
 ---
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
-    text: "Welcome Back! 👋"
+    id: "login-email-input"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
-
-# Dismiss keyboard before tapping Log In
 - hideKeyboard
-
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 30000
 
-# Navigate to Home tab (More tab is first/default after login)
+# Navigate to Home tab
 - tapOn:
-    text: "Home"
+    id: "tab-home"
 - waitForAnimationToEnd:
     timeout: 5000
 
 # ── 2. Home Screen — Verify portfolio card and quick actions are visible ───
 - assertVisible:
-    text: "Good Morning,"
+    id: "home-greeting"
 - assertVisible:
-    text: "Portfolio Value"
+    id: "home-portfolio-label"
 - assertVisible:
-    text: "Buy"
+    id: "home-quick-markets"
 - assertVisible:
-    text: "Learn"
+    id: "home-quick-learn"
 
 # Tap "Learn" quick action to navigate to Learn screen
-- tapOn: "Learn"
+- tapOn:
+    id: "home-quick-learn"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Learning Hub"
+    id: "learn-title"
 
 # Go back to Home via tab
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Good Morning,"
+    id: "home-greeting"
 
 # ── 3. Markets — Test search ──────────────────────────────────────────────
-- tapOn: "Markets"
+- tapOn:
+    id: "tab-markets"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Markets"
+    id: "markets-title"
 
 # Verify market indices are visible
 - assertVisible:
@@ -73,10 +73,11 @@ appId: com.anonymous.Toroloom
     text: "BSE Sensex"
 
 # ── 4. More Screen — Quick Actions ────────────────────────────────────────
-- tapOn: "More"
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "More"
+    id: "more-title"
 
 # Verify key menu items are present
 - assertVisible:
@@ -93,19 +94,21 @@ appId: com.anonymous.Toroloom
     text: "Help & Support"
 
 # ── 5. Portfolio Screen ────────────────────────────────────────────────────
-- tapOn: "Portfolio"
+- tapOn:
+    id: "tab-portfolio"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Portfolio"
+    id: "portfolio-title"
 - assertVisible:
-    text: "Invested"
+    id: "portfolio-invested"
 - assertVisible:
-    text: "Current Value"
+    id: "portfolio-current-value"
 - assertVisible:
-    text: "Total Returns"
+    id: "portfolio-total-returns"
 
 # ── 6. Logout ──────────────────────────────────────────────────────────────
-- tapOn: "More"
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 - scrollUntilVisible:
     element:

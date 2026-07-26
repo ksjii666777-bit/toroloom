@@ -10,62 +10,62 @@ appId: com.anonymous.Toroloom
 ---
 # ── Step 1: Login ──────────────────────────────────────────────────────────
 - assertVisible:
-    text: "Welcome Back!"
+    id: "login-email-input"
 - tapOn:
-    text: "Enter your email"
+    id: "login-email-input"
 - inputText: ${TEST_EMAIL}
 - tapOn:
-    text: "Enter your password"
+    id: "login-password-input"
 - inputText: ${TEST_PASSWORD}
-
-# Dismiss keyboard before tapping Log In
 - hideKeyboard
-
 - tapOn:
-    text: "Log In"
+    id: "login-btn"
 - waitForAnimationToEnd:
     timeout: 5000
 
 # ── Step 2: Home Tab ───────────────────────────────────────────────────────
 - assertVisible:
-    text: "Good Morning,"
-- assertVisible:
-    text: "Markets"
+    id: "home-greeting"
 
 # ── Step 3: Markets Tab ────────────────────────────────────────────────────
-- tapOn: "Markets"
+- tapOn:
+    id: "tab-markets"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Markets"
+    id: "markets-title"
 - assertVisible:
-    text: "Real-time stock market data"
+    id: "markets-subtitle"
 
 # ── Step 4: Portfolio Tab ──────────────────────────────────────────────────
-- tapOn: "Portfolio"
+- tapOn:
+    id: "tab-portfolio"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Portfolio"
+    id: "portfolio-title"
 - assertVisible:
-    text: "Track your investments"
+    id: "portfolio-subtitle"
 
 # ── Step 5: Watchlist Tab ──────────────────────────────────────────────────
-- tapOn: "Watchlist"
+- tapOn:
+    id: "tab-watchlist"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Watchlist"
+    id: "watchlist-title"
 - assertVisible:
-    text: "Monitor your favorite stocks"
+    id: "watchlist-subtitle"
 
 # ── Step 6: More Tab ───────────────────────────────────────────────────────
-- tapOn: "More"
+- tapOn:
+    id: "tab-more"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "More"
+    id: "more-title"
 - assertVisible:
     text: "Mutual Funds"
 
 # ── Step 7: Back to Home ───────────────────────────────────────────────────
-- tapOn: "Home"
+- tapOn:
+    id: "tab-home"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Good Morning,"
+    id: "home-greeting"

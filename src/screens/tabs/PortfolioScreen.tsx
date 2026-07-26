@@ -120,8 +120,8 @@ export default function PortfolioScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>{t('portfolio.title')}</Text>
-          <Text style={styles.subtitle}>{t('portfolio.subtitle')}</Text>
+          <Text style={styles.title} testID="portfolio-title">{t('portfolio.title')}</Text>
+          <Text style={styles.subtitle} testID="portfolio-subtitle">{t('portfolio.subtitle')}</Text>
         </View>
 
         {/* Portfolio Summary — Glassmorphic */}
@@ -129,18 +129,18 @@ export default function PortfolioScreen({ navigation }: any) {
           <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>{t('portfolio.invested')}</Text>
+                <Text style={styles.summaryLabel} testID="portfolio-invested">{t('portfolio.invested')}</Text>
                 <Text style={styles.summaryValue}>{formatCurrency(displayInvested, true)}</Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>{t('portfolio.currentValue')}</Text>
+                <Text style={styles.summaryLabel} testID="portfolio-current-value">{t('portfolio.currentValue')}</Text>
                 <Text style={styles.summaryValue}>{formatCurrency(displayPortfolio, true)}</Text>
               </View>
             </View>
 
             <View style={styles.pnlContainer}>
-              <Text style={styles.pnlLabel}>{t('portfolio.totalReturns')}</Text>
+              <Text style={styles.pnlLabel} testID="portfolio-total-returns">{t('portfolio.totalReturns')}</Text>
               <View style={styles.pnlRow}>
                 <Text style={[styles.pnlValue, { color: displayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
                   {displayPnl >= 0 ? '+' : ''}{formatCurrency(displayPnl, true)}

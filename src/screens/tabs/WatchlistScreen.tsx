@@ -501,8 +501,8 @@ export default function WatchlistScreen({ navigation }: any) {
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.title}>{t('watchlist.title')}</Text>
-              <Text style={styles.subtitle}>{t('watchlist.subtitle')}</Text>
+              <Text style={styles.title} testID="watchlist-title">{t('watchlist.title')}</Text>
+              <Text style={styles.subtitle} testID="watchlist-subtitle">{t('watchlist.subtitle')}</Text>
             </View>
             {/* Performance buttons + Sort Button */}
             <View style={styles.headerActions}>

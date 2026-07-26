@@ -31,7 +31,7 @@ export default function PeerComparison({
   return (
     <View style={{ marginBottom: SPACING.lg }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md }}>
-        <Text style={styles.sectionTitle}>Peer Comparison</Text>
+        <Text style={styles.sectionTitle} testID="stock-peer-comparison">Peer Comparison</Text>
         {sectorName && (
           <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted }}>{sectorName}</Text>
         )}

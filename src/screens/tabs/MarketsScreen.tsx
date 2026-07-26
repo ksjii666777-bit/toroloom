@@ -152,7 +152,7 @@ export default function MarketsScreen({ navigation }: any) {
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={styles.title}>{t('market.title')}</Text>
+            <Text style={styles.title} testID="markets-title">{t('market.title')}</Text>
             <AnimatedPressable
               onPress={() => navigation.navigate('StockScreener')}
               haptic="light"
@@ -164,7 +164,7 @@ export default function MarketsScreen({ navigation }: any) {
               </View>
             </AnimatedPressable>
           </View>
-          <Text style={styles.subtitle}>{t('market.subtitle')}</Text>
+          <Text style={styles.subtitle} testID="markets-subtitle">{t('market.subtitle')}</Text>
         </View>
 
         {/* Search Bar — elevated when focused */}

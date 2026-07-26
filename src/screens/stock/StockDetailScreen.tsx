@@ -389,6 +389,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
         </AnimatedPressable>
 
         {/* About Company */}
+        <View testID="stock-about-company">
         <Card title="About Company" style={styles.aboutCard}>
           <Text style={styles.aboutText}>
             {stock.name} is a leading company in the {stock.sector} sector with a market
@@ -398,6 +399,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
             consistent performance in its sector.
           </Text>
         </Card>
+        </View>
 
         {/* ── Extracted: Sector Context ── */}
         {sectorData && <SectorContext data={sectorData} />}

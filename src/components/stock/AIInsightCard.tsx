@@ -45,7 +45,7 @@ export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsight
             <Ionicons name="bulb" size={18} color={sentimentColor} />
           </View>
           <View>
-            <Text style={styles.title}>AI Analysis</Text>
+            <Text style={styles.title} testID="stock-ai-analysis">AI Analysis</Text>
             <Text style={styles.subtitle}>Powered by Deep Learning</Text>
           </View>
         </View>

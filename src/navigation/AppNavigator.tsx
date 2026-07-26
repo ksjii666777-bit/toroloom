@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useEffect } from 'react';
-import { Text, StyleSheet, Alert, Linking} from 'react-native';
+import { Text, StyleSheet, Alert, Linking, TouchableOpacity } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -166,6 +166,26 @@ import { startWidgetAutoUpdate } from '../services/widgetService';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+/**
+ * Tab bar button wrapper that adds a testID for E2E test targeting.
+ * Renders the default React Navigation touchable with an added testID.
+ */
+function TabBarButton({ testID, children, onPress, onLongPress, accessibilityRole, accessibilityState, style, ...rest }: any) {
+  return (
+    <TouchableOpacity
+      testID={testID}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      accessibilityRole={accessibilityRole}
+      accessibilityState={accessibilityState}
+      style={style}
+      {...rest}
+    >
+      {children}
+    </TouchableOpacity>
+  );
+}
+
 function TabIcon({ name, focused, color, badgeCount }: { name: string; focused: boolean; color: string; badgeCount?: number }) {
   const scaleAnim = useSharedValue(focused ? 1 : 0.85);
   const badgeScale = useSharedValue(1);
@@ -288,6 +308,9 @@ function MainTabs() {
       <Tab.Screen
         name="More"
         component={MoreScreen}
+        options={{
+          tabBarButton: (props) => <TabBarButton testID="tab-more" {...props} />,
+        }}
         listeners={{
           tabPress: () => {
             if (wsLockdownCount > 0) clearLockdownAlert();
@@ -295,10 +318,10 @@ function MainTabs() {
           },
         }}
       />
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Markets" component={MarketsScreen} />
-      <Tab.Screen name="Portfolio" component={PortfolioScreen} />
-      <Tab.Screen name="Watchlist" component={WatchlistScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarButton: (props) => <TabBarButton testID="tab-home" {...props} /> }} />
+      <Tab.Screen name="Markets" component={MarketsScreen} options={{ tabBarButton: (props) => <TabBarButton testID="tab-markets" {...props} /> }} />
+      <Tab.Screen name="Portfolio" component={PortfolioScreen} options={{ tabBarButton: (props) => <TabBarButton testID="tab-portfolio" {...props} /> }} />
+      <Tab.Screen name="Watchlist" component={WatchlistScreen} options={{ tabBarButton: (props) => <TabBarButton testID="tab-watchlist" {...props} /> }} />
     </Tab.Navigator>
       <AvatarWidget />
       <IronLockOverlay />

@@ -33,7 +33,7 @@ export default function SectorContext({ data }: SectorContextProps) {
   return (
     <View style={{ marginBottom: SPACING.lg }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md }}>
-        <Text style={styles.sectionTitle}>Sector Context</Text>
+        <Text style={styles.sectionTitle} testID="stock-sector-context">Sector Context</Text>
         <Badge
           label={`#${data.rank} of ${data.totalSectors}`}
           variant={data.rank <= 3 ? 'success' : data.rank >= data.totalSectors - 2 ? 'danger' : 'info'}

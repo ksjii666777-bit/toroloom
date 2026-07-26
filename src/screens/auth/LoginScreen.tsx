@@ -84,6 +84,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             autoCapitalize="none"
             id="login-email"
             name="email"
+            testID="login-email-input"
           />
 
           <Input
@@ -96,6 +97,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             id="login-password"
             name="password"
             onSubmitEditing={handleLogin}
+            testID="login-password-input"
           />
 
           <Pressable style={styles.forgotPassword}>
@@ -107,6 +109,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             onPress={handleLogin}
             loading={isLoading}
             size="large"
+            testID="login-btn"
           />
 
           {/* Social Login */}

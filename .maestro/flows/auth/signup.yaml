@@ -3,6 +3,8 @@
 # =============================================================================
 # Tests the signup screen: navigates from Login → Signup, fills in all
 # fields, taps "Create Account", and verifies login screen is shown after.
+#
+# Uses testID-based targeting for i18n-independent robustness.
 # =============================================================================
 
 appId: com.anonymous.Toroloom
@@ -11,47 +13,46 @@ appId: com.anonymous.Toroloom
 - tapOn:
     text: "Sign Up"
 
-# Wait for the Signup screen to load
+# Wait for the Signup screen to load — use testID to confirm
 - assertVisible:
-    text: "Create Account"
-- assertVisible:
-    text: "Start your investment journey today"
+    id: "signup-name-input"
 
 # Fill in Full Name
 - tapOn:
-    text: "Enter your full name"
+    id: "signup-name-input"
 - inputText: "Rahul Sharma"
 
 # Fill in Email
 - tapOn:
-    text: "Enter your email"
+    id: "signup-email-input"
 - inputText: "rahul@toroloom.com"
 
 # Fill in Phone
 - tapOn:
-    text: "Enter your phone number"
+    id: "signup-phone-input"
 - inputText: "9876543210"
 
 # Fill in Password
 - tapOn:
-    text: "Create a strong password"
+    id: "signup-password-input"
 - inputText: "Secure@123"
 
 # Fill in Confirm Password
 - tapOn:
-    text: "Re-enter your password"
+    id: "signup-confirm-password-input"
 - inputText: "Secure@123"
+
+# Dismiss keyboard
+- hideKeyboard
 
 # Tap "Create Account" button
 - tapOn:
-    text: "Create Account"
+    id: "signup-btn"
 
 # Wait for signup to process
 - waitForAnimationToEnd:
     timeout: 5000
 
 # After successful signup, user should see the Home screen
-- assertVisible:
-    text: "Good Morning,"
 - assertVisible:
     text: "Portfolio"
