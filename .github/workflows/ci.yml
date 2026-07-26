@@ -206,6 +206,9 @@ jobs:
       - name: Lint check
         run: npm run lint
 
+      - name: Check locale parity (en/ vs hi/)
+        run: node scripts/check-locale-parity.mjs
+
       - name: Run vitest tests with coverage
         run: npx vitest run --reporter=verbose --coverage
         env:

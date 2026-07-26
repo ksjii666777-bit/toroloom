@@ -108,6 +108,7 @@
     "screenshots:studio": "maestro studio",
     "screenshots:guide": "echo 'For iOS capture, run: maestro test .maestro/flows/screenshots/capture.yaml --app-id host.exp.Exponent'",
     "validate:imports": "node scripts/validate-imports.mjs",
+    "check:i18n": "node scripts/check-locale-parity.mjs",
     "doctor": "npx react-doctor@latest"
   },
   "private": true

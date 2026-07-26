@@ -1,0 +1,45 @@
+# =============================================================================
+# Toroloom — Locale Parity Check
+# =============================================================================
+#
+# Fast-track job that verifies every namespace in src/i18n/locales/en/ has a
+# matching file in hi/ with the exact same set of translation keys.
+#
+# Runs on every pull request that touches files under src/i18n/locales/,
+# and can be triggered manually from the Actions tab.
+#
+# This is a ~1-second smoke check — much faster than the full CI suite's
+# ~2-minute frontend job. It also runs as part of the main CI (ci.yml) on
+# every push.
+# =============================================================================
+
+name: Locale Parity
+
+on:
+  pull_request:
+    branches: [master, main]
+    # Only trigger when locale files change
+    paths:
+      - 'src/i18n/locales/**'
+      - 'scripts/check-locale-parity.mjs'
+      - '.github/workflows/locale-parity.yml'
+  workflow_dispatch:            # Allow manual trigger from the Actions tab
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true     # Cancel in-flight runs on the same branch
+
+jobs:
+  locale-parity:
+    name: Locale Parity Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Script is pure Node.js with zero npm dependencies — no npm ci needed
+      - name: Check locale parity (en/ vs hi/)
+        run: node scripts/check-locale-parity.mjs
