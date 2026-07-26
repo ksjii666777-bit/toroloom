@@ -130,7 +130,10 @@ export const env = {
   /** NewsAPI.org key for financial news articles */
   newsApiKey: process.env.NEWSAPI_KEY || '',
 
-  /** Encryption key for SnapTrade userSecrets (must be set in production) */
+  /** CORS allowed origins. Comma-separated list. Default: * (dev only — set in production!) */
+  corsOrigin: process.env.CORS_ORIGIN || '*',
+
+  /** Encryption key for SnapTrade userSecrets (REQUIRED in production — app warns on missing) */
   snapTradeEncryptionKey: process.env.SNAPTRADE_ENCRYPTION_KEY || '',
 
   // ──── Error Tracking ─────────────────────────────────────────────────
@@ -186,6 +189,20 @@ export function validateRequiredEnv(): string[] {
 
   if (env.storageBackend === 'mongodb' && !env.mongodbUri) {
     missing.push('MONGODB_URI');
+  }
+
+  if (isProduction && env.corsOrigin === '*') {
+    console.warn(
+      '[env] WARNING: CORS_ORIGIN is set to "*" — any website can call your API.\n' +
+      '      Set CORS_ORIGIN to your app domain(s) (comma-separated) in production.',
+    );
+  }
+
+  if (isProduction && !env.snapTradeEncryptionKey) {
+    console.warn(
+      '[env] WARNING: SNAPTRADE_ENCRYPTION_KEY not set. Broker session tokens will use DEV key.\n' +
+      '      Generate a key with: openssl rand -hex 32',
+    );
   }
 
   // In production, warn if no AI keys are configured (the app will return mock data)

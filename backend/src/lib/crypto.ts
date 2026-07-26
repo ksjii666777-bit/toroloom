@@ -23,20 +23,29 @@ const KEY_ENV = 'SNAPTRADE_ENCRYPTION_KEY';
 
 /**
  * Derive a 256-bit key from a passphrase using scrypt.
- * If the env var is not set, falls back to a SHA-256 hash of 'toroloom-default-key'
- * (which is fine for development but MUST be set in production).
+ * The SNAPTRADE_ENCRYPTION_KEY env var is REQUIRED in production.
+ * Falls back to a warning + dev-only key for local development.
  */
 function getEncryptionKey(): Buffer {
   const passphrase = process.env[KEY_ENV];
   if (!passphrase) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        '[crypto] FATAL: ' + KEY_ENV + ' is not set.\n' +
+        '  Generate a 256-bit key with: openssl rand -hex 32\n' +
+        '  Set it in Railway Dashboard → Variables → ' + KEY_ENV,
+      );
+    }
     console.warn(
       '[crypto] WARNING: ' + KEY_ENV + ' not set. Using DEVELOPMENT key.\n' +
       '           Generate a key with: openssl rand -hex 32\n' +
       '           Set it in Railway Dashboard → Variables → ' + KEY_ENV,
     );
+    // Dev-only fallback: NOT for production use
+    const devKey = 'toroloom-dev-only-key-do-not-use-in-production';
+    return crypto.scryptSync(devKey, 'toroloom-salt', 32);
   }
-  const key = passphrase || 'toroloom-default-development-key-change-in-production';
-  return crypto.scryptSync(key, 'toroloom-salt', 32);
+  return crypto.scryptSync(passphrase, 'toroloom-salt', 32);
 }
 
 /**

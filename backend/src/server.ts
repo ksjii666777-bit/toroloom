@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/node';
 import path from 'path';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import http from 'http';
 import { env, validateRequiredEnv } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
@@ -87,10 +88,20 @@ const server = http.createServer(app);
 
 // ============ Middleware ============
 
+// ── Security Headers (Helmet) — guards against XSS, clickjacking, MIME sniffing, etc.
+app.use(helmet({
+  contentSecurityPolicy: env.isDev ? false : undefined,
+  crossOriginEmbedderPolicy: false,
+}));
+
+// ── CORS — restrict in production via CORS_ORIGIN env var (comma-separated domains)
+// Default '*' is safe for dev but MUST be locked down in production.
+const corsOrigins = env.corsOrigin === '*' ? '*' : env.corsOrigin.split(',').map(s => s.trim());
 app.use(cors({
-  origin: '*',
+  origin: corsOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 
 // ── Webhook route MUST use raw body for Razorpay signature verification ──
