@@ -41,7 +41,7 @@ appId: com.anonymous.Toroloom
     id: "tab-markets"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Markets"
+    id: "markets-title"
 
 # ── 3. Tap the first visible stock card ─────────────────────────────────────
 # Stock cards show symbol (e.g. "RELIANCE", "TCS") as the primary text
@@ -121,4 +121,4 @@ appId: com.anonymous.Toroloom
 - waitForAnimationToEnd
 
 - assertVisible:
-    text: "Markets"
+    id: "markets-title"

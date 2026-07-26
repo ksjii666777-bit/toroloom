@@ -82,19 +82,19 @@ appId: com.anonymous.Toroloom
 - assertVisible:
     id: "more-title"
 
-# Verify key menu items are present
+# Verify key menu items are present (via testIDs — i18n-safe)
 - assertVisible:
-    text: "Fund Dashboard"
+    id: "menu-FundsDashboard"
 - assertVisible:
-    text: "Mutual Funds"
+    id: "menu-MutualFunds"
 - assertVisible:
-    text: "Trade History"
+    id: "menu-TradeHistory"
 - scrollUntilVisible:
     element:
-      text: "Help & Support"
+      id: "menu-Help"
     direction: DOWN
 - assertVisible:
-    text: "Help & Support"
+    id: "menu-Help"
 
 # ── 5. Portfolio Screen ────────────────────────────────────────────────────
 - tapOn:
@@ -115,16 +115,17 @@ appId: com.anonymous.Toroloom
 - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
-      text: "Log Out"
+      id: "more-logout-btn"
     direction: DOWN
 - assertVisible:
-    text: "Log Out"
-- tapOn: "Log Out"
+    id: "more-logout-btn"
+- tapOn:
+    id: "more-logout-btn"
 - waitForAnimationToEnd:
     timeout: 3000
 
 # Verify we're back on the login screen
 - assertVisible:
-    text: "Welcome Back! 👋"
+    id: "login-welcome-back"
 - assertVisible:
-    text: "Don't have an account?"
+    id: "login-no-account"

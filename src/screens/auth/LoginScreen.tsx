@@ -64,7 +64,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         <View
           style={styles.formSection}
         >
-          <Text style={styles.welcomeBack}>{t('auth.welcomeBack')}</Text>
+          <Text style={styles.welcomeBack} testID="login-welcome-back">{t('auth.welcomeBack')}</Text>
           <Text style={styles.subtitle}>{t('auth.loginSubtitle')}</Text>
 
           {error ? (
@@ -134,9 +134,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
         {/* Sign Up Link */}
         <View style={styles.signupSection}>
-          <Text style={styles.noAccount}>{t('auth.noAccount')}</Text>
+          <Text style={styles.noAccount} testID="login-no-account">{t('auth.noAccount')}</Text>
           <Pressable onPress={() => navigation.navigate('Signup')}>
-            <Text style={styles.signupLink}>{t('auth.signup')}</Text>
+            <Text style={styles.signupLink} testID="login-signup-link">{t('auth.signup')}</Text>
           </Pressable>
         </View>
       </ScrollView>

@@ -296,6 +296,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
         haptic="medium"
         scaleTo={0.97}
         style={{ opacity: isIFSCFormatValid && !isLoading ? 1 : 0.5 }}
+        testID="bank-verify-ifsc-btn"
       >
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
           <Ionicons name="search" size={20} color={colors.white} />
@@ -366,6 +367,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
         haptic="medium"
         scaleTo={0.97}
         style={{ opacity: isAccountFormatValid && isNameValid && !isLoading ? 1 : 0.5, marginTop: SPACING.md }}
+        testID="bank-verify-account-btn"
       >
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
           <Ionicons name="shield-checkmark" size={20} color={colors.white} />
@@ -447,6 +449,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
       <TouchableOpacity
         style={styles.primaryRow}
         onPress={() => setIsPrimary(!isPrimary)}
+        testID="bank-set-primary-toggle"
       >
         <View style={[styles.checkbox, isPrimary && styles.checkboxActive]}>
           {isPrimary && <Ionicons name="star" size={14} color={colors.white} />}
@@ -464,6 +467,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
         haptic="medium"
         scaleTo={0.97}
         style={{ marginTop: SPACING.lg }}
+        testID="bank-link-btn"
       >
         <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
           <Ionicons name="link" size={20} color={colors.white} />
@@ -519,6 +523,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
             haptic="medium"
             scaleTo={0.97}
             style={{ marginTop: SPACING.xl }}
+            testID="bank-done-btn"
           >
             <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
               <Text style={styles.continueBtnText}>{t('app.done')}</Text>

@@ -64,7 +64,7 @@ appId: com.anonymous.Toroloom
 - assertVisible:
     id: "more-title"
 - assertVisible:
-    text: "Mutual Funds"
+    id: "menu-MutualFunds"
 
 # ── Step 7: Back to Home ───────────────────────────────────────────────────
 - tapOn:

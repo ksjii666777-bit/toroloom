@@ -238,7 +238,7 @@ export default function ProfileScreen({ navigation }: any) {
         ) : (
           <>
             {/* KYC Status */}
-            <Card title={t('profile.kycStatus')} subtitle={t('kyc.title')} style={{ marginBottom: SPACING.md }}>
+            <Card title={t('profile.kycStatus')} subtitle={t('kyc.title')} style={{ marginBottom: SPACING.md }} testID="kyc-status-card">
               <View style={styles.kycHeader}>
                 <View style={[styles.kycStatusBadge, {
                   backgroundColor: completedStepsCount >= 4 ? '#00C85320' : colors.bgInput,
@@ -266,6 +266,7 @@ export default function ProfileScreen({ navigation }: any) {
                     style={styles.kycStepRow}
                     onPress={() => handleKycStepPress(step.key)}
                     activeOpacity={0.7}
+                    testID={`kyc-step-${step.key}`}
                   >
                     <View style={[
                       styles.kycStepIcon,

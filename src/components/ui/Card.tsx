@@ -17,6 +17,8 @@ interface CardProps {
   animated?: boolean;
   /** Delay before entry animation starts (ms) */
   animationDelay?: number;
+  /** Test ID for E2E targeting */
+  testID?: string;
 }
 
 export default function Card({
@@ -29,6 +31,7 @@ export default function Card({
   noPadding = false,
   animated = false,
   animationDelay = 0,
+  testID,
 }: CardProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -56,6 +59,7 @@ export default function Card({
         animated ? entryStyle : {},
         style,
       ]}
+      testID={testID}
     >
       {gradient && (
         <View style={StyleSheet.absoluteFill}>

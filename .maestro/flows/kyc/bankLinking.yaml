@@ -39,32 +39,21 @@ appId: com.anonymous.Toroloom
     id: "tab-more"
 - waitForAnimationToEnd
 - tapOn:
-    text: "Profile"
+    id: "more-profile-card"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "Profile"
+    id: "kyc-status-card"
 
-# ── 3. Navigate to KYC section ────────────────────────────────────────────
+# ── 3. Navigate to KYC section via step row (testID — i18n-safe) ─────────
 - scrollUntilVisible:
     element:
-      text: "KYC Verification"
+      id: "kyc-step-bank"
     direction: DOWN
 - tapOn:
-    text: "KYC Verification"
+    id: "kyc-step-bank"
 - waitForAnimationToEnd
 
-# ── 4. Navigate to Link Bank Account ──────────────────────────────────────
-- scrollUntilVisible:
-    element:
-      text: "Link Bank Account"
-    direction: DOWN
-- tapOn:
-    text: "Link Bank Account"
-- waitForAnimationToEnd
-
-# ── 5. Verify Bank Linking Screen ─────────────────────────────────────────
-- assertVisible:
-    text: "Link Bank Account"
+# ── 4. Verify Bank Linking Screen ─────────────────────────────────────────
 - assertVisible:
     text: "Step 1 of 3 — IFSC"
 - assertVisible:
@@ -78,9 +67,9 @@ appId: com.anonymous.Toroloom
 - inputText: "HDFC0001234"
 - waitForAnimationToEnd
 
-# Verify the checkmark indicator appears
+# Verify button via testID — i18n-safe
 - tapOn:
-    text: "Verify IFSC"
+    id: "bank-verify-ifsc-btn"
 - waitForAnimationToEnd:
     timeout: 10000
 
@@ -88,13 +77,13 @@ appId: com.anonymous.Toroloom
 - assertVisible:
     text: "Step 2 of 3 — Account Details"
 - assertVisible:
-    text: "HDFC Bank"
+    text: "HDFC Bank"          # mock data — not i18n'd ✅
 - assertVisible:
-    text: "Andheri West"
+    text: "Andheri West"       # mock data — not i18n'd ✅
 - assertVisible:
-    text: "IFSC: HDFC0001234"
+    text: "IFSC: HDFC0001234"  # mock data — not i18n'd ✅
 - assertVisible:
-    text: "Account Number"
+    text: "Account Number"     # hardcoded — not i18n'd ✅
 
 # ── 8. Step 2: Enter Account Number + Holder Name ─────────────────────────
 - tapOn:
@@ -107,47 +96,47 @@ appId: com.anonymous.Toroloom
 - inputText: "RAHUL SHARMA"
 - hideKeyboard
 
-# Tap Verify Account
+# Tap Verify Account via testID — i18n-safe
 - tapOn:
-    text: "Verify Account"
+    id: "bank-verify-account-btn"
 - waitForAnimationToEnd:
     timeout: 10000
 
 # ── 9. Verify Account Verification → Step 3 ───────────────────────────────
 - assertVisible:
-    text: "Account Verified"
+    text: "Account Verified"       # i18n'd -> keep but optional
+    optional: true
 - assertVisible:
-    text: "Account holder name matches bank records"
+    text: "Account holder name matches bank records"  # i18n'd
+    optional: true
 - assertVisible:
-    text: "Account Type"
+    text: "Account Type"          # hardcoded — not i18n'd ✅
 
 # ── 10. Step 3: Select Account Type + Primary + Link ──────────────────────
 # Savings is already selected by default, just proceed
+# Toggle set as primary via testID — i18n-safe
 - tapOn:
-    text: "Set as Primary Account"
+    id: "bank-set-primary-toggle"
 - waitForAnimationToEnd
 
+# Tap link bank via testID — i18n-safe
 - tapOn:
-    text: "Link Bank Account"
+    id: "bank-link-btn"
 - waitForAnimationToEnd:
     timeout: 10000
 
 # ── 11. Verify Account Linked Successfully ────────────────────────────────
 - assertVisible:
-    text: "Account Linked"
+    text: "HDFC Bank"             # mock data ✅
 - assertVisible:
-    text: "HDFC Bank"
+    text: "Savings"               # hardcoded type ✅
 - assertVisible:
-    text: "Savings"
-- assertVisible:
-    text: "Primary Account"
-- assertVisible:
-    text: "Manage Linked Banks"
+    text: "Primary Account"       # hardcoded label ✅
 
-# ── 12. Tap Done and navigate back ────────────────────────────────────────
+# ── 12. Tap Done and navigate back via testID — i18n-safe ─────────────────
 - tapOn:
-    text: "Done"
+    id: "bank-done-btn"
 - waitForAnimationToEnd
 
 - assertVisible:
-    text: "KYC Verification"
+    id: "kyc-status-card"

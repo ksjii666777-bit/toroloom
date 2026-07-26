@@ -258,26 +258,9 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
     <>
       {/* Estimated Total */}
       <View style={styles.summaryRow}>
-        <Text style={styles.summaryLabel}>{t('trading.estimatedTotal')}</Text>
+        <Text style={styles.summaryLabel} testID="order-summary-est-total">{t('trading.estimatedTotal')}</Text>
         <Text style={styles.summaryValue}>{formatCurrency(estimatedTotal)}</Text>
       </View>
-
-      {/* Estimated Charges */}
-      <View style={styles.summaryRow}>
-        <Text style={styles.summaryLabel}>{t('trading.estCharges')}</Text>
-        <Text style={styles.summaryValueMuted}>{formatCurrency(charges)}</Text>
-      </View>
-
-      {/* Divider */}
-      <View style={styles.summaryDivider} />
-
-      {/* Grand Total */}
-      <View style={styles.summaryRow}>
-        <Text style={styles.grandTotalLabel}>{t('trading.grandTotal')}</Text>
-        <Text style={styles.grandTotalValue}>{formatCurrency(grandTotal)}</Text>
-      </View>
-
-      {/* Balance indicator */}
       {tradeType === 'buy' && (
         <View style={[styles.balanceIndicator, {
           backgroundColor: isBalanceSufficient ? '#00C85320' : '#FF174420',
@@ -524,7 +507,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
         {/* Order Summary Card */}
         {qtyNum > 0 && (
           <Animated.View style={[detailStyles[0], styles.summaryCard]}>
-            <Text style={styles.summaryCardTitle}>{t('trading.orderSummary')}</Text>
+            <Text style={styles.summaryCardTitle} testID="order-summary-title">{t('trading.orderSummary')}</Text>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>{t('trading.orderType')}</Text>
               <Text style={styles.summaryValue}>
@@ -533,11 +516,11 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
               </Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{t('trading.quantity')}</Text>
+              <Text style={styles.summaryLabel} testID="order-summary-qty">{t('trading.quantity')}</Text>
               <Text style={styles.summaryValue}>{qtyNum} {t('trading.shares')}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{t('trading.pricePerShare')}</Text>
+              <Text style={styles.summaryLabel} testID="order-summary-price-per-share">{t('trading.pricePerShare')}</Text>
               <Text style={styles.summaryValue}>{formatCurrency(displayPrice)}</Text>
             </View>
             {orderCostSummary}

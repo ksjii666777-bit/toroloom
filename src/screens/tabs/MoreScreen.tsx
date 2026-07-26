@@ -300,7 +300,7 @@ export default function MoreScreen({ navigation }: any) {
 
         {/* Profile Card */}
         {/* Glassmorphic Profile Card */}
-        <AnimatedPressable onPress={() => navigation.navigate('Profile')} haptic="medium" scaleTo={0.97}>
+        <AnimatedPressable onPress={() => navigation.navigate('Profile')} haptic="medium" scaleTo={0.97} testID="more-profile-card">
           <View style={styles.glassProfileCard}>
             <View style={styles.glassBg} />
             <View style={styles.profileRow}>
@@ -390,6 +390,7 @@ export default function MoreScreen({ navigation }: any) {
                     }}
                     haptic="selection"
                     scaleTo={0.93}
+                    testID={`menu-${item.screen}`}
                   >
                     <View style={styles.menuItem}>
                       <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
@@ -426,7 +427,7 @@ export default function MoreScreen({ navigation }: any) {
         </AnimatedPressable>
 
         {/* Logout */}
-        <AnimatedPressable onPress={logout} haptic="warning" scaleTo={0.97}>
+        <AnimatedPressable onPress={logout} haptic="warning" scaleTo={0.97} testID="more-logout-btn">
           <View style={styles.logoutBtn}>
             <Ionicons name="log-out-outline" size={20} color={colors.danger} />
             <Text style={styles.logoutText}>{t('profile.logout')}</Text>

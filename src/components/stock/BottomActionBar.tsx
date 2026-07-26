@@ -31,12 +31,14 @@ export default function BottomActionBar({ displayPrice, onBuy, onSell, isUSStock
           <Pressable
             style={[styles.tradeBtn, styles.sellBtn, { backgroundColor: colors.bgCard, borderColor: colors.marketDown }]}
             onPress={onSell}
+            testID="stock-sell-btn"
           >
             <Text style={[styles.tradeBtnText, { color: colors.white }]}>Sell</Text>
           </Pressable>
           <Pressable
             style={[styles.tradeBtn, { padding: 0, overflow: 'hidden' }]}
             onPress={onBuy}
+            testID="stock-buy-btn"
           >
             <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.buyGrad}>
               <Text style={[styles.tradeBtnText, { color: colors.white }]}>Buy</Text>
