@@ -13,6 +13,9 @@
 
 appId: com.anonymous.Toroloom
 ---
+# ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
+- stopApp
+
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:
     id: "login-email-input"
@@ -32,16 +35,16 @@ appId: com.anonymous.Toroloom
 - waitForAnimationToEnd:
     timeout: 5000
 
-# ── 2. Navigate: More → Settings ──────────────────────────────────────────
+# ── 2. Navigate: More → Security ──────────────────────────────────────────
 - tapOn:
     id: "tab-more"
 - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
-      text: "Security"
+      id: "menu-SecuritySettings"
     direction: DOWN
 - tapOn:
-    text: "Security"
+    id: "menu-SecuritySettings"
 - waitForAnimationToEnd
 - assertVisible:
     text: "Security Settings"
