@@ -10,6 +10,7 @@ export default {
     sessionManagement: 'सत्र प्रबंधन',
     voiceSettings: 'आवाज़ सेटिंग्स',
     tenantConfig: 'टेनेंट कॉन्फ़िग',
+    tenantConfigTitle: 'टेनेंट कॉन्फ़िग',
     helpSupport: 'सहायता',
     about: 'बारे में',
     version: 'संस्करण {{version}}',
