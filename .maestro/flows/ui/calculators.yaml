@@ -39,12 +39,12 @@ appId: com.anonymous.Toroloom
 - waitForAnimationToEnd
 - scrollUntilVisible:
     element:
-      id: "menu-SIPCalculator"
+      id: "menu-SIPs"
     direction: DOWN
 
 # ── 3. SIP Calculator ─────────────────────────────────────────────────────
 - tapOn:
-    id: "menu-SIPCalculator"
+    id: "menu-SIPs"
 - waitForAnimationToEnd
 - assertVisible:
     text: "SIP Calculator"
@@ -80,4 +80,4 @@ appId: com.anonymous.Toroloom
     accessibilityLabel: "Go back"
 - waitForAnimationToEnd
 - assertVisible:
-    text: "More"
+    id: "more-title"

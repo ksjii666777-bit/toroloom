@@ -90,4 +90,4 @@ appId: com.anonymous.Toroloom
 - waitForAnimationToEnd
 
 - assertVisible:
-    text: "More"
+    id: "more-title"
