@@ -316,7 +316,7 @@ describe('MockBroker', () => {
 
     it('should throw for an unknown symbol', async () => {
       await expect(broker.getQuote('NONEXISTENT')).rejects.toThrow(
-        'Stock not found: NONEXISTENT',
+        'Symbol not found: NONEXISTENT',
       );
     });
 

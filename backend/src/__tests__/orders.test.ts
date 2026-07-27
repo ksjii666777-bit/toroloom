@@ -96,8 +96,12 @@ const { mockRiskEngine } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('../services/riskEngine', () => ({
+// Mock the exact import paths the route uses (not the barrel file)
+vi.mock('../services/riskEngine/RiskEngine', () => ({
   riskEngine: mockRiskEngine,
+}));
+
+vi.mock('../services/riskEngine/types', () => ({
   OrderActionType: {
     BUY: 'BUY',
     SELL: 'SELL',

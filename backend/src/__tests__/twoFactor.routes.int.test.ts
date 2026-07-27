@@ -25,19 +25,15 @@ vi.hoisted(() => {
 vi.mock('otplib', () => {
   let secretCounter = 0;
   return {
-    authenticator: {
-      options: {},
-      generateSecret: () => {
-        secretCounter++;
-        // Return a unique secret per call using counter value
-        const pad = String(secretCounter).padStart(2, '0');
-        return `JBSWY3DPEHPK${pad}PXP`;
-      },
-      keyuri: (email: string, issuer: string, secret: string) =>
-        `otpauth://totp/${issuer}:${email}?secret=${secret}&issuer=${issuer}&period=30&digits=6`,
-      check: (token: string, _secret: string) => token === '123456',
-      generate: () => '123456',
+    // otplib v13 functional API — used by the twoFactor service
+    generateSecret: () => {
+      secretCounter++;
+      const pad = String(secretCounter).padStart(2, '0');
+      return `JBSWY3DPEHPK${pad}PXP`;
     },
+    generateURI: ({ label, issuer, secret }: { label: string; issuer: string; secret: string }) =>
+      `otpauth://totp/${issuer}:${label}?secret=${secret}&issuer=${issuer}&period=30&digits=6`,
+    verify: async ({ token }: { token: string }) => ({ valid: token === '123456' }),
   };
 });
 
@@ -194,9 +190,7 @@ describe('POST /api/auth/2fa/setup', () => {
     expect(setupRes.status).toBe(200);
 
     // Verify with valid OTP (promotes pending → active)
-    const secret = setupRes.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     const verifyRes = await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
     expect(verifyRes.status).toBe(200);
     expect(verifyRes.body.verified).toBe(true);
@@ -277,9 +271,7 @@ describe('POST /api/auth/2fa/verify', () => {
     expect(setup.status).toBe(200);
 
     // Step 2: Verify with TOTP
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
 
     const { status, body } = await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
     expect(status).toBe(200);
@@ -325,9 +317,7 @@ describe('POST /api/auth/2fa/enable', () => {
   it('enables 2FA after successful verification', async () => {
     // Setup + verify
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // Enable
@@ -371,9 +361,7 @@ describe('POST /api/auth/2fa/disable', () => {
   it('disables 2FA with valid TOTP code', async () => {
     // Setup → verify → enable (verify promotes and enables)
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // Status check — should be enabled
@@ -381,7 +369,7 @@ describe('POST /api/auth/2fa/disable', () => {
     expect(statusBefore.body.enabled).toBe(true);
 
     // Disable with a new valid token
-    const newToken = authenticator.generate(secret);
+    const newToken = '123456';
     const { status, body } = await post('/api/auth/2fa/disable', { token: newToken }, AUTH_HEADER);
     expect(status).toBe(200);
     expect(body.success).toBe(true);
@@ -395,9 +383,7 @@ describe('POST /api/auth/2fa/disable', () => {
   it('disables 2FA with valid backup code', async () => {
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
     const backupCode = setup.body.backupCodes[0];
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // Disable with backup code
@@ -412,9 +398,7 @@ describe('POST /api/auth/2fa/disable', () => {
 
   it('returns 400 when disabling with invalid code', async () => {
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // Disable with wrong code
@@ -449,9 +433,7 @@ describe('GET /api/auth/2fa/status', () => {
 
   it('returns enabled status after successful verify', async () => {
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     const { body } = await get('/api/auth/2fa/status', AUTH_HEADER);
@@ -466,9 +448,7 @@ describe('GET /api/auth/2fa/status', () => {
 
     // Set up 2FA for user 1
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // User 1 should have 2FA enabled
@@ -495,9 +475,7 @@ describe('POST /api/auth/2fa/backup-codes (regenerate)', () => {
   it('regenerates backup codes after 2FA is enabled', async () => {
     // Setup + verify
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // Regenerate
@@ -514,9 +492,7 @@ describe('POST /api/auth/2fa/backup-codes (regenerate)', () => {
   it('new backup codes replace old ones (old are invalidated)', async () => {
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
     const oldCode = setup.body.backupCodes[0];
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // Regenerate
@@ -542,9 +518,7 @@ describe('GET /api/auth/2fa/backup-codes (retrieve)', () => {
 
   it('returns backup codes with unused count after setup', async () => {
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     const { status, body } = await get('/api/auth/2fa/backup-codes', AUTH_HEADER);
@@ -561,14 +535,12 @@ describe('GET /api/auth/2fa/backup-codes (retrieve)', () => {
   it('decreases unused count after a backup code is used', async () => {
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
     const backupCode = setup.body.backupCodes[0];
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // Verify that using a backup code as a verification token marks it as used
     // (The verify endpoint also accepts backup codes)
-    const newToken = authenticator.generate(secret);
+    const newToken = '123456';
     await post('/api/auth/2fa/verify', { token: newToken }, AUTH_HEADER);
 
     const { body } = await get('/api/auth/2fa/backup-codes', AUTH_HEADER);
@@ -578,9 +550,7 @@ describe('GET /api/auth/2fa/backup-codes (retrieve)', () => {
   it('marks backup code as used after successful disable via backup code', async () => {
     const setup = await post('/api/auth/2fa/setup', {}, AUTH_HEADER);
     const backupCode = setup.body.backupCodes[0];
-    const secret = setup.body.secret;
-    const { authenticator } = await import('otplib');
-    const token = authenticator.generate(secret);
+    const token = '123456';
     await post('/api/auth/2fa/verify', { token }, AUTH_HEADER);
 
     // Use backup code to disable (marks it as used)

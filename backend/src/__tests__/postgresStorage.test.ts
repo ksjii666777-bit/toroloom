@@ -375,7 +375,7 @@ describe('PostgreSQLStorage', () => {
       const deleteTables = mockPoolInstance.query.mock.calls
         .map((c: any[]) => c[0] as string)
         .filter((sql: string) => sql.startsWith('DELETE'));
-      expect(deleteTables.length).toBe(10);
+      expect(deleteTables.length).toBe(14);
     });
 
     it('should handle JSONB data as string (legacy pg driver)', async () => {

@@ -54,6 +54,11 @@ import brokerRoutes from '../routes/broker';
 import { circuitRegistry } from '../services/circuitBreaker';
 import * as state from '../websocket/state';
 
+// ──── Security middleware imports ───────────────────────────────────────
+
+import { inputSanitizer } from '../middleware/inputSanitizer';
+import { replayProtection } from '../middleware/replayProtection';
+
 // ──── Constants ─────────────────────────────────────────────────────────────
 
 const TEST_USER_ID = 'test_user_routes';
@@ -190,7 +195,7 @@ describe('POST /api/auth', () => {
   });
 
   it('should reject login without email', async () => {
-    const { status, body } = await post('/api/auth/login', { password: 'pw' });
+    const { status, body } = await post('/api/auth/login', { password: 'password123' });
 
     expect(status).toBe(400);
     expect(body.error).toContain('Email');
@@ -200,7 +205,7 @@ describe('POST /api/auth', () => {
     const { status, body } = await post('/api/auth/login', { email: 'a@b.com' });
 
     expect(status).toBe(400);
-    expect(body.error).toContain('password');
+    expect(body.error).toContain('Password');
   });
 
   // ── POST /api/auth/signup ───────────────────────────────────────────
@@ -2219,5 +2224,481 @@ describe('POST /api/notifications/portfolio-alert/evaluate - badgeCount sync', (
     expect(status).toBe(200);
     // Server badge count stays at 1 (not reset to 0)
     expect(body.badgeCount).toBeGreaterThanOrEqual(1);
+  });
+});
+
+// ============================================================================
+// 18. SECURITY MIDDLEWARE E2E TESTS
+// ============================================================================
+//
+// End-to-end tests for the three security middleware layers:
+//   inputSanitizer — SSTI stripping, NoSQL/SQL injection rejection
+//   replayProtection — nonce validation, replay detection
+//   authLimiter — rate limiting after N login attempts
+//
+// Each group spins its own Express server with only the middleware under test
+// plus a simple echo/login endpoint. This prevents interference with the
+// existing route integration tests above.
+// ============================================================================
+
+describe('Security Middleware — inputSanitizer', () => {
+  let secServer: http.Server;
+  let secBaseUrl: string;
+
+  const secRequest = (opts: {
+    method?: string;
+    path: string;
+    body?: any;
+    headers?: Record<string, string>;
+  }): Promise<{ status: number; body: any }> =>
+    new Promise((resolve, reject) => {
+      const url = new URL(opts.path, secBaseUrl);
+      const req = http.request(
+        url.toString(),
+        {
+          method: opts.method || 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...opts.headers,
+          },
+        },
+        (res) => {
+          let data = '';
+          res.on('data', (chunk: string) => (data += chunk));
+          res.on('end', () => {
+            try {
+              resolve({ status: res.statusCode!, body: data ? JSON.parse(data) : undefined });
+            } catch {
+              resolve({ status: res.statusCode!, body: data });
+            }
+          });
+        },
+      );
+      req.on('error', reject);
+      if (opts.body) req.write(JSON.stringify(opts.body));
+      req.end();
+    });
+
+  const secPost = (path: string, body?: any) => secRequest({ method: 'POST', path, body });
+
+  beforeAll(async () => {
+    const app = express();
+    app.use(express.json({ limit: '1mb' }));
+    app.use(inputSanitizer);
+
+    // Echo endpoint — returns the sanitized body
+    app.post('/api/test/echo', (req, res) => {
+      res.json({ received: req.body });
+    });
+
+    secServer = http.createServer(app);
+    await new Promise<void>((resolve) => {
+      secServer.listen(0, () => {
+        const port = (secServer.address() as any).port;
+        secBaseUrl = `http://localhost:${port}`;
+        resolve();
+      });
+    });
+  });
+
+  afterAll(() => {
+    secServer?.close();
+  });
+
+  // ── SSTI: Template syntax gets stripped ────────────────────────────────
+
+  it('strips Handlebars/Mustache {{ }} from POST body strings', async () => {
+    const { status, body } = await secPost('/api/test/echo', { name: '{{7*7}}' });
+    expect(status).toBe(200);
+    expect(body.received.name).not.toContain('{{7*7}}');
+    expect(body.received.name).toContain('[filtered]');
+  });
+
+  it('strips EJS/ERB <% %> from POST body strings', async () => {
+    const { status, body } = await secPost('/api/test/echo', { code: '<%= process.env.SECRET %>' });
+    expect(status).toBe(200);
+    expect(body.received.code).toContain('[filtered]');
+    expect(body.received.code).not.toContain('process.env');
+  });
+
+  it('strips ES6 template literal ${ } from POST body strings', async () => {
+    const { status, body } = await secPost('/api/test/echo', { query: '${1+1}' });
+    expect(status).toBe(200);
+    expect(body.received.query).toContain('[filtered]');
+  });
+
+  it('strips Jinja2 {% %} from POST body strings', async () => {
+    const { status, body } = await secPost('/api/test/echo', { template: '{% include "config" %}' });
+    expect(status).toBe(200);
+    expect(body.received.template).toContain('[filtered]');
+  });
+
+  it('strips Angular [[ ]] from POST body strings', async () => {
+    const { status, body } = await secPost('/api/test/echo', { binding: '[[1+1]]' });
+    expect(status).toBe(200);
+    expect(body.received.binding).toContain('[filtered]');
+  });
+
+  // ── NoSQL Injection: Operators are rejected with 400 ───────────────────
+
+  it('rejects NoSQL $where injection in string values', async () => {
+    const { status, body } = await secPost('/api/test/echo', {
+      query: '$where: 1',
+    });
+    expect(status).toBe(400);
+    expect(body.error).toContain('forbidden');
+  });
+
+  it('rejects NoSQL $gt operator in nested object keys', async () => {
+    const { status, body } = await secPost('/api/test/echo', {
+      field: { $gt: '' },
+    });
+    expect(status).toBe(400);
+    expect(body.error).toContain('$gt');
+    expect(body.error).toContain('not allowed');
+  });
+
+  it('rejects NoSQL $regex in string value', async () => {
+    const { status, body } = await secPost('/api/test/echo', {
+      search: '$regex.*',
+    });
+    expect(status).toBe(400);
+    expect(body.error).toContain('forbidden');
+  });
+
+  it('rejects SQL injection UNION SELECT in body', async () => {
+    const { status, body } = await secPost('/api/test/echo', {
+      query: "1' UNION SELECT * FROM users--",
+    });
+    expect(status).toBe(400);
+    expect(body.error).toContain('forbidden');
+  });
+
+  // ── Legitimate input passes through ────────────────────────────────────
+
+  it('allows normal input without modification', async () => {
+    const { status, body } = await secPost('/api/test/echo', {
+      name: 'John Doe',
+      email: 'john@example.com',
+    });
+    expect(status).toBe(200);
+    expect(body.received.name).toBe('John Doe');
+    expect(body.received.email).toBe('john@example.com');
+  });
+
+  it('trims whitespace from string values', async () => {
+    const { status, body } = await secPost('/api/test/echo', {
+      name: '  Alice  ',
+    });
+    expect(status).toBe(200);
+    expect(body.received.name).toBe('Alice');
+  });
+
+  // ── JSON depth bomb ────────────────────────────────────────────────────
+
+  it('rejects excessively nested JSON (depth > 10)', async () => {
+    // Build a deeply nested object: { a: { a: { ... { x: 'deep' } ... } } }
+    let deep: any = { x: 'deep' };
+    for (let i = 0; i < 15; i++) {
+      deep = { a: deep };
+    }
+
+    const { status, body } = await secPost('/api/test/echo', deep);
+    expect(status).toBe(400);
+    expect(body.error).toContain('depth');
+  });
+});
+
+// ============================================================================
+// 18b. Security Middleware — Replay Protection
+// ============================================================================
+
+describe('Security Middleware — replayProtection', () => {
+  let secServer: http.Server;
+  let secBaseUrl: string;
+
+  const secPost = (path: string, body?: any, headers?: Record<string, string>) =>
+    new Promise<{ status: number; body: any }>((resolve, reject) => {
+      const url = new URL(path, secBaseUrl);
+      const req = http.request(
+        url.toString(),
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+          },
+        },
+        (res) => {
+          let data = '';
+          res.on('data', (chunk: string) => (data += chunk));
+          res.on('end', () => {
+            try {
+              resolve({ status: res.statusCode!, body: data ? JSON.parse(data) : undefined });
+            } catch {
+              resolve({ status: res.statusCode!, body: data });
+            }
+          });
+        },
+      );
+      req.on('error', reject);
+      if (body) req.write(JSON.stringify(body));
+      req.end();
+    });
+
+  let clearNonces: () => void;
+
+  beforeAll(async () => {
+    // Dynamically import to get the nonce-clearing function
+    const mod = await import('../middleware/replayProtection');
+    clearNonces = mod.clearNonces;
+
+    const app = express();
+    app.use(express.json({ limit: '1mb' }));
+    app.use(replayProtection);
+
+    // Echo endpoint — returns body (with nonce/timestamp stripped)
+    app.post('/api/test/replay', (req, res) => {
+      res.json({ success: true, body: req.body });
+    });
+
+    secServer = http.createServer(app);
+    await new Promise<void>((resolve) => {
+      secServer.listen(0, () => {
+        const port = (secServer.address() as any).port;
+        secBaseUrl = `http://localhost:${port}`;
+        resolve();
+      });
+    });
+
+    clearNonces();
+  });
+
+  afterAll(() => {
+    secServer?.close();
+  });
+
+  beforeEach(() => {
+    clearNonces();
+  });
+
+  // ── Valid request passes through ───────────────────────────────────────
+
+  it('allows request with valid nonce and timestamp', async () => {
+    const { status, body } = await secPost('/api/test/replay', {
+      nonce: 'unique-nonce-001',
+      timestamp: Date.now(),
+      data: 'hello',
+    });
+
+    expect(status).toBe(200);
+    expect(body.success).toBe(true);
+    // nonce and timestamp should be stripped from body
+    expect(body.body.nonce).toBeUndefined();
+    expect(body.body.timestamp).toBeUndefined();
+    expect(body.body.data).toBe('hello');
+  });
+
+  it('allows requests without nonce (backward compatible)', async () => {
+    const { status, body } = await secPost('/api/test/replay', {
+      data: 'backward-compat',
+    });
+
+    expect(status).toBe(200);
+    expect(body.body.data).toBe('backward-compat');
+  });
+
+  // ── Reuse detection ────────────────────────────────────────────────
+
+  it('rejects reused nonce with 429', async () => {
+    const nonce = 'replay-test-nonce';
+    const ts = Date.now();
+
+    // First use succeeds
+    const first = await secPost('/api/test/replay', { nonce, timestamp: ts, amount: 100 });
+    expect(first.status).toBe(200);
+
+    // Second use with same nonce is rejected
+    const second = await secPost('/api/test/replay', { nonce, timestamp: ts, amount: 100 });
+    expect(second.status).toBe(429);
+    expect(second.body.error).toContain('already used');
+  });
+
+  it('rejects reused nonce even with different timestamp', async () => {
+    const nonce = 'diff-ts-nonce';
+
+    // First use
+    const first = await secPost('/api/test/replay', { nonce, timestamp: Date.now() });
+    expect(first.status).toBe(200);
+
+    // Same nonce, later timestamp — still rejected
+    const second = await secPost('/api/test/replay', { nonce, timestamp: Date.now() + 1000 });
+    expect(second.status).toBe(429);
+    expect(second.body.error).toContain('already used');
+  });
+
+  // ── Timestamp validation ───────────────────────────────────────────────
+
+  it('rejects expired timestamp (older than 5 minutes)', async () => {
+    const { status, body } = await secPost('/api/test/replay', {
+      nonce: 'expired-ts-nonce',
+      timestamp: Date.now() - 10 * 60 * 1000, // 10 minutes ago
+    });
+
+    expect(status).toBe(429);
+    expect(body.error).toContain('expired');
+  });
+
+  it('rejects future timestamp (more than 1 minute ahead)', async () => {
+    const { status, body } = await secPost('/api/test/replay', {
+      nonce: 'future-ts-nonce',
+      timestamp: Date.now() + 5 * 60 * 1000, // 5 minutes in future
+    });
+
+    expect(status).toBe(429);
+    expect(body.error).toContain('future');
+  });
+
+  // ── Nonce format validation ────────────────────────────────────────────
+
+  it('rejects too-short nonce (< 8 chars)', async () => {
+    const { status, body } = await secPost('/api/test/replay', {
+      nonce: 'short',
+      timestamp: Date.now(),
+    });
+
+    expect(status).toBe(429);
+    expect(body.error).toContain('nonce');
+  });
+
+  it('rejects non-string nonce (number)', async () => {
+    const { status, body } = await secPost('/api/test/replay', {
+      nonce: 123,
+      timestamp: Date.now(),
+    });
+
+    expect(status).toBe(429);
+    expect(body.error).toContain('nonce');
+  });
+
+  // ── Different nonces are allowed ───────────────────────────────────────
+
+  it('allows different nonces from the same client', async () => {
+    for (let i = 0; i < 5; i++) {
+      const { status } = await secPost('/api/test/replay', {
+        nonce: `sequential-nonce-${i}`,
+        timestamp: Date.now(),
+      });
+      expect(status).toBe(200);
+    }
+  });
+});
+
+// ============================================================================
+// 18c. Security Middleware — authLimiter
+// ============================================================================
+
+describe('Security Middleware — authLimiter', () => {
+  let secServer: http.Server;
+  let secBaseUrl: string;
+
+  const secPost = (path: string, body?: any, headers?: Record<string, string>) =>
+    new Promise<{ status: number; body: any }>((resolve, reject) => {
+      const url = new URL(path, secBaseUrl);
+      const req = http.request(
+        url.toString(),
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+          },
+        },
+        (res) => {
+          let data = '';
+          res.on('data', (chunk: string) => (data += chunk));
+          res.on('end', () => {
+            try {
+              resolve({ status: res.statusCode!, body: data ? JSON.parse(data) : undefined });
+            } catch {
+              resolve({ status: res.statusCode!, body: data });
+            }
+          });
+        },
+      );
+      req.on('error', reject);
+      if (body) req.write(JSON.stringify(body));
+      req.end();
+    });
+
+  beforeAll(async () => {
+    // Create a fresh rate limiter without the skipInTest override
+    // (the production authLimiter has skip: () => true when NODE_ENV=test)
+    // We use a low max of 3 so tests complete quickly.
+    const rateLimit = (await import('express-rate-limit')).default;
+    const testAuthLimiter = rateLimit({
+      windowMs: 60 * 1000, // 1 minute window
+      max: 3,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { error: 'Too many login attempts. Please try again after 15 minutes.' },
+    });
+
+    const app = express();
+    app.use(express.json({ limit: '1mb' }));
+    app.use('/api/test/rate-limit', testAuthLimiter, (_req, res) => {
+      res.json({ success: true });
+    });
+
+    secServer = http.createServer(app);
+    await new Promise<void>((resolve) => {
+      secServer.listen(0, () => {
+        const port = (secServer.address() as any).port;
+        secBaseUrl = `http://localhost:${port}`;
+        resolve();
+      });
+    });
+  });
+
+  afterAll(() => {
+    secServer?.close();
+  });
+
+  it('allows requests within the limit (max=3)', async () => {
+    for (let i = 0; i < 3; i++) {
+      const { status, body } = await secPost('/api/test/rate-limit', { email: 'within@test.com', password: 'pass123' });
+      expect(status).toBe(200);
+      expect(body.success).toBe(true);
+    }
+  });
+
+  it('blocks the 4th request after exceeding the limit (max=3)', async () => {
+    for (let i = 0; i < 3; i++) {
+      await secPost('/api/test/rate-limit', { email: 'exceed@test.com', password: 'pass123' });
+    }
+
+    const { status, body } = await secPost('/api/test/rate-limit', { email: 'exceed@test.com', password: 'pass123' });
+    expect(status).toBe(429);
+    expect(body.error).toContain('Too many');
+  });
+
+  it('returns the configured error message on rate limit', async () => {
+    for (let i = 0; i < 3; i++) {
+      await secPost('/api/test/rate-limit', { email: 'blocked@test.com', password: 'test123' });
+    }
+
+    const { status, body } = await secPost('/api/test/rate-limit', { email: 'blocked@test.com', password: 'test123' });
+    expect(status).toBe(429);
+    expect(body.error).toContain('15 minutes');
+  });
+
+  it('blocks by IP when no auth header is present', async () => {
+    for (let i = 0; i < 3; i++) {
+      await secPost('/api/test/rate-limit', { email: 'anon@test.com', password: 'anon123' });
+    }
+
+    const { status, body } = await secPost('/api/test/rate-limit', { email: 'anon@test.com', password: 'anon123' });
+    expect(status).toBe(429);
+    expect(body.error).toContain('Too many');
   });
 });

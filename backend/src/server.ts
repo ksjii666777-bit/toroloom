@@ -10,6 +10,8 @@ import { errorHandler } from './middleware/errorHandler';
 import { apiLimiter, authLimiter, writeLimiter, readLimiter, adminLimiter } from './middleware/rateLimiter';
 import { authMiddleware } from './middleware/auth';
 import { requireSubscription, configureSubscriptionGating } from './middleware/subscriptionGate';
+import { inputSanitizer, bodySizeLimiter } from './middleware/inputSanitizer';
+import { replayProtection } from './middleware/replayProtection';
 import { setupWebSocket } from './websocket/handler';
 import { getStorage, getStorageIfInitialized } from './services/storage';
 import { auditTrail } from './services/auditTrail';
@@ -105,13 +107,29 @@ app.use(cors({
   credentials: true,
 }));
 
+// ── Security: Body size limiter (guards against LPDOS & body bombs) ────
+// Mounted BEFORE express.json() to abort early on oversized bodies.
+// Default: 100 KB for regular endpoints, webhook route uses its own.
+app.use(bodySizeLimiter(100_000));
+
 // ── Webhook route MUST use raw body for Razorpay signature verification ──
 // Mounted BEFORE express.json() to prevent body consumption by JSON parser.
 // Razorpay sends application/json with HMAC-SHA256 over the raw body bytes.
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }), webhookRouter);
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '100kb' }));
+
+// ── Security: Global input sanitizer (SSTI, NoSQL, SQL injection, clipboard) ──
+// ** MUST be mounted AFTER express.json() ** so req.body is already parsed.
+// Sanitizes body fields, query params, and URL params for all incoming requests.
+app.use(inputSanitizer);
+
 app.use('/api', apiLimiter);
+
+// ── Security: Replay attack protection on payment routes ────────────────
+// Parent catch-all covers all /api/payments/* sub-paths.
+// Backward-compatible: passes through if no nonce/timestamp present.
+app.use('/api/payments', replayProtection);
 
 // Per-route rate limiters applied below:
 //   authLimiter  → auth routes (login/signup) — strictest
@@ -181,8 +199,9 @@ app.use('/api/system', readLimiter, systemRoutes);
 app.use('/api/system', readLimiter, wsStatusRoutes);
 
 // ── Writes — 50 req / min ────────────────────────────────────────────
-app.use('/api/funds', writeLimiter, fundsRoutes);
-app.use('/api/orders', writeLimiter, ordersRoutes);
+// Replay protection ensures idempotency for fund transfers and order placement
+app.use('/api/funds', writeLimiter, replayProtection, fundsRoutes);
+app.use('/api/orders', writeLimiter, replayProtection, ordersRoutes);
 app.use('/api/broker', writeLimiter, brokerRoutes);
 app.use('/api/broker-link', writeLimiter, authMiddleware, requireSubscription('pro'), brokerLinkRoutes);
 
@@ -210,10 +229,11 @@ app.use('/api/social', readLimiter, authMiddleware, requireSubscription('elite')
 app.use('/api/coupons', writeLimiter, couponRoutes);
 
 // ── KYC — 50 req / min (writes), auth required ────────────────────────
-app.use('/api/kyc', writeLimiter, authMiddleware, kycRoutes);
+app.use('/api/kyc', writeLimiter, authMiddleware, replayProtection, kycRoutes);
 
 // ── 2FA — auth required, moderate rate ──────────────────────────────────
-app.use('/api/auth/2fa', writeLimiter, authMiddleware, twoFactorRoutes);
+// Replay protection prevents reuse of intercepted 2FA setup/verify requests
+app.use('/api/auth/2fa', writeLimiter, authMiddleware, replayProtection, twoFactorRoutes);
 
 // ── News — 100 req / min ──────────────────────────────────────────
 app.use('/api/news', readLimiter, newsRoutes);

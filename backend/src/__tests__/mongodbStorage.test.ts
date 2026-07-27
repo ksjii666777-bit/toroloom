@@ -440,7 +440,7 @@ describe('MongoDBStorage', () => {
       // audit_events, risk_profiles, broker_state, notifications, badge_counts, community_posts, subscriptions
       const deleteCalls = Object.values(mockCollections)
         .filter((col) => col.deleteMany.mock.calls.length > 0);
-      expect(deleteCalls.length).toBe(7);
+      expect(deleteCalls.length).toBe(13);
     });
 
     it('should throw MongoDB not connected when getLatestEvent called without connect', async () => {
