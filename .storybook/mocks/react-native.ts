@@ -12,10 +12,10 @@ export * from 'react-native-web';
 // ─── Missing React Native internals ────────────────────────────────────────
 
 export const TurboModuleRegistry = {
-  get(name: string) {
+  get(_name: string) {
     return null;
   },
-  getEnforcing(name: string) {
+  getEnforcing(_name: string) {
     return null;
   },
 };

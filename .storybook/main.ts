@@ -21,7 +21,7 @@ const config: StorybookConfig = {
    */
   async viteFinal(config) {
     const dirname = path.dirname(fileURLToPath(import.meta.url));
-    const alias = (config.resolve ??= {}).alias = {
+    const _alias = (config.resolve ??= {}).alias = {
       ...((config.resolve.alias ?? {}) as Record<string, string>),
       // Comprehensive react-native mock — re-exports react-native-web + missing internals
       'react-native': path.resolve(dirname, 'mocks/react-native.ts'),

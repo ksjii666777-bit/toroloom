@@ -95,12 +95,12 @@ interface LinearGradientProps {
 }
 
 function createDiv(props: Record<string, unknown>): React.ReactElement {
-  const { children, style, ...rest } = props as any;
+  const { children, _style, ...rest } = props as any;
   return React.createElement(View, { ...rest }, children);
 }
 
 const SvgComponent = (props: SvgProps) => {
-  const { width, height, viewBox, children, style, ...rest } = props;
+  const { width, height, _viewBox, children, style, ...rest } = props;
   return (
     <View
       {...rest}

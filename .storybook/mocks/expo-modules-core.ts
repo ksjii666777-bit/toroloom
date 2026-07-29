@@ -46,7 +46,7 @@ export class LegacyEventEmitter {
   constructor(eventType: string) {
     this._eventType = eventType;
   }
-  addListener(listener: (...args: any[]) => void) {
+  addListener(_listener: (...args: any[]) => void) {
     return { remove: () => {} };
   }
   removeAllListeners() {}

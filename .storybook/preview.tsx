@@ -2,7 +2,7 @@ import React from 'react';
 import type { Preview } from '@storybook/react';
 import { View, StyleSheet } from 'react-native';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
-import { COLORS, SPACING } from '../src/constants/theme';
+import { COLORS as _COLORS, SPACING } from '../src/constants/theme';
 
 /**
  * Toroloom — Storybook Preview Configuration

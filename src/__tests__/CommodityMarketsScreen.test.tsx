@@ -13,7 +13,7 @@
  * ============================================================================
  */
 
-import React, { act } from 'react';
+import { act } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
 import CommodityMarketsScreen from '../screens/markets/CommodityMarketsScreen';
