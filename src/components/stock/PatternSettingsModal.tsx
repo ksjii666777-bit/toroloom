@@ -206,8 +206,10 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
     setLookback(localLookback);
     // Sync enabled patterns
     const currentEnabled = usePatternSettingsStore.getState().enabledPatterns;
-    const toDisable = currentEnabled.filter(p => !localEnabled.includes(p));
-    const toEnable = localEnabled.filter(p => !currentEnabled.includes(p));
+    const localEnabledSet = new Set(localEnabled);
+    const currentEnabledSet = new Set(currentEnabled);
+    const toDisable = currentEnabled.filter(p => !localEnabledSet.has(p));
+    const toEnable = localEnabled.filter(p => !currentEnabledSet.has(p));
     for (const p of toDisable) togglePattern(p);
     for (const p of toEnable) togglePattern(p);
     setHasChanges(false);
@@ -319,11 +321,12 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
 
               {CATEGORIES.map(category => {
                 const metas = PATTERN_METAS.filter(m => m.category === category);
+                const localEnabledSet = new Set(localEnabled);
                 return (
                   <View key={category} style={styles.categoryGroup}>
                     <Text style={[styles.categoryLabel, { color: colors.textSecondary }]}>{category}</Text>
                     {metas.map(meta => {
-                      const active = localEnabled.includes(meta.type);
+                      const active = localEnabledSet.has(meta.type);
                       return (
                         <Pressable
                           key={meta.type}

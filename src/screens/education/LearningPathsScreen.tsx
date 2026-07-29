@@ -44,7 +44,10 @@ export default function LearningPathsScreen({ navigation }: any) {
   // Calculate progress for each path
   const pathsWithProgress = useMemo(() => {
     return mockLearningPaths.map(path => {
-      const pathCourses = path.courseIds.map(cid => courses.find(c => c.id === cid)).filter(Boolean);
+      const pathCourses = path.courseIds.flatMap(cid => {
+        const course = courses.find(c => c.id === cid);
+        return course ? [course] : [];
+      });
       const totalLessonsInPath = pathCourses.reduce((sum, c) => sum + (c?.lessons || 0), 0);
 
       // Count completed lessons

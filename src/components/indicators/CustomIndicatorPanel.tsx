@@ -143,8 +143,6 @@ export function CustomIndicatorPanel({
     });
   }, [indicators, data]);
 
-  if (!data || data.length < 5) return null;
-
   const panelWidth = width - SPACING.md * 2;
   const pad = CHART_PADDING;
   const chartW = panelWidth - pad.left - pad.right;
@@ -182,16 +180,7 @@ export function CustomIndicatorPanel({
     return { minVal: mn - padding, maxVal: mx + padding };
   }, [overlayIndicators]);
 
-  // Touch handler for crosshair
-  const handleTouchMove = (e: any) => {
-    if (data.length < 2) return;
-    const x = e.nativeEvent?.locationX ?? 0;
-    const relativeX = x - pad.left;
-    const index = Math.round((relativeX / chartW) * (data.length - 1));
-    setFocusedIndex(Math.max(0, Math.min(data.length - 1, index)));
-  };
-
-  // Get crosshair values
+  // Get crosshair values (moved before early return to maintain hook order)
   const crosshairValues = useMemo(() => {
     if (focusedIndex === null) return null;
     const vals: { label: string; value: number | null; color: string }[] = [];
@@ -201,6 +190,17 @@ export function CustomIndicatorPanel({
     });
     return vals;
   }, [evaluatedIndicators, focusedIndex]);
+
+  if (!data || data.length < 5) return null;
+
+  // Touch handler for crosshair
+  const handleTouchMove = (e: any) => {
+    if (data.length < 2) return;
+    const x = e.nativeEvent?.locationX ?? 0;
+    const relativeX = x - pad.left;
+    const index = Math.round((relativeX / chartW) * (data.length - 1));
+    setFocusedIndex(Math.max(0, Math.min(data.length - 1, index)));
+  };
 
   return (
     <View style={styles.container}>

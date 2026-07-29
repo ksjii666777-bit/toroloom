@@ -12,7 +12,7 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   Alert, KeyboardAvoidingView, Platform, ScrollView,
@@ -44,6 +44,7 @@ export default function AadhaarVerificationScreen({ navigation, route }: any) {
   const [error, setError] = useState<string | null>(null);
   const [otpTimer, setOtpTimer] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const otpExpiredRef = useRef(false);
 
   const cleanedAadhaar = aadhaarNumber.replace(/\s/g, '');
   const isAadhaarValid = /^[2-9]\d{11}$/.test(cleanedAadhaar);
@@ -91,20 +92,23 @@ export default function AadhaarVerificationScreen({ navigation, route }: any) {
     }
   }, [otp]);
 
-  // Start timer for OTP expiry
+  // Start timer for OTP expiry — pure decrement (no side effects inside updater)
   const startOtpTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
+    otpExpiredRef.current = false;
     setOtpTimer(600); // 10 minutes
     timerRef.current = setInterval(() => {
-      setOtpTimer(prev => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setOtpTimer(prev => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
   }, []);
+
+  // Clear interval when timer hits 0
+  useEffect(() => {
+    if (otpTimer <= 0 && !otpExpiredRef.current) {
+      otpExpiredRef.current = true;
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+  }, [otpTimer]);
 
   // Step 1: Send OTP
   const handleSendOtp = useCallback(async () => {

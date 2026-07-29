@@ -272,10 +272,10 @@ export default function PortfolioScreen({ navigation }: any) {
 
         {/* Dividend Calendar */}
         {holdings.length > 0 && (() => {
-          // Estimate dividend events from holdings stock data
-          const dividendEvents = holdings.map(h => {
+          // Estimate dividend events from holdings stock data — single pass via flatMap
+          const dividendEvents = holdings.flatMap(h => {
             const stock = stocks.find(s => s.id === h.stockId);
-            if (!stock || stock.dividend <= 0) return null;
+            if (!stock || stock.dividend <= 0) return [];
             const annualDividendPerShare = (stock.dividend / 100) * stock.price;
             const estimatedQuarterly = annualDividendPerShare / 4;
             const estimatedAnnual = estimatedQuarterly * h.quantity;
@@ -289,8 +289,8 @@ export default function PortfolioScreen({ navigation }: any) {
               const monthStr = new Date(year, quarterMonth, 15).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
               upcoming.push({ month: monthStr, amount: estimatedQuarterly * h.quantity });
             }
-            return { symbol: h.symbol, name: h.name, yield: stock.dividend, annualAmount: estimatedAnnual, upcoming, quantity: h.quantity };
-          }).filter(Boolean) as { symbol: string; name: string; yield: number; annualAmount: number; upcoming: { month: string; amount: number }[]; quantity: number }[];
+            return [{ symbol: h.symbol, name: h.name, yield: stock.dividend, annualAmount: estimatedAnnual, upcoming, quantity: h.quantity }];
+          }) as { symbol: string; name: string; yield: number; annualAmount: number; upcoming: { month: string; amount: number }[]; quantity: number }[];
 
           const totalAnnualDividend = dividendEvents.reduce((s, d) => s + d.annualAmount, 0);
 

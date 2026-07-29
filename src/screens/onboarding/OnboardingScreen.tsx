@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Dimensions,
   Pressable, ActivityIndicator, ScrollView,
+  StyleProp, ViewStyle,
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, useAnimatedScrollHandler,
@@ -16,7 +17,7 @@ import { useOnboardingStore, ONBOARDING_STEPS } from '../../store/onboardingStor
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { analytics } from '../../services/analytics';
 import * as Haptics from 'expo-haptics';
-import { renderIllustration } from '../../components/onboarding/OnboardingIllustrations';
+import { renderIllustration } from '../../components/onboarding/onboardingUtils';
 import OnboardingLottie from '../../components/onboarding/OnboardingLottie';
 
 const { width, height } = Dimensions.get('window');
@@ -97,15 +98,12 @@ function MiniPieChart({
                 
                 onPress={() => {
                   onInteract();
-                  setExploredSectors(prev => {
-                    const next = new Set(prev);
-                    next.add(i);
-                    if (next.size >= MOCK_SECTORS.length && !demoCompletedRef.current) {
-                      demoCompletedRef.current = true;
-                      setTimeout(() => onDemoComplete?.(), 300);
-                    }
-                    return next;
-                  });
+                  const next = new Set(exploredSectors).add(i);
+                  setExploredSectors(next);
+                  if (next.size >= MOCK_SECTORS.length && !demoCompletedRef.current) {
+                    demoCompletedRef.current = true;
+                    setTimeout(() => onDemoComplete?.(), 300);
+                  }
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setSelectedSector(isSelected ? null : i);
                 }}
@@ -134,15 +132,12 @@ function MiniPieChart({
               style={[demoStyles.legendItem, isSelected && demoStyles.legendItemActive]}
               onPress={() => {
                 onInteract();
-                setExploredSectors(prev => {
-                  const next = new Set(prev);
-                  next.add(i);
-                  if (next.size >= MOCK_SECTORS.length && !demoCompletedRef.current) {
-                    demoCompletedRef.current = true;
-                    setTimeout(() => onDemoComplete?.(), 300);
-                  }
-                  return next;
-                });
+                const next = new Set(exploredSectors).add(i);
+                setExploredSectors(next);
+                if (next.size >= MOCK_SECTORS.length && !demoCompletedRef.current) {
+                  demoCompletedRef.current = true;
+                  setTimeout(() => onDemoComplete?.(), 300);
+                }
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setSelectedSector(isSelected ? null : i);
               }}
@@ -536,14 +531,11 @@ function InteractiveBadges({
   const handleBadgeTap = (id: string) => {
     onInteract();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setUnlocked(prev => {
-      const next = { ...prev, [id]: !prev[id] };
-      const allUnlocked = Object.values(next).filter(Boolean).length >= MOCK_BADGES.length;
-      if (allUnlocked) {
-        setTimeout(() => onDemoComplete?.(), 400);
-      }
-      return next;
-    });
+    const next = { ...unlocked, [id]: !unlocked[id] };
+    setUnlocked(next);
+    if (Object.values(next).filter(Boolean).length >= MOCK_BADGES.length) {
+      setTimeout(() => onDemoComplete?.(), 400);
+    }
   };
 
   const unlockedCount = Object.values(unlocked).filter(Boolean).length;
@@ -692,6 +684,40 @@ function RocketAnimation({
 }
 
 // ────────────────────────────────────────────────────────
+// Animated Step Card — manages its own entrance animation
+// (extracted to avoid calling hooks inside Array.from/map)
+// ────────────────────────────────────────────────────────
+
+function AnimatedStepCard({ index, style, children }: {
+  index: number;
+  style?: StyleProp<ViewStyle>;
+  children: React.ReactNode;
+}) {
+  const scale = useSharedValue(0.9);
+  const opacity = useSharedValue(0);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  useEffect(() => {
+    const delay = index * 150;
+    const id = setTimeout(() => {
+      scale.value = withSpring(1, { stiffness: 100, damping: 12 });
+      opacity.value = withTiming(1, { duration: 300 });
+    }, delay);
+    return () => clearTimeout(id);
+  }, [index, scale, opacity]);
+
+  return (
+    <Animated.View style={[style, animStyle]}>
+      {children}
+    </Animated.View>
+  );
+}
+
+// ────────────────────────────────────────────────────────
 // Main Component
 // ────────────────────────────────────────────────────────
 
@@ -748,29 +774,7 @@ export default function OnboardingScreen({ _navigation }: any) {
   const contentStyle = useAnimatedStyle(() => ({ opacity: contentProgress.value }));
   const bottomStyle = useAnimatedStyle(() => ({ opacity: bottomProgress.value }));
 
-  // ── Card entrance animations ──
-  const cardScales = Array.from({ length: visibleSteps.length }, () => useSharedValue(0.9));
-  const cardOpacities = Array.from({ length: visibleSteps.length }, () => useSharedValue(0));
-
-  const cardStyles = cardScales.map((_, i) =>
-    useAnimatedStyle(() => ({
-      transform: [{ scale: cardScales[i].value }],
-      opacity: cardOpacities[i].value,
-    }))
-  );
-
-  useEffect(() => {
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
-    visibleSteps.forEach((_, i) => {
-      const delay = i * 150;
-      const id = setTimeout(() => {
-        cardScales[i].value = withSpring(1, { stiffness: 100, damping: 12 });
-        cardOpacities[i].value = withTiming(1, { duration: 300 });
-      }, delay);
-      timeouts.push(id);
-    });
-    return () => timeouts.forEach(clearTimeout);
-  }, [cardScales, cardOpacities, visibleSteps]);
+  // ── Card entrance animations (managed per-card by AnimatedStepCard) ──
 
   // ── Scroll-driven progress bar with parallax ──
   const scrollHandler = useAnimatedScrollHandler({
@@ -1063,12 +1067,12 @@ export default function OnboardingScreen({ _navigation }: any) {
           {visibleSteps.map((step, i) => {
             const isInteracted = interactedSteps[step.id] || false;
             return (
-              <Animated.View
+              <AnimatedStepCard
                 key={step.id}
+                index={i}
                 style={[
                   styles.card,
                   { width: CARD_WIDTH },
-                  cardStyles[i],
                 ]}
               >
                 {/* Card Gradient Background */}
@@ -1115,7 +1119,7 @@ export default function OnboardingScreen({ _navigation }: any) {
                     ))}
                   </View>
                 </View>
-              </Animated.View>
+              </AnimatedStepCard>
             );          })
         }
         </Animated.ScrollView>

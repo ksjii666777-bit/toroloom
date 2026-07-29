@@ -24,7 +24,7 @@ import {
 import Animated, { FadeInRight, FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation as useNavigationHook } from '@react-navigation/native';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import type { CryptoDetailData } from '../../services/api/globalMarkets';
@@ -186,7 +186,9 @@ function formatSupply(num: number | null | undefined): string {
 export default function CryptoDetailScreen({ route, navigation }: any) {
   const { coinId, coinSymbol, coinName } = route.params || {};
   const { colors } = useTheme();
-  const nav = navigation || useNavigation<any>();
+  // Call unconditionally (Rules of Hooks) — navigation prop is always available inside navigator
+  const hookNav = useNavigationHook<any>();
+  const nav = navigation || hookNav;
 
   const [data, setData] = useState<CryptoDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);

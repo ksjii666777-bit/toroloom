@@ -35,6 +35,8 @@ export default function CourseDetailScreen({ route, navigation }: any) {
     if (course) fetchLesson(lessons[0]?.id || '');
   }, [courseId, course, fetchLesson, lessons]);
 
+  const { certificates } = useEducationStore();
+
   if (!course) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -53,10 +55,9 @@ export default function CourseDetailScreen({ route, navigation }: any) {
 
   const _handleMarkComplete = async (lessonId: string) => {
     await markLessonComplete(lessonId);
-    addXp(50); // Reward XP for completing a lesson
+    addXp(50);
   };
 
-  const { certificates } = useEducationStore();
   const nextIncomplete = lessons.find(l => !(lessonProgress[l.id] || l.completed));
   const allLessonsComplete = !nextIncomplete && completedCount === course.lessons;
   const certificate = certificates.find(c => c.courseId === courseId);

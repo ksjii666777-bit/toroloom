@@ -108,7 +108,7 @@ const SECTOR_MAP: Record<string, string> = {
   // Fallback: 'Other',
 };
 
-function classifySector(symbol: string): string {
+export function classifySector(symbol: string): string {
   // Normalize: remove common suffixes / prefixes
   const clean = symbol.replace(/\.NS$|\.BSE$|-EQ$/i, '').toUpperCase();
   return SECTOR_MAP[clean] || 'Other';

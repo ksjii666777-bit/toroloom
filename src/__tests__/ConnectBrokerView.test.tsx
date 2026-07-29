@@ -21,40 +21,21 @@ import { render } from './testUtils';
 
 const mockGoBack = vi.fn();
 
-// Mock session storage services
-const mockHasValidSession = vi.fn();
-const mockStoreBrokerSession = vi.fn();
-const mockClearBrokerSession = vi.fn();
-const mockGetBrokerHoldings = vi.fn();
+// Hoisted SnapTrade API mocks so per-test overrides work
+const mockSnapTradeStatus = vi.hoisted(() => vi.fn(() => Promise.resolve({ connected: false })));
+const mockBrokerApiGetHoldings = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true, data: {} })));
 
-vi.mock('../services/gateway/sessionStorage', () => ({
-  hasValidSession: (...args: any[]) => mockHasValidSession(...args),
-  storeBrokerSession: (...args: any[]) => mockStoreBrokerSession(...args),
-  clearBrokerSession: (...args: any[]) => mockClearBrokerSession(...args),
-  parseSessionPayload: vi.fn((payload: any) => ({ ...payload, parsed: true })),
-}));
-
-vi.mock('../services/gateway/proxyClient', () => ({
-  getBrokerHoldings: (...args: any[]) => mockGetBrokerHoldings(...args),
-}));
-
-// Mock API services used by the component (snapTradeApi, brokerProxyApi, angelConnectApi)
+// Mock API services used by the component (snapTradeApi, brokerProxyApi)
 vi.mock('../services/api', () => ({
   snapTradeApi: {
-    status: vi.fn(() => Promise.resolve({ connected: false })),
+    status: mockSnapTradeStatus,
     register: vi.fn(() => Promise.resolve({ success: true })),
     getConnectLink: vi.fn(() => Promise.resolve({ oauthUrl: '' })),
     handleCallback: vi.fn(() => Promise.resolve({ success: true, connection: {} })),
     disconnect: vi.fn(() => Promise.resolve()),
   },
   brokerProxyApi: {
-    getHoldings: vi.fn(() => Promise.resolve({ success: true, data: {} })),
-  },
-  angelConnectApi: {
-    connect: vi.fn(() => Promise.resolve({ success: true })),
-    status: vi.fn(() => Promise.resolve({ connected: false })),
-    holdings: vi.fn(() => Promise.resolve({ success: true, data: [] })),
-    disconnect: vi.fn(() => Promise.resolve()),
+    getHoldings: mockBrokerApiGetHoldings,
   },
 }));
 
@@ -67,7 +48,7 @@ vi.mock('../components/ui/AnimatedPressable', () => ({
   default: 'AnimatedPressable',
 }));
 
-// Mock useT to return English text for brokerConnect keys so existing test assertions work
+// Mock useT to return English text for brokerConnect keys for brokerConnect keys so existing test assertions work
 const brokerConnectTranslations: Record<string, string> = {
   'brokerConnect.title': 'Connect Broker',
   'brokerConnect.subtitle': '1-tap OAuth — powered by SnapTrade',
@@ -125,24 +106,22 @@ async function flushPromises() {
 beforeEach(() => {
   vi.clearAllMocks();
   // Default: no existing session
-  mockHasValidSession.mockResolvedValue(false);
-  mockStoreBrokerSession.mockResolvedValue(true);
-  mockClearBrokerSession.mockResolvedValue(undefined);
-  mockGetBrokerHoldings.mockResolvedValue({ success: true, statusCode: 200, data: {} });
+  mockSnapTradeStatus.mockResolvedValue({ connected: false });
+  mockBrokerApiGetHoldings.mockResolvedValue({ success: true, data: {} });
 });
 
 // ==================== Tests ====================
 
 describe('ConnectBrokerView — Loading State', () => {
   it('shows loading indicator while checking existing sessions', async () => {
-    mockHasValidSession.mockImplementation(() => new Promise(() => {}));
+    mockSnapTradeStatus.mockImplementation(() => new Promise(() => {}));
 
     const { getByText } = renderView();
     expect(getByText('Checking connection status...')).toBeDefined();
   });
 
   it('shows ActivityIndicator while loading', () => {
-    mockHasValidSession.mockImplementation(() => new Promise(() => {}));
+    mockSnapTradeStatus.mockImplementation(() => new Promise(() => {}));
 
     const { toJSON } = renderView();
     expect(toJSON()).toBeTruthy();
@@ -151,7 +130,7 @@ describe('ConnectBrokerView — Loading State', () => {
 
 describe('ConnectBrokerView — Disconnected State', () => {
   beforeEach(() => {
-    mockHasValidSession.mockResolvedValue(false);
+    mockSnapTradeStatus.mockResolvedValue({ connected: false });
   });
 
   it('renders the screen title', async () => {
@@ -238,8 +217,8 @@ describe('ConnectBrokerView — Disconnected State', () => {
 });
 
 describe('ConnectBrokerView — Connected State', () => {
-  it('renders connected banner when hasValidSession finds a session', async () => {
-    mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'zerodha');
+  it('renders connected banner when snapTradeApi returns connected', async () => {
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
 
     const { getByText } = renderView();
     await flushPromises();
@@ -247,7 +226,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('shows broker name in connected banner', async () => {
-    mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'zerodha');
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
 
     const { getByText } = renderView();
     await flushPromises();
@@ -255,7 +234,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('renders Test API button when connected', async () => {
-    mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'angel');
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' });
 
     const { getByText } = renderView();
     await flushPromises();
@@ -263,7 +242,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('renders Disconnect button when connected', async () => {
-    mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'angel');
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' });
 
     const { getByText } = renderView();
     await flushPromises();
@@ -271,7 +250,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('shows "Session Active" on connected broker card', async () => {
-    mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'zerodha');
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
 
     const { getByText } = renderView();
     await flushPromises();
@@ -279,7 +258,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('shows section subtitle asking to switch broker when connected', async () => {
-    mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'zerodha');
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
 
     const { getByText } = renderView();
     await flushPromises();
@@ -288,8 +267,8 @@ describe('ConnectBrokerView — Connected State', () => {
 });
 
 describe('ConnectBrokerView — Edge Cases', () => {
-  it('renders without crashing when hasValidSession rejects', async () => {
-    mockHasValidSession.mockRejectedValue(new Error('Storage error'));
+  it('renders without crashing when snapTradeApi.status rejects', async () => {
+    mockSnapTradeStatus.mockRejectedValue(new Error('API error'));
 
     const { toJSON } = renderView();
     await flushPromises();

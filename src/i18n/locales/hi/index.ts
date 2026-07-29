@@ -32,6 +32,7 @@ import mutualFunds from './mutualFunds';
 import notifications from './notifications';
 import onboarding from './onboarding';
 import paymentHistory from './paymentHistory';
+import periodReport from './periodReport';
 import performanceChart from './performanceChart';
 import portfolio from './portfolio';
 import portfolioAlerts from './portfolioAlerts';
@@ -87,6 +88,7 @@ const hi = {
   notifications,
   onboarding,
   paymentHistory,
+  periodReport,
   performanceChart,
   portfolio,
   portfolioAlerts,

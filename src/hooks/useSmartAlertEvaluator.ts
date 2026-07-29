@@ -202,6 +202,7 @@ export function useSmartAlertEvaluator(): SmartAlertEvaluatorState {
   // the useEffect would re-run, clearing the interval AND the history cache.
   // Using a ref ensures the interval always calls the latest version.
 
+  // Standard React pattern: keep ref pointing to latest callback without restarting effects
   const runEvalRef = useRef(runEvaluationCycle);
   runEvalRef.current = runEvaluationCycle;
 

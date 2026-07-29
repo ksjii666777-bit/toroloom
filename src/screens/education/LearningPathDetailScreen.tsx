@@ -40,9 +40,10 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
   // Get path courses
   const pathCourses = useMemo(() => {
     if (!path) return [];
-    return path.courseIds
-      .map(cid => mockCourses.find(c => c.id === cid))
-      .filter(Boolean) as typeof mockCourses;
+    return path.courseIds.flatMap(cid => {
+      const course = mockCourses.find(c => c.id === cid);
+      return course ? [course] : [];
+    }) as typeof mockCourses;
   }, [path]);
 
   // Calculate overall progress

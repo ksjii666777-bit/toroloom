@@ -181,7 +181,8 @@ export async function deleteApiKey(keyId: string, userId: string): Promise<boole
  * Check if a API key's scopes include all the required scopes.
  */
 export function hasRequiredScopes(keyScopes: string[], requiredScopes: string[]): boolean {
-  return requiredScopes.every(s => keyScopes.includes(s));
+  const keyScopesSet = new Set(keyScopes);
+  return requiredScopes.every(s => keyScopesSet.has(s));
 }
 
 /**

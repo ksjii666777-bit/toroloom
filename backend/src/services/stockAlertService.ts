@@ -351,10 +351,11 @@ export async function getActiveAlertsBySymbols(
 
   // In-memory fallback — scan all users
   const grouped = new Map<string, StockAlert[]>();
+  const symbolsSet = symbols.length > 0 ? new Set(symbols) : null;
   for (const userAlerts of _memoryStore.values()) {
     for (const alert of userAlerts.values()) {
       if (alert.status !== 'active') continue;
-      if (symbols.length > 0 && !symbols.includes(alert.symbol)) continue;
+      if (symbolsSet && !symbolsSet.has(alert.symbol)) continue;
       const existing = grouped.get(alert.symbol) || [];
       existing.push(alert);
       grouped.set(alert.symbol, existing);

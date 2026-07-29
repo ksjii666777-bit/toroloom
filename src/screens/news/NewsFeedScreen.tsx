@@ -628,17 +628,19 @@ export default function NewsFeedScreen({ navigation }: any) {
   }, []);
 
   const toggleSearch = useCallback(() => {
-    setShowSearch(prev => {
-      const next = !prev;
-      if (next) {
-        setTimeout(() => searchRef.current?.focus(), 200);
-      } else {
-        setSearchQuery('');
-        Keyboard.dismiss();
-      }
-      return next;
-    });
+    setShowSearch(prev => !prev);
   }, []);
+
+  // Search bar side effects — auto-focus on open, clear on close
+  useEffect(() => {
+    if (showSearch) {
+      const timer = setTimeout(() => searchRef.current?.focus(), 200);
+      return () => clearTimeout(timer);
+    } else {
+      setSearchQuery('');
+      if (typeof Keyboard.dismiss === 'function') Keyboard.dismiss();
+    }
+  }, [showSearch]);
 
   return (
     <View style={[feedStyles.container, { backgroundColor: colors.bg }]}>

@@ -84,7 +84,8 @@ router.post('/', async (req: Request, res: Response) => {
       'notifications:read',
     ];
 
-    const invalidScopes = scopes.filter((s: string) => !validScopes.includes(s));
+    const validScopesSet = new Set(validScopes);
+    const invalidScopes = scopes.filter((s: string) => !validScopesSet.has(s));
     if (invalidScopes.length > 0) {
       res.status(400).json({
         error: `Invalid scopes: ${invalidScopes.join(', ')}`,

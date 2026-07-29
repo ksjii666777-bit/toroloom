@@ -117,6 +117,7 @@ const ALERT_KINDS: {
 ];
 
 const HOLDING_KINDS: PortfolioAlertKind[] = ['holding_day_gain_pct', 'holding_pnl_pct'];
+const HOLDING_KINDS_SET = new Set(HOLDING_KINDS);
 
 export default function PortfolioAlertsScreen({ navigation }: any) {
   const { colors } = useTheme();
@@ -177,7 +178,8 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
     setStockPickerVisible(false);
 
     // Get selected holding info
-    const selectedHoldings = holdings.filter(h => selectedStockIds.includes(h.stockId));
+    const selectedStockIdsSet = new Set(selectedStockIds);
+    const selectedHoldings = holdings.filter(h => selectedStockIdsSet.has(h.stockId));
     const symbols = selectedHoldings.map(h => h.symbol);
     const labelSuffix = symbols.length <= 2
       ? symbols.join(', ')
@@ -228,7 +230,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
     if (!config) return;
 
     // Holding-specific alerts need a stock picker first
-    if (HOLDING_KINDS.includes(kind)) {
+    if (HOLDING_KINDS_SET.has(kind)) {
       openStockPicker(kind);
       return;
     }
@@ -322,9 +324,10 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
   const renderAlertCard = (rule: typeof portfolioAlertRules[0]) => {
     const config = ALERT_KINDS.find(c => c.kind === rule.kind);
     if (!config) return null;
-    const isHoldingKind = HOLDING_KINDS.includes(rule.kind);
-    const _holdingInfos = isHoldingKind && rule.symbols?.length
-      ? holdings.filter(h => rule.symbols!.includes(h.symbol))
+    const ruleSymbolsSet = rule.symbols?.length ? new Set(rule.symbols) : null;
+    const isHoldingKind = HOLDING_KINDS_SET.has(rule.kind);
+    const _holdingInfos = isHoldingKind && ruleSymbolsSet
+      ? holdings.filter(h => ruleSymbolsSet.has(h.symbol))
       : [];
 
     return (
@@ -478,6 +481,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
               const exists = portfolioAlertRules.some(r => r.kind === config.kind && r.enabled);
               return (
                 <Pressable
+                  key={config.kind}
                   disabled={exists}
                   onPress={() => handleAddRule(config.kind)}
                 >
@@ -762,19 +766,23 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                     .forEach(r => r.stockIds!.forEach(sid => alertedIds.add(sid)));
                 }
 
-                return filteredHoldings.filter(h => !alertedIds.has(h.stockId)).map(h => (
-                  <Pressable key={h.stockId} onPress={() => toggleStockSelection(h.stockId)} style={styles.modalItem}>
-                    <View style={styles.modalItemInfo}>
-                      <Text style={[styles.modalItemSymbol, { color: colors.text }]}>{h.symbol}</Text>
-                      <Text style={[styles.modalItemName, { color: colors.textMuted }]} numberOfLines={1}>{h.name}</Text>
-                    </View>
-                    <Ionicons
-                      name={selectedStockIds.includes(h.stockId) ? 'checkbox' : 'square-outline'}
-                      size={22}
-                      color={selectedStockIds.includes(h.stockId) ? colors.primary : colors.textMuted}
-                    />
-                  </Pressable>
-                ));
+                const selectedStockIdsSet = new Set(selectedStockIds);
+                return filteredHoldings.filter(h => !alertedIds.has(h.stockId)).map(h => {
+                  const isSelected = selectedStockIdsSet.has(h.stockId);
+                  return (
+                    <Pressable key={h.stockId} onPress={() => toggleStockSelection(h.stockId)} style={styles.modalItem}>
+                      <View style={styles.modalItemInfo}>
+                        <Text style={[styles.modalItemSymbol, { color: colors.text }]}>{h.symbol}</Text>
+                        <Text style={[styles.modalItemName, { color: colors.textMuted }]} numberOfLines={1}>{h.name}</Text>
+                      </View>
+                      <Ionicons
+                        name={isSelected ? 'checkbox' : 'square-outline'}
+                        size={22}
+                        color={isSelected ? colors.primary : colors.textMuted}
+                      />
+                    </Pressable>
+                  );
+                });
               })()}
             </ScrollView>
 

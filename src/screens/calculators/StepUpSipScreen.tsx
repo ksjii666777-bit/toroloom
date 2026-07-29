@@ -170,12 +170,12 @@ export default function StepUpSipScreen() {
                       <Text style={[styles.stepUpActiveDetail, { color: colors.textSecondary }]}>
                         {getStepUpSummary(sip.stepUp)}
                       </Text>
-                      {sip.stepUp.projectedAmount && (
+                      {sip.stepUp.projectedAmount ? (
                         <Text style={[styles.stepUpProjection, { color: colors.text }]}>
                           After 10 years: <Text style={{ color: colors.accent, fontFamily: FONTS.bold.fontFamily, fontWeight: FONTS.bold.fontWeight }}>
                             {formatCurrency(sip.stepUp.projectedAmount)}</Text>/month
                         </Text>
-                      )}
+                      ) : null}
                       {/* Mini Projection Chart */}
                       {projection && maxProjection > 0 && (
                         <View style={styles.miniChart}>

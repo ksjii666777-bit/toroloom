@@ -99,12 +99,15 @@ function estimateDividends(holdings: any[]): { upcoming: DividendEventResponse[]
     const annualPerShare = holding.price * (holding.dividend / 100);
     const paymentPerOccurrence = annualPerShare / months.length;
 
+    // Build Set for constant-time membership check inside loop
+    const monthsSet = new Set(months);
+
     // Upcoming (next 4 occurrences)
     let occurrencesFound = 0;
     for (let m = 0; m < 18 && occurrencesFound < 4; m++) {
       const checkMonth = (currentMonth + m) % 12;
       const checkYear = currentYear + Math.floor((currentMonth + m) / 12);
-      if (months.includes(checkMonth)) {
+      if (monthsSet.has(checkMonth)) {
         occurrencesFound++;
         const exDate = new Date(checkYear, checkMonth, 15);
         const payDate = new Date(checkYear, checkMonth, 25);
@@ -128,7 +131,7 @@ function estimateDividends(holdings: any[]): { upcoming: DividendEventResponse[]
     for (let m = 1; m <= 12; m++) {
       const checkMonth = (currentMonth - m + 12) % 12;
       const checkYear = currentYear - (m > currentMonth ? 1 : 0);
-      if (months.includes(checkMonth)) {
+      if (monthsSet.has(checkMonth)) {
         const exDate = new Date(checkYear, checkMonth, 15);
         const payDate = new Date(checkYear, checkMonth, 25);
         history.push({

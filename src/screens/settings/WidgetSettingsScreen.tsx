@@ -233,7 +233,7 @@ export default function WidgetSettingsScreen({ navigation }: any) {
   const metricOptions: { key: WidgetPreferences['highlightedMetric']; label: string; icon: string }[] = [
     { key: 'totalValue', label: t('widgetSettings.totalValue'), icon: 'wallet' },
     { key: 'pnl', label: t('widgetSettings.pnlAmount'), icon: 'trending-up' },
-    { key: 'pnlPercent', label: t('widgetSettings.pnlPercent'), icon: 'percent' },
+    { key: 'pnlPercent', label: t('widgetSettings.pnlPercent'), icon: 'percent-outline' },
     { key: 'topHolding', label: t('widgetSettings.topHolding'), icon: 'star' },
   ];
 
@@ -434,9 +434,11 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                 {t('widgetSettings.tapToHide')}
               </Text>
               <View style={styles.symbolGrid}>
-                {allSymbols.map(sym => {
-                  const isHidden = prefs.hiddenSymbols.includes(sym);
-                  return (
+                {(() => {
+                  const hiddenSymbolsSet = new Set(prefs.hiddenSymbols);
+                  return allSymbols.map(sym => {
+                    const isHidden = hiddenSymbolsSet.has(sym);
+                    return (
                     <Pressable
                       key={sym}
                       style={[
@@ -461,7 +463,8 @@ export default function WidgetSettingsScreen({ navigation }: any) {
                       </Text>
                     </Pressable>
                   );
-                })}
+                  });
+                })()}
               </View>
             </Animated.View>
           )}

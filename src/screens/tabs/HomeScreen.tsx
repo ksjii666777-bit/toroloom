@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, TextInput, Modal, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -112,6 +113,14 @@ export default function HomeScreen({ navigation }: any) {
 
   const topGainers = [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 3);
   const topLosers = [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 3);
+
+  // Calculators data for horizontal list
+  const calculatorsData = useMemo(() => [
+    { icon: 'calculator' as const, label: t('home.sipCalculator'), desc: t('home.systematicInvestment'), color: colors.primary, screen: 'SIPCalculator' },
+    { icon: 'briefcase' as const, label: t('calculators.lumpsum'), desc: t('home.oneTimeInvestment'), color: colors.accent, screen: 'LumpsumCalculator' },
+    { icon: 'trending-up' as const, label: t('calculators.emi'), desc: t('home.loanCalculator'), color: colors.warning, screen: 'EMICalculator' },
+    { icon: 'cash' as const, label: t('calculators.tax'), desc: t('home.capitalGainsTax'), color: colors.secondary, screen: 'TaxCalculator' },
+  ], [t]);
 
   // ── Sector Heatmap ────────────────────────────────────────────
   const sectorPerformance = useMemo(() => {
@@ -451,11 +460,16 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.seeAll}>{t('app.seeAll')}</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.indicesScroll}>
-            {indices.map((index) => (
-              <MarketCard key={index.id} index={index} />
-            ))}
-          </ScrollView>
+          <FlashList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={indices}
+            keyExtractor={(index) => index.id}
+            renderItem={({ item: index }) => (
+              <MarketCard index={index} />
+            )}
+            style={styles.indicesScroll}
+          />
         </ReanimatedAnimated.View>
 
         {/* Sector Heatmap */}
@@ -496,15 +510,13 @@ export default function HomeScreen({ navigation }: any) {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle} testID="home-section-calculators">{t('home.financialCalculators')}</Text>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {[
-              { icon: 'calculator', label: t('home.sipCalculator'), desc: t('home.systematicInvestment'), color: colors.primary, screen: 'SIPCalculator' },
-              { icon: 'briefcase', label: t('calculators.lumpsum'), desc: t('home.oneTimeInvestment'), color: colors.accent, screen: 'LumpsumCalculator' },
-              { icon: 'trending-up', label: t('calculators.emi'), desc: t('home.loanCalculator'), color: colors.warning, screen: 'EMICalculator' },
-              { icon: 'cash', label: t('calculators.tax'), desc: t('home.capitalGainsTax'), color: colors.secondary, screen: 'TaxCalculator' },
-            ].map((calc, i) => (
+          <FlashList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={calculatorsData}
+            keyExtractor={(calc) => calc.screen}
+            renderItem={({ item: calc }) => (
               <TouchableOpacity
-                key={i}
                 style={[styles.calcCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
                 onPress={() => navigation.navigate(calc.screen)}
                 activeOpacity={0.7}
@@ -515,8 +527,8 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={[styles.calcLabel, { color: colors.text }]}>{calc.label}</Text>
                 <Text style={[styles.calcDesc, { color: colors.textMuted }]}>{calc.desc}</Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            )}
+          />
         </ReanimatedAnimated.View>
 
         {/* AI Market Insight */}
@@ -920,10 +932,13 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={styles.seeAll}>{t('home.allNews')}</Text>
               </TouchableOpacity>
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {latestNews.map((news: any, i: number) => (
+            <FlashList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={latestNews}
+              keyExtractor={(news: any, i: number) => news.id || String(i)}
+              renderItem={({ item: news }: { item: any }) => (
                 <TouchableOpacity
-                  key={news.id || i}
                   style={[styles.newsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
                   onPress={() => navigation.navigate('NewsFeed')}
                   activeOpacity={0.7}
@@ -944,8 +959,8 @@ export default function HomeScreen({ navigation }: any) {
                     {news.source} · {new Date(news.publishedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
+              )}
+            />
           </ReanimatedAnimated.View>
         )}
 

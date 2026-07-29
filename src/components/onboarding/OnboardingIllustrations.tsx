@@ -1209,30 +1209,4 @@ export function LearnIllustration({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Illustration Resolver
-// ═══════════════════════════════════════════════════════════════════════════
-
-interface IllustrationProps {
-  stepId: string;
-  gradient: readonly [string, string];
-}
-
-export function renderIllustration({ stepId, gradient }: IllustrationProps) {
-  switch (stepId) {
-    case 'welcome':
-      return <RocketIllustration colors={gradient} />;
-    case 'portfolio':
-      return <PortfolioIllustration colors={gradient} />;
-    case 'markets':
-      return <MarketsIllustration colors={gradient} />;
-    case 'trading':
-      return <TradingIllustration colors={gradient} />;
-    case 'broker':
-      return <BrokerIllustration colors={gradient} />;
-    case 'learn':
-      return <LearnIllustration colors={gradient} />;
-    default:
-      return null;
-  }
-}
+// (renderIllustration moved to onboardingUtils.ts)

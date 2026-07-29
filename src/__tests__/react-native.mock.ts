@@ -155,6 +155,7 @@ export const Animated = {
   loop: (_animation: any) => ({ start: (cb?: () => void) => cb?.(), stop: () => {} }),
   delay: (_ms: number) => ({ start: (cb?: () => void) => cb?.(), stop: () => {} }),
   event: (_argMapping: any[], _config?: any) => () => {},
+  createAnimatedComponent: (Component: any) => Component,
 };
 
 // ── PixelRatio ———————————————————————————————————————————————

@@ -61,6 +61,7 @@ export default function QuizComponent({
   const progressAnim = useRef(new Animated.Value(0)).current;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(Date.now());
+  const autoSubmittedRef = useRef(false);
 
   const questions = quiz.questions;
   const totalQuestions = questions.length;
@@ -68,23 +69,28 @@ export default function QuizComponent({
   const answeredCount = Object.keys(selectedAnswers).length;
   const progress = totalQuestions > 0 ? (currentQuestionIndex / totalQuestions) : 0;
 
-  // Timer
+  // Timer — pure decrement (no side effects inside updater)
   useEffect(() => {
     if (timerMinutes <= 0) return;
+    autoSubmittedRef.current = false;
     startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          handleAutoSubmit();
-          return 0;
-        }
-        if (prev <= 60) setIsTimerWarning(true);
-        return prev - 1;
-      });
+      setTimeRemaining(prev => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [timerMinutes]);
+
+  // Timer side effects — auto-submit on expiry, warning at 60s
+  useEffect(() => {
+    if (timerMinutes <= 0 || autoSubmittedRef.current) return;
+    if (timeRemaining <= 0) {
+      autoSubmittedRef.current = true;
+      if (timerRef.current) clearInterval(timerRef.current);
+      handleAutoSubmit();
+    } else if (timeRemaining <= 60) {
+      setIsTimerWarning(true);
+    }
+  }, [timeRemaining, timerMinutes, handleAutoSubmit]);
 
   // Animate progress
   useEffect(() => {

@@ -58,6 +58,7 @@ import TradeHistoryScreen from '../screens/trade/TradeHistoryScreen';
 import PlaceOrderScreen from '../screens/trade/PlaceOrderScreen';
 import OpenOrdersScreen from '../screens/trade/OpenOrdersScreen';
 import ReportsScreen from '../screens/reports/ReportsScreen';
+import PeriodReportScreen from '../screens/reports/PeriodReportScreen';
 import HelpScreen from '../screens/support/HelpScreen';
 import AchievementsScreen from '../screens/achievements/AchievementsScreen';
 import NotificationPreferencesScreen from '../screens/settings/NotificationPreferencesScreen';
@@ -535,6 +536,7 @@ export default function AppNavigator() {
             <Stack.Screen name="PlaceOrder" component={PlaceOrderScreen} />
             <Stack.Screen name="OpenOrders" component={OpenOrdersScreen} />
             <Stack.Screen name="Reports" component={ReportsScreen} />
+            <Stack.Screen name="PeriodReport" component={PeriodReportScreen} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="Achievements" component={AchievementsScreen} />
             <Stack.Screen name="Settings" component={RiskSettingsScreen} />

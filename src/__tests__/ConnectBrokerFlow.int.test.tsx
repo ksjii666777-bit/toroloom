@@ -16,30 +16,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockGoBack = vi.fn();
 
-// Session storage services — hoisted so vi.mock() factory can reference them
-const mockHasValidSession = vi.hoisted(() => vi.fn());
-const mockStoreBrokerSession = vi.hoisted(() => vi.fn());
-const mockClearBrokerSession = vi.hoisted(() => vi.fn());
-const mockParseSessionPayload = vi.hoisted(() => vi.fn());
-const mockGetBrokerHoldings = vi.hoisted(() => vi.fn());
-
-vi.mock('../services/gateway/sessionStorage', () => ({
-  hasValidSession: mockHasValidSession,
-  storeBrokerSession: mockStoreBrokerSession,
-  clearBrokerSession: mockClearBrokerSession,
-  parseSessionPayload: mockParseSessionPayload,
-  listStoredSessions: vi.fn().mockResolvedValue([]),
-}));
-
-vi.mock('../services/gateway/proxyClient', () => ({
-  getBrokerHoldings: mockGetBrokerHoldings,
-}));
+// (sessionStorage and proxyClient mocks removed — component now uses snapTradeApi only)
 
 // Mock API services used by ConnectBrokerView
 const mockSnapTradeStatus = vi.hoisted(() => vi.fn(() => Promise.resolve({ connected: false })));
+const mockBrokerApiGetHoldings = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true, statusCode: 200, data: { holdings: [] } })));
 const mockSnapTradeRegister = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true })));
 const mockSnapTradeGetLink = vi.hoisted(() => vi.fn(() => Promise.resolve({ oauthUrl: 'https://example.com/oauth' })));
-const mockBrokerApiGetHoldings = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true, statusCode: 200, data: { holdings: [] } })));
 
 vi.mock('../services/api', () => ({
   snapTradeApi: {
@@ -114,35 +97,13 @@ async function flushPromises() {
   });
 }
 
-async function flushWithModalDelay() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  });
-}
-
 function renderView() {
   return render(<ConnectBrokerView navigation={{ goBack: mockGoBack }} />);
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockHasValidSession.mockResolvedValue(false);
-  mockStoreBrokerSession.mockResolvedValue(true);
-  mockClearBrokerSession.mockResolvedValue(undefined);
-  mockGetBrokerHoldings.mockResolvedValue({ success: true, statusCode: 200, data: { holdings: [] } });
-  mockParseSessionPayload.mockImplementation((payload: any) => ({
-    brokerType: payload.brokerType,
-    cookies: payload.cookies,
-    capturedAt: payload.capturedAt,
-    enctoken: 'parsed_enc_token',
-    jwt: 'parsed_jwt',
-    accessToken: undefined,
-    userId: undefined,
-  }));
-  // Restore SnapTrade mocks after clear
   mockSnapTradeStatus.mockResolvedValue({ connected: false });
-  mockSnapTradeRegister.mockResolvedValue({ success: true });
-  mockSnapTradeGetLink.mockResolvedValue({ oauthUrl: 'https://example.com/oauth' });
   mockBrokerApiGetHoldings.mockResolvedValue({ success: true, statusCode: 200, data: { holdings: [] } });
 });
 
@@ -171,39 +132,27 @@ describe('ConnectBrokerView', () => {
     });
   });
 
-  describe('Flow 2: Angel One Connection', () => {
-    it('shows Angel Options modal when Angel One is tapped', async () => {
+  describe('Flow 2: SnapTrade Connect (all brokers)', () => {
+    it('renders Angel One broker card ready for SnapTrade OAuth', async () => {
       const { getByText } = renderView();
       await flushPromises();
 
-      act(() => { fireEvent.press(getByText('Angel One')); });
-      await flushWithModalDelay();
-      await flushPromises();
-
-      expect(getByText('SmartAPI (Official)')).toBeDefined();
-      expect(getByText('Zero-API Sync')).toBeDefined();
-      expect(getByText('Cancel')).toBeDefined();
+      expect(getByText('Angel One')).toBeDefined();
+      expect(getByText('Tap to Connect')).toBeDefined();
     });
 
-    it('opens session sync when Zero-API Sync is selected', async () => {
+    it('renders Zerodha broker card ready for SnapTrade OAuth', async () => {
       const { getByText } = renderView();
       await flushPromises();
 
-      act(() => { fireEvent.press(getByText('Angel One')); });
-      await flushWithModalDelay();
-      await flushPromises();
-
-      act(() => { fireEvent.press(getByText('Zero-API Sync')); });
-      await flushWithModalDelay();
-      await flushPromises();
-
-      expect(getByText('Connect Angel One')).toBeDefined();
+      expect(getByText('Zerodha')).toBeDefined();
+      expect(getByText('Tap to Connect')).toBeDefined();
     });
   });
 
   describe('Flow 3: Connected State', () => {
     it('detects existing Zerodha session and shows connected state', async () => {
-      mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'zerodha');
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
 
       const { getByText } = renderView();
       expect(getByText('Checking connection status...')).toBeDefined();
@@ -217,7 +166,7 @@ describe('ConnectBrokerView', () => {
     });
 
     it('detects existing Angel One session', async () => {
-      mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'angel');
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' });
 
       const { getByText } = renderView();
       await flushPromises();
@@ -229,7 +178,7 @@ describe('ConnectBrokerView', () => {
     });
 
     it('detects existing Groww session', async () => {
-      mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'groww');
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'groww', brokerName: 'Groww' });
 
       const { getByText } = renderView();
       await flushPromises();
@@ -242,7 +191,7 @@ describe('ConnectBrokerView', () => {
 
   describe('Flow 4: Test API', () => {
     it('calls brokerProxyApi.getHoldings when Test API is pressed', async () => {
-      mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'angel');
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' });
 
       const { getByText } = renderView();
       await flushPromises();
@@ -255,7 +204,7 @@ describe('ConnectBrokerView', () => {
 
     it('handles Test API failure gracefully', async () => {
       mockBrokerApiGetHoldings.mockRejectedValue(new Error('Network error'));
-      mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'angel');
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' });
 
       const { getByText } = renderView();
       await flushPromises();
@@ -269,7 +218,7 @@ describe('ConnectBrokerView', () => {
 
   describe('Flow 5: Disconnect', () => {
     it('triggers disconnect when Disconnect is pressed in connected state', async () => {
-      mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'zerodha');
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
 
       const { getByText } = renderView();
       await flushPromises();
@@ -279,12 +228,12 @@ describe('ConnectBrokerView', () => {
       act(() => { fireEvent.press(getByText('Disconnect')); });
       await flushPromises();
 
-      expect(mockClearBrokerSession).not.toHaveBeenCalled();
+      // Disconnect shows an Alert confirmation dialog
       expect(getByText('Connected')).toBeDefined();
     });
 
     it('tapping connected broker card triggers disconnect flow', async () => {
-      mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'zerodha');
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
 
       const { getByText } = renderView();
       await flushPromises();
@@ -294,20 +243,21 @@ describe('ConnectBrokerView', () => {
       act(() => { fireEvent.press(getByText('Zerodha')); });
       await flushPromises();
 
-      expect(mockClearBrokerSession).not.toHaveBeenCalled();
+      // Pressing a connected broker card triggers the disconnect Alert
+      expect(getByText('Connected')).toBeDefined();
     });
   });
 
   describe('Flow 6: Loading Edge Cases', () => {
     it('shows loading state while session check is pending', () => {
-      mockHasValidSession.mockImplementation(() => new Promise(() => {}));
+      mockSnapTradeStatus.mockImplementation(() => new Promise(() => {}));
 
       const { getByText } = renderView();
       expect(getByText('Checking connection status...')).toBeDefined();
     });
 
     it('recovers gracefully when session check errors', async () => {
-      mockHasValidSession.mockRejectedValue(new Error('Storage corrupted'));
+      mockSnapTradeStatus.mockRejectedValue(new Error('API error'));
 
       const { toJSON } = renderView();
       await flushPromises();
@@ -316,7 +266,7 @@ describe('ConnectBrokerView', () => {
     });
 
     it('renders without crashing in loading state', () => {
-      mockHasValidSession.mockImplementation(() => new Promise(() => {}));
+      mockSnapTradeStatus.mockImplementation(() => new Promise(() => {}));
 
       const { toJSON } = renderView();
       expect(toJSON()).toBeTruthy();
@@ -334,7 +284,7 @@ describe('ConnectBrokerView', () => {
     });
 
     it('renders connected state with Zerodha session', async () => {
-      mockHasValidSession.mockImplementation(async (brokerType: string) => brokerType === 'zerodha');
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
 
       const { getByText } = renderView();
       await flushPromises();
@@ -376,15 +326,12 @@ describe('ConnectBrokerView', () => {
   });
 
   describe('Flow 8: Broker Switching', () => {
-    it('opens Angel Options for Angel One when tapped', async () => {
-      const { getByText } = renderView();
+    it('renders Angel One card in disconnected state without being marked as connected', async () => {
+      const { queryByText } = renderView();
       await flushPromises();
 
-      act(() => { fireEvent.press(getByText('Angel One')); });
-      await flushWithModalDelay();
-      await flushPromises();
-
-      expect(getByText('Connect Angel One')).toBeDefined();
+      // In disconnected state, broker cards show 'Tap to Connect' not 'Connected'
+      expect(queryByText('Connected')).toBeNull();
     });
 
     it('back button is configured', async () => {

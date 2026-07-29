@@ -109,17 +109,11 @@ export default function TelegramConnectScreen({ navigation }: any) {
     loadStatus();
   }, [loadStatus]);
 
-  // ── Countdown for code expiry ──
+  // ── Countdown for code expiry — pure decrement (cleanup handles interval clearing) ──
   useEffect(() => {
     if (!linkCode || codeExpiresIn <= 0) return;
     const interval = setInterval(() => {
-      setCodeExpiresIn(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setCodeExpiresIn(prev => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
     return () => clearInterval(interval);
   }, [linkCode, codeExpiresIn]);

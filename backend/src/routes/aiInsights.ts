@@ -276,14 +276,13 @@ router.post('/analyze/batch', async (req: Request, res: Response) => {
       }
     }
 
-    // Build final result preserving original order
-    const result = symbols
-      .map(sym => {
-        const cached = l1Hits.get(sym);
-        if (cached && cached !== null) return cached;
-        return fresh.find(i => i.symbol === sym);
-      })
-      .filter(Boolean) as AIInsight[];
+    // Build final result preserving original order — single pass via flatMap
+    const result = symbols.flatMap(sym => {
+      const cached = l1Hits.get(sym);
+      if (cached && cached !== null) return [cached];
+      const match = fresh.find(i => i.symbol === sym);
+      return match ? [match] : [];
+    }) as AIInsight[];
 
     res.json(result);
   } catch (error: unknown) {

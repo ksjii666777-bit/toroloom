@@ -42,7 +42,8 @@ export class InMemoryStorage implements StorageEngine {
       const types = Array.isArray(filter.eventType)
         ? filter.eventType
         : [filter.eventType];
-      filtered = filtered.filter((e) => types.includes(e.eventType));
+      const typesSet = new Set(types);
+      filtered = filtered.filter((e) => typesSet.has(e.eventType));
     }
     if (filter.startTime) {
       filtered = filtered.filter((e) => e.timestamp >= filter.startTime!);

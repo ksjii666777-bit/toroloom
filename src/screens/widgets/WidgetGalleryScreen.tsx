@@ -11,9 +11,10 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert,
+  View, Text, StyleSheet, TouchableOpacity, Alert,
   Pressable,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -85,17 +86,17 @@ export default function WidgetGalleryScreen({ navigation }: any) {
         </View>
       </View>
 
-      <ScrollView
+      <FlashList
+        data={Object.entries(grouped)}
+        keyExtractor={([category]) => category}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
-      >
-        {Object.entries(grouped).map(([category, metas]) => {
+        renderItem={({ item: [category, metas] }) => {
           const catMeta = CATEGORY_META[category] || { label: category, icon: 'grid' };
           const addedCount = metas.filter(m => existingTypes.has(m.type)).length;
 
           return (
             <Animated.View
-              key={category}
               entering={FadeInDown.duration(300).delay(100)}
               layout={Layout.springify()}
               style={styles.categorySection}
@@ -235,16 +236,16 @@ export default function WidgetGalleryScreen({ navigation }: any) {
               </View>
             </Animated.View>
           );
-        })}
-
-        {/* Tips */}
-        <View style={[styles.tipCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="information-circle" size={18} color={colors.primary} />
-          <Text style={[styles.tipText, { color: colors.textSecondary }]}>
-            Long-press any widget on the dashboard to reorder. Tap the ⋮ menu to resize or remove widgets.
-          </Text>
-        </View>
-      </ScrollView>
+        }}
+        ListFooterComponent={
+          <View style={[styles.tipCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="information-circle" size={18} color={colors.primary} />
+            <Text style={[styles.tipText, { color: colors.textSecondary }]}>
+              Long-press any widget on the dashboard to reorder. Tap the ⋮ menu to resize or remove widgets.
+            </Text>
+          </View>
+        }
+      />
     </View>
   );
 }

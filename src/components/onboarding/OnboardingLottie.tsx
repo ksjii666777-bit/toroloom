@@ -590,8 +590,8 @@ export default function OnboardingLottie({
 }
 
 // ─── Resolver ───────────────────────────────────────────────────────────────
-
-export function renderLottieIllustration(stepId: string) {
+// (internal — no longer exported to avoid Fast Refresh boundary issue)
+function renderLottieIllustration(stepId: string) {
   return (
     <OnboardingLottie
       stepId={stepId}

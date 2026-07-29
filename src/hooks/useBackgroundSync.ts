@@ -132,7 +132,7 @@ export async function runSyncCycle(source: 'auto_reconnect' | 'app_foreground' |
     failedCount: failed.length,
     error:
       resultType === 'failed'
-        ? failed.map((f) => f.error).filter(Boolean).join('; ')
+        ? failed.flatMap((f) => f.error ? [f.error] : []).join('; ')
         : undefined,
   });
 

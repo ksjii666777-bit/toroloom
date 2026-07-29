@@ -87,66 +87,18 @@ export function useCommodityPrices() {
   const subscribedRef = useRef(false);
   const detectionDoneRef = useRef(false);
 
-  const doSubscribe = useCallback(() => {
-    if (subscribedRef.current) return;
-    subscribedRef.current = true;
-
-    const ws = getActiveWS();
-
-    // Listen for connection changes
-    ws.onConnectionChangeCallback((isConnected) => {
-      setConnected(isConnected);
-    });
-
-    // Connect if not already connected
-    ws.connect().catch(() => {
-      log.warn('[CommodityWS] Connection failed');
-    });
-
-    // Subscribe to each commodity symbol
-    for (const symbol of COMMODITY_SYMBOLS) {
-      ws.subscribe(
-        symbol,
-        (tickData) => {
-          setPrices(prev => ({
-            ...prev,
-            [symbol]: {
-              price: tickData.price,
-              change: tickData.change,
-              changePercent: tickData.changePercent,
-              timestamp: tickData.timestamp,
-            },
-          }));
-          setLastUpdate(tickData.timestamp);
-        },
-        () => {
-          // We don't use candle data for commodities (price-only display)
-        },
-      );
-    }
-
-    setConnected(ws.getIsAuthenticated());
-  }, []);
-
-  const doUnsubscribe = useCallback(() => {
-    if (!subscribedRef.current) return;
-    subscribedRef.current = false;
-
-    const ws = getActiveWS();
-    for (const symbol of COMMODITY_SYMBOLS) {
-      ws.unsubscribe(symbol);
-    }
-  }, []);
-
   // ── On mount: detect backend, then subscribe ──────────────────────────
   useEffect(() => {
     if (detectionDoneRef.current) return;
     detectionDoneRef.current = true;
 
+    let cancelled = false;
+
     const init = async () => {
       setIsDetecting(true);
 
       const backendAvailable = await detectBackend();
+      if (cancelled) return;
 
       if (backendAvailable) {
         log.info('[CommodityWS] Backend detected — switching to real WebSocket');
@@ -157,21 +109,58 @@ export function useCommodityPrices() {
         setSource('real_backend');
       } else {
         log.info('[CommodityWS] Backend not available — using mock WebSocket (commodity seeds active)');
-        // Keep mock mode (the default) — commodity prices are seeded in mockWebSocketService
         setSource('mock');
       }
 
       setIsDetecting(false);
-      doSubscribe();
+
+      // Subscribe inline — allocation and cleanup in the same effect
+      if (subscribedRef.current) return;
+      subscribedRef.current = true;
+      const ws = getActiveWS();
+      ws.onConnectionChangeCallback((isConnected) => {
+        setConnected(isConnected);
+      });
+      ws.connect().catch(() => {
+        log.warn('[CommodityWS] Connection failed');
+      });
+      for (const symbol of COMMODITY_SYMBOLS) {
+        ws.subscribe(
+          symbol,
+          (tickData) => {
+            setPrices(prev => ({
+              ...prev,
+              [symbol]: {
+                price: tickData.price,
+                change: tickData.change,
+                changePercent: tickData.changePercent,
+                timestamp: tickData.timestamp,
+              },
+            }));
+            setLastUpdate(tickData.timestamp);
+          },
+          () => {
+            // We don't use candle data for commodities (price-only display)
+          },
+        );
+      }
+      setConnected(ws.getIsAuthenticated());
     };
 
     init();
 
     return () => {
-      detectionDoneRef.current = false; // Allow re-detection on re-mount
-      doUnsubscribe();
+      cancelled = true;
+      detectionDoneRef.current = false;
+      if (subscribedRef.current) {
+        subscribedRef.current = false;
+        const ws = getActiveWS();
+        for (const symbol of COMMODITY_SYMBOLS) {
+          ws.unsubscribe(symbol);
+        }
+      }
     };
-  }, [doSubscribe, doUnsubscribe]);
+  }, []);
 
   // ── Reconnection poll (keeps subscriptions alive across reconnect cycles) ──
   useEffect(() => {

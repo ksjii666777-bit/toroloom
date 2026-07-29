@@ -36,6 +36,10 @@ import type { CryptoAssetData } from '../../services/api/globalMarkets';
 
 const COIN_ICON_SIZE = 40;
 
+// ── Memoized Set for O(1) crypto symbol lookups ──
+const CRYPTO_SYMBOLS = ['BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOGE', 'DOT', 'LINK', 'AVAX', 'MATIC'];
+const CRYPTO_SYMBOLS_SET = new Set(CRYPTO_SYMBOLS);
+
 // ─── Types ─────────────────────────────────────────────────────────────
 
 interface CryptoHolding {
@@ -517,7 +521,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
           if (holdingsResult?.data) {
             // Filter crypto-like holdings
             const cryptoHoldings = holdingsResult.data
-              .filter(h => ['BTC', 'ETH', 'SOL', 'XRP', 'ADA', 'DOGE', 'DOT', 'LINK', 'AVAX', 'MATIC'].includes(h.symbol))
+              .filter(h => CRYPTO_SYMBOLS_SET.has(h.symbol))
               .map(h => ({
                 symbol: h.symbol,
                 name: h.name || h.symbol,

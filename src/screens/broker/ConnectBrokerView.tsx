@@ -41,10 +41,8 @@ import { useT } from '../../hooks/useT';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import SecureSessionSync from '../../components/gateway/SecureSessionSync';
-import { clearBrokerSession, hasValidSession } from '../../services/gateway/sessionStorage';
-import { brokerProxyApi, angelConnectApi, snapTradeApi } from '../../services/api';
-import type { SessionPayload } from '../../types';
+
+import { brokerProxyApi, snapTradeApi } from '../../services/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -149,16 +147,6 @@ export default function ConnectBrokerView({ navigation }: any) {
 
   // Modal states
   const [selectedBroker, setSelectedBroker] = useState<BrokerMeta | null>(null);
-  const [showSessionSync, setShowSessionSync] = useState(false);
-  const [sessionSyncUrl, setSessionSyncUrl] = useState('');
-
-  // Angel One SmartAPI states
-  const [showAngelOptions, setShowAngelOptions] = useState(false);
-  const [showSmartApiForm, setShowSmartApiForm] = useState(false);
-  const [smartApiClientId, setSmartApiClientId] = useState('');
-  const [smartApiPassword, setSmartApiPassword] = useState('');
-  const [smartApiTotp, setSmartApiTotp] = useState('');
-  const [isConnectingSmartApi, setIsConnectingSmartApi] = useState(false);
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -194,18 +182,8 @@ export default function ConnectBrokerView({ navigation }: any) {
         return;
       }
 
-      // Fallback: check legacy Zero-API sessions
-      const brokers = ['zerodha', 'angel', 'groww'];
-      for (const b of brokers) {
-        const valid = await hasValidSession(b);
-        if (valid) {
-          setConnectedBroker(b);
-          setConnectedLabel(BROKERS.find((br) => br.type === b)?.label || b);
-          break;
-        }
-      }
     } catch {
-      // Session storage unavailable — gracefully fall through to disconnected state
+      // SnapTrade unavailable — gracefully fall through to disconnected state
     } finally {
       setSnapTradeConnected(false);
       setIsLoading(false);
@@ -313,111 +291,14 @@ export default function ConnectBrokerView({ navigation }: any) {
     [],
   );
 
-  // ── Open Session Sync (Zero-API Gateway) — fallback ────────
-  const openSessionSync = useCallback(
-    (broker: BrokerMeta) => {
-      // Try SnapTrade first for OAuth-capable brokers
-      if (broker.hasOAuth) {
-        openSnapTradeConnect(broker);
-        return;
-      }
-
-      setSelectedBroker(broker);
-      triggerHaptic(ImpactFeedbackStyle.Medium);
-
-      // Map broker to their production login URL for session extraction
-      const loginUrls: Record<string, string> = {
-        zerodha: 'https://kite.zerodha.com/',
-        angel: 'https://smartapi.angelbroking.com/',
-        groww: 'https://groww.in/login',
-      };
-
-      const url = loginUrls[broker.type];
-      if (url) {
-        setSessionSyncUrl(url);
-        // Small delay so the state updates before SecureSessionSync mounts
-        setTimeout(() => setShowSessionSync(true), 100);
-      } else {
-        Alert.alert(t('brokerConnect.unavailable'), t('brokerConnect.gatewayUnavailable', { broker: broker.label }));
-      }
-    },
-    [openSnapTradeConnect],
-  );
-
-  // ── Open Broker Selection ───────────────────────────────────
+  // ── Open SnapTrade Connect (all brokers) ────────────────────
   const openBrokerSelection = useCallback(
     (broker: BrokerMeta) => {
       setSelectedBroker(broker);
       triggerHaptic(ImpactFeedbackStyle.Medium);
-
-      // Angel One has TWO connection methods: SmartAPI (official) + Zero-API
-      if (broker.type === 'angel') {
-        setShowAngelOptions(true);
-      } else {
-        // Other brokers: direct Zero-API sync
-        openSessionSync(broker);
-      }
+      openSnapTradeConnect(broker);
     },
-    [openSessionSync],
-  );
-
-  // ── Angel One SmartAPI Connect ──────────────────────────────
-  const handleSmartApiConnect = useCallback(async () => {
-    if (!smartApiClientId.trim() || !smartApiPassword.trim() || !smartApiTotp.trim()) {
-      Alert.alert(t('brokerConnect.requiredFields'), t('brokerConnect.fillFields'));
-      return;
-    }
-
-    setIsConnectingSmartApi(true);
-
-    try {
-      const result = await angelConnectApi.connect(
-        smartApiClientId.trim(),
-        smartApiPassword,
-        smartApiTotp.trim(),
-      );
-
-      if (result.success) {
-        setShowSmartApiForm(false);
-        setConnectedBroker('angel');
-        setConnectedLabel('Angel One (SmartAPI)');
-        showConnectedSuccess();
-      }
-    } catch (err: any) {
-      Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedAngel'));
-    } finally {
-      setIsConnectingSmartApi(false);
-    }
-  }, [smartApiClientId, smartApiPassword, smartApiTotp, showConnectedSuccess]);
-
-  // ── Check Angel SmartAPI Status on mount ────────────────────
-  useEffect(() => {
-    (async () => {
-      try {
-        const status = await angelConnectApi.status();
-        if (status.connected) {
-          setConnectedBroker('angel');
-          setConnectedLabel('Angel One (SmartAPI)');
-        }
-      } catch {
-        // Not connected — fine
-      }
-    })();
-  }, []);
-
-  // ── Handle Session Captured ─────────────────────────────────
-  const handleSessionCaptured = useCallback(
-    async (payload: SessionPayload) => {
-      setShowSessionSync(false);
-
-      // Session captured via SecureSessionSync — Zero-API Gateway
-      setConnectedBroker(payload.brokerType);
-      setConnectedLabel(
-        BROKERS.find((b) => b.type === payload.brokerType)?.label || null,
-      );
-      showConnectedSuccess();
-    },
-    [showConnectedSuccess],
+    [openSnapTradeConnect],
   );
 
   // ── Test API Request ───────────────────────────────────────
@@ -429,14 +310,8 @@ export default function ConnectBrokerView({ navigation }: any) {
     try {
       let result;
 
-      // SmartAPI connection: use angelConnectApi directly
-      // Zero-API connection: use brokerProxyApi through backend
-      if (connectedBroker === 'angel' && connectedLabel?.includes('SmartAPI')) {
-        const r = await angelConnectApi.holdings();
-        result = { success: r.success, data: r.data, error: undefined, statusCode: 200 };
-      } else {
-        result = await brokerProxyApi.getHoldings(connectedBroker);
-      }
+      // Use brokerProxyApi through backend (SnapTrade-powered)
+      result = await brokerProxyApi.getHoldings(connectedBroker);
 
       const title = result.success ? t('brokerConnect.apiSuccess') : t('brokerConnect.apiFailed');
       const body = [
@@ -457,8 +332,6 @@ export default function ConnectBrokerView({ navigation }: any) {
   // ── Disconnect ──────────────────────────────────────────────
   const handleDisconnect = useCallback(
     async (brokerType: string) => {
-      const isSmartApi = connectedLabel?.includes('SmartAPI');
-
       Alert.alert(
         t('brokerConnect.disconnectTitle'),
         t('brokerConnect.disconnectMsg'),
@@ -468,12 +341,8 @@ export default function ConnectBrokerView({ navigation }: any) {
             text: t('brokerConnect.disconnect'),
             style: 'destructive',
             onPress: async () => {
-              // SmartAPI: disconnect via backend
-              if (isSmartApi) {
-                try { await angelConnectApi.disconnect(); } catch { /* ignore */ }
-              }
-              // Zero-API: clear keychain session
-              await clearBrokerSession(brokerType);
+              // SnapTrade: disconnect via backend
+              try { await snapTradeApi.disconnect(); } catch { /* ignore */ }
               setConnectedBroker(null);
               setConnectedLabel(null);
               notificationAsync(NotificationFeedbackType.Warning);
@@ -482,7 +351,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         ],
       );
     },
-    [connectedLabel],
+    [],
   );
 
   // ── Loading State ───────────────────────────────────────────
@@ -690,245 +559,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         <View style={{ height: 60 }} />
       </ScrollView>
 
-      {/* ── Angel One Selection Modal ───────────────────────── */}
-      <Modal
-        visible={showAngelOptions}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowAngelOptions(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.angelOptionsContainer}>
-            <Text style={styles.angelOptionsTitle}>{t('brokerConnect.connectAngel')}</Text>
-            <Text style={styles.angelOptionsSubtitle}>{t('brokerConnect.chooseMethod')}</Text>
-
-            {/* SmartAPI Option */}
-            <TouchableOpacity
-              style={[styles.angelOptionCard, { backgroundColor: 'rgba(255,107,0,0.1)', borderColor: 'rgba(255,107,0,0.3)' }]}
-              onPress={() => {
-                setShowAngelOptions(false);
-                setShowSmartApiForm(true);
-              }}
-            >
-              <View style={styles.angelOptionRow}>
-                <View style={[styles.angelOptionIcon, { backgroundColor: 'rgba(255,107,0,0.2)' }]}>
-                  <Ionicons name="code-slash" size={22} color="#FF6B00" />
-                </View>
-                <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.angelOptionTitle}>{t('brokerConnect.smartApi')}</Text>
-                  <Text style={styles.angelOptionDesc}>
-                    {t('brokerConnect.smartApiDesc')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.angelOptionBadgeRow}>
-                <View style={[styles.angelOptionBadge, { backgroundColor: 'rgba(16,185,129,0.2)' }]}>
-                  <Text style={[styles.angelOptionBadgeText, { color: '#10B981' }]}>{t('brokerConnect.mostReliable')}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            {/* Zero-API Option */}
-            <TouchableOpacity
-              style={[styles.angelOptionCard, { backgroundColor: 'rgba(0,242,254,0.06)', borderColor: 'rgba(0,242,254,0.2)' }]}
-              onPress={() => {
-                setShowAngelOptions(false);
-                if (selectedBroker) openSessionSync(selectedBroker);
-              }}
-            >
-              <View style={styles.angelOptionRow}>
-                <View style={[styles.angelOptionIcon, { backgroundColor: 'rgba(0,242,254,0.12)' }]}>
-                  <Ionicons name="wifi" size={22} color="#00F2FE" />
-                </View>
-                <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                  <Text style={styles.angelOptionTitle}>{t('brokerConnect.zeroApiSync')}</Text>
-                  <Text style={styles.angelOptionDesc}>
-                    {t('brokerConnect.zeroApiDesc')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.angelOptionBadgeRow}>
-                <View style={[styles.angelOptionBadge, { backgroundColor: 'rgba(0,242,254,0.12)' }]}>
-                  <Text style={[styles.angelOptionBadgeText, { color: '#00F2FE' }]}>{t('brokerConnect.noCredentials')}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setShowAngelOptions(false)}
-              style={styles.angelOptionCancel}
-            >
-              <Text style={styles.angelOptionCancelText}>{t('brokerConnect.cancel')}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* ── Angel One SmartAPI Credential Form Modal ──────────── */}
-      <Modal
-        visible={showSmartApiForm}
-        animationType="slide"
-        onRequestClose={() => setShowSmartApiForm(false)}
-      >
-        <View style={[styles.webViewContainer, { backgroundColor: MIDNIGHT_BG }]}>
-          <View
-            style={[
-              styles.webViewHeader,
-              {
-                backgroundColor: MIDNIGHT_BG,
-                paddingTop: 60 + insets.top,
-                borderBottomWidth: 1,
-                borderBottomColor: GLASS_BORDER,
-              },
-            ]}
-          >
-            <TouchableOpacity onPress={() => setShowSmartApiForm(false)} style={styles.webViewBack}>
-              <Ionicons name="close" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-            <Text style={styles.webViewTitle}>{t('brokerConnect.angelSmartApiTitle')}</Text>
-            <View style={{ width: 24 }} />
-          </View>
-
-          <ScrollView contentContainerStyle={styles.smartApiFormContent}>
-            <View style={styles.smartApiFormHeader}>
-              <View style={[styles.smartApiIconCircle, { backgroundColor: 'rgba(255,107,0,0.15)' }]}>
-                <Ionicons name="code-slash" size={32} color="#FF6B00" />
-              </View>
-              <Text style={styles.smartApiFormTitle}>{t('brokerConnect.connectAngel')}</Text>
-              <Text style={styles.smartApiFormSubtitle}>
-                {t('brokerConnect.enterCredentials')}
-              </Text>
-            </View>
-
-            {/* Client ID */}
-            <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>{t('brokerConnect.clientId')}</Text>
-              <View style={[styles.smartApiInputContainer, smartApiClientId ? styles.smartApiInputFocused : null]}>
-                <Ionicons name="person-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
-                <TextInput
-                  style={styles.smartApiInput}
-                  placeholder={t('brokerConnect.clientCodePlaceholder')}
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={smartApiClientId}
-                  onChangeText={setSmartApiClientId}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                />
-              </View>
-            </View>
-
-            {/* Password */}
-            <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>{t('brokerConnect.password')}</Text>
-              <View style={[styles.smartApiInputContainer, smartApiPassword ? styles.smartApiInputFocused : null]}>
-                <Ionicons name="lock-closed-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
-                <TextInput
-                  style={styles.smartApiInput}
-                  placeholder={t('brokerConnect.passwordPlaceholder')}
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={smartApiPassword}
-                  onChangeText={setSmartApiPassword}
-                  secureTextEntry
-                  autoCorrect={false}
-                />
-              </View>
-            </View>
-
-            {/* TOTP Secret */}
-            <View style={styles.smartApiFieldGroup}>
-              <Text style={styles.smartApiFieldLabel}>{t('brokerConnect.totpSecret')}</Text>
-              <View style={[styles.smartApiInputContainer, smartApiTotp ? styles.smartApiInputFocused : null]}>
-                <Ionicons name="key-outline" size={18} color="rgba(255,255,255,0.4)" style={{ marginRight: 8 }} />
-                <TextInput
-                  style={styles.smartApiInput}
-                  placeholder={t('brokerConnect.totpPlaceholder')}
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  value={smartApiTotp}
-                  onChangeText={setSmartApiTotp}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                />
-              </View>
-              <Text style={styles.smartApiFieldHint}>
-                {t('brokerConnect.totpHint')}
-              </Text>
-            </View>
-
-            {/* Connect Button */}
-            <TouchableOpacity
-              style={[
-                styles.smartApiConnectBtn,
-                isConnectingSmartApi && { opacity: 0.7 },
-              ]}
-              onPress={handleSmartApiConnect}
-              disabled={isConnectingSmartApi}
-            >
-              <LinearGradient
-                colors={['#FF6B00', '#CC5500']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.smartApiConnectGradient}
-              >
-                {isConnectingSmartApi ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={styles.smartApiConnectText}>{t('brokerConnect.connectToAngel')}</Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-
-            {/* Info Card */}
-            <View style={styles.smartApiInfoCard}>
-              <Ionicons name="information-circle-outline" size={18} color="rgba(255,255,255,0.4)" />
-              <Text style={styles.smartApiInfoText}>
-                {t('brokerConnect.credentialInfo')}
-              </Text>
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
-
-      {/* ── Session Sync WebView Modal ──────────────────────── */}
-      <Modal
-        visible={showSessionSync}
-        animationType="slide"
-        onRequestClose={() => setShowSessionSync(false)}
-      >
-        <View style={[styles.webViewContainer, { backgroundColor: MIDNIGHT_BG }]}>
-          <View
-            style={[
-              styles.webViewHeader,
-              {
-                backgroundColor: MIDNIGHT_BG,
-                paddingTop: 60 + insets.top,
-                borderBottomWidth: 1,
-                borderBottomColor: GLASS_BORDER,
-              },
-            ]}
-          >
-            <TouchableOpacity onPress={() => setShowSessionSync(false)} style={styles.webViewBack}>
-              <Ionicons name="close" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-            <Text style={styles.webViewTitle}>{t('brokerConnect.connectBroker', { name: selectedBroker?.label })}</Text>
-            <TouchableOpacity onPress={() => setShowSessionSync(false)}>
-              <Text style={{ color: '#00F2FE', fontSize: 13, fontWeight: '600' }}>{t('brokerConnect.cancelWebview')}</Text>
-            </TouchableOpacity>
-          </View>
-
-          {sessionSyncUrl.length > 0 && (
-            <SecureSessionSync
-              sourceUrl={sessionSyncUrl}
-              brokerType={selectedBroker?.type || 'unknown'}
-              onSessionCaptured={handleSessionCaptured}
-              onError={(error) => {
-                setShowSessionSync(false);
-                Alert.alert(t('brokerConnect.sessionSyncFailed'), error);
-              }}
-              onClose={() => setShowSessionSync(false)}
-            />
-          )}
-        </View>
-      </Modal>
+      {/* ── All brokers use SnapTrade OAuth Gateway ──────────── */}
 
       {/* ── Success Overlay ──────────────────────────────────── */}
       {showSuccess && (
@@ -1249,190 +880,5 @@ const createStyles = (_colors: any) =>
       paddingHorizontal: 40,
     },
 
-    // ── Angel Options Modal ────────────────────────────────────
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(7,8,11,0.85)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: SPACING.xl,
-    },
-    angelOptionsContainer: {
-      width: '100%',
-      backgroundColor: '#0D0E12',
-      borderRadius: BORDER_RADIUS.xl,
-      borderWidth: 1,
-      borderColor: GLASS_BORDER,
-      padding: SPACING.xl,
-      maxWidth: 400,
-    },
-    angelOptionsTitle: {
-      ...FONTS.bold,
-      fontSize: FONTS.size.xl,
-      color: '#FFFFFF',
-      textAlign: 'center',
-      marginBottom: 4,
-    },
-    angelOptionsSubtitle: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.5)',
-      textAlign: 'center',
-      marginBottom: SPACING.xl,
-    },
-    angelOptionCard: {
-      borderRadius: BORDER_RADIUS.lg,
-      borderWidth: 1,
-      padding: SPACING.lg,
-      marginBottom: SPACING.md,
-    },
-    angelOptionRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-    },
-    angelOptionIcon: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    angelOptionTitle: {
-      ...FONTS.semiBold,
-      fontSize: FONTS.size.md,
-      color: '#FFFFFF',
-      marginBottom: 2,
-    },
-    angelOptionDesc: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.xs,
-      color: 'rgba(255,255,255,0.5)',
-      lineHeight: 16,
-    },
-    angelOptionBadgeRow: {
-      flexDirection: 'row',
-      marginTop: SPACING.sm,
-      marginLeft: 52,
-    },
-    angelOptionBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: BORDER_RADIUS.full,
-    },
-    angelOptionBadgeText: {
-      fontSize: 10,
-      fontWeight: '700',
-    },
-    angelOptionCancel: {
-      alignItems: 'center',
-      marginTop: SPACING.sm,
-      paddingVertical: SPACING.sm,
-    },
-    angelOptionCancelText: {
-      ...FONTS.medium,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.4)',
-    },
-
-    // ── SmartAPI Form ──────────────────────────────────────────
-    smartApiFormContent: {
-      padding: SPACING.xl,
-      paddingBottom: 60,
-    },
-    smartApiFormHeader: {
-      alignItems: 'center',
-      marginBottom: SPACING.xl,
-      marginTop: SPACING.lg,
-    },
-    smartApiIconCircle: {
-      width: 64,
-      height: 64,
-      borderRadius: 20,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: SPACING.md,
-    },
-    smartApiFormTitle: {
-      ...FONTS.bold,
-      fontSize: FONTS.size.xl,
-      color: '#FFFFFF',
-      marginBottom: 4,
-    },
-    smartApiFormSubtitle: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.5)',
-      textAlign: 'center',
-      lineHeight: 18,
-      paddingHorizontal: SPACING.md,
-    },
-    smartApiFieldGroup: {
-      marginBottom: SPACING.lg,
-    },
-    smartApiFieldLabel: {
-      ...FONTS.medium,
-      fontSize: FONTS.size.sm,
-      color: 'rgba(255,255,255,0.7)',
-      marginBottom: SPACING.xs,
-    },
-    smartApiInputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: GLASS_WHITE,
-      borderWidth: 1,
-      borderColor: GLASS_BORDER,
-      borderRadius: BORDER_RADIUS.md,
-      paddingHorizontal: SPACING.md,
-      height: 48,
-    },
-    smartApiInputFocused: {
-      borderColor: '#FF6B00',
-      borderWidth: 1.5,
-    },
-    smartApiInput: {
-      flex: 1,
-      color: '#FFFFFF',
-      fontSize: FONTS.size.md,
-      height: 48,
-    },
-    smartApiFieldHint: {
-      ...FONTS.regular,
-      fontSize: 10,
-      color: 'rgba(255,255,255,0.3)',
-      marginTop: 4,
-      paddingLeft: 2,
-    },
-    smartApiConnectBtn: {
-      borderRadius: BORDER_RADIUS.lg,
-      overflow: 'hidden',
-      marginTop: SPACING.sm,
-      marginBottom: SPACING.lg,
-    },
-    smartApiConnectGradient: {
-      paddingVertical: 16,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    smartApiConnectText: {
-      ...FONTS.bold,
-      fontSize: FONTS.size.md,
-      color: '#FFFFFF',
-    },
-    smartApiInfoCard: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: 8,
-      backgroundColor: GLASS_WHITE,
-      borderWidth: 1,
-      borderColor: GLASS_BORDER,
-      borderRadius: BORDER_RADIUS.md,
-      padding: SPACING.md,
-    },
-    smartApiInfoText: {
-      ...FONTS.regular,
-      fontSize: FONTS.size.xs,
-      color: 'rgba(255,255,255,0.4)',
-      flex: 1,
-      lineHeight: 15,
-    },
+    // (Removed legacy Angel Options modal & SmartAPI TOTP form styles)
   });

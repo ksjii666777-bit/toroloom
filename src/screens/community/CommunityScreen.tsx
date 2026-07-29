@@ -110,7 +110,8 @@ function PostCard({
   colors: any;
   styles: any;
 }) {
-  const isVerified = VERIFIED_USERS.includes(post.userName);
+  const verifiedUsersSet = new Set(VERIFIED_USERS);
+  const isVerified = verifiedUsersSet.has(post.userName);
 
   return (
     <Pressable
@@ -230,6 +231,10 @@ export default function CommunityScreen({ navigation }: any) {
     navigation.navigate('CommunityPost', { postId });
   }, [navigation]);
 
+  // ── Memoized Sets for O(1) lookups inside posts.map() ──
+  const likedSet = useMemo(() => new Set(likedPostIds), [likedPostIds]);
+  const bookmarkedSet = useMemo(() => new Set(bookmarkedPostIds), [bookmarkedPostIds]);
+
   // ── Render ────────────────────────────────────────────────────────────
   return (
     <View style={styles.container}>
@@ -343,8 +348,8 @@ export default function CommunityScreen({ navigation }: any) {
           <PostCard
             key={post.id}
             post={post}
-            isLiked={likedPostIds.includes(post.id)}
-            isBookmarked={bookmarkedPostIds.includes(post.id)}
+            isLiked={likedSet.has(post.id)}
+            isBookmarked={bookmarkedSet.has(post.id)}
             onLike={() => handleLike(post.id)}
             onBookmark={() => handleBookmark(post.id)}
             onUserPress={() => handleUserPress(post.userId, post.userName)}

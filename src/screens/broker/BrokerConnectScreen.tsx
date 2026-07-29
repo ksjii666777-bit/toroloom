@@ -21,9 +21,9 @@
 
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TextInput, Modal,
+  View, Text, StyleSheet, ScrollView, Modal,
   TouchableOpacity, Animated, Dimensions, Alert, ActivityIndicator,
-  KeyboardAvoidingView, Platform,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -117,15 +117,6 @@ const BROKERS: BrokerMeta[] = [
 
 // ──── Types ────────────────────────────────────────────────────────────────
 
-interface BrokerCredentials {
-  apiKey: string;
-  apiSecret?: string;
-  accessToken?: string;
-  clientId?: string;
-  password?: string;
-  totp?: string;
-}
-
 interface ConnectionState {
   connected: boolean;
   brokerType: string | null;
@@ -152,17 +143,8 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
   // Modal states
   const [selectedBroker, setSelectedBroker] = useState<BrokerMeta | null>(null);
-  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [showWebView, setShowWebView] = useState(false);
   const [webViewUrl, setWebViewUrl] = useState('');
-
-  // Credential form
-  const [credentials, setCredentials] = useState<BrokerCredentials>({
-    apiKey: '', apiSecret: '', accessToken: '', clientId: '', password: '', totp: '',
-  });
-
-  // Focus state for TextInputs
-  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Animations (top level — NEVER inside loops/conditions per Rules of Hooks)
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -303,15 +285,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
     }
   }, [showConnectedSuccess]);
 
-  // ── Open credential modal ──────────────────────────────────
-  const openCredentialsModal = useCallback((broker: BrokerMeta) => {
-    setSelectedBroker(broker);
-    setCredentials({ apiKey: '', apiSecret: '', accessToken: '', clientId: '', password: '', totp: '' });
-    setShowCredentialsModal(true);
-    triggerHaptic(ImpactFeedbackStyle.Medium);
-  }, []);
-
-  // ── Open OAuth WebView (Zerodha) ───────────────────────────
+  // ── Open OAuth WebView (Zerodha — legacy fallback) ────────
   const openOAuthWebView = useCallback(async (broker: BrokerMeta) => {
     setSelectedBroker(broker);
     triggerHaptic(ImpactFeedbackStyle.Medium);
@@ -321,46 +295,12 @@ export default function BrokerConnectScreen({ navigation }: any) {
       setWebViewUrl(data.oauthUrl);
       setShowWebView(true);
     } catch {
-      // Fallback: show credential modal if OAuth URL not available
-      Alert.alert(
-        'OAuth Unavailable',
-        'OAuth URL not configured. You can connect manually by entering your credentials.',
-        [{ text: 'Enter Credentials', onPress: () => openCredentialsModal(broker) },
-         { text: 'Cancel', style: 'cancel' }],
-      );
+      // Fallback: try SnapTrade OAuth
+      openSnapTradeConnect(broker);
     }
-  }, [openCredentialsModal]);
+  }, [openSnapTradeConnect]);
 
-  // ── Connect broker with credentials ────────────────────────
-  const handleConnect = useCallback(async () => {
-    if (!selectedBroker) return;
-
-    try {
-      const payload: { brokerType: string; credentials: BrokerCredentials } = { brokerType: selectedBroker.type, credentials };
-
-      // Only send relevant fields for this broker type
-      if (selectedBroker.type === 'zerodha') {
-        payload.credentials = { apiKey: credentials.apiKey, apiSecret: credentials.apiSecret };
-      } else if (selectedBroker.type === 'angel') {
-        payload.credentials = {
-          apiKey: credentials.apiKey,
-          clientId: credentials.clientId,
-          password: credentials.password,
-          totp: credentials.totp,
-        };
-      } else if (selectedBroker.type === 'groww') {
-        payload.credentials = { apiKey: credentials.apiKey, accessToken: credentials.accessToken };
-      }
-
-      await api.post('/broker-link/connect', payload);
-      setShowCredentialsModal(false);
-      showConnectedSuccess();
-    } catch (err: any) {
-      Alert.alert('Connection Failed', err.message || 'Failed to connect broker. Please try again.');
-    }
-  }, [selectedBroker, credentials, showConnectedSuccess]);
-
-  // ── Connect broker via OAuth token (dedicated for WebView flow) ──
+  // ── Connect broker via OAuth token (dedicated for legacy WebView flow) ──
   const handleOAuthConnect = useCallback(async (brokerType: string, requestToken: string) => {
     try {
       const res = await api.post<any>('/broker-link/connect', {
@@ -370,7 +310,6 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
       setShowWebView(false);
 
-      // If token exchange failed, warn the user; otherwise show standard success
       if (!res.hasAccessToken && res.exchangeError) {
         Alert.alert(
           'Limited Connection',
@@ -616,205 +555,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
         <View style={{ height: 60 }} />
       </ScrollView>
 
-      {/* ── Credentials Modal ──────────────────────────────── */}
-      <Modal
-        visible={showCredentialsModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setShowCredentialsModal(false)}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.modalOverlay}
-        >
-          <View style={[styles.modalContent, { backgroundColor: '#07080B' }]}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <View style={[styles.modalIconCircle, { backgroundColor: selectedBroker?.color + '20' }]}>
-                <Text style={[styles.modalIconText, { color: selectedBroker?.color }]}>
-                  {selectedBroker?.icon}
-                </Text>
-              </View>
-              <View style={styles.modalHeaderText}>
-                <Text style={styles.modalTitle}>Connect {selectedBroker?.label}</Text>
-                <Text style={styles.modalSubtitle}>Enter your API credentials</Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowCredentialsModal(false)}>
-                <Ionicons name="close" size={24} color={colors.textMuted} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Form Fields */}
-            <ScrollView style={styles.modalForm} showsVerticalScrollIndicator={false}>
-              {/* API Key (all brokers) */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>API Key</Text>                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: colors.bgInput,
-                        color: colors.text,
-                        borderColor: focusedField === 'apiKey' ? '#00D2FF' : colors.border,
-                      },
-                    ]}
-                    placeholder="Enter your API key"
-                    placeholderTextColor={colors.textMuted}
-                    value={credentials.apiKey}
-                    onChangeText={t => setCredentials(p => ({ ...p, apiKey: t }))}
-                    onFocus={() => setFocusedField('apiKey')}
-                    onBlur={() => setFocusedField(null)}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                  />
-              </View>
-
-              {/* API Secret (Zerodha only) */}
-              {selectedBroker?.type === 'zerodha' && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>API Secret</Text>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: colors.bgInput,
-                        color: colors.text,
-                        borderColor: focusedField === 'apiSecret' ? '#00D2FF' : colors.border,
-                      },
-                    ]}
-                    placeholder="Enter your API secret"
-                    placeholderTextColor={colors.textMuted}
-                    value={credentials.apiSecret}
-                    onChangeText={t => setCredentials(p => ({ ...p, apiSecret: t }))}
-                    onFocus={() => setFocusedField('apiSecret')}
-                    onBlur={() => setFocusedField(null)}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry
-                    {...({ id: 'broker-api-secret', name: 'apiSecret' } as { id: string; name: string })}
-                  />
-                </View>
-              )}
-
-              {/* Client ID (Angel One only) */}
-              {selectedBroker?.type === 'angel' && (
-                <>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Client ID</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        {
-                          backgroundColor: colors.bgInput,
-                          color: colors.text,
-                          borderColor: focusedField === 'clientId' ? '#00D2FF' : colors.border,
-                        },
-                      ]}
-                      placeholder="Enter your Angel One Client ID"
-                      placeholderTextColor={colors.textMuted}
-                      value={credentials.clientId}
-                      onChangeText={t => setCredentials(p => ({ ...p, clientId: t }))}
-                      onFocus={() => setFocusedField('clientId')}
-                      onBlur={() => setFocusedField(null)}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Password</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        {
-                          backgroundColor: colors.bgInput,
-                          color: colors.text,
-                          borderColor: focusedField === 'password' ? '#00D2FF' : colors.border,
-                        },
-                      ]}
-                      placeholder="Trading password"
-                      placeholderTextColor={colors.textMuted}
-                      value={credentials.password}
-                      onChangeText={t => setCredentials(p => ({ ...p, password: t }))}
-                      onFocus={() => setFocusedField('password')}
-                      onBlur={() => setFocusedField(null)}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      secureTextEntry
-                      {...({ id: 'broker-password', name: 'password' } as { id: string; name: string })}
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>TOTP Secret (optional)</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        {
-                          backgroundColor: colors.bgInput,
-                          color: colors.text,
-                          borderColor: focusedField === 'totp' ? '#00D2FF' : colors.border,
-                        },
-                      ]}
-                      placeholder="2FA TOTP secret for auto-login"
-                      placeholderTextColor={colors.textMuted}
-                      value={credentials.totp}
-                      onChangeText={t => setCredentials(p => ({ ...p, totp: t }))}
-                      onFocus={() => setFocusedField('totp')}
-                      onBlur={() => setFocusedField(null)}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
-                  </View>
-                </>
-              )}
-
-              {/* Access Token (Groww only) */}
-              {selectedBroker?.type === 'groww' && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Access Token</Text>
-                  <TextInput
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: colors.bgInput,
-                        color: colors.text,
-                        borderColor: focusedField === 'accessToken' ? '#00D2FF' : colors.border,
-                      },
-                    ]}
-                    placeholder="Enter your Groww access token"
-                    placeholderTextColor={colors.textMuted}
-                    value={credentials.accessToken}
-                    onChangeText={t => setCredentials(p => ({ ...p, accessToken: t }))}
-                    onFocus={() => setFocusedField('accessToken')}
-                    onBlur={() => setFocusedField(null)}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry
-                    {...({ id: 'broker-access-token', name: 'accessToken' } as { id: string; name: string })}
-                  />
-                </View>
-              )}
-
-              {/* Connect Button */}
-              <TouchableOpacity
-                onPress={handleConnect}
-                activeOpacity={0.85}
-              >
-                <LinearGradient
-                  colors={['#F59E0B', '#3B82F6']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.connectButton}
-                >
-                  <Text style={styles.connectButtonText}>
-                    Connect to {selectedBroker?.label}
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* ── OAuth WebView ───────────────────────────────────── */}
+      {/* ── OAuth WebView (legacy fallback) ──────────────────── */}
       <Modal
         visible={showWebView}
         animationType="slide"
@@ -1110,84 +851,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     lineHeight: 18,
   },
 
-  // ── Credentials Modal ─────────────────────────────────────────
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: BORDER_RADIUS.xxl,
-    borderTopRightRadius: BORDER_RADIUS.xxl,
-    padding: SPACING.xl,
-    maxHeight: '85%',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  connectButton: {
-    paddingVertical: SPACING.lg,
-    borderRadius: BORDER_RADIUS.md,
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.xl,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.xl,
-  },
-  modalIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalIconText: {
-    ...FONTS.bold,
-    fontSize: FONTS.size.xxl,
-  },
-  modalHeaderText: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  modalTitle: {
-    ...FONTS.bold,
-    fontSize: FONTS.size.lg,
-    color: colors.text,
-  },
-  modalSubtitle: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  modalForm: {
-    maxHeight: 400,
-  },
-  inputGroup: {
-    marginBottom: SPACING.lg,
-  },
-  inputLabel: {
-    ...FONTS.medium,
-    fontSize: FONTS.size.sm,
-    color: colors.textSecondary,
-    marginBottom: SPACING.sm,
-  },
-  input: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.md,
-    borderWidth: 1,
-    borderRadius: BORDER_RADIUS.md,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-  },
-  connectButtonText: {
-    ...FONTS.semiBold,
-    fontSize: FONTS.size.md,
-    color: '#fff',
-  },
+  // (Removed legacy credentials modal styles)
 
   // ── OAuth WebView ─────────────────────────────────────────────
   webViewContainer: {

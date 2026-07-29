@@ -90,8 +90,10 @@ export function requireApiScopes(requiredScopes: string[]) {
       return;
     }
 
+    // Build Set once for O(1) lookups inside .every()
+    const userScopesSet = new Set(req.apiKeyInfo!.scopes);
     const hasAllScopes = requiredScopes.every(scope =>
-      req.apiKeyInfo!.scopes.includes(scope),
+      userScopesSet.has(scope),
     );
 
     if (!hasAllScopes) {

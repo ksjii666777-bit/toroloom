@@ -19,6 +19,11 @@ import type { CryptoDetailData } from '../services/api/globalMarkets';
 const mockNavigate = vi.fn();
 const mockGetCryptoDetail = vi.fn();
 
+// Mock navigation (needed since CryptoDetailScreen calls useNavigation unconditionally)
+vi.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate, goBack: vi.fn() }),
+}));
+
 // Mock the globalMarketsApi module
 vi.mock('../services/api/globalMarkets', () => ({
   globalMarketsApi: {

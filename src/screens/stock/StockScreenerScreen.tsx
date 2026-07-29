@@ -644,15 +644,13 @@ export default function StockScreenerScreen({ navigation }: any) {
   }, [screenerResults, sortBy, sortDir]);
 
   const handleSort = useCallback((key: string) => {
-    setSortBy(prev => {
-      if (prev === key) {
-        setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-        return prev;
-      }
+    if (sortBy === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
       setSortDir('desc');
-      return key;
-    });
-  }, []);
+    }
+    setSortBy(key);
+  }, [sortBy]);
 
   // Compute filtered results live as filters change
   const liveResults = useMemo(() => {

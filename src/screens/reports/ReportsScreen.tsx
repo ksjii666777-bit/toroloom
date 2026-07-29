@@ -261,6 +261,44 @@ export default function ReportsScreen({ navigation }: any) {
           <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
         </TouchableOpacity>
 
+        {/* ── Tools: Period Report ──────────────────────────── */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('PeriodReport')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: 'rgba(59,130,246,0.06)',
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: 'rgba(59,130,246,0.12)',
+          }}
+        >
+          <View style={{
+            width: 44, height: 44, borderRadius: 12,
+            backgroundColor: 'rgba(59,130,246,0.1)',
+            justifyContent: 'center', alignItems: 'center',
+          }}>
+            <Ionicons name="calendar" size={22} color="#3B82F6" />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={{
+              ...FONTS.semiBold, fontSize: FONTS.size.md, color: '#FFFFFF',
+            }}>
+              {t('periodReport.title')}
+            </Text>
+            <Text style={{
+              ...FONTS.regular, fontSize: FONTS.size.xs,
+              color: 'rgba(255,255,255,0.5)', marginTop: 2,
+            }}>
+              {t('periodReport.subtitle')}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+
         {/* ── Portfolio Snapshot — Glassmorphic ────────────── */}
         <View style={styles.snapshotCard}>
           <View style={styles.snapshotTop}>

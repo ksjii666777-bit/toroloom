@@ -125,6 +125,8 @@ export default function CommunityCoursesScreen({ navigation }: any) {
     }
   }, [enrollInCommunityCourse, unenrollFromCommunityCourse, isEnrolledInCommunityCourse]);
 
+  const enrolledSet = useMemo(() => new Set(enrolledCommunityCourseIds), [enrolledCommunityCourseIds]);
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -308,7 +310,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
                 >
                   <FeaturedCourseCard
                     course={course}
-                    isEnrolled={enrolledCommunityCourseIds.includes(course.id)}
+                    isEnrolled={enrolledSet.has(course.id)}
                     onEnrollToggle={() => handleEnrollToggle(course)}
                     colors={colors}
                     styles={styles}
@@ -358,7 +360,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
                 >
                   <CommunityCourseCard
                     course={course}
-                    isEnrolled={enrolledCommunityCourseIds.includes(course.id)}
+                    isEnrolled={enrolledSet.has(course.id)}
                     onEnrollToggle={() => handleEnrollToggle(course)}
                     colors={colors}
                     styles={styles}

@@ -17,9 +17,10 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable,
+  View, Text, StyleSheet, Pressable,
   Dimensions,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -434,6 +435,22 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
     [filtered],
   );
 
+  // Combined data for FlashList: stock rows + recent articles
+  const combinedData = useMemo(() => {
+    const stocks = filtered.map(s => ({ type: 'stock' as const, data: s }));
+    const articles = selectedSentiment?.recentArticles.map(a => ({ type: 'article' as const, data: a })) || [];
+    return [...stocks, ...articles];
+  }, [filtered, selectedSentiment]);
+
+  const filterOptions = useMemo(() =>
+    (['all', 'bullish', 'bearish', 'neutral'] as const).map(f => ({
+      key: f,
+      label: f.charAt(0).toUpperCase() + f.slice(1),
+      count: filtered.length,
+    })),
+    [filtered.length],
+  );
+
   if (!selectedSentiment) {
     return (
       <View style={[styles.container, styles.centerContent]}>
@@ -465,12 +482,16 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
         </View>
 
         {/* Stock Picker */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pickerRow}>
-          {stockSymbols.map(c => {
+        <FlashList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={stockSymbols}
+          keyExtractor={(c) => c.symbol}
+          contentContainerStyle={styles.pickerRow}
+          renderItem={({ item: c }) => {
             const isActive = c.symbol === selectedSymbol;
             return (
               <Pressable
-                key={c.symbol}
                 onPress={() => setSelectedSymbol(c.symbol)}
                 style={({pressed}) => [{opacity: pressed ? 0.7 : 1}, styles.pickerChip, {
                   backgroundColor: isActive ? colors.primary : colors.bgCardLight,
@@ -482,193 +503,201 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
                 </Text>
               </Pressable>
             );
-          })}
-        </ScrollView>
+          }}
+        />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Sentiment Hero */}
-        <LinearGradient
-          colors={[sc.color + '15', colors.bgCard]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.heroCard, { borderColor: sc.color + '25' }]}
-        >
-          <View style={styles.heroTop}>
-            <View>
-              <Text style={styles.heroCompany}>{selectedSentiment.name}</Text>
-              <Text style={styles.heroSector}>{selectedSentiment.sector}</Text>
-            </View>
-            <View style={styles.scoreChangeRow}>
-              <Ionicons name={selectedSentiment.scoreChange >= 0 ? 'arrow-up' : 'arrow-down'} size={14} color={selectedSentiment.scoreChange >= 0 ? colors.marketUp : colors.marketDown} />
-              <Text style={[styles.scoreChange, { color: selectedSentiment.scoreChange >= 0 ? colors.marketUp : colors.marketDown }]}>
-                {selectedSentiment.scoreChange >= 0 ? '+' : ''}{selectedSentiment.scoreChange.toFixed(1)}
-              </Text>
-            </View>
-          </View>
-
-          {/* Gauge */}
-          <SentimentGauge score={selectedSentiment.currentScore} label={selectedSentiment.label} />
-
-          {/* Source Breakdown */}
-          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Source Breakdown</Text>
-          <View style={[styles.sourceCard, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
-            <SourceBar label="News" score={selectedSentiment.sourceBreakdown.newsScore} color="#3B82F6" />
-            <SourceBar label="Social" score={selectedSentiment.sourceBreakdown.socialScore} color="#8B5CF6" />
-            <SourceBar label="Analyst" score={selectedSentiment.sourceBreakdown.analystScore} color="#10B981" />
-            <SourceBar label="AI" score={selectedSentiment.sourceBreakdown.aiScore} color="#F59E0B" />
-          </View>
-
-          {/* Confidence bar */}
-          <View style={styles.confidenceRow}>
-            <Text style={styles.confidenceLabel}>Confidence</Text>
-            <View style={[styles.confidenceBar, { backgroundColor: colors.bgInput }]}>
-              <View style={[styles.confidenceFill, { width: `${selectedSentiment.confidence}%`, backgroundColor: sc.color }]} />
-            </View>
-            <Text style={[styles.confidenceValue, { color: sc.color }]}>{selectedSentiment.confidence}%</Text>
-          </View>
-        </LinearGradient>
-
-        {/* Metrics Row */}
-        <View style={styles.metricsRow}>
-          <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={styles.metricLabel}>Mentions Today</Text>
-            <Text style={styles.metricValue}>{formatCompactNumber(selectedSentiment.mentionVolume)}</Text>
-            <View style={styles.metricChangeRow}>
-              <Ionicons name={selectedSentiment.mentionChange >= 0 ? 'arrow-up' : 'arrow-down'} size={10} color={selectedSentiment.mentionChange >= 0 ? colors.marketUp : colors.marketDown} />
-              <Text style={[styles.metricChange, { color: selectedSentiment.mentionChange >= 0 ? colors.marketUp : colors.marketDown }]}>
-                {selectedSentiment.mentionChange >= 0 ? '+' : ''}{selectedSentiment.mentionChange.toFixed(1)}%
-              </Text>
-            </View>
-          </View>
-          <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={styles.metricLabel}>Stability</Text>
-            <Text style={[styles.metricValue, { color: stability.volatility === 'high' ? colors.marketDown : stability.volatility === 'low' ? colors.marketUp : colors.warning }]}>
-              {stability.stabilityScore}%
-            </Text>
-            <Text style={[styles.metricSub, { color: colors.textMuted }]}>{stability.volatility} volatility</Text>
-          </View>
-          <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={styles.metricLabel}>Keywords</Text>
-            <View style={styles.keywordRow}>
-              {selectedSentiment.topKeywords.slice(0, 3).map((kw, i) => (
-                <View key={i} style={[styles.keywordChip, { backgroundColor: sc.color + '15' }]}>
-                  <Text style={[styles.keywordText, { color: sc.color }]}>{kw}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Sentiment Chart */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <View style={styles.sectionHeaderRow}>
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIcon, { backgroundColor: colors.primary + '20' }]}>
-                <Ionicons name="pulse" size={16} color={colors.primary} />
-              </View>
-              <Text style={styles.sectionCardTitle}>30-Day Trend</Text>
-            </View>
-            {shift.hasShifted && (
-              <View style={[styles.shiftBadge, { backgroundColor: shift.direction === 'improving' ? colors.marketUp + '20' : colors.marketDown + '20' }]}>
-                <Text style={[styles.shiftText, { color: shift.direction === 'improving' ? colors.marketUp : colors.marketDown }]}>
-                  {shift.direction === 'improving' ? '↑' : '↓'} {Math.round(shift.magnitude)}pts
-                </Text>
-              </View>
-            )}
-          </View>
-          <SentimentMiniChart history={selectedSentiment.history} label={selectedSentiment.label} />
-          {shift.alert && (
-            <View style={[styles.shiftAlert, { backgroundColor: colors.bgCardLight, borderLeftColor: sc.color }]}>
-              <Text style={[styles.shiftAlertText, { color: colors.textSecondary }]}>{shift.alert}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Market Overview */}
-        <View style={[styles.overviewCard, { borderColor: colors.border }]}>
-          <View style={styles.overviewHeader}>
-            <Ionicons name="globe" size={16} color={colors.primary} />
-            <Text style={styles.overviewTitle}>Market Sentiment Overview</Text>
-          </View>
-          <Text style={[styles.overviewText, { color: colors.textSecondary }]}>{overviewText}</Text>
-
-          {/* Filter chips */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-            {(['all', 'bullish', 'bearish', 'neutral'] as const).map(f => {
-              const fColors = getSentimentColors(f === 'all' ? 'neutral' : f);
-              return (
-                <Pressable
-                  key={f}
-                  onPress={() => setActiveFilter(f)}
-                  style={({pressed}) => [{opacity: pressed ? 0.7 : 1}, styles.filterChip, {
-                    backgroundColor: activeFilter === f ? fColors.color + '20' : colors.bgCardLight,
-                    borderColor: activeFilter === f ? fColors.color : colors.border,
-                  }]}
-                >
-                  <Text style={[styles.filterChipText, {
-                    color: activeFilter === f ? fColors.color : colors.textSecondary,
-                    fontWeight: activeFilter === f ? '700' : '500',
-                  }]}>
-                    {f.charAt(0).toUpperCase() + f.slice(1)} ({filtered.length})
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-
-        {/* Stock Sentiment List */}
-        {filtered.map(stock => {
-          const s = getSentimentColors(stock.label);
-          const stockInfo = mockStocks.find(s => s.id === stock.symbol);
-          return (
-            <Pressable
-              key={stock.symbol}
-              style={({pressed}) => [[styles.stockRow, { backgroundColor: colors.bgCard, borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
-              onPress={() => setSelectedSymbol(stock.symbol)}
+      <FlashList
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        data={combinedData}
+        keyExtractor={(item) => item.type === 'stock' ? `stock-${item.data.symbol}` : `article-${(item.data as any).id}`}
+        ListHeaderComponent={
+          <View>
+            {/* Sentiment Hero */}
+            <LinearGradient
+              colors={[sc.color + '15', colors.bgCard]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.heroCard, { borderColor: sc.color + '25' }]}
             >
-              <View style={[styles.stockSentimentDot, { backgroundColor: s.color }]} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.stockSymbol, { color: colors.text }]}>{stock.symbol}</Text>
-                <Text style={[styles.stockName, { color: colors.textMuted }]} numberOfLines={1}>{stock.name}</Text>
-              </View>
-              <View style={styles.stockScoreRow}>
-                <Text style={[styles.stockScore, { color: s.color }]}>
-                  {stock.currentScore > 0 ? '+' : ''}{stock.currentScore}
-                </Text>
-                <View style={[styles.stockBar, { backgroundColor: colors.bgInput }]}>
-                  <View style={[styles.stockBarFill, {
-                    width: `${Math.abs(stock.currentScore)}%`,
-                    backgroundColor: s.color,
-                  }]} />
+              <View style={styles.heroTop}>
+                <View>
+                  <Text style={styles.heroCompany}>{selectedSentiment.name}</Text>
+                  <Text style={styles.heroSector}>{selectedSentiment.sector}</Text>
+                </View>
+                <View style={styles.scoreChangeRow}>
+                  <Ionicons name={selectedSentiment.scoreChange >= 0 ? 'arrow-up' : 'arrow-down'} size={14} color={selectedSentiment.scoreChange >= 0 ? colors.marketUp : colors.marketDown} />
+                  <Text style={[styles.scoreChange, { color: selectedSentiment.scoreChange >= 0 ? colors.marketUp : colors.marketDown }]}>
+                    {selectedSentiment.scoreChange >= 0 ? '+' : ''}{selectedSentiment.scoreChange.toFixed(1)}
+                  </Text>
                 </View>
               </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-            </Pressable>
-          );
-        })}
 
-        {/* Recent News */}
-        <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>Recent News</Text>
-        {selectedSentiment.recentArticles.map(article => (
-          <ArticleCard key={article.id} article={article} />
-        ))}
+              {/* Gauge */}
+              <SentimentGauge score={selectedSentiment.currentScore} label={selectedSentiment.label} />
 
-        {/* Top Keywords */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <Text style={styles.sectionCardTitle}>Trending Keywords</Text>
-          <View style={styles.keywordsGrid}>
-            {selectedSentiment.topKeywords.map((kw, i) => (
-              <View key={i} style={[styles.keywordChip, { backgroundColor: sc.color + '10', borderColor: sc.color + '25' }]}>
-                <Text style={[styles.keywordText, { color: sc.color }]}>#{kw}</Text>
+              {/* Source Breakdown */}
+              <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Source Breakdown</Text>
+              <View style={[styles.sourceCard, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
+                <SourceBar label="News" score={selectedSentiment.sourceBreakdown.newsScore} color="#3B82F6" />
+                <SourceBar label="Social" score={selectedSentiment.sourceBreakdown.socialScore} color="#8B5CF6" />
+                <SourceBar label="Analyst" score={selectedSentiment.sourceBreakdown.analystScore} color="#10B981" />
+                <SourceBar label="AI" score={selectedSentiment.sourceBreakdown.aiScore} color="#F59E0B" />
               </View>
-            ))}
-          </View>
-        </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
+              {/* Confidence bar */}
+              <View style={styles.confidenceRow}>
+                <Text style={styles.confidenceLabel}>Confidence</Text>
+                <View style={[styles.confidenceBar, { backgroundColor: colors.bgInput }]}>
+                  <View style={[styles.confidenceFill, { width: `${selectedSentiment.confidence}%`, backgroundColor: sc.color }]} />
+                </View>
+                <Text style={[styles.confidenceValue, { color: sc.color }]}>{selectedSentiment.confidence}%</Text>
+              </View>
+            </LinearGradient>
+
+            {/* Metrics Row */}
+            <View style={styles.metricsRow}>
+              <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={styles.metricLabel}>Mentions Today</Text>
+                <Text style={styles.metricValue}>{formatCompactNumber(selectedSentiment.mentionVolume)}</Text>
+                <View style={styles.metricChangeRow}>
+                  <Ionicons name={selectedSentiment.mentionChange >= 0 ? 'arrow-up' : 'arrow-down'} size={10} color={selectedSentiment.mentionChange >= 0 ? colors.marketUp : colors.marketDown} />
+                  <Text style={[styles.metricChange, { color: selectedSentiment.mentionChange >= 0 ? colors.marketUp : colors.marketDown }]}>
+                    {selectedSentiment.mentionChange >= 0 ? '+' : ''}{selectedSentiment.mentionChange.toFixed(1)}%
+                  </Text>
+                </View>
+              </View>
+              <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={styles.metricLabel}>Stability</Text>
+                <Text style={[styles.metricValue, { color: stability.volatility === 'high' ? colors.marketDown : stability.volatility === 'low' ? colors.marketUp : colors.warning }]}>
+                  {stability.stabilityScore}%
+                </Text>
+                <Text style={[styles.metricSub, { color: colors.textMuted }]}>{stability.volatility} volatility</Text>
+              </View>
+              <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={styles.metricLabel}>Keywords</Text>
+                <View style={styles.keywordRow}>
+                  {selectedSentiment.topKeywords.slice(0, 3).map((kw, i) => (
+                    <View key={i} style={[styles.keywordChip, { backgroundColor: sc.color + '15' }]}>
+                      <Text style={[styles.keywordText, { color: sc.color }]}>{kw}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </View>
+
+            {/* Sentiment Chart */}
+            <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+              <View style={styles.sectionHeaderRow}>
+                <View style={styles.sectionHeaderLeft}>
+                  <View style={[styles.sectionIcon, { backgroundColor: colors.primary + '20' }]}>
+                    <Ionicons name="pulse" size={16} color={colors.primary} />
+                  </View>
+                  <Text style={styles.sectionCardTitle}>30-Day Trend</Text>
+                </View>
+                {shift.hasShifted && (
+                  <View style={[styles.shiftBadge, { backgroundColor: shift.direction === 'improving' ? colors.marketUp + '20' : colors.marketDown + '20' }]}>
+                    <Text style={[styles.shiftText, { color: shift.direction === 'improving' ? colors.marketUp : colors.marketDown }]}>
+                      {shift.direction === 'improving' ? '↑' : '↓'} {Math.round(shift.magnitude)}pts
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <SentimentMiniChart history={selectedSentiment.history} label={selectedSentiment.label} />
+              {shift.alert && (
+                <View style={[styles.shiftAlert, { backgroundColor: colors.bgCardLight, borderLeftColor: sc.color }]}>
+                  <Text style={[styles.shiftAlertText, { color: colors.textSecondary }]}>{shift.alert}</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Market Overview */}
+            <View style={[styles.overviewCard, { borderColor: colors.border }]}>
+              <View style={styles.overviewHeader}>
+                <Ionicons name="globe" size={16} color={colors.primary} />
+                <Text style={styles.overviewTitle}>Market Sentiment Overview</Text>
+              </View>
+              <Text style={[styles.overviewText, { color: colors.textSecondary }]}>{overviewText}</Text>
+
+              {/* Filter chips */}
+              <FlashList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filterRow}
+                data={filterOptions}
+                keyExtractor={(f) => f.key}
+                renderItem={({ item: f }) => {
+                  const fColors = getSentimentColors(f.key === 'all' ? 'neutral' : f.key);
+                  return (
+                    <Pressable
+                      onPress={() => setActiveFilter(f.key)}
+                      style={({pressed}) => [{opacity: pressed ? 0.7 : 1}, styles.filterChip, {
+                        backgroundColor: activeFilter === f.key ? fColors.color + '20' : colors.bgCardLight,
+                        borderColor: activeFilter === f.key ? fColors.color : colors.border,
+                      }]}
+                    >
+                      <Text style={[styles.filterChipText, {
+                        color: activeFilter === f.key ? fColors.color : colors.textSecondary,
+                        fontWeight: activeFilter === f.key ? '700' : '500',
+                      }]}>
+                        {f.label} ({f.count})
+                      </Text>
+                    </Pressable>
+                  );
+                }}
+              />
+            </View>
+          </View>
+        }
+        renderItem={({ item }) => {
+          if (item.type === 'stock') {
+            const stock = item.data;
+            const s = getSentimentColors(stock.label);
+            return (
+              <Pressable
+                style={({pressed}) => [[styles.stockRow, { backgroundColor: colors.bgCard, borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
+                onPress={() => setSelectedSymbol(stock.symbol)}
+              >
+                <View style={[styles.stockSentimentDot, { backgroundColor: s.color }]} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.stockSymbol, { color: colors.text }]}>{stock.symbol}</Text>
+                  <Text style={[styles.stockName, { color: colors.textMuted }]} numberOfLines={1}>{stock.name}</Text>
+                </View>
+                <View style={styles.stockScoreRow}>
+                  <Text style={[styles.stockScore, { color: s.color }]}>
+                    {stock.currentScore > 0 ? '+' : ''}{stock.currentScore}
+                  </Text>
+                  <View style={[styles.stockBar, { backgroundColor: colors.bgInput }]}>
+                    <View style={[styles.stockBarFill, {
+                      width: `${Math.abs(stock.currentScore)}%`,
+                      backgroundColor: s.color,
+                    }]} />
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              </Pressable>
+            );
+          }
+          return <ArticleCard article={item.data as any} />;
+        }}
+        ListFooterComponent={
+          <View>
+            {/* Top Keywords */}
+            <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+              <Text style={styles.sectionCardTitle}>Trending Keywords</Text>
+              <View style={styles.keywordsGrid}>
+                {selectedSentiment.topKeywords.map((kw, i) => (
+                  <View key={i} style={[styles.keywordChip, { backgroundColor: sc.color + '10', borderColor: sc.color + '25' }]}>
+                    <Text style={[styles.keywordText, { color: sc.color }]}>#{kw}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={{ height: 60 }} />
+          </View>
+        }
+      />
     </View>
   );
 }

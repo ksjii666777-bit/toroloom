@@ -149,7 +149,10 @@ export class ZerodhaBroker implements IBroker {
   async getIndices(): Promise<IndexData[]> {
     this.requireAuth();
 
-    const tokens = DEFAULT_INDICES.map(name => INDEX_TOKENS[name]).filter(Boolean);
+    const tokens = DEFAULT_INDICES.flatMap(name => {
+      const token = INDEX_TOKENS[name];
+      return token ? [token] : [];
+    });
     const results: IndexData[] = [];
 
     // Use getQuote which works with index tokens like "NSE:NIFTY 50"

@@ -54,7 +54,7 @@ import * as Sharing from 'expo-sharing';
 type CouponType = 'percentage' | 'fixed' | 'free_trial';
 
 const COUPON_TYPES: { value: CouponType; label: string; icon: string; color: string }[] = [
-  { value: 'percentage', label: 'Percentage', icon: 'percent', color: '#3B82F6' },
+  { value: 'percentage', label: 'Percentage', icon: 'percent-outline', color: '#3B82F6' },
   { value: 'fixed', label: 'Fixed ₹', icon: 'pricetag', color: '#10B981' },
   { value: 'free_trial', label: 'Free Trial', icon: 'timer', color: '#FF9800' },
 ];
@@ -95,7 +95,7 @@ function getTypeColor(type: CouponType): string {
 
 function getTypeIcon(type: CouponType): string {
   switch (type) {
-    case 'percentage': return 'percent';
+    case 'percentage': return 'percent-outline';
     case 'fixed': return 'pricetag';
     case 'free_trial': return 'timer';
   }

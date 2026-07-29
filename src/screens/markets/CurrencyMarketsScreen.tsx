@@ -19,6 +19,7 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable,
   TextInput, Platform, Dimensions,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -305,12 +306,16 @@ export function CurrencyConverterModal({
 
         {/* From Currency Picker */}
         <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyMarkets.converterFrom')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
-          {CURRENCIES.map(cur => {
+        <FlashList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={CURRENCIES}
+          keyExtractor={(cur) => cur.code}
+          style={styles.convPickerScroll}
+          renderItem={({ item: cur }) => {
             const selected = fromCode === cur.code;
             return (
               <Pressable
-                key={cur.code}
                 onPress={() => { setFromCode(cur.code); }}
                 style={[
                   styles.convChip,
@@ -332,8 +337,8 @@ export function CurrencyConverterModal({
                 )}
               </Pressable>
             );
-          })}
-        </ScrollView>
+          }}
+        />
 
         {/* Swap + Rate Display */}
         <View style={styles.convRateRow}>
@@ -350,12 +355,16 @@ export function CurrencyConverterModal({
 
         {/* To Currency Picker */}
         <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyMarkets.converterTo')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
-          {selectableCurrencies.map(cur => {
+        <FlashList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={selectableCurrencies}
+          keyExtractor={(cur) => cur.code}
+          style={styles.convPickerScroll}
+          renderItem={({ item: cur }) => {
             const selected = toCode === cur.code;
             return (
               <Pressable
-                key={cur.code}
                 onPress={() => { setToCode(cur.code); }}
                 style={[
                   styles.convChip,
@@ -377,8 +386,8 @@ export function CurrencyConverterModal({
                 )}
               </Pressable>
             );
-          })}
-        </ScrollView>
+          }}
+        />
 
         {/* Result Display */}
         <View style={[styles.convResultCard, { backgroundColor: toCurrency.color + '12', borderColor: toCurrency.color + '30' }]}>
@@ -568,25 +577,29 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
 
         {/* Region filter */}
         {activeTab !== 'summary' && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-            {[
+          <FlashList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={[
               { key: null as string | null, label: t('currencyMarkets.filterAll') },
               { key: 'major', label: t('currencyMarkets.filterMajor') },
               { key: 'asian', label: t('currencyMarkets.filterAsian') },
               { key: 'other', label: t('currencyMarkets.filterOther') },
-            ].map(f => {
+            ]}
+            keyExtractor={(f) => f.label}
+            style={styles.filterScroll}
+            renderItem={({ item: f }) => {
               const isActive = regionFilter === f.key;
               return (
                 <Pressable
-                  key={f.label}
                   onPress={() => setRegionFilter(f.key)}
                   style={[styles.filterChip, { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary + '40' : colors.border }]}
                 >
                   <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textMuted }]}>{f.label}</Text>
                 </Pressable>
               );
-            })}
-          </ScrollView>
+            }}
+          />
         )}
       </View>
 

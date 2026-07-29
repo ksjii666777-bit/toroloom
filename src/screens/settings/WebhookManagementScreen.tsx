@@ -500,9 +500,11 @@ export default function WebhookManagementScreen({ navigation }: any) {
               ))}
             </ScrollView>
             <View style={styles.eventsGrid}>
-              {filteredEvents.map(meta => {
-                const isSelected = selectedEvents.includes(meta.event);
-                return (
+              {(() => {
+                const selectedEventsSet = new Set(selectedEvents);
+                return filteredEvents.map(meta => {
+                  const isSelected = selectedEventsSet.has(meta.event);
+                  return (
                   <Pressable key={meta.event} onPress={() => toggleCreateEvent(meta.event)}
                     style={[styles.eventOption, {
                       backgroundColor: isSelected ? meta.color + '20' : 'rgba(255,255,255,0.04)',
@@ -516,7 +518,8 @@ export default function WebhookManagementScreen({ navigation }: any) {
                     <Ionicons name={isSelected ? 'checkmark-circle' : 'add-circle-outline'} size={18} color={isSelected ? meta.color : colors.textMuted} />
                   </Pressable>
                 );
-              })}
+                });
+              })()}
             </View>
 
             <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.97}>

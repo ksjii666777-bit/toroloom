@@ -546,7 +546,7 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
                 <ScopeChip
                   key={meta.scope}
                   scope={meta}
-                  selected={selectedScopes.includes(meta.scope)}
+                  selected={new Set(selectedScopes).has(meta.scope)}
                   onToggle={() => toggleScope(meta.scope)}
                   colors={colors}
                 />

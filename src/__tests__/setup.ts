@@ -552,6 +552,45 @@ vi.mock('expo-modules-core', () => {
   };
 });
 
+// ==================== Mock @shopify/flash-list ====================
+// FlashList v2 throws "FlashList v2 is only supported on new architecture"
+// at import time in test environment. Create a functional mock that
+// actually renders items via data/renderItem so tests can find content.
+vi.mock('@shopify/flash-list', () => ({
+  FlashList: (props: any) => {
+    const React = require('react');
+    const { data, renderItem, ListHeaderComponent, ListFooterComponent, ListEmptyComponent, ...rest } = props;
+    const children = [];
+    if (ListHeaderComponent) {
+      children.push(React.createElement('View', { key: 'header' },
+        typeof ListHeaderComponent === 'function' ? React.createElement(ListHeaderComponent) : ListHeaderComponent
+      ));
+    }
+    if (data && Array.isArray(data) && renderItem) {
+      data.forEach((item: any, index: number) => {
+        const el = renderItem({ item, index });
+        if (el) children.push(el);
+      });
+    } else if (!data || data.length === 0) {
+      if (ListEmptyComponent) {
+        children.push(React.createElement('View', { key: 'empty' },
+          typeof ListEmptyComponent === 'function' ? React.createElement(ListEmptyComponent) : ListEmptyComponent
+        ));
+      }
+    }
+    if (ListFooterComponent) {
+      children.push(React.createElement('View', { key: 'footer' },
+        typeof ListFooterComponent === 'function' ? React.createElement(ListFooterComponent) : ListFooterComponent
+      ));
+    }
+    return React.createElement('View', rest, ...children);
+  },
+  MasonryFlashList: (props: any) => {
+    const React = require('react');
+    return React.createElement('View', props, props.children);
+  },
+}));
+
 // ==================== Mock @shopify/react-native-skia ====================
 // SkiaCandlestickChart.tsx uses this for GPU-accelerated canvas. The native
 // module is not available in Node.js test environment. Mock all Skia exports.

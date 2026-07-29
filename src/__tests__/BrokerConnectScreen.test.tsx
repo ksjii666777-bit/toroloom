@@ -383,19 +383,6 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     expect(getByText('Connecting...')).toBeDefined();
   });
 
-  it('shows API Key field in credentials modal', async () => {
-    const { getByText, getByPlaceholderText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
-    );
-    await advanceAndFlush();
-
-    act(() => { fireEvent.press(getByText('Angel One')); });
-    await advanceAndFlush();
-
-    expect(getByText('API Key')).toBeDefined();
-    expect(getByPlaceholderText('Enter your API key')).toBeDefined();
-  });
-
   it('shows connecting overlay when Angel is selected (SnapTrade connect)', async () => {
     const { getByText } = render(
       <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
@@ -406,6 +393,20 @@ describe('BrokerConnectScreen — Connect Flow', () => {
     await advanceAndFlush();
 
     expect(getByText('Connecting...')).toBeDefined();
+  });
+
+  it('does not show old credentials modal for SnapTrade brokers', async () => {
+    const { getByText, queryByText, queryByPlaceholderText } = render(
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+    );
+    await advanceAndFlush();
+
+    act(() => { fireEvent.press(getByText('Angel One')); });
+    await advanceAndFlush();
+
+    // Credentials modal was removed — SnapTrade OAuth is used instead
+    expect(queryByText('API Key')).toBeNull();
+    expect(queryByPlaceholderText('Enter your API key')).toBeNull();
   });
 
   it('triggers SnapTrade connect when tapping a broker', async () => {

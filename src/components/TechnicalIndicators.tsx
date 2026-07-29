@@ -246,6 +246,8 @@ const RSIPanel = React.memo(({
   const chartW = width - pad.left - pad.right;
   const chartH = panelHeight - pad.top - pad.bottom;
 
+  const touchPan = useCrosshairTouch(rsi.length, width, setFocusedIndex);
+
   const validPoints = rsi.filter((v): v is number => v !== null);
   if (validPoints.length < 2) {
     return (
@@ -266,8 +268,6 @@ const RSIPanel = React.memo(({
     const y = getY(rsi[i]!);
     rsiPath += rsiPath ? ` L ${x} ${y}` : `M ${x} ${y}`;
   }
-
-  const touchPan = useCrosshairTouch(rsi.length, width, setFocusedIndex);
 
   const lastRSI = validPoints[validPoints.length - 1];
   const isOverbought = lastRSI > 70;
@@ -354,6 +354,9 @@ const MACDPanel = React.memo(({
     ...signal.filter((v): v is number => v !== null),
     ...histogram.filter((v): v is number => v !== null),
   ];
+
+  const touchPan = useCrosshairTouch(macd.length, width, setFocusedIndex);
+
   if (allValues.length < 2) {
     return (
       <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
@@ -383,8 +386,6 @@ const MACDPanel = React.memo(({
     const y = getY(signal[i]!);
     signalPath += signalPath ? ` L ${x} ${y}` : `M ${x} ${y}`;
   }
-
-  const touchPan = useCrosshairTouch(macd.length, width, setFocusedIndex);
 
   const lastMACD = macd.filter((v): v is number => v !== null).pop() || 0;
   const lastSignal = signal.filter((v): v is number => v !== null).pop() || 0;
@@ -480,6 +481,9 @@ const BollingerPanel = React.memo(({
   const chartW = width - pad.left - pad.right;
   const chartH = panelHeight - pad.top - pad.bottom;
 
+  // call hooks BEFORE early return to maintain hook order
+  const touchPan = useCrosshairTouch(upper.length, width, setFocusedIndex);
+
   const validUpper = upper.filter((v): v is number => v !== null);
   if (validUpper.length < 2) {
     return (
@@ -535,8 +539,6 @@ const BollingerPanel = React.memo(({
     }
     fillPath = `${fillPath}${revPath} Z`;
   }
-
-  const touchPan = useCrosshairTouch(upper.length, width, setFocusedIndex);
 
   const lastUpperVal = upper.filter((v): v is number => v !== null).pop() || 0;
   const lastLowerVal = lower.filter((v): v is number => v !== null).pop() || 0;

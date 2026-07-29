@@ -67,4 +67,6 @@ function AppRoot() {
   );
 }
 
-export default isSentryEnabled ? Sentry.wrap(AppRoot) : AppRoot;
+// Named wrapper so Fast Refresh can track the exported component
+const WrappedApp = isSentryEnabled ? Sentry.wrap(AppRoot) : AppRoot;
+export default WrappedApp;
