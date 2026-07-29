@@ -38,6 +38,7 @@ expo-env.d.ts
 
 # ===================== Build Output =====================
 backend/dist/
+storybook-static/
 
 # ===================== Test & Coverage =====================
 coverage/

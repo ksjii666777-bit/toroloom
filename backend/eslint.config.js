@@ -20,7 +20,7 @@ export default [
   {
     rules: {
       // Allow unused vars with underscore prefix (_foo, _bar)
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       // Allow require() statements (backend uses CommonJS)
       '@typescript-eslint/no-require-imports': 'off',
       // Allow explicit any (longstanding usage in the codebase)
@@ -37,6 +37,15 @@ export default [
       'no-useless-escape': 'warn',
       // Unused assignments — warn but don't block
       'no-useless-assignment': 'warn',
+    },
+  },
+  // Test files: disable no-unused-vars entirely — test code frequently destructures
+  // values for assertions (e.g. `const { status, body } = await request(...)`)
+  // and imports types/helpers that are used across describe/it blocks.
+  {
+    files: ['src/__tests__/**', '**/*.test.ts', '**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 ];
