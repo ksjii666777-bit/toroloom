@@ -175,7 +175,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
   // ── Load current connection status ─────────────────────────
   useEffect(() => {
     loadStatus();
-// eslint-disable-next-line react-hooks/exhaustive-deps
+// eslint-disable-next-line react-hooks/exhaustive-deps -- loadStatus defined below (TDZ)
   }, []);
 
   // ── Entrance animation ─────────────────────────────────────
@@ -193,7 +193,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
     );
     glowLoop.start();
     return () => glowLoop.stop();
-// eslint-disable-next-line react-hooks/exhaustive-deps
+// eslint-disable-next-line react-hooks/exhaustive-deps -- Animated refs are stable
   }, []);
 
   // ── Load status ────────────────────────────────────────────

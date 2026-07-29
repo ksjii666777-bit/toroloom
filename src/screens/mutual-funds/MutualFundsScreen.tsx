@@ -46,9 +46,9 @@ export default function MutualFundsScreen({ navigation }: any) {
 
   useEffect(() => {
     fetchFunds();
+    fetchFunds();
     fetchSIPs();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchFunds, fetchSIPs]);
 
   const categories = [...new Set(funds.map(f => f.category))];
   const filteredFunds = selectedCategory

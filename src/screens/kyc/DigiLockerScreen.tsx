@@ -76,8 +76,7 @@ export default function DigiLockerScreen({ navigation, route }: any) {
     } finally {
       setIsConnecting(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleFetchDocuments]);
 
   // Step 2: Fetch documents after authorization
   const handleFetchDocuments = useCallback(async (referenceId: string) => {

@@ -39,7 +39,7 @@ export default function CertificateScreen({ _navigation, route }: any) {
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
   const { certificates, generateCertificate, isGeneratingCertificate, courses } = useEducationStore();
-  const userName = useAuthStore(s => s.user?.name) || 'Student';
+  const _userName = useAuthStore(s => s.user?.name) || 'Student';
 
   const [selectedCert, setSelectedCert] = useState<string | null>(null);
   const [sharingId, setSharingId] = useState<string | null>(null);
@@ -54,18 +54,6 @@ export default function CertificateScreen({ _navigation, route }: any) {
     });
   }, [courses, certificates]);
 
-  // Handle incoming route param to auto-generate for a specific course
-  React.useEffect(() => {
-    const autoCourseId = route?.params?.courseId as string | undefined;
-    if (autoCourseId) {
-      const existing = certificates.find(c => c.courseId === autoCourseId);
-      if (!existing) {
-        handleGenerate(autoCourseId);
-      }
-    }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route?.params?.courseId]);
-
   const handleGenerate = useCallback(async (courseId: string) => {
     const cert = await generateCertificate(courseId);
     if (cert) {
@@ -78,8 +66,19 @@ export default function CertificateScreen({ _navigation, route }: any) {
     } else {
       Alert.alert(t('app.error'), t('education.certificateGenerateError'));
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [generateCertificate, userName]);
+  }, [generateCertificate, t]);
+
+  // Handle incoming route param to auto-generate for a specific course
+  React.useEffect(() => {
+    const autoCourseId = route?.params?.courseId as string | undefined;
+    if (autoCourseId) {
+      const existing = certificates.find(c => c.courseId === autoCourseId);
+      if (!existing) {
+        handleGenerate(autoCourseId);
+      }
+    }
+// eslint-disable-next-line react-hooks/exhaustive-deps -- handleGenerate in deps causes re-render loop
+  }, [route?.params?.courseId]);
 
   const handleSharePDF = useCallback(async (cert: CourseCertificate) => {
     let pdfUri = cert.pdfUri;
@@ -107,8 +106,7 @@ export default function CertificateScreen({ _navigation, route }: any) {
     } catch {
       // User cancelled share
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [t]);
 
   const selectedCertData = selectedCert
     ? certificates.find(c => c.id === selectedCert)

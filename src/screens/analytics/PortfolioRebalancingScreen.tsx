@@ -26,8 +26,7 @@ export default function PortfolioRebalancingScreen({ _navigation }: any) {
   // Run analysis on mount
   useEffect(() => {
     runAnalysis();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [runAnalysis]);
 
   const selectedProfile = useMemo(
     () => profiles.find(p => p.id === selectedProfileId) || profiles[1],

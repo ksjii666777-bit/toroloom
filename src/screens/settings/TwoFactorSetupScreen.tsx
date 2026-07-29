@@ -55,8 +55,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
   // ── Load Status on Mount ────────────────────────────────────────
   useEffect(() => {
     loadStatus();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadStatus]);
 
   const loadStatus = useCallback(async () => {
     try {

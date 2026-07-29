@@ -483,8 +483,7 @@ export default function SocialTradingScreen({ navigation }: any) {
   // Load leaderboard on mount
   useEffect(() => {
     fetchLeaderboard();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchLeaderboard]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

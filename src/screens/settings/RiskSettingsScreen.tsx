@@ -39,8 +39,7 @@ export default function RiskSettingsScreen({ navigation }: any) {
 
   useEffect(() => {
     syncFromBackend();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [syncFromBackend]);
 
   const formatTimeRemaining = () => {
     if (!lockdown.liftsAt) return t('app.na');

@@ -74,8 +74,7 @@ export default function ABTestRunnerScreen({ _navigation }: any) {
         ]);
         break;
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, startExperiment, pauseExperiment, resumeExperiment, completeExperiment, simulateMetrics, deleteExperiment, selectedExperimentId, selectExperiment]);
+  }, [archiveExperiment, t, startExperiment, pauseExperiment, resumeExperiment, completeExperiment, simulateMetrics, deleteExperiment, selectedExperimentId, selectExperiment]);
 
   return (
     <View style={styles.container}>
