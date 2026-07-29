@@ -238,8 +238,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         setIsConnectingSnapTrade(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedBroker, showConnectedSuccess],
+    [selectedBroker, showConnectedSuccess, setIsConnectingSnapTrade, t, setConnectedBroker, setConnectedLabel],
   );
 
   // Listen for SnapTrade OAuth deep link callbacks
@@ -290,8 +289,7 @@ export default function ConnectBrokerView({ navigation }: any) {
       }
       // Don't set isConnectingSnapTrade = false here — the deep link callback will handle it
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [setSelectedBroker, setIsConnectingSnapTrade, t],
   );
 
   // ── Open SnapTrade Connect (all brokers) ────────────────────
@@ -328,8 +326,7 @@ export default function ConnectBrokerView({ navigation }: any) {
     } finally {
       setIsTestingProxy(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedBroker, connectedLabel, t]);
+  }, [connectedBroker, t, setIsTestingProxy]);
 
   // ── Disconnect ──────────────────────────────────────────────
   const handleDisconnect = useCallback(
@@ -353,8 +350,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         ],
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [t, setConnectedBroker, setConnectedLabel],
   );
 
   // ── Loading State ───────────────────────────────────────────

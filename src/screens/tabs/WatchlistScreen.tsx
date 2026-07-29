@@ -131,12 +131,13 @@ export default function WatchlistScreen({ navigation }: any) {
   }, []);
 
   const currentWatchlist = isAllView ? null : watchlists.find(w => w.id === activeWatchlist);
-   
-   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const watchlistStocks = isAllView
-    ? combinedStocks.map(entry => entry.stock)
-    : currentWatchlist?.stocks || [];
+
+  const watchlistStocks = useMemo(() =>
+    isAllView
+      ? combinedStocks.map(entry => entry.stock)
+      : currentWatchlist?.stocks || [],
+    [isAllView, combinedStocks, currentWatchlist],
+  );
 
   // ── Performance counts ────────────────────────────────────
   const gainersCount = useMemo(
