@@ -52,12 +52,6 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
   const [disableCodeModal, setDisableCodeModal] = useState(false);
   const [disableCodeInput, setDisableCodeInput] = useState('');
 
-  // ── Load Status on Mount ────────────────────────────────────────
-  useEffect(() => {
-    loadStatus();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const loadStatus = useCallback(async () => {
     try {
       const s = await authApi.get2FAStatus();
@@ -69,6 +63,11 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
       setFlowStep('setup');
     }
   }, []);
+
+  // ── Load Status on Mount ────────────────────────────────────────
+  useEffect(() => {
+    loadStatus();
+  }, [loadStatus]);
 
   // ── Generate Setup ──────────────────────────────────────────────
   const handleStartSetup = useCallback(async () => {

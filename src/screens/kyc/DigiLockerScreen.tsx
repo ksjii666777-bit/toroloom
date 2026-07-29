@@ -48,6 +48,28 @@ export default function DigiLockerScreen({ navigation, route }: any) {
   const [isVerified, setIsVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Step 2: Fetch documents after authorization
+  const handleFetchDocuments = useCallback(async (referenceId: string) => {
+    setIsFetching(true);
+    setError(null);
+
+    try {
+      const data = await kycApi.fetchDigiLockerDocuments(referenceId);
+      setDocuments(data.documents);
+      setIsVerified(data.isVerified);
+
+      if (data.isVerified) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (err: any) {
+      const msg = err?.body?.error || err?.message || 'Failed to fetch documents';
+      setError(msg);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsFetching(false);
+    }
+  }, []);
+
   // Step 1: Get DigiLocker auth URL and open consent
   const handleConnect = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -76,30 +98,7 @@ export default function DigiLockerScreen({ navigation, route }: any) {
     } finally {
       setIsConnecting(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Step 2: Fetch documents after authorization
-  const handleFetchDocuments = useCallback(async (referenceId: string) => {
-    setIsFetching(true);
-    setError(null);
-
-    try {
-      const data = await kycApi.fetchDigiLockerDocuments(referenceId);
-      setDocuments(data.documents);
-      setIsVerified(data.isVerified);
-
-      if (data.isVerified) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    } catch (err: any) {
-      const msg = err?.body?.error || err?.message || 'Failed to fetch documents';
-      setError(msg);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsFetching(false);
-    }
-  }, []);
+  }, [handleFetchDocuments]);
 
   const handleContinue = useCallback(() => {
     if (route.params?.onVerified) {

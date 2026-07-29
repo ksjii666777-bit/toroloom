@@ -172,29 +172,6 @@ export default function BrokerConnectScreen({ navigation }: any) {
     }
   });
 
-  // ── Load current connection status ─────────────────────────
-  useEffect(() => {
-    loadStatus();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ── Entrance animation ─────────────────────────────────────
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
-    ]).start();
-
-    const glowLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glowAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
-        Animated.timing(glowAnim, { toValue: 0, duration: 2000, useNativeDriver: true }),
-      ]),
-    );
-    glowLoop.start();
-    return () => glowLoop.stop();
-  }, [fadeAnim, glowAnim, slideAnim]);
-
   // ── Load status ────────────────────────────────────────────
   const loadStatus = useCallback(async () => {
     try {
@@ -224,6 +201,28 @@ export default function BrokerConnectScreen({ navigation }: any) {
       setConnectionState(s => ({ ...s, isLoading: false }));
     }
   }, []);
+
+  // ── Load current connection status ─────────────────────────
+  useEffect(() => {
+    loadStatus();
+  }, [loadStatus]);
+
+  // ── Entrance animation ─────────────────────────────────────
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
+    ]).start();
+
+    const glowLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
+        Animated.timing(glowAnim, { toValue: 0, duration: 2000, useNativeDriver: true }),
+      ]),
+    );
+    glowLoop.start();
+    return () => glowLoop.stop();
+  }, [fadeAnim, glowAnim, slideAnim]);
 
   // ── Show connected success overlay ─────────────────────────
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

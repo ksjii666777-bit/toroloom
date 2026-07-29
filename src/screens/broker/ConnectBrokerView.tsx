@@ -153,24 +153,8 @@ export default function ConnectBrokerView({ navigation }: any) {
   const slideAnim = useRef(new Animated.Value(30)).current;
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Check existing sessions on mount
-  useEffect(() => {
-    checkExistingSessions();
-  }, []);
-
-  // ── SnapTrade integration hooks ──
-  const [_isConnectingSnapTrade, setIsConnectingSnapTrade] = useState(false);
-  const [_snapTradeConnected, setSnapTradeConnected] = useState<boolean | null>(null);
-
-  // Entrance animation
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
-    ]).start();
-  }, [fadeAnim, slideAnim]);
-
-  const checkExistingSessions = async () => {
+  // ── Check existing sessions ────────────────────────────────────
+  const checkExistingSessions = useCallback(async () => {
     try {
       // First try SnapTrade status
       const st = await snapTradeApi.status();
@@ -188,7 +172,24 @@ export default function ConnectBrokerView({ navigation }: any) {
       setSnapTradeConnected(false);
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // ── SnapTrade integration hooks ──
+  const [_isConnectingSnapTrade, setIsConnectingSnapTrade] = useState(false);
+  const [_snapTradeConnected, setSnapTradeConnected] = useState<boolean | null>(null);
+
+  // Check existing sessions on mount
+  useEffect(() => {
+    checkExistingSessions();
+  }, [checkExistingSessions]);
+
+  // Entrance animation
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
+    ]).start();
+  }, [fadeAnim, slideAnim]);
 
   // ── Show Connected Success Overlay ──────────────────────────
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
