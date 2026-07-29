@@ -24,7 +24,7 @@ export default [
     },
   },
   {
-    ignores: ['node_modules', 'coverage', 'dist', 'backend', 'android', 'ios', '.expo'],
+    ignores: ['node_modules', 'coverage', 'dist', 'backend', 'android', 'ios', '.expo', 'storybook-static'],
   },
   {
     rules: {
