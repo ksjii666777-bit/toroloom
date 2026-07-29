@@ -22,7 +22,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
-import { useAuthStore } from '../../store/authStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatDate } from '../../utils/formatters';
 import type { CourseCertificate } from '../../types';
@@ -39,8 +38,6 @@ export default function CertificateScreen({ _navigation, route }: any) {
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
   const { certificates, generateCertificate, isGeneratingCertificate, courses } = useEducationStore();
-  const _userName = useAuthStore(s => s.user?.name) || 'Student';
-
   const [selectedCert, setSelectedCert] = useState<string | null>(null);
   const [sharingId, setSharingId] = useState<string | null>(null);
   const [_pdfUris, setPdfUris] = useState<Record<string, string>>({});
