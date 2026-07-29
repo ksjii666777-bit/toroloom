@@ -9,7 +9,7 @@
  * dividendService estimation as a fallback.
  */
 
-import { api, ApiError } from './client';
+import { api } from './client';
 import type { DividendTrackerState, Holding } from '../../types';
 import { computeDividendState } from '../../services/dividendService';
 
@@ -106,7 +106,7 @@ function mapHoldingsForApi(
 function convertApiResponse(
   response: DividendApiResponse,
   holdings: Holding[],
-  stocks: { id: string; symbol: string; name: string; price: number; dividend: number; sector: string }[],
+  _stocks: { id: string; symbol: string; name: string; price: number; dividend: number; sector: string }[],
 ): DividendTrackerState {
   const totalPortfolioCost = holdings.reduce((s, h) => s + h.totalInvested, 0);
   const totalPortfolioValue = holdings.reduce((s, h) => s + h.currentValue, 0);

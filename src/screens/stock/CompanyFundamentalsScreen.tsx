@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView , Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
@@ -12,10 +12,10 @@ import { marketApi } from '../../services/api/market';
 import { mockFundamentals } from '../../constants/mockData';
 import type { CompanyFundamentals, FinancialQuarter } from '../../types';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 // ──── Helpers ────────────────────────────────────────────────
-const formatLarge = (val: number) => {
+const _formatLarge = (val: number) => {
   if (val >= 100000) return `\u20B9${(val / 100000).toFixed(1)}L Cr`;
   if (val >= 1000) return `\u20B9${val.toFixed(0)} Cr`;
   return `\u20B9${val.toFixed(2)} Cr`;
@@ -153,7 +153,7 @@ function ShareholdingChart({ data }: { data: { label: string; value: number; col
 // ──── Main Screen ────────────────────────────────────────────
 export default function CompanyFundamentalsScreen({ route, navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
+  const { _t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { symbol, stockId } = route.params || {};
   const { stocks } = useMarketStore();

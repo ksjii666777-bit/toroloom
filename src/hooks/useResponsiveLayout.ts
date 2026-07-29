@@ -101,6 +101,7 @@ export function useResponsiveLayout(): ResponsiveLayout {
   }, []);
 
   // Memoize to prevent unnecessary re-renders when the object reference changes
+// eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => layout, [
     layout.width,
     layout.height,

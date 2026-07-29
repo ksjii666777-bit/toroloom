@@ -265,7 +265,7 @@ const s = StyleSheet.create({
   },
 });
 
-const createStyles = (colors: any) =>
+const createStyles = (_colors: any) =>
   StyleSheet.create({
     container: { flex: 1 },
     header: {

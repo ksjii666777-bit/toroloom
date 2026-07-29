@@ -234,7 +234,7 @@ export default function BaseWidget({
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (_colors: any) => StyleSheet.create({
   container: {
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,

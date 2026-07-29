@@ -5,11 +5,11 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { formatCurrency, formatTimeAgo } from '../../utils/formatters';
-import { FONTS, BORDER_RADIUS } from '../../constants/theme';
+
 import type { WidgetSize } from '../../types/widgets';
 
 interface RecentTradesWidgetProps {

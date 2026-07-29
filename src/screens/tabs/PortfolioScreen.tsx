@@ -68,6 +68,7 @@ export default function PortfolioScreen({ navigation }: any) {
   useEffect(() => {
     countUpProgress.value = 0;
     countUpProgress.value = withTiming(1, { duration: 1000 });
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portfolioValue]);
 
   useAnimatedReaction(

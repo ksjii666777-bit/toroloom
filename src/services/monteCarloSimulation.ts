@@ -23,7 +23,7 @@
  * ============================================================================
  */
 
-import type { MonteCarloParams, MonteCarloResult, MonteCarloYearResult, MonteCarloPercentile } from '../types';
+import type { MonteCarloParams, MonteCarloResult, MonteCarloYearResult, _MonteCarloPercentile } from '../types';
 
 // ─── Constants ────────────────────────────────────────────────
 
@@ -118,9 +118,9 @@ export function runMonteCarloSimulation(
   // ── Percentiles on final values ────────────────────────────
   const sortedFinal = [...finalValues].sort((a, b) => a - b);
   const p5 = percentile(sortedFinal, 5);
-  const p25 = percentile(sortedFinal, 25);
+  const _p25 = percentile(sortedFinal, 25);
   const p50 = percentile(sortedFinal, 50);
-  const p75 = percentile(sortedFinal, 75);
+  const _p75 = percentile(sortedFinal, 75);
   const p95 = percentile(sortedFinal, 95);
 
   // ── Probability of profit ──────────────────────────────────

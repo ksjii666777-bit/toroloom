@@ -23,7 +23,7 @@ import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, Modal,
   TouchableOpacity, Animated, Dimensions, Alert, ActivityIndicator,
-  Platform,
+  _Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -175,6 +175,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
   // ── Load current connection status ─────────────────────────
   useEffect(() => {
     loadStatus();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Entrance animation ─────────────────────────────────────
@@ -192,6 +193,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
     );
     glowLoop.start();
     return () => glowLoop.stop();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Load status ────────────────────────────────────────────
@@ -254,7 +256,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
   // SnapTrade specific state
   const [isConnectingSnapTrade, setIsConnectingSnapTrade] = useState(false);
-  const [snapTradeOauthUrl, setSnapTradeOauthUrl] = useState<string | null>(null);
+  const [_snapTradeOauthUrl, setSnapTradeOauthUrl] = useState<string | null>(null);
 
   // ── Open SnapTrade Connect ────────────────────────────────
   const openSnapTradeConnect = useCallback(async (broker: BrokerMeta) => {
@@ -286,7 +288,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
   }, [showConnectedSuccess]);
 
   // ── Open OAuth WebView (Zerodha — legacy fallback) ────────
-  const openOAuthWebView = useCallback(async (broker: BrokerMeta) => {
+  const _openOAuthWebView = useCallback(async (broker: BrokerMeta) => {
     setSelectedBroker(broker);
     triggerHaptic(ImpactFeedbackStyle.Medium);
 

@@ -26,7 +26,7 @@ import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { mockLearningPaths } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 export default function LearningPathsScreen({ navigation }: any) {
   const { colors } = useTheme();

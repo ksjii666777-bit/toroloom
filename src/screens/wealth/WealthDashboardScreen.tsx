@@ -19,12 +19,12 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable,
   Dimensions, Platform,
 } from 'react-native';
-import Animated, { FadeInUp, FadeInRight } from 'react-native-reanimated';
+import Animated, { FadeInUp, _FadeInRight } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useWealthStore, type FinancialGoal } from '../../store/wealthStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
@@ -32,7 +32,7 @@ const { width } = Dimensions.get('window');
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 
-const formatINR = (n: number) =>
+const _formatINR = (n: number) =>
   '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
 const formatCompactINR = (n: number): string => {
@@ -117,7 +117,7 @@ export default function WealthDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { goals, summary, retirementPlan } = useWealthStore();
-  const getGoalProgress = useWealthStore(s => s.getGoalProgress);
+  const _getGoalProgress = useWealthStore(s => s.getGoalProgress);
 
   const stats = useMemo(() => {
     const totalGoalTarget = goals.reduce((s, g) => s + g.targetAmount, 0);
@@ -189,7 +189,7 @@ export default function WealthDashboardScreen({ navigation }: any) {
 
         {/* ── Quick Actions ── */}
         <Animated.View entering={FadeInUp.duration(450)} style={styles.quickActionsRow}>
-          {quickActions.map((action, i) => (
+          {quickActions.map((action, _i) => (
             <AnimatedPressable
               key={action.screen}
               onPress={() => navigation.navigate(action.screen)}

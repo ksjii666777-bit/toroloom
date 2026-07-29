@@ -24,7 +24,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useUserCourseStore } from '../../store/userCourseStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { UserGeneratedCourse } from '../../types';
 
@@ -80,7 +80,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
   const allCommunityCourses = useMemo(() => myCourses.filter(c => c.publishStatus === 'published'), [myCourses]);
 
   // Separate featured and regular
-  const { featured, regular } = useMemo(() => {
+  const { featured, _regular } = useMemo(() => {
     const feat: UserGeneratedCourse[] = [];
     const reg: UserGeneratedCourse[] = [];
     allCommunityCourses.forEach(c => {
@@ -380,7 +380,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
 // ─── Featured Course Card ──────────────────────────────────────
 
 function FeaturedCourseCard({
-    course, isEnrolled, onEnrollToggle, colors, styles,
+    course, isEnrolled, onEnrollToggle, _colors, styles,
 }: {
   course: UserGeneratedCourse;
   isEnrolled: boolean;

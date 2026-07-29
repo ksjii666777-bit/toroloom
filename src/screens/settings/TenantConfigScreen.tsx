@@ -150,6 +150,7 @@ export default function TenantConfigScreen({ navigation }: any) {
     Alert.alert(t('app.saved'), `${t('tenantConfig.savedSuccess')} "${config.name}".`, [
       { text: t('app.ok'), onPress: () => navigation.goBack() },
     ]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, name, domain, primaryColor, featureOverrides, pricingOverrides, razorpayKeyId, razorpayKeySecret, configureTenant, navigation]);
 
   // ── Reset form to defaults ───────────────────────────────
@@ -182,6 +183,7 @@ export default function TenantConfigScreen({ navigation }: any) {
         },
       ]
     );
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configureTenant]);
 
   // ── Render ───────────────────────────────────────────────

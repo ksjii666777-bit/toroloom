@@ -11,12 +11,12 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { useBehaviorJournalStore, MISTAKE_LABELS, ALL_EMOTIONS } from '../../store/behavioralJournalStore';
+import { useBehaviorJournalStore, MISTAKE_LABELS } from '../../store/behavioralJournalStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 type TabKey = 'Dashboard' | 'Entries' | 'Reports';
 
-export default function BehavioralJournalScreen({ navigation }: any) {
+export default function BehavioralJournalScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabKey>('Dashboard');
@@ -42,7 +42,7 @@ export default function BehavioralJournalScreen({ navigation }: any) {
   }, [allMetrics.emotionalBreakdown]);
 
   // Week of date formatting
-  const weekOfStr = latestReport
+  const _weekOfStr = latestReport
     ? `Week of ${new Date(latestReport.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
     : '';
 

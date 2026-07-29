@@ -8,7 +8,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
-import { FONTS, BORDER_RADIUS } from '../../constants/theme';
+
 import type { WidgetSize } from '../../types/widgets';
 
 interface HoldingsWidgetProps {

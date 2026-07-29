@@ -17,7 +17,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  Switch, Dimensions, Platform, Alert,
+  Switch, Dimensions, _Platform, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -26,7 +26,7 @@ import { useAccessibilityStore, FontScaleLevel, FONT_SCALE_VALUES } from '../../
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
 // ═════════════════════════════════════════════════════════════════════════
 // FONT SCALE OPTIONS

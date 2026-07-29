@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, _useCallback } from 'react';
 import {
   View, Text, StyleSheet, Pressable,
   Dimensions,
@@ -26,15 +26,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
-import { mockSentimentData, mockStocks } from '../../constants/mockData';
+import { mockSentimentData } from '../../constants/mockData';
 
 import {
-  classifySentiment,
+  _classifySentiment,
   generateSentimentOverview,
   computeSentimentStability,
   detectSentimentShift,
 } from '../../services/ai/sentimentAnalyzer';
-import type { StockSentiment } from '../../types';
+import type { _StockSentiment } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

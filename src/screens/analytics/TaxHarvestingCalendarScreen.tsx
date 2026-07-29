@@ -87,7 +87,7 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
 
   const harvestNow = useMemo(() => opportunities.filter(o => o.recommendation === 'harvest_now'), [opportunities]);
   const waitLongTerm = useMemo(() => opportunities.filter(o => o.recommendation === 'wait_long_term'), [opportunities]);
-  const avoidHarvest = useMemo(() => opportunities.filter(o => o.recommendation === 'avoid'), [opportunities]);
+  const _avoidHarvest = useMemo(() => opportunities.filter(o => o.recommendation === 'avoid'), [opportunities]);
 
   // Filter realized losses by type
   const filteredLosses = useMemo(() => {
@@ -378,7 +378,7 @@ export default function TaxHarvestingCalendarScreen({ navigation }: any) {
 
             {harvestNow.length > 0 ? (
               <View>
-                {harvestNow.map((opp, i) => (
+                {harvestNow.map((opp, _i) => (
                   <View key={opp.id} style={[styles.simCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                     <View style={styles.simHeader}>
                       <Text style={[styles.simSymbol, { color: colors.text }]}>{opp.symbol}</Text>
@@ -496,7 +496,7 @@ function OpportunityCard({ opp, index, isExpanded, onPress, colors }: {
   opp: TaxHarvestOpportunity; index: number; isExpanded: boolean; onPress: () => void; colors: any;
 }) {
   const { t } = useT();
-  const isUp = opp.recommendation === 'harvest_now';
+  const _isUp = opp.recommendation === 'harvest_now';
   const color = recColor(opp.recommendation);
 
   return (

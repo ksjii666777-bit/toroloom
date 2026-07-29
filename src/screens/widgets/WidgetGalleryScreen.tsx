@@ -21,7 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useWidgetStore } from '../../store/widgetStore';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
-import { WIDGET_REGISTRY, getWidgetsByCategory } from '../../components/widgets/WidgetRegistry';
+import { getWidgetsByCategory } from '../../components/widgets/WidgetRegistry';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import type { WidgetType, WidgetMeta, WidgetSize } from '../../types/widgets';
 import type { SubscriptionTier } from '../../types';
@@ -252,7 +252,7 @@ export default function WidgetGalleryScreen({ navigation }: any) {
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (_colors: any) => StyleSheet.create({
   container: { flex: 1 },
   header: {
     flexDirection: 'row',

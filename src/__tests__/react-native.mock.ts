@@ -179,10 +179,10 @@ export const Easing = {
   sin: (t: number) => 1 - Math.cos((t * Math.PI) / 2),
   circle: (t: number) => 1 - Math.sqrt(1 - t * t),
   exp: (t: number) => Math.pow(2, 10 * (t - 1)),
-  elastic: (bounciness: number) => (t: number) => t,
-  back: (overshoot: number) => (t: number) => t,
+  elastic: (_bounciness: number) => (t: number) => t,
+  back: (_overshoot: number) => (t: number) => t,
   bounce: (t: number) => t,
-  bezier: (x1: number, y1: number, x2: number, y2: number) => (t: number) => t,
+  bezier: (_x1: number, _y1: number, _x2: number, _y2: number) => (t: number) => t,
   in: (easing: (t: number) => number) => (t: number) => easing(t),
   out: (easing: (t: number) => number) => (t: number) => 1 - easing(1 - t),
   inOut: (easing: (t: number) => number) => (t: number) => t < 0.5

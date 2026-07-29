@@ -11,7 +11,7 @@
 
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, fireEvent } from './testUtils';
+import { render } from './testUtils';
 import type { CryptoDetailData } from '../services/api/globalMarkets';
 
 // ==================== Mocks ====================

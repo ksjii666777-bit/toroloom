@@ -107,7 +107,7 @@ function StatRow({ label, value, highlightColor }: { label: string; value: strin
 // ──── Main Screen ──────────────────────────────────────────────────────────
 
 export default function USStockDetailScreen({ route, navigation }: any) {
-  const { stockId, symbol, source } = route.params || {};
+  const { stockId, symbol, _source } = route.params || {};
   const { colors } = useTheme();
 
   // Find mock stock first (fallback and structural data)
@@ -134,6 +134,7 @@ export default function USStockDetailScreen({ route, navigation }: any) {
       }
     })();
     return () => { cancelled = true; };
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mockStock.symbol]);
 
   const relatedETFs = mockUSETFs.filter(

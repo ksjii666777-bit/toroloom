@@ -67,7 +67,7 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
     );
   }, [resetPreferences]);
 
-  const adjustThreshold = useCallback((delta: number) => {
+  const _adjustThreshold = useCallback((delta: number) => {
     const newVal = Math.max(0.5, Math.min(10, preferences.priceAlertThreshold + delta));
     handleToggle('priceAlertThreshold', Math.round(newVal * 10) / 10);
   }, [preferences.priceAlertThreshold, handleToggle]);

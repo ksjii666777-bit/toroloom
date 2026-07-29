@@ -200,7 +200,7 @@ vi.mock('expo-haptics', () => ({
 
 vi.mock('@react-navigation/native', () => ({
   useNavigation: function() { return { navigate: mockNavigate, goBack: mockGoBack }; },
-  useFocusEffect: function(cb: () => void) { React.useEffect(function() { cb(); }, []); },
+  useFocusEffect: function(cb: () => void) { React.useEffect(function() { cb(); }, [cb]); },
 }));
 
 // User course store mock — with getState() for useFocusEffect

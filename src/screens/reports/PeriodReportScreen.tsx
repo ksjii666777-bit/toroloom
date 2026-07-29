@@ -35,8 +35,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
-import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import { formatCurrency, formatPercent } from '../../utils/formatters';
+import { SPACING } from '../../constants/theme';
+
 import { buildPeriodReportHTML } from '../../utils/periodReportPDF';
 import { computeSectorMetrics, groupTradesByPeriod, groupLosersBySector } from '../../utils/analytics/periodAnalytics';
 import type { PeriodType } from '../../utils/analytics/periodAnalytics';
@@ -53,7 +53,7 @@ import ReportHeader from '../../components/ReportHeader';
 import PeriodTabs from '../../components/PeriodTabs';
 import EmptyReportState from '../../components/EmptyReportState';
 import { computeCognitiveSummary } from '../../services/gateway/cognitiveAnalytics';
-import type { Holding, Trade } from '../../types';
+import type { _Holding, _Trade } from '../../types';
 
 // ──── Main Screen ───────────────────────────────────────────────────────────
 

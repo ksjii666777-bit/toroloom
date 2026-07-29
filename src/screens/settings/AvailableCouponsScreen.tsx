@@ -342,7 +342,7 @@ export default function AvailableCouponsScreen({ navigation }: any) {
 
 // ─── Coupon Card Styles ───────────────────────────────────────
 
-const createCouponCardStyles = (colors: any) =>
+const createCouponCardStyles = (_colors: any) =>
   StyleSheet.create({
     couponCard: {
       marginHorizontal: SPACING.xl,
@@ -484,7 +484,7 @@ const createCouponCardStyles = (colors: any) =>
 
 // ─── Main Screen Styles ───────────────────────────────────────
 
-const createStyles = (colors: any) =>
+const createStyles = (_colors: any) =>
   StyleSheet.create({
     container: {
       flex: 1,

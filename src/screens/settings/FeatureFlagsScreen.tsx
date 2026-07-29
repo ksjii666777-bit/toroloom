@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, _useRef } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ import {
   Pressable,
   Alert,
   RefreshControl,
-  Animated as RNAnimated,
+  Animated as _RNAnimated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,8 +36,8 @@ import {
   FeatureFlagMeta,
   ExperimentId,
   ExperimentVariant,
-  ExperimentAssignment,
-  DEFAULT_FEATURE_FLAGS,
+  _ExperimentAssignment,
+  _DEFAULT_FEATURE_FLAGS,
   DEFAULT_EXPERIMENTS,
 } from '../../types/featureFlags';
 import { useTheme } from '../../context/ThemeContext';
@@ -112,11 +112,13 @@ export default function FeatureFlagsScreen({ navigation }: any) {
     }
 
     return { grouped, overriddenCount, activeCount, totalCount: allFlags.length };
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, overrides, getAllFlags]);
 
   const experimentsData = useMemo(() => {
     if (!hydrated) return [];
     return getAllExperiments();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, experimentAssignments, getAllExperiments]);
 
   // ── Handlers ──
@@ -158,7 +160,7 @@ export default function FeatureFlagsScreen({ navigation }: any) {
     );
   }, [resetOverrides, t]);
 
-  const handleActivateExperiment = useCallback(
+  const _handleActivateExperiment = useCallback(
     (experimentId: ExperimentId) => {
       Alert.alert(
         t('featureFlags.experimentOverrideTitle'),

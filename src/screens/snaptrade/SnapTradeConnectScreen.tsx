@@ -13,10 +13,10 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, _useRef } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator,
-  Dimensions, Platform, Linking,
+  View, Text, StyleSheet, ScrollView, _Pressable, ActivityIndicator,
+  Dimensions, _Platform, Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,7 +26,7 @@ import { snapTradeApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import Button from '../../components/ui/Button';
+import _Button from '../../components/ui/Button';
 
 const { width } = Dimensions.get('window');
 
@@ -48,7 +48,7 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
 
   const [status, setStatus] = useState<ConnectionStatus>('checking');
   const [brokerName, setBrokerName] = useState<string | null>(null);
-  const [brokerSlug, setBrokerSlug] = useState<string | null>(null);
+  const [_brokerSlug, setBrokerSlug] = useState<string | null>(null);
   const [connectedAt, setConnectedAt] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedBroker, setSelectedBroker] = useState<string | null>(null);

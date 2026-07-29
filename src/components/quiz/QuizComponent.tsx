@@ -5,16 +5,16 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, Animated,
-  Dimensions, Platform,
+  Dimensions, _Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../ui/AnimatedPressable';
-import type { Quiz, QuizQuestion, QuizResult } from '../../types';
+import type { Quiz, _QuizQuestion, QuizResult } from '../../types';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 const OPTION_HEIGHT = 52;
 
 interface QuizComponentProps {
@@ -99,6 +99,7 @@ export default function QuizComponent({
       duration: 300,
       useNativeDriver: false,
     }).start();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQuestionIndex]);
 
   const animateTransition = useCallback((direction: 'forward' | 'back') => {

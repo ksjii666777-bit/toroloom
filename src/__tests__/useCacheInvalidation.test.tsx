@@ -16,7 +16,7 @@
  */
 
 import React, { act } from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TestRenderer from 'react-test-renderer';
 
 // ──── Hoisted Mocks ─────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ vi.mock('../../backend/src/constants/cacheNamespaces', () => ({
 // ──── Imports (after mocks) ─────────────────────────────────────────────────
 
 import { useCacheInvalidation } from '../hooks/useCacheInvalidation';
-import { offlineCache } from '../services/offlineCache';
+
 
 // ──── Test Component ────────────────────────────────────────────────────────
 

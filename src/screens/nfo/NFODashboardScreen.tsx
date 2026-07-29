@@ -302,7 +302,7 @@ const cardStyles = StyleSheet.create({
 // ──── Application Card ─────────────────────────────────────────────────────
 
 function ApplicationCard({ app, colors }: { app: NFOApplication; colors: any }) {
-  const config = APP_STATUS_CONFIG[app.status] || APP_STATUS_CONFIG.submitted;
+  const _config = APP_STATUS_CONFIG[app.status] || APP_STATUS_CONFIG.submitted;
   const isPositive = app.returnPercent ? app.returnPercent >= 0 : false;
 
   return (

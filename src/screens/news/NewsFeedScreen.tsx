@@ -170,6 +170,7 @@ function NewsCard({
         useNativeDriver: true,
       }),
     ]).start();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const categoryLabel = CATEGORIES.find(c => c.key === article.category)?.label || article.category;

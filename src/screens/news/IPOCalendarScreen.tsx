@@ -31,7 +31,7 @@ const seasonData = [
   { month: 'Jul 2026', count: 8, totalRaised: '₹15,300 Cr' },
 ];
 
-function formatDate(dateStr: string): string {
+function _formatDate(dateStr: string): string {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -42,7 +42,7 @@ function daysUntil(dateStr: string): number {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-export default function IPOCalendarScreen({ navigation }: any) {
+export default function IPOCalendarScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
@@ -189,7 +189,7 @@ export default function IPOCalendarScreen({ navigation }: any) {
                         : ipo.subscriptionStatus === 'open'
                           ? daysUntil(ipo.closeDate)
                           : 0;
-                      const isLast = idx === items.length - 1;
+                      const _isLast = idx === items.length - 1;
 
                       return (
                         <TouchableOpacity

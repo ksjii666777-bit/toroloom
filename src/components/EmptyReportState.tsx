@@ -38,7 +38,7 @@ export default function EmptyReportState() {
 
 // ──── Styles ─────────────────────────────────────────────────────────────────
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (_colors: any) => StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     paddingVertical: SPACING.huge * 2,

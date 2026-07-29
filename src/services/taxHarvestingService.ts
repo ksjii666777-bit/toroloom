@@ -349,8 +349,8 @@ export function generateMockTrades(): Trade[] {
  * Generate mock holdings for demo/empty state.
  */
 export function generateMockHoldings(): Holding[] {
-  const now = Date.now();
-  const DAY = 86400000;
+  const _now = Date.now();
+  const _DAY = 86400000;
 
   return [
     { id: 'h1', stockId: 's1', symbol: 'RELIANCE', name: 'Reliance Industries', quantity: 30, buyPrice: 2850, currentPrice: 2690, totalInvested: 85500, currentValue: 80700, pnl: -4800, pnlPercent: -5.61, dayChange: -120, dayChangePercent: -0.15 },

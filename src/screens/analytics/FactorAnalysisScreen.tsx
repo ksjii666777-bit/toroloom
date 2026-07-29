@@ -34,7 +34,7 @@ import { computeFactorAnalysis, FACTOR_META } from '../../services/factorAnalysi
 import { usePortfolioStore } from '../../store/portfolioStore';
 import type { FactorAnalysisResult, FactorName } from '../../types';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
 // ══════════════════════════════════════════════════════════════
 // COMPONENT
@@ -183,7 +183,7 @@ export default function FactorAnalysisScreen({ navigation }: any) {
             {/* ── Factor Exposure Bars ─────────────────────── */}
             <Card title={t('factorAnalysis.factorExposures')} subtitle={t('factorAnalysis.factorExposuresSub')} style={styles.sectionCard}>
               <View style={styles.factorsList}>
-                {result.factors.map((factor, i) => (
+                {result.factors.map((factor, _i) => (
                   <AnimatedPressable
                     key={factor.factor}
                     onPress={() => {

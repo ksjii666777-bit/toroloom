@@ -16,7 +16,7 @@
  */
 
 import React, { useMemo, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions , ActivityIndicator } from 'react-native';
 import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -128,7 +128,7 @@ function mergeApiToStock(stock: InternationalStock, api: { price: number; change
 
 // ──── Main Screen ────────────────────────────────────────────
 export default function GlobalStockDetailScreen({ route, navigation }: any) {
-  const { stockId, symbol, region } = route.params || {};
+  const { stockId, symbol, _region } = route.params || {};
   const { colors } = useTheme();
 
   // ── Live vs mock state ─────────────────────────────────────
@@ -158,6 +158,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
       }
     })();
     return () => { cancelled = true; };
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mockStock.symbol]);
 
   const relatedStocks = allGlobalStocks.filter(

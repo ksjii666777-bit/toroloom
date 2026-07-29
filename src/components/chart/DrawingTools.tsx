@@ -81,7 +81,7 @@ interface DrawingToolsProps {
 
 const DRAWING_COLORS = ['#3B82F6', '#FF5252', '#00E676', '#FFAB40', '#8B5CF6', '#06B6D4'];
 const FIB_LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-const TAP_HIT_RADIUS = 24; // px radius for tap-to-select
+const _TAP_HIT_RADIUS = 24; // px radius for tap-to-select
 const SELECTED_STROKE_WIDTH = 3;
 const NORMAL_STROKE_WIDTH = 2;
 

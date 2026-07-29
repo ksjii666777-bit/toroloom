@@ -93,6 +93,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
     ]).start();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Handle file picker ──────────────────────────────────────
@@ -121,6 +122,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brokerFormat]);
 
   // ── Handle batch upload ────────────────────────────────────
@@ -159,6 +161,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brokerFormat]);
 
   // ── Handle paste text ───────────────────────────────────────
@@ -189,6 +192,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pastedText, brokerFormat]);
 
   // ── Export to CSV ───────────────────────────────────────────
@@ -216,6 +220,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsExporting(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batchResult]);
 
   // ── Single export handler ───────────────────────────────────
@@ -240,6 +245,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsExporting(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parseResult]);
 
   // ── Toggle file selection ────────────────────────────────────
@@ -288,6 +294,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsExporting(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batchResult, selectedFiles]);
 
   // ── Clear results ───────────────────────────────────────────

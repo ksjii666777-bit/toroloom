@@ -11,7 +11,7 @@
  * so persist operations are safe in tests.
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useUserCourseStore } from '../store/userCourseStore';
 
 // ─── Mock the notification store ─────────────────────────────────────────────

@@ -312,7 +312,7 @@ export function runAlgoBacktest(
     // Not in a position — check entry
     if (!position) {
       const entrySignal = entryValues[i] ?? 0;
-      const allowShort = strategy.allowShort || false;
+      const _allowShort = strategy.allowShort || false;
 
       if (entrySignal > 0.5) {
         const direction: 'long' | 'short' = entrySignal > 0.5 ? 'long' : 'short';
@@ -391,7 +391,7 @@ export function runAlgoBacktest(
       : (position.entryPrice - exitPrice) * position.quantity;
 
     trades.push({
-      id: `trade_${tradeIndex++}`,
+      id: `trade_${tradeIndex}`,
       entryIndex: position.entryIndex,
       entryDate: data[position.entryIndex].date,
       entryPrice: position.entryPrice,

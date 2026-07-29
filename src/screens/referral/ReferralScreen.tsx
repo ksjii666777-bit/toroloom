@@ -44,7 +44,7 @@ export default function ReferralScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user } = useAuthStore();
-  const { referralStats, isLoading, loadReferralStats } = useReferralStore();
+  const { referralStats, _isLoading, loadReferralStats } = useReferralStore();
 
   useEffect(() => {
     loadReferralStats();

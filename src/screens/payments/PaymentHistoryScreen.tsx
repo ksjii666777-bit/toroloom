@@ -24,9 +24,9 @@ import type { SubscriptionPayment } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
-import * as Haptics from 'expo-haptics';
+import * as _Haptics from 'expo-haptics';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 // ─── Mock Payment History (fallback if store is empty) ───────────────────────
 
@@ -69,7 +69,7 @@ function generateMockPayments(): SubscriptionPayment[] {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const METHOD_ICONS: Record<string, string> = {
+const _METHOD_ICONS: Record<string, string> = {
   razorpay: 'card-outline',
   upi_autopay: 'qr-code-outline',
   coupon: 'pricetag-outline',
@@ -234,7 +234,7 @@ export default function PaymentHistoryScreen({ navigation }: any) {
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
-  const { paymentHistory, subscription } = useSubscriptionStore();
+  const { _paymentHistory, subscription } = useSubscriptionStore();
 
   // Use store history if available, otherwise use mock data
   const payments = useMemo(() => {

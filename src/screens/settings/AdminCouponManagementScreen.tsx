@@ -26,7 +26,7 @@ import {
   RefreshControl,
   Modal,
   TextInput,
-  TouchableOpacity,
+  _TouchableOpacity,
   Alert,
   Platform,
 } from 'react-native';
@@ -595,7 +595,7 @@ function CouponFormModal({
   );
 }
 
-const createFormStyles = (colors: any) =>
+const createFormStyles = (_colors: any) =>
   StyleSheet.create({
     modalOverlay: {
       flex: 1,
@@ -1298,7 +1298,7 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
           text: 'Seed',
           onPress: async () => {
             setSeeding(true);
-            const count = await couponApi.seedCoupons();
+            const _count = await couponApi.seedCoupons();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             await loadCoupons();
             setSeeding(false);
@@ -1492,7 +1492,7 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
 
 // ─── Main Screen Styles ───────────────────────────────────────
 
-const createStyles = (colors: any) =>
+const createStyles = (_colors: any) =>
   StyleSheet.create({
     container: {
       flex: 1,

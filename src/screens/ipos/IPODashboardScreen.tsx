@@ -299,7 +299,7 @@ function ApplicationCard({ app, colors }: {
   app: IPOApplication; colors: any;
 }) {
   const { t } = useT();
-  const config = APPLICATION_STATUS_CONFIG[app.status] || APPLICATION_STATUS_CONFIG.pending;
+  const _config = APPLICATION_STATUS_CONFIG[app.status] || APPLICATION_STATUS_CONFIG.pending;
   const isPositive = app.status === 'allotted' && (app.listingGain || 0) >= 0;
 
   return (
@@ -789,6 +789,7 @@ export default function IPODashboardScreen({ navigation }: any) {
   const [activeFilter, setActiveFilter] = useState<IPOFilter>('open');
   const [applyModalIPO, setApplyModalIPO] = useState<IPOItem | null>(null);
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getApplicationStats(), [applications, getApplicationStats]);
 
   // Filtered IPOs

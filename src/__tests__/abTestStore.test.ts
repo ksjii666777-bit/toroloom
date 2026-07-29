@@ -11,7 +11,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useABTestStore } from '../store/abTestStore';
-import type { ABExperiment } from '../types';
+import type { _ABExperiment } from '../types';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
 
@@ -244,7 +244,7 @@ describe('ABTestStore — startExperiment', () => {
   });
 
   it('does nothing for non-existent experiment', () => {
-    const before = getState().experiments.length;
+    const _before = getState().experiments.length;
     getState().startExperiment('non_existent');
     expect(getState().experiments).toHaveLength(5);
   });
@@ -420,7 +420,7 @@ describe('ABTestStore — simulateMetrics', () => {
   });
 
   it('recomputes conversion rates after simulation', () => {
-    const before = getState().experiments.find(e => e.id === 'exp_1')!.variants[1].conversionRate;
+    const _before = getState().experiments.find(e => e.id === 'exp_1')!.variants[1].conversionRate;
     getState().simulateMetrics('exp_1');
     const after = getState().experiments.find(e => e.id === 'exp_1')!.variants[1].conversionRate;
     expect(after).toBeGreaterThanOrEqual(0);

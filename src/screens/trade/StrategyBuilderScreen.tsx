@@ -76,6 +76,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
   useEffect(() => {
     fetchSpotPrices();
     loadPrebuiltStrategies();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -135,6 +136,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
 
     // Auto-analyze after setting up legs
     setTimeout(() => analyzeStrategy(spotPrice), 300);
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spotPrice, selectedStrategyName, clearStrategyLegs, addStrategyLeg, analyzeStrategy]);
 
   const handleAddCustomLeg = useCallback(() => {

@@ -3,13 +3,13 @@
  * Shows Nifty, Sensex, and key market indices with change percentages.
  */
 
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path, Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
+import React, { _useMemo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import Svg, { Path, Text as _SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useMarketStore } from '../../store/marketStore';
-import { FONTS } from '../../constants/theme';
+
 import type { WidgetSize } from '../../types/widgets';
 
 // Mock indices data (since marketStore may not have indices)

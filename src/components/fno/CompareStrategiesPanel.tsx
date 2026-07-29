@@ -18,7 +18,7 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, } from 'react-native';
-import Svg, { Path, Line, Text as SvgText, Defs, LinearGradient, Stop, Circle, Rect } from 'react-native-svg';
+import Svg, { Path, Line, Text as SvgText, _Defs, _LinearGradient, _Stop, _Circle, Rect } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';

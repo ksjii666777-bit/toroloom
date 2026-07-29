@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { Dimensions, Text } from 'react-native';
+import { Dimensions } from 'react-native';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from './testUtils';
 

@@ -12,7 +12,7 @@
  * ============================================================================
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { _useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -34,7 +34,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useAdminStore, SystemService } from '../../store/adminStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Badge from '../../components/ui/Badge';
 import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
@@ -174,7 +174,7 @@ function QuickLink({
 
 export default function AdminDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
+  const { _t } = useT();
   const { stats, services, refresh, isLoading } = useAdminStore();
 
   const [refreshing, setRefreshing] = React.useState(false);

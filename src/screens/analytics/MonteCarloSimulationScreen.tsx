@@ -53,7 +53,7 @@ const INPUT_FIELDS: InputField[] = [
 ];
 
 // ─── Color palette for percentile bands ───────────────────────
-const BAND_COLORS = [
+const _BAND_COLORS = [
   { upper: '#6C63FF40', lower: '#6C63FF15', line: '#6C63FF' },   // 75th-25th
   { upper: '#3B82F630', lower: '#3B82F610', line: '#3B82F6' },   // 95th-5th
 ];
@@ -351,7 +351,7 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
             <Card title="Distribution Analysis" style={styles.sectionCard}>
               {(() => {
                 const sorted = result.finalValues;
-                const median = result.medianEndValue;
+                const _median = result.medianEndValue;
                 const totalInvested = params.initialInvestment + params.monthlyContribution * params.years * 12;
 
                 // Count how many are above certain thresholds

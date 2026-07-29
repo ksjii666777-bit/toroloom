@@ -17,8 +17,8 @@
  * ============================================================================
  */
 
-import { describe, it, expect, vi, beforeEach, beforeAll, afterEach } from 'vitest';
-import { widgetService, startWidgetAutoUpdate } from '../services/widgetService';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { widgetService } from '../services/widgetService';
 import { usePortfolioStore } from '../store/portfolioStore';
 import type { Holding } from '../types';
 

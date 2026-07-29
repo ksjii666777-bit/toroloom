@@ -26,9 +26,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
-import { globalMarketsApi, type USStockData } from '../../services/api/globalMarkets';
+import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { snapTradeApi, api } from '../../services/api';
-import type { SnapTradeHolding } from '../../services/api/snaptrade';
+import type { _SnapTradeHolding } from '../../services/api/snaptrade';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
 // ─── Types ─────────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ function formatUSD(n: number): string {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
 }
 
-function formatCompactUSD(n: number): string {
+function _formatCompactUSD(n: number): string {
   const abs = Math.abs(n);
   if (abs >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
   if (abs >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
@@ -298,6 +298,7 @@ function TradeModal({
     } else {
       slideAnim.setValue(0);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, stock]);
 
   const placeOrder = useCallback(async () => {

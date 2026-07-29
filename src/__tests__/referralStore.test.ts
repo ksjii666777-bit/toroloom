@@ -36,7 +36,7 @@ const mockStats: ReferralStats = {
   ],
 };
 
-const mockFallbackStats: ReferralStats = {
+const _mockFallbackStats: ReferralStats = {
   code: 'RAHUL12',
   totalReferrals: 5,
   activeReferrals: 4,

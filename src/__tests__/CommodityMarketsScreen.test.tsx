@@ -119,7 +119,7 @@ vi.mock('../hooks/useCommodityPrices', () => ({
 }));
 
 vi.mock('react-native-reanimated', () => {
-  const React = require('react');
+  const _React = require('react');
   return {
     default: {
       View: 'View',

@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Switch, Platform, Alert,
+  View, Text, StyleSheet, ScrollView, Switch, _Platform, Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,13 +9,13 @@ import { useT } from '../../hooks/useT';
 import {
   DEFAULT_OPTIMIZATION_CONFIG, ImageFormat, ImageSizeKey,
   IMAGE_SIZES, IMAGE_SIZE_LABELS, isWebPSupported,
-  formatBytes, estimateWebPSavings, suggestSizePreset,
+  _formatBytes, estimateWebPSavings, _suggestSizePreset,
 } from '../../services/imageOptimization';
 import OptimizedImage from '../../components/ui/OptimizedImage';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-export default function CDNOptimizationScreen({ navigation }: any) {
+export default function CDNOptimizationScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

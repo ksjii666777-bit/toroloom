@@ -14,7 +14,7 @@
  *   <Text>{prices['XAUUSD']?.price}</Text>
  */
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getActiveWS, setWSMode, getWSMode } from '../services/wsRegistry';
 import { getBaseUrl } from '../services/api/client';
 import { log } from '../utils/logger';

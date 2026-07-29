@@ -33,7 +33,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { ApiKey, ApiKeyScope, ApiKeyScopeMeta } from '../../types';
 import { API_KEY_SCOPES } from '../../types';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
 // ═════════════════════════════════════════════════════════════════════════
 // MOCK DATA

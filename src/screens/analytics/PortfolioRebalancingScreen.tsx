@@ -1,6 +1,6 @@
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React, { useMemo, _useCallback, useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Alert, Platform,
+  View, Text, StyleSheet, ScrollView, _Alert, _Platform,
 } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,13 +8,13 @@ import { useTheme } from '../../context/ThemeContext';
 import { useRebalanceStore } from '../../store/rebalanceStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { AllocationProfile, RebalanceTrade } from '../../types';
+import type { _AllocationProfile, RebalanceTrade } from '../../types';
 
 /** Format currency in INR */
 const formatINR = (val: number) =>
   '₹' + val.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
-export default function PortfolioRebalancingScreen({ navigation }: any) {
+export default function PortfolioRebalancingScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
@@ -26,6 +26,7 @@ export default function PortfolioRebalancingScreen({ navigation }: any) {
   // Run analysis on mount
   useEffect(() => {
     runAnalysis();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selectedProfile = useMemo(

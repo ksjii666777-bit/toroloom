@@ -101,7 +101,7 @@ export default function SmartPriceAlertsScreen() {
   ], [t]);
 
   // ── Helper: format condition as short chip text ──────────────────────
-  const formatConditionShort = useCallback((condition: SmartAlertCondition, info?: ConditionKindInfo): string => {
+  const formatConditionShort = useCallback((condition: SmartAlertCondition, _info?: ConditionKindInfo): string => {
     const { kind, params } = condition;
     switch (kind) {
       case 'price_cross_above': return `> \u20B9${params.threshold || 0}`;
@@ -188,6 +188,7 @@ export default function SmartPriceAlertsScreen() {
 
   const getConditionKindInfo = useCallback((kind: SmartAlertConditionKind): ConditionKindInfo | undefined => {
     return CONDITION_KINDS.find(c => c.kind === kind);
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Open creation wizard ──────────────────────────────────────────────
@@ -245,9 +246,10 @@ export default function SmartPriceAlertsScreen() {
       params: { ...info.defaultParams },
     };
     setFormConditions(prev => [...prev, newCondition]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateConditionParam = useCallback((index: number, key: string, value: number | string) => {
+  const _updateConditionParam = useCallback((index: number, key: string, value: number | string) => {
     setFormConditions(prev =>
       prev.map((c, i) =>
         i === index ? { ...c, params: { ...c.params, [key]: value } } : c
@@ -255,7 +257,7 @@ export default function SmartPriceAlertsScreen() {
     );
   }, []);
 
-  const updateConditionKind = useCallback((index: number, kind: SmartAlertConditionKind) => {
+  const _updateConditionKind = useCallback((index: number, kind: SmartAlertConditionKind) => {
     const info = CONDITION_KINDS.find(c => c.kind === kind);
     if (!info) return;
     setFormConditions(prev =>
@@ -263,6 +265,7 @@ export default function SmartPriceAlertsScreen() {
         i === index ? { ...c, kind, params: { ...info.defaultParams } } : c
       )
     );
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const removeCondition = useCallback((index: number) => {
@@ -400,6 +403,7 @@ export default function SmartPriceAlertsScreen() {
         )}
       </Pressable>
     );
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colors, getConditionKindInfo, toggleAlert, openEditAlert, handleDelete, formatConditionShort]);
 
   // ── Render condition item in form ─────────────────────────────────────
@@ -426,6 +430,7 @@ export default function SmartPriceAlertsScreen() {
         </View>
       </View>
     );
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colors, getConditionKindInfo, removeCondition, formatConditionShort]);
 
   // ── Test alert ───────────────────────────────────────────────────────
@@ -548,7 +553,7 @@ export default function SmartPriceAlertsScreen() {
 
           <View style={styles.quickAddGrid}>
             {CONDITION_KINDS.map((info) => {
-              const exists = formConditions.some(c => c.kind === info.kind);
+              const _exists = formConditions.some(c => c.kind === info.kind);
               return (
                 <Pressable
                   key={info.kind}

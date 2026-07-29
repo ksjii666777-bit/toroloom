@@ -72,7 +72,7 @@ const OPTIONS: OptionConfig[] = [
 export default function DarkModeSettingsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { t } = useT();
-  const { colors, toggleTheme, setOverride, isDark, mode } = useTheme();
+  const { colors, _toggleTheme, setOverride, isDark, _mode } = useTheme();
   const override = useThemeStore((s) => s.override);
   const styles = createStyles(colors);
 

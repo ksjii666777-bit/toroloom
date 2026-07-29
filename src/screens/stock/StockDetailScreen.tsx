@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { Ionicons } from '@expo/vector-icons';
 import { useMarketStore } from '../../store/marketStore';
 import { useT } from '../../hooks/useT';
@@ -8,12 +8,12 @@ import { useWatchlistStore } from '../../store/watchlistStore';
 import { useAIStore } from '../../store/aiStore';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import { formatCurrency, formatCompactNumber, hexToRgba } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 import CandlestickChart, { ChartType } from '../../components/CandlestickChart';
 import TechnicalIndicators from '../../components/TechnicalIndicators';
 import type { IndicatorType } from '../../components/TechnicalIndicators';
 import { DrawingToolbar, type DrawingAnnotation, type DrawingToolType } from '../../components/chart/DrawingTools';
-import { detectPatterns, getPatternDescription, type DetectedPattern } from '../../components/chart/patternDetection';
+import { detectPatterns , type DetectedPattern } from '../../components/chart/patternDetection';
 import { usePatternSettingsStore } from '../../store/patternSettingsStore';
 import PatternSettingsModal from '../../components/stock/PatternSettingsModal';
 import { ChartCrosshairContext } from '../../components/ChartCrosshairContext';

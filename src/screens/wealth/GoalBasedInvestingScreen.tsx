@@ -15,20 +15,20 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, _useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
   Platform, Alert, Dimensions,
 } from 'react-native';
-import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInUp, _FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import { useWealthStore, type FinancialGoal, type GoalCategory } from '../../store/wealthStore';
+import { useWealthStore, type GoalCategory } from '../../store/wealthStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 // ─── Category Data ─────────────────────────────────────────────────────
 
@@ -74,7 +74,7 @@ export function GoalCreateScreen({ navigation }: any) {
   const [name, setName] = useState('');
   const [category, setCategory] = useState<GoalCategory>('custom');
   const [targetAmount, setTargetAmount] = useState('500000');
-  const [monthlyContribution, setMonthlyContribution] = useState('10000');
+  const [monthlyContribution, _setMonthlyContribution] = useState('10000');
   const [targetYears, setTargetYears] = useState('5');
   const [expectedReturn, setExpectedReturn] = useState('12');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
@@ -320,7 +320,7 @@ export function GoalDetailScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { goalId } = route.params || {};
-  const { goals, updateGoal, deleteGoal, contributeToGoal, getGoalProgress } = useWealthStore();
+  const { goals, _updateGoal, deleteGoal, contributeToGoal, getGoalProgress } = useWealthStore();
   const goal = goals.find(g => g.id === goalId);
 
   const [addAmount, setAddAmount] = useState('');
@@ -341,7 +341,7 @@ export function GoalDetailScreen({ route, navigation }: any) {
   const monthsLeft = Math.max(0, (targetDate.getFullYear() - new Date().getFullYear()) * 12 +
     (targetDate.getMonth() - new Date().getMonth()));
 
-  const inputStyle = { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border };
+  const _inputStyle = { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>

@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Switch, Platform, Alert,
+  View, Text, StyleSheet, ScrollView, Switch, _Platform, Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,7 +28,7 @@ const DEFAULT_PREFS: LandscapePrefs = {
   showSideNav: true,
 };
 
-export default function LandscapeSettingsScreen({ navigation }: any) {
+export default function LandscapeSettingsScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -49,6 +49,7 @@ export default function LandscapeSettingsScreen({ navigation }: any) {
         { text: t('landscapeSettings.reset'), onPress: () => setPrefs(DEFAULT_PREFS) },
       ],
     );
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

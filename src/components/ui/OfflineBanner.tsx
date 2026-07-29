@@ -116,7 +116,7 @@ export default function OfflineBanner() {
   // Initialize freshness on mount
   useEffect(() => {
     refreshFreshness();
-  }, [, refreshFreshness]);
+  }, [refreshFreshness]);
 
   // Register auto-refresh when connectivity is restored
   useEffect(() => {

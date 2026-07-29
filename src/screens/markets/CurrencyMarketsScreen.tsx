@@ -213,7 +213,7 @@ export function CurrencyConverterModal({
 
   // ── Live forex rates (only active when modal is visible) ─────────────
   const {
-    getLiveCurrencyRate, convertWithLive, getLiveCurrency,
+    _getLiveCurrencyRate, convertWithLive, getLiveCurrency,
     isLive, isLoading: ratesLoading, lastUpdated, refresh,
   } = useLiveConversion(visible);
 
@@ -426,7 +426,7 @@ export function CurrencyConverterModal({
         {recentConversions.length > 0 && (
           <View style={styles.convRecentSection}>
             <Text style={[styles.convRecentTitle, { color: colors.text }]}>{t('currencyMarkets.recent')}</Text>
-            {recentConversions.map((conv, i) => {
+            {recentConversions.map((conv, _i) => {
               const fC = getCurrency(conv.from);
               const tC = getCurrency(conv.to);
               return (
@@ -497,6 +497,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
       pairs = pairs.filter(p => p.pair.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
     }
     return pairs;
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, regionFilter, searchQuery]);
 
   const summaryStats = useMemo(() => {
@@ -633,7 +634,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
                 { label: t('currencyMarkets.inrPairs'), value: summaryStats.inr.toString(), icon: '🇮🇳', color: '#3B82F6' },
                 { label: t('currencyMarkets.avgInrChg'), value: `${(summaryStats.avgInrChange >= 0 ? '+' : '') + summaryStats.avgInrChange.toFixed(2)}%`, icon: '📈', color: summaryStats.avgInrChange >= 0 ? '#00E676' : '#FF5252' },
                 { label: t('currencyMarkets.avgVolatility'), value: `${summaryStats.avgInrVol.toFixed(1)}%`, icon: '🌊', color: '#FFC107' },
-              ].map((stat, i) => (
+              ].map((stat, _i) => (
                 <View key={stat.label} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
                   <Text style={styles.summaryIcon}>{stat.icon}</Text>
                   <Text style={[styles.summaryValue, { color: stat.color }]}>{stat.value}</Text>

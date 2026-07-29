@@ -3517,7 +3517,7 @@ function daysAgo(n: number): string {
   return d.toISOString();
 }
 
-function hoursAgo(n: number): string {
+function _hoursAgo(n: number): string {
   const d = new Date();
   d.setHours(d.getHours() - n);
   return d.toISOString();

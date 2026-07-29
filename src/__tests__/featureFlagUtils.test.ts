@@ -228,8 +228,8 @@ describe('computeVariant — weighted assignment (conceptual)', () => {
   it('the hash seed (userId + "_" + experimentId) ensures cross-experiment independence', () => {
     // Same user in different experiments should get potentially different buckets
     const user = 'cross_user';
-    const bucket1 = hashUserId(`${user}_${'onboarding_flow_v2'}`);
-    const bucket2 = hashUserId(`${user}_${'home_layout_test'}`);
+    const _bucket1 = hashUserId(`${user}_${'onboarding_flow_v2'}`);
+    const _bucket2 = hashUserId(`${user}_${'home_layout_test'}`);
 
     // It's extremely unlikely that the same user ID + different experiment ID
     // hash to exactly the same bucket (1/100 chance), but it's possible.

@@ -18,7 +18,7 @@ import {
 
 const now = Date.now();
 const daysAgo = (d: number) => new Date(now - d * 86400000).toISOString();
-const daysFromNow = (d: number) => new Date(now + d * 86400000).toISOString();
+const _daysFromNow = (d: number) => new Date(now + d * 86400000).toISOString();
 
 const mockTransactions: RevenueTransaction[] = [
   { id: 'txn_1', source: 'courses',    amount: 499, fee: 49, netAmount: 450, description: 'Sale: Advanced Options Strategies',  reference: 'course_1', referenceName: 'Advanced Options Strategies',  createdAt: daysAgo(1),  paidOut: false },
@@ -50,7 +50,7 @@ function buildMonthlyHistory(transactions: RevenueTransaction[]): MonthlyEarning
   for (const txn of transactions) {
     const d = new Date(txn.createdAt);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const _label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
     const existing = monthMap.get(key) || { total: 0, breakdown: {}, count: 0 };
     existing.total += txn.netAmount;
@@ -137,7 +137,7 @@ function computeDashboard() {
   };
 }
 
-export const useRevenueStore = create<RevenueStoreState>((set, get) => ({
+export const useRevenueStore = create<RevenueStoreState>((set, _get) => ({
   dashboard: computeDashboard(),
 
   requestPayout: async (amount, method, destination) => {

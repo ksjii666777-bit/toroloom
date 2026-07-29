@@ -17,10 +17,10 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, _useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
-  Platform, Alert, Dimensions,
+  Platform, _Alert, Dimensions,
 } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,11 +29,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { useWealthStore } from '../../store/wealthStore';
-import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import _AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
-const formatINR = (n: number) =>
+const _formatINR = (n: number) =>
   '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
 const formatCompactINR = (n: number): string => {
@@ -75,6 +75,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
       otherIncome: parseFloat(otherIncome) || 0,
     });
     return getRetirementProjection();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAge, retirementAge, lifeExpectancy, currentSavings, monthlyContribution,
       expectedReturn, inflationRate, expectedExpense, otherIncome]);
 

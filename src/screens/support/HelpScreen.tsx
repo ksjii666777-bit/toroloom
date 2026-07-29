@@ -76,11 +76,11 @@ export default function HelpScreen({ navigation }: any) {
     });
   }, [searchQuery, faqs]);
 
-  const toggleFaq = (question: string) => {
+  const _toggleFaq = (question: string) => {
     setExpandedFaq(expandedFaq === question ? null : question);
   };
 
-  const handleTopicPress = useCallback((topic: typeof quickTopics[0]) => {
+  const _handleTopicPress = useCallback((topic: typeof quickTopics[0]) => {
     setSearchQuery(topic.search);
     setExpandedFaq(null);
     // Scroll to FAQ section after a brief delay so state updates first
@@ -91,7 +91,7 @@ export default function HelpScreen({ navigation }: any) {
     }, 100);
   }, [faqSectionY]);
 
-  const handleContact = (option: typeof contactOptions[0]) => {
+  const _handleContact = (option: typeof contactOptions[0]) => {
     if (option.link) {
       Linking.openURL(option.link).catch(() => {});
     }
@@ -187,7 +187,7 @@ export default function HelpScreen({ navigation }: any) {
               <Text style={styles.loadingText}>Loading articles...</Text>
             </View>
           ) : filteredFaqs.length > 0 ? (
-            filteredFaqs.map((faq, i) => {
+            filteredFaqs.map((faq, _i) => {
             const isExpanded = expandedFaq === faq.id;
             return (
               <Pressable key={faq.id} style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>

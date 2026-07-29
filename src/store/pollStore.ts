@@ -9,7 +9,7 @@
  */
 
 import { create } from 'zustand';
-import { Poll, PollOption, PollCategory, PollStatus, PollDuration } from '../types';
+import { Poll , PollCategory, PollStatus, PollDuration } from '../types';
 import { offlineCache } from '../services/offlineCache';
 
 // ─── Mock Polls ─────────────────────────────────────────────────────────────

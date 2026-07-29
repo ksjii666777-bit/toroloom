@@ -14,7 +14,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  TextInput, RefreshControl, Dimensions, Platform, ActivityIndicator,
+  TextInput, RefreshControl, Dimensions, Platform, _ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -315,7 +315,7 @@ export default function USMarketsScreen() {
   const [usStocks, setUsStocks] = useState<USStock[]>(mockUSStocks);
   const [euStocks, setEuStocks] = useState<InternationalStock[]>(mockEuropeanStocks);
   const [asiaStocks, setAsiaStocks] = useState<InternationalStock[]>(mockAsianStocks);
-  const [stocksLoading, setStocksLoading] = useState(false);
+  const [_stocksLoading, setStocksLoading] = useState(false);
   const [stocksLive, setStocksLive] = useState(false);
 
   // Live indices from backend

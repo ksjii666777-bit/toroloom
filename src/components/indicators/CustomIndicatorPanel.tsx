@@ -10,7 +10,7 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path, Circle as SvgCircle, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Circle as SvgCircle, Line, _Defs, _LinearGradient, _Stop } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
@@ -165,7 +165,7 @@ export function CustomIndicatorPanel({
   }, [separateIndicators]);
 
   // For overlay, compute a combined range
-  const overlayRange = useMemo(() => {
+  const _overlayRange = useMemo(() => {
     if (overlayIndicators.length === 0) return null;
     const allValues: number[] = [];
     overlayIndicators.forEach((ind) => {
@@ -303,7 +303,7 @@ export function CustomIndicatorOverlay({
   minPrice,
   maxPrice,
 }: CustomIndicatorOverlayProps) {
-  const { colors } = useTheme();
+  const { _colors } = useTheme();
   const { focusedIndex } = useChartCrosshair();
 
   const evaluated = useMemo(() => {

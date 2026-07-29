@@ -768,7 +768,7 @@ export default function OnboardingScreen({ _navigation }: any) {
     heroProgress.value = withTiming(1, { duration: 500 });
     contentProgress.value = withDelay(500, withTiming(1, { duration: 400 }));
     bottomProgress.value = withDelay(900, withTiming(1, { duration: 300 }));
-  }, [, bottomProgress, contentProgress, heroProgress]);
+  }, [bottomProgress, contentProgress, heroProgress]);
 
   const heroStyle = useAnimatedStyle(() => ({ opacity: heroProgress.value }));
   const contentStyle = useAnimatedStyle(() => ({ opacity: contentProgress.value }));
@@ -825,6 +825,7 @@ export default function OnboardingScreen({ _navigation }: any) {
       setCurrentStep(index);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     },
+// eslint-disable-next-line react-hooks/exhaustive-deps
     [setCurrentStep, totalSteps]
   );
 
@@ -998,7 +999,7 @@ export default function OnboardingScreen({ _navigation }: any) {
           {visibleSteps.map((_, i) => {
             const stepId = visibleSteps[i].id;
             const isCompleted = !!stepDemoCompleted[stepId];
-            const isWelcome = stepId === 'welcome';
+            const _isWelcome = stepId === 'welcome';
             return (
               <Pressable
                 key={i}

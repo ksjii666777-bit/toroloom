@@ -8,7 +8,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { formatPercent } from '../../utils/formatters';
-import { FONTS, BORDER_RADIUS } from '../../constants/theme';
+
 import type { WidgetSize } from '../../types/widgets';
 
 interface RiskMetricsWidgetProps {

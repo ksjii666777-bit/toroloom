@@ -591,7 +591,7 @@ export default function CommodityMarketsScreen({ navigation }: any) {
               {t('commodityMarkets.commodityCount', { count: filteredItems.length })}
             </Text>
             {filteredItems.length > 0 ? (
-              filteredItems.map((item, i) => (
+              filteredItems.map((item, _i) => (
                 <CommodityCard key={item.id} item={item} isExpanded={expandedId === item.id} onPress={() => handlePress(item.id)} colors={colors} />
               ))
             ) : (

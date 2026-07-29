@@ -18,19 +18,19 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Dimensions, RefreshControl,
 } from 'react-native';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown, _FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useMarketStore } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import Card from '../../components/ui/Card';
+import _Card from '../../components/ui/Card';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 // ─── Helper: Market cap display ──────────────────────────────────────────
 
-function formatMarketCap(marketCap: string): string {
+function _formatMarketCap(marketCap: string): string {
   const num = parseFloat(marketCap.replace(/[₹,\s]/g, ''));
   if (marketCap.includes('Cr')) {
     if (num >= 100000) return `${(num / 100000).toFixed(1)}L Cr`;

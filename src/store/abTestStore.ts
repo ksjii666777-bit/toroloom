@@ -41,7 +41,7 @@ function computeConfidence(conversionsA: number, usersA: number, conversionsB: n
 
 const now = Date.now();
 const daysAgo = (d: number) => new Date(now - d * 86400000).toISOString();
-const daysFromNow = (d: number) => new Date(now + d * 86400000).toISOString();
+const _daysFromNow = (d: number) => new Date(now + d * 86400000).toISOString();
 
 const mockExperiments: ABExperiment[] = [
   {
@@ -369,7 +369,7 @@ export const useABTestStore = create<ABTestStoreState>((set, get) => ({
 
     // Add random traffic and conversions
     const newUsers = randomInt(50, 300);
-    const newConversions = randomInt(Math.round(newUsers * 0.05), Math.round(newUsers * 0.3));
+    const _newConversions = randomInt(Math.round(newUsers * 0.05), Math.round(newUsers * 0.3));
 
     set(s => ({
       experiments: s.experiments.map(e => {

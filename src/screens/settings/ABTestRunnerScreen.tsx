@@ -12,7 +12,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { ABExperiment, ABTestStatus } from '../../types';
 
-export default function ABTestRunnerScreen({ navigation }: any) {
+export default function ABTestRunnerScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -38,7 +38,7 @@ export default function ABTestRunnerScreen({ navigation }: any) {
     draft: experiments.filter(e => e.status === 'draft').length,
   }), [experiments]);
 
-  const selectedExp = useMemo(
+  const _selectedExp = useMemo(
     () => experiments.find(e => e.id === selectedExperimentId) || null,
     [experiments, selectedExperimentId],
   );
@@ -74,6 +74,7 @@ export default function ABTestRunnerScreen({ navigation }: any) {
         ]);
         break;
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, startExperiment, pauseExperiment, resumeExperiment, completeExperiment, simulateMetrics, deleteExperiment, selectedExperimentId, selectExperiment]);
 
   return (

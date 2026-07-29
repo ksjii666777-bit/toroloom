@@ -16,7 +16,7 @@
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator,
+  View, Text, StyleSheet, ScrollView, _Pressable, ActivityIndicator,
   RefreshControl, Dimensions, Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,11 +25,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { snapTradeApi } from '../../services/api';
 import type { SnapTradeHolding, SnapTradePosition, SnapTradeStatus } from '../../services/api/snaptrade';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 // ──── Format helpers ──────────────────────────────────────────
 const formatUSD = (n: number) =>

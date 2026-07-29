@@ -29,7 +29,7 @@ vi.mock('react-native', () => {
     FlatList: MockFlatList,
     Platform: { OS: 'ios' },
     KeyboardAvoidingView: (props: any) => React.createElement('View', null, props.children),
-    ActivityIndicator: (props: any) => null,
+    ActivityIndicator: (_props: any) => null,
     Modal: (props: any) => props.visible ? React.createElement('View', null, props.children) : null,
     TouchableOpacity: (props: any) => React.createElement('View', { onPress: props.onPress }, props.children),
     Animated: {

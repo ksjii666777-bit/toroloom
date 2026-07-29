@@ -39,9 +39,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useOfflineStore, type SyncConflict } from '../../store/offlineStore';
 import { offlineMutationQueue } from '../../services/offlineMutationQueue';
-import { log } from '../../utils/logger';
+
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import Button from './Button';
+import _Button from './Button';
 
 const { width } = Dimensions.get('window');
 

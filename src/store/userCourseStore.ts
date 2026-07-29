@@ -423,7 +423,7 @@ export const useUserCourseStore = create<UserCourseState>()(
           if (cached) {
             set({ myCourses: cached.data.courses });
           }
-        } catch (err) {
+        } catch (_err) {
           log.info('[UserCourseStore] No cached courses found');
         }
       },

@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Rect, Text as SvgText, Line, Circle } from 'react-native-svg';
+import _Svg, { _Rect, Text as _SvgText, _Line, _Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { useSocialStore } from '../../store/socialStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -129,7 +129,7 @@ function MonthlyReturnsChart({ data, colors }: {
     ...data.flatMap(d => [Math.abs(d.trader1), Math.abs(d.trader2)]),
     1,
   );
-  const chartW = (width - SPACING.xl * 2 - SPACING.xxl * 2) / 2 - 8;
+  const _chartW = (width - SPACING.xl * 2 - SPACING.xxl * 2) / 2 - 8;
   const barH = 8;
 
   return (
@@ -214,7 +214,7 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
     const pausedCount = copyRelations.filter(r => r.isPaused).length;
     const openTrades = copiedTrades.filter(t => t.isOpen).length;
     const closedTrades = copiedTrades.filter(t => !t.isOpen);
-    const closedPnl = closedTrades.reduce((s, t) => s + (t.pnl || 0), 0);
+    const _closedPnl = closedTrades.reduce((s, t) => s + (t.pnl || 0), 0);
     const copyWinRate = closedTrades.length > 0
       ? (closedTrades.filter(t => (t.pnl || 0) > 0).length / closedTrades.length * 100)
       : 0;

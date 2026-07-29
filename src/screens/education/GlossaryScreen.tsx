@@ -427,7 +427,7 @@ export default function GlossaryScreen({ navigation }: any) {
             </Text>
           </View>
         ) : (
-          groupedTerms.map((group, gi) => (
+          groupedTerms.map((group, _gi) => (
             <View key={group.type === 'alpha' ? group.letter : group.category} style={styles.groupSection}>
               <View style={styles.groupHeader}>
                 <View style={[styles.groupLetterCircle, { backgroundColor: colors.primary + '15' }]}>

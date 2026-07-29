@@ -255,7 +255,7 @@ vi.mock('expo-haptics', () => ({
 
 vi.mock('@react-navigation/native', () => ({
   useNavigation: function() { return { navigate: mockNavigate, goBack: mockGoBack }; },
-  useFocusEffect: function(cb: () => void) { React.useEffect(function() { cb(); }, []); },
+  useFocusEffect: function(cb: () => void) { React.useEffect(function() { cb(); }, [cb]); },
 }));
 
 // Store mock — closes over mutable var variables

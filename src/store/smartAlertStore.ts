@@ -253,7 +253,7 @@ export const useSmartAlertStore = create<SmartAlertState>()(
 
         // Build summary from alert info
         const summary = `${alert.symbol}: ${alert.conditions.map(c => {
-          const patterns = ['doji', 'hammer', 'shooting_star', 'bullish_engulfing', 'bearish_engulfing',
+          const _patterns = ['doji', 'hammer', 'shooting_star', 'bullish_engulfing', 'bearish_engulfing',
             'bullish_harami', 'bearish_harami', 'morning_star', 'evening_star', 'three_white_soldiers',
             'three_black_crows', 'marubozu'];
           if (c.kind === 'candle_pattern' && c.params.pattern) {

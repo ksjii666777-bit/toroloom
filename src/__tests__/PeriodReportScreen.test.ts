@@ -14,7 +14,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { groupTradesByPeriod, groupLosersBySector } from '../utils/analytics/periodAnalytics';
-import { buildPeriodReportHTML } from '../utils/periodReportPDF';
+
 import { formatCurrency } from '../utils/formatters';
 import { computeCognitiveSummary } from '../services/gateway/cognitiveAnalytics';
 import type { Trade, Holding, ParsedTrade } from '../types';
@@ -23,8 +23,8 @@ import type { Trade, Holding, ParsedTrade } from '../types';
 // 1. groupTradesByPeriod — Period Grouping Logic
 // ============================================================================
 
-const emptyTrades: Trade[] = [];
-const emptyHoldings: Holding[] = [];
+const _emptyTrades: Trade[] = [];
+const _emptyHoldings: Holding[] = [];
 
 const singleBuyTrade: Trade[] = [
   { id: 't1', symbol: 'RELIANCE', type: 'buy', price: 2450, quantity: 10, total: 24500, stockId: 'RELIANCE', name: 'Reliance', timestamp: '2026-06-15T10:30:00Z' },

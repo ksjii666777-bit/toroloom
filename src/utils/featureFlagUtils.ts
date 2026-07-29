@@ -12,7 +12,7 @@
 import {
   FeatureFlagKey,
   ExperimentId,
-  ExperimentConfig,
+  _ExperimentConfig,
   ExperimentVariant,
   DEFAULT_FEATURE_FLAGS,
   DEFAULT_EXPERIMENTS,

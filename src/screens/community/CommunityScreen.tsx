@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withSpring, withSequence,
-  withTiming, BounceIn,
+  _withTiming, BounceIn,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useCommunityStore, FeedSort } from '../../store/communityStore';
@@ -34,7 +34,7 @@ import { triggerHaptic } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { showShareSheet, ShareContent } from '../../utils/share';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 const trendingTags = ['RELIANCE', 'Nifty', 'SIP', 'Budget2025', 'TCS', 'IPO', 'Dividend', 'Crypto'];
 
@@ -222,7 +222,7 @@ export default function CommunityScreen({ navigation }: any) {
     showShareSheet(shareContent);
   }, []);
 
-  const handleUserPress = useCallback((userId: string, userName: string) => {
+  const handleUserPress = useCallback((userId: string, _userName: string) => {
     // Navigate to profile or social trader profile
     navigation.navigate('TraderProfile', { traderId: userId });
   }, [navigation]);

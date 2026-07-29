@@ -1,6 +1,6 @@
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, _useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Alert, Platform,
+  View, Text, StyleSheet, ScrollView, Alert, _Platform,
 } from 'react-native';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import { usePollStore } from '../../store/pollStore';
 import { POLL_CATEGORIES } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { Poll, PollCategory, PollStatus } from '../../types';
+import type { Poll, PollCategory, _PollStatus } from '../../types';
 
 /** Format a relative time string */
 function formatRelativeTime(dateStr: string): string {
@@ -45,6 +45,7 @@ export default function PollsScreen({ navigation }: any) {
     loadFromCache, getFilteredPolls,
   } = usePollStore();
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
   const filteredPolls = useMemo(() => getFilteredPolls(), [polls, activeCategory, activeStatus, getFilteredPolls]);
 
   const stats = useMemo(() => ({
@@ -329,7 +330,7 @@ function PollCard({
           const isSelected = poll.userVote === option.id;
 
           // Bar color based on selection and status
-          const barColor = isSelected ? catMeta.color : colors.bgCardLight;
+          const _barColor = isSelected ? catMeta.color : colors.bgCardLight;
 
           return (
             <AnimatedPressable

@@ -9,7 +9,7 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, _useEffect } from 'react';
 import {
   View,
   Text,
@@ -59,7 +59,7 @@ function generateMockData(count: number): { close: number; high: number; low: nu
 }
 
 const mockData = generateMockData(200);
-const mockCloses = mockData.map(d => d.close);
+const _mockCloses = mockData.map(d => d.close);
 
 // ============================================================================
 // Color Picker
@@ -212,7 +212,6 @@ function highlightToken(word: string): { text: string; color: string } {
 function tokenizeHighlight(formula: string): { text: string; color: string }[] {
   const tokens: { text: string; color: string }[] = [];
   let current = '';
-  let inWord = false;
 
   for (let i = 0; i < formula.length; i++) {
     const ch = formula[i];
@@ -235,7 +234,6 @@ function tokenizeHighlight(formula: string): { text: string; color: string }[] {
       continue;
     }
     current += ch;
-    inWord = true;
   }
   if (current) {
     tokens.push(highlightToken(current));
@@ -310,7 +308,7 @@ const builderStyles = StyleSheet.create({
 
 export default function CustomIndicatorEditorScreen() {
   const { colors } = useTheme();
-  const t = useT();
+  const _t = useT();
   const navigation = useNavigation();
   const route = useRoute<any>();
 

@@ -30,7 +30,7 @@ import {
 } from '../../utils/currencyConverter';
 import { useLiveConversion } from '../../hooks/useLiveConversion';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 export default function CurrencyConverterScreen() {
   const { colors } = useTheme();
@@ -258,7 +258,7 @@ export default function CurrencyConverterScreen() {
         {recentConversions.length > 0 && (
           <View style={styles.convRecentSection}>
             <Text style={[styles.convRecentTitle, { color: colors.text }]}>Recent</Text>
-            {recentConversions.map((conv, i) => {
+            {recentConversions.map((conv, _i) => {
               const fC = getCurrency(conv.from);
               const tC = getCurrency(conv.to);
               return (

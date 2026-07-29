@@ -179,7 +179,7 @@ const metricStyles = StyleSheet.create({
 // ─── Analyst Consensus Badge ────────────────────────────────
 
 function ConsensusBadge({ consensus }: { consensus: EarningsSummary['analystConsensus'] }) {
-  const { colors } = useTheme();
+  const { _colors } = useTheme();
   const config: Record<string, { label: string; color: string; bg: string }> = {
     strong_buy: { label: 'Strong Buy', color: '#10B981', bg: '#10B98120' },
     buy: { label: 'Buy', color: '#34D399', bg: '#34D39920' },
@@ -590,7 +590,7 @@ export default function EarningsCallScreen({ navigation }: any) {
                 <Text style={[styles.peerCell, { color: colors.textMuted }]}>Rev Gr</Text>
               </View>
 
-              {selectedEarnings.peerComparison.map((p, i) => {
+              {selectedEarnings.peerComparison.map((p, _i) => {
                 const isCurrent = p.symbol === selectedEarnings.symbol;
                 return (
                   <View

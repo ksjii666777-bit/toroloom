@@ -23,7 +23,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  Dimensions, Platform, ActivityIndicator,
+  Dimensions, Platform, _ActivityIndicator,
 } from 'react-native';
 import Svg, {
   Path, Line, Circle, Text as SvgText, Defs,
@@ -546,7 +546,7 @@ export default function FuturesCurveScreen({ navigation }: any) {
   const { t } = useT();
   const [selectedSymbol, setSelectedSymbol] = useState<SymbolKey>('NIFTY');
   const [apiData, setApiData] = useState<Record<string, FuturesCurveData> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
 
   // Fetch from backend API on mount
   useEffect(() => {

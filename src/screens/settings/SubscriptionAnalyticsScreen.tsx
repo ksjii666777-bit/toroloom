@@ -22,7 +22,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import _Animated from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';

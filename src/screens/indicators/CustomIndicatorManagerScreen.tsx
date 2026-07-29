@@ -8,7 +8,7 @@
  * ============================================================================
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, _useState } from 'react';
 import {
   View,
   Text,
@@ -28,7 +28,7 @@ import {
   type CustomIndicator,
 } from '../../store/customIndicatorStore';
 import { useNavigation } from '@react-navigation/native';
-import { validateFormula } from '../../utils/indicatorFormulaEngine';
+
 
 // ============================================================================
 // Indicator Card
@@ -263,7 +263,7 @@ const presetSectionStyles = StyleSheet.create({
 
 export default function CustomIndicatorManagerScreen() {
   const { colors } = useTheme();
-  const t = useT();
+  const _t = useT();
   const navigation = useNavigation<any>();
   const indicators = useCustomIndicatorStore((s) => s.indicators);
   const toggleActive = useCustomIndicatorStore((s) => s.toggleActive);

@@ -120,6 +120,7 @@ export default function HomeScreen({ navigation }: any) {
     { icon: 'briefcase' as const, label: t('calculators.lumpsum'), desc: t('home.oneTimeInvestment'), color: colors.accent, screen: 'LumpsumCalculator' },
     { icon: 'trending-up' as const, label: t('calculators.emi'), desc: t('home.loanCalculator'), color: colors.warning, screen: 'EMICalculator' },
     { icon: 'cash' as const, label: t('calculators.tax'), desc: t('home.capitalGainsTax'), color: colors.secondary, screen: 'TaxCalculator' },
+// eslint-disable-next-line react-hooks/exhaustive-deps
   ], [t]);
 
   // ── Sector Heatmap ────────────────────────────────────────────
@@ -229,6 +230,7 @@ export default function HomeScreen({ navigation }: any) {
       -1, // infinite repeat
       true // yoyo (reverse each cycle)
     );
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const glowStyle = useAnimatedStyle(() => ({
@@ -756,7 +758,7 @@ export default function HomeScreen({ navigation }: any) {
               <QuickAddAlertForm
                 colors={colors}
                 styles={styles}
-                onAdd={(rule) => {
+                onAdd={(_rule) => {
                   setShowQuickAlert(false);
                   navigation.navigate('SentimentAlert');
                 }}

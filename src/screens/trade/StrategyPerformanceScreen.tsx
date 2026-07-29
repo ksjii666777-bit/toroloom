@@ -5,9 +5,9 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, FONTS } from '../../constants/theme';
 
-export default function StrategyPerformanceScreen({ navigation }: any) {
+export default function StrategyPerformanceScreen({ _navigation }: any) {
   const { colors } = useTheme();
 
   return (

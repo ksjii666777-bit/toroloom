@@ -78,7 +78,7 @@ const SECTOR_VOLATILITY: Record<string, number> = {
 };
 
 // ─── P/E ratio inference from stock data ─────────────────────
-function inferPeRatio(stockName: string, sector: string, symbol: string): number {
+function inferPeRatio(stockName: string, sector: string, _symbol: string): number {
   // Realistic P/E ranges by sector
   const sectorPE: Record<string, number> = {
     Energy:      22,

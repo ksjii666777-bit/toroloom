@@ -28,7 +28,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import Svg, { Path, Line, Text as SvgText, Defs, LinearGradient, Stop, G, Circle } from 'react-native-svg';
+import Svg, { Path, Line, Text as SvgText, Defs, LinearGradient, Stop, _G, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';

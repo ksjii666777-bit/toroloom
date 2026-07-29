@@ -11,11 +11,11 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path, Line, Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, _Line, Text as _SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
-import { FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { FONTS } from '../../constants/theme';
 import type { WidgetSize } from '../../types/widgets';
 
 interface PnLWidgetProps {

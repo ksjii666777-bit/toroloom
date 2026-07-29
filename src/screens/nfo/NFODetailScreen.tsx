@@ -171,7 +171,7 @@ function SectorChip({ label, color }: { label: string; color: string }) {
 
 // ──── Performance Projection Card ──────────────────────────────────────────
 
-function PerformanceProjection({ nfo }: { nfo: NFOItem }) {
+function PerformanceProjection({ _nfo }: { nfo: NFOItem }) {
   const { colors } = useTheme();
 
   const projections = useMemo(() => {
@@ -235,7 +235,7 @@ export default function NFODetailScreen({ route, navigation }: any) {
   const collectedPercent = nfo ? Math.min((nfo.collectedAmount / nfo.targetSize) * 100, 100) : 0;
 
   // Risk color based on level
-  const riskColor = nfo ? (RISK_CONFIG[nfo.riskLevel]?.color || '#3B82F6') : '#3B82F6';
+  const _riskColor = nfo ? (RISK_CONFIG[nfo.riskLevel]?.color || '#3B82F6') : '#3B82F6';
 
   if (!nfo) {
     return (

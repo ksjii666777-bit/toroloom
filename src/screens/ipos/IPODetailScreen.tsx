@@ -12,7 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
+import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { useIPOStore } from '../../store/ipoStore';
 import type { IPOItem } from '../../types';
 

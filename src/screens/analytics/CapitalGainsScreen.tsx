@@ -29,7 +29,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import _Animated, { _FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
@@ -38,7 +38,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import { api } from '../../services/api';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 // ──── Types ────────────────────────────────────────────────────────────────
 

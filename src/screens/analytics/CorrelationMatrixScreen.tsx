@@ -109,7 +109,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
   }, [holdings]);
 
   // ── Display helpers ───────────────────────────────────────
-  const formatPercent = (v: number) => `${(v * 100).toFixed(0)}%`;
+  const _formatPercent = (v: number) => `${(v * 100).toFixed(0)}%`;
   const formatScore = (v: number) => `${v}/100`;
 
   // ── Cell tap handler ──────────────────────────────────────

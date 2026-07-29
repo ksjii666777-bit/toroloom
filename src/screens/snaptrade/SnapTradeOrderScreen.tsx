@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, _useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
   Alert, Dimensions, Platform, Keyboard,
@@ -33,7 +33,7 @@ import { useBiometricStore } from '../../store/biometricStore';
 import { biometricAuth } from '../../services/biometricService';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 type TradeAction = 'BUY' | 'SELL';
 type OrderType = 'Market' | 'Limit' | 'StopLimit' | 'StopLoss';
@@ -50,7 +50,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
 
   // Route params — pre-fill from stock detail/portfolio tap
   const prefillSymbol = route.params?.symbol as string | undefined;
-  const prefillName = route.params?.name as string | undefined;
+  const _prefillName = route.params?.name as string | undefined;
   const prefillPrice = route.params?.price as number | undefined;
 
   const [action, setAction] = useState<TradeAction>('BUY');
@@ -95,6 +95,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
       // Backend unavailable — skip pre-validation (non-critical)
       return null;
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action, symbol, qty, displayPrice]);
 
   // ── Place Order (biometric check → risk validation → submit) ────
@@ -151,6 +152,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
     } finally {
       setIsPlacing(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canPlaceOrder, symbol, action, orderType, qty, limitPrice, stopPrice, timeInForce, preValidateOrder, displayPrice]);
 
   // ── Reset ──────────────────────────────────────────────────

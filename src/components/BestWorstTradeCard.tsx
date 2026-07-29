@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '../context/ThemeContext';
 import { useT } from '../hooks/useT';
-import { SPACING, FONTS, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, FONTS } from '../constants/theme';
 import { formatCurrency } from '../utils/formatters';
 import Card from './ui/Card';
 

@@ -180,8 +180,8 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
     lookback,
     setMinConfidence,
     togglePattern,
-    enableAllPatterns,
-    disableAllPatterns,
+    _enableAllPatterns,
+    _disableAllPatterns,
     setLookback,
     resetDefaults,
   } = usePatternSettingsStore();
@@ -378,7 +378,7 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
 
 // ── Styles ──
 
-const createStyles = (colors: any) =>
+const createStyles = (_colors: any) =>
   StyleSheet.create({
     overlay: {
       flex: 1,

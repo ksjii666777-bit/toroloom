@@ -490,7 +490,7 @@ function computeEMAArray(data: number[], period: number): (number | null)[] {
 }
 
 
-function computeRSIAt(index: number, closes: number[], period: number): number | null {
+function _computeRSIAt(index: number, closes: number[], period: number): number | null {
   if (index < period) return null;
   let gains = 0, losses = 0;
   for (let j = index - period; j < index; j++) {

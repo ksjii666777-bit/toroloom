@@ -28,7 +28,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAdminStore, AdminUser } from '../../store/adminStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import Badge from '../../components/ui/Badge';
+import _Badge from '../../components/ui/Badge';
 import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
 
 function KYCUserCard({

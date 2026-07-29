@@ -29,7 +29,7 @@ import { useMarketStore } from '../../store/marketStore';
 import { widgetService, WidgetPreferences, WidgetPortfolioSnapshot } from '../../services/widgetService';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
-import Svg, { Rect, Text as SvgText, Circle, Line, G, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Rect, Text as SvgText, Circle, _Line, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 // ──── Widget Preview Component ─────────────────────────────────────────────
 

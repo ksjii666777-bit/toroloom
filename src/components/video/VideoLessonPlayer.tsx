@@ -17,7 +17,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING , BORDER_RADIUS } from '../../constants/theme';
 import type { TranscriptEntry, VideoBookmark, VideoProgress } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');

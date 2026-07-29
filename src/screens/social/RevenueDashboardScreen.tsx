@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, _useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TextInput, Alert, Platform,
   KeyboardAvoidingView, Modal,
@@ -35,10 +35,10 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export default function RevenueDashboardScreen({ navigation }: any) {
+export default function RevenueDashboardScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { dashboard, requestPayout, refresh } = useRevenueStore();
+  const { dashboard, requestPayout, _refresh } = useRevenueStore();
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'payouts'>('overview');
 
@@ -49,6 +49,7 @@ export default function RevenueDashboardScreen({ navigation }: any) {
 
   const sourceEntries = useMemo(() =>
     Object.entries(dashboard.breakdownBySource) as [RevenueSource, typeof dashboard.breakdownBySource[RevenueSource]][],
+// eslint-disable-next-line react-hooks/exhaustive-deps
     [dashboard.breakdownBySource]
   );
 

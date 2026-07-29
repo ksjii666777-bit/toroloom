@@ -47,6 +47,7 @@ export default function MutualFundsScreen({ navigation }: any) {
   useEffect(() => {
     fetchFunds();
     fetchSIPs();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const categories = [...new Set(funds.map(f => f.category))];

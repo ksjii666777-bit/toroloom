@@ -27,8 +27,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
-import { FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants/theme';
+
+import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import { useNavigation } from '@react-navigation/native';
 import { validateFormula } from '../../utils/indicatorFormulaEngine';
@@ -43,7 +43,7 @@ import {
   useAlgoStrategyStore,
   STRATEGY_TEMPLATES,
 } from '../../store/algoStrategyStore';
-import Svg, { Path, Line, Circle, Text as SvgText, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import Svg, { Path, Line, Circle, Text as SvgText, Defs, LinearGradient, Stop, _Rect } from 'react-native-svg';
 
 // ============================================================================
 // Mock stock symbols
@@ -232,7 +232,7 @@ export default function AlgoTradingScreen() {
   // ── Backtest State ──
   const [backtestRunning, setBacktestRunning] = useState(false);
   const [result, setResult] = useState<AlgoBacktestResult | null>(null);
-  const [resultId, setResultId] = useState<string | null>(null);
+  const [_resultId, setResultId] = useState<string | null>(null);
 
   // Validation
   const entryValid = useMemo(() => {
@@ -677,7 +677,7 @@ export default function AlgoTradingScreen() {
               </Text>
             ) : (
               <View style={screenStyles.tradeList}>
-                {result.trades.map((trade, i) => (
+                {result.trades.map((trade, _i) => (
                   <TradeRow key={trade.id} trade={trade} colors={colors} />
                 ))}
               </View>

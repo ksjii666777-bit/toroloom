@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import OptimizedImage from './OptimizedImage';
-import { SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING } from '../../constants/theme';
 
 /**
  * OptimizedImage — a drop-in replacement for React Native Image with

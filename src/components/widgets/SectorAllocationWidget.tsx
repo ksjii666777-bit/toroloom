@@ -8,8 +8,8 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Path, Text as SvgText, Circle as SvgCircle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
-import { formatCurrency } from '../../utils/formatters';
-import { FONTS, BORDER_RADIUS } from '../../constants/theme';
+
+
 import type { WidgetSize } from '../../types/widgets';
 
 const SECTOR_COLORS = [
