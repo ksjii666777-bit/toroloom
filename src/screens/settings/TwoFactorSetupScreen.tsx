@@ -55,7 +55,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
   // ── Load Status on Mount ────────────────────────────────────────
   useEffect(() => {
     loadStatus();
-// eslint-disable-next-line react-hooks/exhaustive-deps -- loadStatus defined below (TDZ)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadStatus = useCallback(async () => {
@@ -87,8 +87,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [t]);
 
   // ── Verify Code ─────────────────────────────────────────────────
   const handleVerify = useCallback(async () => {
@@ -119,8 +118,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verificationCode]);
+  }, [verificationCode, t]);
 
   // ── Disable 2FA ─────────────────────────────────────────────────
   const handleDisable = useCallback(() => {
@@ -155,8 +153,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [disableCodeInput]);
+  }, [disableCodeInput, t]);
 
   // ── Regenerate Backup Codes ─────────────────────────────────────
   const handleRegenerateCodes = useCallback(async () => {
@@ -188,8 +185,7 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
         },
       ],
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [t]);
 
   // ── Copy / Share Backup Codes ───────────────────────────────────
   const handleCopyCodes = useCallback(async () => {

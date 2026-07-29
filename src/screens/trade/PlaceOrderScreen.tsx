@@ -131,8 +131,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
       // Backend unavailable — skip pre-validation (non-critical)
       return null;
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tradeType, stock, qtyNum, displayPrice]);
+  }, [tradeType, stock, qtyNum, displayPrice, t]);
 
   // Place order handler with biometric check + pre-validation
   const handlePlaceOrder = useCallback(async () => {
@@ -219,7 +218,7 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
 
       Alert.alert(t('trading.orderFailed'), errorMsg);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canPlaceOrder, tradeType, stock, qtyNum, displayPrice, existingHolding,
       buyStock, sellStock, orderType, productType, triggerPriceNum, preValidateOrder]);
 

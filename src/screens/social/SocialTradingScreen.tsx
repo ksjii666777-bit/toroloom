@@ -260,7 +260,7 @@ function _CopyAllocationModal({
       setAllocation(50);
       setInvestment('250000');
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trader?.id]);
 
   if (!trader) return null;
@@ -508,8 +508,7 @@ export default function SocialTradingScreen({ navigation }: any) {
     }
     setSelectedTrader(trader);
     setAllocModalVisible(true);
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasSocialAccess]);
+  }, [hasSocialAccess, t]);
 
   const _handleCopyConfirm = useCallback((allocationPercent: number, investmentAmount: number) => {
     if (selectedTrader) {
@@ -634,8 +633,7 @@ export default function SocialTradingScreen({ navigation }: any) {
         </AnimatedPressable>
       </TouchableOpacity>
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors, styles, handleFollow, handleStartCopy, followedTraderIds, copyRelations]);
+  }, [colors, styles, handleFollow, handleStartCopy, followedTraderIds, copyRelations, navigation, t]);
 
   // ── Copy Trade Card ────────────────────────────────────────────────
   const renderCopyTrade = useCallback((relation: typeof copyRelations[0]) => {
@@ -726,8 +724,7 @@ export default function SocialTradingScreen({ navigation }: any) {
         </View>
       </Card>
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors, styles, copiedTrades, toggleCopyPause, stopCopyTrading]);
+  }, [colors, styles, copiedTrades, toggleCopyPause, stopCopyTrading, t]);
 
   // ── Premium Gate ───────────────────────────────────────────────────
   if (!hasSocialAccess) {

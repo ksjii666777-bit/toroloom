@@ -74,7 +74,7 @@ export default function CertificateScreen({ _navigation, route }: any) {
         handleGenerate(autoCourseId);
       }
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps -- handleGenerate in deps causes re-render loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route?.params?.courseId]);
 
   const handleSharePDF = useCallback(async (cert: CourseCertificate) => {

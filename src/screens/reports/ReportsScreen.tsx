@@ -132,8 +132,7 @@ export default function ReportsScreen({ navigation }: any) {
         { text: t('app.cancel'), style: 'cancel' as const },
       ],
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [portfolioAlertRules, addPortfolioAlertRule, quickAddDayGainThreshold, quickAddPnLThreshold]);
+  }, [portfolioAlertRules, addPortfolioAlertRule, quickAddDayGainThreshold, quickAddPnLThreshold, t]);
 
   // ── Share analytics (text) ────────────────────────────────────
   const handleShare = async () => {
@@ -183,8 +182,7 @@ export default function ReportsScreen({ navigation }: any) {
     } finally {
       setExporting(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [analytics, holdings, trades, user?.name]);
+  }, [analytics, holdings, trades, user?.name, t]);
 
   return (
     <View style={styles.container}>

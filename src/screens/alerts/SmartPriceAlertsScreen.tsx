@@ -188,8 +188,7 @@ export default function SmartPriceAlertsScreen() {
 
   const getConditionKindInfo = useCallback((kind: SmartAlertConditionKind): ConditionKindInfo | undefined => {
     return CONDITION_KINDS.find(c => c.kind === kind);
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [CONDITION_KINDS]);
 
   // ── Open creation wizard ──────────────────────────────────────────────
 
@@ -246,8 +245,7 @@ export default function SmartPriceAlertsScreen() {
       params: { ...info.defaultParams },
     };
     setFormConditions(prev => [...prev, newCondition]);
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [CONDITION_KINDS]);
 
   const _updateConditionParam = useCallback((index: number, key: string, value: number | string) => {
     setFormConditions(prev =>
@@ -265,8 +263,7 @@ export default function SmartPriceAlertsScreen() {
         i === index ? { ...c, kind, params: { ...info.defaultParams } } : c
       )
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [CONDITION_KINDS]);
 
   const removeCondition = useCallback((index: number) => {
     setFormConditions(prev => prev.filter((_, i) => i !== index));
@@ -403,8 +400,7 @@ export default function SmartPriceAlertsScreen() {
         )}
       </Pressable>
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors, getConditionKindInfo, toggleAlert, openEditAlert, handleDelete, formatConditionShort]);
+  }, [colors, getConditionKindInfo, toggleAlert, openEditAlert, handleDelete, formatConditionShort, styles.alertCard, styles.alertCardDisabled, styles.alertCardHeader, styles.alertName, styles.alertSymbol, styles.alertSymbolRow, styles.alertTitleRow, styles.chip, styles.chipIcon, styles.chipText, styles.conditionChips, styles.conditionCount, styles.cooldownText, styles.logicBadge, styles.logicBadgeText, styles.statusDot, styles.triggeredRow, styles.triggeredText, t]);
 
   // ── Render condition item in form ─────────────────────────────────────
 
@@ -430,8 +426,7 @@ export default function SmartPriceAlertsScreen() {
         </View>
       </View>
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors, getConditionKindInfo, removeCondition, formatConditionShort]);
+  }, [colors, getConditionKindInfo, removeCondition, formatConditionShort, styles.formConditionActions, styles.formConditionBtn, styles.formConditionCard, styles.formConditionDetail, styles.formConditionHeader, styles.formConditionIcon, styles.formConditionInfo, styles.formConditionLabel]);
 
   // ── Test alert ───────────────────────────────────────────────────────
 

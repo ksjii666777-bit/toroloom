@@ -111,8 +111,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [normalizedIFSC, isIFSCFormatValid]);
+  }, [normalizedIFSC, isIFSCFormatValid, t]);
 
   // ── Account Verification ────────────────────────────────────────
   const handleVerifyAccount = useCallback(async () => {
@@ -164,8 +163,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountNumber, accountHolderName, normalizedIFSC, ifscResult, isAccountFormatValid, isNameValid]);
+  }, [accountNumber, accountHolderName, normalizedIFSC, ifscResult, isAccountFormatValid, isNameValid, t]);
 
   // ── Link Account ────────────────────────────────────────────────
   const handleLinkAccount = useCallback(async () => {
@@ -199,8 +197,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountResult, ifscResult, accountType, isPrimary, linkedBanks.length, addLinkedBank, markStepCompleted]);
+  }, [accountResult, ifscResult, accountType, isPrimary, linkedBanks.length, addLinkedBank, markStepCompleted, t]);
 
   // ── Manage Banks ────────────────────────────────────────────────
   const handleRemoveBank = useCallback((accountId: string) => {
@@ -219,8 +216,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
         },
       ],
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [removeLinkedBank]);
+  }, [removeLinkedBank, t]);
 
   const handleSetPrimary = useCallback((accountId: string) => {
     setPrimaryBank(accountId);

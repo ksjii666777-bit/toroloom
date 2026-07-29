@@ -75,7 +75,7 @@ export default function CreateCourseScreen({ route, navigation }: any) {
     return () => {
       if (course) doSave();
     };
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!course) {

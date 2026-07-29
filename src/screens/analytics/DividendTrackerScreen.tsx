@@ -229,7 +229,7 @@ export default function DividendTrackerScreen({ navigation }: any) {
 
     return () => { mounted = false; };
     // Only re-fetch when holdings/stocks length changes (not on every tick)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [holdings.length, stocks.length]);
 
   const [dividendState, setDividendState] = useState<DividendTrackerState>(() =>

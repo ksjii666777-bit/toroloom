@@ -131,7 +131,9 @@ export default function WatchlistScreen({ navigation }: any) {
   }, []);
 
   const currentWatchlist = isAllView ? null : watchlists.find(w => w.id === activeWatchlist);
-// eslint-disable-next-line react-hooks/exhaustive-deps
+   
+   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const watchlistStocks = isAllView
     ? combinedStocks.map(entry => entry.stock)
     : currentWatchlist?.stocks || [];
@@ -214,7 +216,7 @@ export default function WatchlistScreen({ navigation }: any) {
       return sortDir === 'desc' ? -cmp : cmp;
     });
     return filtered;
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchlistStocks, sortBy, sortDir, activeSector, activeMarketCap, activeTopMovers, performanceView]);
 
   const setPerformance = useCallback((view: 'all' | 'gainers' | 'losers') => {

@@ -112,13 +112,13 @@ export default function FeatureFlagsScreen({ navigation }: any) {
     }
 
     return { grouped, overriddenCount, activeCount, totalCount: allFlags.length };
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, overrides, getAllFlags]);
 
   const experimentsData = useMemo(() => {
     if (!hydrated) return [];
     return getAllExperiments();
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, experimentAssignments, getAllExperiments]);
 
   // ── Handlers ──

@@ -136,8 +136,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
       codeScale.value = 0.8;
       codeOpacity.value = 0;
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linkCode]);
+  }, [linkCode, codeOpacity, codeScale, pulseAnim]);
 
   // ── Generate link code ──
   const handleConnect = async () => {

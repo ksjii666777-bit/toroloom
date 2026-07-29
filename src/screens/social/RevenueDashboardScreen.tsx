@@ -49,7 +49,7 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
 
   const sourceEntries = useMemo(() =>
     Object.entries(dashboard.breakdownBySource) as [RevenueSource, typeof dashboard.breakdownBySource[RevenueSource]][],
-// eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dashboard.breakdownBySource]
   );
 

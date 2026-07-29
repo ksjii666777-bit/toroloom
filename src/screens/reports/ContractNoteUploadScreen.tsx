@@ -93,8 +93,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
     ]).start();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fadeAnim, slideAnim]);
 
   // ── Handle file picker ──────────────────────────────────────
   const handlePickPDF = useCallback(async () => {
@@ -122,8 +121,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brokerFormat]);
+  }, [brokerFormat, t]);
 
   // ── Handle batch upload ────────────────────────────────────
   const handleBatchUpload = useCallback(async () => {
@@ -161,8 +159,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brokerFormat]);
+  }, [brokerFormat, t]);
 
   // ── Handle paste text ───────────────────────────────────────
   const handleParsePastedText = useCallback(() => {
@@ -192,8 +189,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsLoading(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pastedText, brokerFormat]);
+  }, [pastedText, brokerFormat, t]);
 
   // ── Export to CSV ───────────────────────────────────────────
   const [isExporting, setIsExporting] = useState(false);
@@ -220,8 +216,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsExporting(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [batchResult]);
+  }, [batchResult, t]);
 
   // ── Single export handler ───────────────────────────────────
   const handleExportSingleCSV = useCallback(async () => {
@@ -245,8 +240,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsExporting(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parseResult]);
+  }, [parseResult, t]);
 
   // ── Toggle file selection ────────────────────────────────────
   const toggleFileSelection = useCallback((index: number) => {
@@ -294,8 +288,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
     } finally {
       setIsExporting(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [batchResult, selectedFiles]);
+  }, [batchResult, selectedFiles, t]);
 
   // ── Clear results ───────────────────────────────────────────
   const handleClear = useCallback(() => {

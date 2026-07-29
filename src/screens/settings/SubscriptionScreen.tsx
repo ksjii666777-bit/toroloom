@@ -154,8 +154,7 @@ export default function SubscriptionScreen({ navigation }: any) {
         },
       ]
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPlanId, subscription.tier, isYearly, initiateUpgrade, getDiscountedPrice, couponResult]);
+  }, [selectedPlanId, subscription.tier, isYearly, initiateUpgrade, getDiscountedPrice, couponResult, t]);
 
   const handleCancel = useCallback(() => {
     Alert.alert(
@@ -173,8 +172,7 @@ export default function SubscriptionScreen({ navigation }: any) {
         },
       ]
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cancelSubscription]);
+  }, [cancelSubscription, t]);
 
   const handleAutopayToggle = useCallback(() => {
     if (subscription.isAutoPayEnabled && subscription.upiMandate) {
@@ -197,8 +195,7 @@ export default function SubscriptionScreen({ navigation }: any) {
     } else {
       setShowAutopayModal(true);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscription.isAutoPayEnabled, cancelAutopay, subscription.upiMandate]);
+  }, [subscription.isAutoPayEnabled, cancelAutopay, subscription.upiMandate, t]);
 
   const handleSetupAutopay = useCallback(async (upiId: string) => {
     const plan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId);

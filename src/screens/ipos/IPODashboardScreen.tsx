@@ -789,7 +789,7 @@ export default function IPODashboardScreen({ navigation }: any) {
   const [activeFilter, setActiveFilter] = useState<IPOFilter>('open');
   const [applyModalIPO, setApplyModalIPO] = useState<IPOItem | null>(null);
 
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getApplicationStats(), [applications, getApplicationStats]);
 
   // Filtered IPOs

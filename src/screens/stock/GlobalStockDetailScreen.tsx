@@ -158,7 +158,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
       }
     })();
     return () => { cancelled = true; };
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mockStock.symbol]);
 
   const relatedStocks = allGlobalStocks.filter(

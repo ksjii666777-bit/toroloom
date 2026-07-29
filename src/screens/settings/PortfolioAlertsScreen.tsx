@@ -222,8 +222,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
       t('portfolioAlerts.alertAdded'),
       `${t('portfolioAlerts.alertAddedDesc')} ${labelSuffix} ${config.label} ${t('portfolioAlerts.withThreshold')} ${config.defaultThreshold}${config.unit}.`,
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedStockIds, holdings, stockPickerForRule, pendingKind, portfolioAlertRules, addPortfolioAlertRule, updatePortfolioAlertRule]);
+  }, [selectedStockIds, holdings, stockPickerForRule, pendingKind, portfolioAlertRules, addPortfolioAlertRule, updatePortfolioAlertRule, t]);
 
   /** For non-holding alerts (portfolio-level), add directly without stock picker */
   const handleAddRule = useCallback((kind: PortfolioAlertKind) => {
@@ -254,8 +253,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
     });
 
     Alert.alert(t('portfolioAlerts.alertAdded'), `${config.label} ${t('portfolioAlerts.alertAddedDefault')} ${config.defaultThreshold}${config.unit}.`);
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addPortfolioAlertRule, portfolioAlertRules, handleToggleRule, openStockPicker]);
+  }, [addPortfolioAlertRule, portfolioAlertRules, handleToggleRule, openStockPicker, t]);
 
   const handleTestAlert = useCallback((rule: typeof portfolioAlertRules[0]) => {
     const config = ALERT_KINDS.find(c => c.kind === rule.kind);
@@ -311,8 +309,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
         { text: t('portfolioAlerts.remove'), style: 'destructive', onPress: () => removePortfolioAlertRule(ruleId) },
       ],
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [removePortfolioAlertRule]);
+  }, [removePortfolioAlertRule, t]);
 
   const handleAdjustThreshold = useCallback((ruleId: string, delta: number, kind: PortfolioAlertKind) => {
     const rule = portfolioAlertRules.find(r => r.id === ruleId);

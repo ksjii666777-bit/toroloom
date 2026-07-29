@@ -45,7 +45,7 @@ export default function PollsScreen({ navigation }: any) {
     loadFromCache, getFilteredPolls,
   } = usePollStore();
 
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const filteredPolls = useMemo(() => getFilteredPolls(), [polls, activeCategory, activeStatus, getFilteredPolls]);
 
   const stats = useMemo(() => ({

@@ -75,7 +75,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
       otherIncome: parseFloat(otherIncome) || 0,
     });
     return getRetirementProjection();
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAge, retirementAge, lifeExpectancy, currentSavings, monthlyContribution,
       expectedReturn, inflationRate, expectedExpense, otherIncome]);
 

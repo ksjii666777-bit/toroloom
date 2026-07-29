@@ -497,7 +497,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
       pairs = pairs.filter(p => p.pair.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
     }
     return pairs;
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, regionFilter, searchQuery]);
 
   const summaryStats = useMemo(() => {

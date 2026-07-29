@@ -95,8 +95,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
       // Backend unavailable — skip pre-validation (non-critical)
       return null;
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [action, symbol, qty, displayPrice]);
+  }, [action, symbol, qty, displayPrice, t]);
 
   // ── Place Order (biometric check → risk validation → submit) ────
   const placeOrder = useCallback(async () => {
@@ -152,8 +151,8 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
     } finally {
       setIsPlacing(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canPlaceOrder, symbol, action, orderType, qty, limitPrice, stopPrice, timeInForce, preValidateOrder, displayPrice]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canPlaceOrder, symbol, action, orderType, qty, limitPrice, stopPrice, timeInForce, preValidateOrder, displayPrice, t]);
 
   // ── Reset ──────────────────────────────────────────────────
   const resetForm = useCallback(() => {

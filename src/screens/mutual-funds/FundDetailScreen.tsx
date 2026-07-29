@@ -170,9 +170,9 @@ export default function FundDetailScreen({ navigation, route }: any) {
     return funds.find(f => f.id === fundId) || null;
   }, [funds, fundId]);
 
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const navHistory = useMemo(() => fund ? generateNAVHistory(fund.nav) : [fund?.nav, fund], [fund?.nav]);
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const sectorAllocation = useMemo(() => fund ? getSectorAllocation(fund.category) : [fund?.category, fund], [fund?.category]);
   const [chartTimeframe, setChartTimeframe] = useState('6M');
 

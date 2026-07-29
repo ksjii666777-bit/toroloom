@@ -134,7 +134,7 @@ export default function USStockDetailScreen({ route, navigation }: any) {
       }
     })();
     return () => { cancelled = true; };
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mockStock.symbol]);
 
   const relatedETFs = mockUSETFs.filter(

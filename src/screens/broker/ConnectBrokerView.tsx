@@ -168,8 +168,7 @@ export default function ConnectBrokerView({ navigation }: any) {
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
     ]).start();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fadeAnim, slideAnim]);
 
   const checkExistingSessions = async () => {
     try {
@@ -238,7 +237,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         setIsConnectingSnapTrade(false);
       }
     },
-// eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedBroker, showConnectedSuccess],
   );
 
@@ -290,7 +289,7 @@ export default function ConnectBrokerView({ navigation }: any) {
       }
       // Don't set isConnectingSnapTrade = false here — the deep link callback will handle it
     },
-// eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -328,8 +327,8 @@ export default function ConnectBrokerView({ navigation }: any) {
     } finally {
       setIsTestingProxy(false);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedBroker, connectedLabel]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectedBroker, connectedLabel, t]);
 
   // ── Disconnect ──────────────────────────────────────────────
   const handleDisconnect = useCallback(
@@ -353,7 +352,7 @@ export default function ConnectBrokerView({ navigation }: any) {
         ],
       );
     },
-// eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 

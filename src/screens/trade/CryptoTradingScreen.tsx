@@ -289,8 +289,7 @@ function TradeModal({
     } else {
       slideAnim.setValue(0);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, coin]);
+  }, [visible, coin, slideAnim]);
 
   const placeOrder = useCallback(async () => {
     if (!coin || !canPlace) return;

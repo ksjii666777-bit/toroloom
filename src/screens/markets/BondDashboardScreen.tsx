@@ -228,7 +228,7 @@ export default function BondDashboardScreen({ navigation }: any) {
     }
 
     return bonds;
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, filterCategory, searchQuery]);
 
   // Summary stats
@@ -249,7 +249,7 @@ export default function BondDashboardScreen({ navigation }: any) {
       taxfree: { count: taxFree.length, avgYTM: avgYTM(taxFree), avgCoupon: avgCoupon(taxFree) },
       all: mockBonds.length,
     };
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Yield curve data
@@ -267,14 +267,14 @@ export default function BondDashboardScreen({ navigation }: any) {
       avgYield: buckets[l] ? Math.round((buckets[l].yield / buckets[l].count) * 100) / 100 : 0,
       count: buckets[l]?.count || 0,
     }));
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Corporate sector categories
   const corpSectors = useMemo(() => {
     const sectors = new Set(bondData.filter(b => b.category === 'corporate' && b.sector).map(b => b.sector!));
     return [t('bondDashboard.all'), ...Array.from(sectors)];
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t]);
 
   const handleBondPress = useCallback((id: string) => {

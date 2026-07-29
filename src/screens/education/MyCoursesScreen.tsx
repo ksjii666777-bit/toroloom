@@ -64,7 +64,7 @@ export default function MyCoursesScreen({ navigation }: any) {
   } = useUserCourseStore();
   const [activeFilter, setActiveFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
 
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stats = useMemo(() => getStats(), [myCourses, getStats]);
 
   const filteredCourses = useMemo(() => {
@@ -145,8 +145,7 @@ export default function MyCoursesScreen({ navigation }: any) {
       onPress: o.onPress,
       style: o.label === t('education.delete') ? 'destructive' as const : 'default' as const,
     })));
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submitForReview, archiveCourse, unarchiveCourse, duplicateCourse, deleteCourse]);
+  }, [submitForReview, archiveCourse, unarchiveCourse, duplicateCourse, deleteCourse, t]);
 
   return (
     <View style={styles.container}>

@@ -298,8 +298,7 @@ function TradeModal({
     } else {
       slideAnim.setValue(0);
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, stock]);
+  }, [visible, stock, slideAnim]);
 
   const placeOrder = useCallback(async () => {
     if (!stock || !canPlace) return;

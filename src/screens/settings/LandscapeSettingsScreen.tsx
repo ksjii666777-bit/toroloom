@@ -49,8 +49,7 @@ export default function LandscapeSettingsScreen({ _navigation }: any) {
         { text: t('landscapeSettings.reset'), onPress: () => setPrefs(DEFAULT_PREFS) },
       ],
     );
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [t]);
 
   return (
     <View style={styles.container}>
