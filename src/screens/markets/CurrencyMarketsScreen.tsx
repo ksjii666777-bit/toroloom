@@ -497,8 +497,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
       pairs = pairs.filter(p => p.pair.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
     }
     return pairs;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, regionFilter, searchQuery]);
+  }, [activeTab, regionFilter, searchQuery, pairsData]);
 
   const summaryStats = useMemo(() => {
     const inrPairs = pairsData.filter(p => p.quoteCurrency === 'INR');

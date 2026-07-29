@@ -99,8 +99,7 @@ export default function QuizComponent({
       duration: 300,
       useNativeDriver: false,
     }).start();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentQuestionIndex]);
+  }, [currentQuestionIndex, progressAnim, progress]);
 
   const animateTransition = useCallback((direction: 'forward' | 'back') => {
     Animated.parallel([

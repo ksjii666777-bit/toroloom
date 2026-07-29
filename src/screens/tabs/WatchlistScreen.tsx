@@ -216,8 +216,7 @@ export default function WatchlistScreen({ navigation }: any) {
       return sortDir === 'desc' ? -cmp : cmp;
     });
     return filtered;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watchlistStocks, sortBy, sortDir, activeSector, activeMarketCap, activeTopMovers, performanceView]);
+  }, [watchlistStocks, sortBy, sortDir, activeSector, activeMarketCap, activeTopMovers, performanceView, listSearchQuery, priceRange]);
 
   const setPerformance = useCallback((view: 'all' | 'gainers' | 'losers') => {
     triggerHaptic();

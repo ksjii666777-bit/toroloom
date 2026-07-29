@@ -47,8 +47,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
     } else {
       addXp(attemptXp);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [recordQuizAttempt, lessonId, result, addXp, passXp, attemptXp]);
 
   const allAttempts = getQuizAttempts(lessonId);
   const bestAttempt = allAttempts.reduce((best, curr) =>
