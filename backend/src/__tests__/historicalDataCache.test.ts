@@ -214,9 +214,9 @@ describe('Historical Data Cache', () => {
       });
 
       expect(status).toBe(200);
-      // ~261 trading days in a year (365 - 104 weekend days)
+      // ~261 trading days in a year (varies by year: 365 - weekend days)
       expect(body.data.length).toBeGreaterThan(240);
-      expect(body.data.length).toBeLessThanOrEqual(261);
+      expect(body.data.length).toBeLessThanOrEqual(263);
 
       // Verify no Saturdays (day 6) or Sundays (day 0)
       for (const point of body.data) {
