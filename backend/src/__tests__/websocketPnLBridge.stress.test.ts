@@ -118,7 +118,6 @@ function currentTotalPnL(): number {
  */
 async function drainBuffer(c: Awaited<ReturnType<typeof createBufferedClient>>): Promise<void> {
   const DRAIN_TIMEOUT_MS = 10;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
       await Promise.race([

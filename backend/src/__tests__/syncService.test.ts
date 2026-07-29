@@ -53,9 +53,9 @@ vi.mock('../services/syncInvalidationBridge', () => ({
 }));
 
 // Reset module-level state (_entityStore, _mutationDedup) before each test
-// @ts-ignore
+// @ts-expect-error — dynamic import for module-level state reset
 let processSyncRequest: typeof import('../services/syncService').processSyncRequest;
-// @ts-ignore
+// @ts-expect-error — dynamic import for module-level state reset
 let registerMutationHandler: typeof import('../services/syncService').registerMutationHandler;
 
 beforeEach(async () => {
