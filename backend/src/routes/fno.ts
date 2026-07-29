@@ -880,8 +880,8 @@ router.post('/place-order', (req: Request, res: Response) => {
 // POST /api/fno/strategy/execute — Execute a multi-leg strategy (all legs to broker)
 router.post('/strategy/execute', async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId || 'default_user';
-    const { legs, spotPrice, symbol: strategySymbol, productType = 'NRML', orderType = 'MARKET' } = req.body;
+    const _userId = (req as any).userId || 'default_user';
+    const { legs, _spotPrice, symbol: strategySymbol, productType = 'NRML', orderType = 'MARKET' } = req.body;
 
     if (!legs || !Array.isArray(legs) || legs.length < 1) {
       res.status(400).json({ error: 'At least one leg is required' });
@@ -1498,7 +1498,7 @@ router.get('/strategies/shared/:shareId', (req: Request, res: Response) => {
       return;
     }
 
-    const { userId, ...publicStrategy } = strategy;
+    const { userId: _userId, ...publicStrategy } = strategy;
     res.json(publicStrategy);
   } catch (error: unknown) {
     res.status(500).json({ error: (error as Error).message || 'Failed to load shared strategy' });

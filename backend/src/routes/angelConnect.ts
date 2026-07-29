@@ -89,8 +89,7 @@ router.post('/disconnect', async (req: Request, res: Response) => {
     res.json({
       success: true,
       message: wasConnected ? 'Angel One disconnected.' : 'Not connected.',
-    });
-  } catch (error: unknown) {
+    });    } catch (_error: unknown) {
     res.status(500).json({ error: 'Failed to disconnect' });
   }
 });
@@ -107,8 +106,7 @@ router.get('/status', async (req: Request, res: Response) => {
       connected: info.connected,
       clientId: info.clientId,
       connectedAt: info.connectedAt ? new Date(info.connectedAt).toISOString() : undefined,
-    });
-  } catch (error: unknown) {
+    });    } catch (_error: unknown) {
     res.status(500).json({ error: 'Failed to check status' });
   }
 });

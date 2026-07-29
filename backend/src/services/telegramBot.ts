@@ -51,7 +51,7 @@ interface PendingLink {
 
 let bot: TelegramBot | null = null;
 let botToken: string = '';
-let botInitialized = false;
+let _botInitialized = false;
 
 /** Map of userId → TelegramUserLink (in-memory; can be extended to storage) */
 const userLinks = new Map<string, TelegramUserLink>();
@@ -86,13 +86,13 @@ export function configureTelegramBot(config: TelegramBotConfig): void {
 
   if (!botToken) {
     log.info('[TelegramBot] No token configured — running in dry mode');
-    botInitialized = true;
+    _botInitialized = true;
     return;
   }
 
   try {
     bot = new TelegramBot(botToken, { polling: true });
-    botInitialized = true;
+    _botInitialized = true;
 
     // Handle /start command for linking
     bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
@@ -212,7 +212,7 @@ export function configureTelegramBot(config: TelegramBotConfig): void {
     log.info('[TelegramBot] Bot initialized with polling');
   } catch (error: any) {
     log.error('[TelegramBot] Failed to initialize:', error.message || error);
-    botInitialized = true; // Still mark as initialized so the app doesn't hang
+    _botInitialized = true; // Still mark as initialized so the app doesn't hang
   }
 }
 
@@ -312,7 +312,7 @@ export async function sendNotification(
   const link = userLinks.get(userId);
   if (!link) return false;
 
-  let message = `*${title}*\n\n${body}`;
+  const message = `*${title}*\n\n${body}`;
 
   if (!bot || !botToken) {
     log.info(`[TelegramBot] Dry mode: ${title} → ${userId}`);

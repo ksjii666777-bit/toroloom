@@ -20,7 +20,7 @@ export default [
   {
     rules: {
       // Allow unused vars with underscore prefix (_foo, _bar)
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
       // Allow require() statements (backend uses CommonJS)
       '@typescript-eslint/no-require-imports': 'off',
       // Allow explicit any (longstanding usage in the codebase)

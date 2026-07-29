@@ -24,9 +24,8 @@ import {
   resetUserBadgeCount,
   getUserBadgeCount,
 } from '../services/portfolioAlerts';
-import { sendExpoPushNotification } from '../services/pushNotifications';
-import { saveNotification } from '../services/notifications';
-import type { NotificationData } from '../services/storage/types';
+
+
 
 const router = Router();
 router.use(authMiddleware);

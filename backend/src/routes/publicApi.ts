@@ -35,7 +35,7 @@ import { Router, Request, Response } from 'express';
 import { apiKeyAuth, requireApiScopes } from '../middleware/apiKeyAuth';
 import { getBroker } from '../services/broker';
 import { marketCache, CACHE_TTL } from '../services/cache';
-import { getStorage, getStorageIfInitialized } from '../services/storage';
+import { getStorageIfInitialized } from '../services/storage';
 
 const router = Router();
 

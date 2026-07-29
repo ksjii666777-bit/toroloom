@@ -173,7 +173,7 @@ router.get('/current', async (req: Request, res: Response) => {
 router.post('/upgrade', async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const { planId, billingPeriod = 'monthly', razorpayPaymentId, razorpayOrderId, tenantId } = req.body;
+    const { planId, billingPeriod = 'monthly', _razorpayPaymentId, razorpayOrderId, tenantId } = req.body;
 
     const plan = PLANS[planId];
     if (!plan) {
@@ -429,7 +429,7 @@ async function handlePaymentCaptured(
     autoRenew: billingPeriod === 'yearly',
     paymentMethod: 'razorpay',
     razorpayOrderId: order?.id || payment?.order_id || undefined,
-    razorpayPaymentId: payment?.id || undefined,
+    _razorpayPaymentId: payment?.id || undefined,
     lastPaymentDate: now.toISOString(),
     tenantId: notes.tenantId || undefined,
     updatedAt: now.toISOString(),

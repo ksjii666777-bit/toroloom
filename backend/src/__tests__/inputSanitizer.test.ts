@@ -859,7 +859,7 @@ describe('inputSanitizer (Express middleware)', () => {
     const { inputSanitizer } = await importModule();
 
     // Build an object with depth 11 (exceeds default max of 10)
-    let body: Record<string, unknown> = {};
+    const body: Record<string, unknown> = {};
     let current = body;
     for (let i = 0; i < 11; i++) {
       current[`level${i}`] = {};

@@ -31,7 +31,7 @@ import { generateToken } from '../middleware/auth';
 const mockAuthenticate = vi.fn();
 const mockIsConnected = vi.fn();
 const mockDisconnect = vi.fn();
-let mockName = 'Interactive Brokers';
+const mockName = 'Interactive Brokers';
 
 // Factory that returns a plain object matching IbkrBroker's shape
 function createMockIbkrBroker() {

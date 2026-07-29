@@ -52,7 +52,7 @@ interface ApiNinjasConfig {
   apiKey: string;
 }
 
-let config: ApiNinjasConfig = {
+const config: ApiNinjasConfig = {
   apiKey: process.env.COMMODITY_API_KEY || '',
 };
 

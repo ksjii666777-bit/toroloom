@@ -169,7 +169,7 @@ export function normalizePan(pan: string): string {
 // ==================== Internal State ====================
 
 let storage: StorageEngine | null = null;
-let kycStateStore = new Map<string, KycStateData>();
+const kycStateStore = new Map<string, KycStateData>();
 
 // Mock Setu API responses
 const MOCK_AADHAAR_OTPS = new Map<string, string>(); // referenceId → OTP

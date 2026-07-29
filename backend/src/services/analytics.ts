@@ -186,8 +186,8 @@ export async function computeTaxSummary(_userId: string, fiscalYear: string): Pr
     // For now, use a heuristic: small trades = STCG, large trades = LTCG.
     let shortTermGains = 0;
     let longTermGains = 0;
-    let shortTermTrades = 0;
-    let longTermTrades = 0;
+    let _shortTermTrades = 0;
+    let _longTermTrades = 0;
 
     for (const t of trades as any[]) {
       const pnl = t.pnl || t.netValue || 0;
@@ -195,10 +195,10 @@ export async function computeTaxSummary(_userId: string, fiscalYear: string): Pr
       // Real implementation: compare execution date vs. today - 1 year
       if (Math.abs(pnl) < 2000) {
         shortTermGains += pnl;
-        shortTermTrades++;
+        _shortTermTrades++;
       } else {
         longTermGains += pnl;
-        longTermTrades++;
+        _longTermTrades++;
       }
     }
 

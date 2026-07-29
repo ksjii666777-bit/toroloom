@@ -22,7 +22,7 @@ import multer, { FileFilterCallback, MulterError } from 'multer';
 
 // pdf-parse v2 exports a PDFParse class (NOT a function).
 // Use destructured require with class instantiation.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+ 
 const { PDFParse } = require('pdf-parse') as { PDFParse: new (opts: { data: Buffer }) => { getText(): Promise<{ text: string; pages: unknown[]; total: number }>; getInfo(): Promise<{ info: Record<string, string>; metadata: Record<string, string> }> } };
 
 const router = Router();

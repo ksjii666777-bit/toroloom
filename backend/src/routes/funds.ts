@@ -237,7 +237,7 @@ router.post('/withdraw', (req: Request, res: Response) => {
 
 // POST /api/funds/transfer
 router.post('/transfer', (req: Request, res: Response) => {
-  const { amount, type: transferType, fromAccount, toAccount, bankId, bankName, accountNumber } = req.body;
+  const { amount, type: transferType, fromAccount, toAccount, _bankId, bankName, accountNumber } = req.body;
 
   if (!amount || typeof amount !== 'number' || amount <= 0) {
     res.status(400).json({ error: 'A valid positive amount is required' });

@@ -47,7 +47,7 @@ router.use(authMiddleware);
 
 // ──── Types ────────────────────────────────────────────────────────────────
 
-interface ConnectionRecord {
+interface _ConnectionRecord {
   snapTradeUserId: string;
   encryptedUserSecret: string;
   authorizationId: string;

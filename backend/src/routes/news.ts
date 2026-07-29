@@ -81,7 +81,7 @@ router.get('/', async (req: Request, res: Response) => {
       totalResults: result.totalResults,
       source: 'newsapi',
     });
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     // Fallback to mock data on error
     const fallbackArticles = mockNews.slice(0, 10).map(a => ({
       ...a,

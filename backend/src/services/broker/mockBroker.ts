@@ -220,7 +220,7 @@ let mockOpenOrders: OpenOrder[] = [
   },
 ];
 
-let mockOrders: OrderResult[] = [];
+const mockOrders: OrderResult[] = [];
 let mockPositions: Position[] = [
   { symbol: 'RELIANCE', quantity: 50, buyPrice: 2650, currentPrice: 2890.50, pnl: 12025, pnlPercent: 9.08 },
   { symbol: 'HDFCBANK', quantity: 100, buyPrice: 1550, currentPrice: 1678.90, pnl: 12890, pnlPercent: 8.32 },
@@ -229,7 +229,7 @@ let mockPositions: Position[] = [
   { symbol: 'SBIN', quantity: 200, buyPrice: 720, currentPrice: 789.50, pnl: 13900, pnlPercent: 9.65 },
 ];
 
-let mockTradeHistory: TradeHistory[] = [
+const mockTradeHistory: TradeHistory[] = [
   { id: 't1', symbol: 'RELIANCE', type: 'buy', quantity: 50, price: 2650, total: 132500, timestamp: '2025-05-20T09:30:00' },
   { id: 't2', symbol: 'TCS', type: 'sell', quantity: 10, price: 3920, total: 39200, timestamp: '2025-05-19T14:45:00' },
   { id: 't3', symbol: 'HDFCBANK', type: 'buy', quantity: 100, price: 1550, total: 155000, timestamp: '2025-05-18T11:20:00' },

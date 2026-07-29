@@ -19,7 +19,7 @@
 
 import { Router, Request, Response } from 'express';
 import { authMiddleware, adminMiddleware } from '../middleware/auth';
-import { getStorage, getStorageIfInitialized } from '../services/storage';
+
 import type { CouponData, CouponUsageData } from '../services/storage/types';
 
 const router = Router();

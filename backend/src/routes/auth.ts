@@ -2,7 +2,6 @@ import { Router, Request, Response } from 'express';
 import { generateToken, authMiddleware } from '../middleware/auth';
 import { inputSanitizer, InputValidationError, sanitizeInput } from '../middleware/inputSanitizer';
 import { mockUser } from '../data/mockData';
-import { env } from '../config/env';
 
 const router = Router();
 

@@ -320,7 +320,7 @@ ${LOG_PREFIX} ╚═════════════════════
   const { Pool: PgPool } = await import('pg');
 
   // ── Retry loop with exponential backoff ─────────────────────────────
-  let lastError: Error | null = null;
+  let _lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -349,7 +349,7 @@ ${LOG_PREFIX} ╚═════════════════════
       initialized = true;
       return pool;
     } catch (err: any) {
-      lastError = err;
+      _lastError = err;
       const backoff = Math.min(RETRY_BASE_MS * Math.pow(2, attempt - 1), 4_000);
 
       console.error(
@@ -376,7 +376,7 @@ ${LOG_PREFIX} ╚═════════════════════
 ${LOG_PREFIX} ╔═══════════════════════════════════════════════════════════════╗
 ${LOG_PREFIX} ║  PostgreSQL connection FAILED after ${MAX_RETRIES} attempts              ║
 ${LOG_PREFIX} ║                                                             ║
-${LOG_PREFIX} ║  Last error: ${lastError?.message?.padEnd(59) || 'Unknown'} ║
+${LOG_PREFIX} ║  Last error: ${_lastError?.message?.padEnd(59) || 'Unknown'} ║
 ${LOG_PREFIX} ║                                                             ║
 ${LOG_PREFIX} ║  Verify:                                                     ║
 ${LOG_PREFIX} ║  1. DATABASE_URL is correct in Railway Variables             ║
@@ -405,7 +405,7 @@ async function initializeReaderPool(readerUrl: string): Promise<Pool | null> {
   const pgBouncerUrl = buildPgBouncerUrl(readerUrl);
   const { Pool: PgPool } = await import('pg');
 
-  let lastError: Error | null = null;
+  let _lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -429,7 +429,7 @@ async function initializeReaderPool(readerUrl: string): Promise<Pool | null> {
       readerInitialized = true;
       return readerPool;
     } catch (err: any) {
-      lastError = err;
+      _lastError = err;
       const backoff = Math.min(RETRY_BASE_MS * Math.pow(2, attempt - 1), 4_000);
       console.error(
         `${LOG_PREFIX} Reader pool attempt ${attempt}/${MAX_RETRIES} failed: ${err.message}` +

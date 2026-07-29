@@ -100,7 +100,7 @@ interface IbkrContract {
   group: string;
 }
 
-interface IbkrQuote {
+interface _IbkrQuote {
   conid: number;
   symbol: string;
   last: number;
@@ -134,7 +134,7 @@ interface IbkrHistoricalBar {
 
 const DEFAULT_GATEWAY_URL = 'http://localhost:5000';
 const TICKLE_INTERVAL_MS = 30_000; // Keep session alive every 30 seconds
-const MAX_RETRIES = 2;
+const _MAX_RETRIES = 2;
 const RATE_LIMIT_PER_SECOND = 8; // IBKR limit is 10/sec, we use 8 to be safe
 
 // ──── Rate Limiter ────────────────────────────────────────────────────────
@@ -377,7 +377,7 @@ export class IbkrBroker implements IBroker {
     };
 
     const barType = barTypeMap[interval] || '1d';
-    const toDate = new Date();
+    const _toDate = new Date();
     const fromDate = new Date(Date.now() - days * 86400000);
 
     try {
@@ -624,7 +624,7 @@ export class IbkrBroker implements IBroker {
         );
         const quotes = await this.getMarketSnapshot(conids);
 
-        for (const [conidStr, quote] of quotes) {
+        for (const [_conidStr, quote] of quotes) {
           if (cleanupCalled) return;
           onTick(quote);
         }

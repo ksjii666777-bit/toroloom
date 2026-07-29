@@ -64,7 +64,7 @@ const faqs: FAQ[] = [
   },
   {
     id: 'faq_8',
-    question: 'What is the \"Financial Bodyguard\" feature?',
+    question: 'What is the "Financial Bodyguard" feature?',
     answer: 'Financial Bodyguard is our risk management system that helps protect your portfolio. You can set daily loss limits, position size limits, and get real-time risk alerts.',
     category: 'Features',
     order: 8,

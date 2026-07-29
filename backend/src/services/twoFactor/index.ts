@@ -87,7 +87,7 @@ const TOTP_URI_OPTIONS = {
 /**
  * Generate a TOTP setup: secret key, otpauth URI for QR code, backup codes.
  *
- * The secret is stored in a "pending" state until the user verifies
+ * The secret is stored in a "_pending" state until the user verifies
  * by entering a valid TOTP code from their authenticator app.
  *
  * Throws if 2FA is already enabled.
@@ -113,23 +113,23 @@ export async function generateSetup(userId: string, email: string): Promise<TwoF
     backupCodes.push(generateBackupCode());
   }
 
-  // Store pending setup (expires after 10 minutes)
+  // Store _pending setup (expires after 10 minutes)
   pendingSetups.set(userId, {
     secret,
     backupCodes,
     createdAt: Date.now(),
   });
 
-  // Clean up old pending setups periodically
+  // Clean up old _pending setups periodically
   cleanupExpiredSetups();
 
   return { secret, otpauthUrl, backupCodes };
 }
 
 /**
- * Verify a TOTP token against the user's pending or active secret.
+ * Verify a TOTP token against the user's _pending or active secret.
  * Used both for:
- *   - Confirming setup (pending secret)
+ *   - Confirming setup (_pending secret)
  *   - Daily verification / login
  */
 export async function verifyToken(userId: string, token: string): Promise<boolean> {
@@ -147,19 +147,19 @@ export async function verifyToken(userId: string, token: string): Promise<boolea
     }
   }
 
-  // 2. Check pending setup secret
-  const pending = pendingSetups.get(userId);
-  if (pending) {
+  // 2. Check _pending setup secret
+  const _pending = pendingSetups.get(userId);
+  if (_pending) {
     try {
-      const result = await verify({ token, secret: pending.secret, ...TOTP_VERIFY_OPTIONS });
+      const result = await verify({ token, secret: _pending.secret, ...TOTP_VERIFY_OPTIONS });
       if (result.valid) {
-        // Promote pending to active 2FA
+        // Promote _pending to active 2FA
         twoFactorStore.set(userId, {
           enabled: true,
-          secret: pending.secret,
+          secret: _pending.secret,
           verified: true,
           setupAt: new Date().toISOString(),
-          backupCodes: pending.backupCodes.map(code => ({ code, used: false })),
+          backupCodes: _pending.backupCodes.map(code => ({ code, used: false })),
         });
         pendingSetups.delete(userId);
         return true;
@@ -188,7 +188,7 @@ export async function verifyToken(userId: string, token: string): Promise<boolea
 export async function enableTwoFactor(userId: string): Promise<void> {
   const existing = twoFactorStore.get(userId);
   if (!existing) {
-    throw new Error('No pending 2FA setup found. Please complete setup first.');
+    throw new Error('No _pending 2FA setup found. Please complete setup first.');
   }
   if (!existing.verified) {
     throw new Error('2FA setup not verified. Please enter a valid code from your authenticator app.');
@@ -218,7 +218,7 @@ export async function disableTwoFactor(userId: string, token: string): Promise<v
  */
 export async function getStatus(userId: string): Promise<TwoFactorStatus> {
   const existing = twoFactorStore.get(userId);
-  const pending = pendingSetups.get(userId);
+  const _pending = pendingSetups.get(userId);
 
   return {
     enabled: existing?.enabled || false,
@@ -283,14 +283,14 @@ function generateBackupCode(): string {
 }
 
 /**
- * Clean up expired pending setups (older than 10 minutes).
+ * Clean up expired _pending setups (older than 10 minutes).
  */
 function cleanupExpiredSetups(): void {
   const now = Date.now();
   const expiryMs = 10 * 60 * 1000; // 10 minutes
 
-  for (const [userId, pending] of pendingSetups.entries()) {
-    if (now - pending.createdAt > expiryMs) {
+  for (const [userId, _pending] of pendingSetups.entries()) {
+    if (now - _pending.createdAt > expiryMs) {
       pendingSetups.delete(userId);
     }
   }

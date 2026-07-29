@@ -108,7 +108,7 @@ if (cluster.isPrimary && clusterEnabled) {
   }
 
   // Dynamic require — safe because tsconfig compiles to CommonJS
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   const { start, server, wss } = require('./server');
 
   async function gracefulShutdown(signal: string): Promise<void> {

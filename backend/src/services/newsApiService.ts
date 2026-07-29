@@ -25,7 +25,7 @@ interface NewsApiConfig {
   apiKey: string;
 }
 
-let config: NewsApiConfig = {
+const config: NewsApiConfig = {
   apiKey: process.env.NEWSAPI_KEY || '',
 };
 

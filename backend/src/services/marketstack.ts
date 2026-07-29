@@ -26,7 +26,7 @@ interface MarketStackConfig {
   accessKey: string;
 }
 
-let config: MarketStackConfig = {
+const config: MarketStackConfig = {
   accessKey: process.env.MARKETSTACK_KEY || '',
 };
 

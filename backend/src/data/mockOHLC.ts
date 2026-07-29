@@ -33,8 +33,8 @@ const MARKET_OPEN_HOUR = 9;
 const MARKET_OPEN_MINUTE = 15;
 
 /** Market close: 3:30 PM IST */
-const MARKET_CLOSE_HOUR = 15;
-const MARKET_CLOSE_MINUTE = 30;
+const _MARKET_CLOSE_HOUR = 15;
+const _MARKET_CLOSE_MINUTE = 30;
 
 /** Total trading minutes per day = 6.25 hours = 375 minutes */
 const TRADING_MINUTES_PER_DAY = 375;
@@ -80,12 +80,6 @@ function isTradingDay(date: Date): boolean {
 function getMarketOpen(date: Date): Date {
   const d = new Date(date);
   d.setHours(MARKET_OPEN_HOUR, MARKET_OPEN_MINUTE, 0, 0);
-  return d;
-}
-
-function getMarketClose(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(MARKET_CLOSE_HOUR, MARKET_CLOSE_MINUTE, 0, 0);
   return d;
 }
 

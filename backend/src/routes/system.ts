@@ -100,7 +100,7 @@ router.get('/circuit-breakers', (_req: Request, res: Response) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     res.status(500).json({
       error: 'Failed to fetch circuit breaker states',
     });
@@ -159,7 +159,7 @@ router.get('/circuit-breakers/:name', (req: Request, res: Response) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     res.status(500).json({
       error: 'Failed to fetch circuit breaker state',
     });

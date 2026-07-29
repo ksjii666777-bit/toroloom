@@ -186,7 +186,7 @@ interface FredConfig {
   apiKey: string;
 }
 
-let fredConfig: FredConfig = {
+const fredConfig: FredConfig = {
   apiKey: process.env.FRED_API_KEY || '',
 };
 

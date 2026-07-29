@@ -49,11 +49,6 @@ const NONCE_CLEANUP_INTERVAL = parseInt(process.env.NONCE_CLEANUP_INTERVAL || '3
 //   const used = await redis.sismember('used_nonces', nonce);
 //   await redis.sadd('used_nonces', nonce, 'EX', REPLAY_WINDOW_MS / 1000);
 
-interface NonceEntry {
-  nonce: string;
-  expiresAt: number;
-}
-
 const usedNonces: Map<string, number> = new Map();
 
 // ──── Periodic Cleanup ──────────────────────────────────────────────────────

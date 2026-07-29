@@ -19,7 +19,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { marketstack, isMarketStackConfigured } from '../services/marketstack';
-import { marketCache, CACHE_TTL } from '../services/cache';
+import { marketCache } from '../services/cache';
 import { getBroker } from '../services/broker';
 import { env } from '../config/env';
 
