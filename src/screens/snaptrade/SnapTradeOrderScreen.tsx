@@ -151,8 +151,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
     } finally {
       setIsPlacing(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canPlaceOrder, symbol, action, orderType, qty, limitPrice, stopPrice, timeInForce, preValidateOrder, displayPrice, t]);
+  }, [canPlaceOrder, symbol, action, orderType, qty, limitPrice, stopPrice, timeInForce, preValidateOrder, t, setIsPlacing]);
 
   // ── Reset ──────────────────────────────────────────────────
   const resetForm = useCallback(() => {

@@ -218,9 +218,8 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
 
       Alert.alert(t('trading.orderFailed'), errorMsg);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canPlaceOrder, tradeType, stock, qtyNum, displayPrice, existingHolding,
-      buyStock, sellStock, orderType, productType, triggerPriceNum, preValidateOrder]);
+      buyStock, sellStock, orderType, productType, triggerPriceNum, preValidateOrder, t]);
 
   const handleConfirmationClose = useCallback(() => {
     setShowConfirmation(false);

@@ -825,8 +825,7 @@ export default function OnboardingScreen({ _navigation }: any) {
       setCurrentStep(index);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setCurrentStep, totalSteps]
+    [setCurrentStep, scrollRef]
   );
 
   const handleSkip = useCallback(async () => {
