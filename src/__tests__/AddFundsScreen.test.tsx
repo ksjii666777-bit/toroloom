@@ -10,7 +10,7 @@
  */
 
 import React from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act } from 'react';
 import type { ReactTestInstance } from 'react-test-renderer';
 import { render, fireEvent } from './testUtils';

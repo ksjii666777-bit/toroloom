@@ -49,12 +49,6 @@ export function getSectorColor(sector: string): string {
 
 // ──── Date Helpers ──────────────────────────────────────────────────────────
 
-function fmtDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-  } catch { return iso; }
-}
-
 function todayStr(): string {
   return new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 }

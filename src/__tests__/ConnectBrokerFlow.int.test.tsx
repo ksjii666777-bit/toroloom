@@ -21,25 +21,17 @@ const mockGoBack = vi.fn();
 // Mock API services used by ConnectBrokerView
 const mockSnapTradeStatus = vi.hoisted(() => vi.fn(() => Promise.resolve({ connected: false })));
 const mockBrokerApiGetHoldings = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true, statusCode: 200, data: { holdings: [] } })));
-const mockSnapTradeRegister = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true })));
-const mockSnapTradeGetLink = vi.hoisted(() => vi.fn(() => Promise.resolve({ oauthUrl: 'https://example.com/oauth' })));
 
 vi.mock('../services/api', () => ({
   snapTradeApi: {
     status: mockSnapTradeStatus,
-    register: mockSnapTradeRegister,
-    getConnectLink: mockSnapTradeGetLink,
+    register: vi.fn(() => Promise.resolve({ success: true })),
+    getConnectLink: vi.fn(() => Promise.resolve({ oauthUrl: 'https://example.com/oauth' })),
     handleCallback: vi.fn(() => Promise.resolve({ success: true })),
     disconnect: vi.fn(() => Promise.resolve({ success: true })),
   },
   brokerProxyApi: {
     getHoldings: mockBrokerApiGetHoldings,
-  },
-  angelConnectApi: {
-    status: vi.fn(() => Promise.resolve({ connected: false })),
-    connect: vi.fn(() => Promise.resolve({ success: true })),
-    holdings: vi.fn(() => Promise.resolve({ success: true, data: [] })),
-    disconnect: vi.fn(() => Promise.resolve({ success: true })),
   },
 }));
 

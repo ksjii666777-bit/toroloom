@@ -6,14 +6,14 @@ import { render, fireEvent } from './testUtils';
 vi.mock('react-native', () => {
   const React = require('react');
 
-  function MockFlatList(props: any) {
-    if (!props.data || props.data.length === 0) {
-      return props.ListEmptyComponent || null;
+  function MockFlatList(_props: any) {
+    if (!_props.data || _props.data.length === 0) {
+      return _props.ListEmptyComponent || null;
     }
     // Render each item via renderItem and wrap in a View
     return React.createElement('View', null,
-      ...props.data.map((item: any, idx: number) => {
-        const element = props.renderItem({ item, index: idx });
+      ..._props.data.map((item: any, idx: number) => {
+        const element = _props.renderItem({ item, index: idx });
         return element || null;
       })
     );
@@ -34,7 +34,7 @@ vi.mock('react-native', () => {
     TouchableOpacity: (props: any) => React.createElement('View', { onPress: props.onPress }, props.children),
     Animated: {
       View: (props: any) => React.createElement('View', props, props.children),
-      Value: class { constructor(v: number) {}; interpolate() { return {}; } },
+      Value: class { constructor(_v: number) {}; interpolate() { return {}; } },
       timing: () => ({ start: (cb: any) => cb?.() }),
       spring: () => ({ start: (cb: any) => cb?.() }),
       parallel: () => ({ start: (cb: any) => cb?.() }),
