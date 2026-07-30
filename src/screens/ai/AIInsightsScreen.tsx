@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, } from 'react-native';
+import React, { useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useAIStore } from '../../store/aiStore';
@@ -14,7 +14,12 @@ export default function AIInsightsScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useT();
-  const { insights } = useAIStore();
+  const { insights, isLoading, fetchInsights } = useAIStore();
+
+  // Fetch insights on mount if store uses mock data
+  useEffect(() => {
+    fetchInsights();
+  }, [fetchInsights]);
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -56,6 +61,25 @@ export default function AIInsightsScreen({ _navigation }: any) {
 
         {/* Insights List */}
         <Text style={styles.sectionTitle}>{t('ai.stockAnalysis')}</Text>
+
+        {/* ── Loading State ── */}
+        {isLoading && insights.length === 0 && (
+          <View style={styles.stateContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.stateText, { color: colors.textMuted }]}>{t('ai.generating')}</Text>
+          </View>
+        )}
+
+        {/* ── Empty State ── */}
+        {!isLoading && insights.length === 0 && (
+          <View style={styles.stateContainer}>
+            <Ionicons name="bulb-outline" size={48} color={colors.textMuted} />
+            <Text style={[styles.stateTitle, { color: colors.text }]}>{t('ai.noInsights')}</Text>
+            <Text style={[styles.stateText, { color: colors.textMuted }]}>Pull to refresh to generate insights for your watchlist stocks.</Text>
+          </View>
+        )}
+
+        {/* ── Data ── */}
         {insights.map(insight => (
           <Pressable key={insight.id} style={styles.insightCard}>
             <View style={styles.insightHeader}>
@@ -265,5 +289,25 @@ const createStyles = (colors: any) =>
       fontSize: FONTS.size.xs,
       color: colors.textMuted,
       marginTop: 2,
+    },
+
+    // States
+    stateContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: SPACING.huge,
+      gap: SPACING.md,
+    },
+    stateTitle: {
+      ...FONTS.semiBold,
+      fontSize: FONTS.size.lg,
+      marginTop: SPACING.sm,
+    },
+    stateText: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.sm,
+      textAlign: 'center',
+      paddingHorizontal: SPACING.xxxl,
+      lineHeight: 20,
     },
   });
