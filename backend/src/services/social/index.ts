@@ -56,7 +56,7 @@ export interface FollowRelationData {
 
 // ==================== Internal State ====================
 
-let socialStorage: StorageEngine | null = null;
+const _socialStorage: StorageEngine | null = null;
 
 // Mock top traders data (same as frontend mock)
 const mockTraders: SocialTraderData[] = [

@@ -226,7 +226,7 @@ export class AngelBroker implements IBroker {
           return String(token);
         }
       }
-    } catch (err) {
+    } catch {
       // Fall through
     }
 
@@ -257,7 +257,7 @@ export class AngelBroker implements IBroker {
           const ltp = q.ltp || q.last_price || 0;
 
           // marketData returns OHLC values — no need for separate candle fetch
-          const open = q.open || ltp;
+          const _open = q.open || ltp;
           const close = q.close || ltp;
           const change = q.net_change || q.change || (ltp - close);
           const changePercent = q.percentage_change || (close > 0 ? (change / close) * 100 : 0);

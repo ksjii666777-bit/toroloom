@@ -28,7 +28,8 @@ function isValidEmail(email: string): boolean {
 
 // POST /api/auth/login
 router.post('/login', (req: Request, res: Response) => {
-  let { email, password, role } = req.body;
+  let { email, password } = req.body;
+  const { role } = req.body;
 
   // --- Check required fields first ---
   if (!email && !password) {

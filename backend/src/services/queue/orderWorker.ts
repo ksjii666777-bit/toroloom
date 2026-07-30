@@ -48,7 +48,7 @@ export function startOrderWorker(): void {
     QUEUE_NAME,
     async (job: Job<OrderJobData>): Promise<OrderJobResult> => {
       const { correlationId, params } = job.data;
-      const startedAt = Date.now();
+      const _startedAt = Date.now();
 
       try {
         // Execute the order through the pipeline

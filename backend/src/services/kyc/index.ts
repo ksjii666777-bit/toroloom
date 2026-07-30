@@ -168,6 +168,7 @@ export function normalizePan(pan: string): string {
 
 // ==================== Internal State ====================
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let storage: StorageEngine | null = null;
 const kycStateStore = new Map<string, KycStateData>();
 
@@ -392,6 +393,7 @@ export async function verifyAadhaarOtp(
  *   Body: { redirectUrl: "https://toroloom.app/digilocker/callback" }
  *   Response: { authUrl, referenceId }
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getDigiLockerAuthUrl(userId: string): Promise<DigiLockerAuthResponse> {
   await new Promise(resolve => setTimeout(resolve, 300));
 

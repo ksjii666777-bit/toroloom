@@ -129,7 +129,7 @@ export async function sendBulkExpoPushNotifications(
       const result: any = await response.json();
       const tickets: any[] = result.data || [];
 
-      tickets.forEach((ticket, idx) => {
+      tickets.forEach((ticket, _idx) => {
         if (ticket.status === 'error') {
           results.push({
             status: 'error',

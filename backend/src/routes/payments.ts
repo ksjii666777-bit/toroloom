@@ -350,7 +350,7 @@ router.post('/create-subscription', async (req: Request, res: Response) => {
 
 router.post('/create-mandate', async (req: Request, res: Response) => {
   try {
-    const { planId, billingPeriod = 'monthly', customerName, customerEmail, customerContact, tenantId } = req.body;
+    const { planId, billingPeriod = 'monthly', _customerName, _customerEmail, _customerContact, tenantId } = req.body;
 
     const planAmounts = PLAN_AMOUNTS[planId];
     if (!planAmounts) {

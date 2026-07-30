@@ -28,6 +28,7 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { authMiddleware } from '../middleware/auth';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getStorage } from '../services/storage';
 import type { UserSubscriptionData } from '../services/storage/types';
 import { logWebhookEvent } from './webhookHealth';

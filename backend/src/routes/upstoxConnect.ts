@@ -105,7 +105,7 @@ router.post('/oauth-connect', async (req: Request, res: Response) => {
       return;
     }
 
-    const result = await upstoxUserManager.connectViaOAuth(
+    const _result = await upstoxUserManager.connectViaOAuth(
       userId,
       authCode.trim(),
       upstoxClientId,
@@ -137,7 +137,7 @@ router.post('/disconnect', async (req: Request, res: Response) => {
       success: true,
       message: wasConnected ? 'Upstox disconnected.' : 'Not connected.',
     });
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     res.status(500).json({ error: 'Failed to disconnect' });
   }
 });
@@ -156,7 +156,7 @@ router.get('/status', async (req: Request, res: Response) => {
       connectedAt: info.connectedAt ? new Date(info.connectedAt).toISOString() : undefined,
       hasOrderAccess: info.connected,
     });
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     res.status(500).json({ error: 'Failed to check status' });
   }
 });

@@ -138,7 +138,7 @@ function categoryToKeywords(category: NewsCategory): string {
 /**
  * Get the difference in days between two dates.
  */
-function daysBetween(d1: Date, d2: Date): number {
+function _daysBetween(d1: Date, d2: Date): number {
   const diffMs = Math.abs(d2.getTime() - d1.getTime());
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 }

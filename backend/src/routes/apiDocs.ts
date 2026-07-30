@@ -583,6 +583,7 @@ router.get('/openapi.json', (_req: Request, res: Response) => {
 // ──── GET /api/docs ────────────────────────────────────────────────────────
 // Returns a simple HTML documentation page with Swagger UI.
 router.get('/', (_req: Request, res: Response) => {
+  /* eslint-disable no-useless-escape */
   res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -676,6 +677,7 @@ router.get('/', (_req: Request, res: Response) => {
   <\/script>
 </body>
 </html>`);
+  /* eslint-enable no-useless-escape */
 });
 
 export default router;

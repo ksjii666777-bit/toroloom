@@ -44,7 +44,7 @@ const TEMPLATE_PATTERNS = [
   // Generic template syntax
   { pattern: /\{\{.*?\}\}/g, replacement: '[filtered]' },     // {{ ... }} (Handlebars, Mustache, Liquid, Twig)
   { pattern: /\$\{.*?\}/g, replacement: '[filtered]' },        // ${ ... } (ES6 template literals in strings)
-  { pattern: /\{\%.*?\%\}/g, replacement: '[filtered]' },     // {% ... %} (Jinja2, Twig, Nunjucks)
+  { pattern: /\{%.*?%\}/g, replacement: '[filtered]' },     // {% ... %} (Jinja2, Twig, Nunjucks)
   { pattern: /\{#.*?#\}/g, replacement: '[filtered]' },        // {# ... #} (Jinja2 comments)
   { pattern: /<%.*?%>/g, replacement: '[filtered]' },          // <% ... %> (EJS, ERB, ASP)
   { pattern: /<\?=.*?\?>/g, replacement: '[filtered]' },       // <?= ... ?> (PHP)
@@ -309,7 +309,7 @@ export function sanitizeInput(
  */
 export function sanitizeObject(
   obj: Record<string, unknown>,
-  parentKey?: string,
+  _parentKey?: string,
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 

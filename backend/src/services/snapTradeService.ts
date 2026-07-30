@@ -319,7 +319,7 @@ class SnapTradeService {
     userSecret: string,
   ): Promise<boolean> {
     try {
-      const response = await this.client.connections.removeBrokerageAuthorization({
+      const _response = await this.client.connections.removeBrokerageAuthorization({
         authorizationId,
         userId,
         userSecret,

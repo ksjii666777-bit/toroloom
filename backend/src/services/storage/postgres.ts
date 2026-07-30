@@ -562,6 +562,7 @@ export class PostgreSQLStorage implements StorageEngine {
       params.push(filter.startTime);
     }
     if (filter.endTime) {
+      // eslint-disable-next-line no-useless-assignment -- false positive: paramIdx++ inside template literal
       conditions.push(`timestamp <= $${paramIdx++}`);
       params.push(filter.endTime);
     }

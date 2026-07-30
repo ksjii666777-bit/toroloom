@@ -516,7 +516,7 @@ export class IbkrBroker implements IBroker {
     this.requireAuth();
 
     try {
-      const data = await this.apiPost(
+      const _data = await this.apiPost(
         `/iserver/account/${this.accountId}/order/${modifyOrder.orderId}`,
         {
           ...modifyOrder,

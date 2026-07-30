@@ -2,9 +2,11 @@ import { env } from '../../config/env';
 import { IBroker } from './interface';
 import { registry } from './registry';
 import { registerDefaultPlugins, updatePluginEnvConfig } from './plugins/registerDefaults';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getCircuitBreaker, CircuitOpenError } from '../circuitBreaker';
 import { auditTrail } from '../auditTrail';
 import type { StorageEngine } from '../storage/types';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { setBrokerConnected, incrementBrokerAuthError, incrementBrokerReconnects } from '../metrics';
 
 let brokerInstance: IBroker | null = null;

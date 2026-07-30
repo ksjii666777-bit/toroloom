@@ -231,6 +231,7 @@ export async function updateAlert(
     params.push(alertId);
     params.push(userId);
 
+    // eslint-disable-next-line no-useless-assignment -- false positive: paramIdx++ inside template literal
     const query = `UPDATE stock_alerts SET ${setClauses.join(', ')} WHERE id = $${paramIdx++} AND user_id = $${paramIdx++} RETURNING *`;
     const result = await pool.query(query, params);
 

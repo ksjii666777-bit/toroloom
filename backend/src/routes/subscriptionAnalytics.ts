@@ -113,7 +113,7 @@ function computeOverview(subscriptions: UserSubscriptionData[]): SubscriptionAna
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const _label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     monthlyBuckets.set(key, { revenue: 0, newSubs: 0, churned: 0 });
   }
 

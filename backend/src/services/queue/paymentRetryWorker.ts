@@ -20,7 +20,7 @@ import { sendExpoPushNotification } from '../pushNotifications';
 import { saveNotification } from '../notifications';
 import { pushTokenStore } from '../../routes/pushNotifications';
 import type { PaymentRetryJobData, PaymentRetryJobResult } from './paymentRetryTypes';
-import { PAYMENT_RETRY_QUEUE_NAME, MAX_PAYMENT_RETRIES } from './paymentRetryTypes';
+import { PAYMENT_RETRY_QUEUE_NAME } from './paymentRetryTypes';
 
 /** Lazy-loaded Razorpay instance */
 let _Razorpay: any = null;
@@ -63,7 +63,7 @@ export function startPaymentRetryWorker(): void {
   paymentRetryWorker = new Worker<PaymentRetryJobData, PaymentRetryJobResult>(
     PAYMENT_RETRY_QUEUE_NAME,
     async (job: Job<PaymentRetryJobData>): Promise<PaymentRetryJobResult> => {
-      const { userId, planId, billingPeriod, mandateId, upiId, amount, attempt, maxRetries, failedAt } = job.data;
+      const { userId, planId, billingPeriod, mandateId, _upiId, amount, attempt, maxRetries, failedAt } = job.data;
       const now = new Date();
 
       console.log(`[PaymentRetry] Attempt #${attempt}/${maxRetries} for user ${userId}, mandate ${mandateId}`);
@@ -75,7 +75,7 @@ export function startPaymentRetryWorker(): void {
           throw new Error('Razorpay SDK not available');
         }
 
-        const order = await razorpay.orders.create({
+        const _order = await razorpay.orders.create({
           amount,
           currency: 'INR',
           payment: {

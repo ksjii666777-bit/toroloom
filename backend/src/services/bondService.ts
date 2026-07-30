@@ -217,7 +217,7 @@ interface FredResponse {
   observations: FredObservation[];
 }
 
-function fetchFromFred<T>(seriesId: string): Promise<FredResponse> {
+function fetchFromFred(seriesId: string): Promise<FredResponse> {
   if (!fredConfig.apiKey) {
     return Promise.reject(new Error('FRED API key not configured. Set FRED_API_KEY env var.'));
   }

@@ -556,7 +556,7 @@ export class UpstoxBroker implements IBroker {
     // Upstox doesn't have a search endpoint in v2.
     // Fall back to fetching known stocks that match the query.
     try {
-      const quote = await this.getQuote(query);
+      const _quote = await this.getQuote(query);
       const info = await this.getQuoteInfo(query);
       return [info];
     } catch {
@@ -754,7 +754,7 @@ export class UpstoxBroker implements IBroker {
       };
     }
 
-    const response = await this.apiDelete<CancelOrderResponse>(
+    const _response = await this.apiDelete<CancelOrderResponse>(
       `/order/cancel?order_id=${order.orderId}`,
       UPSTOX_HFT_BASE,
     );

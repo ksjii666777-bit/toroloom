@@ -34,6 +34,7 @@ import type {
   BrokerCapability,
 } from './plugin';
 import { getCircuitBreaker, CircuitOpenError } from '../circuitBreaker';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { auditTrail } from '../auditTrail';
 import { setBrokerConnected, incrementBrokerAuthError, incrementBrokerReconnects } from '../metrics';
 

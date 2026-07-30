@@ -46,7 +46,7 @@ export function startTrialReminderWorker(): void {
   trialReminderWorker = new Worker<TrialReminderJobData, TrialReminderJobResult>(
     TRIAL_REMINDER_QUEUE_NAME,
     async (job: Job<TrialReminderJobData>): Promise<TrialReminderJobResult> => {
-      const { userId, planTier, trialEndDate, daysRemaining, reminderType, scheduledAt } = job.data;
+      const { userId, planTier, trialEndDate, daysRemaining, reminderType, _scheduledAt } = job.data;
       const now = new Date();
 
       console.log(`[TrialReminder] Sending ${reminderType} reminder for user ${userId} (${planTier}, ${daysRemaining}d remaining)`);

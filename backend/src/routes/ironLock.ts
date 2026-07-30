@@ -44,7 +44,7 @@ router.use(authMiddleware);
 
 // ──── Constants ───────────────────────────────────────────────
 
-const LOCKDOWN_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+const _LOCKDOWN_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Market hours in milliseconds since midnight UTC (Indian markets: 9:15 AM – 3:30 PM IST = UTC+5:30)
 const MARKET_OPEN_MS = 3 * 60 * 60 * 1000 + 45 * 60 * 1000;  // 3:45 UTC = 9:15 AM IST
@@ -273,7 +273,7 @@ router.post('/force-unlock', (req: Request, res: Response) => {
 router.post('/check-order', (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const { actionType, symbol, quantity, price } = req.body;
+    const { actionType, _symbol, _quantity, _price } = req.body;
 
     if (!actionType) {
       res.status(400).json({ error: 'actionType is required' });
@@ -285,8 +285,8 @@ router.post('/check-order', (req: Request, res: Response) => {
     // Determine if this is an exit action
     const exitActions = ['SQUARE_OFF', 'CANCEL', 'EXIT'];
     const isExit = exitActions.includes(actionType.toUpperCase());
-    const isBuy = actionType.toUpperCase() === 'BUY';
-    const isSell = actionType.toUpperCase() === 'SELL';
+    const _isBuy = actionType.toUpperCase() === 'BUY';
+    const _isSell = actionType.toUpperCase() === 'SELL';
 
     const isLockdown = profile.lockdown.status !== LockdownStatus.NONE;
     const isFrozen = profile.settingsFrozen;

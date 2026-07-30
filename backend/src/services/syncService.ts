@@ -115,7 +115,7 @@ function checkConflict(
   entityType: string,
   entityId: string | null,
   clientVersion: number | null,
-  userId: string,
+  _userId: string,
 ): ConflictCheckResult {
   if (!entityId) {
     // Creating a new entity — no conflict possible
@@ -393,7 +393,7 @@ registerMutationHandler('ADD_TO_WATCHLIST', async (mutation, userId) => {
   return { success: true, entityId: watchlistId };
 });
 
-registerMutationHandler('REMOVE_FROM_WATCHLIST', async (mutation, userId) => {
+registerMutationHandler('REMOVE_FROM_WATCHLIST', async (mutation, _userId) => {
   const { watchlistId, symbol } = mutation.payload as any;
   const key = `watchlist_stock:${watchlistId}:${symbol}`;
 
@@ -426,7 +426,7 @@ registerMutationHandler('CREATE_WATCHLIST', async (mutation, userId) => {
   return { success: true, entityId };
 });
 
-registerMutationHandler('DELETE_WATCHLIST', async (mutation, userId) => {
+registerMutationHandler('DELETE_WATCHLIST', async (mutation, _userId) => {
   const { watchlistId } = mutation.payload as any;
   const key = `watchlist:${watchlistId}`;
 
@@ -441,7 +441,7 @@ registerMutationHandler('DELETE_WATCHLIST', async (mutation, userId) => {
 });
 
 // Order operations
-registerMutationHandler('MODIFY_ORDER', async (mutation, userId) => {
+registerMutationHandler('MODIFY_ORDER', async (mutation, _userId) => {
   const { orderId, ...updates } = mutation.payload as any;
   const key = `order:${orderId}`;
 
@@ -456,7 +456,7 @@ registerMutationHandler('MODIFY_ORDER', async (mutation, userId) => {
   return { success: false, entityId: orderId, error: 'Order not found' };
 });
 
-registerMutationHandler('CANCEL_ORDER', async (mutation, userId) => {
+registerMutationHandler('CANCEL_ORDER', async (mutation, _userId) => {
   const { orderId } = mutation.payload as any;
   const key = `order:${orderId}`;
 
