@@ -460,7 +460,10 @@ export function MarketsIllustration({
   const minPrice = Math.min(...CANDLE_DATA.map(d => d.low));
   const range = maxPrice - minPrice || 1;
 
-  const toY = (price: number) => chartB - ((price - minPrice) / range) * chartH;
+  const toY = (price: number) => {
+    'worklet';
+    return chartB - ((price - minPrice) / range) * chartH;
+  };
 
   const linePoints = CANDLE_DATA.map((d, i) => {
     const x = startX + i * (candleW + gap) + candleW / 2;
