@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioStore } from '../../store/portfolioStore';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatTimeAgo } from '../../utils/formatters';
 import Button from '../../components/ui/Button';
@@ -38,6 +39,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function OpenOrdersScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { openOrders, ordersLoading, fetchOpenOrders, modifyOrder, cancelOrder } = usePortfolioStore();
   const [selectedOrder, setSelectedOrder] = useState<OpenOrder | null>(null);
@@ -144,8 +146,8 @@ export default function OpenOrdersScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>Open Orders</Text>
-          <Text style={styles.subtitle}>{openOrders.length} active orders</Text>
+          <Text style={styles.title}>{t('trading.openOrders')}</Text>
+          <Text style={styles.subtitle}>{t('trading.activeOrders', { count: openOrders.length })}</Text>
         </View>
         <TouchableOpacity onPress={fetchOpenOrders} style={styles.refreshBtn}>
           <Ionicons name="refresh" size={22} color={colors.primary} />
@@ -155,12 +157,12 @@ export default function OpenOrdersScreen({ navigation }: any) {
       {/* Stats Cards */}
       <View style={styles.statsRow}>
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
-          <Text style={styles.statCardLabel}>Buy Orders</Text>
+          <Text style={styles.statCardLabel}>{t('trading.buyOrders')}</Text>
           <Text style={styles.statCardValue}>{formatCurrency(totalBuyValue, true)}</Text>
           <Text style={styles.statCardSub}>{openOrders.filter(o => o.transactionType === 'BUY').length} orders</Text>
         </LinearGradient>
         <LinearGradient colors={GRADIENTS.secondary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
-          <Text style={styles.statCardLabel}>Sell Orders</Text>
+          <Text style={styles.statCardLabel}>{t('trading.sellOrders')}</Text>
           <Text style={styles.statCardValue}>{formatCurrency(totalSellValue, true)}</Text>
           <Text style={styles.statCardSub}>{openOrders.filter(o => o.transactionType === 'SELL').length} orders</Text>
         </LinearGradient>
@@ -183,7 +185,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
               opacity: statusFilter === status ? 1 : 0.5,
             }]} />
             <Text style={[styles.filterText, statusFilter === status && styles.filterTextActive]}>
-              {status === 'all' ? 'All' : STATUS_LABELS[status] || status}
+              {status === 'all' ? t('trading.all') : (STATUS_LABELS[status] || status)}
             </Text>
             {statusCounts[status] > 0 && (
               <View style={[styles.filterCount, {
@@ -253,7 +255,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
                 {/* Order Details */}
                 <View style={styles.orderDetails}>
                   <View style={styles.detailCol}>
-                    <Text style={styles.detailLabel}>Qty</Text>
+                    <Text style={styles.detailLabel}>{t('trading.orderQty')}</Text>
                     <Text style={styles.detailValue}>
                       {order.filledQuantity > 0
                         ? `${order.filledQuantity}/${order.quantity}`
@@ -262,16 +264,16 @@ export default function OpenOrdersScreen({ navigation }: any) {
                   </View>
                   <View style={styles.detailCol}>
                     <Text style={styles.detailLabel}>
-                      {order.orderType === 'MARKET' ? 'Market' : 'Limit'} Price
+                      {order.orderType === 'MARKET' ? t('trading.market') : t('trading.limit')} {t('trading.orderPrice')}
                     </Text>
                     <Text style={styles.detailValue}>₹{order.price.toFixed(2)}</Text>
                   </View>
                   <View style={styles.detailCol}>
-                    <Text style={styles.detailLabel}>Type</Text>
+                    <Text style={styles.detailLabel}>{t('trading.orderTypeLabel')}</Text>
                     <Text style={styles.detailValue}>{order.orderType} · {order.productType}</Text>
                   </View>
                   <View style={styles.detailCol}>
-                    <Text style={styles.detailLabel}>Value</Text>
+                    <Text style={styles.detailLabel}>{t('trading.orderValue')}</Text>
                     <Text style={styles.detailValue}>
                       {formatCurrency(order.price * (order.quantity - order.filledQuantity))}
                     </Text>
@@ -312,14 +314,14 @@ export default function OpenOrdersScreen({ navigation }: any) {
                       onPress={() => handleModifyOpen(order)}
                     >
                       <Ionicons name="create-outline" size={16} color={colors.primary} />
-                      <Text style={styles.modifyBtnText}>Modify</Text>
+                      <Text style={styles.modifyBtnText}>{t('trading.modify')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.actionBtn, styles.cancelBtn]}
                       onPress={() => handleCancelOrder(order)}
                     >
                       <Ionicons name="close-circle-outline" size={16} color={colors.danger} />
-                      <Text style={styles.cancelBtnText}>Cancel</Text>
+                      <Text style={styles.cancelBtnText}>{t('trading.cancel')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -329,9 +331,9 @@ export default function OpenOrdersScreen({ navigation }: any) {
         ) : (
           <View style={styles.emptyState}>
             <Ionicons name="document-text-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>No Open Orders</Text>
+            <Text style={styles.emptyTitle}>{t('trading.noOpenOrders')}</Text>
             <Text style={styles.emptySubtitle}>
-              Place a limit order to see it here, or pull down to refresh
+              {t('trading.noOpenOrdersDesc')}
             </Text>
           </View>
         )}
@@ -343,7 +345,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Modify Order</Text>
+              <Text style={styles.modalTitle}>{t('trading.modifyOrder')}</Text>
               <TouchableOpacity onPress={() => { setShowModifyModal(false); setSelectedOrder(null); }}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
@@ -369,7 +371,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
             </View>
 
             {/* Price Input */}
-            <Text style={styles.modalLabel}>Price (₹)</Text>
+            <Text style={styles.modalLabel}>{t('trading.price')} (₹)</Text>
             <TextInput
               style={styles.modalInput}
               value={modifyPrice}
@@ -380,7 +382,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
             />
 
             {/* Quantity Input */}
-            <Text style={styles.modalLabel}>Quantity</Text>
+            <Text style={styles.modalLabel}>{t('trading.quantityLabel')}</Text>
             <TextInput
               style={styles.modalInput}
               value={modifyQty}
@@ -391,7 +393,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
             />
 
             {/* Order Type Selector */}
-            <Text style={styles.modalLabel}>Order Type</Text>
+            <Text style={styles.modalLabel}>{t('trading.orderTypeLabel')}</Text>
             <View style={styles.modalChipRow}>
               {['LIMIT', 'MARKET', 'SL', 'SL-M'].map(ot => (
                 <TouchableOpacity
@@ -416,7 +418,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
                 style={{ flex: 1 }}
               />
               <Button
-                title={isProcessing ? 'Updating...' : 'Update Order'}
+                title={isProcessing ? t('trading.processing') : t('trading.modifyOrder')}
                 onPress={handleModifySubmit}
                 variant="primary"
                 size="medium"

@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { usePortfolioStore } from '../../store/portfolioStore';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatDate} from '../../utils/formatters';
 import { Trade } from '../../types';
@@ -14,6 +15,7 @@ type FilterType = 'all' | 'buy' | 'sell';
 
 export default function TradeHistoryScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { trades } = usePortfolioStore();
   const [filter, setFilter] = useState<FilterType>('all');
@@ -55,29 +57,29 @@ export default function TradeHistoryScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>Trade History</Text>
-          <Text style={styles.subtitle}>{totalTrades} total trades</Text>
+          <Text style={styles.title}>{t('trading.tradeHistory')}</Text>
+          <Text style={styles.subtitle}>{t('trading.totalTrades', { count: totalTrades })}</Text>
         </View>
         <TouchableOpacity
           style={styles.openOrdersBtn}
           onPress={() => navigation.navigate('OpenOrders')}
         >
           <Ionicons name="clipboard-outline" size={18} color={colors.primary} />
-          <Text style={styles.openOrdersBtnText}>Open</Text>
+          <Text style={styles.openOrdersBtnText}>{t('trading.openOrdersBtn')}</Text>
         </TouchableOpacity>
       </View>
 
       {/* Stats Cards */}
       <View style={styles.statsRow}>
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
-          <Text style={styles.statCardLabel}>Total Buys</Text>
+          <Text style={styles.statCardLabel}>{t('trading.totalBuys')}</Text>
           <Text style={styles.statCardValue}>{formatCurrency(totalBuyValue, true)}</Text>
-          <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'buy').length} orders</Text>
+          <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'buy').length} {t('trading.orders')}</Text>
         </LinearGradient>
         <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
-          <Text style={styles.statCardLabel}>Total Sells</Text>
+          <Text style={styles.statCardLabel}>{t('trading.totalSells')}</Text>
           <Text style={styles.statCardValue}>{formatCurrency(totalSellValue, true)}</Text>
-          <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'sell').length} orders</Text>
+          <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'sell').length} {t('trading.orders')}</Text>
         </LinearGradient>
       </View>
 
@@ -86,7 +88,7 @@ export default function TradeHistoryScreen({ navigation }: any) {
         <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search by symbol or name..."
+          placeholder={t('trading.searchPlaceholder')}
           placeholderTextColor={colors.textMuted}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -111,7 +113,7 @@ export default function TradeHistoryScreen({ navigation }: any) {
               opacity: filter === f ? 1 : 0.5,
             }]} />
             <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-              {f === 'all' ? 'All' : f === 'buy' ? 'Buy' : 'Sell'}
+              {f === 'all' ? t('trading.all') : f === 'buy' ? t('trading.buy') : t('trading.sell')}
             </Text>
           </TouchableOpacity>
         ))}
@@ -130,10 +132,13 @@ export default function TradeHistoryScreen({ navigation }: any) {
               ? 'Yesterday'
               : formatDate(dateKey, 'dd MMM yyyy');
 
+            // Convert displayDate to use t() when it's 'Today' or 'Yesterday'
+            const displayDateT = displayDate === 'Today' ? t('trading.today') : displayDate === 'Yesterday' ? t('trading.yesterday') : displayDate;
+
             return (
               <View key={dateKey} style={styles.dateGroup}>
                 <View style={styles.dateHeader}>
-                  <Text style={styles.dateTitle}>{displayDate}</Text>
+                  <Text style={styles.dateTitle}>{displayDateT}</Text>
                   <Text style={[styles.datePnl, { color: dayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
                     {dayPnl >= 0 ? '+' : ''}{formatCurrency(dayPnl, true)}
                   </Text>
@@ -175,9 +180,9 @@ export default function TradeHistoryScreen({ navigation }: any) {
         ) : (
           <View style={styles.emptyState}>
             <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>No Trades Found</Text>
+            <Text style={styles.emptyTitle}>{t('trading.noTradesFound')}</Text>
             <Text style={styles.emptySubtitle}>
-              {searchQuery ? 'Try a different search term' : 'Start trading to see your history here'}
+              {searchQuery ? t('trading.differentSearchTerm') : t('trading.startTrading')}
             </Text>
           </View>
         )}

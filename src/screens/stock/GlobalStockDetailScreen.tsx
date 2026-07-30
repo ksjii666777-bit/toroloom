@@ -21,7 +21,7 @@ import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import { useT } from '../../i18n/useT';
+import { useT } from '../../hooks/useT';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { mockEuropeanStocks, mockAsianStocks } from '../../constants/mockData';
 import type { InternationalStock } from '../../types';

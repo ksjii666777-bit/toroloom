@@ -25,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 const BORDER_RADIUS_SM = 4;
 import { globalMarketsApi } from '../../services/api/globalMarkets';
@@ -118,6 +119,7 @@ function CoinCard({
   onTrade: (coin: CryptoAssetData, action: TradeAction) => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const isPositive = coin.changePercent >= 0;
 
   return (
@@ -160,13 +162,13 @@ function CoinCard({
             onPress={() => onTrade(coin, 'BUY')}
             style={[styles.coinActionBtn, { backgroundColor: '#00E676' + '20' }]}
           >
-            <Text style={[styles.coinActionText, { color: '#00E676' }]}>Buy</Text>
+            <Text style={[styles.coinActionText, { color: '#00E676' }]}>{t('trading.coinBuy')}</Text>
           </Pressable>
           <Pressable
             onPress={() => onTrade(coin, 'SELL')}
             style={[styles.coinActionBtn, { backgroundColor: '#FF5252' + '20' }]}
           >
-            <Text style={[styles.coinActionText, { color: '#FF5252' }]}>Sell</Text>
+            <Text style={[styles.coinActionText, { color: '#FF5252' }]}>{t('trading.coinSell')}</Text>
           </Pressable>
         </View>
       </Pressable>
@@ -484,6 +486,7 @@ function TradeModal({
 
 export default function CryptoTradingScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const [coins, setCoins] = useState<CryptoAssetData[]>([]);

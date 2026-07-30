@@ -25,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { snapTradeApi, api } from '../../services/api';
@@ -483,6 +484,7 @@ function TradeModal({
 
 export default function USStocksTradingScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const [stocks, setStocks] = useState<USStockDisplay[]>([]);

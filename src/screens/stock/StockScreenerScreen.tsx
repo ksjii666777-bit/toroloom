@@ -38,7 +38,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../i18n/useT';
+import { useT } from '../../hooks/useT';
 import { useMarketStore, getMarketCapCategory, parseMarketCap, type ScreenerFilters } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 

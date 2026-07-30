@@ -25,7 +25,7 @@ import Animated, { FadeInRight, FadeInUp, _FadeInDown } from 'react-native-reani
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useNavigation as useNavigationHook } from '@react-navigation/native';
-import { useT } from '../../i18n/useT';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import type { CryptoDetailData } from '../../services/api/globalMarkets';
