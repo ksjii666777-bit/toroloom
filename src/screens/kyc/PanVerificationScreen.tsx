@@ -23,6 +23,7 @@ import { kycApi } from '../../services/api/kyc';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
+import { kycCallbackStore } from '../../store/kycCallbackStore';
 import type { PanVerificationResult } from '../../types';
 
 // PAN regex: 5 uppercase letters, 4 digits, 1 uppercase letter
@@ -79,11 +80,9 @@ export default function PanVerificationScreen({ navigation, route }: any) {
   }, [normalizedPan, isFormatValid]);
 
   const handleContinue = useCallback(() => {
-    if (route.params?.onVerified) {
-      route.params.onVerified(normalizedPan);
-    }
+    kycCallbackStore.invokeStepCallback('pan', normalizedPan);
     navigation.goBack();
-  }, [navigation, normalizedPan, route.params]);
+  }, [navigation, normalizedPan]);
 
   const isVerified = result?.isVerified === true;
 

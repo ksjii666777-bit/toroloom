@@ -26,6 +26,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import { kycCallbackStore } from '../../store/kycCallbackStore';
 import { useKycStore, LinkedBankStoreAccount } from '../../store/kycStore';
 import type { IFSCVerificationResult, AccountVerificationResult } from '../../types';
 
@@ -224,11 +225,9 @@ export default function BankLinkingScreen({ navigation, route }: any) {
   }, [setPrimaryBank]);
 
   const handleContinue = useCallback(() => {
-    if (route.params?.onVerified) {
-      route.params.onVerified();
-    }
+    kycCallbackStore.invokeStepCallback('bank');
     navigation.goBack();
-  }, [navigation, route.params]);
+  }, [navigation]);
 
   // ── Account Type Picker ─────────────────────────────────────────
   const ACCOUNT_TYPES: { key: typeof accountType; label: string; icon: string; tKey: string }[] = [

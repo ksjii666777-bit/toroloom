@@ -148,7 +148,7 @@ const menuItems = [
     { icon: 'paper-plane', label: 'Telegram Alerts', color: '#0088CC', screen: 'TelegramConnect' },
     { icon: 'compass', label: 'Replay Tour', color: '#8B5CF6', screen: '__onboarding' },
     { icon: 'volume-high', label: 'Voice Settings', color: '#00D2FF', screen: 'VoiceSettings' },
-    { icon: 'brain', label: 'AI Settings', color: '#8B5CF6', screen: 'AISettings' },
+    { icon: 'cog', label: 'AI Settings', color: '#8B5CF6', screen: 'AISettings' },
     { icon: 'shield-checkmark', label: 'Security', color: '#FF6B6B', screen: 'SecuritySettings' },
     { icon: 'help-circle', label: 'Help & Support', color: '#00C853', screen: 'Help' },
     { icon: 'settings', label: 'Tenant Config', color: '#8B5CF6', screen: 'TenantConfig' },

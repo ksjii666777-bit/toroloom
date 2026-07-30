@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useAuthStore, useKycStore } from '../../store';
 import { useGamificationStore } from '../../store/gamificationStore';
+import { kycCallbackStore } from '../../store/kycCallbackStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
@@ -73,24 +74,22 @@ export default function ProfileScreen({ navigation }: any) {
     }
 
     if (stepKey === 'bank') {
-      navigation.navigate('BankLinking', {
-        onVerified: () => {
-          markStepCompleted('bank');
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        },
+      kycCallbackStore.setStepCallback('bank', () => {
+        markStepCompleted('bank');
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       });
+      navigation.navigate('BankLinking');
       return;
     }
 
     const screen = KYC_SCREENS[stepKey];
     if (screen) {
-      navigation.navigate(screen, {
-        onVerified: () => {
-          // Persist to AsyncStorage via store
-          markStepCompleted(stepKey as 'pan' | 'aadhaar' | 'digilocker' | 'bank');
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        },
+      kycCallbackStore.setStepCallback(stepKey as 'pan' | 'aadhaar' | 'digilocker' | 'bank', () => {
+        // Persist to AsyncStorage via store
+        markStepCompleted(stepKey as 'pan' | 'aadhaar' | 'digilocker' | 'bank');
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       });
+      navigation.navigate(screen);
     }
   }, [navigation, completedStepsCount, markStepCompleted]);
 
@@ -335,11 +334,12 @@ export default function ProfileScreen({ navigation }: any) {
               ))}
               <TouchableOpacity
                 style={styles.addBankBtn}
-                onPress={() => navigation.navigate('BankLinking', {
-                  onVerified: () => {
+                onPress={() => {
+                  kycCallbackStore.setStepCallback('bank', () => {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  },
-                })}
+                  });
+                  navigation.navigate('BankLinking');
+                }}
               >
                 <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
                 <Text style={styles.addBankText}>{t('profile.addBankAccount')}</Text>

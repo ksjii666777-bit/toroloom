@@ -27,6 +27,7 @@ import { kycApi } from '../../services/api/kyc';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
+import { kycCallbackStore } from '../../store/kycCallbackStore';
 import type { DigiLockerDocument } from '../../types';
 
 const DOCUMENT_TYPES = [
@@ -101,11 +102,9 @@ export default function DigiLockerScreen({ navigation, route }: any) {
   }, [handleFetchDocuments]);
 
   const handleContinue = useCallback(() => {
-    if (route.params?.onVerified) {
-      route.params.onVerified();
-    }
+    kycCallbackStore.invokeStepCallback('digilocker');
     navigation.goBack();
-  }, [navigation, route.params]);
+  }, [navigation]);
 
   const getDocumentIcon = (docType: string): keyof typeof Ionicons.glyphMap => {
     switch (docType) {

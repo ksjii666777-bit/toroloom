@@ -25,6 +25,7 @@ import { kycApi } from '../../services/api/kyc';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
+import { kycCallbackStore } from '../../store/kycCallbackStore';
 import type { AadhaarOtpResponse, AadhaarVerifyResponse } from '../../types';
 
 type FlowStep = 'aadhaar_input' | 'otp_input' | 'verified';
@@ -173,11 +174,9 @@ export default function AadhaarVerificationScreen({ navigation, route }: any) {
   }, [otp, otpResponse, isOtpComplete]);
 
   const handleContinue = useCallback(() => {
-    if (route.params?.onVerified) {
-      route.params.onVerified();
-    }
+    kycCallbackStore.invokeStepCallback('aadhaar');
     navigation.goBack();
-  }, [navigation, route.params]);
+  }, [navigation]);
 
   const handleResendOtp = useCallback(async () => {
     if (!otpResponse) return;
