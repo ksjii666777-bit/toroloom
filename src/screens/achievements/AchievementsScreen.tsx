@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useGamificationStore } from '../../store/gamificationStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS, COLORS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatDate } from '../../utils/formatters';
 import { Badge } from '../../types';
 
@@ -135,7 +135,7 @@ export default function AchievementsScreen({ navigation }: any) {
                 <Text style={styles.badgeIcon}>{badge.icon}</Text>
                 {!badge.unlocked && (
                   <View style={styles.lockOverlay}>
-                    <Ionicons name="lock-closed" size={14} color={COLORS.textMuted} />
+                    <Ionicons name="lock-closed" size={14} color={colors.textMuted} />
                   </View>
                 )}
               </View>
@@ -177,7 +177,7 @@ export default function AchievementsScreen({ navigation }: any) {
                   <Text style={styles.modalIcon}>{selectedBadge.icon}</Text>
                   {!selectedBadge.unlocked && (
                     <View style={styles.modalLockOverlay}>
-                      <Ionicons name="lock-closed" size={20} color={COLORS.textMuted} />
+                      <Ionicons name="lock-closed" size={20} color={colors.textMuted} />
                     </View>
                   )}
                 </View>
@@ -284,7 +284,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   levelNumber: {
     ...FONTS.black,
     fontSize: FONTS.size.hero,
-    color: COLORS.white,
+    color: '#FFFFFF',
   },
   levelInfo: {
     flex: 1,
@@ -292,7 +292,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   levelTitle: {
     ...FONTS.semiBold,
     fontSize: FONTS.size.lg,
-    color: COLORS.white,
+    color: '#FFFFFF',
   },
   levelXp: {
     ...FONTS.regular,
@@ -316,7 +316,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   xpValue: {
     ...FONTS.semiBold,
     fontSize: FONTS.size.xs,
-    color: COLORS.white,
+    color: '#FFFFFF',
   },
   xpBarBg: {
     height: 10,
@@ -326,7 +326,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   xpBarFill: {
     height: '100%',
-    backgroundColor: COLORS.white,
+    backgroundColor: '#FFFFFF',
     borderRadius: 5,
   },
   statsGrid: {
@@ -381,7 +381,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textMuted,
   },
   tabTextActive: {
-    color: COLORS.white,
+    color: '#FFFFFF',
   },
   badgesGrid: {
     flexDirection: 'row',
@@ -479,7 +479,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: COLORS.bgOverlay,
+    backgroundColor: colors.bgOverlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.xl,
@@ -569,6 +569,6 @@ const createStyles = (colors: any) => StyleSheet.create({
   modalCloseText: {
     ...FONTS.semiBold,
     fontSize: FONTS.size.md,
-    color: COLORS.white,
+    color: '#FFFFFF',
   },
 });

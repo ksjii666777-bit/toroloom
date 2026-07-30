@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useFundStore, FundTransaction } from '../../store/fundStore';
-import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatTimestamp } from '../../utils/formatters';
 
 Dimensions.get('window');
@@ -62,7 +62,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.white} />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Transaction History</Text>
         <View style={{ width: 40 }} />
@@ -74,13 +74,13 @@ export default function TransactionHistoryScreen({ navigation }: any) {
           <View style={styles.summaryTopRow}>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Total Added</Text>
-              <Text style={[styles.summaryValue, { color: COLORS.success }]}>
+              <Text style={[styles.summaryValue, { color: colors.marketUp }]}>
                 {formatCurrency(summary.totalAdd, true)}
               </Text>
             </View>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Total Withdrawn</Text>
-              <Text style={[styles.summaryValue, { color: COLORS.danger }]}>
+              <Text style={[styles.summaryValue, { color: colors.marketDown }]}>
                 {formatCurrency(summary.totalWithdraw, true)}
               </Text>
             </View>
@@ -89,7 +89,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
           <View style={styles.summaryNetRow}>
             <Text style={styles.summaryLabel}>Net Addition</Text>
             <Text style={[styles.summaryNetValue, {
-              color: summary.net >= 0 ? COLORS.success : COLORS.danger,
+              color: summary.net >= 0 ? colors.marketUp : colors.marketDown,
             }]}>
               {summary.net >= 0 ? '+' : ''}{formatCurrency(summary.net, true)}
             </Text>
@@ -105,16 +105,16 @@ export default function TransactionHistoryScreen({ navigation }: any) {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Ionicons name="add-circle" size={16} color={COLORS.success} />
-            <Text style={[styles.statValue, { color: COLORS.success }]}>
+            <Ionicons name="add-circle" size={16} color={colors.marketUp} />
+            <Text style={[styles.statValue, { color: colors.marketUp }]}>
               {transactions.filter(t => t.type === 'add').length}
             </Text>
             <Text style={styles.statLabel}>Adds</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Ionicons name="arrow-up-circle" size={16} color={COLORS.danger} />
-            <Text style={[styles.statValue, { color: COLORS.danger }]}>
+            <Ionicons name="arrow-up-circle" size={16} color={colors.marketDown} />
+            <Text style={[styles.statValue, { color: colors.marketDown }]}>
               {transactions.filter(t => t.type === 'withdraw').length}
             </Text>
             <Text style={styles.statLabel}>Withdrawals</Text>
@@ -169,7 +169,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
                           <Ionicons
                             name={tx.type === 'add' ? 'add-circle' : 'arrow-up-circle'}
                             size={22}
-                            color={tx.type === 'add' ? COLORS.success : COLORS.danger}
+                            color={tx.type === 'add' ? colors.marketUp : colors.marketDown}
                           />
                         </View>
                         <View style={styles.txInfo}>
@@ -182,16 +182,16 @@ export default function TransactionHistoryScreen({ navigation }: any) {
                         </View>
                         <View style={styles.txRight}>
                           <Text style={[styles.txAmount, {
-                            color: tx.type === 'add' ? COLORS.success : COLORS.danger,
+                            color: tx.type === 'add' ? colors.marketUp : colors.marketDown,
                           }]}>
                             {tx.type === 'add' ? '+' : '-'}{formatCurrency(tx.amount, true)}
                           </Text>
                           <View style={styles.txStatusRow}>
                             <Text style={styles.txTime}>{formatTimestamp(tx.timestamp)}</Text>
                             <View style={[styles.statusDot, {
-                              backgroundColor: tx.status === 'completed' ? COLORS.success
-                                : tx.status === 'pending' ? COLORS.warning
-                                : COLORS.danger,
+                              backgroundColor: tx.status === 'completed' ? colors.marketUp
+                                : tx.status === 'pending' ? colors.warning
+                                : colors.marketDown,
                             }]} />
                             <Text style={styles.txStatus}>{tx.status}</Text>
                           </View>
@@ -229,9 +229,9 @@ export default function TransactionHistoryScreen({ navigation }: any) {
                           <View style={styles.detailRow}>
                             <Text style={styles.detailLabel}>Status</Text>
                             <Text style={[styles.detailValue, {
-                              color: tx.status === 'completed' ? COLORS.success
-                                : tx.status === 'pending' ? COLORS.warning
-                                : COLORS.danger,
+                              color: tx.status === 'completed' ? colors.marketUp
+                                : tx.status === 'pending' ? colors.warning
+                                : colors.marketDown,
                             }]}>
                               {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
                             </Text>
@@ -385,7 +385,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textMuted,
   },
   tabTextActive: {
-    color: COLORS.white,
+    color: '#FFFFFF',
   },
 
   // Groups

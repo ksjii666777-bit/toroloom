@@ -1,23 +1,26 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useAIStore } from '../../store/aiStore';
-import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { formatCurrency } from '../../utils/formatters';
 import { useT } from '../../hooks/useT';
 
 export default function AIInsightsScreen({ _navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useT();
   const { insights } = useAIStore();
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'bullish': return COLORS.marketUp;
-      case 'bearish': return COLORS.marketDown;
-      default: return COLORS.warning;
+      case 'bullish': return colors.marketUp;
+      case 'bearish': return colors.marketDown;
+      default: return colors.warning;
     }
   };
 
@@ -40,7 +43,7 @@ export default function AIInsightsScreen({ _navigation }: any) {
         {/* Market Overview */}
         <Card gradient={GRADIENTS.primary} style={styles.overviewCard}>
           <View style={styles.overviewRow}>
-            <Ionicons name="bulb" size={28} color={COLORS.white} />
+            <Ionicons name="bulb" size={28} color="#FFFFFF" />
             <View style={styles.overviewText}>
               <Text style={styles.overviewTitle}>{t('ai.marketOverview')}</Text>
               <Text style={styles.overviewSub}>
@@ -99,167 +102,168 @@ export default function AIInsightsScreen({ _navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  scrollContent: {
-    paddingHorizontal: SPACING.xl,
-    paddingBottom: 20,
-  },
-  header: {
-    paddingTop: 60,
-    marginBottom: SPACING.xl,
-  },
-  title: {
-    ...FONTS.bold,
-    fontSize: FONTS.size.title,
-    color: COLORS.text,
-  },
-  subtitle: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.md,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  overviewCard: {
-    marginBottom: SPACING.xl,
-  },
-  overviewRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  overviewText: {
-    flex: 1,
-  },
-  overviewTitle: {
-    ...FONTS.semiBold,
-    fontSize: FONTS.size.lg,
-    color: COLORS.white,
-  },
-  overviewSub: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 2,
-  },
-  overviewNote: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.xs,
-    color: 'rgba(255,255,255,0.6)',
-    lineHeight: 16,
-  },
-  sectionTitle: {
-    ...FONTS.semiBold,
-    fontSize: FONTS.size.lg,
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  insightCard: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  insightHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.md,
-  },
-  insightSymbol: {
-    ...FONTS.bold,
-    fontSize: FONTS.size.lg,
-    color: COLORS.text,
-  },
-  insightName: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    color: COLORS.textMuted,
-  },
-  signelBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.full,
-    gap: 4,
-  },
-  signelEmoji: {
-    fontSize: 14,
-  },
-  signelText: {
-    ...FONTS.semiBold,
-    fontSize: FONTS.size.sm,
-  },
-  insightSummary: {
-    ...FONTS.medium,
-    fontSize: FONTS.size.md,
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  insightAnalysis: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.sm,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
-    marginBottom: SPACING.md,
-  },
-  confidenceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  insightTime: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.xs,
-    color: COLORS.textMuted,
-  },
-  targetsRow: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-  },
-  targetItem: {
-    flex: 1,
-    backgroundColor: COLORS.bgInput,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    alignItems: 'center',
-  },
-  targetLabel: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.xs,
-    color: COLORS.textMuted,
-  },
-  targetValue: {
-    ...FONTS.bold,
-    fontSize: FONTS.size.lg,
-    color: COLORS.text,
-    marginTop: 2,
-  },
-  targetBar: {
-    width: '100%',
-    height: 3,
-    backgroundColor: COLORS.border,
-    borderRadius: 1.5,
-    marginTop: SPACING.xs,
-    overflow: 'hidden',
-  },
-  targetFill: {
-    height: '100%',
-    backgroundColor: COLORS.primary,
-    borderRadius: 1.5,
-  },
-  targetProb: {
-    ...FONTS.regular,
-    fontSize: FONTS.size.xs,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    scrollContent: {
+      paddingHorizontal: SPACING.xl,
+      paddingBottom: SPACING.xl,
+    },
+    header: {
+      paddingTop: 60,
+      marginBottom: SPACING.xl,
+    },
+    title: {
+      ...FONTS.bold,
+      fontSize: FONTS.size.title,
+      color: colors.text,
+    },
+    subtitle: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.md,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    overviewCard: {
+      marginBottom: SPACING.xl,
+    },
+    overviewRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.md,
+      marginBottom: SPACING.md,
+    },
+    overviewText: {
+      flex: 1,
+    },
+    overviewTitle: {
+      ...FONTS.semiBold,
+      fontSize: FONTS.size.lg,
+      color: '#FFFFFF',
+    },
+    overviewSub: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.sm,
+      color: 'rgba(255,255,255,0.7)',
+      marginTop: 2,
+    },
+    overviewNote: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.xs,
+      color: 'rgba(255,255,255,0.6)',
+      lineHeight: 16,
+    },
+    sectionTitle: {
+      ...FONTS.semiBold,
+      fontSize: FONTS.size.lg,
+      color: colors.text,
+      marginBottom: SPACING.md,
+    },
+    insightCard: {
+      backgroundColor: colors.bgCard,
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING.lg,
+      marginBottom: SPACING.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    insightHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: SPACING.md,
+    },
+    insightSymbol: {
+      ...FONTS.bold,
+      fontSize: FONTS.size.lg,
+      color: colors.text,
+    },
+    insightName: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.sm,
+      color: colors.textMuted,
+    },
+    signelBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: SPACING.md,
+      paddingVertical: SPACING.xs,
+      borderRadius: BORDER_RADIUS.full,
+      gap: 4,
+    },
+    signelEmoji: {
+      fontSize: 14,
+    },
+    signelText: {
+      ...FONTS.semiBold,
+      fontSize: FONTS.size.sm,
+    },
+    insightSummary: {
+      ...FONTS.medium,
+      fontSize: FONTS.size.md,
+      color: colors.text,
+      marginBottom: SPACING.sm,
+    },
+    insightAnalysis: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.sm,
+      color: colors.textSecondary,
+      lineHeight: 20,
+      marginBottom: SPACING.md,
+    },
+    confidenceRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+    },
+    insightTime: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.xs,
+      color: colors.textMuted,
+    },
+    targetsRow: {
+      flexDirection: 'row',
+      gap: SPACING.sm,
+    },
+    targetItem: {
+      flex: 1,
+      backgroundColor: colors.bgInput,
+      borderRadius: BORDER_RADIUS.md,
+      padding: SPACING.md,
+      alignItems: 'center',
+    },
+    targetLabel: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.xs,
+      color: colors.textMuted,
+    },
+    targetValue: {
+      ...FONTS.bold,
+      fontSize: FONTS.size.lg,
+      color: colors.text,
+      marginTop: 2,
+    },
+    targetBar: {
+      width: '100%',
+      height: 3,
+      backgroundColor: colors.border,
+      borderRadius: 1.5,
+      marginTop: SPACING.xs,
+      overflow: 'hidden',
+    },
+    targetFill: {
+      height: '100%',
+      backgroundColor: colors.primary,
+      borderRadius: 1.5,
+    },
+    targetProb: {
+      ...FONTS.regular,
+      fontSize: FONTS.size.xs,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+  });
