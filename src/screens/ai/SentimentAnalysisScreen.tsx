@@ -469,23 +469,6 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
     );
   }
 
-  // Error state
-  if (computeError) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <Ionicons name="alert-circle-outline" size={48} color={colors.danger} />
-        <Text style={[styles.errorTitle, { color: colors.text }]}>Analysis Error</Text>
-        <Text style={[styles.errorText, { color: colors.textMuted }]}>{computeError}</Text>
-        <Pressable
-          style={[styles.retryBtn, { backgroundColor: colors.primary }]}
-          onPress={() => setComputeError(null)}
-        >
-          <Text style={styles.retryBtnText}>Retry</Text>
-        </Pressable>
-      </View>
-    );
-  }
-
   // Empty state
   if (!selectedSentiment || sentimentData.length === 0) {
     return (
@@ -497,14 +480,17 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
   }
 
   const sc = getSentimentColors(selectedSentiment.label);
-  let stability: ReturnType<typeof computeSentimentStability> = { stabilityScore: 0, volatility: 'moderate' };
-  let shift: ReturnType<typeof detectSentimentShift> = { hasShifted: false, direction: 'stable', magnitude: 0, alert: null };
-  try {
-    stability = computeSentimentStability(selectedSentiment.history);
-    shift = detectSentimentShift(selectedSentiment.history);
-  } catch (err: any) {
-    setComputeError(err?.message || 'Failed to analyze sentiment data');
-  }
+
+  // Safer compute with fallback (no setState in render)
+  const stability = useMemo(() => {
+    try { return computeSentimentStability(selectedSentiment.history); }
+    catch { return { stabilityScore: 0, volatility: 'moderate' as const }; }
+  }, [selectedSentiment]);
+
+  const shift = useMemo(() => {
+    try { return detectSentimentShift(selectedSentiment.history); }
+    catch { return { hasShifted: false, direction: 'stable' as const, magnitude: 0, alert: null }; }
+  }, [selectedSentiment]);
 
   return (
     <View style={styles.container}>
@@ -751,10 +737,6 @@ const createStyles = (colors: any) => StyleSheet.create({
   centerContent: { justifyContent: 'center', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.xl },
   emptyText: { fontSize: 16, fontWeight: '600', textAlign: 'center' },
   loadingText: { ...FONTS.regular, fontSize: 14, textAlign: 'center' },
-  errorTitle: { ...FONTS.bold, fontSize: 18, marginTop: SPACING.sm },
-  errorText: { ...FONTS.regular, fontSize: 14, textAlign: 'center', lineHeight: 20, marginTop: 4 },
-  retryBtn: { paddingHorizontal: 24, paddingVertical: 10, borderRadius: BORDER_RADIUS.full, marginTop: SPACING.lg },
-  retryBtnText: { ...FONTS.semiBold, fontSize: 14, color: '#FFFFFF' },
 
   // Header
   header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
