@@ -556,7 +556,7 @@ export default function SocialTradingScreen({ navigation }: any) {
             <View style={styles.traderNameRow}>
               <Text style={styles.cardName}>{trader.name}</Text>
               {trader.verified && <Ionicons name="checkmark-circle" size={14} color="#00E676" />}
-              {isCopyingTrader && <Badge label="Copy" variant="primary" size="medium" />}
+              {isCopyingTrader && <Badge label={t('social.copyTrading')} variant="primary" size="medium" />}
             </View>
             <Text style={styles.cardStrategy}>{trader.strategy.replace(/_/g, ' · ')}</Text>
             <View style={styles.cardStats}>
@@ -597,15 +597,15 @@ export default function SocialTradingScreen({ navigation }: any) {
             <Text style={[styles.cardStatValue, { color: trader.totalPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
               +{trader.totalPnlPercent.toFixed(1)}%
             </Text>
-            <Text style={styles.cardStatLabel}>Returns</Text>
+            <Text style={styles.cardStatLabel}>{t('social.returns')}</Text>
           </View>
           <View style={styles.cardStatItem}>
             <Text style={[styles.cardStatValue, { color: colors.primary }]}>{trader.winRate.toFixed(0)}%</Text>
-            <Text style={styles.cardStatLabel}>Win Rate</Text>
+            <Text style={styles.cardStatLabel}>{t('social.winRate')}</Text>
           </View>
           <View style={styles.cardStatItem}>
             <Text style={[styles.cardStatValue, { color: colors.text }]}>{(trader.followers / 1000).toFixed(1)}K</Text>
-            <Text style={styles.cardStatLabel}>Followers</Text>
+            <Text style={styles.cardStatLabel}>{t('social.followers')}</Text>
           </View>
           <View style={styles.cardStatItem}>
             <Text style={[styles.cardStatValue, { color: colors.marketUp }]}>+{trader.monthlyReturn.toFixed(1)}%</Text>
@@ -734,7 +734,7 @@ export default function SocialTradingScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Social Trading</Text>
+          <Text style={styles.title}>{t('social.title')}</Text>
         </View>
         <View style={styles.premiumGate}>
           <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.premiumIconContainer}>

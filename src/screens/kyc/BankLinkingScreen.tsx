@@ -562,7 +562,7 @@ export default function BankLinkingScreen({ navigation, route }: any) {
                 <View style={styles.manageBankInfo}>
                   <View style={styles.manageBankNameRow}>
                     <Text style={styles.manageBankName}>{bank.bankName}</Text>
-                    {bank.isPrimary && <Badge label="Primary" variant="primary" size="small" />}
+                    {bank.isPrimary && <Badge label={t('kyc.primaryAccount')} variant="primary" size="small" />}
                   </View>
                   <Text style={styles.manageBankAccount}>{bank.accountNumber}</Text>
                   <Text style={styles.manageBankIfsc}>{t('kyc.ifscWithType', { ifsc: bank.ifsc, type: bank.accountType.charAt(0).toUpperCase() + bank.accountType.slice(1) })}</Text>

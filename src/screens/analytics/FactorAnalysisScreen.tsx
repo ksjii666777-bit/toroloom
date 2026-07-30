@@ -289,11 +289,11 @@ export default function FactorAnalysisScreen({ navigation }: any) {
                 <View style={styles.contribHeader}>
                   <Text style={styles.contribHeaderCell}>{t('factorAnalysis.stockHeader')}</Text>
                   <Text style={styles.contribHeaderCell}>{t('factorAnalysis.wtHeader')}</Text>
-                  <Text style={styles.contribHeaderCell}>Mom</Text>
-                  <Text style={styles.contribHeaderCell}>Val</Text>
-                  <Text style={styles.contribHeaderCell}>Size</Text>
-                  <Text style={styles.contribHeaderCell}>Qual</Text>
-                  <Text style={styles.contribHeaderCell}>Vol</Text>
+                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorMom')}</Text>
+                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorVal')}</Text>
+                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorSize')}</Text>
+                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorQual')}</Text>
+                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorVol')}</Text>
                 </View>
 
                 {(showAllStocks ? result.stockContributions : result.stockContributions.slice(0, 3)).map((sc, i) => (

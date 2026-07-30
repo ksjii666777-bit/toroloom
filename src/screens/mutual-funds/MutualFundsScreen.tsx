@@ -361,7 +361,7 @@ export default function MutualFundsScreen({ navigation }: any) {
                     value={amount}
                     onChangeText={setAmount}
                     keyboardType="numeric"
-                    placeholder="Enter amount"
+                    placeholder={t('mutualFunds.enterAmount')}
                     placeholderTextColor={colors.textMuted}
                   />
                 </View>
@@ -442,7 +442,7 @@ export default function MutualFundsScreen({ navigation }: any) {
                     value={editAmount}
                     onChangeText={setEditAmount}
                     keyboardType="numeric"
-                    placeholder="Enter amount"
+                    placeholder={t('mutualFunds.enterAmount')}
                     placeholderTextColor={colors.textMuted}
                   />
                 </View>
