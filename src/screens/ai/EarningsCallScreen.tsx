@@ -181,12 +181,13 @@ const metricStyles = StyleSheet.create({
 
 function ConsensusBadge({ consensus }: { consensus: EarningsSummary['analystConsensus'] }) {
   const { _colors } = useTheme();
+  const { t } = useT();
   const config: Record<string, { label: string; color: string; bg: string }> = {
-    strong_buy: { label: 'Strong Buy', color: '#10B981', bg: '#10B98120' },
-    buy: { label: 'Buy', color: '#34D399', bg: '#34D39920' },
-    hold: { label: 'Hold', color: '#F59E0B', bg: '#F59E0B20' },
-    sell: { label: 'Sell', color: '#F97316', bg: '#F9731620' },
-    strong_sell: { label: 'Strong Sell', color: '#EF4444', bg: '#EF444420' },
+    strong_buy: { label: t('earningsCall.consensusStrongBuy'), color: '#10B981', bg: '#10B98120' },
+    buy: { label: t('earningsCall.consensusBuy'), color: '#34D399', bg: '#34D39920' },
+    hold: { label: t('earningsCall.consensusHold'), color: '#F59E0B', bg: '#F59E0B20' },
+    sell: { label: t('earningsCall.consensusSell'), color: '#F97316', bg: '#F9731620' },
+    strong_sell: { label: t('earningsCall.consensusStrongSell'), color: '#EF4444', bg: '#EF444420' },
   };
   const cfg = config[consensus] || config.hold;
   return (

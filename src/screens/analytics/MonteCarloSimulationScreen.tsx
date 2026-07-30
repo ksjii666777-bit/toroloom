@@ -211,10 +211,10 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
             <Text style={styles.presetsLabel}>Quick Presets:</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetsScroll}>
               {[
-                { label: 'Conservative', icon: '🛡️', params: { annualReturn: 0.10, annualVolatility: 0.12 } as Partial<MonteCarloParams> },
-                { label: 'Moderate', icon: '📊', params: { annualReturn: 0.12, annualVolatility: 0.18 } as Partial<MonteCarloParams> },
-                { label: 'Aggressive', icon: '🚀', params: { annualReturn: 0.16, annualVolatility: 0.25 } as Partial<MonteCarloParams> },
-                { label: 'SIP Only', icon: '💪', params: { initialInvestment: 0, monthlyContribution: 25000 } as Partial<MonteCarloParams> },
+                { label: t('monteCarlo.conservative'), icon: '🛡️', params: { annualReturn: 0.10, annualVolatility: 0.12 } as Partial<MonteCarloParams> },
+                { label: t('monteCarlo.moderate'), icon: '📊', params: { annualReturn: 0.12, annualVolatility: 0.18 } as Partial<MonteCarloParams> },
+                { label: t('monteCarlo.aggressive'), icon: '🚀', params: { annualReturn: 0.16, annualVolatility: 0.25 } as Partial<MonteCarloParams> },
+                { label: t('monteCarlo.sipOnly'), icon: '💪', params: { initialInvestment: 0, monthlyContribution: 25000 } as Partial<MonteCarloParams> },
               ].map((preset, i) => (
                 <AnimatedPressable
                   key={i}
@@ -309,7 +309,7 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
                     </View>
                     <View style={styles.summaryDivider} />
                     <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>Range (5th–95th)</Text>
+                      <Text style={styles.summaryLabel}>{t('monteCarlo.range5th95th')}</Text>
                       <Text style={styles.summaryValue}>
                         {formatRupees(result.worstCaseValue)} – {formatRupees(result.bestCaseValue)}
                       </Text>
@@ -336,15 +336,15 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
               <View style={styles.chartLegend}>
                 <View style={styles.legendRow}>
                   <View style={[styles.legendLine, { backgroundColor: '#6C63FF', width: 20, height: 2.5 }]} />
-                  <Text style={styles.legendText}>Median (50th)</Text>
+                  <Text style={styles.legendText}>{t('monteCarlo.legendMedian')}</Text>
                 </View>
                 <View style={styles.legendRow}>
                   <View style={[styles.legendLine, { backgroundColor: '#6C63FF80', borderStyle: 'dashed', height: 1.5 }]} />
-                  <Text style={styles.legendText}>25th–75th Percentile</Text>
+                  <Text style={styles.legendText}>{t('monteCarlo.legend25th75th')}</Text>
                 </View>
                 <View style={styles.legendRow}>
                   <View style={[styles.legendLine, { backgroundColor: '#3B82F660', borderStyle: 'dashed', height: 1 }]} />
-                  <Text style={styles.legendText}>5th–95th Percentile</Text>
+                  <Text style={styles.legendText}>{t('monteCarlo.legend5th95th')}</Text>
                 </View>
               </View>
             </Card>

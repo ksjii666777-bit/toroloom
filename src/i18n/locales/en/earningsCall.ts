@@ -36,4 +36,9 @@ export default {
     revenueCagr: 'Revenue CAGR: {{val}}%',
     profitCagr: 'Profit CAGR: {{val}}%',
     sourceText: 'Source: {{source}} · Generated {{date}}',
+    consensusStrongBuy: 'Strong Buy',
+    consensusBuy: 'Buy',
+    consensusHold: 'Hold',
+    consensusSell: 'Sell',
+    consensusStrongSell: 'Strong Sell',
 };

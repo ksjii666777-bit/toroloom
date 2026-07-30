@@ -36,4 +36,9 @@ export default {
     revenueCagr: 'रेवेन्यू CAGR: {{val}}%',
     profitCagr: 'प्रॉफिट CAGR: {{val}}%',
     sourceText: 'स्रोत: {{source}} · जनरेट {{date}}',
+    consensusStrongBuy: 'स्ट्रॉन्ग बाय',
+    consensusBuy: 'बाय',
+    consensusHold: 'होल्ड',
+    consensusSell: 'सेल',
+    consensusStrongSell: 'स्ट्रॉन्ग सेल',
 };
