@@ -19,4 +19,5 @@ export { angelConnectApi } from './angelConnect';
 export { forexApi } from './forex';
 export { commoditiesApi } from './commodities';
 export { bondsApi } from './bonds';
+export { fundsApi } from './funds';
 export { getFuturesCurve } from './futuresCurve';

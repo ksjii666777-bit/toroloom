@@ -14,6 +14,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import { LINKED_BANKS, INTERNAL_ACCOUNTS, TRANSFER_PRESETS } from '../../services/mockDataService';
+import { fundsApi } from '../../services/api';
 
 Dimensions.get('window');
 
@@ -58,7 +59,7 @@ export default function TransferScreen({ navigation }: any) {
     if (cleaned) setSelectedAmount(null);
   }, []);
 
-  const handleTransfer = useCallback(() => {
+  const handleTransfer = useCallback(async () => {
     if (displayAmount < 100) {
       Alert.alert(t('funds.transferMinAmount'), t('funds.transferMinAmountMsg'));
       return;
@@ -73,9 +74,10 @@ export default function TransferScreen({ navigation }: any) {
       return;
     }
 
+    const bank = LINKED_BANKS.find(b => b.id === selectedBank);
     const destination = activeTab === 'internal'
       ? toData?.label || 'Demat Account'
-      : LINKED_BANKS.find(b => b.id === selectedBank)?.bankName || 'Bank Account';
+      : bank?.bankName || 'Bank Account';
 
     Alert.alert(
       t('funds.transferConfirmTitle'),
@@ -84,23 +86,33 @@ export default function TransferScreen({ navigation }: any) {
         { text: t('funds.upiCancel'), style: 'cancel' },
         {
           text: t('funds.transferBtn'),
-          onPress: () => {
+          onPress: async () => {
             setIsLoading(true);
-            const transactionId = 'TRF' + Date.now().toString(36).toUpperCase();
-            setTxId(transactionId);
-            setTimeout(() => {
-              setIsLoading(false);
+            try {
+              const result = await fundsApi.transfer({
+                amount: displayAmount,
+                type: activeTab,
+                fromAccount: activeTab === 'internal' ? fromAccount : undefined,
+                toAccount: activeTab === 'internal' ? toAccount : undefined,
+                bankName: activeTab === 'external' ? bank?.bankName : undefined,
+                accountNumber: activeTab === 'external' ? bank?.accountNumber : undefined,
+              });
+              setTxId(result.transaction.transactionId);
               updateBalance(-displayAmount);
               addTransaction({
                 type: 'withdraw',
                 amount: displayAmount,
-                method: activeTab === 'internal' ? 'Internal Transfer' : (LINKED_BANKS.find(b => b.id === selectedBank)?.bankName || 'Bank'),
-                account: activeTab === 'external' ? LINKED_BANKS.find(b => b.id === selectedBank)?.accountNumber : undefined,
-                status: 'completed',
-                transactionId,
+                method: activeTab === 'internal' ? 'Internal Transfer' : (bank?.bankName || 'Bank'),
+                account: activeTab === 'external' ? bank?.accountNumber : undefined,
+                status: result.transaction.status,
+                transactionId: result.transaction.transactionId,
               });
               setIsSuccess(true);
-            }, 1500);
+            } catch {
+              Alert.alert(t('errors.somethingWentWrong'), t('funds.transferFailedMsg'));
+            } finally {
+              setIsLoading(false);
+            }
           },
         },
       ]

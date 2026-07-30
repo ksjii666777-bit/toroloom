@@ -14,6 +14,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import { LINKED_BANKS, WITHDRAW_PRESETS } from '../../services/mockDataService';
+import { fundsApi } from '../../services/api';
 
 Dimensions.get('window');
 
@@ -64,31 +65,40 @@ export default function WithdrawScreen({ navigation }: any) {
       return;
     }
 
+    const bank = LINKED_BANKS.find(b => b.id === selectedBank);
+
     Alert.alert(
       t('funds.withdrawConfirmTitle'),
-      t('funds.withdrawConfirmMsg', { amount: formatCurrency(displayAmount), bank: LINKED_BANKS.find(b => b.id === selectedBank)?.bankName, account: LINKED_BANKS.find(b => b.id === selectedBank)?.accountNumber }),
+      t('funds.withdrawConfirmMsg', { amount: formatCurrency(displayAmount), bank: bank?.bankName, account: bank?.accountNumber }),
       [
         { text: t('funds.upiCancel'), style: 'cancel' },
         {
           text: t('funds.withdrawBtn'),
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
             setIsLoading(true);
-            const transactionId = 'WDR' + Date.now().toString(36).toUpperCase();
-            setTxId(transactionId);
-            setTimeout(() => {
-              setIsLoading(false);
+            try {
+              const result = await fundsApi.withdraw({
+                amount: displayAmount,
+                method: bank?.bankName || 'Bank',
+                account: bank?.accountNumber,
+              });
+              setTxId(result.transaction.transactionId);
               updateBalance(-displayAmount);
               addTransaction({
                 type: 'withdraw',
                 amount: displayAmount,
-                method: LINKED_BANKS.find(b => b.id === selectedBank)?.bankName || 'Bank',
-                account: LINKED_BANKS.find(b => b.id === selectedBank)?.accountNumber,
-                status: 'completed',
-                transactionId,
+                method: bank?.bankName || 'Bank',
+                account: bank?.accountNumber,
+                status: result.transaction.status,
+                transactionId: result.transaction.transactionId,
               });
               setIsSuccess(true);
-            }, 1500);
+            } catch {
+              Alert.alert(t('errors.somethingWentWrong'), t('funds.withdrawFailedMsg'));
+            } finally {
+              setIsLoading(false);
+            }
           },
         },
       ]
