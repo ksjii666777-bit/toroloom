@@ -286,12 +286,7 @@ export default function EarningsCallScreen({ navigation }: any) {
   }
 
   const sc = getSentimentColors(selectedEarnings.sentimentLabel);
-  let m: EarningsSummary['metrics'];
-  try {
-    m = selectedEarnings.metrics;
-  } catch {
-    m = { revenue: 0, revenueGrowth: 0, revenueBeat: null, netProfit: 0, profitGrowth: 0, profitBeat: null, eps: 0, epsGrowth: 0, ebitda: 0, ebitdaMargin: 0, operatingMargin: 0, netMargin: 0 };
-  }
+  const m = selectedEarnings.metrics;
 
   return (
     <View style={styles.container}>
