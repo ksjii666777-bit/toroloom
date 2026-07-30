@@ -14,7 +14,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  TextInput, RefreshControl, Dimensions, Platform, _ActivityIndicator,
+  TextInput, RefreshControl, Dimensions, Platform, ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,7 +22,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useNavigation } from '@react-navigation/native';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import { globalMarketsApi, type GlobalStockData, type USStockData, type GlobalIndexData } from '../../services/api/globalMarkets';
+import { globalMarketsApi, type GlobalStockData, type USStockData, type GlobalIndexData, type CryptoAssetData } from '../../services/api/globalMarkets';
 import {
   mockUSIndices, mockGlobalIndices, mockUSStocks, mockEuropeanStocks, mockAsianStocks, mockUSETFs, mockCryptoAssets,
 } from '../../constants/mockData';
@@ -114,6 +114,22 @@ function buildIndexList(apiData: GlobalIndexData[], mockData: MarketIndex[]): Ma
       region: api.region as 'us' | 'europe' | 'asia',
     };
   });
+}
+
+function buildCryptoList(apiData: CryptoAssetData[], mockFallback: CryptoAsset[]): CryptoAsset[] {
+  if (!apiData || apiData.length === 0) return mockFallback;
+  return apiData.map(api => ({
+    id: api.id,
+    symbol: api.symbol,
+    name: api.name,
+    price: api.price,
+    change: api.change,
+    changePercent: api.changePercent,
+    marketCap: api.marketCap,
+    volume24h: api.volume24h,
+    icon: api.icon,
+    color: api.color,
+  }));
 }
 
 function buildIntlStockList(apiData: GlobalStockData[], mockData: InternationalStock[]): InternationalStock[] {
@@ -315,12 +331,16 @@ export default function USMarketsScreen() {
   const [usStocks, setUsStocks] = useState<USStock[]>(mockUSStocks);
   const [euStocks, setEuStocks] = useState<InternationalStock[]>(mockEuropeanStocks);
   const [asiaStocks, setAsiaStocks] = useState<InternationalStock[]>(mockAsianStocks);
-  const [_stocksLoading, setStocksLoading] = useState(false);
+  const [stocksLoading, setStocksLoading] = useState(false);
   const [stocksLive, setStocksLive] = useState(false);
 
   // Live indices from backend
   const [liveIndices, setLiveIndices] = useState<MarketIndex[]>([]);
   const [indicesLive, setIndicesLive] = useState(false);
+
+  // Live crypto from backend
+  const [cryptoAssets, setCryptoAssets] = useState<CryptoAsset[]>(mockCryptoAssets);
+  const [cryptoLive, setCryptoLive] = useState(false);
 
   // Last updated timestamp
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -361,6 +381,16 @@ export default function USMarketsScreen() {
     }
   }, []);
 
+  // ── Fetch crypto from backend ────────────────────────────────
+  const fetchCrypto = useCallback(async () => {
+    const apiCrypto = await globalMarketsApi.getCrypto().catch(() => null as CryptoAssetData[] | null);
+    if (apiCrypto && apiCrypto.length > 0) {
+      setCryptoAssets(buildCryptoList(apiCrypto, mockCryptoAssets));
+      setCryptoLive(true);
+      setLastUpdated(new Date());
+    }
+  }, []);
+
   // Initial load + fetch API status
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -372,10 +402,13 @@ export default function USMarketsScreen() {
           fetchAllStocks();
           fetchAllIndices();
         }
+        if (res.coinGeckoConfigured) {
+          fetchCrypto();
+        }
       })
       .catch(() => setApiStatus({ marketstackConfigured: false, coinGeckoConfigured: false }));
     return () => clearTimeout(timer);
-  }, [fetchAllStocks, fetchAllIndices]);
+  }, [fetchAllStocks, fetchAllIndices, fetchCrypto]);
 
   const isLive = apiStatus?.marketstackConfigured === true || apiStatus?.coinGeckoConfigured === true;
 
@@ -384,8 +417,9 @@ export default function USMarketsScreen() {
     Promise.all([
       fetchAllStocks(),
       fetchAllIndices(),
+      fetchCrypto(),
     ]).finally(() => setRefreshing(false));
-  }, [fetchAllStocks, fetchAllIndices]);
+  }, [fetchAllStocks, fetchAllIndices, fetchCrypto]);
 
   // Region-grouped stocks: US, European, Asian
   const regionStockData = useMemo(() => ({
@@ -415,12 +449,12 @@ export default function USMarketsScreen() {
 
   // Filter crypto by search
   const filteredCrypto = useMemo(() => {
-    if (!searchQuery.trim()) return mockCryptoAssets;
+    if (!searchQuery.trim()) return cryptoAssets;
     const q = searchQuery.toLowerCase();
-    return mockCryptoAssets.filter(
+    return cryptoAssets.filter(
       c => c.symbol.toLowerCase().includes(q) || c.name.toLowerCase().includes(q),
     );
-  }, [searchQuery]);
+  }, [searchQuery, cryptoAssets]);
 
   if (isLoading) {
     return (
