@@ -174,7 +174,6 @@ function QuickLink({
 
 export default function AdminDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
   const { stats, services, refresh, isLoading } = useAdminStore();
 
   const [refreshing, setRefreshing] = React.useState(false);
