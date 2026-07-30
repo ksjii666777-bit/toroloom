@@ -303,7 +303,7 @@ export function CustomIndicatorOverlay({
   minPrice,
   maxPrice,
 }: CustomIndicatorOverlayProps) {
-  const { _colors } = useTheme();
+  const { colors } = useTheme();
   const { focusedIndex } = useChartCrosshair();
 
   const evaluated = useMemo(() => {

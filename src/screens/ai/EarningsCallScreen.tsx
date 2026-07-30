@@ -180,7 +180,6 @@ const metricStyles = StyleSheet.create({
 // ─── Analyst Consensus Badge ────────────────────────────────
 
 function ConsensusBadge({ consensus }: { consensus: EarningsSummary['analystConsensus'] }) {
-  const { _colors } = useTheme();
   const { t } = useT();
   const config: Record<string, { label: string; color: string; bg: string }> = {
     strong_buy: { label: t('earningsCall.consensusStrongBuy'), color: '#10B981', bg: '#10B98120' },

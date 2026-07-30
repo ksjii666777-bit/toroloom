@@ -484,7 +484,7 @@ describe('LiveFeedScreen', () => {
   // ── Navigation ──────────────────────────────────────────
 
   it('triggers goBack when back button area is pressed', () => {
-    const { _getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
     // The back button is a TouchableOpacity wrapping an Ionicons.
     // In the mocked react-native, Ionicons renders as the string 'IonIonicons'.
     // TouchableOpacity wraps it directly, so there's no child <Text> to query.

@@ -200,7 +200,7 @@ describe('RiskRewardCharts', () => {
     });
 
     it('shows zero for max consecutive losses', () => {
-      const { _getByText } = render(
+      const { getByText } = render(
         <RiskRewardCharts
           metrics={buildMetrics({
             winningPeriods: 100,

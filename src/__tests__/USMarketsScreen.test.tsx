@@ -192,7 +192,7 @@ describe('USMarketsScreen — Search Functionality', () => {
   afterEach(() => { vi.useRealTimers(); });
 
   it('filters stocks when search query is entered', async () => {
-    const { _queryByPlaceholderText, getByText } = render(<USMarketsScreen />);
+    const { queryByPlaceholderText, getByText } = render(<USMarketsScreen />);
     await advanceAndFlush();
 
     // Switch to Stocks tab

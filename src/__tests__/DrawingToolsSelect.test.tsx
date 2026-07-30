@@ -13,7 +13,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from './testUtils';
-import DrawingTools, { type DrawingAnnotation, type _DrawingPoint, type DrawingToolType } from '../components/chart/DrawingTools';
+import DrawingTools, { type DrawingAnnotation, type DrawingToolType } from '../components/chart/DrawingTools';
 import { findDrawingAtPoint } from '../components/chart/drawingTestUtils';
 
 // ==================== Mocks ====================

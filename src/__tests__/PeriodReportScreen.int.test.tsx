@@ -665,7 +665,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
       resolvePrint = resolve;
     }));
 
-    const { _queryByTestId, getByTestId } = render(
+    const { queryByTestId, getByTestId } = render(
       <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
     );
 
