@@ -1265,7 +1265,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             55
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -1527,7 +1526,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             -20
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -1791,7 +1789,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             30
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -2053,7 +2050,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             -10
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -2317,7 +2313,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             40
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -2581,7 +2576,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             25
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -2843,7 +2837,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             -15
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -3107,7 +3100,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
             35
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -4430,7 +4422,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             55
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -4692,7 +4683,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             -20
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -4956,7 +4946,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             30
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -5218,7 +5207,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             -10
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -5482,7 +5470,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             40
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -5746,7 +5733,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             25
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -6008,7 +5994,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             -15
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -6272,7 +6257,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
             35
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {
@@ -7603,7 +7587,6 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
             -10
           </Text>
         </View>
-                  
         <Pressable
           hitSlop={
             {

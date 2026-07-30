@@ -7405,8 +7405,7 @@ exports[`PortfolioAnalyticsDashboard — Integration > matches snapshot with ful
                         ]
                       },
                       "children": [
-                        "Tax: ",
-                        "₹33,750.00"
+                        "Tax: ₹33,750.00"
                       ]
                     }
                   ]
@@ -7485,8 +7484,7 @@ exports[`PortfolioAnalyticsDashboard — Integration > matches snapshot with ful
                         ]
                       },
                       "children": [
-                        "Tax: ",
-                        "₹10,000.00"
+                        "Tax: ₹10,000.00"
                       ]
                     }
                   ]
@@ -7565,8 +7563,7 @@ exports[`PortfolioAnalyticsDashboard — Integration > matches snapshot with ful
                         ]
                       },
                       "children": [
-                        "STT: ",
-                        "₹425.00"
+                        "STT: ₹425.00"
                       ]
                     }
                   ]
