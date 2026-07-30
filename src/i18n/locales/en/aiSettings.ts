@@ -2,7 +2,7 @@ export default {
     title: 'AI Settings',
     loadingStatus: 'Loading AI provider status...',
     connectedVia: 'Connected via {{provider}}',
-    notConfigured: 'No AI provider configured',
+    subtitleNotConfigured: 'No AI provider configured',
     retry: 'Retry',
     aiProviderActive: 'AI Provider Active',
     noProvider: 'No AI Provider Configured',

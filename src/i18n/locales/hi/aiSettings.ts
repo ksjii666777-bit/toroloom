@@ -2,7 +2,7 @@ export default {
     title: 'AI सेटिंग्स',
     loadingStatus: 'AI प्रदाता स्थिति लोड हो रही है...',
     connectedVia: '{{provider}} के माध्यम से कनेक्ट',
-    notConfigured: 'कोई AI प्रदाता कॉन्फ़िगर नहीं',
+    subtitleNotConfigured: 'कोई AI प्रदाता कॉन्फ़िगर नहीं',
     retry: 'पुनः प्रयास',
     aiProviderActive: 'AI प्रदाता सक्रिय',
     noProvider: 'कोई AI प्रदाता कॉन्फ़िगर नहीं',
