@@ -24,26 +24,34 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
-import { mockLearningPaths } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-const { _width } = Dimensions.get('window');
 
 export default function LearningPathsScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { lessonProgress, courses } = useEducationStore();
+  const { lessonProgress, courses, fetchCourses } = useEducationStore();
   const [refreshing, setRefreshing] = React.useState(false);
+  const [pathsData, setPathsData] = React.useState<typeof mockLearningPaths>([]);
+
+  // Fetch courses from API on mount + fallback to mock for learning paths
+  React.useEffect(() => {
+    fetchCourses();
+    // Import mockLearningPaths lazily for the paths themselves (no backend endpoint)
+    import('../../constants/mockData').then(mod => {
+      setPathsData(mod.mockLearningPaths);
+    });
+  }, [fetchCourses]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    // Refresh from store
+    await fetchCourses();
     setRefreshing(false);
-  }, []);
+  }, [fetchCourses]);
 
-  // Calculate progress for each path
+  // Calculate progress for each path — use dynamically imported mockLearningPaths
   const pathsWithProgress = useMemo(() => {
-    return mockLearningPaths.map(path => {
+    return pathsData.map(path => {
       const pathCourses = path.courseIds.flatMap(cid => {
         const course = courses.find(c => c.id === cid);
         return course ? [course] : [];
@@ -65,6 +73,11 @@ export default function LearningPathsScreen({ navigation }: any) {
       return { ...path, progress, completedCourses, totalCourses: pathCourses.length };
     });
   }, [courses, lessonProgress]);
+
+  const totalPaths = pathsData.length;
+  const totalCourses = courses.length;
+  const totalLessonsInAllPaths = pathsData.reduce((s, p) => s + p.totalLessons, 0);
+  const totalEnrolled = pathsData.reduce((s, p) => s + p.enrolledCount, 0);
 
   const handlePathPress = useCallback((pathId: string) => {
     navigation.navigate('LearningPathDetail', { pathId });
@@ -106,22 +119,22 @@ export default function LearningPathsScreen({ navigation }: any) {
         >
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryValue}>{mockLearningPaths.length}</Text>
+              <Text style={styles.summaryValue}>{totalPaths}</Text>
               <Text style={styles.summaryLabel}>{t('education.paths')}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryValue}>{mockLearningPaths.reduce((s, p) => s + p.courseIds.length, 0)}</Text>
+              <Text style={styles.summaryValue}>{totalCourses}</Text>
               <Text style={styles.summaryLabel}>{t('education.title')}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryValue}>{mockLearningPaths.reduce((s, p) => s + p.totalLessons, 0)}</Text>
+              <Text style={styles.summaryValue}>{totalLessonsInAllPaths}</Text>
               <Text style={styles.summaryLabel}>{t('education.lessonsLabel')}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryValue}>{(mockLearningPaths.reduce((s, p) => s + p.enrolledCount, 0) / 1000).toFixed(0)}K</Text>
+              <Text style={styles.summaryValue}>{totalEnrolled >= 1000 ? `${(totalEnrolled / 1000).toFixed(0)}K` : totalEnrolled}</Text>
               <Text style={styles.summaryLabel}>{t('education.learners')}</Text>
             </View>
           </View>

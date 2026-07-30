@@ -13,7 +13,6 @@ import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import { mockLessons } from '../../constants/mockData';
 import type { QuizResult } from '../../types';
 
 interface QuizResultScreenProps {
@@ -31,7 +30,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
   const { result, lessonId, courseId } = route.params;
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { recordQuizAttempt, getQuizAttempts, courses } = useEducationStore();
+  const { recordQuizAttempt, getQuizAttempts, courses, currentLesson, fetchLesson } = useEducationStore();
   const { addXp } = useGamificationStore();
 
   const [showReview, setShowReview] = useState(false);
@@ -72,9 +71,14 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
     navigation.navigate('Certificate', { courseId });
   }, [navigation, courseId]);
 
-  const lesson = mockLessons.find(l => l.id === lessonId);
-  const course = courses.find(c => c.id === courseId);
+  const lesson = currentLesson?.id === lessonId ? currentLesson : null;
+  const course = courses.find((c: any) => c.id === courseId);
   const lessonQuizQuestions = lesson?.quiz?.questions || [];
+
+  // Fetch lesson if not already loaded
+  React.useEffect(() => {
+    if (!lesson) fetchLesson(lessonId);
+  }, [lessonId, lesson, fetchLesson]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);

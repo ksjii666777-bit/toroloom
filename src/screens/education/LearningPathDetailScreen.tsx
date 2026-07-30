@@ -11,48 +11,60 @@
  * ============================================================================
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
-import { mockLearningPaths } from '../../constants/mockData';
-import { mockCourses, mockLessons } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-
-const { _width } = Dimensions.get('window');
+import { educationApi } from '../../services/api/education';
 
 export default function LearningPathDetailScreen({ navigation, route }: any) {
   const { pathId } = route.params;
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { lessonProgress } = useEducationStore();
+  const { courses, lessonProgress, fetchCourses, fetchLesson } = useEducationStore();
+  const [path, setPath] = React.useState<any>(null);
+  const [pathCourses, setPathCourses] = React.useState<any[]>([]);
 
-  // Find the path
-  const path = useMemo(() => mockLearningPaths.find(p => p.id === pathId), [pathId]);
+  // Fetch data on mount
+  useEffect(() => {
+    fetchCourses();
+    // Load path data from mock (no backend endpoint for learning paths)
+    import('../../constants/mockData').then(mod => {
+      const foundPath = mod.mockLearningPaths.find((p: any) => p.id === pathId);
+      if (foundPath) {
+        setPath(foundPath);
+        // Map course IDs to actual courses from store
+        const matchedCourses = foundPath.courseIds
+          .map((cid: string) => courses.find((c: any) => c.id === cid) || mod.mockCourses.find((c: any) => c.id === cid))
+          .filter(Boolean);
+        setPathCourses(matchedCourses);
+      }
+    });
+  }, [pathId, fetchCourses, courses]);
 
-  // Get path courses
-  const pathCourses = useMemo(() => {
-    if (!path) return [];
-    return path.courseIds.flatMap(cid => {
-      const course = mockCourses.find(c => c.id === cid);
-      return course ? [course] : [];
-    }) as typeof mockCourses;
-  }, [path]);
+  // Fetch lesson data for progress calculation
+  useEffect(() => {
+    if (pathCourses.length > 0) {
+      pathCourses.forEach((c: any) => {
+        // Try to fetch lessons for this course to populate progress
+        educationApi.getCourse(c.id).catch(() => {});
+      });
+    }
+  }, [pathCourses]);
 
   // Calculate overall progress
   const pathProgress = useMemo(() => {
-    if (!path) return { percent: 0, completedCourses: 0, totalCourses: 0 };
-    const completed = pathCourses.filter(c => {
-      const courseLessons = mockLessons.filter(l => l.courseId === c.id);
-      if (courseLessons.length === 0) return false;
-      return courseLessons.every(l => lessonProgress[l.id] || l.completed);
+    if (!path || pathCourses.length === 0) return { percent: 0, completedCourses: 0, totalCourses: 0 };
+    const completed = pathCourses.filter((c: any) => {
+      const completedLessons = Object.keys(lessonProgress).length;
+      return completedLessons > 0;
     }).length;
     return {
       percent: pathCourses.length > 0 ? Math.round((completed / pathCourses.length) * 100) : 0,
@@ -73,10 +85,10 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
   }, [navigation]);
 
   const handleStartPath = useCallback(() => {
-    // Find first incomplete course
+    // Find first course with incomplete progress
+    const incompleteCourseIds = Object.keys(lessonProgress);
     const firstIncomplete = pathCourses.find(c => {
-      const courseLessons = mockLessons.filter(l => l.courseId === c.id);
-      return !courseLessons.every(l => lessonProgress[l.id] || l.completed);
+      return !incompleteCourseIds.includes(c.id);
     });
     if (firstIncomplete) {
       navigation.navigate('CourseDetail', { courseId: firstIncomplete.id });
@@ -197,11 +209,10 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
             <Text style={styles.sectionCount}>{pathCourses.length}</Text>
           </View>
 
-          {pathCourses.map((course, index) => {
-            const courseLessons = mockLessons.filter(l => l.courseId === course.id);
-            const completedCount = courseLessons.filter(l => lessonProgress[l.id] || l.completed).length;
-            const courseProgress = course.lessons > 0 ? Math.round((completedCount / course.lessons) * 100) : 0;
-            const isComplete = courseProgress >= 100;
+          {pathCourses.map((course: any, index) => {
+            const completedCount = Object.keys(lessonProgress).filter(id => id.startsWith(course.id)).length;
+            const courseProgress = course.lessons > 0 ? Math.min(100, Math.round((completedCount / course.lessons) * 100)) : 0;
+            const isComplete = courseProgress >= 100 || course.completed;
 
             return (
               <Pressable

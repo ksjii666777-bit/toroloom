@@ -7,8 +7,8 @@ import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 
-import { mockLessons } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { educationApi } from '../../services/api/education';
 import Card from '../../components/ui/Card';
 import VideoLessonPlayer from '../../components/video/VideoLessonPlayer';
 import QuizComponent from '../../components/quiz/QuizComponent';
@@ -35,7 +35,8 @@ export default function LessonViewScreen({ route, navigation }: any) {
   const [autoAdvancing, setAutoAdvancing] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const lesson = currentLesson?.id === lessonId ? currentLesson : mockLessons.find(l => l.id === lessonId);
+  const [courseLessons, setCourseLessons] = useState<any[]>([]);
+  const lesson = currentLesson?.id === lessonId ? currentLesson : null;
   const isCompleted = lessonProgress[lessonId] || lesson?.completed || false;
   const hasVideo = !!lesson?.videoUrl;
   const lessonVideoProgress = videoProgress[lessonId];
@@ -48,8 +49,19 @@ export default function LessonViewScreen({ route, navigation }: any) {
     if (lessonId) fetchLesson(lessonId);
   }, [lessonId, fetchLesson]);
 
-  // Find next/prev lessons
-  const courseLessons = mockLessons.filter(l => l.courseId === courseId);
+  // Fetch course lesson list from API
+  useEffect(() => {
+    educationApi.getCourse(courseId)
+      .then(detail => {
+        if (detail.lessonList?.length) setCourseLessons(detail.lessonList);
+      })
+      .catch(() => {
+        // Fallback to mock
+        import('../../constants/mockData').then(mod => {
+          setCourseLessons(mod.mockLessons.filter((l: any) => l.courseId === courseId));
+        });
+      });
+  }, [courseId]);
   const currentIndex = courseLessons.findIndex(l => l.id === lessonId);
   const prevLesson = currentIndex > 0 ? courseLessons[currentIndex - 1] : null;
   const nextLesson = currentIndex < courseLessons.length - 1 ? courseLessons[currentIndex + 1] : null;

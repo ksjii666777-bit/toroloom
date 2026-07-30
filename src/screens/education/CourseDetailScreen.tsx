@@ -1,5 +1,5 @@
-import React, { useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
+import React, { useMemo, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -7,12 +7,10 @@ import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 
-import { mockCourses, mockLessons } from '../../constants/mockData';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-
-Dimensions.get('window');
+import { educationApi } from '../../services/api/education';
 
 const levelGradients: Record<string, readonly [string, string]> = {
   beginner: GRADIENTS.success,
@@ -25,15 +23,33 @@ export default function CourseDetailScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { fetchLesson, markLessonComplete, lessonProgress } = useEducationStore();
+  const { courses, fetchCourses, fetchLesson, markLessonComplete, lessonProgress } = useEducationStore();
   const { addXp } = useGamificationStore();
+  const [courseLessons, setCourseLessons] = useState<any[]>([]);
 
-  const course = mockCourses.find(c => c.id === courseId);
-  const lessons = mockLessons.filter(l => l.courseId === courseId);
+  const course = courses.find((c: any) => c.id === courseId);
 
   useEffect(() => {
-    if (course) fetchLesson(lessons[0]?.id || '');
-  }, [courseId, course, fetchLesson, lessons]);
+    fetchCourses();
+    // Fetch course with lesson list from API
+    educationApi.getCourse(courseId)
+      .then(detail => {
+        if (detail.lessonList) {
+          setCourseLessons(detail.lessonList);
+          if (detail.lessonList.length > 0) {
+            fetchLesson(detail.lessonList[0].id);
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback: use mock data for lesson list
+        import('../../constants/mockData').then(mod => {
+          const mockLessons = mod.mockLessons.filter((l: any) => l.courseId === courseId);
+          setCourseLessons(mockLessons);
+          if (mockLessons.length > 0) fetchLesson(mockLessons[0].id);
+        });
+      });
+  }, [courseId, fetchCourses, fetchLesson]);
 
   const { certificates } = useEducationStore();
 
@@ -45,7 +61,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
     );
   }
 
-  const completedCount = lessons.filter(l => lessonProgress[l.id] || l.completed).length;
+  const completedCount = courseLessons.filter((l: any) => lessonProgress[l.id] || l.completed).length;
   const progress = course.lessons > 0 ? Math.round((completedCount / course.lessons) * 100) : 0;
   const levelGradient = levelGradients[course.level] || GRADIENTS.primary;
 
@@ -58,7 +74,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
     addXp(50);
   };
 
-  const nextIncomplete = lessons.find(l => !(lessonProgress[l.id] || l.completed));
+  const nextIncomplete = courseLessons.find((l: any) => !(lessonProgress[l.id] || l.completed));
   const allLessonsComplete = !nextIncomplete && completedCount === course.lessons;
   const certificate = certificates.find(c => c.courseId === courseId);
 
@@ -131,7 +147,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
             {t('education.lessonsProgress', { completed: completedCount, total: course.lessons })}
           </Text>
 
-          {lessons.map((lesson, index) => {
+          {courseLessons.map((lesson: any, index) => {
             const isCompleted = lessonProgress[lesson.id] || lesson.completed;
             const isNext = nextIncomplete?.id === lesson.id;
 
