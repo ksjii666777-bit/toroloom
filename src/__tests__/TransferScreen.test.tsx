@@ -66,6 +66,29 @@ vi.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
 
+// Mock fundsApi so transfer flow doesn't make real HTTP calls
+vi.mock('../services/api', () => ({
+  fundsApi: {
+    transfer: vi.fn().mockResolvedValue({
+      message: 'Transfer initiated',
+      transaction: {
+        id: 'txn_002',
+        type: 'transfer',
+        amount: 5000,
+        method: 'Internal Transfer',
+        status: 'completed',
+        transactionId: 'TXN987654321',
+        timestamp: new Date().toISOString(),
+      },
+      newBalance: 2495000,
+    }),
+    withdraw: vi.fn(),
+    upiPay: vi.fn(),
+    getBalance: vi.fn(),
+    getTransactions: vi.fn(),
+  },
+}));
+
 // Mock useT to return English text for funds keys so test assertions work
 const fundsTranslations: Record<string, string> = {
   'funds.transferTitle': 'Transfer',
@@ -367,13 +390,13 @@ describe('TransferScreen — Transfer Flow', () => {
     );
   });
 
-  it('processes transfer when confirmation is accepted', () => {
+  it('processes transfer when confirmation is accepted', async () => {
     const { getByText, getByPlaceholderText } = renderTransfer();
     changeText(getByPlaceholderText('Enter transfer amount'), '5000');
     press(getByText(/Transfer ₹5,000/));
 
     expect(confirmCallback).toBeDefined();
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     expect(mockUpdateBalance).toHaveBeenCalledWith(-5000);
@@ -385,22 +408,22 @@ describe('TransferScreen — Transfer Flow', () => {
     }));
   });
 
-  it('shows success state after transfer completes', () => {
+  it('shows success state after transfer completes', async () => {
     const { getByText, getByPlaceholderText } = renderTransfer();
     changeText(getByPlaceholderText('Enter transfer amount'), '5000');
     press(getByText(/Transfer ₹5,000/));
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     expect(getByText('Transfer Initiated!')).toBeDefined();
     expect(getByText(/₹5,000/)).toBeDefined();
   });
 
-  it('shows transaction details in success screen', () => {
+  it('shows transaction details in success screen', async () => {
     const { getByText, getByPlaceholderText } = renderTransfer();
     changeText(getByPlaceholderText('Enter transfer amount'), '5000');
     press(getByText(/Transfer ₹5,000/));
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     expect(getByText('Transaction ID')).toBeDefined();
@@ -408,18 +431,18 @@ describe('TransferScreen — Transfer Flow', () => {
     expect(getByText('To')).toBeDefined();
   });
 
-  it('done button navigates back after success', () => {
+  it('done button navigates back after success', async () => {
     const { getByText, getByPlaceholderText } = renderTransfer();
     changeText(getByPlaceholderText('Enter transfer amount'), '5000');
     press(getByText(/Transfer ₹5,000/));
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     press(getByText('Done'));
     expect(mockGoBack).toHaveBeenCalledTimes(1);
   });
 
-  it('processes transfer to external bank account', () => {
+  it('processes transfer to external bank account', async () => {
     const { getByText, getByPlaceholderText } = renderTransfer();
 
     // Switch to external tab
@@ -433,7 +456,7 @@ describe('TransferScreen — Transfer Flow', () => {
 
     // Accept confirmation
     expect(confirmCallback).toBeDefined();
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     expect(mockUpdateBalance).toHaveBeenCalledWith(-10000);

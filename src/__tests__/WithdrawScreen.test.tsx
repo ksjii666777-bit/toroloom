@@ -64,6 +64,30 @@ vi.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
 
+// Mock fundsApi so withdrawal flow doesn't make real HTTP calls
+vi.mock('../services/api', () => ({
+  fundsApi: {
+    withdraw: vi.fn().mockResolvedValue({
+      message: 'Withdrawal initiated',
+      transaction: {
+        id: 'txn_001',
+        type: 'withdraw',
+        amount: 5000,
+        method: 'HDFC Bank',
+        account: 'XXXX1234',
+        status: 'completed',
+        transactionId: 'TXN123456789',
+        timestamp: new Date().toISOString(),
+      },
+      newBalance: 2495000,
+    }),
+    transfer: vi.fn(),
+    upiPay: vi.fn(),
+    getBalance: vi.fn(),
+    getTransactions: vi.fn(),
+  },
+}));
+
 // ==================== Imports ====================
 
 import WithdrawScreen from '../screens/funds/WithdrawScreen';
@@ -227,13 +251,13 @@ describe('WithdrawScreen — Withdrawal Flow', () => {
     );
   });
 
-  it('processes withdrawal when confirmation is accepted', () => {
+  it('processes withdrawal when confirmation is accepted', async () => {
     const { getByText, getByPlaceholderText } = renderWithdraw();
     changeText(getByPlaceholderText('Enter withdrawal amount'), '5000');
     press(getByText(/Withdraw ₹5,000/));
 
     expect(confirmCallback).toBeDefined();
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     expect(mockUpdateBalance).toHaveBeenCalledWith(-5000);
@@ -245,54 +269,54 @@ describe('WithdrawScreen — Withdrawal Flow', () => {
     }));
   });
 
-  it('shows success state after withdrawal completes', () => {
+  it('shows success state after withdrawal completes', async () => {
     const { getByText, getByPlaceholderText } = renderWithdraw();
     changeText(getByPlaceholderText('Enter withdrawal amount'), '5000');
     press(getByText(/Withdraw ₹5,000/));
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     expect(getByText('Withdrawal Initiated!')).toBeDefined();
     expect(getByText(/₹5,000/)).toBeDefined();
   });
 
-  it('done button navigates back after success', () => {
+  it('done button navigates back after success', async () => {
     const { getByText, getByPlaceholderText } = renderWithdraw();
     changeText(getByPlaceholderText('Enter withdrawal amount'), '5000');
     press(getByText(/Withdraw ₹5,000/));
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     press(getByText('Done'));
     expect(mockGoBack).toHaveBeenCalledTimes(1);
   });
 
-  it('view transaction history button navigates to history screen', () => {
+  it('view transaction history button navigates to history screen', async () => {
     const { getByText, getByPlaceholderText } = renderWithdraw();
     changeText(getByPlaceholderText('Enter withdrawal amount'), '5000');
     press(getByText(/Withdraw ₹5,000/));
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     press(getByText('View Transaction History'));
     expect(mockNavigate).toHaveBeenCalledWith('TransactionHistory');
   });
 
-  it('shows remaining new balance in success screen', () => {
+  it('shows remaining new balance in success screen', async () => {
     const { getByText, getByPlaceholderText } = renderWithdraw();
     changeText(getByPlaceholderText('Enter withdrawal amount'), '5000');
     press(getByText(/Withdraw ₹5,000/));
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     expect(getByText('New Balance')).toBeDefined();
   });
 
-  it('displays transaction ID in success screen', () => {
+  it('displays transaction ID in success screen', async () => {
     const { getByText, getByPlaceholderText } = renderWithdraw();
     changeText(getByPlaceholderText('Enter withdrawal amount'), '5000');
     press(getByText(/Withdraw ₹5,000/));
-    act(() => { confirmCallback!(); });
+    await act(async () => { await confirmCallback!(); });
     act(() => { vi.advanceTimersByTime(1500); });
 
     expect(getByText('Transaction ID')).toBeDefined();
