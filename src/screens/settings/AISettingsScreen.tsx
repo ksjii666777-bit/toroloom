@@ -18,6 +18,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { aiApi, type AIStatusResponse } from '../../services/api/ai';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -55,6 +56,7 @@ const PROVIDER_META: Record<string, {
 
 export default function AISettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -132,7 +134,7 @@ export default function AISettingsScreen({ navigation }: any) {
               <Ionicons name="bulb" size={22} color={colors.primary} />
             </View>
             <View>
-              <Text style={[styles.title, { color: colors.text }]}>AI Settings</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t('aiSettings.title')}</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                 {status?.configured
                   ? `Connected via ${status.activeProvider}`

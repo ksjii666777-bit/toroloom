@@ -17,6 +17,7 @@ import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { useAuthStore } from '../../store/authStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -49,6 +50,7 @@ function getSubmissionStats(courses: UserGeneratedCourse[]) {
 
 export default function AdminCourseReviewScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const isAdmin = useAuthStore(s => s.isAdmin);
   const {
@@ -160,28 +162,28 @@ export default function AdminCourseReviewScreen({ navigation }: any) {
             <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </AnimatedPressable>
-            <Text style={styles.title}>Course Reviews</Text>
+            <Text style={styles.title}>{t('adminCourseReview.title')}</Text>
           </View>
-          <Text style={styles.subtitle}>Review and manage user-submitted courses</Text>
+          <Text style={styles.subtitle}>{t('adminCourseReview.subtitle')}</Text>
         </View>
 
         {/* Stats Bar */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { borderColor: colors.warning + '40' }]}>
             <Text style={[styles.statValue, { color: colors.warning }]}>{stats.pending.length}</Text>
-            <Text style={styles.statLabel}>Pending</Text>
+            <Text style={styles.statLabel}>{t('adminCourseReview.pendingLabel')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: colors.success + '40' }]}>
             <Text style={[styles.statValue, { color: colors.success }]}>{stats.approved.length}</Text>
-            <Text style={styles.statLabel}>Approved</Text>
+            <Text style={styles.statLabel}>{t('adminCourseReview.approvedLabel')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: colors.danger + '40' }]}>
             <Text style={[styles.statValue, { color: colors.danger }]}>{stats.rejected.length}</Text>
-            <Text style={styles.statLabel}>Rejected</Text>
+            <Text style={styles.statLabel}>{t('adminCourseReview.rejectedLabel')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: colors.textMuted + '40' }]}>
             <Text style={[styles.statValue, { color: colors.text }]}>{myCourses.length}</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel}>{t('adminCourseReview.totalLabel')}</Text>
           </View>
         </View>
 
@@ -222,7 +224,7 @@ export default function AdminCourseReviewScreen({ navigation }: any) {
                         : colors.primary,
                     },
                   ]}>
-                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                    {filter === 'pending' ? t('adminCourseReview.pendingLabel') : filter === 'approved' ? t('adminCourseReview.approvedLabel') : filter === 'rejected' ? t('adminCourseReview.rejectedLabel') : t('adminCourseReview.totalLabel')}
                   </Text>
                   {count > 0 && (
                     <View style={[styles.filterCount, {
@@ -254,15 +256,15 @@ export default function AdminCourseReviewScreen({ navigation }: any) {
               color={colors.textMuted}
             />
             <Text style={styles.emptyTitle}>
-              {activeFilter === 'pending' ? 'No pending reviews' :
-               activeFilter === 'approved' ? 'No approved courses' :
-               activeFilter === 'rejected' ? 'No rejected courses' :
-               'No reviewed courses'}
+              {activeFilter === 'pending' ? t('adminCourseReview.noPending') :
+               activeFilter === 'approved' ? t('adminCourseReview.noApproved') :
+               activeFilter === 'rejected' ? t('adminCourseReview.noRejected') :
+               t('adminCourseReview.noReviewed')}
             </Text>
             <Text style={styles.emptySubtitle}>
               {activeFilter === 'pending'
-                ? 'When users submit courses for review, they\'ll appear here.'
-                : 'No courses match this filter.'}
+                ? t('adminCourseReview.pendingEmpty')
+                : t('adminCourseReview.noMatchFilter')}
             </Text>
           </View>
         ) : (

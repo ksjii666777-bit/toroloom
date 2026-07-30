@@ -2,7 +2,9 @@
 import abTestRunner from './abTestRunner';
 import accessibility from './accessibility';
 import adminCoupon from './adminCoupon';
+import adminCourseReview from './adminCourseReview';
 import advancedMarkets from './advancedMarkets';
+import aiSettings from './aiSettings';
 import ai from './ai';
 import alerts from './alerts';
 import apiKeyManagement from './apiKeyManagement';
@@ -37,6 +39,7 @@ import landscapeSettings from './landscapeSettings';
 import market from './market';
 import monteCarlo from './monteCarlo';
 import mutualFunds from './mutualFunds';
+import notificationPrefs from './notificationPrefs';
 import notifications from './notifications';
 import onboarding from './onboarding';
 import paymentHistory from './paymentHistory';
@@ -52,9 +55,12 @@ import reports from './reports';
 import revenueDashboard from './revenueDashboard';
 import risk from './risk';
 import riskSettings from './riskSettings';
+import securityAudit from './securityAudit';
+import syncSettings from './syncSettings';
 import security from './security';
 import social from './social';
 import status from './status';
+import telegramConnect from './telegramConnect';
 import subscription from './subscription';
 import taxHarvesting from './taxHarvesting';
 import tenantConfig from './tenantConfig';
@@ -63,6 +69,7 @@ import traderProfile from './traderProfile';
 import trading from './trading';
 import twoFactor from './twoFactor';
 import usMarkets from './usMarkets';
+import voiceSettings from './voiceSettings';
 import watchlist from './watchlist';
 import webhookManagement from './webhookManagement';
 import widgetSettings from './widgetSettings';
@@ -71,7 +78,9 @@ const hi = {
   abTestRunner,
   accessibility,
   adminCoupon,
+  adminCourseReview,
   advancedMarkets,
+  aiSettings,
   ai,
   alerts,
   apiKeyManagement,
@@ -106,6 +115,7 @@ const hi = {
   market,
   monteCarlo,
   mutualFunds,
+  notificationPrefs,
   notifications,
   onboarding,
   paymentHistory,
@@ -121,9 +131,12 @@ const hi = {
   revenueDashboard,
   risk,
   riskSettings,
+  securityAudit,
+  syncSettings,
   security,
   social,
   status,
+  telegramConnect,
   subscription,
   taxHarvesting,
   tenantConfig,
@@ -132,6 +145,7 @@ const hi = {
   trading,
   twoFactor,
   usMarkets,
+  voiceSettings,
   watchlist,
   webhookManagement,
   widgetSettings,

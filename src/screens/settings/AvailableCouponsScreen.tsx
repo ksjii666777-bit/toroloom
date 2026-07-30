@@ -17,6 +17,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 
 import type { CouponCode } from '../../types';
@@ -214,6 +215,7 @@ function CouponCard({
 
 export default function AvailableCouponsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [coupons, setCoupons] = useState<CouponCode[]>([]);
   const [loading, setLoading] = useState(true);
@@ -263,7 +265,7 @@ export default function AvailableCouponsScreen({ navigation }: any) {
             <Ionicons name="chevron-back" size={24} color={colors.text} />
           </View>
         </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>Available Coupons</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('coupons.availableTitle')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
