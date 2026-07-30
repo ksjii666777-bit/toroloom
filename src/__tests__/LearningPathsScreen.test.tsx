@@ -176,6 +176,7 @@ vi.mock('../store/educationStore', () => ({
   useEducationStore: () => ({
     courses: [],
     lessonProgress: {},
+    fetchCourses: vi.fn(),
   }),
 }));
 

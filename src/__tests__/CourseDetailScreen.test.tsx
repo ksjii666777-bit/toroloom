@@ -23,6 +23,22 @@ const mockFetchLesson = vi.fn();
 const mockMarkLessonComplete = vi.fn();
 const mockAddXp = vi.fn();
 
+// Shared course data used by both mockData and educationStore mocks
+// vi.hoisted ensures this runs before vi.mock() factories
+const mockCourseForTest = vi.hoisted(() => ({
+  id: 'c1',
+  title: 'Stock Market Basics',
+  description: 'Everything you need to know to start investing in the stock market.',
+  thumbnail: '📈',
+  duration: '5 hours',
+  lessons: 8,
+  progress: 75,
+  level: 'beginner',
+  category: 'Fundamentals',
+  rating: 4.8,
+  enrolledCount: 24500,
+}));
+
 vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({
     colors: {
@@ -59,7 +75,9 @@ vi.mock('../context/ThemeContext', () => ({
 
 vi.mock('../store/educationStore', () => ({
   useEducationStore: vi.fn(() => ({
+    courses: [],
     currentLesson: null,
+    fetchCourses: vi.fn(),
     fetchLesson: mockFetchLesson,
     markLessonComplete: mockMarkLessonComplete,
     lessonProgress: {},
@@ -78,19 +96,7 @@ vi.mock('../store/gamificationStore', () => ({
 // which can cause vitest parsing issues. Mock a minimal subset used by the tests.
 
 vi.mock('../../constants/mockData', () => {
-  const mockCourse = {
-    id: 'c1',
-    title: 'Stock Market Basics',
-    description: 'Everything you need to know to start investing in the stock market.',
-    thumbnail: '📈',
-    duration: '5 hours',
-    lessons: 8,
-    progress: 75,
-    level: 'beginner' as const,
-    category: 'Fundamentals',
-    rating: 4.8,
-    enrolledCount: 24500,
-  };
+  const mockCourse = mockCourseForTest;
 
   const mockLessonData = [
     {
@@ -132,6 +138,17 @@ vi.mock('../../constants/mockData', () => {
     mockLessons: mockLessonData,
   };
 });
+
+// Now add courses to the educationStore mock using the shared course data
+vi.mocked(useEducationStore).mockImplementation(() => ({
+  courses: [mockCourseForTest],
+  currentLesson: null,
+  fetchCourses: vi.fn(),
+  fetchLesson: mockFetchLesson,
+  markLessonComplete: mockMarkLessonComplete,
+  lessonProgress: {},
+  certificates: [],
+}));
 
 // ==================== Imports ====================
 

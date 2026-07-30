@@ -409,6 +409,7 @@ vi.mock('../services/api/notifications', () => ({
 vi.mock('../services/api/education', () => ({
   educationApi: {
     getCourses: vi.fn(),
+    getCourse: vi.fn().mockRejectedValue(new Error('Not found')),
     getLesson: vi.fn(),
     markLessonProgress: vi.fn(),
   },

@@ -35,6 +35,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockStoreState = {
     courses: defaultCourses,
+    fetchCourses: vi.fn(),
   };
 });
 

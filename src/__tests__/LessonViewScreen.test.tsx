@@ -27,6 +27,33 @@ const mockDownloadVideo = vi.fn();
 const mockRemoveOfflineVideo = vi.fn();
 const mockIsVideoDownloaded = vi.fn(() => false);
 
+// Shared lesson data used by educationStore mock — mutable so each test can set it
+let mockCurrentLesson: any = null;
+
+const lessonData: Record<string, any> = {
+  l1: {
+    id: 'l1', courseId: 'c1', title: 'What is the Stock Market?',
+    content: 'The stock market is a place where shares of publicly traded companies are bought and sold.',
+    duration: '20 min', completed: true,
+    quiz: { title: 'Market Basics Quiz', questions: [{ question: 'What is a stock?', options: ['A loan', 'Partial ownership', 'A bond', 'A derivative'], correct: 1 }, { question: 'Q2?', options: ['A', 'B', 'C', 'D'], correct: 0 }, { question: 'Q3?', options: ['A', 'B', 'C', 'D'], correct: 0 }, { question: 'Q4?', options: ['A', 'B', 'C', 'D'], correct: 0 }] },
+  },
+  l2: {
+    id: 'l2', courseId: 'c1', title: 'Key Market Participants',
+    content: 'Market participants include retail investors, institutional investors, and market makers.',
+    duration: '20 min', completed: true,
+  },
+  l6: {
+    id: 'l6', courseId: 'c1', title: 'Demat & Trading Accounts',
+    content: 'A Demat account holds your shares electronically, while a trading account is used to place orders.',
+    duration: '20 min', completed: false,
+  },
+  l8: {
+    id: 'l8', courseId: 'c1', title: 'Building Your First Portfolio',
+    content: 'Diversification is key to building a resilient portfolio.',
+    duration: '25 min', completed: false,
+  },
+};
+
 // Shared navigation mock object — includes replace used by auto-advance
 const mockNav = { navigate: mockNavigate, goBack: mockGoBack, replace: mockNavigate };
 
@@ -66,8 +93,10 @@ vi.mock('../context/ThemeContext', () => ({
 
 vi.mock('../store/educationStore', () => ({
   useEducationStore: vi.fn(() => ({
-    currentLesson: null,
-    fetchLesson: mockFetchLesson,
+    currentLesson: mockCurrentLesson,
+    fetchLesson: vi.fn((id: string) => {
+      mockCurrentLesson = lessonData[id] || null;
+    }),
     markLessonComplete: mockMarkLessonComplete,
     lessonProgress: {},
     videoProgress: {},
@@ -87,6 +116,27 @@ vi.mock('../store/gamificationStore', () => ({
   useGamificationStore: vi.fn(() => ({
     addXp: mockAddXp,
   })),
+}));
+
+// Mock educationApi to resolve with proper lesson list — avoids async fallback to mockData
+vi.mock('../../services/api/education', () => ({
+  educationApi: {
+    getCourse: vi.fn().mockResolvedValue({
+      lessonList: [
+        { id: 'l1', courseId: 'c1', title: 'What is the Stock Market?', content: 'Lesson 1', duration: '20 min', completed: true },
+        { id: 'l2', courseId: 'c1', title: 'Key Market Participants', content: 'Lesson 2', duration: '20 min', completed: true },
+        { id: 'l3', courseId: 'c1', title: 'Understanding Stock Exchanges', content: 'Lesson 3', duration: '25 min', completed: true },
+        { id: 'l4', courseId: 'c1', title: 'How to Read Stock Prices', content: 'Lesson 4', duration: '25 min', completed: true },
+        { id: 'l5', courseId: 'c1', title: 'Order Types Explained', content: 'Lesson 5', duration: '25 min', completed: true },
+        { id: 'l6', courseId: 'c1', title: 'Demat & Trading Accounts', content: 'Lesson 6', duration: '20 min', completed: false },
+        { id: 'l7', courseId: 'c1', title: 'Taxation of Stock Market Income', content: 'Lesson 7', duration: '20 min', completed: false },
+        { id: 'l8', courseId: 'c1', title: 'Building Your First Portfolio', content: 'Lesson 8', duration: '25 min', completed: false },
+      ],
+    }),
+    getCourses: vi.fn(),
+    getLesson: vi.fn(),
+    markLessonProgress: vi.fn(),
+  },
 }));
 
 // Mock QuizComponent to render quiz content in test env
@@ -144,6 +194,7 @@ function advanceAndRender(ms: number) {
 describe('LessonViewScreen — Loading State', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    mockCurrentLesson = null;
   });
 
   afterEach(() => {
@@ -167,6 +218,8 @@ describe('LessonViewScreen — Loaded Content', () => {
     mockFetchLesson.mockClear();
     mockMarkLessonComplete.mockClear();
     mockAddXp.mockClear();
+    // Pre-set currentLesson so component renders content immediately
+    mockCurrentLesson = lessonData['l1'];
   });
 
   afterEach(() => {
@@ -351,6 +404,7 @@ describe('LessonViewScreen — Last Lesson Navigation', () => {
     mockFetchLesson.mockClear();
     mockMarkLessonComplete.mockClear();
     mockAddXp.mockClear();
+    mockCurrentLesson = lessonData['l8'];
   });
 
   afterEach(() => {
@@ -376,6 +430,7 @@ describe('LessonViewScreen — Download Flow', () => {
     mockIsVideoDownloaded.mockClear();
     mockNavigate.mockClear();
     mockGoBack.mockClear();
+    mockCurrentLesson = lessonData['l1'];
   });
 
   afterEach(() => {
@@ -446,6 +501,7 @@ describe('LessonViewScreen — Auto-Advance on Complete', () => {
     mockDownloadVideo.mockClear();
     mockRemoveOfflineVideo.mockClear();
     mockIsVideoDownloaded.mockClear();
+    mockCurrentLesson = lessonData['l6'];
   });
 
   afterEach(() => {
@@ -525,6 +581,7 @@ describe('LessonViewScreen — Missing Lesson', () => {
     mockNavigate.mockClear();
     mockGoBack.mockClear();
     mockFetchLesson.mockClear();
+    mockCurrentLesson = null;
   });
 
   afterEach(() => {

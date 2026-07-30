@@ -83,7 +83,7 @@ function createFrozenNavigation() {
 describe('LearnScreen — Frozen Navigation Object', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockStoreState = { courses: defaultCourses };
+    mockStoreState = { courses: defaultCourses, fetchCourses: vi.fn() };
   });
 
   describe('render resilience with frozen navigation', () => {
