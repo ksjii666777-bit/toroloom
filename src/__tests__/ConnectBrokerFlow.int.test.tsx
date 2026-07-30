@@ -144,7 +144,7 @@ describe('ConnectBrokerView', () => {
 
   describe('Flow 3: Connected State', () => {
     it('detects existing Zerodha session and shows connected state', async () => {
-      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' } as any);
 
       const { getByText } = renderView();
       expect(getByText('Checking connection status...')).toBeDefined();
@@ -210,7 +210,7 @@ describe('ConnectBrokerView', () => {
 
   describe('Flow 5: Disconnect', () => {
     it('triggers disconnect when Disconnect is pressed in connected state', async () => {
-      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' } as any);
 
       const { getByText } = renderView();
       await flushPromises();
@@ -225,7 +225,7 @@ describe('ConnectBrokerView', () => {
     });
 
     it('tapping connected broker card triggers disconnect flow', async () => {
-      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' } as any);
 
       const { getByText } = renderView();
       await flushPromises();
@@ -276,7 +276,7 @@ describe('ConnectBrokerView', () => {
     });
 
     it('renders connected state with Zerodha session', async () => {
-      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
+      mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' } as any);
 
       const { getByText } = renderView();
       await flushPromises();

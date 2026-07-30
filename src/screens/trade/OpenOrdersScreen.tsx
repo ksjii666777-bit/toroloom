@@ -269,7 +269,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
                     <Text style={styles.detailValue}>₹{order.price.toFixed(2)}</Text>
                   </View>
                   <View style={styles.detailCol}>
-                    <Text style={styles.detailLabel}>{t('trading.orderTypeLabel')}</Text>
+                    <Text style={styles.detailLabel}>{t('trading.orderTypeLabelShort')}</Text>
                     <Text style={styles.detailValue}>{order.orderType} · {order.productType}</Text>
                   </View>
                   <View style={styles.detailCol}>
@@ -393,7 +393,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
             />
 
             {/* Order Type Selector */}
-            <Text style={styles.modalLabel}>{t('trading.orderTypeLabel')}</Text>
+            <Text style={styles.modalLabel}>{t('trading.orderTypeLabelShort')}</Text>
             <View style={styles.modalChipRow}>
               {['LIMIT', 'MARKET', 'SL', 'SL-M'].map(ot => (
                 <TouchableOpacity

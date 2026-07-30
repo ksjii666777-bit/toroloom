@@ -69,6 +69,53 @@ export default function QuizComponent({
   const answeredCount = Object.keys(selectedAnswers).length;
   const progress = totalQuestions > 0 ? (currentQuestionIndex / totalQuestions) : 0;
 
+  const calculateResult = useCallback((): QuizResult => {
+    let correct = 0;
+    const correctMap: Record<string, number> = {};
+    questions.forEach(q => { correctMap[q.id] = q.correctAnswer; });
+
+    Object.entries(selectedAnswers).forEach(([qId, ansIdx]) => {
+      const q = questions.find(qq => qq.id === qId);
+      if (q && ansIdx === q.correctAnswer) correct++;
+    });
+
+    const answered = Object.keys(selectedAnswers).length;
+    const wrong = answered - correct;
+    const unanswered = totalQuestions - answered;
+    const pct = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
+    const timeTaken = Math.round((Date.now() - startTimeRef.current) / 1000);
+
+    return {
+      quizId: quiz.id,
+      quizTitle: quiz.title,
+      totalQuestions,
+      correctAnswers: correct,
+      wrongAnswers: wrong,
+      unanswered,
+      score: correct,
+      percentage: pct,
+      passed: pct >= passingPercent,
+      timeTaken,
+      answers: selectedAnswers,
+      correctAnswerMap: correctMap,
+    };
+  }, [quiz, selectedAnswers, totalQuestions, passingPercent, questions]);
+
+  const handleSubmit = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const result = calculateResult();
+    setQuizResult(result);
+    setIsComplete(true);
+    onComplete(result);
+  }, [calculateResult, onComplete]);
+
+  const handleAutoSubmit = useCallback(() => {
+    const result = calculateResult();
+    setQuizResult(result);
+    setIsComplete(true);
+    onComplete(result);
+  }, [calculateResult, onComplete]);
+
   // Timer — pure decrement (no side effects inside updater)
   useEffect(() => {
     if (timerMinutes <= 0) return;
@@ -156,53 +203,6 @@ export default function QuizComponent({
       animateTransition('back');
     }
   }, [currentQuestionIndex, animateTransition]);
-
-  const calculateResult = useCallback((): QuizResult => {
-    let correct = 0;
-    const correctMap: Record<string, number> = {};
-    questions.forEach(q => { correctMap[q.id] = q.correctAnswer; });
-
-    Object.entries(selectedAnswers).forEach(([qId, ansIdx]) => {
-      const q = questions.find(qq => qq.id === qId);
-      if (q && ansIdx === q.correctAnswer) correct++;
-    });
-
-    const answered = Object.keys(selectedAnswers).length;
-    const wrong = answered - correct;
-    const unanswered = totalQuestions - answered;
-    const pct = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
-    const timeTaken = Math.round((Date.now() - startTimeRef.current) / 1000);
-
-    return {
-      quizId: quiz.id,
-      quizTitle: quiz.title,
-      totalQuestions,
-      correctAnswers: correct,
-      wrongAnswers: wrong,
-      unanswered,
-      score: correct,
-      percentage: pct,
-      passed: pct >= passingPercent,
-      timeTaken,
-      answers: selectedAnswers,
-      correctAnswerMap: correctMap,
-    };
-  }, [quiz, selectedAnswers, totalQuestions, passingPercent, questions]);
-
-  const handleSubmit = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    const result = calculateResult();
-    setQuizResult(result);
-    setIsComplete(true);
-    onComplete(result);
-  }, [calculateResult, onComplete]);
-
-  const handleAutoSubmit = useCallback(() => {
-    const result = calculateResult();
-    setQuizResult(result);
-    setIsComplete(true);
-    onComplete(result);
-  }, [calculateResult, onComplete]);
 
   const formatTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60);

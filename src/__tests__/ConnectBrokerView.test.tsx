@@ -218,7 +218,7 @@ describe('ConnectBrokerView — Disconnected State', () => {
 
 describe('ConnectBrokerView — Connected State', () => {
   it('renders connected banner when snapTradeApi returns connected', async () => {
-    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' } as any);
 
     const { getByText } = renderView();
     await flushPromises();
@@ -226,7 +226,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('shows broker name in connected banner', async () => {
-    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' } as any);
 
     const { getByText } = renderView();
     await flushPromises();
@@ -234,7 +234,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('renders Test API button when connected', async () => {
-    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' });
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' } as any);
 
     const { getByText } = renderView();
     await flushPromises();
@@ -242,7 +242,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('renders Disconnect button when connected', async () => {
-    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' });
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'angel', brokerName: 'Angel One' } as any);
 
     const { getByText } = renderView();
     await flushPromises();
@@ -250,7 +250,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('shows "Session Active" on connected broker card', async () => {
-    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' } as any);
 
     const { getByText } = renderView();
     await flushPromises();
@@ -258,7 +258,7 @@ describe('ConnectBrokerView — Connected State', () => {
   });
 
   it('shows section subtitle asking to switch broker when connected', async () => {
-    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' });
+    mockSnapTradeStatus.mockResolvedValue({ connected: true, brokerSlug: 'zerodha', brokerName: 'Zerodha' } as any);
 
     const { getByText } = renderView();
     await flushPromises();
