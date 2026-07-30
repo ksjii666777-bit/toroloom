@@ -13,6 +13,7 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Line, Text as SvgText, G } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -45,11 +46,11 @@ interface InputField {
 }
 
 const INPUT_FIELDS: InputField[] = [
-  { key: 'initialInvestment', label: 'Initial Investment', icon: 'wallet', suffix: '₹', placeholder: 'e.g. 500000', info: 'Your current portfolio value' },
-  { key: 'monthlyContribution', label: 'Monthly SIP', icon: 'trending-up', suffix: '₹', placeholder: 'e.g. 10000', info: 'Amount you add each month' },
-  { key: 'annualReturn', label: 'Expected Return', icon: 'trending-up', suffix: '%', placeholder: 'e.g. 12', info: 'Expected annual return (Nifty ~12-14%)' },
-  { key: 'annualVolatility', label: 'Volatility', icon: 'pulse', suffix: '%', placeholder: 'e.g. 18', info: 'Expected annual volatility (Nifty ~15-20%)' },
-  { key: 'years', label: 'Time Horizon', icon: 'calendar', suffix: 'yr', placeholder: 'e.g. 10', info: 'Investment horizon in years' },
+  { key: 'initialInvestment', label: 'Initial Investment', icon: 'wallet', suffix: '₹', placeholder: 'e.g. 500000', info: 'Your current portfolio value', tKey: 'monteCarlo.initialInvestment' },
+  { key: 'monthlyContribution', label: 'Monthly SIP', icon: 'trending-up', suffix: '₹', placeholder: 'e.g. 10000', info: 'Amount you add each month', tKey: 'monteCarlo.monthlySip' },
+  { key: 'annualReturn', label: 'Expected Return', icon: 'trending-up', suffix: '%', placeholder: 'e.g. 12', info: 'Expected annual return (Nifty ~12-14%)', tKey: 'monteCarlo.expectedReturn' },
+  { key: 'annualVolatility', label: 'Volatility', icon: 'pulse', suffix: '%', placeholder: 'e.g. 18', info: 'Expected annual volatility (Nifty ~15-20%)', tKey: 'monteCarlo.volatility' },
+  { key: 'years', label: 'Time Horizon', icon: 'calendar', suffix: 'yr', placeholder: 'e.g. 10', info: 'Investment horizon in years', tKey: 'monteCarlo.timeHorizon' },
 ];
 
 // ─── Color palette for percentile bands ───────────────────────
@@ -73,6 +74,7 @@ const PERCENTILE_CONFIGS = [
 
 export default function MonteCarloSimulationScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // ── Input state ────────────────────────────────────────────
@@ -135,8 +137,8 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
             </View>
           </AnimatedPressable>
           <View style={styles.headerContent}>
-            <Text style={styles.title}>Monte Carlo</Text>
-            <Text style={styles.subtitle}>10,000 portfolio risk scenarios</Text>
+            <Text style={styles.title}>{t('monteCarlo.title')}</Text>
+            <Text style={styles.subtitle}>{t('monteCarlo.subtitle', { count: '10,000' })}</Text>
           </View>
         </View>
 
@@ -156,7 +158,7 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
         </Animated.View>
 
         {/* ── Input Section ────────────────────────────────── */}
-        <Card title="Portfolio Parameters" style={styles.sectionCard}>
+        <Card title={t('monteCarlo.portfolioParams')} style={styles.sectionCard}>
           <View style={styles.inputFields}>
             {INPUT_FIELDS.map((field, i) => {
               const displayValue = (() => {
@@ -182,7 +184,7 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
                       size={16}
                       color={colors.primary}
                     />
-                    <Text style={styles.inputLabel}>{field.label}</Text>
+                    <Text style={styles.inputLabel}>{t(field.tKey)}</Text>
                     <View style={styles.inputInfoTooltip}>
                       <Text style={styles.inputInfoIcon}>?</Text>
                     </View>
@@ -264,10 +266,10 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
             {/* ── Key Metrics Grid ──────────────────────────── */}
             <View style={styles.metricsGrid}>
               {[
-                { label: 'Median Value', value: formatRupees(result.medianEndValue), icon: '📈', color: '#6C63FF' },
-                { label: 'Best Case (95th)', value: formatRupees(result.bestCaseValue), icon: '🚀', color: '#00C853' },
-                { label: 'Worst Case (5th)', value: formatRupees(result.worstCaseValue), icon: '📉', color: '#FF1744' },
-                { label: 'Profit Probability', value: `${result.probabilityOfProfit}%`, icon: '🎯', color: '#FFC107' },
+                { label: 'Median Value', value: formatRupees(result.medianEndValue), icon: '📈', color: '#6C63FF', tKey: 'monteCarlo.medianValue' },
+                { label: 'Best Case (95th)', value: formatRupees(result.bestCaseValue), icon: '🚀', color: '#00C853', tKey: 'monteCarlo.bestCase' },
+                { label: 'Worst Case (5th)', value: formatRupees(result.worstCaseValue), icon: '📉', color: '#FF1744', tKey: 'monteCarlo.worstCase' },
+                { label: 'Profit Probability', value: `${result.probabilityOfProfit}%`, icon: '🎯', color: '#FFC107', tKey: 'monteCarlo.profitProbability' },
               ].map((metric, i) => (
                 <Animated.View
                   key={metric.label}
@@ -276,13 +278,13 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
                 >
                   <Text style={styles.metricIcon}>{metric.icon}</Text>
                   <Text style={[styles.metricValue, { color: metric.color }]}>{metric.value}</Text>
-                  <Text style={styles.metricLabel}>{metric.label}</Text>
+                  <Text style={styles.metricLabel}>{t(metric.tKey)}</Text>
                 </Animated.View>
               ))}
             </View>
 
             {/* ── Investment Summary ─────────────────────────── */}
-            <Card title="Investment Summary" style={styles.sectionCard}>
+            <Card title={t('monteCarlo.investmentSummary')} style={styles.sectionCard}>
               {(() => {
                 const totalContributed = result.params.initialInvestment + result.params.monthlyContribution * result.params.years * 12;
                 const medianReturn = result.medianEndValue - totalContributed;
@@ -290,17 +292,17 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
                 return (
                   <View style={styles.summaryContent}>
                     <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>Total Invested</Text>
+                      <Text style={styles.summaryLabel}>{t('monteCarlo.totalInvested')}</Text>
                       <Text style={styles.summaryValue}>{formatCurrency(totalContributed)}</Text>
                     </View>
                     <View style={styles.summaryDivider} />
                     <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>Median Final Value</Text>
+                      <Text style={styles.summaryLabel}>{t('monteCarlo.medianFinalValue')}</Text>
                       <Text style={styles.summaryValue}>{formatRupees(result.medianEndValue)}</Text>
                     </View>
                     <View style={styles.summaryDivider} />
                     <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>Median Return</Text>
+                      <Text style={styles.summaryLabel}>{t('monteCarlo.medianReturn')}</Text>
                       <Text style={[styles.summaryValue, { color: medianReturn >= 0 ? '#00C853' : '#FF1744' }]}>
                         {formatCurrency(medianReturn)} ({medianReturnPct.toFixed(1)}%)
                       </Text>
@@ -318,7 +320,7 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
             </Card>
 
             {/* ── Percentile Fan Chart (SVG) ─────────────────── */}
-            <Card title="Portfolio Growth Projection" subtitle="Percentile ranges over time" style={styles.sectionCard}>
+            <Card title={t('monteCarlo.growthProjection')} subtitle={t('monteCarlo.growthProjectionSub')} style={styles.sectionCard}>
               <View style={styles.chartContainer}>
                 {result.yearResults.length > 0 && (
                   <MonteCarloChart
@@ -348,7 +350,7 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
             </Card>
 
             {/* ── Distribution Summary ───────────────────────── */}
-            <Card title="Distribution Analysis" style={styles.sectionCard}>
+            <Card title={t('monteCarlo.distributionAnalysis')} style={styles.sectionCard}>
               {(() => {
                 const sorted = result.finalValues;
                 const _median = result.medianEndValue;
@@ -365,13 +367,13 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
                     <View style={styles.distRow}>
                       <View style={styles.distItem}>
                         <Text style={styles.distValue}>{result.probabilityOfProfit}%</Text>
-                        <Text style={styles.distLabel}>Probability of Profit</Text>
+                        <Text style={styles.distLabel}>{t('monteCarlo.probabilityOfProfit')}</Text>
                       </View>
                       <View style={styles.distItem}>
                         <Text style={[styles.distValue, { color: '#FF1744' }]}>
                           {((loseMoneyCount / total) * 100).toFixed(0)}%
                         </Text>
-                        <Text style={styles.distLabel}>Chance of Loss</Text>
+                        <Text style={styles.distLabel}>{t('monteCarlo.chanceOfLoss')}</Text>
                       </View>
                     </View>
                     <View style={styles.distRow}>
@@ -379,13 +381,13 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
                         <Text style={[styles.distValue, { color: '#00C853' }]}>
                           {((doubleCount / total) * 100).toFixed(0)}%
                         </Text>
-                        <Text style={styles.distLabel}>Chance to 2x Investment</Text>
+                        <Text style={styles.distLabel}>{t('monteCarlo.chanceTo2x')}</Text>
                       </View>
                       <View style={styles.distItem}>
                         <Text style={[styles.distValue, { color: '#6C63FF' }]}>
                           {((tripleCount / total) * 100).toFixed(0)}%
                         </Text>
-                        <Text style={styles.distLabel}>Chance to 3x Investment</Text>
+                        <Text style={styles.distLabel}>{t('monteCarlo.chanceTo3x')}</Text>
                       </View>
                     </View>
                   </View>
@@ -394,7 +396,7 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
             </Card>
 
             {/* ── Interpretations ──────────────────────────── */}
-            <Card title="What This Means" style={styles.sectionCard}>
+            <Card title={t('monteCarlo.whatThisMeans')} style={styles.sectionCard}>
               <View style={styles.interpretContent}>
                 <View style={styles.interpretRow}>
                   <Text style={styles.interpretIcon}>📊</Text>
@@ -420,30 +422,25 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
             </Card>
 
             {/* ── Parameters Used ─────────────────────────── */}
-            <Card title="Parameters Used" style={styles.sectionCard}>
+            <Card title={t('monteCarlo.parametersUsed')} style={styles.sectionCard}>
               <View style={styles.paramsContent}>
                 <View style={styles.paramRow}>
-                  <Text style={styles.paramLabel}>Initial Investment</Text>
+                  <Text style={styles.paramLabel}>{t('monteCarlo.initialInvestment')}</Text>
                   <Text style={styles.paramValue}>{formatCurrency(result.params.initialInvestment)}</Text>
                 </View>
-                <View style={styles.paramRow}>
-                  <Text style={styles.paramLabel}>Monthly SIP</Text>
+                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.monthlySip')}</Text>
                   <Text style={styles.paramValue}>{formatCurrency(result.params.monthlyContribution)}</Text>
                 </View>
-                <View style={styles.paramRow}>
-                  <Text style={styles.paramLabel}>Expected Return</Text>
+                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.expectedReturn')}</Text>
                   <Text style={styles.paramValue}>{formatPercent(result.params.annualReturn)}</Text>
                 </View>
-                <View style={styles.paramRow}>
-                  <Text style={styles.paramLabel}>Volatility</Text>
+                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.volatility')}</Text>
                   <Text style={styles.paramValue}>{formatPercent(result.params.annualVolatility)}</Text>
                 </View>
-                <View style={styles.paramRow}>
-                  <Text style={styles.paramLabel}>Time Horizon</Text>
+                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.timeHorizon')}</Text>
                   <Text style={styles.paramValue}>{result.params.years} years</Text>
                 </View>
-                <View style={styles.paramRow}>
-                  <Text style={styles.paramLabel}>Simulations</Text>
+                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.simulations')}</Text>
                   <Text style={styles.paramValue}>{result.params.simulations.toLocaleString()}</Text>
                 </View>
               </View>

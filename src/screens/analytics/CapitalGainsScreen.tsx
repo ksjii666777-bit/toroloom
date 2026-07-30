@@ -32,6 +32,7 @@ import {
 import _Animated, { _FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -205,6 +206,7 @@ const recCardStyles = StyleSheet.create({
 
 export default function CapitalGainsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const fyOptions = useMemo(() => getFiscalYearOptions(), []);
@@ -351,7 +353,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </AnimatedPressable>
             <View style={{ flex: 1, marginLeft: SPACING.md }}>
-              <Text style={[styles.title, { color: colors.text }]}>Capital Gains</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t('capitalGains.title')}</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                 Tax summary & optimization
               </Text>
@@ -396,7 +398,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
             <Ionicons name="alert-circle" size={20} color={colors.danger} />
             <Text style={[styles.errorText, { color: colors.text }]}>{error}</Text>
             <AnimatedPressable onPress={() => loadData()} haptic="light" scaleTo={0.95}>
-              <Text style={[styles.retryText, { color: colors.primary }]}>Retry</Text>
+              <Text style={[styles.retryText, { color: colors.primary }]}>{t('capitalGains.retry')}</Text>
             </AnimatedPressable>
           </View>
         )}
@@ -433,7 +435,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
                 <Text style={[styles.statValue, { color: colors.danger }]}>
                   ₹{(taxData.estimatedTaxSTCG + taxData.estimatedTaxLTCG).toLocaleString()}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Tax</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('capitalGains.totalTax')}</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <View style={[styles.statIcon, { backgroundColor: '#8B5CF618' }]}>
@@ -442,33 +444,33 @@ export default function CapitalGainsScreen({ navigation }: any) {
                 <Text style={[styles.statValue, { color: colors.text }]}>
                   ₹{taxData.taxableGains.toLocaleString()}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Taxable Gains</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('capitalGains.taxableGains')}</Text>
               </View>
             </View>
 
             {/* ── Tax Breakdown Bars ── */}
-            <Card title="Tax Breakdown" style={styles.card}>
+            <Card title={t('capitalGains.taxBreakdown')} style={styles.card}>
               <TaxBar
-                label="STCG"
+                label={t('capitalGains.stcg')}
                 amount={taxData.shortTermGains}
                 maxAmount={maxTaxAmount}
                 color="#FFC107"
               />
               <TaxBar
-                label="LTCG"
+                label={t('capitalGains.ltcg')}
                 amount={taxData.longTermGains}
                 maxAmount={maxTaxAmount}
                 color="#3B82F6"
               />
               <View style={[styles.divider, { backgroundColor: colors.divider }]} />
               <TaxBar
-                label="Realized"
+                label={t('capitalGains.realized')}
                 amount={taxData.totalRealizedGains}
                 maxAmount={maxTaxAmount}
                 color="#8B5CF6"
               />
               <TaxBar
-                label="Unrealized"
+                label={t('capitalGains.unrealized')}
                 amount={taxData.totalUnrealizedGains}
                 maxAmount={maxTaxAmount}
                 color="#10B981"
@@ -476,7 +478,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
             </Card>
 
             {/* ── Tax Liability Breakdown ── */}
-            <Card title="Estimated Tax Liability" style={styles.card}>
+            <Card title={t('capitalGains.estimatedTaxLiability')} style={styles.card}>
               <View style={styles.taxRow}>
                 <Text style={[styles.taxLabel, { color: colors.textSecondary }]}>STCG Tax (15%)</Text>
                 <Text style={[styles.taxValue, { color: '#FFC107' }]}>
@@ -493,20 +495,20 @@ export default function CapitalGainsScreen({ navigation }: any) {
               </View>
               <View style={[styles.divider, { backgroundColor: colors.divider }]} />
               <View style={styles.taxRow}>
-                <Text style={[styles.taxLabelBold, { color: colors.text }]}>Total Estimated Tax</Text>
+                <Text style={[styles.taxLabelBold, { color: colors.text }]}>{t('capitalGains.totalEstimatedTax')}</Text>
                 <Text style={[styles.taxValueBold, { color: colors.danger }]}>
                   ₹{(taxData.estimatedTaxSTCG + taxData.estimatedTaxLTCG).toLocaleString()}
                 </Text>
               </View>
               <View style={styles.taxRow}>
-                <Text style={[styles.taxLabel, { color: colors.textSecondary }]}>Trades Analyzed</Text>
+                <Text style={[styles.taxLabel, { color: colors.textSecondary }]}>{t('capitalGains.tradesAnalyzed')}</Text>
                 <Text style={[styles.taxValue, { color: colors.text }]}>{taxData.tradeCount}</Text>
               </View>
             </Card>
 
             {/* ── Portfolio Capital Gains (frontend data) ── */}
             {capitalGains && (
-              <Card title="Portfolio Capital Gains" style={styles.card}>
+              <Card title={t('capitalGains.portfolioCapitalGains')} style={styles.card}>
                 <View style={styles.taxRow}>
                   <Text style={[styles.taxLabel, { color: colors.textSecondary }]}>
                     Short-Term Gains
@@ -535,7 +537,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
                 </View>
                 <View style={[styles.divider, { backgroundColor: colors.divider }]} />
                 <View style={styles.taxRow}>
-                  <Text style={[styles.taxLabelBold, { color: colors.text }]}>Total CG</Text>
+                  <Text style={[styles.taxLabelBold, { color: colors.text }]}>{t('capitalGains.totalCg')}</Text>
                   <Text
                     style={[
                       styles.taxValueBold,
@@ -554,7 +556,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
 
             {/* ── Recommendations ── */}
             {recommendations.length > 0 && (
-              <Card title="Tax Optimization Tips" style={styles.card}>
+              <Card title={t('capitalGains.taxOptimizationTips')} style={styles.card}>
                 {recommendations.map((rec, i) => (
                   <RecommendationCard key={i} {...rec} />
                 ))}
@@ -562,7 +564,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
             )}
 
             {/* ── Tax Rules Reference ── */}
-            <Card title="Tax Rules (India FY 2025-26)" style={styles.card}>
+            <Card title={t('capitalGains.taxRules')} style={styles.card}>
               <View style={styles.ruleRow}>
                 <View style={[styles.ruleDot, { backgroundColor: '#FFC107' }]} />
                 <Text style={[styles.ruleLabel, { color: colors.text }]}>STCG (Equity)</Text>
@@ -579,14 +581,14 @@ export default function CapitalGainsScreen({ navigation }: any) {
               </View>
               <View style={styles.ruleRow}>
                 <View style={[styles.ruleDot, { backgroundColor: '#00E676' }]} />
-                <Text style={[styles.ruleLabel, { color: colors.text }]}>STCL Offset</Text>
+                <Text style={[styles.ruleLabel, { color: colors.text }]}>{t('capitalGains.stclOffset')}</Text>
                 <Text style={[styles.ruleDesc, { color: colors.textMuted }]}>
                   Can offset both STCG & LTCG
                 </Text>
               </View>
               <View style={styles.ruleRow}>
                 <View style={[styles.ruleDot, { backgroundColor: '#8B5CF6' }]} />
-                <Text style={[styles.ruleLabel, { color: colors.text }]}>LTCL Offset</Text>
+                <Text style={[styles.ruleLabel, { color: colors.text }]}>{t('capitalGains.ltclOffset')}</Text>
                 <Text style={[styles.ruleDesc, { color: colors.textMuted }]}>
                   Can offset LTCG only · Carry forward 8 years
                 </Text>

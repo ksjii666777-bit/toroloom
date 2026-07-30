@@ -1,0 +1,21 @@
+// Auto-generated from hi.ts — capitalGains namespace
+export default {
+    title: 'पूंजीगत लाभ',
+    retry: 'पुनः प्रयास',
+    totalTax: 'कुल कर',
+    taxableGains: 'कर योग्य लाभ',
+    taxBreakdown: 'कर विवरण',
+    stcg: 'STCG',
+    ltcg: 'LTCG',
+    realized: 'वसूली गई',
+    unrealized: 'अवास्तविक',
+    estimatedTaxLiability: 'अनुमानित कर देयता',
+    totalEstimatedTax: 'कुल अनुमानित कर',
+    tradesAnalyzed: 'विश्लेषित ट्रेड',
+    portfolioCapitalGains: 'पोर्टफोलियो पूंजीगत लाभ',
+    totalCg: 'कुल CG',
+    taxOptimizationTips: 'कर अनुकूलन युक्तियाँ',
+    taxRules: 'कर नियम (भारत वित्त वर्ष 2025-26)',
+    stclOffset: 'STCL ऑफ़सेट',
+    ltclOffset: 'LTCL ऑफ़सेट',
+};

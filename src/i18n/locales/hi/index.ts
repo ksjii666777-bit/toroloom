@@ -10,6 +10,7 @@ import auth from './auth';
 import bondDashboard from './bondDashboard';
 import brokerConnect from './brokerConnect';
 import calculators from './calculators';
+import capitalGains from './capitalGains';
 import cdnOptimization from './cdnOptimization';
 import commodityMarkets from './commodityMarkets';
 import community from './community';
@@ -17,6 +18,7 @@ import contractNoteUpload from './contractNoteUpload';
 import currencyMarkets from './currencyMarkets';
 import darkMode from './darkMode';
 import education from './education';
+import earningsCall from './earningsCall';
 import errors from './errors';
 import factorAnalysis from './factorAnalysis';
 import featureFlags from './featureFlags';
@@ -28,6 +30,7 @@ import ipos from './ipos';
 import kyc from './kyc';
 import landscapeSettings from './landscapeSettings';
 import market from './market';
+import monteCarlo from './monteCarlo';
 import mutualFunds from './mutualFunds';
 import notifications from './notifications';
 import onboarding from './onboarding';
@@ -66,6 +69,7 @@ const hi = {
   bondDashboard,
   brokerConnect,
   calculators,
+  capitalGains,
   cdnOptimization,
   commodityMarkets,
   community,
@@ -73,6 +77,7 @@ const hi = {
   currencyMarkets,
   darkMode,
   education,
+  earningsCall,
   errors,
   factorAnalysis,
   featureFlags,
@@ -84,6 +89,7 @@ const hi = {
   kyc,
   landscapeSettings,
   market,
+  monteCarlo,
   mutualFunds,
   notifications,
   onboarding,

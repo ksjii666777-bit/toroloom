@@ -26,6 +26,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { mockEarningsData } from '../../constants/mockData';
 import type { EarningsSummary } from '../../types';
@@ -221,6 +222,7 @@ const consensusStyles = StyleSheet.create({
 
 export default function EarningsCallScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -260,7 +262,7 @@ export default function EarningsCallScreen({ navigation }: any) {
   if (!selectedEarnings) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>No earnings data available</Text>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('earningsCall.noData')}</Text>
       </View>
     );
   }
@@ -277,8 +279,8 @@ export default function EarningsCallScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>Earnings Call</Text>
-            <Text style={styles.headerSubtitle}>AI-powered quarterly summaries</Text>
+            <Text style={styles.headerTitle}>{t('earningsCall.title')}</Text>
+            <Text style={styles.headerSubtitle}>{t('earningsCall.subtitle')}</Text>
           </View>
           <Pressable onPress={handleShare} style={styles.shareBtn}>
             <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
@@ -343,7 +345,7 @@ export default function EarningsCallScreen({ navigation }: any) {
 
           {/* Confidence bar */}
           <View style={styles.confidenceRow}>
-            <Text style={styles.confidenceLabel}>AI Confidence</Text>
+            <Text style={styles.confidenceLabel}>{t('earningsCall.aiConfidence')}</Text>
             <View style={[styles.confidenceBar, { backgroundColor: colors.bgInput }]}>
               <View style={[styles.confidenceFill, {
                 width: `${selectedEarnings.confidence}%`,
@@ -358,7 +360,7 @@ export default function EarningsCallScreen({ navigation }: any) {
           {/* Market Reaction */}
           <View style={[styles.reactionRow, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
             <View style={styles.reactionItem}>
-              <Text style={styles.reactionLabel}>Pre-Market</Text>
+              <Text style={styles.reactionLabel}>{t('earningsCall.preMarket')}</Text>
               <Text style={[styles.reactionValue, {
                 color: selectedEarnings.marketReaction.preMarketChange >= 0 ? colors.marketUp : colors.marketDown,
               }]}>
@@ -367,7 +369,7 @@ export default function EarningsCallScreen({ navigation }: any) {
             </View>
             <View style={styles.reactionDivider} />
             <View style={styles.reactionItem}>
-              <Text style={styles.reactionLabel}>Day Change</Text>
+              <Text style={styles.reactionLabel}>{t('earningsCall.dayChange')}</Text>
               <Text style={[styles.reactionValue, {
                 color: selectedEarnings.marketReaction.dayChange >= 0 ? colors.marketUp : colors.marketDown,
               }]}>
@@ -376,7 +378,7 @@ export default function EarningsCallScreen({ navigation }: any) {
             </View>
             <View style={styles.reactionDivider} />
             <View style={styles.reactionItem}>
-              <Text style={styles.reactionLabel}>Volume Surge</Text>
+              <Text style={styles.reactionLabel}>{t('earningsCall.volumeSurge')}</Text>
               <Text style={[styles.reactionValue, { color: colors.marketUp }]}>
                 +{selectedEarnings.marketReaction.volumeSurge}%
               </Text>
@@ -385,37 +387,37 @@ export default function EarningsCallScreen({ navigation }: any) {
         </LinearGradient>
 
         {/* Key Metrics Grid */}
-        <Text style={styles.sectionTitle}>Key Metrics</Text>
+        <Text style={styles.sectionTitle}>{t('earningsCall.keyMetrics')}</Text>
         <View style={styles.metricsGrid}>
           <MetricCard
-            label="Revenue"
+            label={t('earningsCall.metricRevenue')}
             value={`₹${formatCr(m.revenue)}`}
             change={m.revenueGrowth}
             sublabel={`Beat: ${m.revenueBeat !== null ? formatPct(m.revenueBeat) : 'N/A'}`}
           />
           <MetricCard
-            label="Net Profit"
+            label={t('earningsCall.metricNetProfit')}
             value={`₹${formatCr(m.netProfit)}`}
             change={m.profitGrowth}
             sublabel={`Beat: ${m.profitBeat !== null ? formatPct(m.profitBeat) : 'N/A'}`}
           />
           <MetricCard
-            label="EPS"
+            label={t('earningsCall.metricEps')}
             value={`₹${m.eps.toFixed(2)}`}
             change={m.epsGrowth}
           />
           <MetricCard
-            label="EBITDA"
+            label={t('earningsCall.metricEbitda')}
             value={`₹${formatCr(m.ebitda)}`}
             change={m.ebitdaMargin}
             sublabel={`Margin: ${m.ebitdaMargin.toFixed(1)}%`}
           />
           <MetricCard
-            label="Operating Margin"
+            label={t('earningsCall.metricOpMargin')}
             value={`${m.operatingMargin.toFixed(1)}%`}
           />
           <MetricCard
-            label="Net Margin"
+            label={t('earningsCall.metricNetMargin')}
             value={`${m.netMargin.toFixed(1)}%`}
           />
         </View>
@@ -430,7 +432,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               <View style={[styles.sectionIcon, { backgroundColor: colors.primary + '20' }]}>
                 <Ionicons name="bulb" size={16} color={colors.primary} />
               </View>
-              <Text style={styles.sectionCardTitle}>Key Takeaways</Text>
+              <Text style={styles.sectionCardTitle}>{t('earningsCall.keyTakeaways')}</Text>
             </View>
             <Ionicons
               name={expandedSections.takeaways ? 'chevron-up' : 'chevron-down'}
@@ -460,7 +462,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               <View style={[styles.sectionIcon, { backgroundColor: '#8B5CF620' }]}>
                 <Ionicons name="megaphone" size={16} color="#8B5CF6" />
               </View>
-              <Text style={styles.sectionCardTitle}>Management Highlights</Text>
+              <Text style={styles.sectionCardTitle}>{t('earningsCall.managementHighlights')}</Text>
             </View>
             <Ionicons
               name={expandedSections.highlights ? 'chevron-up' : 'chevron-down'}
@@ -484,14 +486,14 @@ export default function EarningsCallScreen({ navigation }: any) {
 
         {/* Analyst Consensus */}
         <View style={[styles.analystCard, { borderColor: colors.border }]}>
-          <Text style={styles.sectionTitle}>Analyst Outlook</Text>
+          <Text style={styles.sectionTitle}>{t('earningsCall.analystOutlook')}</Text>
           <View style={styles.analystRow}>
             <View style={styles.analystLeft}>
               <ConsensusBadge consensus={selectedEarnings.analystConsensus} />
               <Text style={styles.analystFirms}>Based on 28 analyst ratings</Text>
             </View>
             <View style={styles.analystRight}>
-              <Text style={styles.analystPriceLabel}>Target Price</Text>
+              <Text style={styles.analystPriceLabel}>{t('earningsCall.targetPrice')}</Text>
               <Text style={[styles.analystPrice, { color: colors.text }]}>
                 ₹{selectedEarnings.analystTargetPrice.toLocaleString('en-IN')}
               </Text>
@@ -512,7 +514,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               <View style={[styles.sectionIcon, { backgroundColor: colors.marketUp + '20' }]}>
                 <Ionicons name="rocket" size={16} color={colors.marketUp} />
               </View>
-              <Text style={styles.sectionCardTitle}>Growth Drivers</Text>
+              <Text style={styles.sectionCardTitle}>{t('earningsCall.growthDrivers')}</Text>
             </View>
             <Ionicons
               name={expandedSections.drivers ? 'chevron-up' : 'chevron-down'}
@@ -542,7 +544,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               <View style={[styles.sectionIcon, { backgroundColor: colors.marketDown + '20' }]}>
                 <Ionicons name="warning" size={16} color={colors.marketDown} />
               </View>
-              <Text style={styles.sectionCardTitle}>Risk Factors</Text>
+              <Text style={styles.sectionCardTitle}>{t('earningsCall.riskFactors')}</Text>
             </View>
             <Ionicons
               name={expandedSections.risks ? 'chevron-up' : 'chevron-down'}
@@ -572,7 +574,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               <View style={[styles.sectionIcon, { backgroundColor: '#06B6D420' }]}>
                 <Ionicons name="people" size={16} color="#06B6D4" />
               </View>
-              <Text style={styles.sectionCardTitle}>Peer Comparison</Text>
+              <Text style={styles.sectionCardTitle}>{t('earningsCall.peerComparison')}</Text>
             </View>
             <Ionicons
               name={expandedSections.peerComparison ? 'chevron-up' : 'chevron-down'}
@@ -584,10 +586,10 @@ export default function EarningsCallScreen({ navigation }: any) {
             <View style={styles.sectionBody}>
               {/* Table Header */}
               <View style={[styles.peerHeader, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.peerCell, styles.peerSymbolCol, { color: colors.textMuted }]}>Company</Text>
-                <Text style={[styles.peerCell, { color: colors.textMuted }]}>Revenue</Text>
-                <Text style={[styles.peerCell, { color: colors.textMuted }]}>Profit</Text>
-                <Text style={[styles.peerCell, { color: colors.textMuted }]}>Rev Gr</Text>
+                <Text style={[styles.peerCell, styles.peerSymbolCol, { color: colors.textMuted }]}>{t('earningsCall.peerCompany')}</Text>
+                <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerRevenue')}</Text>
+                <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerProfit')}</Text>
+                <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerRevGr')}</Text>
               </View>
 
               {selectedEarnings.peerComparison.map((p, _i) => {
@@ -607,7 +609,7 @@ export default function EarningsCallScreen({ navigation }: any) {
                       </Text>
                       {isCurrent && (
                         <View style={[styles.youBadge, { backgroundColor: colors.primary + '20' }]}>
-                          <Text style={[styles.youBadgeText, { color: colors.primary }]}>YOU</Text>
+                          <Text style={[styles.youBadgeText, { color: colors.primary }]}>{t('earningsCall.youLabel')}</Text>
                         </View>
                       )}
                     </View>
@@ -647,10 +649,10 @@ export default function EarningsCallScreen({ navigation }: any) {
             <View style={styles.sectionBody}>
               {/* Header */}
               <View style={[styles.histHeader, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.histCell, styles.histQuarterCol, { color: colors.textMuted }]}>Quarter</Text>
-                <Text style={[styles.histCell, { color: colors.textMuted }]}>Revenue</Text>
-                <Text style={[styles.histCell, { color: colors.textMuted }]}>Profit</Text>
-                <Text style={[styles.histCell, { color: colors.textMuted }]}>EPS</Text>
+                <Text style={[styles.histCell, styles.histQuarterCol, { color: colors.textMuted }]}>{t('earningsCall.historyQuarter')}</Text>
+                <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyRevenue')}</Text>
+                <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyProfit')}</Text>
+                <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyEps')}</Text>
               </View>
 
               {selectedEarnings.historicalQuarters.map((q, i) => (

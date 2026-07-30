@@ -1,0 +1,21 @@
+// Auto-generated from en.ts — capitalGains namespace
+export default {
+    title: 'Capital Gains',
+    retry: 'Retry',
+    totalTax: 'Total Tax',
+    taxableGains: 'Taxable Gains',
+    taxBreakdown: 'Tax Breakdown',
+    stcg: 'STCG',
+    ltcg: 'LTCG',
+    realized: 'Realized',
+    unrealized: 'Unrealized',
+    estimatedTaxLiability: 'Estimated Tax Liability',
+    totalEstimatedTax: 'Total Estimated Tax',
+    tradesAnalyzed: 'Trades Analyzed',
+    portfolioCapitalGains: 'Portfolio Capital Gains',
+    totalCg: 'Total CG',
+    taxOptimizationTips: 'Tax Optimization Tips',
+    taxRules: 'Tax Rules (India FY 2025-26)',
+    stclOffset: 'STCL Offset',
+    ltclOffset: 'LTCL Offset',
+};
