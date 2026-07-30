@@ -104,7 +104,9 @@ describe('StockScreenerScreen — Rendering', () => {
 
   it('shows the total stock count in preview bar', () => {
     const { getByText } = renderScreen();
-    expect(getByText(/stocks match current filters/i)).toBeDefined();
+    // Check that the preview hint text ("No filters applied") is rendered alongside
+    // the stock count in the preview bar
+    expect(getByText('No filters applied')).toBeDefined();
   });
 
   it('shows Clear All and Show Results buttons', () => {

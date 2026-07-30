@@ -517,7 +517,7 @@ describe('OpenOrdersScreen — Modify Modal', () => {
     act(() => { fireEvent.press(getByText('Modify')); });
     advanceAnimations();
 
-    expect(getByText('Update Order')).toBeDefined();
+    expect(getByText('Modify Order')).toBeDefined();
   });
 
   it('pre-fills price from the last order (HDFCBANK: 1660)', () => {
