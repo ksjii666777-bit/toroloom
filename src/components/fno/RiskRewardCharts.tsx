@@ -16,9 +16,8 @@
  * ============================================================================
  */
 
-import React, { _useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import _Svg, { _Rect, _Line, Text as _SvgText } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 

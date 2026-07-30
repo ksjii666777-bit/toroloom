@@ -26,7 +26,7 @@ import {
   Image,
   StyleSheet,
   LayoutAnimation,
-  _Platform,
+  Platform,
   Animated,
   TouchableOpacity,
   Text,

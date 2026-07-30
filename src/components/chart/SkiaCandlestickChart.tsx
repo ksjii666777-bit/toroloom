@@ -39,7 +39,6 @@ import {
   computePriceRange,
   computeMaxVolume,
   computeYLabels,
-  _computeXLabels,
   computeHeikinAshi,
   computeMA,
   createGetX,
@@ -48,8 +47,6 @@ import {
   isBullish,
   CANDLE_WIDTH_RATIO,
   CANDLE_MIN_WIDTH,
-  type _ChartLayout,
-  type _PriceRange,
 } from './SkiaChartUtils';
 
 // ============================================================================
@@ -116,7 +113,7 @@ export default function SkiaCandlestickChart({
   chartHeight: externalChartHeight,
 }: SkiaCandlestickChartProps) {
   const { colors } = useTheme();
-  const { focusedIndex, _setFocusedIndex } = useChartCrosshair();
+  const { focusedIndex } = useChartCrosshair();
 
   // ── Apply Heikin-Ashi if selected ──
   const processedData = useMemo(() => {

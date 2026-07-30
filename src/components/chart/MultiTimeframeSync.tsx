@@ -37,7 +37,6 @@ export default function MultiTimeframeSync({
   timeframeData,
   activeTimeframe,
   onTimeframeSelect,
-  _symbol,
 }: MultiTimeframeSyncProps) {
   const { colors } = useTheme();
   const { focusedIndex } = useChartCrosshair();
@@ -115,7 +114,8 @@ function MiniChart({ data, width, height, colors, isActive }: MiniChartProps) {
   const chartW = width - pad * 2;
   const chartH = height - pad * 2;
 
-  const { _minP, _maxP, path } = useMemo(() => {
+  const { path } = useMemo(() => {
+    let minP = 0, maxP = 1;
     if (!data || data.length < 2) {
       return { minP: 0, maxP: 1, path: '' };
     }

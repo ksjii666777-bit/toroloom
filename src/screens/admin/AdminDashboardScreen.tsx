@@ -12,7 +12,7 @@
  * ============================================================================
  */
 
-import React, { _useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,

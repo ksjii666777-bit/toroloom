@@ -4,7 +4,7 @@
 // real-time, with accelerating price updates and tick count metrics.
 // ============================================================================
 
-import React, { useEffect, useRef, _useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';

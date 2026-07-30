@@ -28,7 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
-import Svg, { Rect, Line, _Circle, Text as SvgText } from 'react-native-svg';
+import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { scanMarket, type ScannerResult, type StrategySuggestion} from '../../services/optionsScanner';
 import type { OptionChain } from '../../types';
 
