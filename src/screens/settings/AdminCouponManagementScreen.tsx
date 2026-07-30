@@ -41,6 +41,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { couponApi, AdminUsageResponse } from '../../services/api/coupons';
 import type { CouponCode } from '../../types';
@@ -162,12 +163,12 @@ function CouponListItem({
             </Text>
             {!coupon.isActive && (
               <View style={[s.itemBadge, { backgroundColor: colors.danger + '20' }]}>
-                <Text style={[s.itemBadgeText, { color: colors.danger }]}>DISABLED</Text>
+                <Text style={[s.itemBadgeText, { color: colors.danger }]}>{t('adminCoupon.badgeDisabled')}</Text>
               </View>
             )}
             {isExpired && (
               <View style={[s.itemBadge, { backgroundColor: colors.danger + '20' }]}>
-                <Text style={[s.itemBadgeText, { color: colors.danger }]}>EXPIRED</Text>
+                <Text style={[s.itemBadgeText, { color: colors.danger }]}>{t('adminCoupon.badgeExpired')}</Text>
               </View>
             )}
           </View>
@@ -192,7 +193,7 @@ function CouponListItem({
               <View style={s.metaChip}>
                 <Ionicons name="calendar-outline" size={11} color={isExpired ? colors.danger : colors.textMuted} />
                 <Text style={[s.metaChipText, isExpired && { color: colors.danger }]}>
-                  {isExpired ? 'Expired' : `${daysLeft}d`}
+                  {isExpired ? t('adminCoupon.labelExpired') : `${daysLeft}d`}
                 </Text>
               </View>
             )}
@@ -350,6 +351,7 @@ function CouponFormModal({
   onClose: () => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const s = useMemo(() => createFormStyles(colors), [colors]);
   const isEditing = !!initialData;
   const [form, setForm] = useState<CouponFormData>(EMPTY_FORM);
@@ -454,10 +456,10 @@ function CouponFormModal({
           <View style={s.modalHeader}>
             <View>
               <Text style={[s.modalTitle, { color: colors.text }]}>
-                {isEditing ? 'Edit Coupon' : 'Create Coupon'}
+                {isEditing ? t('adminCoupon.editCoupon') : t('adminCoupon.createCoupon')}
               </Text>
               <Text style={[s.modalSubtitle, { color: colors.textMuted }]}>
-                {isEditing ? `Editing ${initialData?.code}` : 'Add a new promo code'}
+                {isEditing ? t('adminCoupon.editingCode', { code: initialData?.code }) : t('adminCoupon.addNewPromo')}
               </Text>
             </View>
             <AnimatedPressable onPress={onClose} haptic="light" scaleTo={0.9}>
@@ -468,8 +470,7 @@ function CouponFormModal({
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.modalScroll}>
-            {/* Type Selector */}
-            <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>Coupon Type</Text>
+            {/* Type Selector */}              <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>{t('adminCoupon.couponType')}</Text>
             <View style={s.typeRow}>
               {COUPON_TYPES.map(t => (
                 <AnimatedPressable
@@ -575,7 +576,7 @@ function CouponFormModal({
             <View style={s.modalActions}>
               <AnimatedPressable onPress={onClose} haptic="light" scaleTo={0.97} style={{ flex: 1 }}>
                 <View style={[s.cancelBtn, { borderColor: colors.border }]}>
-                  <Text style={[s.cancelBtnText, { color: colors.text }]}>Cancel</Text>
+                  <Text style={[s.cancelBtnText, { color: colors.text }]}>{t('adminCoupon.cancel')}</Text>
                 </View>
               </AnimatedPressable>
               <AnimatedPressable onPress={handleSave} haptic="medium" scaleTo={0.97} style={{ flex: 1 }} disabled={saving}>
@@ -583,7 +584,7 @@ function CouponFormModal({
                   {saving ? (
                     <ActivityIndicator size="small" color="#fff" />
                   ) : (
-                    <Text style={s.saveBtnText}>{isEditing ? 'Update Coupon' : 'Create Coupon'}</Text>
+                    <Text style={s.saveBtnText}>{isEditing ? t('adminCoupon.updateCoupon') : t('adminCoupon.createCouponBtn')}</Text>
                   )}
                 </LinearGradient>
               </AnimatedPressable>
@@ -916,9 +917,9 @@ function UsageAnalyticsTab({
         <View style={[s.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="analytics-outline" size={36} color={colors.textMuted} />
         </View>
-        <Text style={[s.emptyTitle, { color: colors.text }]}>No Usage Data</Text>
+        <Text style={[s.emptyTitle, { color: colors.text }]}>{t('adminCoupon.noUsageData')}</Text>
         <Text style={[s.emptySubtitle, { color: colors.textMuted }]}>
-          Coupons haven't been used by any users yet.
+          {t('adminCoupon.noUsageDesc')}
         </Text>
       </View>
     );
@@ -932,28 +933,28 @@ function UsageAnalyticsTab({
   return (
     <>
       {/* Summary Cards */}
-      <Text style={[s.listTitle, { color: colors.text }]}>Overview</Text>
+      <Text style={[s.listTitle, { color: colors.text }]}>{t('adminCoupon.overview')}</Text>
       <View style={s.statsRow}>
         <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={[s.statIcon, { backgroundColor: colors.marketUp + '20' }]}>
             <Ionicons name="flash" size={18} color={colors.marketUp} />
           </View>
           <Text style={[s.statValue, { color: colors.text }]}>{summary.totalUsages}</Text>
-          <Text style={[s.statLabel, { color: colors.textMuted }]}>Total Uses</Text>
+          <Text style={[s.statLabel, { color: colors.textMuted }]}>{t('adminCoupon.statTotalUses')}</Text>
         </View>
         <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={[s.statIcon, { backgroundColor: colors.warning + '20' }]}>
             <Ionicons name="people" size={18} color={colors.warning} />
           </View>
           <Text style={[s.statValue, { color: colors.text }]}>{summary.uniqueUsers}</Text>
-          <Text style={[s.statLabel, { color: colors.textMuted }]}>Users</Text>
+          <Text style={[s.statLabel, { color: colors.textMuted }]}>{t('adminCoupon.statUsers')}</Text>
         </View>
         <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={[s.statIcon, { backgroundColor: colors.primary + '20' }]}>
             <Ionicons name="pricetag" size={18} color={colors.primary} />
           </View>
           <Text style={[s.statValue, { color: colors.text }]}>{summary.uniqueCoupons}</Text>
-          <Text style={[s.statLabel, { color: colors.textMuted }]}>Coupons</Text>
+          <Text style={[s.statLabel, { color: colors.textMuted }]}>{t('adminCoupon.statCoupons')}</Text>
         </View>
       </View>
 
@@ -979,7 +980,7 @@ function UsageAnalyticsTab({
             borderRadius: BORDER_RADIUS.md,
           }}>
             <Ionicons name="download-outline" size={18} color="#fff" />
-            <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.md, color: '#fff' }}>Export CSV</Text>
+            <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.md, color: '#fff' }}>{t('adminCoupon.exportCsv')}</Text>
           </LinearGradient>
         </AnimatedPressable>
       </View>
@@ -988,7 +989,7 @@ function UsageAnalyticsTab({
       <View style={[s.totalDiscountCard, { backgroundColor: colors.marketUp + '10', borderColor: colors.marketUp + '30' }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Ionicons name="trending-down" size={20} color={colors.marketUp} />
-          <Text style={{ ...FONTS.medium, fontSize: FONTS.size.sm, color: colors.textSecondary }}>Total Discount Given</Text>
+          <Text style={{ ...FONTS.medium, fontSize: FONTS.size.sm, color: colors.textSecondary }}>{t('adminCoupon.totalDiscountGiven')}</Text>
         </View>
         <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xxl, color: colors.marketUp, marginTop: 4 }}>
           ₹{summary.totalDiscountAmount.toLocaleString('en-IN')}
@@ -1019,7 +1020,7 @@ function UsageAnalyticsTab({
           <UsageBarChart
             data={monthlyData}
             color={colors.primary}
-            label="Uses Over Time (Monthly)"
+            label={t('adminCoupon.usageOverTime')}
             formatLabel={(v) => `${v}`}
           />
         );
@@ -1115,7 +1116,7 @@ function UsageAnalyticsTab({
       ))}
 
       {/* Recent Usage List */}
-      <Text style={[s.listTitle, { color: colors.text, marginTop: 12 }]}>Recent Usage</Text>
+      <Text style={[s.listTitle, { color: colors.text, marginTop: 12 }]}>{t('adminCoupon.recentUsageTitle')}</Text>
       {usages.slice(0, 50).map((usage, i) => (
         <Animated.View
           key={usage.id}
@@ -1166,6 +1167,7 @@ function UsageAnalyticsTab({
 
 export default function AdminCouponManagementScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const isAdmin = useAuthStore(s => s.isAdmin);
 
@@ -1174,12 +1176,12 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
     useCallback(() => {
       if (!isAdmin) {
         Alert.alert(
-          'Access Denied',
-          'Only administrators can access the Coupon Manager.',
-          [{ text: 'Go Back', onPress: () => navigation.goBack() }],
+          t('adminCoupon.accessDenied'),
+          t('adminCoupon.accessDeniedMsg'),
+          [{ text: t('adminCoupon.goBack'), onPress: () => navigation.goBack() }],
         );
       }
-    }, [isAdmin, navigation]),
+    }, [isAdmin, navigation, t]),
   );
 
   const [coupons, setCoupons] = useState<CouponCode[]>([]);
@@ -1229,12 +1231,12 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
 
   const handleDelete = useCallback((coupon: CouponCode) => {
     Alert.alert(
-      'Delete Coupon',
-      `Are you sure you want to delete "${coupon.code}"?\n\nThis action cannot be undone.`,
+      t('adminCoupon.deleteTitle'),
+      t('adminCoupon.deleteMsg', { code: coupon.code }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('adminCoupon.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('adminCoupon.deleteBtn'),
           style: 'destructive',
           onPress: async () => {
             const ok = await couponApi.deleteCoupon(coupon.code);
@@ -1249,7 +1251,7 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
         },
       ],
     );
-  }, []);
+  }, [t]);
 
   const handleSave = useCallback(
     async (formData: CouponFormData) => {
@@ -1351,7 +1353,7 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
           </View>
         </AnimatedPressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.title, { color: colors.text }]}>Coupon Manager</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('adminCoupon.title')}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>Admin • {activeTab === 'coupons' ? `${coupons.length} coupons` : `${usageData?.summary.totalUsages || 0} uses`}</Text>
         </View>
         {activeTab === 'coupons' && (
@@ -1373,7 +1375,7 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
         >
           <View style={[styles.toggleBtn, activeTab === 'coupons' && { backgroundColor: colors.primary }]}>
             <Ionicons name="pricetag" size={16} color={activeTab === 'coupons' ? '#fff' : colors.textMuted} />
-            <Text style={[styles.toggleText, { color: activeTab === 'coupons' ? '#fff' : colors.textMuted }]}>Coupons</Text>
+            <Text style={[styles.toggleText, { color: activeTab === 'coupons' ? '#fff' : colors.textMuted }]}>{t('adminCoupon.tabCoupons')}</Text>
           </View>
         </AnimatedPressable>
         <AnimatedPressable
@@ -1384,7 +1386,7 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
         >
           <View style={[styles.toggleBtn, activeTab === 'usage' && { backgroundColor: colors.primary }]}>
             <Ionicons name="analytics" size={16} color={activeTab === 'usage' ? '#fff' : colors.textMuted} />
-            <Text style={[styles.toggleText, { color: activeTab === 'usage' ? '#fff' : colors.textMuted }]}>Usage</Text>
+            <Text style={[styles.toggleText, { color: activeTab === 'usage' ? '#fff' : colors.textMuted }]}>{t('adminCoupon.tabUsage')}</Text>
           </View>
         </AnimatedPressable>
       </View>
@@ -1404,7 +1406,7 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
           loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading coupons...</Text>
+              <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('adminCoupon.loadingCoupons')}</Text>
             </View>
           ) : (
             <>
@@ -1415,21 +1417,21 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
                     <Ionicons name="pricetag" size={18} color={colors.marketUp} />
                   </View>
                   <Text style={[styles.statValue, { color: colors.text }]}>{totalActive}</Text>
-                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Active</Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('adminCoupon.statActive')}</Text>
                 </View>
                 <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                   <View style={[styles.statIcon, { backgroundColor: colors.warning + '20' }]}>
                     <Ionicons name="ban" size={18} color={colors.warning} />
                   </View>
                   <Text style={[styles.statValue, { color: colors.text }]}>{totalDisabled}</Text>
-                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Disabled</Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('adminCoupon.statDisabled')}</Text>
                 </View>
                 <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                   <View style={[styles.statIcon, { backgroundColor: colors.danger + '20' }]}>
                     <Ionicons name="calendar" size={18} color={colors.danger} />
                   </View>
                   <Text style={[styles.statValue, { color: colors.text }]}>{totalExpired}</Text>
-                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Expired</Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('adminCoupon.statExpired')}</Text>
                 </View>
               </View>
 
@@ -1438,7 +1440,7 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
                 <View style={[styles.seedBtn, { borderColor: colors.border }]}>
                   <Ionicons name="refresh" size={16} color={colors.primary} />
                   <Text style={[styles.seedBtnText, { color: colors.primary }]}>
-                    {seeding ? 'Seeding...' : 'Seed Default Coupons'}
+                    {seeding                      ? t('adminCoupon.seeding') : t('adminCoupon.seedDefault')}
                   </Text>
                 </View>
               </AnimatedPressable>
@@ -1449,15 +1451,15 @@ export default function AdminCouponManagementScreen({ navigation }: any) {
                   <View style={[styles.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                     <Ionicons name="pricetag-outline" size={36} color={colors.textMuted} />
                   </View>
-                  <Text style={[styles.emptyTitle, { color: colors.text }]}>No Coupons Yet</Text>
+                  <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('adminCoupon.noCouponsYet')}</Text>
                   <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                    Tap the + button to create your first promo code.
+                    {t('adminCoupon.noCouponsDesc')}
                   </Text>
                 </View>
               ) : (
                 <>
                   <Text style={[styles.listTitle, { color: colors.text }]}>
-                    All Coupons ({coupons.length})
+                    {t('adminCoupon.allCoupons', { count: coupons.length })}
                   </Text>
                   {coupons.map((coupon, i) => (
                     <CouponListItem

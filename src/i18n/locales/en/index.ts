@@ -1,6 +1,7 @@
 // Auto-generated — merges all namespace files into a single export
 import abTestRunner from './abTestRunner';
 import accessibility from './accessibility';
+import adminCoupon from './adminCoupon';
 import advancedMarkets from './advancedMarkets';
 import ai from './ai';
 import alerts from './alerts';
@@ -60,6 +61,7 @@ import widgetSettings from './widgetSettings';
 const en = {
   abTestRunner,
   accessibility,
+  adminCoupon,
   advancedMarkets,
   ai,
   alerts,
