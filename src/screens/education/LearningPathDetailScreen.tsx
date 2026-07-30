@@ -49,15 +49,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
     });
   }, [pathId, fetchCourses, courses]);
 
-  // Fetch lesson data for progress calculation
-  useEffect(() => {
-    if (pathCourses.length > 0) {
-      pathCourses.forEach((c: any) => {
-        // Try to fetch lessons for this course to populate progress
-        educationApi.getCourse(c.id).catch(() => {});
-      });
-    }
-  }, [pathCourses]);
+
 
   // Calculate overall progress
   const pathProgress = useMemo(() => {

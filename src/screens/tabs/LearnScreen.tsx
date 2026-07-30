@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useEducationStore } from '../../store/educationStore';
-import { educationApi } from '../../services/api/education';
+
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -20,20 +20,10 @@ export default function LearnScreen({ navigation }: any) {
   const { courses, fetchCourses } = useEducationStore();
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [totalPaths, setTotalPaths] = useState(0);
-  const [totalLearners, setTotalLearners] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
     fetchCourses();
-    // Try to get learning paths stats from backend (falls back to mock)
-    educationApi.getCourses().then(c => {
-      const learners = c.reduce((s, course) => s + course.enrolledCount, 0);
-      setTotalPaths(Math.ceil(c.length / 3)); // Approx paths based on courses
-      setTotalLearners(learners);
-    }).catch(() => {
-      // Fallback: keep defaults
-    });
     return () => clearTimeout(timer);
   }, [fetchCourses]);
 
@@ -172,7 +162,7 @@ export default function LearnScreen({ navigation }: any) {
               {/* Stats row */}
               <View style={{ flexDirection: 'row', marginTop: SPACING.lg, gap: SPACING.sm }}>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
-                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{totalPaths || Math.ceil(courses.length / 3) || 3}</Text>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{Math.ceil(courses.length / 3) || 3}</Text>
                   <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Paths</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
@@ -184,7 +174,7 @@ export default function LearnScreen({ navigation }: any) {
                   <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Lessons</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
-                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{totalLearners >= 1000 ? `${(totalLearners / 1000).toFixed(0)}K` : totalLearners || '5K'}</Text>
+                  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{(courses.reduce((s, p) => s + p.enrolledCount, 0)) >= 1000 ? `${(courses.reduce((s, p) => s + p.enrolledCount, 0) / 1000).toFixed(0)}K` : '5K'}</Text>
                   <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Learners</Text>
                 </View>
               </View>
