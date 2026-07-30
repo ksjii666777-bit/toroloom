@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
 import { paymentsApi } from '../../services/api/payments';
@@ -20,6 +21,7 @@ const { width } = Dimensions.get('window');
 
 export default function UPIScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { user, updateBalance } = useAuthStore();
   const { addTransaction } = useFundStore();
@@ -64,31 +66,31 @@ export default function UPIScreen({ navigation }: any) {
 
   const handlePay = useCallback(() => {
     if (!payeeUPI || !payeeUPI.includes('@')) {
-      Alert.alert('Invalid UPI ID', 'Please enter a valid UPI ID (e.g., name@bank).');
+      Alert.alert(t('funds.upiInvalidId'), t('funds.upiInvalidIdMsg'));
       return;
     }
     if (displayAmount < 1) {
-      Alert.alert('Enter Amount', 'Please enter an amount to pay.');
+      Alert.alert(t('funds.upiEnterAmount'), t('funds.upiEnterAmountMsg'));
       return;
     }
     if (displayAmount > 100000) {
-      Alert.alert('Limit Exceeded', 'Maximum UPI transaction limit is ₹1,00,000 per transaction.');
+      Alert.alert(t('funds.upiLimitExceeded'), t('funds.upiLimitExceededMsg'));
       return;
     }
     if (displayAmount > currentBalance) {
-      Alert.alert('Insufficient Balance', 'You do not have enough balance for this payment.');
+      Alert.alert(t('funds.upiInsufficientBalance'), t('funds.upiInsufficientBalanceMsg'));
       return;
     }
 
     const contactName = RECENT_UPI_CONTACTS.find(c => c.upiId === payeeUPI)?.name || payeeUPI;
 
     Alert.alert(
-      'Confirm Payment',
-      `Pay ${formatCurrency(displayAmount)} to ${contactName} (${payeeUPI})?`,
+      t('funds.upiConfirmPayment'),
+      `${t('funds.upiPayPrefix')} ${formatCurrency(displayAmount)} ${t('funds.upiTo')} ${contactName} (${payeeUPI})?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('funds.upiCancel'), style: 'cancel' },
         {
-          text: 'Pay ₹' + displayAmount.toLocaleString('en-IN'),
+          text: `${t('funds.upiPayPrefix')} ₹${displayAmount.toLocaleString('en-IN')}`,
           style: 'default',
           onPress: () => {
             setIsProcessing(true);
@@ -150,7 +152,7 @@ export default function UPIScreen({ navigation }: any) {
                 });
                 setIsSuccess(true);
               } catch (error: any) {
-                Alert.alert('Payment Failed', error?.message || 'Something went wrong.');
+                Alert.alert(t('funds.paymentFailed'), error?.message || t('errors.somethingWentWrong'));
               } finally {
                 setIsProcessing(false);
               }
@@ -159,7 +161,7 @@ export default function UPIScreen({ navigation }: any) {
         },
       ]
     );
-  }, [payeeUPI, displayAmount, currentBalance, selectedUPI, updateBalance, addTransaction, user]);
+  }, [payeeUPI, displayAmount, currentBalance, selectedUPI, updateBalance, addTransaction, user, t]);
 
   const handleDone = useCallback(() => {
     navigation.goBack();
@@ -171,7 +173,7 @@ export default function UPIScreen({ navigation }: any) {
 
   const handleAddUPI = useCallback(() => {
     if (!newUPIId.includes('@')) {
-      Alert.alert('Invalid UPI ID', 'Please enter a valid UPI ID (e.g., name@bank).');
+      Alert.alert(t('funds.upiInvalidId'), t('funds.upiInvalidIdMsg'));
       return;
     }
     const newAccount: UPILinkedAccount = {
@@ -183,8 +185,8 @@ export default function UPIScreen({ navigation }: any) {
     setUpiAccounts(prev => [...prev, newAccount]);
     setNewUPIId('');
     setShowAddUPI(false);
-    Alert.alert('UPI ID Added', `${newUPIId} has been linked successfully.`);
-  }, [newUPIId]);
+    Alert.alert(t('funds.upiAdded'), t('funds.upiAddedMsg', { upiId: newUPIId }));
+  }, [newUPIId, t]);
 
   if (isSuccess) {
     return (
@@ -195,29 +197,29 @@ export default function UPIScreen({ navigation }: any) {
               <Ionicons name="checkmark-circle" size={48} color={COLORS.white} />
             </LinearGradient>
           </View>
-          <Text style={styles.successTitle}>Payment Successful!</Text>
+          <Text style={styles.successTitle}>{t('funds.paymentSuccessful')}</Text>
           <Text style={styles.successAmount}>{formatCurrency(displayAmount)}</Text>
           <Text style={styles.successDesc}>
-            paid to {RECENT_UPI_CONTACTS.find(c => c.upiId === payeeUPI)?.name || payeeUPI}
+            {t('funds.upiPaidTo', { name: RECENT_UPI_CONTACTS.find(c => c.upiId === payeeUPI)?.name || payeeUPI })}
           </Text>
           <View style={styles.successDetails}>
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>Transaction ID</Text>
+              <Text style={styles.successLabel}>{t('funds.upiTransactionId')}</Text>
               <Text style={styles.successValue}>{txId}</Text>
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>From</Text>
+              <Text style={styles.successLabel}>{t('funds.upiFrom')}</Text>
               <Text style={styles.successValue}>{selectedUPI}</Text>
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>To</Text>
+              <Text style={styles.successLabel}>{t('funds.upiTo')}</Text>
               <Text style={styles.successValue}>{payeeUPI}</Text>
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>Remaining Balance</Text>
+              <Text style={styles.successLabel}>{t('funds.upiRemainingBalance')}</Text>
               <Text style={styles.successValue}>{formatCurrency(currentBalance - displayAmount)}</Text>
             </View>
           </View>
@@ -227,12 +229,12 @@ export default function UPIScreen({ navigation }: any) {
               onPress={() => navigation.navigate('TransactionHistory')}
             >
               <Ionicons name="time-outline" size={16} color={colors.primary} />
-              <Text style={styles.viewHistoryText}>View Transaction History</Text>
+              <Text style={styles.viewHistoryText}>{t('funds.upiViewHistory')}</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
             <LinearGradient colors={GRADIENTS.accent} style={styles.doneBtnGradient}>
-              <Text style={styles.doneBtnText}>Done</Text>
+              <Text style={styles.doneBtnText}>{t('funds.upiDone')}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -251,7 +253,7 @@ export default function UPIScreen({ navigation }: any) {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>UPI Payment</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>{t('funds.upiTitle')}</Text>
         <TouchableOpacity
           style={[styles.backBtn, { backgroundColor: colors.bgCard }]}
           onPress={() => setShowManageUPI(!showManageUPI)}
@@ -266,7 +268,7 @@ export default function UPIScreen({ navigation }: any) {
         <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.upiCard}>
           <View style={styles.upiHeaderRow}>
             <View style={styles.upiInfo}>
-              <Text style={styles.upiLabel}>Paying from</Text>
+              <Text style={styles.upiLabel}>{t('funds.upiPayFrom')}</Text>
               <View style={styles.upiSelector}>
                 <Text style={styles.upiIdText}>{selectedUPI}</Text>
                 <Ionicons name="chevron-down" size={18} color="rgba(255,255,255,0.7)" />
@@ -277,9 +279,9 @@ export default function UPIScreen({ navigation }: any) {
                 </Text>
               )}
             </View>
-            <TouchableOpacity style={styles.upiQRBtn} onPress={() => Alert.alert('Scan QR', 'Camera opens to scan UPI QR code')}>
+            <TouchableOpacity style={styles.upiQRBtn} onPress={() => Alert.alert(t('funds.upiScanQR'), t('funds.upiScanQRMsg'))}>
               <Ionicons name="scan-outline" size={28} color={COLORS.white} />
-              <Text style={styles.upiQRText}>Scan</Text>
+              <Text style={styles.upiQRText}>{t('funds.upiScan')}</Text>
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -287,7 +289,7 @@ export default function UPIScreen({ navigation }: any) {
         {/* Manage UPI IDs Dropdown */}
         {showManageUPI && (
           <View style={[styles.upiManageWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Linked UPI IDs</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('funds.upiLinkedIds')}</Text>
             {upiAccounts.map(acc => (
               <TouchableOpacity
                 key={acc.upiId}
@@ -304,7 +306,7 @@ export default function UPIScreen({ navigation }: any) {
                     <Text style={[styles.upiAccountId, { color: colors.text }]}>{acc.upiId}</Text>
                     {acc.isPrimary && (
                       <View style={[styles.primaryBadge, { backgroundColor: colors.primary + '20' }]}>
-                        <Text style={[styles.primaryBadgeText, { color: colors.primary }]}>Primary</Text>
+                        <Text style={[styles.primaryBadgeText, { color: colors.primary }]}>{t('funds.upiPrimary')}</Text>
                       </View>
                     )}
                   </View>
@@ -321,7 +323,7 @@ export default function UPIScreen({ navigation }: any) {
               <View style={[styles.addUPIForm, { borderTopColor: colors.divider }]}>
                 <TextInput
                   style={[styles.addUPIInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
-                  placeholder="Enter UPI ID (e.g., name@bank)"
+                  placeholder={t('funds.upiEnterId')}
                   placeholderTextColor={colors.textMuted}
                   value={newUPIId}
                   onChangeText={setNewUPIId}
@@ -333,13 +335,13 @@ export default function UPIScreen({ navigation }: any) {
                     style={[styles.addUPICancel, { borderColor: colors.border }]}
                     onPress={() => { setShowAddUPI(false); setNewUPIId(''); }}
                   >
-                    <Text style={[styles.addUPICancelText, { color: colors.textSecondary }]}>Cancel</Text>
+                    <Text style={[styles.addUPICancelText, { color: colors.textSecondary }]}>{t('funds.upiCancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.addUPIConfirm, { backgroundColor: colors.primary }]}
                     onPress={handleAddUPI}
                   >
-                    <Text style={styles.addUPIConfirmText}>Link UPI ID</Text>
+                    <Text style={styles.addUPIConfirmText}>{t('funds.upiLinkId')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -349,7 +351,7 @@ export default function UPIScreen({ navigation }: any) {
                 onPress={() => setShowAddUPI(true)}
               >
                 <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
-                <Text style={[styles.addUPIBtnText, { color: colors.primary }]}>Link New UPI ID</Text>
+                <Text style={[styles.addUPIBtnText, { color: colors.primary }]}>{t('funds.upiLinkNewId')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -357,12 +359,12 @@ export default function UPIScreen({ navigation }: any) {
 
         {/* Pay To */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Pay To</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('funds.upiPayTo')}</Text>
           <View style={[styles.payeeInputWrap, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
             <Ionicons name="person-outline" size={20} color={colors.textMuted} />
             <TextInput
               style={[styles.payeeInput, { color: colors.text }]}
-              placeholder="Enter UPI ID (e.g., name@bank)"
+              placeholder={t('funds.upiEnterId')}
               placeholderTextColor={colors.textMuted}
               value={payeeUPI}
               onChangeText={text => { setPayeeUPI(text); setActiveContact(null); }}
@@ -381,7 +383,7 @@ export default function UPIScreen({ navigation }: any) {
         {/* Recent Contacts */}
         {payeeUPI.length === 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Contacts</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('funds.upiRecentContacts')}</Text>
             <View style={styles.contactsRow}>
               {RECENT_UPI_CONTACTS.map(contact => (
                 <TouchableOpacity
@@ -420,7 +422,7 @@ export default function UPIScreen({ navigation }: any) {
 
         {/* Amount */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Amount</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('funds.amount')}</Text>
           <View style={styles.presetsRow}>
             {UPI_PRESETS.map(amount => (
               <AnimatedPressable
@@ -446,7 +448,7 @@ export default function UPIScreen({ navigation }: any) {
             <Text style={[styles.currencySymbol, { color: colors.textSecondary }]}>₹</Text>
             <TextInput
               style={[styles.customInput, { color: colors.text }]}
-              placeholder="Enter amount"
+              placeholder={t('funds.enterAmount')}
               placeholderTextColor={colors.textMuted}
               keyboardType="number-pad"
               value={customAmount}
@@ -461,7 +463,7 @@ export default function UPIScreen({ navigation }: any) {
 
           {displayAmount > 0 && (
             <View style={[styles.totalRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>You will pay</Text>
+              <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>{t('funds.upiYouWillPay')}</Text>
               <Text style={[styles.totalValue, { color: colors.primary }]}>{formatCurrency(displayAmount)}</Text>
             </View>
           )}
@@ -471,7 +473,7 @@ export default function UPIScreen({ navigation }: any) {
         <View style={[styles.infoBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="information-circle" size={18} color={colors.warning} />
           <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-            UPI payments are processed instantly. No additional charges apply. Max ₹1,00,000 per transaction.
+            {t('funds.upiInfo')}
           </Text>
         </View>
 
@@ -491,7 +493,7 @@ export default function UPIScreen({ navigation }: any) {
               <>
                 <Ionicons name="shield-checkmark" size={22} color={COLORS.white} />
                 <Text style={styles.payBtnText}>
-                  {!payeeUPI ? 'Enter UPI ID' : displayAmount < 1 ? 'Enter Amount' : `Pay ${formatCurrency(displayAmount)}`}
+                  {!payeeUPI ? t('funds.upiEnterIdBtn') : displayAmount < 1 ? t('funds.upiEnterAmountBtn') : `${t('funds.upiPayPrefix')} ${formatCurrency(displayAmount)}`}
                 </Text>
               </>
             )}

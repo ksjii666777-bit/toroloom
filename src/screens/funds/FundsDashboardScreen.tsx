@@ -5,6 +5,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore, FundTransaction } from '../../store/fundStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -12,18 +13,21 @@ import { formatCurrency, formatTimestamp } from '../../utils/formatters';
 
 const { width } = Dimensions.get('window');
 
-const quickActions = [
-  { icon: 'add-circle', label: 'Add Funds', screen: 'AddFunds' },
-  { icon: 'arrow-up-circle', label: 'Withdraw', screen: 'Withdraw' },
-  { icon: 'swap-horizontal', label: 'Transfer', screen: 'Transfer' },
-  { icon: 'qr-code', label: 'UPI', screen: 'UPI' },
-] as const;
+// quickActions moved inside component for t() access
 
 export default function FundsDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const { transactions } = useFundStore();
+  const quickActions = [
+    { icon: 'add-circle' as const, label: t('funds.addFunds'), screen: 'AddFunds' },
+    { icon: 'arrow-up-circle' as const, label: t('funds.withdraw'), screen: 'Withdraw' },
+    { icon: 'swap-horizontal' as const, label: t('funds.transfer'), screen: 'Transfer' },
+    { icon: 'qr-code' as const, label: t('funds.upi'), screen: 'UPI' },
+  ];
+
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const balance = user?.balance || 2500000;
@@ -77,7 +81,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Funds Dashboard</Text>
+        <Text style={styles.headerTitle}>{t('funds.dashboardTitle')}</Text>
         <TouchableOpacity
           style={styles.historyBtn}
           onPress={() => navigation.navigate('TransactionHistory')}
@@ -90,7 +94,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
         {/* Balance Card — Glassmorphic */}
         <View style={styles.balanceCard}>
           <View style={[StyleSheet.absoluteFill, styles.balanceGlow]} />
-          <Text style={styles.balanceLabel}>Available Balance</Text>
+          <Text style={styles.balanceLabel}>{t('funds.dashboardBalance')}</Text>
           <Text style={styles.balanceValue}>{formatLargeCurrency(balance)}</Text>
           <View style={styles.balanceSubRow}>
             <Ionicons name="wallet-outline" size={14} color="rgba(255,255,255,0.5)" />
@@ -121,14 +125,14 @@ export default function FundsDashboardScreen({ navigation }: any) {
               <Ionicons name="add-circle" size={20} color={colors.accent} />
             </View>
             <Text style={styles.statValue}>{formatLargeCurrency(stats.totalAdd)}</Text>
-            <Text style={styles.statLabel}>Total Added</Text>
+            <Text style={styles.statLabel}>{t('funds.dashboardTotalAdded')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: colors.border }]}>
             <View style={[styles.statIconWrap, { backgroundColor: colors.danger + '20' }]}>
               <Ionicons name="arrow-up-circle" size={20} color={colors.danger} />
             </View>
             <Text style={styles.statValue}>{formatLargeCurrency(stats.totalWithdraw)}</Text>
-            <Text style={styles.statLabel}>Withdrawn</Text>
+            <Text style={styles.statLabel}>{t('funds.dashboardWithdrawn')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: colors.border }]}>
             <View style={[styles.statIconWrap, { backgroundColor: colors.primary + '20' }]}>
@@ -137,28 +141,28 @@ export default function FundsDashboardScreen({ navigation }: any) {
             <Text style={[styles.statValue, { color: stats.net >= 0 ? colors.accent : colors.danger }]}>
               {stats.net >= 0 ? '+' : ''}{formatLargeCurrency(Math.abs(stats.net))}
             </Text>
-            <Text style={styles.statLabel}>Net Addition</Text>
+            <Text style={styles.statLabel}>{t('funds.dashboardNetAddition')}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: colors.border }]}>
             <View style={[styles.statIconWrap, { backgroundColor: colors.warning + '20' }]}>
               <Ionicons name="swap-horizontal" size={20} color={colors.warning} />
             </View>
             <Text style={styles.statValue}>{stats.count}</Text>
-            <Text style={styles.statLabel}>Transactions</Text>
+            <Text style={styles.statLabel}>{t('funds.dashboardTransactions')}</Text>
           </View>
         </View>
 
         {/* Monthly Activity */}
         <View style={[styles.sectionCard, { borderColor: colors.border }]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>This Month</Text>
+            <Text style={styles.sectionTitle}>{t('funds.dashboardThisMonth')}</Text>
             <Text style={styles.sectionSubtitle}>{monthlyActivity.label} 2025</Text>
           </View>
           <View style={styles.monthlyBars}>
             <View style={styles.monthlyBarItem}>
               <View style={styles.monthlyBarLabel}>
                 <Ionicons name="add-circle" size={14} color={colors.accent} />
-                <Text style={styles.monthlyBarLabelText}>Added</Text>
+                <Text style={styles.monthlyBarLabelText}>{t('funds.dashboardAdded')}</Text>
               </View>
               <View style={styles.monthlyBarTrack}>
                 <View style={[styles.monthlyBarFill, {
@@ -173,7 +177,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
             <View style={styles.monthlyBarItem}>
               <View style={styles.monthlyBarLabel}>
                 <Ionicons name="arrow-up-circle" size={14} color={colors.danger} />
-                <Text style={styles.monthlyBarLabelText}>Withdrawn</Text>
+                <Text style={styles.monthlyBarLabelText}>{t('funds.dashboardWithdrawnLabel')}</Text>
               </View>
               <View style={styles.monthlyBarTrack}>
                 <View style={[styles.monthlyBarFill, {
@@ -188,7 +192,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
           </View>
           {(monthlyActivity.add > 0 || monthlyActivity.withdraw > 0) && (
             <View style={styles.monthlyNet}>
-              <Text style={styles.monthlyNetLabel}>Net this month</Text>
+              <Text style={styles.monthlyNetLabel}>{t('funds.dashboardNetThisMonth')}</Text>
               <Text style={[styles.monthlyNetValue, {
                 color: (monthlyActivity.add - monthlyActivity.withdraw) >= 0 ? colors.accent : colors.danger,
               }]}>
@@ -202,21 +206,21 @@ export default function FundsDashboardScreen({ navigation }: any) {
         {/* Recent Transactions */}
         <View style={styles.sectionWrap}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <Text style={styles.sectionTitle}>{t('funds.dashboardRecentTx')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory')}>
-              <Text style={styles.seeAllText}>See All</Text>
+              <Text style={styles.seeAllText}>{t('funds.dashboardSeeAll')}</Text>
             </TouchableOpacity>
           </View>
 
           {recentTx.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="receipt-outline" size={48} color={colors.textMuted} />
-              <Text style={styles.emptyText}>No transactions yet</Text>
+              <Text style={styles.emptyText}>{t('funds.dashboardNoTx')}</Text>
               <TouchableOpacity
                 style={styles.emptyBtn}
                 onPress={() => navigation.navigate('AddFunds')}
               >
-                <Text style={styles.emptyBtnText}>Add Funds</Text>
+                <Text style={styles.emptyBtnText}>{t('funds.addFunds')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -239,7 +243,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
                   </View>
                   <View style={styles.txInfo}>
                     <Text style={styles.txType}>
-                      {tx.type === 'add' ? 'Funds Added' : 'Funds Withdrawn'}
+                      {tx.type === 'add' ? t('funds.dashboardFundsAdded') : t('funds.dashboardFundsWithdrawn')}
                     </Text>
                     <Text style={styles.txMeta}>
                       {tx.method} • {formatTimestamp(tx.timestamp)}
@@ -259,21 +263,21 @@ export default function FundsDashboardScreen({ navigation }: any) {
         {/* Summary Footer Card */}
         <View style={[styles.footerCard, { borderColor: colors.border }]}>
           <View style={styles.footerRow}>
-            <Text style={styles.footerLabel}>Total Deposits</Text>
+            <Text style={styles.footerLabel}>{t('funds.dashboardTotalDeposits')}</Text>
             <Text style={[styles.footerValue, { color: colors.accent }]}>
               {formatCurrency(stats.totalAdd, true)}
             </Text>
           </View>
           <View style={[styles.footerDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.footerRow}>
-            <Text style={styles.footerLabel}>Total Withdrawals</Text>
+            <Text style={styles.footerLabel}>{t('funds.dashboardTotalWithdrawals')}</Text>
             <Text style={[styles.footerValue, { color: colors.danger }]}>
               {formatCurrency(stats.totalWithdraw, true)}
             </Text>
           </View>
           <View style={[styles.footerDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.footerRow}>
-            <Text style={styles.footerLabel}>Current Balance</Text>
+            <Text style={styles.footerLabel}>{t('funds.dashboardCurrentBalance')}</Text>
             <Text style={[styles.footerValue, { color: colors.primary }]}>
               {formatCurrency(balance, true)}
             </Text>

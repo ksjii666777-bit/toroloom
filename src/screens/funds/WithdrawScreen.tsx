@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -18,6 +19,7 @@ Dimensions.get('window');
 
 export default function WithdrawScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { user, updateBalance } = useAuthStore();
   const { addTransaction } = useFundStore();
@@ -54,21 +56,21 @@ export default function WithdrawScreen({ navigation }: any) {
 
   const handleWithdraw = useCallback(() => {
     if (displayAmount < 500) {
-      Alert.alert('Minimum Amount', 'Minimum withdrawal amount is ₹500');
+      Alert.alert(t('funds.withdrawMinAmount'), t('funds.withdrawMinAmountMsg'));
       return;
     }
     if (displayAmount > currentBalance) {
-      Alert.alert('Insufficient Balance', 'You cannot withdraw more than your available balance.');
+      Alert.alert(t('funds.withdrawInsufficient'), t('funds.withdrawInsufficientMsg'));
       return;
     }
 
     Alert.alert(
-      'Confirm Withdrawal',
-      `Are you sure you want to withdraw ${formatCurrency(displayAmount)} to ${LINKED_BANKS.find(b => b.id === selectedBank)?.bankName} ${LINKED_BANKS.find(b => b.id === selectedBank)?.accountNumber}?`,
+      t('funds.withdrawConfirmTitle'),
+      t('funds.withdrawConfirmMsg', { amount: formatCurrency(displayAmount), bank: LINKED_BANKS.find(b => b.id === selectedBank)?.bankName, account: LINKED_BANKS.find(b => b.id === selectedBank)?.accountNumber }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('funds.upiCancel'), style: 'cancel' },
         {
-          text: 'Withdraw',
+          text: t('funds.withdrawBtn'),
           style: 'destructive',
           onPress: () => {
             setIsLoading(true);
@@ -91,7 +93,7 @@ export default function WithdrawScreen({ navigation }: any) {
         },
       ]
     );
-  }, [displayAmount, currentBalance, selectedBank, updateBalance, addTransaction]);
+  }, [displayAmount, currentBalance, selectedBank, updateBalance, addTransaction, t]);
 
   const handleDone = useCallback(() => {
     navigation.goBack();
@@ -110,19 +112,19 @@ export default function WithdrawScreen({ navigation }: any) {
               <Ionicons name="checkmark-circle" size={48} color={COLORS.white} />
             </LinearGradient>
           </View>
-          <Text style={styles.successTitle}>Withdrawal Initiated!</Text>
+          <Text style={styles.successTitle}>{t('funds.withdrawSuccessTitle')}</Text>
           <Text style={styles.successAmount}>{formatCurrency(displayAmount)}</Text>
           <Text style={styles.successDesc}>
-            will be credited to your bank account within 1-2 business days.
+            {t('funds.withdrawDesc')}
           </Text>
           <View style={styles.successDetails}>
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>Transaction ID</Text>
+              <Text style={styles.successLabel}>{t('funds.withdrawTransactionId')}</Text>
               <Text style={styles.successValue}>{txId}</Text>
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>Bank Account</Text>
+              <Text style={styles.successLabel}>{t('funds.withdrawBankAccount')}</Text>
               <Text style={styles.successValue}>
                 {LINKED_BANKS.find(b => b.id === selectedBank)?.bankName}{' '}
                 {LINKED_BANKS.find(b => b.id === selectedBank)?.accountNumber}
@@ -130,7 +132,7 @@ export default function WithdrawScreen({ navigation }: any) {
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>New Balance</Text>
+              <Text style={styles.successLabel}>{t('funds.withdrawNewBalance')}</Text>
               <Text style={[styles.successValue, { color: colors.text }]}>
                 {formatCurrency(currentBalance - displayAmount)}
               </Text>
@@ -138,12 +140,12 @@ export default function WithdrawScreen({ navigation }: any) {
           </View>
           <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
             <LinearGradient colors={GRADIENTS.primary} style={styles.doneBtnGradient}>
-              <Text style={styles.doneBtnText}>Done</Text>
+              <Text style={styles.doneBtnText}>{t('funds.withdrawDone')}</Text>
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity style={styles.viewHistoryBtn} onPress={handleViewHistory}>
             <Ionicons name="time-outline" size={18} color={colors.primary} />
-            <Text style={styles.viewHistoryText}>View Transaction History</Text>
+            <Text style={styles.viewHistoryText}>{t('funds.withdrawViewHistory')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -158,7 +160,7 @@ export default function WithdrawScreen({ navigation }: any) {
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Withdraw Funds</Text>
+        <Text style={styles.headerTitle}>{t('funds.withdrawTitle')}</Text>
         <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory')}>
           <Ionicons name="time-outline" size={24} color={colors.textMuted} />
         </TouchableOpacity>
@@ -167,12 +169,12 @@ export default function WithdrawScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Balance Card */}
         <LinearGradient colors={GRADIENTS.danger} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>Available Balance</Text>
+          <Text style={styles.balanceLabel}>{t('funds.withdrawBalance')}</Text>
           <Text style={styles.balanceValue}>{formatCurrency(currentBalance)}</Text>
           <View style={styles.balanceDivider} />
           <View style={styles.balanceRow}>
             <View>
-              <Text style={styles.balanceSubLabel}>Withdrawable Amount</Text>
+              <Text style={styles.balanceSubLabel}>{t('funds.withdrawWithdrawable')}</Text>
               <Text style={styles.balanceSubValue}>{formatCurrency(currentBalance)}</Text>
             </View>
             <Ionicons name="cash" size={32} color="rgba(255,255,255,0.3)" />
@@ -181,7 +183,7 @@ export default function WithdrawScreen({ navigation }: any) {
 
         {/* Withdrawal Amount */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Withdrawal Amount</Text>
+          <Text style={styles.sectionTitle}>{t('funds.withdrawAmount')}</Text>
           <View style={styles.presetsRow}>
             {WITHDRAW_PRESETS.map(amount => (
               <AnimatedPressable
@@ -224,7 +226,7 @@ export default function WithdrawScreen({ navigation }: any) {
             <Text style={styles.currencySymbol}>₹</Text>
             <TextInput
               style={styles.customInput}
-              placeholder="Enter withdrawal amount"
+              placeholder={t('funds.withdrawEnterAmount')}
               placeholderTextColor={colors.textMuted}
               keyboardType="number-pad"
               value={customAmount}
@@ -240,23 +242,23 @@ export default function WithdrawScreen({ navigation }: any) {
           {displayAmount > 0 && (
             <View style={styles.breakdownCard}>
               <View style={styles.breakdownRow}>
-                <Text style={styles.breakdownLabel}>Current Balance</Text>
+                <Text style={styles.breakdownLabel}>{t('funds.withdrawCurrentBalance')}</Text>
                 <Text style={styles.breakdownValue}>{formatCurrency(currentBalance)}</Text>
               </View>
               <View style={styles.breakdownRow}>
-                <Text style={styles.breakdownLabel}>Withdrawal Amount</Text>
+                <Text style={styles.breakdownLabel}>{t('funds.withdrawWithdrawalAmount')}</Text>
                 <Text style={[styles.breakdownValue, { color: COLORS.danger }]}>
                   - {formatCurrency(displayAmount)}
                 </Text>
               </View>
               <View style={styles.breakdownDivider} />
               <View style={styles.breakdownRow}>
-                <Text style={styles.breakdownLabel}>Remaining Balance</Text>
+                <Text style={styles.breakdownLabel}>{t('funds.withdrawRemainingBalance')}</Text>
                 <Text style={[
                   styles.breakdownValue,
                   { color: remaining >= 0 ? COLORS.success : COLORS.danger },
                 ]}>
-                  {remaining >= 0 ? formatCurrency(remaining) : 'Insufficient'}
+                  {remaining >= 0 ? formatCurrency(remaining) : t('funds.withdrawInsufficientLabel')}
                 </Text>
               </View>
             </View>
@@ -266,9 +268,9 @@ export default function WithdrawScreen({ navigation }: any) {
         {/* Linked Bank Accounts */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Transfer To</Text>
+            <Text style={styles.sectionTitle}>{t('funds.withdrawTransferTo')}</Text>
             <TouchableOpacity>
-              <Text style={styles.addBankText}>+ Add Bank</Text>
+              <Text style={styles.addBankText}>{t('funds.withdrawAddBank')}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.banksWrap}>
@@ -301,12 +303,12 @@ export default function WithdrawScreen({ navigation }: any) {
                     </Text>
                     {bank.isPrimary && (
                       <View style={styles.primaryBadge}>
-                        <Text style={styles.primaryBadgeText}>Primary</Text>
+                        <Text style={styles.primaryBadgeText}>{t('funds.withdrawPrimary')}</Text>
                       </View>
                     )}
                   </View>
                   <Text style={styles.bankAccount}>{bank.accountNumber}</Text>
-                  <Text style={styles.bankIfsc}>IFSC: {bank.ifsc}</Text>
+                  <Text style={styles.bankIfsc}>{t('funds.withdrawIfscPrefix', { code: bank.ifsc })}</Text>
                 </View>
                 <View style={[
                   styles.radio,
@@ -325,7 +327,7 @@ export default function WithdrawScreen({ navigation }: any) {
         <View style={styles.infoBox}>
           <Ionicons name="information-circle" size={18} color={colors.warning} />
           <Text style={styles.infoText}>
-            Withdrawals are processed within 1-2 business days. A nominal fee of ₹9 + GST applies on withdrawals above ₹50,000.
+            {t('funds.withdrawInfo')}
           </Text>
         </View>
 
@@ -349,7 +351,7 @@ export default function WithdrawScreen({ navigation }: any) {
               <>
                 <Ionicons name="arrow-up-circle" size={22} color={COLORS.white} />
                 <Text style={styles.withdrawBtnText}>
-                  Withdraw {displayAmount >= 500 ? formatCurrency(displayAmount) : '₹500+'}
+                  {t('funds.withdrawBtn')} {displayAmount >= 500 ? formatCurrency(displayAmount) : '₹500+'}
                 </Text>
               </>
             )}

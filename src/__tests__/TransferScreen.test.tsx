@@ -66,6 +66,54 @@ vi.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
 
+// Mock useT to return English text for funds keys so test assertions work
+const fundsTranslations: Record<string, string> = {
+  'funds.transferTitle': 'Transfer',
+  'funds.transferToSelf': 'To Self Account',
+  'funds.transferToBank': 'To Bank Account',
+  'funds.transferFrom': 'From',
+  'funds.transferTo': 'To',
+  'funds.transferAmount': 'Transfer Amount',
+  'funds.transferEnterAmount': 'Enter transfer amount',
+  'funds.transferYouWillTransfer': 'You will transfer',
+  'funds.transferTransferTo': 'Transfer To',
+  'funds.transferAddBank': '+ Add Bank',
+  'funds.transferPrimary': 'Primary',
+  'funds.transferInfoInternal': 'Internal transfers between your accounts are instant and free.',
+  'funds.transferInfoBank': 'Bank transfers are processed within 1-2 business days. Free for all transactions.',
+  'funds.transferBtn': 'Transfer',
+  'funds.transferSuccessTitle': 'Transfer Initiated!',
+  'funds.transferTransactionId': 'Transaction ID',
+  'funds.transferFromLabel': 'From',
+  'funds.transferToLabel': 'To',
+  'funds.transferDone': 'Done',
+  'funds.transferReceivingAccount': 'Receiving Account',
+  'funds.dashboardBalance': 'Available Balance',
+  'funds.transferAccountBalance': '{{account}} Balance',
+  'funds.transferDestination': 'Destination',
+  'funds.transferConfirmTitle': 'Confirm Transfer',
+  'funds.transferConfirmMsg': 'Transfer {{amount}} from {{from}} to {{to}}?',
+  'funds.transferInsufficient': 'Insufficient Balance',
+  'funds.transferMinAmount': 'Minimum Amount',
+  'funds.transferMinAmountMsg': 'Minimum transfer amount is ₹100',
+  'funds.transferSameAccount': 'Same Account',
+  'funds.upiCancel': 'Cancel',
+};
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: (key: string, params?: Record<string, string>) => {
+      let val = fundsTranslations[key] || key;
+      if (params) {
+        val = val.replace(/{{(\w+)}}/g, (_m: string, p1: string) => params[p1] || '');
+      }
+      return val;
+    },
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
+}));
+
 // ==================== Imports ====================
 
 import TransferScreen from '../screens/funds/TransferScreen';

@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -20,6 +21,7 @@ type TransferTab = 'internal' | 'external';
 
 export default function TransferScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { user, updateBalance } = useAuthStore();
   const { addTransaction } = useFundStore();
@@ -58,16 +60,16 @@ export default function TransferScreen({ navigation }: any) {
 
   const handleTransfer = useCallback(() => {
     if (displayAmount < 100) {
-      Alert.alert('Minimum Amount', 'Minimum transfer amount is ₹100');
+      Alert.alert(t('funds.transferMinAmount'), t('funds.transferMinAmountMsg'));
       return;
     }
     if (displayAmount > currentBalance) {
-      Alert.alert('Insufficient Balance', 'You do not have enough balance for this transfer.');
+      Alert.alert(t('funds.transferInsufficient'), t('funds.transferInsufficientMsg'));
       return;
     }
 
     if (activeTab === 'internal' && fromAccount === toAccount) {
-      Alert.alert('Same Account', 'Source and destination accounts must be different.');
+      Alert.alert(t('funds.transferSameAccount'), t('funds.transferSameAccountMsg'));
       return;
     }
 
@@ -76,12 +78,12 @@ export default function TransferScreen({ navigation }: any) {
       : LINKED_BANKS.find(b => b.id === selectedBank)?.bankName || 'Bank Account';
 
     Alert.alert(
-      'Confirm Transfer',
-      `Transfer ${formatCurrency(displayAmount)} from ${fromData?.label || 'Trading Account'} to ${destination}?`,
+      t('funds.transferConfirmTitle'),
+      t('funds.transferConfirmMsg', { amount: formatCurrency(displayAmount), from: fromData?.label || 'Trading Account', to: destination }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('funds.upiCancel'), style: 'cancel' },
         {
-          text: 'Transfer',
+          text: t('funds.transferBtn'),
           onPress: () => {
             setIsLoading(true);
             const transactionId = 'TRF' + Date.now().toString(36).toUpperCase();
@@ -103,7 +105,7 @@ export default function TransferScreen({ navigation }: any) {
         },
       ]
     );
-  }, [displayAmount, currentBalance, activeTab, fromAccount, toAccount, fromData, toData, selectedBank, updateBalance, addTransaction]);
+  }, [displayAmount, currentBalance, activeTab, fromAccount, toAccount, fromData, toData, selectedBank, updateBalance, addTransaction, t]);
 
   const handleDone = useCallback(() => {
     navigation.goBack();
@@ -118,7 +120,7 @@ export default function TransferScreen({ navigation }: any) {
               <Ionicons name="checkmark-circle" size={48} color={COLORS.white} />
             </LinearGradient>
           </View>
-          <Text style={styles.successTitle}>Transfer Initiated!</Text>
+          <Text style={styles.successTitle}>{t('funds.transferSuccessTitle')}</Text>
           <Text style={styles.successAmount}>{formatCurrency(displayAmount)}</Text>
           <Text style={styles.successDesc}>
             has been transferred from {fromData?.label || 'Trading Account'} to{' '}
@@ -129,17 +131,17 @@ export default function TransferScreen({ navigation }: any) {
           </Text>
           <View style={styles.successDetails}>
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>Transaction ID</Text>
+              <Text style={styles.successLabel}>{t('funds.transferTransactionId')}</Text>
               <Text style={styles.successValue}>{txId}</Text>
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>From</Text>
+              <Text style={styles.successLabel}>{t('funds.transferFromLabel')}</Text>
               <Text style={styles.successValue}>{fromData?.label || 'Trading Account'}</Text>
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>To</Text>
+              <Text style={styles.successLabel}>{t('funds.transferToLabel')}</Text>
               <Text style={styles.successValue}>
                 {activeTab === 'internal'
                   ? toData?.label || 'Demat Account'
@@ -149,7 +151,7 @@ export default function TransferScreen({ navigation }: any) {
           </View>
           <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
             <LinearGradient colors={GRADIENTS.primary} style={styles.doneBtnGradient}>
-              <Text style={styles.doneBtnText}>Done</Text>
+              <Text style={styles.doneBtnText}>{t('funds.transferDone')}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -165,7 +167,7 @@ export default function TransferScreen({ navigation }: any) {
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Transfer</Text>
+        <Text style={styles.headerTitle}>{t('funds.transferTitle')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -173,8 +175,8 @@ export default function TransferScreen({ navigation }: any) {
         {/* Tab Selector */}
         <View style={styles.tabRow}>
           {([
-            { key: 'internal', label: 'To Self Account' },
-            { key: 'external', label: 'To Bank Account' },
+            { key: 'internal' as const, label: t('funds.transferToSelf') },
+            { key: 'external' as const, label: t('funds.transferToBank') },
           ] as { key: TransferTab; label: string }[]).map(tab => (
             <TouchableOpacity
               key={tab.key}
@@ -200,7 +202,7 @@ export default function TransferScreen({ navigation }: any) {
               <View style={styles.balanceRow}>
                 <View>
                   <Text style={styles.balanceSubLabel}>{toData?.label || 'Destination'}</Text>
-                  <Text style={styles.balanceSubValue}>Receiving Account</Text>
+                  <Text style={styles.balanceSubValue}>{t('funds.transferReceivingAccount')}</Text>
                 </View>
                 <Ionicons name="swap-horizontal" size={28} color="rgba(255,255,255,0.3)" />
               </View>
@@ -211,7 +213,7 @@ export default function TransferScreen({ navigation }: any) {
         {/* Account Selection (Internal) */}
         {activeTab === 'internal' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>From</Text>
+            <Text style={styles.sectionTitle}>{t('funds.transferFrom')}</Text>
             <View style={styles.accountsWrap}>
               {INTERNAL_ACCOUNTS.map(acc => (
                 <TouchableOpacity
@@ -241,7 +243,7 @@ export default function TransferScreen({ navigation }: any) {
               ))}
             </View>
 
-            <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>To</Text>
+            <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>{t('funds.transferTo')}</Text>
             <View style={styles.accountsWrap}>
               {INTERNAL_ACCOUNTS.filter(a => a.id !== fromAccount).map(acc => (
                 <TouchableOpacity
@@ -277,9 +279,9 @@ export default function TransferScreen({ navigation }: any) {
         {activeTab === 'external' && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Transfer To</Text>
+              <Text style={styles.sectionTitle}>{t('funds.transferTransferTo')}</Text>
               <TouchableOpacity>
-                <Text style={styles.addBankText}>+ Add Bank</Text>
+                <Text style={styles.addBankText}>{t('funds.transferAddBank')}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.accountsWrap}>
@@ -301,7 +303,7 @@ export default function TransferScreen({ navigation }: any) {
                       </Text>
                       {bank.isPrimary && (
                         <View style={styles.primaryBadge}>
-                          <Text style={styles.primaryBadgeText}>Primary</Text>
+                          <Text style={styles.primaryBadgeText}>{t('funds.transferPrimary')}</Text>
                         </View>
                       )}
                     </View>
@@ -318,7 +320,7 @@ export default function TransferScreen({ navigation }: any) {
 
         {/* Amount */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Transfer Amount</Text>
+          <Text style={styles.sectionTitle}>{t('funds.transferAmount')}</Text>
           <View style={styles.presetsRow}>
             {TRANSFER_PRESETS.map(amount => (
               <AnimatedPressable
@@ -340,7 +342,7 @@ export default function TransferScreen({ navigation }: any) {
             <Text style={styles.currencySymbol}>₹</Text>
             <TextInput
               style={styles.customInput}
-              placeholder="Enter transfer amount"
+              placeholder={t('funds.transferEnterAmount')}
               placeholderTextColor={colors.textMuted}
               keyboardType="number-pad"
               value={customAmount}
@@ -355,7 +357,7 @@ export default function TransferScreen({ navigation }: any) {
 
           {displayAmount > 0 && (
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>You will transfer</Text>
+              <Text style={styles.totalLabel}>{t('funds.transferYouWillTransfer')}</Text>
               <Text style={styles.totalValue}>{formatCurrency(displayAmount)}</Text>
             </View>
           )}
@@ -366,8 +368,8 @@ export default function TransferScreen({ navigation }: any) {
           <Ionicons name="information-circle" size={18} color={colors.warning} />
           <Text style={styles.infoText}>
             {activeTab === 'internal'
-              ? 'Internal transfers between your accounts are instant and free.'
-              : 'Bank transfers are processed within 1-2 business days. Free for all transactions.'}
+              ? t('funds.transferInfoInternal')
+              : t('funds.transferInfoBank')}
           </Text>
         </View>
 

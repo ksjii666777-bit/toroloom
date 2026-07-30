@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
 import { paymentsApi } from '../../services/api/payments';
@@ -27,6 +28,7 @@ const PAYMENT_METHODS = [
 
 export default function AddFundsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { user, updateBalance } = useAuthStore();
   const { addTransaction } = useFundStore();
@@ -56,11 +58,11 @@ export default function AddFundsScreen({ navigation }: any) {
 
   const handleAddFunds = useCallback(async () => {
     if (displayAmount < 500) {
-      Alert.alert('Minimum Amount', 'Minimum add amount is ₹500');
+      Alert.alert(t('funds.addFundsMinAmount'), t('funds.addFundsMinAmountMsg'));
       return;
     }
     if (displayAmount > 500000) {
-      Alert.alert('Maximum Amount', 'Maximum add amount is ₹5,00,000 per transaction');
+      Alert.alert(t('funds.addFundsMaxAmount'), t('funds.addFundsMaxAmountMsg'));
       return;
     }
 
@@ -132,14 +134,14 @@ export default function AddFundsScreen({ navigation }: any) {
       }
     } catch (error: any) {
       Alert.alert(
-        'Payment Failed',
-        error?.message || 'Something went wrong. Please try again.',
+        t('funds.paymentFailed'),
+        error?.message || t('errors.somethingWentWrong'),
         [{ text: 'OK' }]
       );
     } finally {
       setIsLoading(false);
     }
-  }, [displayAmount, updateBalance, addTransaction, selectedMethod, user]);
+  }, [displayAmount, updateBalance, addTransaction, selectedMethod, user, t]);
 
   const handleDone = useCallback(() => {
     navigation.goBack();
@@ -158,26 +160,26 @@ export default function AddFundsScreen({ navigation }: any) {
               <Ionicons name="checkmark-circle" size={48} color={COLORS.white} />
             </LinearGradient>
           </View>
-          <Text style={styles.successTitle}>Funds Added Successfully!</Text>
+          <Text style={styles.successTitle}>{t('funds.addFundsSuccessTitle')}</Text>
           <Text style={styles.successAmount}>{formatCurrency(displayAmount)}</Text>
           <Text style={styles.successDesc}>
-            has been credited to your Toroloom account. You can start investing right away.
+            {t('funds.addFundsDesc')}
           </Text>
           <View style={styles.successDetails}>
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>Transaction ID</Text>
+              <Text style={styles.successLabel}>{t('funds.addFundsTransactionId')}</Text>
               <Text style={styles.successValue}>{txId}</Text>
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>Payment Method</Text>
+              <Text style={styles.successLabel}>{t('funds.addFundsPaymentMethod')}</Text>
               <Text style={styles.successValue}>
                 {PAYMENT_METHODS.find(m => m.id === selectedMethod)?.label || 'UPI'}
               </Text>
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successRow}>
-              <Text style={styles.successLabel}>New Balance</Text>
+              <Text style={styles.successLabel}>{t('funds.addFundsNewBalance')}</Text>
               <Text style={[styles.successValue, { color: COLORS.success }]}>
                 {formatCurrency((user?.balance || 0) + displayAmount)}
               </Text>
@@ -185,12 +187,12 @@ export default function AddFundsScreen({ navigation }: any) {
           </View>
           <TouchableOpacity style={styles.doneBtn} onPress={handleDone}>
             <LinearGradient colors={GRADIENTS.primary} style={styles.doneBtnGradient}>
-              <Text style={styles.doneBtnText}>Done</Text>
+              <Text style={styles.doneBtnText}>{t('funds.addFundsDone')}</Text>
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity style={styles.viewHistoryBtn} onPress={handleViewHistory}>
             <Ionicons name="time-outline" size={18} color={colors.primary} />
-            <Text style={styles.viewHistoryText}>View Transaction History</Text>
+            <Text style={styles.viewHistoryText}>{t('funds.addFundsViewHistory')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -205,7 +207,7 @@ export default function AddFundsScreen({ navigation }: any) {
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Funds</Text>
+        <Text style={styles.headerTitle}>{t('funds.addFundsTitle')}</Text>
         <TouchableOpacity onPress={handleViewHistory}>
           <Ionicons name="time-outline" size={24} color={colors.textMuted} />
         </TouchableOpacity>
@@ -214,12 +216,12 @@ export default function AddFundsScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Balance Card */}
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>Current Balance</Text>
+          <Text style={styles.balanceLabel}>{t('funds.addFundsBalance')}</Text>
           <Text style={styles.balanceValue}>{formatCurrency(user?.balance || 0)}</Text>
           <View style={styles.balanceDivider} />
           <View style={styles.balanceRow}>
             <View>
-              <Text style={styles.balanceSubLabel}>Available for Investment</Text>
+              <Text style={styles.balanceSubLabel}>{t('funds.addFundsAvailable')}</Text>
               <Text style={styles.balanceSubValue}>{formatCurrency(user?.balance || 0)}</Text>
             </View>
             <Ionicons name="wallet" size={32} color="rgba(255,255,255,0.3)" />
@@ -228,7 +230,7 @@ export default function AddFundsScreen({ navigation }: any) {
 
         {/* Quick Amount */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Select Amount</Text>
+          <Text style={styles.sectionTitle}>{t('funds.addFundsSelectAmount')}</Text>
           <View style={styles.presetsRow}>
             {AMOUNT_PRESETS.map(amount => (
               <AnimatedPressable
@@ -257,7 +259,7 @@ export default function AddFundsScreen({ navigation }: any) {
             <Text style={styles.currencySymbol}>₹</Text>
             <TextInput
               style={styles.customInput}
-              placeholder="Enter custom amount"
+              placeholder={t('funds.addFundsCustomPlaceholder')}
               placeholderTextColor={colors.textMuted}
               keyboardType="number-pad"
               value={customAmount}
@@ -272,7 +274,7 @@ export default function AddFundsScreen({ navigation }: any) {
 
           {displayAmount > 0 && (
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>You will add</Text>
+              <Text style={styles.totalLabel}>{t('funds.addFundsYouWillAdd')}</Text>
               <Text style={styles.totalValue}>{formatCurrency(displayAmount)}</Text>
             </View>
           )}
@@ -280,7 +282,7 @@ export default function AddFundsScreen({ navigation }: any) {
 
         {/* Payment Method */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Payment Method</Text>
+          <Text style={styles.sectionTitle}>{t('funds.paymentMethod')}</Text>
           <View style={styles.methodsWrap}>
             {PAYMENT_METHODS.map(method => (
               <TouchableOpacity
@@ -327,7 +329,7 @@ export default function AddFundsScreen({ navigation }: any) {
         <View style={styles.infoBox}>
           <Ionicons name="information-circle" size={18} color={colors.warning} />
           <Text style={styles.infoText}>
-            Funds will be credited instantly via UPI and within 30 minutes for other methods.
+            {t('funds.addFundsInfo')}
           </Text>
         </View>
 
@@ -344,7 +346,7 @@ export default function AddFundsScreen({ navigation }: any) {
             {isLoading ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <ActivityIndicator color={COLORS.white} size="small" />
-                <Text style={styles.addBtnText}>Processing...</Text>
+                <Text style={styles.addBtnText}>{t('funds.addFundsProcessing')}</Text>
               </View>
             ) : (
               <>
