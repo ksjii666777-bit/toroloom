@@ -130,7 +130,43 @@ vi.mock('../hooks/useT', () => ({
   }),
 }));
 
-import React from 'react';
+// ==================== Mock mockData for dynamic import ====================
+const mockPaths = vi.hoisted(() => [
+  {
+    id: 'path_beginner', title: 'Investing Fundamentals',
+    description: 'Learn the core principles of investing in the stock market.',
+    icon: '🌱', level: 'beginner', totalDuration: '17 hours', totalLessons: 24,
+    enrolledCount: 25000,
+    targetAudience: 'Complete beginners to the stock market',
+    skillsGained: ['Stock Market Basics', 'Financial Literacy', 'Reading Charts', 'Market Psychology'],
+    courseIds: ['c1', 'c2'],
+    gradient: ['#00E676', '#00B248'] as [string, string],
+  },
+  {
+    id: 'path_intermediate', title: 'Technical & Fundamental Trader',
+    description: 'Master technical analysis and fundamental analysis.',
+    icon: '📊', level: 'intermediate', totalDuration: '32 hours', totalLessons: 45,
+    enrolledCount: 18000,
+    targetAudience: 'Level up with professional trading skills',
+    skillsGained: ['Technical Analysis', 'Fundamental Analysis', 'Risk Management', 'Trading Psychology'],
+    courseIds: ['c3', 'c4'],
+    gradient: ['#6C63FF', '#4834D4'] as [string, string],
+  },
+  {
+    id: 'path_advanced', title: 'Options & Portfolio Pro',
+    description: 'Go pro with advanced options strategies and portfolio optimization.',
+    icon: '🎯', level: 'advanced', totalDuration: '40 hours', totalLessons: 55,
+    enrolledCount: 12000,
+    targetAudience: 'Go pro with advanced portfolio management',
+    skillsGained: ['Options Strategies', 'Portfolio Optimization', 'Advanced Technicals', 'Risk Arbitrage'],
+    courseIds: ['c5', 'c6'],
+    gradient: ['#FF5252', '#D50000'] as [string, string],
+  },
+]);
+
+vi.mock('../constants/mockData', () => ({ mockLearningPaths: mockPaths }));
+
+import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
 import LearningPathsScreen from '../screens/education/LearningPathsScreen';
@@ -180,6 +216,14 @@ vi.mock('../store/educationStore', () => ({
   }),
 }));
 
+// ── Helpers ───────────────────────────────────────────────────
+/** Flush pending microtasks and React state updates so dynamic import resolves. */
+async function flushMicrotasks() {
+  await act(async () => {
+    await new Promise(resolve => setImmediate(resolve));
+  });
+}
+
 // ── Tests ─────────────────────────────────────────────────────
 
 describe('LearningPathsScreen', () => {
@@ -187,62 +231,71 @@ describe('LearningPathsScreen', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the screen title', () => {
+  it('renders the screen title', async () => {
     const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     expect(getByText('Learning Paths')).toBeTruthy();
   });
 
-  it('renders all 3 learning path cards', () => {
+  it('renders all 3 learning path cards', async () => {
     const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     expect(getByText('Investing Fundamentals')).toBeTruthy();
     expect(getByText('Technical & Fundamental Trader')).toBeTruthy();
     expect(getByText('Options & Portfolio Pro')).toBeTruthy();
   });
 
-  it('shows summary stats in banner', () => {
+  it('shows summary stats in banner', async () => {
     const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     expect(getByText('Paths')).toBeTruthy();
     expect(getByText('Courses')).toBeTruthy();
     expect(getByText('Lessons')).toBeTruthy();
     expect(getByText('Learners')).toBeTruthy();
   });
 
-  it('shows skill chips for each path', () => {
+  it('shows skill chips for each path', async () => {
     const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     expect(getByText('Stock Market Basics')).toBeTruthy();
     expect(getByText('Technical Analysis')).toBeTruthy();
     expect(getByText('Options Strategies')).toBeTruthy();
   });
 
-  it('shows duration and lesson counts from mock data', () => {
+  it('shows duration and lesson counts from mock data', async () => {
     const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     mockLearningPaths.forEach(path => {
       expect(getByText(path.totalDuration)).toBeTruthy();
       expect(getByText(`${path.totalLessons} lessons`)).toBeTruthy();
     });
   });
 
-  it('shows target audience for paths', () => {
+  it('shows target audience for paths', async () => {
     const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     expect(getByText(/Complete beginners/i)).toBeTruthy();
     expect(getByText(/Level up with professional/i)).toBeTruthy();
     expect(getByText(/Go pro with advanced/i)).toBeTruthy();
   });
 
-  it('displays start CTA text', () => {
+  it('displays start CTA text', async () => {
     const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     expect(getByText('Start Path →')).toBeTruthy();
   });
 
-  it('shows grammar-friendly level labels', () => {
+  it('shows grammar-friendly level labels', async () => {
     const { getAllByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     expect(getAllByText('Beginner').length).toBeGreaterThan(0);
     expect(getAllByText('Intermediate').length).toBeGreaterThan(0);
     expect(getAllByText('Advanced').length).toBeGreaterThan(0);
   });
 
-  it('navigates to detail view when a path card is pressed', () => {
+  it('navigates to detail view when a path card is pressed', async () => {
     const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    await flushMicrotasks();
     fireEvent.press(getByText('Investing Fundamentals'));
     expect(mockNavigate).toHaveBeenCalledWith('LearningPathDetail', { pathId: 'path_beginner' });
   });
