@@ -252,7 +252,7 @@ describe('AdminCourseReviewScreen — Rendering', () => {
     expect(getByText('Pending')).toBeDefined();
     expect(getByText('Approved')).toBeDefined();
     expect(getByText(/^Rejected$/)).toBeDefined(); // exact match — not "Reject"
-    expect(getByText('All')).toBeDefined();
+    expect(getByText('Total')).toBeDefined();
   });
 
   it('renders pending course card by default', () => {
@@ -313,7 +313,7 @@ describe('AdminCourseReviewScreen — Filter Switching', () => {
     const { getByText } = render(
       <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
-    press(getByText('All'));
+    press(getByText('Total'));
     expect(getByText('Pending Course')).toBeDefined();
     expect(getByText('Approved Course')).toBeDefined();
     expect(getByText('Rejected Course')).toBeDefined();

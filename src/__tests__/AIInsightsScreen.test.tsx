@@ -53,6 +53,8 @@ vi.mock('../context/ThemeContext', () => ({
 vi.mock('../store/aiStore', () => ({
   useAIStore: vi.fn(() => ({
     insights: mockAIInsights,
+    isLoading: false,
+    fetchInsights: vi.fn(),
   })),
 }));
 
@@ -212,13 +214,13 @@ describe('AIInsightsScreen — Empty Insights', () => {
     vi.useFakeTimers();
     mockNavigate.mockClear();
     // Override to return empty insights
-    vi.mocked(useAIStore).mockImplementation(() => ({ insights: [] }));
+    vi.mocked(useAIStore).mockImplementation(() => ({ insights: [], isLoading: false, fetchInsights: vi.fn() }));
   });
 
   afterEach(() => {
     vi.useRealTimers();
     // Restore default
-    vi.mocked(useAIStore).mockImplementation(() => ({ insights: mockAIInsights }));
+    vi.mocked(useAIStore).mockImplementation(() => ({ insights: mockAIInsights, isLoading: false, fetchInsights: vi.fn() }));
   });
 
   it('renders gracefully with no insights', () => {
