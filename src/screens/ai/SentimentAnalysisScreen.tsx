@@ -415,7 +415,6 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
   const [activeFilter, setActiveFilter] = useState<'all' | 'bullish' | 'bearish' | 'neutral'>('all');
   const [selectedSymbol, setSelectedSymbol] = useState<string>('RELIANCE');
   const [isLoading, setIsLoading] = useState(true);
-  const [computeError, setComputeError] = useState<string | null>(null);
 
   const sentimentData = useMemo(() => mockSentimentData, []);
 
