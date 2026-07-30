@@ -15,9 +15,9 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, Pressable,
+  View, Text, StyleSheet, Pressable, ActivityIndicator,
   Dimensions,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
@@ -414,8 +414,16 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
 
   const [activeFilter, setActiveFilter] = useState<'all' | 'bullish' | 'bearish' | 'neutral'>('all');
   const [selectedSymbol, setSelectedSymbol] = useState<string>('RELIANCE');
+  const [isLoading, setIsLoading] = useState(true);
+  const [computeError, setComputeError] = useState<string | null>(null);
 
   const sentimentData = useMemo(() => mockSentimentData, []);
+
+  useEffect(() => {
+    // Simulate initial data load (API would replace mock data in future)
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Get all available stocks for the picker (stocks that have sentiment data)
   const stockSymbols = useMemo(() =>
@@ -451,7 +459,35 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
     [filtered.length],
   );
 
-  if (!selectedSentiment) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.textMuted }]}>Analyzing sentiment data...</Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (computeError) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Ionicons name="alert-circle-outline" size={48} color={colors.danger} />
+        <Text style={[styles.errorTitle, { color: colors.text }]}>Analysis Error</Text>
+        <Text style={[styles.errorText, { color: colors.textMuted }]}>{computeError}</Text>
+        <Pressable
+          style={[styles.retryBtn, { backgroundColor: colors.primary }]}
+          onPress={() => setComputeError(null)}
+        >
+          <Text style={styles.retryBtnText}>Retry</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  // Empty state
+  if (!selectedSentiment || sentimentData.length === 0) {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <Ionicons name="analytics-outline" size={48} color={colors.textMuted} />
@@ -461,8 +497,14 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
   }
 
   const sc = getSentimentColors(selectedSentiment.label);
-  const stability = computeSentimentStability(selectedSentiment.history);
-  const shift = detectSentimentShift(selectedSentiment.history);
+  let stability: ReturnType<typeof computeSentimentStability> = { stabilityScore: 0, volatility: 'moderate' };
+  let shift: ReturnType<typeof detectSentimentShift> = { hasShifted: false, direction: 'stable', magnitude: 0, alert: null };
+  try {
+    stability = computeSentimentStability(selectedSentiment.history);
+    shift = detectSentimentShift(selectedSentiment.history);
+  } catch (err: any) {
+    setComputeError(err?.message || 'Failed to analyze sentiment data');
+  }
 
   return (
     <View style={styles.container}>
@@ -706,8 +748,13 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
 
 const createStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  centerContent: { justifyContent: 'center', alignItems: 'center', gap: SPACING.md },
-  emptyText: { fontSize: 16, fontWeight: '600' },
+  centerContent: { justifyContent: 'center', alignItems: 'center', gap: SPACING.md, paddingHorizontal: SPACING.xl },
+  emptyText: { fontSize: 16, fontWeight: '600', textAlign: 'center' },
+  loadingText: { ...FONTS.regular, fontSize: 14, textAlign: 'center' },
+  errorTitle: { ...FONTS.bold, fontSize: 18, marginTop: SPACING.sm },
+  errorText: { ...FONTS.regular, fontSize: 14, textAlign: 'center', lineHeight: 20, marginTop: 4 },
+  retryBtn: { paddingHorizontal: 24, paddingVertical: 10, borderRadius: BORDER_RADIUS.full, marginTop: SPACING.lg },
+  retryBtnText: { ...FONTS.semiBold, fontSize: 14, color: '#FFFFFF' },
 
   // Header
   header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
