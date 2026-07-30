@@ -17,9 +17,9 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable,
+  View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator,
   Dimensions, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -227,6 +227,7 @@ export default function EarningsCallScreen({ navigation }: any) {
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [selectedSymbol, setSelectedSymbol] = useState<string>('RELIANCE');
+  const [isLoading, setIsLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     takeaways: true,
     highlights: true,
@@ -237,6 +238,11 @@ export default function EarningsCallScreen({ navigation }: any) {
   });
 
   const earningsData = useMemo(() => mockEarningsData, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
   const selectedEarnings = earningsData.find(e => e.symbol === selectedSymbol);
   const companies = useMemo(() =>
     earningsData.map(e => ({ symbol: e.symbol, name: e.companyName })),
@@ -259,16 +265,33 @@ export default function EarningsCallScreen({ navigation }: any) {
     }
   }, [selectedEarnings]);
 
-  if (!selectedEarnings) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centerContent, { gap: SPACING.md }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>Loading earnings data...</Text>
+      </View>
+    );
+  }
+
+  // Empty state
+  if (!selectedEarnings || earningsData.length === 0) {
     return (
       <View style={[styles.container, styles.centerContent]}>
+        <Ionicons name="analytics-outline" size={48} color={colors.textMuted} />
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('earningsCall.noData')}</Text>
       </View>
     );
   }
 
   const sc = getSentimentColors(selectedEarnings.sentimentLabel);
-  const m = selectedEarnings.metrics;
+  let m: EarningsSummary['metrics'];
+  try {
+    m = selectedEarnings.metrics;
+  } catch {
+    m = { revenue: 0, revenueGrowth: 0, revenueBeat: null, netProfit: 0, profitGrowth: 0, profitBeat: null, eps: 0, epsGrowth: 0, ebitda: 0, ebitdaMargin: 0, operatingMargin: 0, netMargin: 0 };
+  }
 
   return (
     <View style={styles.container}>
