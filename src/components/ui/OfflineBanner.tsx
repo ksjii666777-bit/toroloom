@@ -554,7 +554,8 @@ export default function OfflineBanner() {
               {toast.type === 'error' && (
                 <Ionicons name="refresh-outline" size={11} color="#EF4444" style={{ marginLeft: 2 }} />
               )}
-            </Pressable>              <Pressable onPress={handleToastDismiss} hitSlop={6}>
+            </Pressable>
+            <Pressable onPress={handleToastDismiss} hitSlop={6}>
               <Ionicons name="close" size={12} color="rgba(255,255,255,0.4)" />
             </Pressable>
           </View>

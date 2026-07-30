@@ -434,7 +434,8 @@ Shared via Toroloom`;
           <Text style={[eventStyles.scoreText, { color: dirColor }]}>
             Score: {event.score > 0 ? '+' : ''}{event.score}
           </Text>
-        </View>          <AnimatedScaleButton onPress={handleShare} onLongPress={handleShareLongPress} style={eventStyles.shareBtn} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+        </View>
+        <AnimatedScaleButton onPress={handleShare} onLongPress={handleShareLongPress} style={eventStyles.shareBtn} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
             {shared ? (
               <Ionicons name="checkmark" size={16} color="#10B981" />
             ) : (

@@ -214,9 +214,10 @@ function WebhookCard({
         <View style={{ flex: 1 }}>
           <Text style={[cardStyles.name, { color: colors.text }]}>{wh.name}</Text>
           <Text style={[cardStyles.url, { color: colors.textMuted }]} numberOfLines={1}>{wh.url}</Text>
-        </View>        <Pressable onPress={() => onToggle(wh)}>
-              <Ionicons name={isUp ? 'toggle' : 'toggle-outline'} size={28} color={isUp ? '#00C853' : colors.textMuted} />
-            </Pressable>
+        </View>
+        <Pressable onPress={() => onToggle(wh)}>
+          <Ionicons name={isUp ? 'toggle' : 'toggle-outline'} size={28} color={isUp ? '#00C853' : colors.textMuted} />
+        </Pressable>
       </View>
 
       {/* Events */}

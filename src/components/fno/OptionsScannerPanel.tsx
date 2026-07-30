@@ -144,7 +144,8 @@ function SuggestionCard({
       <View style={sugStyles.bottomRow}>
         <View style={[sugStyles.riskBadge, { backgroundColor: riskColor + '20' }]}>
           <Text style={[sugStyles.riskText, { color: riskColor }]}>{suggestion.riskCategory}</Text>
-        </View>          <Pressable
+        </View>
+        <Pressable
           style={({pressed}) => [[sugStyles.applyBtn, { backgroundColor: dirColor }], {opacity: pressed ? 0.8 : 1}]}
           onPress={() => onApply(suggestion.strategyId, suggestion.strategyName)}
         >

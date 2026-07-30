@@ -459,7 +459,8 @@ export default function MutualFundsScreen({ navigation }: any) {
                       </Text>
                     </TouchableOpacity>
                   ))}
-                </View>                    <Text style={styles.modalLabel}>{t('mutualFunds.frequency')}</Text>
+                </View>
+                <Text style={styles.modalLabel}>{t('mutualFunds.frequency')}</Text>
                 <View style={styles.frequencyRow}>
                   {frequencyOptions.map(opt => (
                     <TouchableOpacity
