@@ -1,4 +1,4 @@
-import React, { useMemo, useState, _useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TextInput, Alert, Platform,
   KeyboardAvoidingView, Modal,
@@ -6,6 +6,7 @@ import {
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useRevenueStore } from '../../store/revenueStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -37,8 +38,9 @@ function formatDate(dateStr: string): string {
 
 export default function RevenueDashboardScreen({ _navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { dashboard, requestPayout, _refresh } = useRevenueStore();
+  const { dashboard, requestPayout } = useRevenueStore();
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'payouts'>('overview');
 
@@ -58,29 +60,29 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Revenue Dashboard</Text>
-          <Text style={styles.subtitle}>Track your creator earnings</Text>
+          <Text style={styles.title}>{t('revenueDashboard.title')}</Text>
+          <Text style={styles.subtitle}>{t('revenueDashboard.subtitle')}</Text>
         </View>
 
         {/* ── Earnings Summary Cards ── */}
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, { borderLeftColor: '#6C63FF' }]}>
-            <Text style={styles.summaryLabel}>Net Earnings</Text>
+            <Text style={styles.summaryLabel}>{t('revenueDashboard.netEarnings')}</Text>
             <Text style={[styles.summaryValue, { color: '#6C63FF' }]}>{formatINR(dashboard.netEarnings)}</Text>
           </View>
           <View style={[styles.summaryCard, { borderLeftColor: '#00C853' }]}>
-            <Text style={styles.summaryLabel}>Paid Out</Text>
+            <Text style={styles.summaryLabel}>{t('revenueDashboard.paidOut')}</Text>
             <Text style={[styles.summaryValue, { color: '#00C853' }]}>{formatINR(dashboard.totalPaidOut)}</Text>
           </View>
         </View>
 
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, { borderLeftColor: '#FFC107' }]}>
-            <Text style={styles.summaryLabel}>Pending Balance</Text>
+            <Text style={styles.summaryLabel}>{t('revenueDashboard.pendingBalance')}</Text>
             <Text style={[styles.summaryValue, { color: '#FFC107' }]}>{formatINR(dashboard.pendingBalance)}</Text>
           </View>
           <View style={[styles.summaryCard, { borderLeftColor: '#FF6B6B' }]}>
-            <Text style={styles.summaryLabel}>Total Fees</Text>
+            <Text style={styles.summaryLabel}>{t('revenueDashboard.totalFees')}</Text>
             <Text style={[styles.summaryValue, { color: '#FF6B6B' }]}>{formatINR(dashboard.totalFees)}</Text>
           </View>
         </View>
@@ -96,9 +98,9 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
               <Ionicons name="wallet-outline" size={22} color="#fff" />
               <View>
                 <Text style={styles.payoutCtaTitle}>
-                  Withdraw {formatINR(dashboard.pendingBalance)}
+                  {t('revenueDashboard.withdraw', { amount: formatINR(dashboard.pendingBalance) })}
                 </Text>
-                <Text style={styles.payoutCtaSub}>Available for payout (min ₹100)</Text>
+                <Text style={styles.payoutCtaSub}>{t('revenueDashboard.availablePayout')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
             </View>
@@ -122,7 +124,7 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
                   styles.tabChipText,
                   activeTab === tab && { color: colors.primary },
                 ]}>
-                  {tab === 'overview' ? 'Overview' : tab === 'transactions' ? 'Transactions' : 'Payout History'}
+                  {tab === 'overview' ? t('revenueDashboard.tabOverview') : tab === 'transactions' ? t('revenueDashboard.tabTransactions') : t('revenueDashboard.tabPayoutHistory')}
                 </Text>
               </View>
             </AnimatedPressable>
@@ -134,7 +136,7 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
           <>
             {/* Breakdown by Source */}
             <Animated.View entering={FadeInDown.springify()} style={styles.section}>
-              <Text style={styles.sectionTitle}>Earnings by Source</Text>
+              <Text style={styles.sectionTitle}>{t('revenueDashboard.earningsBySource')}</Text>
               <View style={styles.sourceGrid}>
                 {sourceEntries.map(([source, data]) => {
                   const percent = dashboard.netEarnings > 0
@@ -151,7 +153,7 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
                         <View style={[styles.sourceBarFill, { width: `${percent}%`, backgroundColor: data.color }]} />
                       </View>
                       <Text style={styles.sourcePercent}>{percent}%</Text>
-                      <Text style={styles.sourceCount}>{data.count} transactions</Text>
+                      <Text style={styles.sourceCount}>{t('revenueDashboard.transactionsLabel', { count: data.count })}</Text>
                     </View>
                   );
                 })}
@@ -161,7 +163,7 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
             {/* Monthly Chart */}
             {dashboard.monthlyHistory.length > 0 && (
               <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-                <Text style={styles.sectionTitle}>Monthly Earnings</Text>
+                <Text style={styles.sectionTitle}>{t('revenueDashboard.monthlyEarnings')}</Text>
                 <View style={styles.chartContainer}>
                   <View style={styles.chartBars}>
                     {dashboard.monthlyHistory.slice(0, 6).map((month, idx) => {
@@ -186,7 +188,7 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
             {dashboard.recentTransactions.length === 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons name="receipt-outline" size={48} color={colors.textMuted} />
-                <Text style={styles.emptyText}>No transactions yet</Text>
+                <Text style={styles.emptyText}>{t('revenueDashboard.noTransactions')}</Text>
               </View>
             ) : (
               dashboard.recentTransactions.map((txn, idx) => (
@@ -207,7 +209,7 @@ export default function RevenueDashboardScreen({ _navigation }: any) {
             {dashboard.payoutHistory.length === 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons name="cash-outline" size={48} color={colors.textMuted} />
-                <Text style={styles.emptyText}>No payouts yet</Text>
+                <Text style={styles.emptyText}>{t('revenueDashboard.noPayouts')}</Text>
               </View>
             ) : (
               dashboard.payoutHistory.map((payout, idx) => (
@@ -250,6 +252,7 @@ const SOURCE_ICONS: Record<RevenueSource, string> = {
 };
 
 function TransactionRow({ txn, colors, styles }: { txn: RevenueTransaction; colors: any; styles: any }) {
+  const { t } = useT();
   return (
     <View style={[styles.txnCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
       <View style={styles.txnLeft}>
@@ -265,7 +268,7 @@ function TransactionRow({ txn, colors, styles }: { txn: RevenueTransaction; colo
       </View>
       <View style={styles.txnRight}>
         <Text style={styles.txnAmount}>+{formatINR(txn.netAmount)}</Text>
-        {txn.paidOut && <Text style={styles.paidOutBadge}>Paid</Text>}
+        {txn.paidOut && <Text style={styles.paidOutBadge}>{t('revenueDashboard.paid')}</Text>}
       </View>
     </View>
   );
@@ -274,6 +277,7 @@ function TransactionRow({ txn, colors, styles }: { txn: RevenueTransaction; colo
 // ─── Payout Row Component ─────────────────────────────────────────────────
 
 function PayoutRow({ payout, colors, styles }: { payout: PayoutRequest; colors: any; styles: any }) {
+  const { t } = useT();
   const statusColor = payout.status === 'completed' ? '#00C853' : 
     payout.status === 'processing' ? '#FFC107' :
     payout.status === 'failed' ? '#FF5252' : '#6C63FF';
@@ -313,6 +317,7 @@ function PayoutModal({
   colors: any;
   styles: any;
 }) {
+  const { t } = useT();
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<'upi' | 'bank'>('upi');
   const [upiId, setUpiId] = useState('rahul@upi');
@@ -328,7 +333,7 @@ function PayoutModal({
     await onRequestPayout(numericAmount, method === 'upi' ? 'UPI' : 'Bank Transfer', dest);
     setIsProcessing(false);
     onClose();
-    Alert.alert('Payout Requested', `₹${numericAmount.toLocaleString('en-IN')} will be transferred to your ${method === 'upi' ? 'UPI' : 'bank account'} within 24-48 hours.`);
+    Alert.alert(t('revenueDashboard.payoutRequested'), t('revenueDashboard.payoutMsg', { amount: numericAmount.toLocaleString('en-IN'), method: method === 'upi' ? t('revenueDashboard.upi') : t('revenueDashboard.bank') }));
   };
 
   const quickAmounts = [500, 1000, 2000, 5000];
@@ -338,23 +343,23 @@ function PayoutModal({
       <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Request Payout</Text>
+            <Text style={styles.modalTitle}>{t('revenueDashboard.requestPayout')}</Text>
             <AnimatedPressable onPress={onClose} haptic="light" scaleTo={0.88}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </AnimatedPressable>
           </View>
 
-          <Text style={styles.inputLabel}>Amount (₹)</Text>
+          <Text style={styles.inputLabel}>{t('revenueDashboard.amountInput')}</Text>
           <TextInput
             style={styles.amountInput}
-            placeholder="Enter amount"
+            placeholder={t('revenueDashboard.enterAmount')}
             placeholderTextColor={colors.textMuted}
             value={amount}
             onChangeText={setAmount}
             keyboardType="number-pad"
           />
           <Text style={styles.maxHint}>
-            Available: {formatINR(maxAmount)} · Min: ₹100
+            {t('revenueDashboard.available', { amount: formatINR(maxAmount) })}
           </Text>
 
           {/* Quick Amounts */}
@@ -376,25 +381,25 @@ function PayoutModal({
           </View>
 
           {/* Method */}
-          <Text style={[styles.inputLabel, { marginTop: SPACING.md }]}>Method</Text>
+          <Text style={[styles.inputLabel, { marginTop: SPACING.md }]}>{t('revenueDashboard.method')}</Text>
           <View style={styles.methodRow}>
             <AnimatedPressable onPress={() => setMethod('upi')} haptic="selection" scaleTo={0.94}>
               <View style={[styles.methodCard, method === 'upi' && { backgroundColor: colors.primary + '20', borderColor: colors.primary }]}>
                 <Ionicons name="phone-portrait" size={20} color={method === 'upi' ? colors.primary : colors.textMuted} />
-                <Text style={[styles.methodText, method === 'upi' && { color: colors.primary }]}>UPI</Text>
+                <Text style={[styles.methodText, method === 'upi' && { color: colors.primary }]}>{t('revenueDashboard.upi')}</Text>
               </View>
             </AnimatedPressable>
             <AnimatedPressable onPress={() => setMethod('bank')} haptic="selection" scaleTo={0.94}>
               <View style={[styles.methodCard, method === 'bank' && { backgroundColor: colors.primary + '20', borderColor: colors.primary }]}>
                 <Ionicons name="business" size={20} color={method === 'bank' ? colors.primary : colors.textMuted} />
-                <Text style={[styles.methodText, method === 'bank' && { color: colors.primary }]}>Bank</Text>
+                <Text style={[styles.methodText, method === 'bank' && { color: colors.primary }]}>{t('revenueDashboard.bank')}</Text>
               </View>
             </AnimatedPressable>
           </View>
 
           {method === 'upi' && (
             <>
-              <Text style={styles.inputLabel}>UPI ID</Text>
+              <Text style={styles.inputLabel}>{t('revenueDashboard.upiId')}</Text>
               <TextInput
                 style={styles.amountInput}
                 value={upiId}
@@ -414,7 +419,7 @@ function PayoutModal({
             <View style={[styles.submitBtn, !isValid && { opacity: 0.5 }, isProcessing && { opacity: 0.7 }]}>
               <Ionicons name={isProcessing ? 'hourglass' : 'send'} size={18} color="#fff" />
               <Text style={styles.submitBtnText}>
-                {isProcessing ? 'Processing...' : `Request ${formatINR(numericAmount)}`}
+                {isProcessing ? t('revenueDashboard.processing') : t('revenueDashboard.requestAmount', { amount: formatINR(numericAmount) })}
               </Text>
             </View>
           </AnimatedPressable>

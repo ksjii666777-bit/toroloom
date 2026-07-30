@@ -14,6 +14,8 @@ import calculators from './calculators';
 import capitalGains from './capitalGains';
 import cdnOptimization from './cdnOptimization';
 import commodityMarkets from './commodityMarkets';
+import copyAnalytics from './copyAnalytics';
+import createPoll from './createPoll';
 import community from './community';
 import contractNoteUpload from './contractNoteUpload';
 import correlationMatrix from './correlationMatrix';
@@ -41,11 +43,13 @@ import paymentHistory from './paymentHistory';
 import periodReport from './periodReport';
 import portfolioAnalytics from './portfolioAnalytics';
 import portfolioRebalancing from './portfolioRebalancing';
+import polls from './polls';
 import performanceChart from './performanceChart';
 import portfolio from './portfolio';
 import portfolioAlerts from './portfolioAlerts';
 import profile from './profile';
 import reports from './reports';
+import revenueDashboard from './revenueDashboard';
 import risk from './risk';
 import riskSettings from './riskSettings';
 import security from './security';
@@ -55,6 +59,7 @@ import subscription from './subscription';
 import taxHarvesting from './taxHarvesting';
 import tenantConfig from './tenantConfig';
 import time from './time';
+import traderProfile from './traderProfile';
 import trading from './trading';
 import twoFactor from './twoFactor';
 import usMarkets from './usMarkets';
@@ -78,6 +83,8 @@ const hi = {
   capitalGains,
   cdnOptimization,
   commodityMarkets,
+  copyAnalytics,
+  createPoll,
   community,
   contractNoteUpload,
   correlationMatrix,
@@ -105,11 +112,13 @@ const hi = {
   periodReport,
   portfolioAnalytics,
   portfolioRebalancing,
+  polls,
   performanceChart,
   portfolio,
   portfolioAlerts,
   profile,
   reports,
+  revenueDashboard,
   risk,
   riskSettings,
   security,
@@ -119,6 +128,7 @@ const hi = {
   taxHarvesting,
   tenantConfig,
   time,
+  traderProfile,
   trading,
   twoFactor,
   usMarkets,

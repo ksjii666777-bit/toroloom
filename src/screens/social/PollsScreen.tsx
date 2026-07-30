@@ -1,42 +1,44 @@
-import React, { useMemo, useCallback, _useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Alert, _Platform,
+  View, Text, StyleSheet, ScrollView, Alert,
 } from 'react-native';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePollStore } from '../../store/pollStore';
 import { POLL_CATEGORIES } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { Poll, PollCategory, _PollStatus } from '../../types';
+import type { Poll, PollCategory } from '../../types';
 
 /** Format a relative time string */
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(t: any, dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('polls.justNow');
+  if (mins < 60) return t('polls.minsAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('polls.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return `${Math.floor(days / 30)}mo ago`;
+  if (days < 30) return t('polls.daysAgo', { count: days });
+  return t('polls.monthsAgo', { count: Math.floor(days / 30) });
 }
 
 /** Time remaining until expiry */
-function timeRemaining(expiresAt: string): string {
+function timeRemaining(t: any, expiresAt: string): string {
   const diff = new Date(expiresAt).getTime() - Date.now();
-  if (diff <= 0) return 'Ended';
+  if (diff <= 0) return t('polls.ended');
   const hours = Math.floor(diff / 3600000);
-  if (hours < 1) return `${Math.floor(diff / 60000)}m left`;
-  if (hours < 24) return `${hours}h left`;
-  return `${Math.floor(hours / 24)}d left`;
+  if (hours < 1) return t('polls.minsLeft', { count: Math.floor(diff / 60000) });
+  if (hours < 24) return t('polls.hoursLeft', { count: hours });
+  return t('polls.daysLeft', { count: Math.floor(hours / 24) });
 }
 
 export default function PollsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     polls, activeCategory, activeStatus,
@@ -65,7 +67,7 @@ export default function PollsScreen({ navigation }: any) {
   const handleVote = useCallback((poll: Poll, optionId: string) => {
     if (poll.status === 'closed') return;
     if (poll.userVote) {
-      Alert.alert('Already Voted', 'You have already voted on this poll.');
+      Alert.alert(t('polls.alreadyVoted'), t('polls.alreadyVotedMsg'));
       return;
     }
     voteOnPoll(poll.id, optionId);
@@ -81,14 +83,14 @@ export default function PollsScreen({ navigation }: any) {
 
     if (isCreator && poll.status === 'active') {
       options.push({
-        label: 'Close Poll',
+        label: t('polls.closePoll'),
         onPress: () => {
           Alert.alert(
-            'Close Poll',
-            'Closing this poll will prevent any further votes. Continue?',
+            t('polls.closePoll'),
+            t('polls.closePollMsg'),
             [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Close', onPress: () => closePoll(poll.id) },
+              { text: t('polls.cancel'), style: 'cancel' },
+              { text: t('polls.close'), onPress: () => closePoll(poll.id) },
             ]
           );
         },
@@ -96,26 +98,26 @@ export default function PollsScreen({ navigation }: any) {
     }
     if (isCreator) {
       options.push({
-        label: 'Delete Poll',
+        label: t('polls.deletePoll'),
         destructive: true,
         onPress: () => {
           Alert.alert(
-            'Delete Poll',
-            'Are you sure you want to delete this poll? This cannot be undone.',
+            t('polls.deletePoll'),
+            t('polls.deletePollMsg'),
             [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Delete', style: 'destructive', onPress: () => deletePoll(poll.id) },
+              { text: t('polls.cancel'), style: 'cancel' },
+              { text: t('polls.delete'), style: 'destructive', onPress: () => deletePoll(poll.id) },
             ]
           );
         },
       });
     }
     if (options.length === 0) {
-      Alert.alert('No Actions', 'You can only manage polls you created.');
+      Alert.alert(t('polls.noActions'), t('polls.noActionsMsg'));
       return;
     }
 
-    Alert.alert('Poll Options', undefined, options.map(o => ({
+    Alert.alert(t('polls.pollOptions'), undefined, options.map(o => ({
       text: o.label,
       onPress: o.onPress,
       style: o.destructive ? 'destructive' as const : 'default' as const,
@@ -137,19 +139,19 @@ export default function PollsScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Community Polls</Text>
-          <Text style={styles.subtitle}>Vote on market polls and share your views</Text>
+          <Text style={styles.title}>{t('polls.title')}</Text>
+          <Text style={styles.subtitle}>{t('polls.subtitle')}</Text>
         </View>
 
         {/* Stats Bar */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { borderLeftColor: colors.primary }]}>
             <Text style={styles.statValue}>{stats.total}</Text>
-            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statLabel}>{t('polls.total')}</Text>
           </View>
           <View style={[styles.statCard, { borderLeftColor: '#00C853' }]}>
             <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.active}</Text>
-            <Text style={styles.statLabel}>Active</Text>
+            <Text style={styles.statLabel}>{t('polls.active')}</Text>
           </View>
           <View style={[styles.statCard, { borderLeftColor: colors.textMuted }]}>
             <Text style={[styles.statValue, { color: colors.textMuted }]}>{stats.closed}</Text>
@@ -157,7 +159,7 @@ export default function PollsScreen({ navigation }: any) {
           </View>
           <View style={[styles.statCard, { borderLeftColor: '#8B5CF6' }]}>
             <Text style={[styles.statValue, { color: '#8B5CF6' }]}>{stats.myVotes}</Text>
-            <Text style={styles.statLabel}>My Votes</Text>
+            <Text style={styles.statLabel}>{t('polls.myVotes')}</Text>
           </View>
         </View>
 
@@ -169,7 +171,7 @@ export default function PollsScreen({ navigation }: any) {
         >
           <View style={styles.createBtn}>
             <Ionicons name="add-circle" size={22} color="#fff" />
-            <Text style={styles.createBtnText}>Create Poll</Text>
+            <Text style={styles.createBtnText}>{t('polls.createPoll')}</Text>
           </View>
         </AnimatedPressable>
 
@@ -195,7 +197,7 @@ export default function PollsScreen({ navigation }: any) {
                     styles.filterChipText,
                     isActive && { color: colors.primary },
                   ]}>
-                    {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                    {status === 'all' ? t('polls.filterAll') : status === 'active' ? t('polls.active') : t('polls.closed')}
                   </Text>
                   <View style={[styles.filterCount, isActive && { backgroundColor: colors.primary }]}>
                     <Text style={styles.filterCountText}>{count}</Text>
@@ -241,9 +243,9 @@ export default function PollsScreen({ navigation }: any) {
         {filteredPolls.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="chatbubbles-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>No polls found</Text>
+            <Text style={styles.emptyTitle}>{t('polls.noPollsTitle')}</Text>
             <Text style={styles.emptySubtitle}>
-              Be the first to create a poll!{'\n'}Tap "Create Poll" to start.
+              {t('polls.noPollsSubtitle')}
             </Text>
           </View>
         ) : (
@@ -283,10 +285,11 @@ function PollCard({
   colors: any;
   styles: any;
 }) {
+  const { t } = useT();
   const isActive = poll.status === 'active';
   const hasVoted = !!poll.userVote;
   const catMeta = POLL_CATEGORIES[poll.category];
-  const remaining = timeRemaining(poll.expiresAt);
+  const remaining = timeRemaining(t, poll.expiresAt);
 
   return (
     <View style={[
@@ -311,7 +314,7 @@ function PollCard({
           ) : (
             <View style={[styles.timeBadge, { backgroundColor: colors.textMuted + '15' }]}>
               <Ionicons name="lock-closed" size={10} color={colors.textMuted} />
-              <Text style={[styles.timeText, { color: colors.textMuted }]}>Closed</Text>
+              <Text style={[styles.timeText, { color: colors.textMuted }]}>{t('polls.closedStatus')}</Text>
             </View>
           )}
           <AnimatedPressable onPress={() => onMore(poll)} haptic="light" scaleTo={0.88}>
@@ -396,8 +399,8 @@ function PollCard({
       {/* Footer: Total votes + Like */}
       <View style={styles.pollFooter}>
         <Text style={styles.footerText}>
-          {poll.totalVotes} vote{poll.totalVotes !== 1 ? 's' : ''}
-          {!isActive && ' · Final results'}
+          {poll.totalVotes} {poll.totalVotes !== 1 ? t('polls.votes') : t('polls.vote')}
+          {!isActive && ` · ${t('polls.finalResults')}`}
         </Text>
 
         <View style={styles.footerActions}>
@@ -418,7 +421,7 @@ function PollCard({
             </View>
           </AnimatedPressable>
 
-          <Text style={styles.footerTime}>{formatRelativeTime(poll.createdAt)}</Text>
+          <Text style={styles.footerTime}>{formatRelativeTime(t, poll.createdAt)}</Text>
         </View>
       </View>
     </View>

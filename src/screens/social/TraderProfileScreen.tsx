@@ -24,6 +24,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useSocialStore } from '../../store/socialStore';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -119,25 +120,26 @@ function generateMockPnLHistory(trader: TraderProfile): TraderPnLPoint[] {
 
 function PerformanceAnalyticsCard({ trader }: { trader: TraderProfile }) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   const metrics = useMemo(() => [
-    { label: 'Win Rate', value: `${trader.winRate.toFixed(1)}%`, color: trader.winRate >= 60 ? '#00E676' : trader.winRate >= 45 ? '#FFAB40' : '#FF5252', icon: 'checkmark-circle' as const },
-    { label: 'Profit Factor', value: (trader.winRate / (100 - trader.winRate || 1)).toFixed(2), color: colors.primary, icon: 'trending-up' as const },
-    { label: 'Avg Win', value: formatCurrency(Math.round(trader.totalPnl / trader.totalTrades * (trader.winRate / 100) * 1.5), true), color: colors.marketUp, icon: 'arrow-up-circle' as const },
-    { label: 'Avg Loss', value: formatCurrency(Math.round(trader.totalPnl / trader.totalTrades * ((100 - trader.winRate) / 100) * 0.8), true), color: colors.marketDown, icon: 'arrow-down-circle' as const },
-    { label: 'Best Trade', value: formatCurrency(Math.round(trader.totalPnl / trader.totalTrades * 8), true), color: colors.marketUp, icon: 'trophy' as const },
-    { label: 'Worst Trade', value: formatCurrency(Math.round(trader.totalPnl / trader.totalTrades * 4), true), color: colors.marketDown, icon: 'alert-circle' as const },
-    { label: 'Max Drawdown', value: `${trader.maxDrawdown.toFixed(1)}%`, color: colors.danger, icon: 'trending-down' as const },
-    { label: 'Sharpe Ratio', value: ((trader.winRate - 40) / 15).toFixed(2), color: ((trader.winRate - 40) / 15) >= 1 ? '#00E676' : '#FFAB40', icon: 'analytics' as const },
-    { label: 'Avg Hold', value: `${trader.avgHoldingDays}d`, color: colors.text, icon: 'time-outline' as const },
-    { label: 'Consecutive Wins', value: Math.round(trader.winRate / 8).toString(), color: colors.marketUp, icon: 'flame' as const },
-  ], [trader, colors]);
+    { label: t('traderProfile.winRate'), value: `${trader.winRate.toFixed(1)}%`, color: trader.winRate >= 60 ? '#00E676' : trader.winRate >= 45 ? '#FFAB40' : '#FF5252', icon: 'checkmark-circle' as const },
+    { label: t('traderProfile.profitFactor'), value: (trader.winRate / (100 - trader.winRate || 1)).toFixed(2), color: colors.primary, icon: 'trending-up' as const },
+    { label: t('traderProfile.avgWin'), value: formatCurrency(Math.round(trader.totalPnl / trader.totalTrades * (trader.winRate / 100) * 1.5), true), color: colors.marketUp, icon: 'arrow-up-circle' as const },
+    { label: t('traderProfile.avgLoss'), value: formatCurrency(Math.round(trader.totalPnl / trader.totalTrades * ((100 - trader.winRate) / 100) * 0.8), true), color: colors.marketDown, icon: 'arrow-down-circle' as const },
+    { label: t('traderProfile.bestTrade'), value: formatCurrency(Math.round(trader.totalPnl / trader.totalTrades * 8), true), color: colors.marketUp, icon: 'trophy' as const },
+    { label: t('traderProfile.worstTrade'), value: formatCurrency(Math.round(trader.totalPnl / trader.totalTrades * 4), true), color: colors.marketDown, icon: 'alert-circle' as const },
+    { label: t('traderProfile.maxDrawdown'), value: `${trader.maxDrawdown.toFixed(1)}%`, color: colors.danger, icon: 'trending-down' as const },
+    { label: t('traderProfile.sharpeRatio'), value: ((trader.winRate - 40) / 15).toFixed(2), color: ((trader.winRate - 40) / 15) >= 1 ? '#00E676' : '#FFAB40', icon: 'analytics' as const },
+    { label: t('traderProfile.avgHoldLabel'), value: `${trader.avgHoldingDays}d`, color: colors.text, icon: 'time-outline' as const },
+    { label: t('traderProfile.consecutiveWins'), value: Math.round(trader.winRate / 8).toString(), color: colors.marketUp, icon: 'flame' as const },
+  ], [trader, colors, t]);
 
   return (
     <View style={analyticsStyles.container}>
       <View style={analyticsStyles.header}>
         <Ionicons name="analytics" size={18} color={colors.primary} />
-        <Text style={[analyticsStyles.title, { color: colors.text }]}>Performance Analytics</Text>
+        <Text style={[analyticsStyles.title, { color: colors.text }]}>{t('traderProfile.performanceAnalytics')}</Text>
       </View>
       <View style={analyticsStyles.grid}>
         {metrics.map((m, i) => (
@@ -173,6 +175,7 @@ const analyticsStyles = StyleSheet.create({
 // ─── Trade History Row ──────────────────────────────────────────────────────
 
 function TradeRow({ trade, colors }: { trade: TraderPublicTrade; colors: any }) {
+  const { t } = useT();
   const isProfitable = trade.pnl > 0;
   return (
     <View style={[tradeStyles.row, { borderBottomColor: colors.divider }]}>
@@ -187,12 +190,12 @@ function TradeRow({ trade, colors }: { trade: TraderPublicTrade; colors: any }) 
               tradeStyles.directionText,
               { color: trade.direction === 'long' ? '#00E676' : '#FF5252' },
             ]}>
-              {trade.direction === 'long' ? 'LONG' : 'SHORT'}
+              {trade.direction === 'long' ? t('traderProfile.long') : t('traderProfile.short')}
             </Text>
           </View>
           {trade.isOpen && (
             <View style={[tradeStyles.openBadge, { backgroundColor: colors.primary + '20' }]}>
-              <Text style={[tradeStyles.openText, { color: colors.primary }]}>OPEN</Text>
+              <Text style={[tradeStyles.openText, { color: colors.primary }]}>{t('traderProfile.open')}</Text>
             </View>
           )}
         </View>
@@ -223,7 +226,7 @@ function TradeRow({ trade, colors }: { trade: TraderPublicTrade; colors: any }) 
         )}
         {trade.isOpen && (
           <View style={[tradeStyles.runningBadge, { backgroundColor: '#FFAB4020' }]}>
-            <Text style={[tradeStyles.runningText, { color: '#FFAB40' }]}>Running</Text>
+            <Text style={[tradeStyles.runningText, { color: '#FFAB40' }]}>{t('traderProfile.running')}</Text>
           </View>
         )}
       </View>
@@ -258,6 +261,7 @@ const tradeStyles = StyleSheet.create({
 
 export default function TraderProfileScreen({ navigation, route }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { traderId } = route.params;
 
@@ -299,23 +303,23 @@ export default function TraderProfileScreen({ navigation, route }: any) {
   const handleStartCopy = useCallback(() => {
     if (!trader) return;
     if (!hasSocialAccess) {
-      Alert.alert('Premium Feature', 'Social & Copy Trading requires an Elite subscription. Upgrade to follow and copy top traders.');
+      Alert.alert(t('traderProfile.premiumFeature'), t('traderProfile.premiumMsg'));
       return;
     }
     Alert.alert(
-      `Copy ${trader.name}`,
-      `Set allocation percentage and investment amount to start copying ${trader.name}'s trades.`,
+      t('traderProfile.copyTitle', { name: trader.name }),
+      t('traderProfile.copyMsg', { name: trader.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('traderProfile.cancel'), style: 'cancel' },
         {
-          text: '50% @ ₹2.5L',
+          text: t('traderProfile.copy50'),
           onPress: () => {
             startCopyTrading(trader.id, 50, 250000);
             setIsCopied(true);
           },
         },
         {
-          text: '25% @ ₹1L',
+          text: t('traderProfile.copy25'),
           onPress: () => {
             startCopyTrading(trader.id, 25, 100000);
             setIsCopied(true);
@@ -330,8 +334,8 @@ export default function TraderProfileScreen({ navigation, route }: any) {
     if (!trader) return;
     try {
       await Share.share({
-        message: `Check out ${trader.name} on Toroloom — ${trader.bio}. ${trader.totalPnlPercent.toFixed(1)}% returns, ${trader.winRate.toFixed(0)}% win rate!`,
-        title: `${trader.name} — Toroloom Trader Profile`,
+        message: t('traderProfile.shareMessage', { name: trader.name, bio: trader.bio, returns: trader.totalPnlPercent.toFixed(1), winRate: trader.winRate.toFixed(0) }),
+        title: t('traderProfile.shareTitle', { name: trader.name }),
       });
     } catch { /* ignore */ }
   }, [trader]);
@@ -340,9 +344,9 @@ export default function TraderProfileScreen({ navigation, route }: any) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>Trader not found</Text>
+        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('traderProfile.traderNotFound')}</Text>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={[styles.backBtnText, { color: colors.primary }]}>Go Back</Text>
+          <Text style={[styles.backBtnText, { color: colors.primary }]}>{t('traderProfile.goBack')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -387,7 +391,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
                 {trader.verified && (
                   <View style={styles.verifiedBadge}>
                     <Ionicons name="checkmark-circle" size={16} color="#00E676" />
-                    <Text style={styles.verifiedLabel}>Verified</Text>
+                    <Text style={styles.verifiedLabel}>{t('traderProfile.verified')}</Text>
                   </View>
                 )}
               </View>
@@ -400,10 +404,10 @@ export default function TraderProfileScreen({ navigation, route }: any) {
                   <Text style={[styles.riskText, {
                     color: trader.riskScore === 'low' ? '#00E676' : trader.riskScore === 'moderate' ? '#FFAB40' : '#FF5252',
                   }]}>
-                    {trader.riskScore === 'low' ? 'Low Risk' : trader.riskScore === 'moderate' ? 'Moderate' : 'High Risk'}
+                    {trader.riskScore === 'low' ? t('traderProfile.lowRisk') : trader.riskScore === 'moderate' ? t('traderProfile.moderate') : t('traderProfile.highRisk')}
                   </Text>
                 </View>
-                <Text style={styles.expText}>{trader.experienceYears}yr exp</Text>
+                <Text style={styles.expText}>{t('traderProfile.yrExp', { count: trader.experienceYears })}</Text>
               </View>
             </View>
           </View>
@@ -423,15 +427,15 @@ export default function TraderProfileScreen({ navigation, route }: any) {
         {/* ─── Stats Grid ─── */}
         <View style={styles.statsGrid}>
           {[
-            { label: 'Total P&L', value: `${totalPnlPositive ? '+' : ''}₹${(trader.totalPnl / 100000).toFixed(1)}L`, color: totalPnlPositive ? colors.marketUp : colors.marketDown },
-            { label: 'Returns', value: `${trader.totalPnlPercent >= 0 ? '+' : ''}${trader.totalPnlPercent.toFixed(1)}%`, color: trader.totalPnlPercent >= 0 ? colors.marketUp : colors.marketDown },
-            { label: 'Win Rate', value: `${trader.winRate.toFixed(0)}%`, color: trader.winRate >= 60 ? colors.marketUp : colors.marketDown },
-            { label: 'Monthly', value: `${trader.monthlyReturn >= 0 ? '+' : ''}${trader.monthlyReturn.toFixed(1)}%`, color: trader.monthlyReturn >= 0 ? colors.marketUp : colors.marketDown },
-            { label: 'Followers', value: trader.followers >= 1000 ? `${(trader.followers / 1000).toFixed(1)}K` : `${trader.followers}`, color: colors.text },
-            { label: 'Trades', value: trader.totalTrades.toLocaleString(), color: colors.text },
-            { label: 'Max DD', value: `${trader.maxDrawdown.toFixed(1)}%`, color: colors.danger },
-            { label: 'Avg Hold', value: `${trader.avgHoldingDays.toFixed(1)}d`, color: colors.text },
-            { label: 'Copy Traders', value: trader.copyTraders >= 1000 ? `${(trader.copyTraders / 1000).toFixed(1)}K` : `${trader.copyTraders}`, color: colors.primary },
+            { label: t('traderProfile.totalPnl'), value: `${totalPnlPositive ? '+' : ''}₹${(trader.totalPnl / 100000).toFixed(1)}L`, color: totalPnlPositive ? colors.marketUp : colors.marketDown },
+            { label: t('traderProfile.returns'), value: `${trader.totalPnlPercent >= 0 ? '+' : ''}${trader.totalPnlPercent.toFixed(1)}%`, color: trader.totalPnlPercent >= 0 ? colors.marketUp : colors.marketDown },
+            { label: t('traderProfile.winRate'), value: `${trader.winRate.toFixed(0)}%`, color: trader.winRate >= 60 ? colors.marketUp : colors.marketDown },
+            { label: t('traderProfile.monthly'), value: `${trader.monthlyReturn >= 0 ? '+' : ''}${trader.monthlyReturn.toFixed(1)}%`, color: trader.monthlyReturn >= 0 ? colors.marketUp : colors.marketDown },
+            { label: t('traderProfile.followers'), value: trader.followers >= 1000 ? `${(trader.followers / 1000).toFixed(1)}K` : `${trader.followers}`, color: colors.text },
+            { label: t('traderProfile.trades'), value: trader.totalTrades.toLocaleString(), color: colors.text },
+            { label: t('traderProfile.maxDd'), value: `${trader.maxDrawdown.toFixed(1)}%`, color: colors.danger },
+            { label: t('traderProfile.avgHold'), value: `${trader.avgHoldingDays.toFixed(1)}d`, color: colors.text },
+            { label: t('traderProfile.copyTraders'), value: trader.copyTraders >= 1000 ? `${(trader.copyTraders / 1000).toFixed(1)}K` : `${trader.copyTraders}`, color: colors.primary },
           ].map((stat, i) => (
             <View key={i} style={[styles.statBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
@@ -444,7 +448,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons name="pulse" size={18} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>P&L History</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.pnlHistory')}</Text>
           </View>
           <PnLChart
             data={pnlHistory.map(p => ({ date: p.date, value: p.cumulativePnl, cumulativePnl: p.cumulativePnl }))}
@@ -461,7 +465,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons name="business" size={18} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Top Stocks</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.topStocks')}</Text>
           </View>
           <View style={styles.topStocksRow}>
             {trader.topStocks.map(s => (
@@ -480,8 +484,8 @@ export default function TraderProfileScreen({ navigation, route }: any) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons name="swap-horizontal" size={18} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Trade History</Text>
-            <Text style={[styles.tradeCount, { color: colors.textMuted }]}>{trades.length} trades</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.tradeHistory')}</Text>
+            <Text style={[styles.tradeCount, { color: colors.textMuted }]}>{t('traderProfile.tradeCount', { count: trades.length })}</Text>
           </View>
 
           {/* Summary row */}
@@ -490,19 +494,19 @@ export default function TraderProfileScreen({ navigation, route }: any) {
               <Text style={[styles.tradeSummaryValue, { color: colors.marketUp }]}>
                 {trades.filter(t => t.pnl > 0 && !t.isOpen).length}
               </Text>
-              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>Won</Text>
+              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.won')}</Text>
             </View>
             <View style={styles.tradeSummaryItem}>
               <Text style={[styles.tradeSummaryValue, { color: colors.marketDown }]}>
                 {trades.filter(t => t.pnl <= 0 && !t.isOpen).length}
               </Text>
-              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>Lost</Text>
+              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.lost')}</Text>
             </View>
             <View style={styles.tradeSummaryItem}>
               <Text style={[styles.tradeSummaryValue, { color: colors.primary }]}>
                 {trades.filter(t => t.isOpen).length}
               </Text>
-              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>Open</Text>
+              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.openLabel')}</Text>
             </View>
             <View style={styles.tradeSummaryItem}>
               <Text style={[styles.tradeSummaryValue, {
@@ -510,7 +514,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
               }]}>
                 {formatCurrency(trades.filter(t => !t.isOpen).reduce((s, t) => s + t.pnl, 0), true)}
               </Text>
-              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>Net P&L</Text>
+              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.netPnl')}</Text>
             </View>
           </View>
 
@@ -527,7 +531,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
               onPress={() => setShowAllTrades(true)}
             >
               <Text style={[styles.showMoreText, { color: colors.primary }]}>
-                Show All {trades.length} Trades
+                {t('traderProfile.showAll', { count: trades.length })}
               </Text>
               <Ionicons name="chevron-down" size={16} color={colors.primary} />
             </TouchableOpacity>
@@ -537,7 +541,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
               style={[styles.showMoreBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
               onPress={() => setShowAllTrades(false)}
             >
-              <Text style={[styles.showMoreText, { color: colors.primary }]}>Show Less</Text>
+              <Text style={[styles.showMoreText, { color: colors.primary }]}>{t('traderProfile.showLess')}</Text>
               <Ionicons name="chevron-up" size={16} color={colors.primary} />
             </TouchableOpacity>
           )}
@@ -573,7 +577,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
                 styles.followBtnText,
                 isFollowed && styles.followBtnTextActive,
               ]}>
-                {isFollowed ? 'Following' : 'Follow'}
+                {isFollowed ? t('traderProfile.following') : t('traderProfile.followBtn')}
               </Text>
             </View>
           </AnimatedPressable>
@@ -596,7 +600,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
                 color={colors.white}
               />
               <Text style={styles.copyBtnText}>
-                {isCopying ? 'Copying' : 'Copy Trader'}
+                {isCopying ? t('traderProfile.copying') : t('traderProfile.copyTrader')}
               </Text>
             </LinearGradient>
           </AnimatedPressable>

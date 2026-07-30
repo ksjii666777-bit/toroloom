@@ -6,6 +6,7 @@ import {
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePollStore } from '../../store/pollStore';
 import { POLL_CATEGORIES } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -24,6 +25,7 @@ const MIN_OPTIONS = 2;
 
 export default function CreatePollScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { createPoll } = usePollStore();
 
@@ -57,7 +59,7 @@ export default function CreatePollScreen({ navigation }: any) {
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) {
-      Alert.alert('Incomplete', 'Please fill in the question and all options.');
+      Alert.alert(t('createPoll.alertIncomplete'), t('createPoll.alertIncompleteMsg'));
       return;
     }
 
@@ -71,8 +73,8 @@ export default function CreatePollScreen({ navigation }: any) {
       tags,
     );
 
-    Alert.alert('Poll Created!', 'Your poll is now live for the community to vote.', [
-      { text: 'OK', onPress: () => navigation.goBack() },
+    Alert.alert(t('createPoll.alertCreated'), t('createPoll.alertCreatedMsg'), [
+      { text: t('createPoll.ok'), onPress: () => navigation.goBack() },
     ]);
   }, [canSubmit, question, options, tagsText, selectedCategory, selectedDuration, createPoll, navigation]);
 
@@ -92,10 +94,10 @@ export default function CreatePollScreen({ navigation }: any) {
             <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
               <Ionicons name="close" size={24} color={colors.text} />
             </AnimatedPressable>
-            <Text style={styles.headerTitle}>Create Poll</Text>
+            <Text style={styles.headerTitle}>{t('createPoll.title')}</Text>
             <AnimatedPressable onPress={handleSubmit} haptic="medium" scaleTo={0.92}>
               <View style={[styles.publishBtn, !canSubmit && { opacity: 0.5 }]}>
-                <Text style={styles.publishBtnText}>Publish</Text>
+                <Text style={styles.publishBtnText}>{t('createPoll.publish')}</Text>
               </View>
             </AnimatedPressable>
           </View>
@@ -103,28 +105,28 @@ export default function CreatePollScreen({ navigation }: any) {
 
         {/* ── Question ── */}
         <Animated.View entering={FadeInDown.springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Question</Text>
+          <Text style={styles.sectionTitle}>{t('createPoll.question')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="Ask the community something..."
+            placeholder={t('createPoll.askPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={question}
             onChangeText={setQuestion}
             maxLength={200}
             multiline
           />
-          <Text style={styles.charCount}>{question.length}/200</Text>
+          <Text style={styles.charCount}>{t('createPoll.charCount', { count: question.length })}</Text>
         </Animated.View>
 
         {/* ── Options ── */}
         <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Options ({options.length}/{MAX_OPTIONS})</Text>
+            <Text style={styles.sectionTitle}>{t('createPoll.options', { count: options.length, max: MAX_OPTIONS })}</Text>
             {options.length < MAX_OPTIONS && (
               <AnimatedPressable onPress={handleAddOption} haptic="light" scaleTo={0.92}>
                 <View style={styles.addOptionBtn}>
                   <Ionicons name="add" size={16} color={colors.primary} />
-                  <Text style={styles.addOptionBtnText}>Add</Text>
+                  <Text style={styles.addOptionBtnText}>{t('createPoll.add')}</Text>
                 </View>
               </AnimatedPressable>
             )}
@@ -142,7 +144,7 @@ export default function CreatePollScreen({ navigation }: any) {
                 </View>
                 <TextInput
                   style={[styles.textInput, { flex: 1 }]}
-                  placeholder={`Option ${idx + 1}`}
+                  placeholder={t('createPoll.optionPlaceholder', { number: idx + 1 })}
                   placeholderTextColor={colors.textMuted}
                   value={option}
                   onChangeText={(val) => handleOptionChange(idx, val)}
@@ -160,7 +162,7 @@ export default function CreatePollScreen({ navigation }: any) {
 
         {/* ── Category ── */}
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Category</Text>
+          <Text style={styles.sectionTitle}>{t('createPoll.category')}</Text>
           <View style={styles.chipRow}>
             {Object.values(POLL_CATEGORIES).map(meta => {
               const isActive = selectedCategory === meta.category;
@@ -189,7 +191,7 @@ export default function CreatePollScreen({ navigation }: any) {
 
         {/* ── Duration ── */}
         <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Duration</Text>
+          <Text style={styles.sectionTitle}>{t('createPoll.duration')}</Text>
           <View style={styles.durationRow}>
             {DURATION_OPTIONS.map(opt => {
               const isActive = selectedDuration === opt.value;
@@ -231,23 +233,23 @@ export default function CreatePollScreen({ navigation }: any) {
 
         {/* ── Tags ── */}
         <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Tags (optional)</Text>
+          <Text style={styles.sectionTitle}>{t('createPoll.tagsOptional')}</Text>
           <TextInput
             style={styles.textInput}
-            placeholder="e.g., nifty, outlook, strategy"
+            placeholder={t('createPoll.tagsPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={tagsText}
             onChangeText={setTagsText}
           />
-          <Text style={styles.charCount}>Comma separated keywords for discoverability</Text>
+          <Text style={styles.charCount}>{t('createPoll.tagsHint')}</Text>
         </Animated.View>
 
         {/* ── Preview ── */}
         <Animated.View entering={FadeInDown.delay(250).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>Preview</Text>
+          <Text style={styles.sectionTitle}>{t('createPoll.preview')}</Text>
           <View style={[styles.previewCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Text style={[styles.previewQuestion, { color: colors.text }]}>
-              {question.trim() || 'Your poll question will appear here'}
+              {question.trim() || t('createPoll.previewPlaceholder')}
             </Text>
             <View style={styles.previewOptions}>
               {options.filter(o => o.trim()).map((opt, i) => (
@@ -262,7 +264,7 @@ export default function CreatePollScreen({ navigation }: any) {
               <Text style={[styles.previewMeta, { color: colors.textMuted }]}>
                 {POLL_CATEGORIES[selectedCategory].label} · {DURATION_OPTIONS.find(d => d.value === selectedDuration)?.label}
               </Text>
-              <Text style={[styles.previewVotes, { color: colors.textMuted }]}>0 votes</Text>
+              <Text style={[styles.previewVotes, { color: colors.textMuted }]}>{t('createPoll.votes', { count: 0 })}</Text>
             </View>
           </View>
         </Animated.View>

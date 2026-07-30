@@ -22,8 +22,9 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import _Svg, { _Rect, Text as _SvgText, _Line, _Circle } from 'react-native-svg';
+
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useSocialStore } from '../../store/socialStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -200,6 +201,7 @@ function MonthlyReturnsChart({ data, colors }: {
 
 export default function CopyAnalyticsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const { copyRelations, copiedTrades } = useSocialStore();
@@ -290,9 +292,9 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </AnimatedPressable>
           <View style={{ flex: 1, marginLeft: SPACING.md }}>
-            <Text style={[styles.title, { color: colors.text }]}>Copy Analytics</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('copyAnalytics.title')}</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Copy trading performance dashboard
+              {t('copyAnalytics.subtitle')}
             </Text>
           </View>
         </View>
@@ -314,7 +316,7 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
             <Text style={[styles.summaryValue, { color: colors.text }]}>
               ₹{(analytics.totalInvested / 100000).toFixed(1)}L
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total Invested</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('copyAnalytics.totalInvested')}</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={[styles.summaryIcon, {
@@ -331,7 +333,7 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
             }]}>
               {analytics.totalPnl >= 0 ? '+' : ''}₹{analytics.totalPnl.toLocaleString()}
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total P&L</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('copyAnalytics.totalPnl')}</Text>
           </View>
         </View>
 
@@ -347,21 +349,21 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
             }]}>
               {analytics.returnPct >= 0 ? '+' : ''}{analytics.returnPct.toFixed(1)}%
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Return</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('copyAnalytics.return')}</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={[styles.summaryIcon, { backgroundColor: '#8B5CF618' }]}>
               <Ionicons name="copy-outline" size={18} color="#8B5CF6" />
             </View>
             <Text style={[styles.summaryValue, { color: colors.text }]}>
-              {analytics.activeCount}{analytics.pausedCount > 0 ? ` (${analytics.pausedCount} paused)` : ''}
+              {analytics.activeCount}{analytics.pausedCount > 0 ? t('copyAnalytics.paused', { count: analytics.pausedCount }) : ''}
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Active Copy</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('copyAnalytics.activeCopy')}</Text>
           </View>
         </View>
 
         {/* ── P&L Chart ── */}
-        <Card title="P&L Over Time" style={styles.card}>
+        <Card title={t('copyAnalytics.pnlOverTime')} style={styles.card}>
           <PnLChart
             data={pnlHistory}
             height={200}
@@ -371,23 +373,23 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
         </Card>
 
         {/* ── P&L Breakdown by Trader ── */}
-        <Card title="P&L by Trader" style={styles.card}>
+        <Card title={t('copyAnalytics.pnlByTrader')} style={styles.card}>
           {breakdownData.length > 0 ? (
             <PnLBreakdownChart data={breakdownData} colors={colors} />
           ) : (
             <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              No copy trading data yet
+              {t('copyAnalytics.noData')}
             </Text>
           )}
         </Card>
 
         {/* ── Monthly Returns Comparison ── */}
-        <Card title="Monthly Returns Comparison" style={styles.card}>
+        <Card title={t('copyAnalytics.monthlyReturnsComparison')} style={styles.card}>
           <MonthlyReturnsChart data={monthlyReturns} colors={colors} />
         </Card>
 
         {/* ── Per-Trader Performance ── */}
-        <Card title="Per-Trader Performance" style={styles.card}>
+        <Card title={t('copyAnalytics.perTraderPerformance')} style={styles.card}>
           {analytics.perTrader.map((trader, i) => (
             <Animated.View
               key={trader.traderId}
@@ -408,12 +410,12 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
                     <Text style={[styles.traderName, { color: colors.text }]}>{trader.name}</Text>
                     {trader.isPaused && (
                       <View style={[styles.pausedBadge, { backgroundColor: '#FFAB4020' }]}>
-                        <Text style={styles.pausedText}>Paused</Text>
+                        <Text style={styles.pausedText}>{t('copyAnalytics.pausedStatus')}</Text>
                       </View>
                     )}
                   </View>
                   <Text style={[styles.traderAlloc, { color: colors.textMuted }]}>
-                    {trader.allocation}% allocation · {trader.totalTrades} trades
+                    {t('copyAnalytics.allocationTrades', { allocation: trader.allocation, count: trader.totalTrades })}
                   </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
@@ -435,59 +437,59 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
                   <Text style={[styles.traderStatValue, { color: trader.winRate >= 50 ? '#00E676' : '#FF5252' }]}>
                     {trader.winRate.toFixed(0)}%
                   </Text>
-                  <Text style={[styles.traderStatLabel, { color: colors.textMuted }]}>Win Rate</Text>
+                  <Text style={[styles.traderStatLabel, { color: colors.textMuted }]}>{t('copyAnalytics.winRate')}</Text>
                 </View>
                 <View style={styles.traderStat}>
                   <Text style={[styles.traderStatValue, { color: colors.marketUp }]}>
                     ₹{trader.bestTrade.toLocaleString()}
                   </Text>
-                  <Text style={[styles.traderStatLabel, { color: colors.textMuted }]}>Best Trade</Text>
+                  <Text style={[styles.traderStatLabel, { color: colors.textMuted }]}>{t('copyAnalytics.bestTrade')}</Text>
                 </View>
                 <View style={styles.traderStat}>
                   <Text style={[styles.traderStatValue, { color: colors.marketDown }]}>
                     ₹{Math.abs(trader.worstTrade).toLocaleString()}
                   </Text>
-                  <Text style={[styles.traderStatLabel, { color: colors.textMuted }]}>Worst Trade</Text>
+                  <Text style={[styles.traderStatLabel, { color: colors.textMuted }]}>{t('copyAnalytics.worstTrade')}</Text>
                 </View>
                 <View style={styles.traderStat}>
                   <Text style={[styles.traderStatValue, { color: colors.text }]}>
                     {trader.activeTrades}
                   </Text>
-                  <Text style={[styles.traderStatLabel, { color: colors.textMuted }]}>Open</Text>
+                  <Text style={[styles.traderStatLabel, { color: colors.textMuted }]}>{t('copyAnalytics.open')}</Text>
                 </View>
               </View>
             </Animated.View>
           ))}
           {analytics.perTrader.length === 0 && (
             <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              Start copy trading to see performance data
+              {t('copyAnalytics.noPerfData')}
             </Text>
           )}
         </Card>
 
         {/* ── Risk Metrics ── */}
-        <Card title="Risk & Performance Metrics" style={styles.card}>
+        <Card title={t('copyAnalytics.riskMetrics')} style={styles.card}>
           <View style={styles.metricsGrid}>
             <View style={[styles.metricBox, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <Text style={[styles.metricValue, { color: colors.marketUp }]}>
                 {analytics.copyWinRate.toFixed(0)}%
               </Text>
-              <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Win Rate</Text>
-              <Text style={[styles.metricSub, { color: colors.textSecondary }]}>Closed Trades</Text>
+              <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('copyAnalytics.winRate')}</Text>
+              <Text style={[styles.metricSub, { color: colors.textSecondary }]}>{t('copyAnalytics.closedTrades')}</Text>
             </View>
             <View style={[styles.metricBox, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <Text style={[styles.metricValue, { color: colors.primary }]}>
                 {(analytics.copyWinRate / (100 - analytics.copyWinRate || 1)).toFixed(2)}
               </Text>
-              <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Profit Factor</Text>
-              <Text style={[styles.metricSub, { color: colors.textSecondary }]}>Wins / Losses</Text>
+              <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('copyAnalytics.profitFactor')}</Text>
+              <Text style={[styles.metricSub, { color: colors.textSecondary }]}>{t('copyAnalytics.winsVsLosses')}</Text>
             </View>
             <View style={[styles.metricBox, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <Text style={[styles.metricValue, { color: colors.text }]}>
                 ₹{(analytics.totalPnl / (analytics.perTrader.length || 1)).toLocaleString()}
               </Text>
-              <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Avg per Trader</Text>
-              <Text style={[styles.metricSub, { color: colors.textSecondary }]}>Avg P&L</Text>
+              <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('copyAnalytics.avgPerTrader')}</Text>
+              <Text style={[styles.metricSub, { color: colors.textSecondary }]}>{t('copyAnalytics.avgPnl')}</Text>
             </View>
             <View style={[styles.metricBox, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <Text style={[styles.metricValue, { color: colors.danger }]}>
@@ -495,8 +497,8 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
                   ? `${Math.abs(analytics.worstPerformer?.pnl || 0) > 0 ? (Math.abs(analytics.worstPerformer?.pnl || 0) / (analytics.worstPerformer?.invested || 1) * 100).toFixed(1) : '0.0'}%`
                   : '0.0%'}
               </Text>
-              <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Max Drawdown</Text>
-              <Text style={[styles.metricSub, { color: colors.textSecondary }]}>Per Trader</Text>
+              <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('copyAnalytics.maxDrawdown')}</Text>
+              <Text style={[styles.metricSub, { color: colors.textSecondary }]}>{t('copyAnalytics.perTraderLabel')}</Text>
             </View>
           </View>
         </Card>
@@ -508,7 +510,7 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
               <View style={[styles.highlightCard, { backgroundColor: '#00E67610', borderColor: '#00E67630' }]}>
                 <View style={styles.highlightHeader}>
                   <Ionicons name="trophy" size={16} color="#FFD700" />
-                  <Text style={[styles.highlightTitle, { color: '#00E676' }]}>Best Performer</Text>
+                  <Text style={[styles.highlightTitle, { color: '#00E676' }]}>{t('copyAnalytics.bestPerformer')}</Text>
                 </View>
                 <Text style={[styles.highlightName, { color: colors.text }]}>
                   {analytics.bestPerformer.name}
@@ -517,7 +519,7 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
                   +₹{analytics.bestPerformer.pnl.toLocaleString()}
                 </Text>
                 <Text style={[styles.highlightSub, { color: colors.textMuted }]}>
-                  {analytics.bestPerformer.allocation}% allocation · {(analytics.bestPerformer.pnl / (analytics.bestPerformer.invested || 1) * 100).toFixed(1)}% return
+                  {t('copyAnalytics.allocationReturn', { allocation: analytics.bestPerformer.allocation, return: (analytics.bestPerformer.pnl / (analytics.bestPerformer.invested || 1) * 100).toFixed(1) })}
                 </Text>
               </View>
             )}
@@ -525,7 +527,7 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
               <View style={[styles.highlightCard, { backgroundColor: '#FF525210', borderColor: '#FF525230' }]}>
                 <View style={styles.highlightHeader}>
                   <Ionicons name={"alert-triangle" as any} size={16} color="#FF5252" />
-                  <Text style={[styles.highlightTitle, { color: '#FF5252' }]}>Worst Performer</Text>
+                  <Text style={[styles.highlightTitle, { color: '#FF5252' }]}>{t('copyAnalytics.worstPerformer')}</Text>
                 </View>
                 <Text style={[styles.highlightName, { color: colors.text }]}>
                   {analytics.worstPerformer.name}
@@ -534,7 +536,7 @@ export default function CopyAnalyticsScreen({ navigation }: any) {
                   ₹{analytics.worstPerformer.pnl.toLocaleString()}
                 </Text>
                 <Text style={[styles.highlightSub, { color: colors.textMuted }]}>
-                  {analytics.worstPerformer.allocation}% allocation · Consider adjusting
+                  {t('copyAnalytics.allocationReturn', { allocation: analytics.worstPerformer.allocation, return: '' }).replace(' · 0% return', '')} · {t('copyAnalytics.considerAdjusting')}
                 </Text>
               </View>
             )}
