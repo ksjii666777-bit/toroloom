@@ -51,13 +51,15 @@ const mockOnVerified = vi.fn();
 
 const baseProps: any = {
   navigation: { goBack: mockGoBack, navigate: mockNavigate },
-  route: { params: { onVerified: mockOnVerified } },
+  route: { params: {} },
 };
 
 import PanVerificationScreen from '../screens/kyc/PanVerificationScreen';
+import { kycCallbackStore } from '../store/kycCallbackStore';
 
 describe('PanVerificationScreen', () => {
   beforeEach(() => {
+    kycCallbackStore.setStepCallback('pan', (...args) => { mockOnVerified(...args); });
     vi.clearAllMocks();
     mockVerifyPan.mockResolvedValue({
       panNumber: 'ABCDE1234F',
@@ -190,7 +192,7 @@ describe('PanVerificationScreen', () => {
     expect(getByText('Continue')).toBeDefined();
   });
 
-  it('calls onVerified callback and navigates back when Continue is pressed after success', async () => {
+  it('invokes kycCallbackStore callback and navigates back when Continue is pressed after success', async () => {
     const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps} />);
     const input = getByPlaceholderText('ABCDE1234F');
     act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });

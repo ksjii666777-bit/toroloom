@@ -68,15 +68,17 @@ const mockOnVerified = vi.fn();
 
 const baseProps: any = {
   navigation: { goBack: mockGoBack, navigate: mockNavigate },
-  route: { params: { onVerified: mockOnVerified } },
+  route: { params: {} },
 };
 
 // ==================== Import screen ====================
 
 import BankLinkingScreen from '../screens/kyc/BankLinkingScreen';
+import { kycCallbackStore } from '../store/kycCallbackStore';
 
 describe('BankLinkingScreen', () => {
   beforeEach(() => {
+    kycCallbackStore.setStepCallback('bank', (...args) => { mockOnVerified(...args); });
     vi.clearAllMocks();
     mockLinkedBanks.length = 0;
   });
@@ -240,7 +242,8 @@ describe('BankLinkingScreen', () => {
   // Edge Cases
   // ═══════════════════════════════════════════════════════════════
 
-  it('renders without crashing with no onVerified callback', () => {
+  it('renders without crashing with no callback registered', () => {
+    kycCallbackStore.clearAll();
     const noCallbackProps: any = {
       navigation: { goBack: mockGoBack, navigate: mockNavigate },
       route: { params: {} },

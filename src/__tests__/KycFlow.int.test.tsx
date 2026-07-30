@@ -84,22 +84,22 @@ const mockOnVerified = vi.fn();
 
 const panScreenProps: any = {
   navigation: { goBack: mockGoBack, navigate: mockNavigate },
-  route: { params: { onVerified: mockOnVerified } },
+  route: { params: {} },
 };
 
 const aadhaarScreenProps: any = {
   navigation: { goBack: mockGoBack, navigate: mockNavigate },
-  route: { params: { onVerified: mockOnVerified } },
+  route: { params: {} },
 };
 
 const bankScreenProps: any = {
   navigation: { goBack: mockGoBack, navigate: mockNavigate },
-  route: { params: { onVerified: mockOnVerified } },
+  route: { params: {} },
 };
 
 const digilockerScreenProps: any = {
   navigation: { goBack: mockGoBack, navigate: mockNavigate },
-  route: { params: { onVerified: mockOnVerified } },
+  route: { params: {} },
 };
 
 // ==================== Helpers ====================
@@ -137,9 +137,15 @@ import PanVerificationScreen from '../screens/kyc/PanVerificationScreen';
 import AadhaarVerificationScreen from '../screens/kyc/AadhaarVerificationScreen';
 import DigiLockerScreen from '../screens/kyc/DigiLockerScreen';
 import BankLinkingScreen from '../screens/kyc/BankLinkingScreen';
+import { kycCallbackStore } from '../store/kycCallbackStore';
 
 describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', () => {
   beforeEach(() => {
+    // Register callbacks via store (not route.params) to match production code
+    kycCallbackStore.setStepCallback('pan', (...args) => { mockOnVerified(...args); });
+    kycCallbackStore.setStepCallback('aadhaar', (...args) => { mockOnVerified(...args); });
+    kycCallbackStore.setStepCallback('digilocker', (...args) => { mockOnVerified(...args); });
+    kycCallbackStore.setStepCallback('bank', (...args) => { mockOnVerified(...args); });
     vi.clearAllMocks();
 
     // --- PAN mock ---

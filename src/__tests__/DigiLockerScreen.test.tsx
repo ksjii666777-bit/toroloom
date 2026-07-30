@@ -55,13 +55,15 @@ const mockOnVerified = vi.fn();
 
 const baseProps: any = {
   navigation: { goBack: mockGoBack, navigate: mockNavigate },
-  route: { params: { onVerified: mockOnVerified } },
+  route: { params: {} },
 };
 
 import DigiLockerScreen from '../screens/kyc/DigiLockerScreen';
+import { kycCallbackStore } from '../store/kycCallbackStore';
 
 describe('DigiLockerScreen', () => {
   beforeEach(() => {
+    kycCallbackStore.setStepCallback('digilocker', (...args) => { mockOnVerified(...args); });
     vi.clearAllMocks();
     mockGetDigiLockerAuth.mockResolvedValue({
       authUrl: 'https://digilocker.gov.in/authorize?client_id=toroloom&state=DL_test_1',
@@ -195,7 +197,8 @@ describe('DigiLockerScreen', () => {
   // Edge Cases
   // ═══════════════════════════════════════════════════════════════
 
-  it('renders without crashing with no onVerified callback', () => {
+  it('renders without crashing with no callback registered', () => {
+    kycCallbackStore.clearAll();
     const noCallbackProps: any = {
       navigation: { goBack: mockGoBack, navigate: mockNavigate },
       route: { params: {} },

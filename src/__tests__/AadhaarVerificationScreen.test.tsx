@@ -54,13 +54,15 @@ const mockOnVerified = vi.fn();
 
 const baseProps: any = {
   navigation: { goBack: mockGoBack, navigate: mockNavigate },
-  route: { params: { onVerified: mockOnVerified } },
+  route: { params: {} },
 };
 
 import AadhaarVerificationScreen from '../screens/kyc/AadhaarVerificationScreen';
+import { kycCallbackStore } from '../store/kycCallbackStore';
 
 describe('AadhaarVerificationScreen', () => {
   beforeEach(() => {
+    kycCallbackStore.setStepCallback('aadhaar', (...args) => { mockOnVerified(...args); });
     vi.clearAllMocks();
     mockSendAadhaarOtp.mockResolvedValue({
       referenceId: 'AADHAAR_OTP_1234567890_1',
