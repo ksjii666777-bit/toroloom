@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { useWidgetStore } from '../../store/widgetStore';
@@ -25,6 +26,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const analytics = usePortfolioAnalyticsStore(s => s.getAnalytics());
@@ -53,9 +55,9 @@ export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={20} color={colors.text} />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: SPACING.md }}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Portfolio Analytics</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('portfolioAnalytics.title')}</Text>
             <Text style={[styles.headerSub, { color: colors.textMuted }]}>
-              Customize with draggable widgets
+              {t('portfolioAnalytics.subtitle')}
             </Text>
           </View>
           {/* Gallery button */}
@@ -73,11 +75,11 @@ export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
         <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={styles.summaryHeader}>
             <Ionicons name="trophy" size={16} color="#FFC107" />
-            <Text style={[styles.summaryTitle, { color: colors.text }]}>Performance Summary</Text>
+            <Text style={[styles.summaryTitle, { color: colors.text }]}>{t('portfolioAnalytics.performanceSummary')}</Text>
           </View>
           <View style={styles.summaryGrid}>
             <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Total Return</Text>
+              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.totalReturn')}</Text>
               <Text style={[styles.summaryValue, { color: metrics.totalReturn >= 0 ? '#00E676' : '#FF5252' }]}>
                 {formatCurrency(metrics.totalReturn, true)}
               </Text>
@@ -87,19 +89,19 @@ export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Realized P&L</Text>
+              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.realizedPnl')}</Text>
               <Text style={[styles.summaryValue, { color: colors.text }]}>
                 {formatCurrency(metrics.realizedPnl, true)}
               </Text>
-              <Text style={[styles.summaryPct, { color: colors.textMuted }]}>Realized</Text>
+              <Text style={[styles.summaryPct, { color: colors.textMuted }]}>{t('portfolioAnalytics.realized')}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Unrealized</Text>
+              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.unrealized')}</Text>
               <Text style={[styles.summaryValue, { color: colors.text }]}>
                 {formatCurrency(metrics.unrealizedPnl, true)}
               </Text>
-              <Text style={[styles.summaryPct, { color: colors.textMuted }]}>Unrealized</Text>
+              <Text style={[styles.summaryPct, { color: colors.textMuted }]}>{t('portfolioAnalytics.unrealizedLabel')}</Text>
             </View>
           </View>
         </View>
@@ -118,13 +120,13 @@ export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
         {/* ── Widgets Section ── */}
         <View style={styles.sectionHeader}>
           <Ionicons name="grid" size={16} color={colors.primary} />
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Dashboard Widgets</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('portfolioAnalytics.dashboardWidgets')}</Text>
           <TouchableOpacity
             style={[styles.sectionAction, { backgroundColor: colors.primary + '15' }]}
             onPress={() => navigation.navigate('WidgetGallery')}
           >
             <Ionicons name="add" size={14} color={colors.primary} />
-            <Text style={[styles.sectionActionText, { color: colors.primary }]}>Manage</Text>
+            <Text style={[styles.sectionActionText, { color: colors.primary }]}>{t('portfolioAnalytics.manage')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -134,36 +136,36 @@ export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
         <View style={[styles.chartCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={styles.extraHeader}>
             <Ionicons name="receipt" size={16} color={colors.primary} />
-            <Text style={[styles.extraTitle, { color: colors.text }]}>Capital Gains & Tax</Text>
+            <Text style={[styles.extraTitle, { color: colors.text }]}>{t('portfolioAnalytics.capitalGainsTax')}</Text>
           </View>
           <View style={styles.cgGrid}>
             <View style={styles.cgItem}>
-              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>STCG</Text>
+              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.stcg')}</Text>
               <Text style={[styles.cgValue, { color: analytics.capitalGains.shortTerm.gains >= 0 ? '#00E676' : '#FF5252' }]}>
                 {formatCurrency(analytics.capitalGains.shortTerm.gains)}
               </Text>
               <Text style={[styles.cgTax, { color: colors.textMuted }]}>
-                Tax: {formatCurrency(analytics.capitalGains.shortTerm.estimatedTax)}
+                {t('portfolioAnalytics.taxLabel', { amount: formatCurrency(analytics.capitalGains.shortTerm.estimatedTax) })}
               </Text>
             </View>
             <View style={[styles.cgDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.cgItem}>
-              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>LTCG</Text>
+              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.ltcg')}</Text>
               <Text style={[styles.cgValue, { color: analytics.capitalGains.longTerm.gains >= 0 ? '#00E676' : '#FF5252' }]}>
                 {formatCurrency(analytics.capitalGains.longTerm.gains)}
               </Text>
               <Text style={[styles.cgTax, { color: colors.textMuted }]}>
-                Tax: {formatCurrency(analytics.capitalGains.longTerm.estimatedTax)}
+                {t('portfolioAnalytics.taxLabel', { amount: formatCurrency(analytics.capitalGains.longTerm.estimatedTax) })}
               </Text>
             </View>
             <View style={[styles.cgDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.cgItem}>
-              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>Total Tax</Text>
+              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.totalTax')}</Text>
               <Text style={[styles.cgValue, { color: '#FF5252' }]}>
                 {formatCurrency(analytics.capitalGains.totalEstimatedTax)}
               </Text>
               <Text style={[styles.cgTax, { color: colors.textMuted }]}>
-                STT: {formatCurrency(analytics.capitalGains.sttPaid)}
+                {t('portfolioAnalytics.sttLabel', { amount: formatCurrency(analytics.capitalGains.sttPaid) })}
               </Text>
             </View>
           </View>

@@ -16,10 +16,11 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  Dimensions, _Platform, ActivityIndicator,
+  Dimensions, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -35,11 +36,12 @@ const { width } = Dimensions.get('window');
 // ══════════════════════════════════════════════════════════════
 
 function SourceBadge({ source, isLoading }: { source: 'api' | 'local'; isLoading: boolean }) {
+  const { t } = useT();
   if (isLoading) {
     return (
       <View style={[styles.sourceBadge, { backgroundColor: '#FFC10720', borderColor: '#FFC10740' }]}>
         <ActivityIndicator size={8} color="#FFC107" />
-        <Text style={[styles.sourceText, { color: '#FFC107' }]}>Loading…</Text>
+        <Text style={[styles.sourceText, { color: '#FFC107' }]}>{t('dividendTracker.loading')}</Text>
       </View>
     );
   }
@@ -47,14 +49,14 @@ function SourceBadge({ source, isLoading }: { source: 'api' | 'local'; isLoading
     return (
       <View style={[styles.sourceBadge, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
         <View style={[styles.sourceDot, { backgroundColor: '#00E676' }]} />
-        <Text style={[styles.sourceText, { color: '#00E676' }]}>Live</Text>
+        <Text style={[styles.sourceText, { color: '#00E676' }]}>{t('dividendTracker.live')}</Text>
       </View>
     );
   }
   return (
     <View style={[styles.sourceBadge, { backgroundColor: '#6C63FF20', borderColor: '#6C63FF40' }]}>
       <View style={[styles.sourceDot, { backgroundColor: '#6C63FF' }]} />
-      <Text style={[styles.sourceText, { color: '#6C63FF' }]}>Estimated</Text>
+      <Text style={[styles.sourceText, { color: '#6C63FF' }]}>{t('dividendTracker.estimated')}</Text>
     </View>
   );
 }
@@ -64,6 +66,7 @@ function SourceBadge({ source, isLoading }: { source: 'api' | 'local'; isLoading
 // ══════════════════════════════════════════════════════════════
 
 function EventCard({ event, colors }: { event: DividendEvent; colors: any }) {
+  const { t } = useT();
   const payDate = new Date(event.payDate);
   const monthStr = payDate.toLocaleDateString('en-IN', { month: 'short' });
   const dayStr = payDate.getDate().toString();
@@ -90,7 +93,7 @@ function EventCard({ event, colors }: { event: DividendEvent; colors: any }) {
             <Text style={[styles.confidenceText, {
               color: event.confidence === 'paid' ? '#00E676' : event.confidence === 'confirmed' ? '#3B82F6' : '#FFC107',
             }]}>
-              {event.confidence === 'paid' ? 'Paid' : event.confidence === 'confirmed' ? 'Confirmed' : 'Est.'}
+              {event.confidence === 'paid' ? t('dividendTracker.paid') : event.confidence === 'confirmed' ? t('dividendTracker.confirmed') : t('dividendTracker.est')}
             </Text>
           </View>
         </View>
@@ -195,10 +198,10 @@ function TopPayerRow({ symbol, name, totalAmount, yieldPercent, isLast, colors }
 
 type TabKey = 'upcoming' | 'history' | 'summary';
 
-const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'upcoming', label: 'Upcoming', icon: 'calendar' },
-  { key: 'history', label: 'History', icon: 'time' },
-  { key: 'summary', label: 'Summary', icon: 'stats-chart' },
+const TAB_KEYS: { key: TabKey; icon: string }[] = [
+  { key: 'upcoming', icon: 'calendar' },
+  { key: 'history', icon: 'time' },
+  { key: 'summary', icon: 'stats-chart' },
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -207,6 +210,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
 
 export default function DividendTrackerScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabKey>('upcoming');
   const [dataSource, setDataSource] = useState<'api' | 'local'>('local');
   const [isLoading, setIsLoading] = useState(true);
@@ -257,9 +261,9 @@ export default function DividendTrackerScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Dividend Tracker</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('dividendTracker.title')}</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              Annual income: ₹{dividendState.currentYearProjection.totalEstimated.toFixed(0)}
+              {t('dividendTracker.annualIncome', { amount: dividendState.currentYearProjection.totalEstimated.toFixed(0) })}
             </Text>
           </View>
           <SourceBadge source={dataSource} isLoading={isLoading} />
@@ -267,8 +271,9 @@ export default function DividendTrackerScreen({ navigation }: any) {
 
         {/* Tabs */}
         <View style={styles.tabRow}>
-          {TABS.map(tab => {
+          {TAB_KEYS.map(tab => {
             const isActive = activeTab === tab.key;
+            const tabLabel = tab.key === 'upcoming' ? t('dividendTracker.tabUpcoming') : tab.key === 'history' ? t('dividendTracker.tabHistory') : t('dividendTracker.tabSummary');
             return (
               <Pressable
                 key={tab.key}
@@ -279,7 +284,7 @@ export default function DividendTrackerScreen({ navigation }: any) {
                 }]}
               >
                 <Ionicons name={tab.icon as any} size={13} color={isActive ? '#00E676' : colors.textMuted} />
-                <Text style={[styles.tabLabel, { color: isActive ? '#00E676' : colors.textMuted }]}>{tab.label}</Text>
+                <Text style={[styles.tabLabel, { color: isActive ? '#00E676' : colors.textMuted }]}>{tabLabel}</Text>
               </Pressable>
             );
           })}
@@ -291,7 +296,7 @@ export default function DividendTrackerScreen({ navigation }: any) {
         {isLoading && (
           <View style={styles.loadingState}>
             <ActivityIndicator size="large" color="#00E676" />
-            <Text style={[styles.loadingText, { color: colors.textMuted }]}>Fetching dividend data…</Text>
+            <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('dividendTracker.fetchingData')}</Text>
           </View>
         )}
 
@@ -300,8 +305,8 @@ export default function DividendTrackerScreen({ navigation }: any) {
           dividendState.upcoming.length > 0 ? (
             <View>
               <Text style={[styles.sectionHint, { color: colors.textMuted }]}>
-                {dividendState.upcoming.length} upcoming event{dividendState.upcoming.length !== 1 ? 's' : ''}
-                {dataSource === 'api' ? ' · Live data' : ' · Estimated'}
+                {t('dividendTracker.upcomingEvents', { count: dividendState.upcoming.length })}
+                {dataSource === 'api' ? t('dividendTracker.sourceLive') : t('dividendTracker.sourceEstimated')}
               </Text>
               {dividendState.upcoming.map(event => (
                 <Pressable key={event.id} onPress={() => handlePress(event.symbol)}>
@@ -312,9 +317,9 @@ export default function DividendTrackerScreen({ navigation }: any) {
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="calendar-outline" size={56} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No Upcoming Dividends</Text>
+              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('dividendTracker.noUpcomingTitle')}</Text>
               <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
-                Holdings with dividend-paying stocks will appear here
+                {t('dividendTracker.noUpcomingDesc')}
               </Text>
             </View>
           )
@@ -325,8 +330,8 @@ export default function DividendTrackerScreen({ navigation }: any) {
           dividendState.monthlyHistory.length > 0 ? (
             <View>
               <Text style={[styles.sectionHint, { color: colors.textMuted }]}>
-                {dividendState.totalPayments} payment{dividendState.totalPayments !== 1 ? 's' : ''} recorded
-                {dataSource === 'api' ? ' · Live data' : ' · Estimated'}
+                {t('dividendTracker.historyPayments', { count: dividendState.totalPayments })}
+                {dataSource === 'api' ? t('dividendTracker.sourceLive') : t('dividendTracker.sourceEstimated')}
               </Text>
               {dividendState.monthlyHistory.map(month => (
                 <MonthChip key={month.month} month={month} maxAmount={maxMonthlyAmount} colors={colors} />
@@ -335,9 +340,9 @@ export default function DividendTrackerScreen({ navigation }: any) {
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="time-outline" size={56} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No Dividend History</Text>
+              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('dividendTracker.noHistoryTitle')}</Text>
               <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
-                Historical dividend payments will appear here
+                {t('dividendTracker.noHistoryDesc')}
               </Text>
             </View>
           )
@@ -360,8 +365,8 @@ export default function DividendTrackerScreen({ navigation }: any) {
                 color: dataSource === 'api' ? '#00E676' : '#6C63FF',
               }]}>
                 {dataSource === 'api'
-                  ? 'Dividend data from MarketStack API'
-                  : 'Backend unavailable — showing estimated data'}
+                  ? t('dividendTracker.dataLive')
+                  : t('dividendTracker.dataEstimated')}
               </Text>
             </View>
 
@@ -369,34 +374,34 @@ export default function DividendTrackerScreen({ navigation }: any) {
             <View style={styles.summaryGrid}>
               <SummaryStatCard
                 icon="💰"
-                label="Annual Income"
+                label={t('dividendTracker.annualIncomeLabel')}
                 value={formatCurrency(dividendState.currentYearProjection.totalEstimated, true).replace('₹', '')}
                 color="#00E676"
-                subtitle="Estimated this year"
+                subtitle={t('dividendTracker.estimatedThisYear')}
                 textMuted={colors.textMuted}
               />
               <SummaryStatCard
                 icon="📊"
-                label="Portfolio Yield"
+                label={t('dividendTracker.portfolioYieldLabel')}
                 value={`${dividendState.currentYearProjection.portfolioYield.toFixed(2)}%`}
                 color="#3B82F6"
-                subtitle="Div / Portfolio Value"
+                subtitle={t('dividendTracker.divVsPortfolio')}
                 textMuted={colors.textMuted}
               />
               <SummaryStatCard
                 icon="🌱"
-                label="Yield on Cost"
+                label={t('dividendTracker.yieldOnCostLabel')}
                 value={`${dividendState.currentYearProjection.yieldOnCost.toFixed(2)}%`}
                 color="#6C63FF"
-                subtitle="Div / Total Cost"
+                subtitle={t('dividendTracker.divVsCost')}
                 textMuted={colors.textMuted}
               />
               <SummaryStatCard
                 icon="📅"
-                label="Monthly Avg"
+                label={t('dividendTracker.monthlyAvgLabel')}
                 value={formatCurrency(dividendState.currentYearProjection.monthlyAverage, true).replace('₹', '')}
                 color="#FFC107"
-                subtitle="Per month"
+                subtitle={t('dividendTracker.perMonth')}
                 textMuted={colors.textMuted}
               />
             </View>
@@ -404,7 +409,7 @@ export default function DividendTrackerScreen({ navigation }: any) {
             {/* Top Payers */}
             {dividendState.currentYearProjection.topPayers.length > 0 && (
               <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Top Dividend Payers</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dividendTracker.topPayersTitle')}</Text>
                 {dividendState.currentYearProjection.topPayers.map((payer, i) => (
                   <TopPayerRow
                     key={payer.symbol}
@@ -422,7 +427,7 @@ export default function DividendTrackerScreen({ navigation }: any) {
             {/* Annual Breakdown */}
             {dividendState.annualSummaries.length > 0 && (
               <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Annual Breakdown</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dividendTracker.annualBreakdownTitle')}</Text>
                 {dividendState.annualSummaries.map((year, i) => (
                   <View key={year.year} style={[styles.yearRow, i < dividendState.annualSummaries.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
@@ -430,7 +435,7 @@ export default function DividendTrackerScreen({ navigation }: any) {
                       <Text style={[styles.yearTotal, { color: '#00E676' }]}>₹{year.totalIncome.toFixed(0)}</Text>
                     </View>
                     <Text style={[styles.yearAvg, { color: colors.textMuted }]}>
-                      ₹{year.monthlyAverage.toFixed(0)}/mo · {year.months.reduce((s, m) => s + m.count, 0)} payments
+                      ₹{year.monthlyAverage.toFixed(0)}{t('dividendTracker.mo')} · {year.months.reduce((s, m) => s + m.count, 0)} {t('dividendTracker.paymentsLabel')}
                     </Text>
                   </View>
                 ))}
@@ -441,11 +446,11 @@ export default function DividendTrackerScreen({ navigation }: any) {
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="information-circle" size={18} color="#00E676" />
               <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>Dividend Income Notes</Text>
+                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('dividendTracker.dividendNotesTitle')}</Text>
                 <Text style={[styles.infoText, { color: colors.textMuted }]}>
                   {dataSource === 'api'
-                    ? 'Dividend data provided by MarketStack API. Actual payment dates and amounts may vary. TDS at 10% applies on dividends exceeding ₹5,000 per year.'
-                    : 'Dividends are estimated based on stock dividend yields and your holding quantity. Connect the backend with MARKETSTACK_KEY configured for real data. Actual payments may vary.'}
+                    ? t('dividendTracker.dividendNotesLive')
+                    : t('dividendTracker.dividendNotesEstimated')}
                 </Text>
               </View>
             </View>

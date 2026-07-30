@@ -26,6 +26,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -59,11 +60,11 @@ function getHeatColor(correlation: number): string {
 
 function getCorrelationLabel(correlation: number): string {
   const abs = Math.abs(correlation);
-  if (abs >= 0.9) return 'Very Strong';
-  if (abs >= 0.7) return 'Strong';
-  if (abs >= 0.5) return 'Moderate';
-  if (abs >= 0.3) return 'Weak';
-  return 'Negligible';
+  if (abs >= 0.9) return 'correlationMatrix.labelVeryStrong';
+  if (abs >= 0.7) return 'correlationMatrix.labelStrong';
+  if (abs >= 0.5) return 'correlationMatrix.labelModerate';
+  if (abs >= 0.3) return 'correlationMatrix.labelWeak';
+  return 'correlationMatrix.labelNegligible';
 }
 
 // ─── Helper to format small correlation values ───────────────
@@ -80,6 +81,7 @@ function formatCorr(v: number): string {
 
 export default function CorrelationMatrixScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const holdings = usePortfolioStore(s => s.holdings);
@@ -136,8 +138,8 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
             </View>
           </AnimatedPressable>
           <View style={styles.headerContent}>
-            <Text style={styles.title}>Correlation Matrix</Text>
-            <Text style={styles.subtitle}>Asset-to-asset correlation heatmap</Text>
+            <Text style={styles.title}>{t('correlationMatrix.title')}</Text>
+            <Text style={styles.subtitle}>{t('correlationMatrix.subtitle')}</Text>
           </View>
         </View>
 
@@ -151,7 +153,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
           >
             <Ionicons name="information-circle" size={18} color="#6C63FF" />
             <Text style={styles.infoText}>
-              Correlation measures how assets move relative to each other. Values range from -1 (move opposite) to +1 (move together). Lower correlation = better diversification.
+              {t('correlationMatrix.infoBanner')}
             </Text>
           </LinearGradient>
         </Animated.View>
@@ -171,7 +173,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
             >
               <Ionicons name="grid" size={22} color="#fff" />
               <Text style={styles.runBtnText}>
-                {result ? 'Re-analyze Correlation' : 'Analyze Correlation'}
+                {result ? t('correlationMatrix.reanalyze') : t('correlationMatrix.analyze')}
               </Text>
             </LinearGradient>
           </AnimatedPressable>
@@ -180,12 +182,12 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
         {/* ── No Holdings State ────────────────────────────── */}
         {!hasHoldings && (
           <Animated.View entering={FadeInUp.delay(100).springify()}>
-            <Card title="No Holdings Found" style={styles.sectionCard}>
+            <Card title={t('correlationMatrix.noHoldingsTitle')} style={styles.sectionCard}>
               <View style={styles.emptyContent}>
                 <Ionicons name="pie-chart-outline" size={64} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>No Portfolio Data</Text>
+                <Text style={styles.emptyTitle}>{t('correlationMatrix.noHoldingsCardTitle')}</Text>
                 <Text style={styles.emptyDesc}>
-                  Add stocks to your portfolio to see the correlation matrix. You can also add mock holdings to try this feature.
+                  {t('correlationMatrix.noHoldingsDesc')}
                 </Text>
                 <AnimatedPressable
                   onPress={() => {
@@ -205,7 +207,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
                   scaleTo={0.95}
                   style={styles.mockBtn}
                 >
-                  <Text style={styles.mockBtnText}>Use Sample Portfolio</Text>
+                  <Text style={styles.mockBtnText}>{t('correlationMatrix.useSample')}</Text>
                 </AnimatedPressable>
               </View>
             </Card>
@@ -218,10 +220,10 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
             {/* ── Key Metrics ──────────────────────────────── */}
             <View style={styles.metricsGrid}>
               {[
-                { label: 'Diversification Score', value: formatScore(result.diversificationScore), icon: '🎯', color: result.diversificationScore >= 60 ? '#00C853' : result.diversificationScore >= 40 ? '#FFC107' : '#FF1744' },
-                { label: 'Avg Correlation', value: result.averageCorrelation.toFixed(2), icon: '📊', color: '#6C63FF' },
-                { label: 'High Corr. Pairs', value: result.highCorrelationPairs.length.toString(), icon: '⚠️', color: result.highCorrelationPairs.length > 0 ? '#FFC107' : '#00C853' },
-                { label: 'Assets Analyzed', value: result.symbols.length.toString(), icon: '📈', color: '#3B82F6' },
+                { label: t('correlationMatrix.diversificationScore'), value: formatScore(result.diversificationScore), icon: '🎯', color: result.diversificationScore >= 60 ? '#00C853' : result.diversificationScore >= 40 ? '#FFC107' : '#FF1744' },
+                { label: t('correlationMatrix.avgCorrelation'), value: result.averageCorrelation.toFixed(2), icon: '📊', color: '#6C63FF' },
+                { label: t('correlationMatrix.highCorrPairs'), value: result.highCorrelationPairs.length.toString(), icon: '⚠️', color: result.highCorrelationPairs.length > 0 ? '#FFC107' : '#00C853' },
+                { label: t('correlationMatrix.assetsAnalyzed'), value: result.symbols.length.toString(), icon: '📈', color: '#3B82F6' },
               ].map((metric, i) => (
                 <Animated.View
                   key={metric.label}
@@ -236,7 +238,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
             </View>
 
             {/* ── Correlation Heatmap ──────────────────────── */}
-            <Card title="Correlation Heatmap" subtitle="Tap a cell for details" style={styles.sectionCard}>
+            <Card title={t('correlationMatrix.heatmapTitle')} subtitle={t('correlationMatrix.heatmapSubtitle')} style={styles.sectionCard}>
               <View style={styles.heatmapContainer}>
                 <CorrelationHeatmap
                   symbols={result.symbols}
@@ -256,9 +258,9 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
                   />
                 </View>
                 <View style={styles.legendLabels}>
-                  <Text style={styles.legendLabel}>-1</Text>
-                  <Text style={styles.legendLabel}>0</Text>
-                  <Text style={styles.legendLabel}>+1</Text>
+                  <Text style={styles.legendLabel}>{t('correlationMatrix.legendNeg1')}</Text>
+                  <Text style={styles.legendLabel}>{t('correlationMatrix.legend0')}</Text>
+                  <Text style={styles.legendLabel}>{t('correlationMatrix.legendPos1')}</Text>
                 </View>
               </View>
 
@@ -276,30 +278,29 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
                       {formatCorr(selectedPair.correlation)}
                     </Text>
                   </View>
-                  <Text style={styles.selectedPairLabel}>
-                    {getCorrelationLabel(selectedPair.correlation)}{' '}
-                    {selectedPair.correlation > 0 ? 'positive' : 'negative'} correlation
+                  <Text style={styles.selectedPairLabel}>                      {t(getCorrelationLabel(selectedPair.correlation))}{' '}
+                    {selectedPair.correlation > 0 ? t('correlationMatrix.positiveCorrelation') : t('correlationMatrix.negativeCorrelation')}
                   </Text>
                   <Text style={styles.selectedPairDesc}>
                     {selectedPair.correlation > 0.7
-                      ? 'These assets move strongly together. Adding both provides limited diversification benefit. Consider reducing one position.'
+                      ? t('correlationMatrix.pairDescVeryHigh')
                       : selectedPair.correlation > 0.4
-                      ? 'These assets have moderate positive correlation. They provide some diversification but may move together in market swings.'
+                      ? t('correlationMatrix.pairDescHigh')
                       : selectedPair.correlation > 0
-                      ? 'These assets have weak positive correlation. They provide good diversification benefits.'
+                      ? t('correlationMatrix.pairDescModerate')
                       : selectedPair.correlation > -0.4
-                      ? 'These assets have weak negative correlation. They move in opposite directions, providing excellent diversification.'
-                      : 'These assets have strong negative correlation. They act as hedges for each other, providing maximum diversification benefit.'}
+                      ? t('correlationMatrix.pairDescLow')
+                      : t('correlationMatrix.pairDescNegative')}
                   </Text>
                 </Animated.View>
               )}
             </Card>
 
             {/* ── Diversification Assessment ───────────────── */}
-            <Card title="Diversification Assessment" style={styles.sectionCard}>
+            <Card title={t('correlationMatrix.assessmentTitle')} style={styles.sectionCard}>
               <View style={styles.assessmentContent}>
                 <View style={styles.assessmentRow}>
-                  <Text style={styles.assessmentLabel}>Diversification Score</Text>
+                  <Text style={styles.assessmentLabel}>{t('correlationMatrix.diversificationScoreLabel')}</Text>
                   <View style={styles.scoreBarContainer}>
                     <View style={styles.scoreBarBg}>
                       <View
@@ -321,12 +322,12 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
                 </View>
                 <View style={styles.assessmentDivider} />
                 <View style={styles.assessmentRow}>
-                  <Text style={styles.assessmentLabel}>Average Cross-Correlation</Text>
+                  <Text style={styles.assessmentLabel}>{t('correlationMatrix.avgCrossCorrelation')}</Text>
                   <Text style={styles.assessmentValue}>{result.averageCorrelation.toFixed(3)}</Text>
                 </View>
                 <View style={styles.assessmentDivider} />
                 <View style={styles.assessmentRow}>
-                  <Text style={styles.assessmentLabel}>Highly Correlated Pairs (&gt;0.7)</Text>
+                  <Text style={styles.assessmentLabel}>{t('correlationMatrix.highlyCorrelatedPairs')}</Text>
                   <Text style={[styles.assessmentValue, {
                     color: result.highCorrelationPairs.length > 0 ? '#FFC107' : '#00C853',
                   }]}>
@@ -338,7 +339,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
 
             {/* ── High Correlation Pairs ────────────────────── */}
             {result.highCorrelationPairs.length > 0 && (
-              <Card title="High Correlation Pairs" subtitle="Assets that move closely together" style={styles.sectionCard}>
+              <Card title={t('correlationMatrix.highCorrPairsTitle')} subtitle={t('correlationMatrix.highCorrPairsSubtitle')} style={styles.sectionCard}>
                 <View style={styles.pairsContent}>
                   {result.highCorrelationPairs.map((pair, i) => (
                     <Animated.View
@@ -351,7 +352,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
                       </View>
                       <View style={styles.pairInfo}>
                         <Text style={styles.pairName}>{pair.asset1} ↔ {pair.asset2}</Text>
-                        <Text style={styles.pairLabel}>Correlation: {(pair.correlation * 100).toFixed(0)}%</Text>
+                        <Text style={styles.pairLabel}>{t('correlationMatrix.correlationLabel')}: {(pair.correlation * 100).toFixed(0)}%</Text>
                       </View>
                       <Text style={[styles.pairValue, { color: getHeatColor(pair.correlation) }]}>
                         {formatCorr(pair.correlation)}
@@ -363,7 +364,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
             )}
 
             {/* ── Recommendations ──────────────────────────── */}
-            <Card title="Recommendations" style={styles.sectionCard}>
+            <Card title={t('correlationMatrix.recommendationsTitle')} style={styles.sectionCard}>
               <View style={styles.recommendationsContent}>
                 {result.recommendations.map((rec, i) => (
                   <Animated.View
@@ -382,7 +383,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
 
             {/* ── All Pairs Table ──────────────────────────── */}
             {result.pairs.length > 0 && (
-              <Card title="All Asset Pairs" style={styles.sectionCard}>
+              <Card title={t('correlationMatrix.allPairsTitle')} style={styles.sectionCard}>
                 <View style={styles.pairsContent}>
                   {result.pairs.map((pair, i) => (
                     <Animated.View
@@ -392,7 +393,7 @@ export default function CorrelationMatrixScreen({ navigation }: any) {
                     >
                       <View style={styles.pairInfo}>
                         <Text style={styles.pairName}>{pair.asset1} ↔ {pair.asset2}</Text>
-                        <Text style={styles.pairLabel}>{getCorrelationLabel(pair.correlation)} ({pair.dataPoints} data pts)</Text>
+                        <Text style={styles.pairLabel}>{t(getCorrelationLabel(pair.correlation))} ({pair.dataPoints} {t('correlationMatrix.dataPts')})</Text>
                       </View>
                       <View style={[styles.pairBadge, { backgroundColor: getHeatColor(pair.correlation) + '20' }]}>
                         <Text style={[styles.pairValue, { color: getHeatColor(pair.correlation) }]}>

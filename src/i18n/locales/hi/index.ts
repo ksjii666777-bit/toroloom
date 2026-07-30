@@ -16,7 +16,9 @@ import cdnOptimization from './cdnOptimization';
 import commodityMarkets from './commodityMarkets';
 import community from './community';
 import contractNoteUpload from './contractNoteUpload';
+import correlationMatrix from './correlationMatrix';
 import currencyMarkets from './currencyMarkets';
+import dividendTracker from './dividendTracker';
 import darkMode from './darkMode';
 import education from './education';
 import earningsCall from './earningsCall';
@@ -37,6 +39,8 @@ import notifications from './notifications';
 import onboarding from './onboarding';
 import paymentHistory from './paymentHistory';
 import periodReport from './periodReport';
+import portfolioAnalytics from './portfolioAnalytics';
+import portfolioRebalancing from './portfolioRebalancing';
 import performanceChart from './performanceChart';
 import portfolio from './portfolio';
 import portfolioAlerts from './portfolioAlerts';
@@ -76,7 +80,9 @@ const hi = {
   commodityMarkets,
   community,
   contractNoteUpload,
+  correlationMatrix,
   currencyMarkets,
+  dividendTracker,
   darkMode,
   education,
   earningsCall,
@@ -97,6 +103,8 @@ const hi = {
   onboarding,
   paymentHistory,
   periodReport,
+  portfolioAnalytics,
+  portfolioRebalancing,
   performanceChart,
   portfolio,
   portfolioAlerts,

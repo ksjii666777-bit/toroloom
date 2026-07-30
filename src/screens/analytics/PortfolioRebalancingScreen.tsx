@@ -1,14 +1,15 @@
-import React, { useMemo, _useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, _Alert, _Platform,
+  View, Text, StyleSheet, ScrollView,
 } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useRebalanceStore } from '../../store/rebalanceStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { _AllocationProfile, RebalanceTrade } from '../../types';
+import type { RebalanceTrade } from '../../types';
 
 /** Format currency in INR */
 const formatINR = (val: number) =>
@@ -16,6 +17,7 @@ const formatINR = (val: number) =>
 
 export default function PortfolioRebalancingScreen({ _navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     portfolioValue, currentAllocation, profiles, selectedProfileId,
@@ -47,15 +49,15 @@ export default function PortfolioRebalancingScreen({ _navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Portfolio Rebalancing</Text>
+          <Text style={styles.title}>{t('portfolioRebalancing.title')}</Text>
           <Text style={styles.subtitle}>
-            Optimize your allocation — Portfolio: {formatINR(portfolioValue)}
+            {t('portfolioRebalancing.subtitle', { value: formatINR(portfolioValue) })}
           </Text>
         </View>
 
         {/* ── Allocation Profile Selector ── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Target Profile</Text>
+          <Text style={styles.sectionTitle}>{t('portfolioRebalancing.targetProfile')}</Text>
           <View style={styles.profileRow}>
             {profiles.map(p => {
               const isActive = p.id === selectedProfileId;
@@ -88,21 +90,21 @@ export default function PortfolioRebalancingScreen({ _navigation }: any) {
         {isAnalyzing ? (
           <View style={styles.loadingState}>
             <Ionicons name="sync" size={32} color={colors.primary} />
-            <Text style={styles.loadingText}>Analyzing portfolio...</Text>
+            <Text style={styles.loadingText}>{t('portfolioRebalancing.analyzing')}</Text>
           </View>
         ) : analysis && (
           <>
             <Animated.View entering={FadeInDown.springify()} style={styles.summaryRow}>
               <View style={[styles.summaryCard, { borderLeftColor: '#6C63FF' }]}>
-                <Text style={styles.summaryLabel}>Deviations</Text>
+                <Text style={styles.summaryLabel}>{t('portfolioRebalancing.deviations')}</Text>
                 <Text style={[styles.summaryValue, { color: '#6C63FF' }]}>{analysis.deviationCount}</Text>
               </View>
               <View style={[styles.summaryCard, { borderLeftColor: '#FFC107' }]}>
-                <Text style={styles.summaryLabel}>Avg Deviation</Text>
+                <Text style={styles.summaryLabel}>{t('portfolioRebalancing.avgDeviation')}</Text>
                 <Text style={[styles.summaryValue, { color: '#FFC107' }]}>{analysis.avgDeviation}%</Text>
               </View>
               <View style={[styles.summaryCard, { borderLeftColor: '#FF5252' }]}>
-                <Text style={styles.summaryLabel}>Trade Amount</Text>
+                <Text style={styles.summaryLabel}>{t('portfolioRebalancing.tradeAmount')}</Text>
                 <Text style={[styles.summaryValue, { color: '#FF5252', fontSize: 14 }]}>
                   {formatINR(analysis.totalTradeAmount)}
                 </Text>
@@ -112,14 +114,14 @@ export default function PortfolioRebalancingScreen({ _navigation }: any) {
             {/* ── Current vs Target Allocation ── */}
             <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
               <View style={styles.sectionHeaderRow}>
-                <Text style={styles.sectionTitle}>Current vs Target Allocation</Text>
+                <Text style={styles.sectionTitle}>{t('portfolioRebalancing.currentVsTarget')}</Text>
                 <AnimatedPressable
                   onPress={() => setShowAllSectors(!showAllSectors)}
                   haptic="selection"
                   scaleTo={0.94}
                 >
                   <Text style={styles.seeAllText}>
-                    {showAllSectors ? 'Show Less' : `Show All (${currentAllocation.length})`}
+                    {showAllSectors ? t('portfolioRebalancing.showLess') : t('portfolioRebalancing.showAll', { count: currentAllocation.length })}
                   </Text>
                 </AnimatedPressable>
               </View>
@@ -181,14 +183,14 @@ export default function PortfolioRebalancingScreen({ _navigation }: any) {
             {/* ── Suggested Trades ── */}
             <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
               <Text style={styles.sectionTitle}>
-                Suggested Trades ({sortedTrades.length})
+                {t('portfolioRebalancing.suggestedTrades', { count: sortedTrades.length })}
               </Text>
 
               {sortedTrades.length === 0 ? (
                 <View style={styles.perfectAllocation}>
                   <Ionicons name="checkmark-circle" size={48} color="#00C853" />
-                  <Text style={styles.perfectText}>Perfect Allocation!</Text>
-                  <Text style={styles.perfectSubtext}>No changes needed.</Text>
+                  <Text style={styles.perfectText}>{t('portfolioRebalancing.perfectAllocation')}</Text>
+                  <Text style={styles.perfectSubtext}>{t('portfolioRebalancing.noChangesNeeded')}</Text>
                 </View>
               ) : (
                 sortedTrades.map((trade, idx) => (
@@ -209,9 +211,9 @@ export default function PortfolioRebalancingScreen({ _navigation }: any) {
                 <View style={styles.taxLeft}>
                   <Ionicons name="calculator-outline" size={20} color="#FFC107" />
                   <View>
-                    <Text style={styles.taxTitle}>Estimated Tax Impact</Text>
+                    <Text style={styles.taxTitle}>{t('portfolioRebalancing.estimatedTaxImpact')}</Text>
                     <Text style={styles.taxDesc}>
-                      Selling overweight positions may incur short-term capital gains tax.
+                      {t('portfolioRebalancing.taxImpactDesc')}
                     </Text>
                   </View>
                 </View>
@@ -224,7 +226,7 @@ export default function PortfolioRebalancingScreen({ _navigation }: any) {
               <AnimatedPressable onPress={resetToDefaults} haptic="medium" scaleTo={0.97}>
                 <View style={styles.resetBtn}>
                   <Ionicons name="refresh" size={18} color={colors.textMuted} />
-                  <Text style={styles.resetBtnText}>Reset</Text>
+                  <Text style={styles.resetBtnText}>{t('portfolioRebalancing.reset')}</Text>
                 </View>
               </AnimatedPressable>
             </View>
@@ -240,6 +242,7 @@ export default function PortfolioRebalancingScreen({ _navigation }: any) {
 // ─── Trade Card Component ─────────────────────────────────────────────────
 
 function TradeCard({ trade, colors, styles }: { trade: RebalanceTrade; colors: any; styles: any }) {
+  const { t } = useT();
   const isSell = trade.action === 'sell';
   const actionColor = isSell ? '#FF5252' : '#00C853';
 
@@ -255,7 +258,7 @@ function TradeCard({ trade, colors, styles }: { trade: RebalanceTrade; colors: a
               color={actionColor}
             />
             <Text style={[styles.tradeActionText, { color: actionColor }]}>
-              {isSell ? 'SELL' : 'BUY'}
+              {isSell ? t('portfolioRebalancing.sell') : t('portfolioRebalancing.buy')}
             </Text>
           </View>
           <Text style={styles.tradeLabel}>{trade.label}</Text>
@@ -268,14 +271,14 @@ function TradeCard({ trade, colors, styles }: { trade: RebalanceTrade; colors: a
       {/* Allocation Bars */}
       <View style={styles.tradeAllocRow}>
         <View style={styles.tradeAllocItem}>
-          <Text style={styles.tradeAllocLabel}>Current</Text>
+          <Text style={styles.tradeAllocLabel}>{t('portfolioRebalancing.current')}</Text>
           <Text style={[styles.tradeAllocValue, { color: colors.text }]}>{trade.currentPercent}%</Text>
         </View>
         <View style={styles.tradeAllocArrow}>
           <Ionicons name="arrow-forward" size={14} color={colors.textMuted} />
         </View>
         <View style={styles.tradeAllocItem}>
-          <Text style={styles.tradeAllocLabel}>Target</Text>
+          <Text style={styles.tradeAllocLabel}>{t('portfolioRebalancing.target')}</Text>
           <Text style={[styles.tradeAllocValue, { color: colors.primary }]}>{trade.targetPercent}%</Text>
         </View>
       </View>
@@ -288,13 +291,13 @@ function TradeCard({ trade, colors, styles }: { trade: RebalanceTrade; colors: a
         <View style={[styles.priorityBadge, { backgroundColor: trade.priority > 50 ? '#FF525220' : trade.priority > 25 ? '#FFC10720' : '#00C85320' }]}>
           <Ionicons name="flag" size={10} color={trade.priority > 50 ? '#FF5252' : trade.priority > 25 ? '#FFC107' : '#00C853'} />
           <Text style={[styles.priorityText, { color: trade.priority > 50 ? '#FF5252' : trade.priority > 25 ? '#FFC107' : '#00C853' }]}>
-            Priority {trade.priority}
+            {t('portfolioRebalancing.priority')} {trade.priority}
           </Text>
         </View>
         {trade.hasTaxImplication && (
           <View style={[styles.taxBadge, { backgroundColor: '#FFC10715' }]}>
             <Ionicons name="warning" size={10} color="#FFC107" />
-            <Text style={styles.taxBadgeText}>Tax: {formatINR(trade.estimatedTaxCost || 0)}</Text>
+            <Text style={styles.taxBadgeText}>{t('portfolioRebalancing.tax')}: {formatINR(trade.estimatedTaxCost || 0)}</Text>
           </View>
         )}
       </View>
