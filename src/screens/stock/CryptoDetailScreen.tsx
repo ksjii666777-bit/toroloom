@@ -25,6 +25,7 @@ import Animated, { FadeInRight, FadeInUp, _FadeInDown } from 'react-native-reani
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useNavigation as useNavigationHook } from '@react-navigation/native';
+import { useT } from '../../i18n/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import type { CryptoDetailData } from '../../services/api/globalMarkets';
@@ -186,6 +187,7 @@ function formatSupply(num: number | null | undefined): string {
 export default function CryptoDetailScreen({ route, navigation }: any) {
   const { coinId, coinSymbol, coinName } = route.params || {};
   const { colors } = useTheme();
+  const { t } = useT();
   // Call unconditionally (Rules of Hooks) — navigation prop is always available inside navigator
   const hookNav = useNavigationHook<any>();
   const nav = navigation || hookNav;
@@ -251,7 +253,7 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
         </View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading {coinName || coinSymbol || 'crypto'} data...</Text>
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('cryptoDetail.loading')}</Text>
         </View>
       </View>
     );
@@ -273,7 +275,7 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
             onPress={() => fetchData()}
             style={[styles.retryBtn, { backgroundColor: colors.primary }]}
           >
-            <Text style={styles.retryBtnText}>Retry</Text>
+            <Text style={styles.retryBtnText}>{t('cryptoDetail.retry')}</Text>
           </Pressable>
         </View>
       </View>
@@ -309,7 +311,7 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
               style={[styles.websiteBtn, { backgroundColor: data.color + '20' }]}
             >
               <Ionicons name="globe" size={14} color={data.color} />
-              <Text style={[styles.websiteText, { color: data.color }]}>Website</Text>
+              <Text style={[styles.websiteText, { color: data.color }]}>{t('cryptoDetail.website')}</Text>
             </Pressable>
           ) : null}
         </Animated.View>
@@ -381,7 +383,7 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
 
         {/* Change Matrix */}
         <Animated.View entering={FadeInUp.duration(550)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Price Change</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('cryptoDetail.priceChange')}</Text>
           <View style={styles.changeGrid}>
             <ChangePill value={data.change1h} label="1H" />
             <ChangePill value={data.changePercent} label="24H" />
@@ -393,33 +395,33 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
 
         {/* Key Stats */}
         <Animated.View entering={FadeInUp.duration(600)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Key Statistics</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('cryptoDetail.statistics')}</Text>
 
-          <CryptoStatRow label="Market Cap" value={formatLargeNumber(data.marketCap)} />
-          <CryptoStatRow label="24h Volume" value={formatLargeNumber(data.volume24h)} />
-          <CryptoStatRow label="24h High" value={`$${formatPrice(data.high24h)}`} highlightColor={colors.marketUp} />
-          <CryptoStatRow label="24h Low" value={`$${formatPrice(data.low24h)}`} highlightColor={colors.marketDown} />
+          <CryptoStatRow label={t('cryptoDetail.marketCap')} value={formatLargeNumber(data.marketCap)} />
+          <CryptoStatRow label={t('cryptoDetail.volume24h')} value={formatLargeNumber(data.volume24h)} />
+          <CryptoStatRow label={t('cryptoDetail.high24h')} value={`$${formatPrice(data.high24h)}`} highlightColor={colors.marketUp} />
+          <CryptoStatRow label={t('cryptoDetail.low24h')} value={`$${formatPrice(data.low24h)}`} highlightColor={colors.marketDown} />
           <CryptoStatRow
-            label="Circulating Supply"
+            label={t('cryptoDetail.circulatingSupply')}
             value={formatSupply(data.circulatingSupply) + (data.symbol ? ' ' + data.symbol : '')}
             isMono
           />
           {data.totalSupply && (
             <CryptoStatRow
-              label="Total Supply"
+              label={t('cryptoDetail.totalSupply')}
               value={formatSupply(data.totalSupply) + (data.symbol ? ' ' + data.symbol : '')}
               isMono
             />
           )}
           {data.maxSupply && (
             <CryptoStatRow
-              label="Max Supply"
+              label={t('cryptoDetail.maxSupply')}
               value={formatSupply(data.maxSupply) + (data.symbol ? ' ' + data.symbol : '')}
               isMono
             />
           )}
           <CryptoStatRow
-            label="All-Time High"
+            label={t('cryptoDetail.allTimeHigh')}
             value={`$${formatPrice(data.ath)} (${data.athDate ? new Date(data.athDate).toLocaleDateString() : '—'})`}
             highlightColor={colors.marketUp}
           />
@@ -428,13 +430,13 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
         {/* About */}
         {data.description && (
           <Animated.View entering={FadeInUp.duration(650)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>About {data.name}</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('cryptoDetail.about')} {data.name}</Text>
             <Text style={[styles.aboutText, { color: colors.textSecondary }]} numberOfLines={8}>
               {data.description.replace(/<[^>]*>/g, '')}
             </Text>
             {data.description.length > 500 && (
               <Pressable onPress={() => data.homepage && Linking.openURL(data.homepage)}>
-                <Text style={[styles.readMore, { color: data.color }]}>Read more on website →</Text>
+                <Text style={[styles.readMore, { color: data.color }]}>{t('cryptoDetail.readMore')} →</Text>
               </Pressable>
             )}
           </Animated.View>
@@ -447,14 +449,14 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
             style={[styles.actionBtn, { backgroundColor: colors.marketUp }]}
           >
             <Ionicons name="cart" size={18} color="#fff" />
-            <Text style={styles.actionBtnText}>Buy {data.symbol}</Text>
+            <Text style={styles.actionBtnText}>{t('cryptoDetail.buy')} {data.symbol}</Text>
           </Pressable>
           <Pressable
             onPress={() => nav.navigate('CryptoTrading')}
             style={[styles.actionBtn, { backgroundColor: colors.marketDown }]}
           >
             <Ionicons name="arrow-down" size={18} color="#fff" />
-            <Text style={styles.actionBtnText}>Sell {data.symbol}</Text>
+            <Text style={styles.actionBtnText}>{t('cryptoDetail.sell')} {data.symbol}</Text>
           </Pressable>
         </Animated.View>
 
@@ -462,8 +464,7 @@ export default function CryptoDetailScreen({ route, navigation }: any) {
         <View style={[styles.disclaimerCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="warning" size={16} color="#FFAB40" />
           <Text style={[styles.disclaimerText, { color: colors.textMuted }]}>
-            Cryptocurrency prices are volatile. Data is provided for informational purposes only.
-            Past performance does not guarantee future results. DYOR.
+            {t('cryptoDetail.disclaimer')}
           </Text>
         </View>
 

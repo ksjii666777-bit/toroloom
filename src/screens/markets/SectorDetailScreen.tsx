@@ -18,15 +18,15 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Dimensions, RefreshControl,
 } from 'react-native';
-import Animated, { FadeInDown, _FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../i18n/useT';
 import { useMarketStore } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import _Card from '../../components/ui/Card';
 
-const { _width } = Dimensions.get('window');
+const { width: _width } = Dimensions.get('window');
 
 // ─── Helper: Market cap display ──────────────────────────────────────────
 
@@ -44,6 +44,7 @@ function _formatMarketCap(marketCap: string): string {
 
 export default function SectorDetailScreen({ navigation, route }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { sectorName } = route.params || { sectorName: 'All' };
 
@@ -98,9 +99,9 @@ export default function SectorDetailScreen({ navigation, route }: any) {
   };
 
   const SORT_OPTIONS = [
-    { key: 'change' as const, label: 'Change %', icon: 'pulse' },
-    { key: 'price' as const, label: 'Price', icon: 'cash' },
-    { key: 'name' as const, label: 'Name', icon: 'text' },
+    { key: 'change' as const, label: t('sectorDetail.sortChange'), icon: 'pulse' },
+    { key: 'price' as const, label: t('sectorDetail.sortPrice'), icon: 'cash' },
+    { key: 'name' as const, label: t('sectorDetail.sortName'), icon: 'text' },
   ];
 
   const avgChangeColor = sectorStats.avgChange >= 0 ? '#00E676' : '#FF5252';
@@ -116,7 +117,7 @@ export default function SectorDetailScreen({ navigation, route }: any) {
           <View style={{ flex: 1, marginLeft: SPACING.md }}>
             <Text style={[styles.title, { color: colors.text }]}>{sectorName}</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Sector Performance & Stocks
+              {t('sectorDetail.overview')}
             </Text>
           </View>
         </View>
@@ -138,7 +139,7 @@ export default function SectorDetailScreen({ navigation, route }: any) {
             <Text style={[styles.summaryValue, { color: avgChangeColor }]}>
               {sectorStats.avgChange >= 0 ? '+' : ''}{sectorStats.avgChange.toFixed(2)}%
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Avg Change</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('sectorDetail.avgChange')}</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={[styles.summaryIcon, { backgroundColor: colors.primary + '18' }]}>
@@ -147,7 +148,7 @@ export default function SectorDetailScreen({ navigation, route }: any) {
             <Text style={[styles.summaryValue, { color: colors.text }]}>
               {sectorStocks.length}
             </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Stocks</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('sectorDetail.stocks', { count: sectorStocks.length })}</Text>
           </View>
         </View>
 
@@ -157,21 +158,21 @@ export default function SectorDetailScreen({ navigation, route }: any) {
               <Ionicons name="arrow-up" size={18} color="#00E676" />
             </View>
             <Text style={[styles.summaryValue, { color: '#00E676' }]}>{sectorStats.gainers}</Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Gainers</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('sectorDetail.gainers')}</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={[styles.summaryIcon, { backgroundColor: '#FF525218' }]}>
               <Ionicons name="arrow-down" size={18} color="#FF5252" />
             </View>
             <Text style={[styles.summaryValue, { color: '#FF5252' }]}>{sectorStats.losers}</Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Losers</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('sectorDetail.losers')}</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={[styles.summaryIcon, { backgroundColor: colors.textMuted + '18' }]}>
               <Ionicons name="remove" size={18} color={colors.textMuted} />
             </View>
             <Text style={[styles.summaryValue, { color: colors.textMuted }]}>{sectorStats.unchanged}</Text>
-            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Flat</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('sectorDetail.flat')}</Text>
           </View>
         </View>
 
@@ -181,7 +182,7 @@ export default function SectorDetailScreen({ navigation, route }: any) {
             <View style={[styles.performerCard, { backgroundColor: '#00E67610', borderColor: '#00E67630' }]}>
               <View style={styles.performerHeader}>
                 <Ionicons name="trophy" size={14} color="#FFD700" />
-                <Text style={[styles.performerTitle, { color: '#00E676' }]}>Best</Text>
+                <Text style={[styles.performerTitle, { color: '#00E676' }]}>{t('sectorDetail.best')}</Text>
               </View>
               <Text style={[styles.performerSymbol, { color: colors.text }]}>
                 {sectorStats.bestPerformer.symbol}
@@ -193,7 +194,7 @@ export default function SectorDetailScreen({ navigation, route }: any) {
             <View style={[styles.performerCard, { backgroundColor: '#FF525210', borderColor: '#FF525230' }]}>
               <View style={styles.performerHeader}>
                 <Ionicons name={"alert-triangle" as any} size={14} color="#FF5252" />
-                <Text style={[styles.performerTitle, { color: '#FF5252' }]}>Worst</Text>
+                <Text style={[styles.performerTitle, { color: '#FF5252' }]}>{t('sectorDetail.worst')}</Text>
               </View>
               <Text style={[styles.performerSymbol, { color: colors.text }]}>
                 {sectorStats.worstPerformer.symbol}
@@ -207,7 +208,7 @@ export default function SectorDetailScreen({ navigation, route }: any) {
 
         {/* ─── Sort Controls ── */}
         <View style={styles.sortRow}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>All Stocks</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('sectorDetail.allStocks')}</Text>
           <View style={styles.sortChips}>
             {SORT_OPTIONS.map(opt => (
               <TouchableOpacity
@@ -286,7 +287,7 @@ export default function SectorDetailScreen({ navigation, route }: any) {
           <View style={styles.emptyState}>
             <Ionicons name="search-outline" size={48} color={colors.textMuted} />
             <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              No stocks found in this sector
+              {t('sectorDetail.noData')}
             </Text>
           </View>
         )}

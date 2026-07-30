@@ -38,6 +38,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../i18n/useT';
 import { useMarketStore, getMarketCapCategory, parseMarketCap, type ScreenerFilters } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 
@@ -472,6 +473,7 @@ function generateId(): string {
 
 export default function StockScreenerScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const {
     stocks,
@@ -810,13 +812,13 @@ export default function StockScreenerScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>Stock Screener</Text>
-          <Text style={styles.subtitle}>Filter stocks by multiple criteria</Text>
+          <Text style={styles.title}>{t('stockScreener.title')}</Text>
+          <Text style={styles.subtitle}>{t('stockScreener.subtitle')}</Text>
         </View>
         {activeFilterCount > 0 && (
           <TouchableOpacity style={styles.clearBtn} onPress={handleClearAll}>
             <Ionicons name="close-circle" size={20} color={colors.textMuted} />
-            <Text style={styles.clearText}>Clear</Text>
+            <Text style={styles.clearText}>{t('stockScreener.clear')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -830,9 +832,9 @@ export default function StockScreenerScreen({ navigation }: any) {
         <View style={styles.filtersCard}>
 
           {/* Price Range */}
-          <FilterSection title="Price Range" icon="cash-outline" color={colors.marketUp}>
+          <FilterSection title={t('stockScreener.priceRange')} icon="cash-outline" color={colors.marketUp}>
             <RangeInput
-              label="Min – Max Price (₹)"
+              label={t('stockScreener.priceRangeLabel')}
               minValue={priceMinStr}
               maxValue={priceMaxStr}
               onMinChange={setPriceMinStr}
@@ -852,9 +854,9 @@ export default function StockScreenerScreen({ navigation }: any) {
           </FilterSection>
 
           {/* P/E Ratio */}
-          <FilterSection title="P/E Ratio" icon="calculator-outline" color={colors.primary}>
+          <FilterSection title={t('stockScreener.peRatio')} icon="calculator-outline" color={colors.primary}>
             <RangeInput
-              label="Min – Max P/E"
+              label={t('stockScreener.peRatioLabel')}
               minValue={peMinStr}
               maxValue={peMaxStr}
               onMinChange={setPeMinStr}
@@ -874,9 +876,9 @@ export default function StockScreenerScreen({ navigation }: any) {
           </FilterSection>
 
           {/* Day Change */}
-          <FilterSection title="Day Change %" icon="trending-up-outline" color={colors.warning}>
+          <FilterSection title={t('stockScreener.dayChange')} icon="trending-up-outline" color={colors.warning}>
             <RangeInput
-              label="Min – Max Change %"
+              label={t('stockScreener.dayChangeLabel')}
               minValue={dayChangeMinStr}
               maxValue={dayChangeMaxStr}
               onMinChange={setDayChangeMinStr}
@@ -899,9 +901,9 @@ export default function StockScreenerScreen({ navigation }: any) {
           </FilterSection>
 
           {/* Dividend Yield */}
-          <FilterSection title="Dividend Yield" icon="gift-outline" color={colors.accent}>
+          <FilterSection title={t('stockScreener.dividendYield')} icon="gift-outline" color={colors.accent}>
             <RangeInput
-              label="Minimum Dividend %"
+              label={t('stockScreener.dividendLabel')}
               minValue={dividendStr}
               maxValue={dividendStr}
               onMinChange={setDividendStr}
@@ -911,7 +913,7 @@ export default function StockScreenerScreen({ navigation }: any) {
           </FilterSection>
 
           {/* Sector */}
-          <FilterSection title="Sector" icon="grid-outline" color="#8B5CF6">
+          <FilterSection title={t('stockScreener.sector')} icon="grid-outline" color="#8B5CF6">
             <ChipRow
               options={SECTORS.map(s => ({ label: s, value: s }))}
               selectedValue={screenerFilters.sector}
@@ -920,7 +922,7 @@ export default function StockScreenerScreen({ navigation }: any) {
           </FilterSection>
 
           {/* Market Cap Category */}
-          <FilterSection title="Market Cap" icon="business-outline" color="#06B6D4">
+          <FilterSection title={t('stockScreener.marketCap')} icon="business-outline" color="#06B6D4">
             <ChipRow
               options={MARKET_CAP_OPTIONS.map(o => ({ label: o.label, value: o.value, icon: o.icon }))}
               selectedValue={screenerFilters.marketCapCategory}
@@ -928,19 +930,19 @@ export default function StockScreenerScreen({ navigation }: any) {
             />
           </FilterSection>
           {/* Volume Filter */}
-          <FilterSection title="Volume" icon="stats-chart-outline" color="#06B6D4">
+          <FilterSection title={t('stockScreener.volume')} icon="stats-chart-outline" color="#06B6D4">
             <RangeInput
-              label="Minimum Volume"
+              label={t('stockScreener.volumeLabel')}
               minValue={volumeMinStr}
               maxValue={volumeMinStr}
               onMinChange={setVolumeMinStr}
               onMaxChange={setVolumeMinStr}
-              placeholder="0 (e.g. 5M = 5 million)"
+              placeholder={t('stockScreener.volumePlaceholder')}
             />
           </FilterSection>
 
           {/* 52-Week High/Low */}
-          <FilterSection title="52-Week Range" icon="flag-outline" color="#8B5CF6">
+          <FilterSection title={t('stockScreener.wkRange')} icon="flag-outline" color="#8B5CF6">
             <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
               <TouchableOpacity              style={[
                   sChip.chip,
@@ -958,7 +960,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                   { color: colors.textSecondary },
                   near52WHigh && { color: colors.marketUp },
                 ]}>
-                  Near 52W High
+                  {t('stockScreener.near52WHigh')}
                 </Text>
                 {near52WHigh && (
                   <Ionicons name="checkmark-circle" size={14} color={colors.marketUp} />
@@ -980,7 +982,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                   { color: colors.textSecondary },
                   near52WLow && { color: colors.marketDown },
                 ]}>
-                  Near 52W Low
+                  {t('stockScreener.near52WLow')}
                 </Text>
                 {near52WLow && (
                   <Ionicons name="checkmark-circle" size={14} color={colors.marketDown} />
@@ -993,10 +995,10 @@ export default function StockScreenerScreen({ navigation }: any) {
         {/* ── Live Preview Count ── */}
         <View style={styles.previewBar}>
           <Text style={styles.previewText}>
-            {liveResults.length} stock{liveResults.length !== 1 ? 's' : ''} match current filters
+            {t('stockScreener.stocksMatch', { count: liveResults.length })}
           </Text>
           <Text style={styles.previewHint}>
-            {activeFilterCount > 0 ? `${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active` : 'No filters applied'}
+            {activeFilterCount > 0 ? t('stockScreener.filterActive', { count: activeFilterCount }) : t('stockScreener.noFilters')}
           </Text>
         </View>
 
@@ -1004,16 +1006,16 @@ export default function StockScreenerScreen({ navigation }: any) {
         <View style={styles.actionRow}>
           <TouchableOpacity style={[styles.actionBtn, styles.clearAllBtn, { borderColor: colors.border }]} onPress={handleClearAll}>
             <Ionicons name="refresh" size={18} color={colors.textSecondary} />
-            <Text style={[styles.actionBtnText, { color: colors.textSecondary }]}>Clear All</Text>
+            <Text style={[styles.actionBtnText, { color: colors.textSecondary }]}>{t('stockScreener.clearAll')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionBtn, styles.saveBtn, { borderColor: colors.border }]} onPress={openSaveModal}>
             <Ionicons name="bookmark-outline" size={18} color={colors.primary} />
-            <Text style={[styles.actionBtnText, { color: colors.primary }]}>Save</Text>
+            <Text style={[styles.actionBtnText, { color: colors.primary }]}>{t('stockScreener.save')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionBtn, styles.applyBtn]} onPress={handleApplyFilters}>
             <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.applyGradient}>
               <Ionicons name="search" size={18} color="#FFF" />
-              <Text style={styles.applyText}>Show Results ({liveResults.length})</Text>
+              <Text style={styles.applyText}>{t('stockScreener.showResults', { count: liveResults.length })}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -1028,7 +1030,7 @@ export default function StockScreenerScreen({ navigation }: any) {
               <View style={styles.savedSectionHeaderLeft}>
                 <Ionicons name="bookmarks" size={16} color={colors.primary} />
                 <Text style={[styles.savedSectionTitle, { color: colors.text }]}>
-                  Saved Filters
+                  {t('stockScreener.savedFilters')}
                 </Text>
                 <View style={[styles.savedCountBadge, { backgroundColor: colors.primary + '20' }]}>
                   <Text style={[styles.savedCountText, { color: colors.primary }]}>{savedPresets.length}</Text>
@@ -1059,7 +1061,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                       onPress={() => handleApplyPreset(preset)}
                     >
                       <Ionicons name="cloud-download-outline" size={14} color={colors.primary} />
-                      <Text style={[styles.savedPresetActionText, { color: colors.primary }]}>Load</Text>
+                      <Text style={[styles.savedPresetActionText, { color: colors.primary }]}>{t('stockScreener.load')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.savedPresetDeleteBtn, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}
@@ -1079,7 +1081,7 @@ export default function StockScreenerScreen({ navigation }: any) {
           <View style={styles.sortSection}>
             <View style={styles.sortHeader}>
               <Ionicons name="swap-vertical" size={14} color={colors.textMuted} />
-              <Text style={[styles.sortLabel, { color: colors.textMuted }]}>Sort by</Text>
+              <Text style={[styles.sortLabel, { color: colors.textMuted }]}>{t('stockScreener.sortBy')}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sortScroll}>
               {SORT_OPTIONS.map(opt => {
@@ -1125,7 +1127,7 @@ export default function StockScreenerScreen({ navigation }: any) {
           <View style={styles.resultsSection}>
             <View style={styles.resultsHeader}>
               <Text style={styles.resultsTitle}>
-                Results ({screenerResults.length})
+                {t('stockScreener.results', { count: screenerResults.length })}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
                 <TouchableOpacity
@@ -1133,7 +1135,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                   onPress={() => setShowExportSheet(true)}
                 >
                   <Ionicons name="share-outline" size={15} color={colors.primary} />
-                  <Text style={[styles.exportBtnText, { color: colors.primary }]}>Export</Text>
+                  <Text style={[styles.exportBtnText, { color: colors.primary }]}>{t('stockScreener.exportLabel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleSort(sortBy)}>
                   <Text style={[styles.resultsSub, { color: colors.primary }]}>
@@ -1156,8 +1158,8 @@ export default function StockScreenerScreen({ navigation }: any) {
         {screenerResults.length === 0 && !isScreenerVisible && activeFilterCount > 0 && (
           <View style={styles.noResults}>
             <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-            <Text style={styles.noResultsTitle}>No stocks match</Text>
-            <Text style={styles.noResultsSub}>Try adjusting your filter criteria</Text>
+            <Text style={styles.noResultsTitle}>{t('stockScreener.noResults')}</Text>
+            <Text style={styles.noResultsSub}>{t('stockScreener.noResultsSub')}</Text>
           </View>
         )}
 
@@ -1177,17 +1179,17 @@ export default function StockScreenerScreen({ navigation }: any) {
               <View style={[sModal.card, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <View style={sModal.header}>
                   <Ionicons name="bookmark" size={22} color={colors.primary} />
-                  <Text style={[sModal.title, { color: colors.text }]}>Save Filters</Text>
+                  <Text style={[sModal.title, { color: colors.text }]}>{t('stockScreener.saveFilters')}</Text>
                 </View>
                 <Text style={[sModal.subtitle, { color: colors.textSecondary }]}>
-                  Save your current filter criteria as a preset
+                  {t('stockScreener.saveFiltersDesc')}
                 </Text>
                 <View style={[sModal.inputWrap, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
                   <TextInput
                     style={[sModal.input, { color: colors.text }]}
                     value={presetNameInput}
                     onChangeText={setPresetNameInput}
-                    placeholder="e.g. High Dividend Stocks"
+                    placeholder={t('stockScreener.presetPlaceholder')}
                     placeholderTextColor={colors.textMuted}
                     autoFocus
                     maxLength={50}
@@ -1198,7 +1200,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                     style={[sModal.cancelBtn, { borderColor: colors.border, backgroundColor: colors.bg, flex: 1 }]}
                     onPress={() => setShowSaveModal(false)}
                   >
-                    <Text style={[sModal.cancelText, { color: colors.textSecondary }]}>Cancel</Text>
+                    <Text style={[sModal.cancelText, { color: colors.textSecondary }]}>{t('stockScreener.cancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
@@ -1210,7 +1212,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                     disabled={!presetNameInput.trim()}
                   >
                     <Ionicons name="checkmark" size={18} color="#FFF" />
-                    <Text style={sModal.saveText}>Save Preset</Text>
+                    <Text style={sModal.saveText}>{t('stockScreener.savePreset')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1233,7 +1235,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                 {/* Handle bar */}
                 <View style={sExport.handleBar} />
 
-                <Text style={[sExport.title, { color: colors.text }]}>Export Results</Text>
+                <Text style={[sExport.title, { color: colors.text }]}>{t('stockScreener.exportResults')}</Text>
                 <Text style={[sExport.subtitle, { color: colors.textSecondary }]}>
                   {sortedResults.length} stock{sortedResults.length !== 1 ? 's' : ''} · {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)} {sortDir === 'asc' ? '↑' : '↓'}
                 </Text>
@@ -1247,11 +1249,11 @@ export default function StockScreenerScreen({ navigation }: any) {
                     <Ionicons name="document-text-outline" size={22} color={colors.primary} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[sExport.optionTitle, { color: colors.text }]}>Export as CSV</Text>
-                    <Text style={[sExport.optionDesc, { color: colors.textMuted }]}>Download a .csv file with all stock data</Text>
+                    <Text style={[sExport.optionTitle, { color: colors.text }]}>{t('stockScreener.exportCsv')}</Text>
+                    <Text style={[sExport.optionDesc, { color: colors.textMuted }]}>{t('stockScreener.exportCsvDesc')}</Text>
                   </View>
           {isExporting === 'csv' ? (
-            <Animated.Text style={{ color: colors.primary, fontSize: 12 }}>Exporting…</Animated.Text>
+            <Animated.Text style={{ color: colors.primary, fontSize: 12 }}>{t('stockScreener.exporting_')}</Animated.Text>
           ) : (
             <Ionicons name="download-outline" size={20} color={colors.textMuted} />
           )}
@@ -1266,11 +1268,11 @@ export default function StockScreenerScreen({ navigation }: any) {
             <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.accent} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[sExport.optionTitle, { color: colors.text }]}>Share as Text</Text>
-            <Text style={[sExport.optionDesc, { color: colors.textMuted }]}>Send formatted results via messaging apps</Text>
+            <Text style={[sExport.optionTitle, { color: colors.text }]}>{t('stockScreener.shareText')}</Text>
+            <Text style={[sExport.optionDesc, { color: colors.textMuted }]}>{t('stockScreener.shareTextDesc')}</Text>
           </View>
           {isExporting === 'text' ? (
-            <Animated.Text style={{ color: colors.accent, fontSize: 12 }}>Sharing…</Animated.Text>
+            <Animated.Text style={{ color: colors.accent, fontSize: 12 }}>{t('stockScreener.sharing_')}</Animated.Text>
           ) : (
             <Ionicons name="share-social-outline" size={20} color={colors.textMuted} />
           )}
@@ -1280,7 +1282,7 @@ export default function StockScreenerScreen({ navigation }: any) {
                   style={[sExport.cancelBtn, { borderColor: colors.border }]}
                   onPress={() => { if (!isExporting) setShowExportSheet(false); }}
                 >
-                  <Text style={[sExport.cancelText, { color: colors.textSecondary }]}>Cancel</Text>
+                  <Text style={[sExport.cancelText, { color: colors.textSecondary }]}>{t('stockScreener.cancel')}</Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>

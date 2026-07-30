@@ -20,6 +20,7 @@ import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { useT } from '../../i18n/useT';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { mockUSStocks, mockUSETFs } from '../../constants/mockData';
 import type { USStock } from '../../types';
@@ -109,6 +110,7 @@ function StatRow({ label, value, highlightColor }: { label: string; value: strin
 export default function USStockDetailScreen({ route, navigation }: any) {
   const { stockId, symbol, _source } = route.params || {};
   const { colors } = useTheme();
+  const { t } = useT();
 
   // Find mock stock first (fallback and structural data)
   const mockStock = mockUSStocks.find(s => s.id === stockId || s.symbol === symbol) || mockUSStocks[0];
@@ -152,7 +154,7 @@ export default function USStockDetailScreen({ route, navigation }: any) {
         </View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading {mockStock.symbol}...</Text>
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('stockDetail.loading')}</Text>
         </View>
       </View>
     );
@@ -175,7 +177,7 @@ export default function USStockDetailScreen({ route, navigation }: any) {
             {usingLiveData && (
               <View style={[styles.liveBadge, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
                 <View style={styles.liveDot} />
-                <Text style={styles.liveBadgeText}>Live</Text>
+                <Text style={styles.liveBadgeText}>{t('stockDetail.live')}</Text>
               </View>
             )}
             <View style={[styles.exchangeBadge, { backgroundColor: exchangeColor + '20' }]}>
@@ -215,20 +217,20 @@ export default function USStockDetailScreen({ route, navigation }: any) {
 
         {/* Key Stats */}
         <Animated.View entering={FadeInUp.duration(500)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Key Statistics</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.statistics')}</Text>
 
-          <StatRow label="Market Cap" value={formattedMarketCap} />
-          <StatRow label="P/E Ratio" value={stock.pe.toFixed(1)} />
-          <StatRow label="P/B Ratio" value={stock.pb.toFixed(1)} />
-          <StatRow label="Dividend Yield" value={stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%` : 'N/A'} />
-          <StatRow label="Volume" value={stock.volume} />
-          <StatRow label="52-Week High" value={`$${stock.high52.toLocaleString('en-US')}`} highlightColor={colors.marketUp} />
-          <StatRow label="52-Week Low" value={`$${stock.low52.toLocaleString('en-US')}`} highlightColor={colors.marketDown} />
+          <StatRow label={t('stockDetail.marketCap')} value={formattedMarketCap} />
+          <StatRow label={t('stockDetail.peRatio')} value={stock.pe.toFixed(1)} />
+          <StatRow label={t('stockDetail.pbRatio')} value={stock.pb.toFixed(1)} />
+          <StatRow label={t('stockDetail.dividendYield')} value={stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%` : 'N/A'} />
+          <StatRow label={t('stockDetail.volume')} value={stock.volume} />
+          <StatRow label={t('stockDetail.week52High')} value={`$${stock.high52.toLocaleString('en-US')}`} highlightColor={colors.marketUp} />
+          <StatRow label={t('stockDetail.week52Low')} value={`$${stock.low52.toLocaleString('en-US')}`} highlightColor={colors.marketDown} />
         </Animated.View>
 
         {/* About Company */}
         <Animated.View entering={FadeInUp.duration(600)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>About {stock.symbol}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.about')} {stock.symbol}</Text>
           <Text style={[styles.aboutText, { color: colors.textSecondary }]}>
             {stock.name} is a {stock.sector.toLowerCase()} company listed on the {stock.exchange} exchange{stock.exchange === 'NYSE Arca' ? '' : ' Stock Exchange'}. 
             With a market capitalization of {formattedMarketCap}, the company is one of the most actively traded 
@@ -242,7 +244,7 @@ export default function USStockDetailScreen({ route, navigation }: any) {
         {/* Related ETFs */}
         {relatedETFs.length > 0 && (
           <Animated.View entering={FadeInUp.duration(700)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Related ETFs</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.relatedEtfs')}</Text>
             {relatedETFs.map(etf => (
               <View key={etf.id} style={[styles.relatedRow, { borderBottomColor: colors.divider }]}>
                 <View>

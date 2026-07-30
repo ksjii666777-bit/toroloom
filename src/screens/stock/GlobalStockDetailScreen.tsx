@@ -21,6 +21,7 @@ import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { useT } from '../../i18n/useT';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { mockEuropeanStocks, mockAsianStocks } from '../../constants/mockData';
 import type { InternationalStock } from '../../types';
@@ -130,6 +131,7 @@ function mergeApiToStock(stock: InternationalStock, api: { price: number; change
 export default function GlobalStockDetailScreen({ route, navigation }: any) {
   const { stockId, symbol, _region } = route.params || {};
   const { colors } = useTheme();
+  const { t } = useT();
 
   // ── Live vs mock state ─────────────────────────────────────
   const allGlobalStocks = useMemo(() => [...mockEuropeanStocks, ...mockAsianStocks], []);
@@ -175,7 +177,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
         </View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading {mockStock.symbol}...</Text>
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('stockDetail.loading')}</Text>
         </View>
       </View>
     );
@@ -184,7 +186,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
   const isPositive = stock.isPositive;
   const exchangeColor = EXCHANGE_COLORS[stock.exchange] || '#3B82F6';
   const countryFlag = COUNTRY_FLAGS[stock.country] || '🌍';
-  const regionLabel = stock.region === 'europe' ? 'European' : 'Asia-Pacific';
+  const regionLabel = stock.region === 'europe' ? t('stockDetail.regionEuropean') : t('stockDetail.regionAsiaPacific');
 
   // Format numbers
   const formattedMarketCap = stock.marketCap;
@@ -206,7 +208,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
             {usingLiveData && (
               <View style={[styles.liveBadge, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
                 <View style={styles.liveDot} />
-                <Text style={styles.liveBadgeText}>Live</Text>
+                <Text style={styles.liveBadgeText}>{t('stockDetail.live')}</Text>
               </View>
             )}
             <View style={[styles.regionBadge, {
@@ -252,20 +254,20 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
 
         {/* Key Stats */}
         <Animated.View entering={FadeInUp.duration(500)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Key Statistics</Text>
-          <StatRow label="Market Cap" value={formattedMarketCap} />
-          <StatRow label="P/E Ratio" value={stock.pe.toFixed(1)} />
-          <StatRow label="P/B Ratio" value={stock.pb.toFixed(1)} />
-          <StatRow label="Dividend Yield" value={stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%` : 'N/A'} />
-          <StatRow label="Volume" value={stock.volume} />
-          <StatRow label="Exchange" value={stock.exchange} highlightColor={exchangeColor} />
-          <StatRow label={`52-Week High (${currencySymbol})`} value={stock.high52.toLocaleString('en-US')} highlightColor={colors.marketUp} />
-          <StatRow label={`52-Week Low (${currencySymbol})`} value={stock.low52.toLocaleString('en-US')} highlightColor={colors.marketDown} />
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.statistics')}</Text>
+          <StatRow label={t('stockDetail.marketCap')} value={formattedMarketCap} />
+          <StatRow label={t('stockDetail.peRatio')} value={stock.pe.toFixed(1)} />
+          <StatRow label={t('stockDetail.pbRatio')} value={stock.pb.toFixed(1)} />
+          <StatRow label={t('stockDetail.dividendYield')} value={stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%` : 'N/A'} />
+          <StatRow label={t('stockDetail.volume')} value={stock.volume} />
+          <StatRow label={t('stockDetail.exchange')} value={stock.exchange} highlightColor={exchangeColor} />
+          <StatRow label={t('stockDetail.week52High')} value={stock.high52.toLocaleString('en-US')} highlightColor={colors.marketUp} />
+          <StatRow label={t('stockDetail.week52Low')} value={stock.low52.toLocaleString('en-US')} highlightColor={colors.marketDown} />
         </Animated.View>
 
         {/* About Company */}
         <Animated.View entering={FadeInUp.duration(600)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>About {stock.symbol}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.about')} {stock.symbol}</Text>
           <Text style={[styles.aboutText, { color: colors.textSecondary }]}>
             {stock.name} is a {stock.sector.toLowerCase()} company headquartered in {stock.country} and listed on the {stock.exchange} exchange. 
             With a market capitalization of {formattedMarketCap}, the company is one of the most actively traded stocks on the {stock.exchange}. 
@@ -277,7 +279,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
         {/* Related Stocks */}
         {relatedStocks.length > 0 && (
           <Animated.View entering={FadeInUp.duration(700)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Related {stock.sector} Stocks</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.relatedStocks', { sector: stock.sector })}</Text>
             {relatedStocks.map(s => (
               <Pressable
                 key={s.id}

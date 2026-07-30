@@ -21,9 +21,11 @@ import createPoll from './createPoll';
 import community from './community';
 import contractNoteUpload from './contractNoteUpload';
 import correlationMatrix from './correlationMatrix';
+import cryptoDetail from './cryptoDetail';
 import currencyMarkets from './currencyMarkets';
 import dividendTracker from './dividendTracker';
 import darkMode from './darkMode';
+import sectorDetail from './sectorDetail';
 import education from './education';
 import earningsCall from './earningsCall';
 import errors from './errors';
@@ -56,6 +58,8 @@ import revenueDashboard from './revenueDashboard';
 import risk from './risk';
 import riskSettings from './riskSettings';
 import securityAudit from './securityAudit';
+import stockDetail from './stockDetail';
+import stockScreener from './stockScreener';
 import syncSettings from './syncSettings';
 import security from './security';
 import social from './social';
@@ -97,9 +101,11 @@ const hi = {
   community,
   contractNoteUpload,
   correlationMatrix,
+  cryptoDetail,
   currencyMarkets,
   dividendTracker,
   darkMode,
+  sectorDetail,
   education,
   earningsCall,
   errors,
@@ -132,6 +138,8 @@ const hi = {
   risk,
   riskSettings,
   securityAudit,
+  stockDetail,
+  stockScreener,
   syncSettings,
   security,
   social,
