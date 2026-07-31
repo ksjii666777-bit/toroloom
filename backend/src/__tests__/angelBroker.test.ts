@@ -1107,6 +1107,26 @@ describe('AngelBroker', () => {
       }
     });
 
+    it('streams forex alongside the SmartAPI WebSocket for mixed subscriptions', () => {
+      vi.useFakeTimers();
+      try {
+        const onTick = vi.fn();
+        const unsubscribe = broker.subscribeTicks(['RELIANCE', 'USDINR'], onTick);
+
+        // Stock symbols still use the real SmartAPI WebSocket
+        expect(mockWebSocket.on).toHaveBeenCalled();
+
+        // Forex symbols stream from the shared simulated feed in parallel
+        vi.advanceTimersByTime(5000);
+        const symbols = onTick.mock.calls.map((c: any[]) => c[0].symbol);
+        expect(symbols).toContain('USDINR');
+
+        unsubscribe();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('should return noop when no feed token', async () => {
       // Create a broker with no feed token
       mockSmartApi.generateSession.mockResolvedValue({
