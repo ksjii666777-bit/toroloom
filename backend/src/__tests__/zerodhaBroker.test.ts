@@ -543,6 +543,48 @@ describe('ZerodhaBroker', () => {
       expect(mockTicker.close).toHaveBeenCalled();
     });
 
+    it('streams simulated forex ticks for forex-only symbols', () => {
+      vi.useFakeTimers();
+      try {
+        const onTick = vi.fn();
+        const unsubscribe = broker.subscribeTicks(['USDINR', 'EURUSD'], onTick);
+
+        // Forex-only → the Kite ticker is never created
+        expect(mockTicker.connect).not.toHaveBeenCalled();
+        expect(typeof unsubscribe).toBe('function');
+
+        vi.advanceTimersByTime(5000);
+        expect(onTick).toHaveBeenCalled();
+        const symbols = onTick.mock.calls.map((c: any[]) => c[0].symbol);
+        expect(symbols).toContain('USDINR');
+        expect(symbols).toContain('EURUSD');
+
+        unsubscribe();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('streams forex alongside the Kite ticker for mixed subscriptions', () => {
+      vi.useFakeTimers();
+      try {
+        const onTick = vi.fn();
+        const unsubscribe = broker.subscribeTicks(['RELIANCE', 'USDINR'], onTick);
+
+        // Stock symbols still use the real Kite ticker
+        expect(mockTicker.connect).toHaveBeenCalled();
+
+        // Forex symbols stream from the shared simulated feed in parallel
+        vi.advanceTimersByTime(5000);
+        const symbols = onTick.mock.calls.map((c: any[]) => c[0].symbol);
+        expect(symbols).toContain('USDINR');
+
+        unsubscribe();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('should handle subscribe with no cached instruments', async () => {
       const freshMockTicker = createMockKiteTicker();
       const freshMockKite = createMockKiteConnect();

@@ -26,6 +26,7 @@ import {
   StockInfo, OrderPayload, OrderResult, ModifyOrderPayload,
   CancelOrderPayload, OpenOrder, Position, TradeHistory
 } from './interface';
+import { isForexSymbol, startForexTickStream } from './forexQuotes';
 
 // Standard index tokens used by Zerodha Kite
 const INDEX_TOKENS: Record<string, string> = {
@@ -622,6 +623,15 @@ export class ZerodhaBroker implements IBroker {
   subscribeTicks(symbols: string[], onTick: (quote: MarketQuote) => void): () => void {
     this.requireAuth();
 
+    // Forex pairs cannot be resolved to Kite instrument tokens — stream them
+    // from the shared simulated forex feed alongside the real Kite ticker.
+    const stockSymbols = symbols.filter(s => !isForexSymbol(s));
+    const forexSymbols = symbols.filter(isForexSymbol);
+    const stopForexStream = startForexTickStream(forexSymbols, onTick);
+
+    // Forex-only subscriptions never need the Kite ticker.
+    if (stockSymbols.length === 0) return stopForexStream;
+
     try {
       const KiteTickerClass = this.loadKiteTicker();
 
@@ -633,7 +643,7 @@ export class ZerodhaBroker implements IBroker {
       let cleanupCalled = false;
 
       // Resolve trading symbols to numeric Kite instrument tokens
-      const subscribeTokens = this.resolveTokens(symbols);
+      const subscribeTokens = this.resolveTokens(stockSymbols);
 
       this.ticker.on('ticks', (ticks: any[]) => {
         if (cleanupCalled) return;
@@ -673,6 +683,7 @@ export class ZerodhaBroker implements IBroker {
 
       return () => {
         cleanupCalled = true;
+        stopForexStream();
         if (this.ticker) {
           try {
             if (subscribeTokens.length > 0) {
@@ -687,7 +698,7 @@ export class ZerodhaBroker implements IBroker {
       };
     } catch (error: any) {
       console.warn('[ZerodhaBroker] WebSocket setup failed:', error.message);
-      return () => {};
+      return stopForexStream;
     }
   }
 

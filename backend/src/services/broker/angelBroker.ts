@@ -32,6 +32,7 @@ import {
   EDISTranStatusRequest, EDISTranStatusResponse,
   BrokerageEstimateRequest, BrokerageEstimateResponse,
 } from './interface';
+import { isForexSymbol, startForexTickStream } from './forexQuotes';
 
 // Known index tokens for Angel One SmartAPI
 // These are standard across all Angel One accounts
@@ -671,14 +672,23 @@ export class AngelBroker implements IBroker {
   // ======================== Real-time (WebSocket V2) ========================
 
   subscribeTicks(symbols: string[], onTick: (quote: MarketQuote) => void): () => void {
+    // Forex pairs stream from the shared simulated feed (SmartAPI has no
+    // currency-pair token resolution). Stock symbols use the real WS.
+    const stockSymbols = symbols.filter(s => !isForexSymbol(s));
+    const forexSymbols = symbols.filter(isForexSymbol);
+    const stopForexStream = startForexTickStream(forexSymbols, onTick);
+
+    // Forex-only subscriptions never need the SmartAPI WebSocket.
+    if (stockSymbols.length === 0) return stopForexStream;
+
     if (!this.connected || !this.smartApi) {
       console.warn('[AngelBroker] Cannot subscribe to ticks — broker not authenticated');
-      return () => {};
+      return stopForexStream;
     }
 
     if (!this.feedToken && !this.accessToken) {
       console.warn('[AngelBroker] No feed token available — cannot subscribe to WebSocket ticks');
-      return () => {};
+      return stopForexStream;
     }
 
     try {
@@ -720,7 +730,7 @@ export class AngelBroker implements IBroker {
       // Use IIFE to properly sequence token resolution → connection → subscription
       (async () => {
         // Step 1: Resolve all tokens first
-        await Promise.all(symbols.map(async (sym) => {
+        await Promise.all(stockSymbols.map(async (sym) => {
           try {
             const token = await this.resolveToken(sym);
             resolvedTokens.add(token);
@@ -752,6 +762,7 @@ export class AngelBroker implements IBroker {
 
       return () => {
         unsubscribeCalled = true;
+        stopForexStream();
         if (isConnected && this.wsClient) {
           try {
             const jsonReq = {
@@ -771,7 +782,7 @@ export class AngelBroker implements IBroker {
       };
     } catch (error: any) {
       console.warn('[AngelBroker] WebSocket setup failed:', error.message);
-      return () => {};
+      return stopForexStream;
     }
   }
 

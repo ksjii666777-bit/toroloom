@@ -30,6 +30,7 @@ import {
   ModifyOrderPayload, CancelOrderPayload,
   OpenOrder, Position, TradeHistory,
 } from './interface';
+import { isForexSymbol, startForexTickStream } from './forexQuotes';
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
@@ -823,15 +824,15 @@ export class UpstoxBroker implements IBroker {
 
   // ======================== WebSocket (stub) ========================
 
-  subscribeTicks(
-    _symbols: string[],
-    _onTick: (quote: MarketQuote) => void,
-  ): () => void {
-    // Upstox WebSocket requires a separate connection using WebSocket URL:
-    // wss://api.upstox.com/v2/feed/market-data-feed/websocket
-    // with Authorization header.
-    // For now, return a no-op unsubscribe function.
-    console.warn('[UpstoxBroker] WebSocket ticks not yet implemented');
-    return () => {};
+  subscribeTicks(symbols: string[], onTick: (quote: MarketQuote) => void): () => void {
+    // Upstox WebSocket (wss://api.upstox.com/v2/feed/market-data-feed/websocket)
+    // is not wired up yet. Forex pairs stream from the shared simulated feed;
+    // stock symbols remain unsupported until the Upstox WS is implemented.
+    const forexSymbols = symbols.filter(isForexSymbol);
+    const unsupported = symbols.filter(s => !isForexSymbol(s));
+    if (unsupported.length > 0) {
+      console.warn(`[UpstoxBroker] WebSocket ticks not yet implemented for: ${unsupported.join(', ')}`);
+    }
+    return startForexTickStream(forexSymbols, onTick);
   }
 }
