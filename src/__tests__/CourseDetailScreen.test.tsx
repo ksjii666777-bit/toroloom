@@ -12,7 +12,7 @@
  */
 
 import React, { act } from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent } from './testUtils';
 
 // ==================== Mocks (hoisted) ====================
@@ -91,14 +91,14 @@ vi.mock('../store/gamificationStore', () => ({
   })),
 }));
 
-// ==================== Mock mockData ====================
-// The real mockData module imports from courseContent.ts (200K+ chars, 90+ lessons)
-// which can cause vitest parsing issues. Mock a minimal subset used by the tests.
-
-vi.mock('../../constants/mockData', () => {
-  const mockCourse = mockCourseForTest;
-
-  const mockLessonData = [
+// ==================== Mock educationApi ====================
+// setup.ts mocks '../services/api/education' with getCourse REJECTING, which would
+// force the screen down the fallback dynamic import('../../constants/mockData')
+// path — that dynamic import resolves via a macrotask and hangs under vitest.
+// Override locally (same pattern as LessonViewScreen.test.tsx) so getCourse
+// RESOLVES with the lesson list, letting the screen use its primary .then() path.
+vi.mock('../services/api/education', () => {
+  const lessonList = [
     {
       id: 'l1', courseId: 'c1', title: 'What is the Stock Market?',
       content: 'Lesson 1 content', duration: '20 min', completed: true,
@@ -132,10 +132,13 @@ vi.mock('../../constants/mockData', () => {
       content: 'Lesson 8 content', duration: '25 min', completed: false,
     },
   ];
-
   return {
-    mockCourses: [mockCourse],
-    mockLessons: mockLessonData,
+    educationApi: {
+      getCourses: vi.fn(),
+      getCourse: vi.fn().mockResolvedValue({ lessonList }),
+      getLesson: vi.fn(),
+      markLessonProgress: vi.fn(),
+    },
   };
 });
 
@@ -153,6 +156,9 @@ vi.mocked(useEducationStore).mockImplementation(() => ({
 // ==================== Imports ====================
 
 import CourseDetailScreen from '../screens/education/CourseDetailScreen';
+// Imported AFTER vi.mock hoisting so it resolves to the mocked vi.fn() used by
+// vi.mocked(useEducationStore).mockImplementation(...) below
+import { useEducationStore } from '../store/educationStore';
 
 // ==================== Mock useT hook ====================
 const education: Record<string, string> = {
@@ -238,33 +244,37 @@ vi.mock('../hooks/useT', () => ({
 
 // ==================== Helpers ====================
 
-function advanceAndRender(ms: number) {
-  act(() => { vi.advanceTimersByTime(ms); });
+// The screen populates courseLessons from educationApi.getCourse(courseId) which is
+// locally mocked to RESOLVE with the lesson list (primary .then() path — no dynamic
+// import). Flush the promise microtask + React state updates so lesson-list
+// assertions see the loaded data.
+// NOTE: CourseDetailScreen schedules NO timers, so tests deliberately do NOT use
+// vi.useFakeTimers() — faking timers would also fake setImmediate and hang the
+// flush. This is the same pattern as LearningPathsScreen.test.tsx.
+async function flushMicrotasks() {
+  await act(async () => {
+    await new Promise(resolve => setImmediate(resolve));
+  });
 }
 
 // ==================== Tests ====================
 
 describe('CourseDetailScreen — Loading State', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('renders without crashing during loading', () => {
+  it('renders without crashing during loading', async () => {
     const route = { params: { courseId: 'c1' } };
-    const { toJSON } = render(
+    const { toJSON, unmount } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
     expect(toJSON).not.toBeNull();
+    // Let the getCourse → import → setCourseLessons chain settle and unmount so no
+    // pending async work leaks into the next test.
+    await flushMicrotasks();
+    unmount();
   });
 });
 
 describe('CourseDetailScreen — Loaded Content', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
     mockNavigate.mockClear();
     mockGoBack.mockClear();
     mockFetchLesson.mockClear();
@@ -272,147 +282,143 @@ describe('CourseDetailScreen — Loaded Content', () => {
     mockAddXp.mockClear();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('renders the course title from mock data', () => {
+  it('renders the course title from mock data', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('Stock Market Basics')).toBeDefined();
   });
 
-  it('renders the course description in the hero', () => {
+  it('renders the course description in the hero', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText(/investing in the stock market/)).toBeDefined();
   });
 
-  it('renders the level badge', () => {
+  it('renders the level badge', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('beginner')).toBeDefined();
   });
 
-  it('renders the category badge', () => {
+  it('renders the category badge', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('Fundamentals')).toBeDefined();
   });
 
-  it('renders Course Progress section', () => {
+  it('renders Course Progress section', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('Course Progress')).toBeDefined();
   });
 
-  it('renders progress stats (Completed, Remaining, Duration)', () => {
+  it('renders progress stats (Completed, Remaining, Duration)', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('Completed')).toBeDefined();
     expect(getByText('Remaining')).toBeDefined();
     expect(getByText('Duration')).toBeDefined();
   });
 
-  it('renders About this Course section', () => {
+  it('renders About this Course section', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('About this Course')).toBeDefined();
   });
 
-  it('renders the enrolled count stat', () => {
+  it('renders the enrolled count stat', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText(/enrolled/)).toBeDefined();
   });
 
-  it('renders the rating stat', () => {
+  it('renders the rating stat', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText(/rating/)).toBeDefined();
   });
 
-  it('renders the Lessons section title with count', () => {
+  it('renders the Lessons section title with count', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText(/Lessons/)).toBeDefined();
   });
 
-  it('renders individual lesson titles from mock data', () => {
+  it('renders individual lesson titles from mock data', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('What is the Stock Market?')).toBeDefined();
     expect(getByText('Key Market Participants')).toBeDefined();
     expect(getByText('How to Read Stock Prices')).toBeDefined();
   });
 
-  it('renders lesson durations', () => {
+  it('renders lesson durations', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('20 min')).toBeDefined();
     expect(getByText('25 min')).toBeDefined();
   });
 
-  it('renders the Continue Learning button (5 of 8 lessons completed in real data)', () => {
+  it('renders the Continue Learning button (5 of 8 lessons completed in real data)', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('Continue Learning')).toBeDefined();
   });
 
-  it('renders the Next Lesson badge on the next incomplete lesson', () => {
+  it('renders the Next Lesson badge on the next incomplete lesson', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('Next Lesson')).toBeDefined();
   });
 
-  it('does not navigate on initial render', () => {
+  it('does not navigate on initial render', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('Stock Market Basics')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();
     expect(mockGoBack).not.toHaveBeenCalled();
@@ -421,29 +427,23 @@ describe('CourseDetailScreen — Loaded Content', () => {
 
 describe('CourseDetailScreen — Missing Course', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
     mockNavigate.mockClear();
     mockGoBack.mockClear();
     mockFetchLesson.mockClear();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('renders course not found for invalid courseId', () => {
+  it('renders course not found for invalid courseId', async () => {
     const route = { params: { courseId: 'nonexistent' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     expect(getByText('Course not found')).toBeDefined();
   });
 });
 
 describe('CourseDetailScreen — Lesson Navigation', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
     mockNavigate.mockClear();
     mockGoBack.mockClear();
     mockFetchLesson.mockClear();
@@ -451,16 +451,12 @@ describe('CourseDetailScreen — Lesson Navigation', () => {
     mockAddXp.mockClear();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('navigates to LessonView when Continue Learning button is pressed', () => {
+  it('navigates to LessonView when Continue Learning button is pressed', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
       <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
     );
-    advanceAndRender(500);
+    await flushMicrotasks();
     act(() => { fireEvent.press(getByText('Continue Learning')); });
     expect(mockNavigate).toHaveBeenCalledWith('LessonView', {
       lessonId: 'l6',

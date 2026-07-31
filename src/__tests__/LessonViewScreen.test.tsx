@@ -35,7 +35,7 @@ const lessonData: Record<string, any> = {
     id: 'l1', courseId: 'c1', title: 'What is the Stock Market?',
     content: 'The stock market is a place where shares of publicly traded companies are bought and sold.',
     duration: '20 min', completed: true, videoUrl: 'https://example.com/lesson1.mp4',
-    quiz: { title: 'Market Basics Quiz', questions: [{ question: 'What is a stock?', options: ['A loan', 'Partial ownership', 'A bond', 'A derivative'], correct: 1 }, { question: 'Q2?', options: ['A', 'B', 'C', 'D'], correct: 0 }, { question: 'Q3?', options: ['A', 'B', 'C', 'D'], correct: 0 }, { question: 'Q4?', options: ['A', 'B', 'C', 'D'], correct: 0 }] },
+    quiz: { title: 'Market Basics Quiz', questions: [{ question: 'What does buying a stock represent?', options: ['A loan to the company', 'Partial ownership in the company', 'A type of insurance', 'A government bond'], correct: 1 }, { question: 'Which organization regulates the Indian stock market?', options: ['RBI', 'SEBI', 'IRDAI', 'CCC'], correct: 1 }, { question: 'What is an IPO?', options: ['Internal Public Offering', 'Initial Public Offering', 'Indian Public Option', 'Investment Portfolio Objective'], correct: 1 }, { question: 'Which of these is a major Indian stock exchange?', options: ['NYSE', 'NSE', 'NASDAQ', 'LSE'], correct: 1 }] },
   },
   l2: {
     id: 'l2', courseId: 'c1', title: 'Key Market Participants',
@@ -141,27 +141,28 @@ vi.mock('../services/api/education', () => {
   };
 });
 
-// Mock QuizComponent — use a plain component without require('react')
-vi.mock('../components/quiz/QuizComponent', () => {
-  const actualReact = require('react');
-  return {
-    default: (props: any) => {
-      const questions = props.quiz?.questions || [];
-      return actualReact.createElement('View', null,
-        actualReact.createElement('Text', null, props.quiz?.title || 'Quiz'),
-        ...questions.map((q: any, i: number) =>
-          actualReact.createElement('View', { key: i },
-            actualReact.createElement('Text', null, `Q${i + 1}: ${q.question}`),
-            ...(q.options || []).map((opt: string, j: number) =>
-              actualReact.createElement('Text', { key: j }, opt)
-            )
+// React instance obtained via vi.hoisted — runs before vi.mock factories, so the
+// same React module is used by the mock and the renderer.
+const quizReact = vi.hoisted(() => require('react'));
+
+// Mock QuizComponent — uses the hoisted React instance
+vi.mock('../components/quiz/QuizComponent', () => ({
+  default: (props: any) => {
+    const questions = props.quiz?.questions || [];
+    return quizReact.createElement('View', null,
+      quizReact.createElement('Text', null, props.quiz?.title || 'Quiz'),
+      ...questions.map((q: any, i: number) =>
+        quizReact.createElement('View', { key: i },
+          quizReact.createElement('Text', null, `Q${i + 1}: ${q.question}`),
+          ...(q.options || []).map((opt: string, j: number) =>
+            quizReact.createElement('Text', { key: j }, opt)
           )
-        ),
-        actualReact.createElement('Text', null, 'Submit Answers')
-      );
-    },
-  };
-});
+        )
+      ),
+      quizReact.createElement('Text', null, 'Submit Answers')
+    );
+  },
+}));
 
 // Mock VideoLessonPlayer with string-based React.createElement (same pattern as QuizComponent mock)
 // Uses string component names ('View', 'Text', 'Pressable') - no require('react-native') needed
