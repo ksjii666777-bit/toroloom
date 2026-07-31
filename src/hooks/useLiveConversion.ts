@@ -23,12 +23,20 @@
 import { useCallback } from 'react';
 import { getCurrency } from '../utils/currencyConverter';
 import { useForexRates, type UseForexRatesResult } from './useForexRates';
+import type { ForexRates } from '../services/forexRateService';
 import type { CurrencyInfo } from '../utils/currencyConverter';
 
 export interface UseLiveConversionResult extends Pick<
   UseForexRatesResult,
   'isLive' | 'isLoading' | 'error' | 'lastUpdated' | 'refresh'
 > {
+  /**
+   * Raw live rate map (code → INR rate). Only contains codes with an actual
+   * live value — codes without live data are absent (use getLiveCurrencyRate
+   * when a static fallback is acceptable).
+   */
+  rates: ForexRates;
+
   /**
    * Get the INR rate for a currency, using live data when available.
    * Falls back to the static rate from currencyConverter.ts.
@@ -57,6 +65,9 @@ export interface UseLiveConversionResult extends Pick<
 export function useLiveConversion(enabled: boolean = true): UseLiveConversionResult {
   const { rates: liveRates, isLive, isLoading, error, lastUpdated, refresh } = useForexRates(enabled);
 
+  // Expose the raw live map so consumers can distinguish "live value present"
+  // from "static fallback" (e.g. avoid clobbering REST-fetched rates offline).
+
   const getLiveCurrencyRate = useCallback((code: string): number => {
     return liveRates[code] ?? getCurrency(code).inrRate;
   }, [liveRates]);
@@ -79,6 +90,7 @@ export function useLiveConversion(enabled: boolean = true): UseLiveConversionRes
   }, [liveRates]);
 
   return {
+    rates: liveRates,
     getLiveCurrencyRate,
     convertWithLive,
     getLiveCurrency,

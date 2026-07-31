@@ -33,7 +33,7 @@ import {
   formatCurrencyAmount,
   type RecentConversion,
 } from '../../utils/currencyConverter';
-import { useLiveConversion } from '../../hooks/useLiveConversion';
+import { useLiveConversion, type UseLiveConversionResult } from '../../hooks/useLiveConversion';
 import { forexApi } from '../../services/api';
 
 const { width } = Dimensions.get('window');
@@ -200,10 +200,13 @@ export function CurrencyConverterModal({
   visible,
   onClose,
   colors,
+  liveConversion,
 }: {
   visible: boolean;
   onClose: () => void;
   colors: any;
+  /** Optional shared WS-first live state (avoids double WS subscription) */
+  liveConversion?: UseLiveConversionResult;
 }) {
   const { t } = useT();
   const [fromCode, setFromCode] = useState('USD');
@@ -211,11 +214,12 @@ export function CurrencyConverterModal({
   const [amountStr, setAmountStr] = useState('1');
   const [recentConversions, setRecentConversions] = useState<RecentConversion[]>([]);
 
-  // ── Live forex rates (only active when modal is visible) ─────────────
+  // ── Live forex rates (shared from parent when provided, else own hook) ──
+  const conversion = liveConversion ?? useLiveConversion(visible);
   const {
-    _getLiveCurrencyRate, convertWithLive, getLiveCurrency,
+    convertWithLive, getLiveCurrency,
     isLive, isLoading: ratesLoading, lastUpdated, refresh,
-  } = useLiveConversion(visible);
+  } = conversion;
 
   const amount = parseFloat(amountStr) || 0;
   const result = convertWithLive(amount, fromCode, toCode);
@@ -480,6 +484,12 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
   const [converterVisible, setConverterVisible] = useState(false);
   const [pairsData, setPairsData] = useState<CurrencyPair[]>(FALLBACK_PAIRS);
 
+  // ── Live WS-first forex rates (single subscription shared with modal) ──
+  const liveConversion = useLiveConversion(true);
+  // rates is a stable state reference between ticks — use it directly so the
+  // displayPairs memo only recomputes when rates actually change.
+  const { rates: liveRates } = liveConversion;
+
   // ── Fetch from backend API, fall back to static data ──────────────
   useEffect(() => {
     forexApi.getRates().then(data => {
@@ -487,8 +497,24 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
     });
   }, []);
 
+  // ── Merge live WS rates into INR-quoted pairs for display ──────────
+  // Only override when a live rate actually exists — keeps the REST-fetched
+  // rate authoritative during WS/REST outages (static fallback is NOT applied
+  // here, otherwise it would clobber fresher backend rates offline).
+  const displayPairs = useMemo(() => {
+    return pairsData.map(p => {
+      if (p.quoteCurrency === 'INR') {
+        const liveRate = liveRates[p.baseCurrency];
+        if (liveRate !== undefined) {
+          return { ...p, rate: liveRate };
+        }
+      }
+      return p;
+    });
+  }, [pairsData, liveRates]);
+
   const filteredPairs = useMemo(() => {
-    let pairs = [...pairsData];
+    let pairs = [...displayPairs];
     if (activeTab === 'inr') pairs = pairs.filter(p => p.quoteCurrency === 'INR');
     else if (activeTab === 'crosses') pairs = pairs.filter(p => p.quoteCurrency !== 'INR');
     if (regionFilter) pairs = pairs.filter(p => p.region === regionFilter);
@@ -497,20 +523,20 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
       pairs = pairs.filter(p => p.pair.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
     }
     return pairs;
-  }, [activeTab, regionFilter, searchQuery, pairsData]);
+  }, [activeTab, regionFilter, searchQuery, displayPairs]);
 
   const summaryStats = useMemo(() => {
-    const inrPairs = pairsData.filter(p => p.quoteCurrency === 'INR');
+    const inrPairs = displayPairs.filter(p => p.quoteCurrency === 'INR');
     const avgChg = inrPairs.reduce((s, p) => s + p.changePercent, 0) / inrPairs.length;
     const avgVol = inrPairs.reduce((s, p) => s + (p.volatility ?? 0), 0) / inrPairs.length;
     return {
-      total: pairsData.length,
+      total: displayPairs.length,
       inr: inrPairs.length,
-      rbiRef: pairsData.filter(p => p.isRbiReference).length,
+      rbiRef: displayPairs.filter(p => p.isRbiReference).length,
       avgInrChange: avgChg,
       avgInrVol: avgVol,
     };
-  }, [pairsData]);
+  }, [displayPairs]);
 
   const handlePress = useCallback((id: string) => {
     setExpandedId(prev => prev === id ? null : id);
@@ -524,7 +550,23 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('currencyMarkets.title')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('currencyMarkets.title')}</Text>
+              {/* Live / Mock badge */}
+              <View style={[styles.liveBadge, {
+                backgroundColor: liveConversion.isLive ? '#00E67620' : '#FF525220',
+                borderColor: liveConversion.isLive ? '#00E67640' : '#FF525240',
+              }]}>
+                <View style={[styles.liveDot, {
+                  backgroundColor: liveConversion.isLive ? '#00E676' : '#FF5252',
+                }]} />
+                <Text style={[styles.liveBadgeText, {
+                  color: liveConversion.isLive ? '#00E676' : '#FF5252',
+                }]}>
+                  {liveConversion.isLoading ? t('currencyMarkets.loading') : liveConversion.isLive ? t('currencyMarkets.live') : t('currencyMarkets.mock')}
+                </Text>
+              </View>
+            </View>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('currencyMarkets.subtitle')}</Text>
           </View>
           <Pressable
@@ -646,7 +688,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
             <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('currencyMarkets.inrOverview')}</Text>
               <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('currencyMarkets.inrOverviewSub')}</Text>
-              {pairsData.filter(p => p.quoteCurrency === 'INR').map((pair, i) => {
+              {displayPairs.filter(p => p.quoteCurrency === 'INR').map((pair, i) => {
                 const isUp = pair.changePercent >= 0;
                 return (
                   <View key={pair.id} style={[styles.inrRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
@@ -685,7 +727,7 @@ export default function CurrencyMarketsScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Currency Converter Modal */}
-      <CurrencyConverterModal visible={converterVisible} onClose={() => setConverterVisible(false)} colors={colors} />
+      <CurrencyConverterModal visible={converterVisible} onClose={() => setConverterVisible(false)} colors={colors} liveConversion={liveConversion} />
     </View>
   );
 }

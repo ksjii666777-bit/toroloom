@@ -113,6 +113,47 @@ vi.mock('../context/ThemeContext', () => ({
   }),
 }));
 
+// ── useLiveConversion mock (hoisted so tests can inject live WS rates) ────────
+// STATIC_INR_RATES must live inside vi.hoisted too — vi.mock factories are
+// hoisted above plain const declarations (TDZ ReferenceError otherwise).
+const { mockLiveRates, STATIC_INR_RATES } = vi.hoisted(() => ({
+  mockLiveRates: {} as Record<string, number>,
+  // Static INR rates mirroring currencyConverter.ts CURRENCIES (and forex.ts fallback)
+  STATIC_INR_RATES: {
+    INR: 1, USD: 83.45, EUR: 90.78, GBP: 106.2, JPY: 0.54,
+    SGD: 61.8, CNY: 11.52, HKD: 10.68, THB: 2.28,
+  } as Record<string, number>,
+}));
+
+vi.mock('../hooks/useLiveConversion', () => ({
+  useLiveConversion: () => ({
+    // Raw live map — only codes with an injected live value (matches real hook)
+    rates: mockLiveRates,
+    getLiveCurrencyRate: (code: string) => mockLiveRates[code] ?? STATIC_INR_RATES[code] ?? 1,
+    convertWithLive: (amount: number, from: string, to: string) => {
+      if (from === to) return amount;
+      const fromRate = mockLiveRates[from] ?? STATIC_INR_RATES[from] ?? 1;
+      const toRate = mockLiveRates[to] ?? STATIC_INR_RATES[to] ?? 1;
+      if (fromRate === 0 || toRate === 0) return 0;
+      return (amount * fromRate) / toRate;
+    },
+    getLiveCurrency: (code: string) => ({
+      code,
+      name: code,
+      symbol: code === 'INR' ? '₹' : '$',
+      icon: '💵',
+      color: '#3B82F6',
+      inrRate: mockLiveRates[code] ?? STATIC_INR_RATES[code] ?? 1,
+      isPopular: true,
+    }),
+    isLive: Object.keys(mockLiveRates).length > 0,
+    isLoading: false,
+    error: null,
+    lastUpdated: null,
+    refresh: vi.fn(),
+  }),
+}));
+
 const mockNavigate = vi.fn();
 const mockGoBack = vi.fn();
 
@@ -120,6 +161,7 @@ const mockGoBack = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
+  Object.keys(mockLiveRates).forEach(k => delete mockLiveRates[k]);
 });
 
 function renderScreen() {
@@ -463,5 +505,55 @@ describe('CurrencyMarketsScreen — Empty State', () => {
     // Empty state should appear
     expect(getByText('No pairs found')).toBeDefined();
     expect(getByText('Try adjusting search')).toBeDefined();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Live WS Rates (WS-first useLiveConversion)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('CurrencyMarketsScreen — Live WS Rates', () => {
+  it('renders static fallback rate when no live rates are available', () => {
+    const { getByText } = renderScreen();
+    // No live rates injected → USD/INR falls back to static 83.45
+    expect(getByText('83.45')).toBeDefined();
+  });
+
+  it('renders live WS rate on the USD/INR card when a live tick arrives', () => {
+    mockLiveRates.USD = 84.12;
+    const { getByText, queryByText } = renderScreen();
+    // Card rate should now show the live WS rate, not the static 83.45
+    expect(getByText('84.12')).toBeDefined();
+    expect(queryByText('83.45')).toBeNull();
+  });
+
+  it('keeps crosses on REST data (only INR pairs get live WS rates)', () => {
+    mockLiveRates.USD = 84.12;
+    const { getByText } = renderScreen();
+    act(() => { fireEvent.press(getByText('Crosses')); });
+    // EUR/USD is a cross — not WS-overridden; card renders rate.toFixed(2) → 1.09
+    expect(getByText('1.09')).toBeDefined();
+  });
+
+  it('shows the LIVE badge in the header when rates are live', () => {
+    mockLiveRates.USD = 84.12;
+    const { getByText } = renderScreen();
+    expect(getByText('live')).toBeDefined();
+  });
+
+  it('shows the MOCK badge in the header when no live rates', () => {
+    const { getByText } = renderScreen();
+    expect(getByText('mock')).toBeDefined();
+  });
+
+  it('shares live rates with the converter modal (single subscription)', () => {
+    mockLiveRates.USD = 84.12;
+    const { getByText } = renderScreen();
+
+    // Open the converter modal via the calculator button
+    act(() => { fireEvent.press(getByText('calculator')); });
+
+    // Modal rate should reflect the parent's shared live rate, not static 83.45
+    expect(getByText(/84.120000 INR/)).toBeDefined();
   });
 });
