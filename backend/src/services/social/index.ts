@@ -56,7 +56,7 @@ export interface FollowRelationData {
 
 // ==================== Internal State ====================
 
-const _socialStorage: StorageEngine | null = null;
+let _socialStorage: StorageEngine | null = null;
 
 // Mock top traders data (same as frontend mock)
 const mockTraders: SocialTraderData[] = [
@@ -117,7 +117,7 @@ const copyRelations = new Map<string, CopyRelationData[]>(); // userId → CopyR
 // ==================== Public API ====================
 
 export async function configureSocialPersistence(storage: StorageEngine): Promise<void> {
-  socialStorage = storage;
+  _socialStorage = storage;
 }
 
 /** Get leaderboard with sort and pagination */
@@ -255,7 +255,7 @@ export async function getMyFollowedTraders(userId: string): Promise<SocialTrader
 
 /** Reset for testing */
 export function resetSocialService(): void {
-  socialStorage = null;
+  _socialStorage = null;
   followRelations.clear();
   copyRelations.clear();
 }

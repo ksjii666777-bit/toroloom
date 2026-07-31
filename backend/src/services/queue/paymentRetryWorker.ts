@@ -63,7 +63,7 @@ export function startPaymentRetryWorker(): void {
   paymentRetryWorker = new Worker<PaymentRetryJobData, PaymentRetryJobResult>(
     PAYMENT_RETRY_QUEUE_NAME,
     async (job: Job<PaymentRetryJobData>): Promise<PaymentRetryJobResult> => {
-      const { userId, planId, billingPeriod, mandateId, _upiId, amount, attempt, maxRetries, failedAt } = job.data;
+      const { userId, planId, billingPeriod, mandateId, amount, attempt, maxRetries, failedAt } = job.data;
       const now = new Date();
 
       console.log(`[PaymentRetry] Attempt #${attempt}/${maxRetries} for user ${userId}, mandate ${mandateId}`);

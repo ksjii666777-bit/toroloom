@@ -213,12 +213,10 @@ async function applyMutation(
   );
 
   if (conflict.hasConflict) {
-    // @ts-expect-error: conflict.error exists but isn't in the return type
     return {
       status: 'conflict',
       serverVersion: conflict.currentServerVersion,
       serverState: conflict.serverState,
-      // @ts-expect-error: conflict.error may not be on the type but exists at runtime
       error: conflict.error || 'Version conflict — server has newer data',
     };
   }

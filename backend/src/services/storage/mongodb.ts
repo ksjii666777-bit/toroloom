@@ -19,7 +19,7 @@
 
 import type { Collection, Db, MongoClient, MongoClientOptions, Filter } from 'mongodb';
 import type { StorageEngine, BrokerStateData, AuditFilter, NotificationData, CommunityPostData, UserSubscriptionData, SnapTradeConnectionData, TelegramLinkData, CouponData, CouponUsageData, WebhookStorageData, WebhookDeliveryLogData, ApiKeyStorageData } from './types';
-import type { AuditEvent, _AuditTrailSnapshot } from '../auditTrail';
+import type { AuditEvent } from '../auditTrail';
 import type { RiskProfile } from '../riskEngine/types';
 
 /**
