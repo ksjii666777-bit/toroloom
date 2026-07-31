@@ -246,15 +246,13 @@ vi.mock('../hooks/useT', () => ({
 
 // The screen populates courseLessons from educationApi.getCourse(courseId) which is
 // locally mocked to RESOLVE with the lesson list (primary .then() path — no dynamic
-// import). Flush the promise microtask + React state updates so lesson-list
-// assertions see the loaded data.
+// import). Since getCourse resolves via a pure microtask, a plain await act() chain
+// flushes the promise + React state updates — no setImmediate (macrotask) needed.
 // NOTE: CourseDetailScreen schedules NO timers, so tests deliberately do NOT use
-// vi.useFakeTimers() — faking timers would also fake setImmediate and hang the
-// flush. This is the same pattern as LearningPathsScreen.test.tsx.
+// vi.useFakeTimers().
 async function flushMicrotasks() {
-  await act(async () => {
-    await new Promise(resolve => setImmediate(resolve));
-  });
+  await act(async () => {});
+  await act(async () => {});
 }
 
 // ==================== Tests ====================
