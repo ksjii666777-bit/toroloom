@@ -385,8 +385,10 @@ describe('ContractNoteUploadScreen — Single Upload', () => {
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     // Wait for the async operation to settle
-    // Flush microtasks so that async state updates inside act() complete
+    // Double flush — async parse flow settles across multiple steps; a single
+    // macrotask tick flakes under v8 coverage instrumentation overhead.
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
     // Check results
     expect(getByText('Trades Extracted')).toBeDefined();
     expect(getByText('RELIANCE')).toBeDefined();
@@ -400,8 +402,10 @@ await new Promise(resolve => setTimeout(resolve, 0));
       <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
-    // Flush microtasks so that async state updates inside act() complete
+    // Double flush — async parse flow settles across multiple steps; a single
+    // macrotask tick flakes under v8 coverage instrumentation overhead.
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
     expect(getByText('Parsing Incomplete')).toBeDefined();
   });
 
@@ -411,8 +415,10 @@ await new Promise(resolve => setTimeout(resolve, 0));
       <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
-    // Flush microtasks so that async state updates inside act() complete
+    // Double flush — async parse flow settles across multiple steps; a single
+    // macrotask tick flakes under v8 coverage instrumentation overhead.
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
     expect(getByText('Try Again')).toBeDefined();
     expect(getByText('No trade data found in this document')).toBeDefined();
   });
@@ -422,8 +428,10 @@ await new Promise(resolve => setTimeout(resolve, 0));
       <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
-    // Flush microtasks so that async state updates inside act() complete
+    // Double flush — async parse flow settles across multiple steps; a single
+    // macrotask tick flakes under v8 coverage instrumentation overhead.
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
     // Stats: 2 trades, 1 buy, 1 sell
     expect(getByText('2')).toBeDefined();
     // Broker badge shows Zerodha
@@ -575,6 +583,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
 
     expect(getByText('zerodha.pdf')).toBeDefined();
     expect(getByText('angel.pdf')).toBeDefined();
@@ -587,6 +596,7 @@ await new Promise(resolve => setTimeout(resolve, 0));
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
 
     expect(getByText('Zerodha')).toBeDefined();
     expect(getByText('Angel')).toBeDefined();
@@ -599,6 +609,7 @@ await new Promise(resolve => setTimeout(resolve, 0));
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
 
     // Tap on zerodha.pdf row to expand it
     fireEvent.press(getByText('zerodha.pdf'));
@@ -615,6 +626,7 @@ await new Promise(resolve => setTimeout(resolve, 0));
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
 
     expect(getByText('1 succeeded · 1 failed · 2 total')).toBeDefined();
     expect(getByText('good.pdf')).toBeDefined();
@@ -632,6 +644,7 @@ await new Promise(resolve => setTimeout(resolve, 0));
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
 
     expect(getByText(/Deduplicated/)).toBeDefined();
   });
@@ -647,8 +660,10 @@ describe('ContractNoteUploadScreen — Clear Results', () => {
       <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
-    // Flush microtasks so that async state updates inside act() complete
+    // Double flush — async parse flow settles across multiple steps; a single
+    // macrotask tick flakes under v8 coverage instrumentation overhead.
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
 
     expect(getByText('Trades Extracted')).toBeDefined();
 
@@ -671,6 +686,7 @@ await new Promise(resolve => setTimeout(resolve, 0));
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
 
     expect(getByText('Batch Results')).toBeDefined();
 
@@ -698,7 +714,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Upload PDF Contract Note'));
+      // Double flush — async parse flow settles across multiple steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       expect(getByText('Export CSV')).toBeDefined();
     });
@@ -708,7 +727,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Upload PDF Contract Note'));
+      // Double flush — async parse flow settles across multiple steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       fireEvent.press(getByText('Export CSV'));
       expect(mockExportSingle).toHaveBeenCalledTimes(1);
@@ -724,7 +746,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Upload PDF Contract Note'));
+      // Double flush — async parse flow settles across multiple steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       // Export CSV button should not appear when parseResult.success is false
       expect(queryByText('Export CSV')).toBeNull();
@@ -739,7 +764,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Upload PDF Contract Note'));
+      // Double flush — async parse flow settles across multiple steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       // Verify button appears
       expect(getByText('Export CSV')).toBeDefined();
@@ -758,7 +786,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       expect(getByText('Export All CSV')).toBeDefined();
     });
@@ -768,7 +799,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       fireEvent.press(getByText('Export All CSV'));
       expect(mockExportBatch).toHaveBeenCalledTimes(1);
@@ -784,7 +818,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       fireEvent.press(getByText('Export All CSV'));
       expect(getByText('Exporting...')).toBeDefined();
@@ -797,7 +834,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       expect(getByText('Select')).toBeDefined();
     });
@@ -807,7 +847,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       // Enter selection mode
       fireEvent.press(getByText('Select'));
@@ -823,7 +866,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       // Enter selection mode and press Select All
       fireEvent.press(getByText('Select'));
@@ -838,7 +884,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       // Enter selection mode and Select All
       fireEvent.press(getByText('Select'));
@@ -855,7 +904,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       // Enter selection mode and Select All
       fireEvent.press(getByText('Select'));
@@ -877,7 +929,10 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
         <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
+      // Double flush — batch results settle across multiple async steps; a single
+      // macrotask tick flakes under v8 coverage instrumentation overhead.
       await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       expect(getByText('Export All CSV')).toBeDefined();
     });
@@ -893,8 +948,10 @@ describe('ContractNoteUploadScreen — Broker Display', () => {
       <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
-    // Flush microtasks so that async state updates inside act() complete
+    // Double flush — async parse flow settles across multiple steps; a single
+    // macrotask tick flakes under v8 coverage instrumentation overhead.
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
     expect(getByText('Zerodha')).toBeDefined();
   });
 
@@ -903,8 +960,10 @@ await new Promise(resolve => setTimeout(resolve, 0));
       <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
-    // Flush microtasks so that async state updates inside act() complete
+    // Double flush — async parse flow settles across multiple steps; a single
+    // macrotask tick flakes under v8 coverage instrumentation overhead.
 await new Promise(resolve => setTimeout(resolve, 0));
+await new Promise(resolve => setTimeout(resolve, 50));
     expect(getByText('Extracted via server')).toBeDefined();
   });
 });
