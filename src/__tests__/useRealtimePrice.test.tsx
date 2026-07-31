@@ -342,6 +342,67 @@ describe('useRealtimePrice — Candle Data from WebSocket', () => {
   });
 });
 
+describe('useRealtimePrice — Live Price from WebSocket', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('uses WS tick price as the primary source when connected', () => {
+    render(<Harness stockId="RELIANCE" basePrice={2890} />);
+
+    // Connect the WS
+    act(() => {
+      mockWsCallbacks.triggerConnection(true);
+    });
+
+    // Send a live tick with price data
+    act(() => {
+      mockWsCallbacks.triggerPrice({
+        price: 2915,
+        change: 25,
+        changePercent: 0.87,
+        timestamp: '2025-05-24T10:00:00',
+      });
+    });
+
+    expect(harnessResult.currentPrice).toBe(2915);
+    expect(harnessResult.priceChange).toBe(25);
+    expect(harnessResult.priceChangePercent).toBeCloseTo(0.87, 1);
+    expect(harnessResult.lastUpdated).toBe('2025-05-24T10:00:00');
+  });
+
+  it('falls back to interval simulation while disconnected', () => {
+    render(<Harness stockId="RELIANCE" basePrice={2890} />);
+
+    // isConnected stays false → interval drives simulated price
+    const price1 = harnessResult.currentPrice;
+    advance(3000);
+    expect(harnessResult.currentPrice).not.toBe(price1);
+  });
+
+  it('stops interval updates once connected (WS becomes the source)', () => {
+    render(<Harness stockId="RELIANCE" basePrice={2890} />);
+
+    // Capture a price from interval simulation
+    advance(3000);
+    const simulatedPrice = harnessResult.currentPrice;
+
+    // Connect → interval effect cleanup stops simulation
+    act(() => {
+      mockWsCallbacks.triggerConnection(true);
+    });
+
+    // Advance past 3 intervals — simulated updates should no longer apply
+    advance(10000);
+    expect(harnessResult.currentPrice).toBe(simulatedPrice);
+  });
+});
+
 describe('useRealtimePrice — loadHistory', () => {
   beforeEach(() => {
     vi.useFakeTimers();

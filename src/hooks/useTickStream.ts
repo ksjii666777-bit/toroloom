@@ -59,7 +59,12 @@ export function useTickStream(stockId: string, active: boolean): TickStreamState
     startTimeRef.current = Date.now();
 
     const ws = getActiveWS();
-    ws.connect();
+    const conn = ws.connect();
+    if (conn && typeof conn.catch === 'function') {
+      conn.catch(() => {
+        // Connection failed — hook stays silent; UI reflects disconnected state.
+      });
+    }
 
     // Cache the latest price for direction inference
     let prevPrice = ws.getCurrentPrice(stockId) || 0;

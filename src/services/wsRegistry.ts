@@ -14,6 +14,7 @@ import type { WebSocketService } from './wsService';
 import { log } from '../utils/logger';
 import { mockWebSocket } from './mockWebSocketService';
 import { RealWebSocketService } from './realWebSocketService';
+import { getBaseUrl } from './api/client';
 
 // ── Active Service ───────────────────────────────────────────────────────────
 
@@ -24,9 +25,11 @@ type WSMode = 'mock' | 'real';
  * - 'mock' → in-process price simulation (no backend needed)
  * - 'real' → connects to the backend /ws endpoint
  *
- * The host app can switch this at any time (e.g. based on backend availability).
+ * 'real' is the default — the app is deployed with a live backend.  If no
+ * API base URL is configured (local dev / offline), getActiveWS() falls back
+ * to the in-process mock so screens still show data.
  */
-let _mode: WSMode = 'mock';
+let _mode: WSMode = 'real';
 
 // Lazy-loaded instance so RealWebSocketService constructor isn't called on import.
 let _realInstance: WebSocketService | null = null;
@@ -43,6 +46,13 @@ function getRealInstance(): WebSocketService {
 /** Get the currently active WebSocket service instance. */
 export function getActiveWS(): WebSocketService {
   if (_mode === 'real') {
+    // Real mode needs a configured backend URL.  Without one (local dev or
+    // an unset EXPO_PUBLIC_API_URL), fall back to the in-process mock so
+    // hooks still receive price data instead of failing to connect.
+    if (!getBaseUrl()) {
+      log.warn('[WSRegistry] Real mode selected but no API base URL configured — using mock WebSocket');
+      return mockWebSocket;
+    }
     return getRealInstance();
   }
   return mockWebSocket;

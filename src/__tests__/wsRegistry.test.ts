@@ -27,21 +27,34 @@ vi.unmock('../services/wsRegistry');
 // Import AFTER unmocking
 import { getActiveWS, setWSMode, getWSMode } from '../services/wsRegistry';
 import { mockWebSocket } from '../services/mockWebSocketService';
+import { configureApi } from '../services/api/client';
 
 describe('WSRegistry', () => {
   beforeEach(() => {
-    // Reset mode to mock before each test
-    setWSMode('mock');
+    // Reset mode to real (the production default) and configure a base URL
+    // so real mode resolves to the real WebSocket instance.
+    setWSMode('real');
+    configureApi({ baseUrl: 'https://api.example.com/api' });
   });
 
   // ── Default Mode ────────────────────────────────────────────────────
 
-  it('defaults to mock mode', () => {
-    expect(getWSMode()).toBe('mock');
+  it('defaults to real mode', () => {
+    expect(getWSMode()).toBe('real');
   });
 
   it('returns mockWebSocket singleton in mock mode', () => {
+    setWSMode('mock');
     expect(getActiveWS()).toBe(mockWebSocket);
+  });
+
+  it('falls back to mock when real mode has no base URL configured', () => {
+    configureApi({ baseUrl: '' });
+    setWSMode('real');
+    // Without a backend URL, getActiveWS() must not return a real service
+    // that would fail to connect — it falls back to the in-process mock.
+    expect(getActiveWS()).toBe(mockWebSocket);
+    expect(getWSMode()).toBe('real'); // mode itself stays real
   });
 
   // ── Mode Switching ──────────────────────────────────────────────────
@@ -50,6 +63,8 @@ describe('WSRegistry', () => {
     const instance = setWSMode('real');
     expect(getWSMode()).toBe('real');
     expect(instance).toBeDefined();
+    // Real instance should be a DIFFERENT object than the mock singleton
+    expect(instance).not.toBe(mockWebSocket);
     // Real instance should have a connect method
     expect(typeof instance.connect).toBe('function');
   });
@@ -87,9 +102,6 @@ describe('WSRegistry', () => {
   // ── Mode Persistence ────────────────────────────────────────────────
 
   it('survives multiple mode switches', () => {
-    expect(getWSMode()).toBe('mock');
-
-    setWSMode('real');
     expect(getWSMode()).toBe('real');
 
     setWSMode('mock');
@@ -97,5 +109,8 @@ describe('WSRegistry', () => {
 
     setWSMode('real');
     expect(getWSMode()).toBe('real');
+
+    setWSMode('mock');
+    expect(getWSMode()).toBe('mock');
   });
 });

@@ -109,6 +109,13 @@ export function useCommodityPrices() {
         setSource('real_backend');
       } else {
         log.info('[CommodityWS] Backend not available — using mock WebSocket (commodity seeds active)');
+        // Explicitly switch to mock so commodity prices keep flowing even though
+        // the registry now defaults to 'real' (production).  Without this, a
+        // backend outage would leave the registry in real mode and commodities
+        // would go dark (real WS never authenticates → no ticks).
+        if (getWSMode() !== 'mock') {
+          setWSMode('mock');
+        }
         setSource('mock');
       }
 

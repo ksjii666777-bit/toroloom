@@ -24,6 +24,12 @@ export function useRealtimePrice(stockId: string, basePrice: number) {
 
   const subscriptionRef = useRef<boolean>(false);
 
+  // Keep the latest basePrice available to the WS price callback without
+  // re-running the subscription effect (avoids disconnect/reconnect churn
+  // when stock.price updates in the market store while the screen is mounted).
+  const basePriceRef = useRef(basePrice);
+  basePriceRef.current = basePrice;
+
   // Generate initial historical data based on timeframe
   const loadHistory = useCallback((timeframe: string) => {
     // ── Intraday timeframes (end with 'm') ──
@@ -59,9 +65,12 @@ export function useRealtimePrice(stockId: string, basePrice: number) {
     }));
   }, []);
 
-  // Steady price fluctuation via simulated market noise
-  // This is the sole source of price updates for consistency
+  // ── Offline fallback: simulated price noise when WS is NOT connected ──
+  // When connected (mock or real), live WS ticks drive the price instead,
+  // so this interval only runs while disconnected (backend down / offline).
   useEffect(() => {
+    if (state.isConnected) return;
+
     const interval = setInterval(() => {
       setState(prev => {
         const volatility = prev.currentPrice * 0.001;
@@ -80,24 +89,42 @@ export function useRealtimePrice(stockId: string, basePrice: number) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [basePrice]);
+  }, [basePrice, state.isConnected]);
 
-  // Subscribe to mock WebSocket for candle data and connection status
+  // ── Subscribe to WebSocket: live ticks are the PRIMARY price source ──
+  // Mock and real services both emit { price, change, changePercent, timestamp }
+  // via onPrice, so the same handler works for both.  Candle data + connection
+  // status also come from the WS stream.
   useEffect(() => {
     if (!stockId || subscriptionRef.current) return;
     subscriptionRef.current = true;
 
     const ws = getActiveWS();
-    ws.connect();
+    const conn = ws.connect();
+    if (conn && typeof conn.catch === 'function') {
+      conn.catch(() => {
+        // Connection failed (e.g. backend down) — the interval fallback
+        // keeps simulated prices moving until the WS reconnects.
+      });
+    }
     ws.onConnectionChangeCallback((connected) => {
       setState(prev => ({ ...prev, isConnected: connected }));
     });
 
     ws.subscribe(
       stockId,
-      // Only use WebSocket for timestamp, not price (avoid race with interval)
+      // Live tick from the WS stream — drives currentPrice / change
       (priceData) => {
-        setState(prev => ({ ...prev, lastUpdated: priceData.timestamp }));
+        const refBasePrice = basePriceRef.current;
+        setState(prev => {
+          const next = { ...prev, lastUpdated: priceData.timestamp };
+          if (typeof priceData.price === 'number' && priceData.price > 0 && refBasePrice > 0) {
+            next.currentPrice = priceData.price;
+            next.priceChange = Math.round((priceData.price - refBasePrice) * 100) / 100;
+            next.priceChangePercent = Math.round(((priceData.price - refBasePrice) / refBasePrice) * 10000) / 100;
+          }
+          return next;
+        });
       },
       (candleData) => {
         setState(prev => {
