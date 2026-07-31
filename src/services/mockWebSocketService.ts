@@ -34,6 +34,27 @@ class MockWebSocketService implements WebSocketService {
   /** Track whether lockdown has been emitted for the current breach cycle */
   private _lockdownActive = false;
 
+  // ── Forex seeds (mirrors backend mockBroker.ts forexSeeds) ───────
+  private readonly forexSeeds: Array<{
+    symbol: string;
+    basePrice: number;
+    volatility: number;
+  }> = [
+    // INR pairs
+    { symbol: 'USDINR', basePrice: 83.45, volatility: 0.06 },
+    { symbol: 'EURINR', basePrice: 90.78, volatility: 0.07 },
+    { symbol: 'GBPINR', basePrice: 106.20, volatility: 0.08 },
+    { symbol: 'JPYINR', basePrice: 0.54, volatility: 0.09 },
+    { symbol: 'SGDINR', basePrice: 61.80, volatility: 0.05 },
+    { symbol: 'CNYINR', basePrice: 11.52, volatility: 0.07 },
+    { symbol: 'HKDINR', basePrice: 10.68, volatility: 0.04 },
+    { symbol: 'THBINR', basePrice: 2.28, volatility: 0.06 },
+    // Crosses
+    { symbol: 'EURUSD', basePrice: 1.0875, volatility: 0.08 },
+    { symbol: 'GBPUSD', basePrice: 1.2730, volatility: 0.09 },
+    { symbol: 'USDJPY', basePrice: 154.80, volatility: 0.10 },
+  ];
+
   // ── Commodity seeds (mirrors backend mockBroker.ts) ─────────────
   private readonly commoditySeeds: Array<{
     symbol: string;
@@ -66,6 +87,10 @@ class MockWebSocketService implements WebSocketService {
     }
     // Seed commodity symbols so simulateTick works for them too
     for (const seed of this.commoditySeeds) {
+      this.stockPrices.set(seed.symbol, seed.basePrice);
+    }
+    // Seed forex symbols so simulateTick works for them too
+    for (const seed of this.forexSeeds) {
       this.stockPrices.set(seed.symbol, seed.basePrice);
     }
   }
