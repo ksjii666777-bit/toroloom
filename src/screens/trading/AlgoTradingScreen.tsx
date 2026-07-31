@@ -44,7 +44,7 @@ import {
   useAlgoStrategyStore,
   STRATEGY_TEMPLATES,
 } from '../../store/algoStrategyStore';
-import Svg, { Path, Line, Circle, Text as SvgText, Defs, LinearGradient, Stop, _Rect } from 'react-native-svg';
+import Svg, { Path, Line, Circle, Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 // ============================================================================
 // Mock stock symbols

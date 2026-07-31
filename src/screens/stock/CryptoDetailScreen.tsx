@@ -21,7 +21,7 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable, Dimensions,
   Platform, Linking, RefreshControl, ActivityIndicator,
 } from 'react-native';
-import Animated, { FadeInRight, FadeInUp, _FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useNavigation as useNavigationHook } from '@react-navigation/native';

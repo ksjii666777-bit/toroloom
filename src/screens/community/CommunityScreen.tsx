@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withSpring, withSequence,
-  _withTiming, BounceIn,
+  BounceIn,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useCommunityStore, FeedSort } from '../../store/communityStore';
@@ -34,7 +34,6 @@ import { triggerHaptic } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { showShareSheet, ShareContent } from '../../utils/share';
 
-const { _width } = Dimensions.get('window');
 
 const trendingTags = ['RELIANCE', 'Nifty', 'SIP', 'Budget2025', 'TCS', 'IPO', 'Dividend', 'Crypto'];
 

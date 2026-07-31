@@ -15,12 +15,12 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback, _useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
   Platform, Alert, Dimensions,
 } from 'react-native';
-import Animated, { FadeInUp, _FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
@@ -28,7 +28,6 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useWealthStore, type GoalCategory } from '../../store/wealthStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { _width } = Dimensions.get('window');
 
 // ─── Category Data ─────────────────────────────────────────────────────
 
@@ -320,7 +319,7 @@ export function GoalDetailScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { goalId } = route.params || {};
-  const { goals, _updateGoal, deleteGoal, contributeToGoal, getGoalProgress } = useWealthStore();
+  const { goals, deleteGoal, contributeToGoal, getGoalProgress } = useWealthStore();
   const goal = goals.find(g => g.id === goalId);
 
   const [addAmount, setAddAmount] = useState('');

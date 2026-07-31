@@ -26,7 +26,6 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import * as _Haptics from 'expo-haptics';
 
-const { _width } = Dimensions.get('window');
 
 // ─── Mock Payment History (fallback if store is empty) ───────────────────────
 
@@ -234,7 +233,7 @@ export default function PaymentHistoryScreen({ navigation }: any) {
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
-  const { _paymentHistory, subscription } = useSubscriptionStore();
+  const { subscription } = useSubscriptionStore();
 
   // Use store history if available, otherwise use mock data
   const payments = useMemo(() => {

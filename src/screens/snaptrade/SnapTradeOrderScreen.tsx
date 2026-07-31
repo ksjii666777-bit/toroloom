@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback, _useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
   Alert, Dimensions, Platform, Keyboard,
@@ -33,7 +33,6 @@ import { useBiometricStore } from '../../store/biometricStore';
 import { biometricAuth } from '../../services/biometricService';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { _width } = Dimensions.get('window');
 
 type TradeAction = 'BUY' | 'SELL';
 type OrderType = 'Market' | 'Limit' | 'StopLimit' | 'StopLoss';

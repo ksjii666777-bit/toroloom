@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Alert, _Platform,
+  View, Text, StyleSheet, ScrollView, Alert,
 } from 'react-native';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';

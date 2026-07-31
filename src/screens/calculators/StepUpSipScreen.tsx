@@ -32,7 +32,7 @@ export default function StepUpSipScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { sipPlans, enableStepUp, _modifyStepUp, disableStepUp } = useMutualFundStore();
+  const { sipPlans, enableStepUp, disableStepUp } = useMutualFundStore();
 
   const [selectedSip, setSelectedSip] = useState<string | null>(null);
   const [percent, setPercent] = useState('10');

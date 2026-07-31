@@ -106,6 +106,8 @@ export function useForexRates(enabled: boolean = true): UseForexRatesResult {
     if (!enabled) return;
 
     const ws = getActiveWS();
+    // WS may be unavailable (not connected / backend offline) — REST fallback covers rates.
+    if (!ws) return;
     const conn = ws.connect();
     if (conn && typeof conn.catch === 'function') {
       conn.catch(() => {

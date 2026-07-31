@@ -30,7 +30,6 @@ import {
 } from '../../utils/currencyConverter';
 import { useLiveConversion } from '../../hooks/useLiveConversion';
 
-const { _width } = Dimensions.get('window');
 
 export default function CurrencyConverterScreen() {
   const { colors } = useTheme();

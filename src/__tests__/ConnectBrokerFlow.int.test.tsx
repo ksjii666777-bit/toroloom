@@ -19,7 +19,7 @@ const mockGoBack = vi.fn();
 // (sessionStorage and proxyClient mocks removed — component now uses snapTradeApi only)
 
 // Mock API services used by ConnectBrokerView
-const mockSnapTradeStatus = vi.hoisted(() => vi.fn(() => Promise.resolve({ connected: false })));
+const mockSnapTradeStatus = vi.hoisted(() => vi.fn(() => Promise.resolve({ connected: false } as { connected: boolean; brokerSlug?: string | null; brokerName?: string })));
 const mockBrokerApiGetHoldings = vi.hoisted(() => vi.fn(() => Promise.resolve({ success: true, statusCode: 200, data: { holdings: [] } })));
 
 vi.mock('../services/api', () => ({

@@ -29,7 +29,6 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { snapTradeApi, api } from '../../services/api';
-import type { _SnapTradeHolding } from '../../services/api/snaptrade';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
 // ─── Types ─────────────────────────────────────────────────────────────

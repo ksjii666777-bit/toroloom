@@ -8,7 +8,7 @@
  * ============================================================================
  */
 
-import React, { useCallback, _useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,

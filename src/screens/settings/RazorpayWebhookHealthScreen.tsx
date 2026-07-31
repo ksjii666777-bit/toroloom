@@ -18,7 +18,7 @@
  * ============================================================================
  */
 
-import React, { useState, _useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
@@ -28,7 +28,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
-  _Platform,
 } from 'react-native';
 import Animated, {
   FadeInDown,
@@ -168,7 +167,6 @@ function formatId(id: string): string {
 
 export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
   const { colors } = useTheme();
-  const { _t } = useT();
   const s = useMemo(() => createStyles(colors), [colors]);
 
   const [loading, setLoading] = useState(true);

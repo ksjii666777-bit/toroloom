@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback, useMemo, _useRef } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -36,8 +36,6 @@ import {
   FeatureFlagMeta,
   ExperimentId,
   ExperimentVariant,
-  _ExperimentAssignment,
-  _DEFAULT_FEATURE_FLAGS,
   DEFAULT_EXPERIMENTS,
 } from '../../types/featureFlags';
 import { useTheme } from '../../context/ThemeContext';

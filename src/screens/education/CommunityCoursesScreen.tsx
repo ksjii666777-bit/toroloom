@@ -80,7 +80,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
   const allCommunityCourses = useMemo(() => myCourses.filter(c => c.publishStatus === 'published'), [myCourses]);
 
   // Separate featured and regular
-  const { featured, _regular } = useMemo(() => {
+  const { featured } = useMemo(() => {
     const feat: UserGeneratedCourse[] = [];
     const reg: UserGeneratedCourse[] = [];
     allCommunityCourses.forEach(c => {
@@ -380,7 +380,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
 // ─── Featured Course Card ──────────────────────────────────────
 
 function FeaturedCourseCard({
-    course, isEnrolled, onEnrollToggle, _colors, styles,
+    course, isEnrolled, onEnrollToggle, styles,
 }: {
   course: UserGeneratedCourse;
   isEnrolled: boolean;

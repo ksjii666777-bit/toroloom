@@ -9,7 +9,7 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback, useMemo, _useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -221,7 +221,6 @@ function tokenizeHighlight(formula: string): { text: string; color: string }[] {
         current = '';
       }
       tokens.push({ text: ch, color: '#888' });
-      inWord = false;
       continue;
     }
     if ('(),'.includes(ch) || OPERATORS.includes(ch)) {
@@ -230,7 +229,6 @@ function tokenizeHighlight(formula: string): { text: string; color: string }[] {
         current = '';
       }
       tokens.push({ text: ch, color: '#DDA0DD' });
-      inWord = false;
       continue;
     }
     current += ch;

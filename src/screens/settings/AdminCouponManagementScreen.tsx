@@ -26,7 +26,6 @@ import {
   RefreshControl,
   Modal,
   TextInput,
-  _TouchableOpacity,
   Alert,
   Platform,
 } from 'react-native';
@@ -129,6 +128,7 @@ function CouponListItem({
   onDelete: (c: CouponCode) => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const s = useMemo(() => createListItemStyles(colors), [colors]);
   const scaleAnim = useSharedValue(0);
   const typeColor = getTypeColor(coupon.type);
@@ -902,6 +902,7 @@ function UsageAnalyticsTab({
   colors: any;
   styles: any;
 }) {
+  const { t } = useT();
   if (loading) {
     return (
       <View style={{ paddingVertical: 80, alignItems: 'center' }}>

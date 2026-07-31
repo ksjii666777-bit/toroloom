@@ -23,7 +23,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  Dimensions, Platform, _ActivityIndicator,
+  Dimensions, Platform,
 } from 'react-native';
 import Svg, {
   Path, Line, Circle, Text as SvgText, Defs,

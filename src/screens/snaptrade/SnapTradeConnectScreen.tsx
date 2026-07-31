@@ -13,10 +13,10 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback, useEffect, _useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, _Pressable, ActivityIndicator,
-  Dimensions, _Platform, Linking,
+  View, Text, StyleSheet, ScrollView, ActivityIndicator,
+  Dimensions, Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

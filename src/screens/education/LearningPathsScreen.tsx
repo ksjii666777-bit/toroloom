@@ -24,6 +24,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
+import type { LearningPath } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 export default function LearningPathsScreen({ navigation }: any) {
@@ -32,7 +33,7 @@ export default function LearningPathsScreen({ navigation }: any) {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { lessonProgress, courses, fetchCourses } = useEducationStore();
   const [refreshing, setRefreshing] = React.useState(false);
-  const [pathsData, setPathsData] = React.useState<typeof mockLearningPaths>([]);
+  const [pathsData, setPathsData] = React.useState<LearningPath[]>([]);
 
   // Fetch courses from API on mount + fallback to mock for learning paths
   React.useEffect(() => {

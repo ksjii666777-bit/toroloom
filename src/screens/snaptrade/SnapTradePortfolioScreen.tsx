@@ -16,7 +16,7 @@
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, _Pressable, ActivityIndicator,
+  View, Text, StyleSheet, ScrollView, ActivityIndicator,
   RefreshControl, Dimensions, Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,7 +29,6 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { _width } = Dimensions.get('window');
 
 // ──── Format helpers ──────────────────────────────────────────
 const formatUSD = (n: number) =>

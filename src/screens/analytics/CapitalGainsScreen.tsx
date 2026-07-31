@@ -29,7 +29,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import _Animated, { _FadeInUp } from 'react-native-reanimated';
+import _Animated from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
@@ -39,7 +39,6 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import { api } from '../../services/api';
 
-const { _width } = Dimensions.get('window');
 
 // ──── Types ────────────────────────────────────────────────────────────────
 

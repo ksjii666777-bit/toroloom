@@ -23,7 +23,7 @@
  * ============================================================================
  */
 
-import type { MonteCarloParams, MonteCarloResult, MonteCarloYearResult, _MonteCarloPercentile } from '../types';
+import type { MonteCarloParams, MonteCarloResult, MonteCarloYearResult } from '../types';
 
 // ─── Constants ────────────────────────────────────────────────
 

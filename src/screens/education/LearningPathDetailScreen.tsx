@@ -184,7 +184,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
             <Text style={styles.sectionTitle}>{t('education.skillsYouGain')}</Text>
           </View>
           <View style={styles.skillsGrid}>
-            {path.skillsGained.map((skill, i) => (
+            {path.skillsGained.map((skill: string, i: number) => (
               <View key={i} style={[styles.skillItem, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '20' }]}>
                 <Ionicons name="checkmark-circle" size={16} color={colors.primary} />
                 <Text style={styles.skillText}>{skill}</Text>

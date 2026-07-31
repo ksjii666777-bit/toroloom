@@ -17,7 +17,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  Switch, Dimensions, _Platform, Alert,
+  Switch, Dimensions, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';

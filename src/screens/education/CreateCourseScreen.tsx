@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TextInput, Alert, Platform,
-  KeyboardAvoidingView, _TouchableWithoutFeedback, _Keyboard,
+  KeyboardAvoidingView,
 } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { _UserGeneratedCourse, CourseDraftLesson, QuizQuestion } from '../../types';
+import type { UserGeneratedCourse, CourseDraftLesson, QuizQuestion } from '../../types';
 
 const COURSE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
 const COURSE_CATEGORIES = [
@@ -25,7 +25,7 @@ export default function CreateCourseScreen({ route, navigation }: any) {
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
-    myCourses, editingCourse, saveCourse, _setEditingCourse,
+    myCourses, editingCourse, saveCourse,
     addLesson, removeLesson, updateLesson,
     addQuizToLesson, removeQuizFromLesson,
     addQuestionToQuiz, updateQuizQuestion, removeQuestionFromQuiz,
@@ -350,7 +350,7 @@ export default function CreateCourseScreen({ route, navigation }: any) {
 // ─── Lesson Editor Component ───────────────────────────────────
 
 function LessonEditor({
-  lesson, index, _courseId, isExpanded,
+  lesson, index, isExpanded,
   onToggleExpand, onUpdate, onRemove,
   onAddQuiz, onRemoveQuiz,
   onAddQuestion, onUpdateQuestion, onRemoveQuestion,

@@ -53,7 +53,6 @@ import ReportHeader from '../../components/ReportHeader';
 import PeriodTabs from '../../components/PeriodTabs';
 import EmptyReportState from '../../components/EmptyReportState';
 import { computeCognitiveSummary } from '../../services/gateway/cognitiveAnalytics';
-import type { _Holding, _Trade } from '../../types';
 
 // ──── Main Screen ───────────────────────────────────────────────────────────
 

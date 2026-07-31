@@ -17,10 +17,10 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, _useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
-  Platform, _Alert, Dimensions,
+  Platform, Dimensions,
 } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,7 +31,6 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import { useWealthStore } from '../../store/wealthStore';
 import _AnimatedPressable from '../../components/ui/AnimatedPressable';
 
-const { _width } = Dimensions.get('window');
 
 const _formatINR = (n: number) =>
   '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });

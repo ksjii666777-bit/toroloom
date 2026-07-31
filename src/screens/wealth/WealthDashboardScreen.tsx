@@ -19,7 +19,7 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable,
   Dimensions, Platform,
 } from 'react-native';
-import Animated, { FadeInUp, _FadeInRight } from 'react-native-reanimated';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

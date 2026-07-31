@@ -38,6 +38,7 @@ const DEFAULT_PARAMS: MonteCarloParams = {
 // ─── Input field config ───────────────────────────────────────
 interface InputField {
   key: keyof MonteCarloParams;
+  tKey: string;
   label: string;
   icon: string;
   suffix: string;

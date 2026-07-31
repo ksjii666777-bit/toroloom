@@ -177,7 +177,7 @@ describe('PeriodBreakdownCard', () => {
 
     it('hides W/L badge when only winners or only losers', () => {
       const onlyWins = [
-        { label: 'Week 1', pnl: 3000, trades: 2, winners: 2, losers: 0 },
+        { label: 'Week 1', startDate: '2026-01-06', endDate: '2026-01-12', pnl: 3000, trades: 2, winners: 2, losers: 0 },
       ];
       const { queryByText } = render(<PeriodBreakdownCard periods={onlyWins} />);
       // 'W' alone would match 'Week' — use 'W/' to target the W/L badge format
@@ -186,7 +186,7 @@ describe('PeriodBreakdownCard', () => {
 
     it('handles zero P&L period', () => {
       const zeroPnl = [
-        { label: 'Week 1', pnl: 0, trades: 1, winners: 0, losers: 1 },
+        { label: 'Week 1', startDate: '2026-01-06', endDate: '2026-01-12', pnl: 0, trades: 1, winners: 0, losers: 1 },
       ];
       const { getByText } = render(<PeriodBreakdownCard periods={zeroPnl} />);
       expect(getByText('+₹0')).toBeDefined();
@@ -194,7 +194,7 @@ describe('PeriodBreakdownCard', () => {
 
     it('shows trade count only when trades > 0', () => {
       const noTrades = [
-        { label: 'Week 1', pnl: 1000, trades: 0, winners: 0, losers: 0 },
+        { label: 'Week 1', startDate: '2026-01-06', endDate: '2026-01-12', pnl: 1000, trades: 0, winners: 0, losers: 0 },
       ];
       const { queryByText } = render(<PeriodBreakdownCard periods={noTrades} />);
       expect(queryByText(/trades?/i)).toBeNull();
@@ -239,10 +239,10 @@ describe('PeriodBreakdownCard', () => {
   describe('mixed profit/loss periods', () => {
     it('renders all periods regardless of sign', () => {
       const mixed = [
-        { label: 'P1', pnl: 10000, trades: 2, winners: 2, losers: 0 },
-        { label: 'P2', pnl: -500, trades: 1, winners: 0, losers: 1 },
-        { label: 'P3', pnl: -2500, trades: 3, winners: 1, losers: 2 },
-        { label: 'P4', pnl: 750, trades: 2, winners: 2, losers: 0 },
+        { label: 'P1', startDate: '2026-01-06', endDate: '2026-01-12', pnl: 10000, trades: 2, winners: 2, losers: 0 },
+        { label: 'P2', startDate: '2026-01-06', endDate: '2026-01-12', pnl: -500, trades: 1, winners: 0, losers: 1 },
+        { label: 'P3', startDate: '2026-01-06', endDate: '2026-01-12', pnl: -2500, trades: 3, winners: 1, losers: 2 },
+        { label: 'P4', startDate: '2026-01-06', endDate: '2026-01-12', pnl: 750, trades: 2, winners: 2, losers: 0 },
       ];
       const { getByText } = render(<PeriodBreakdownCard periods={mixed} />);
       expect(getByText('P1')).toBeDefined();
@@ -253,8 +253,8 @@ describe('PeriodBreakdownCard', () => {
 
     it('shows all P&L values correctly', () => {
       const mixed = [
-        { label: 'A', pnl: 5000, trades: 2, winners: 2, losers: 0 },
-        { label: 'B', pnl: -3000, trades: 1, winners: 0, losers: 1 },
+        { label: 'A', startDate: '2026-01-06', endDate: '2026-01-12', pnl: 5000, trades: 2, winners: 2, losers: 0 },
+        { label: 'B', startDate: '2026-01-06', endDate: '2026-01-12', pnl: -3000, trades: 1, winners: 0, losers: 1 },
       ];
       const { getByText } = render(<PeriodBreakdownCard periods={mixed} />);
       expect(getByText('+₹5.0K')).toBeDefined();

@@ -23,7 +23,6 @@ import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, Modal,
   TouchableOpacity, Animated, Dimensions, Alert, ActivityIndicator,
-  _Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

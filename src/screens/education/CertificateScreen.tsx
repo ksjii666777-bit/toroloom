@@ -321,7 +321,6 @@ function CertificatePreview({
   cert,
   colors,
   onShare,
-  _onBack,
   sharing,
 }: {
   cert: CourseCertificate;

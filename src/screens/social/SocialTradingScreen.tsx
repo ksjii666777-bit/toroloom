@@ -128,7 +128,6 @@ const PODIUM_ICONS = ['trophy', 'medal', 'medal-outline'];
 
 function LeaderboardPodium({ topThree, onPress }: { topThree: LeaderboardEntry[]; onPress: (id: string) => void }) {
   const { t } = useT();
-  const { _colors } = useTheme();
 
   if (topThree.length < 3) return null;
 
@@ -881,7 +880,7 @@ export default function SocialTradingScreen({ navigation }: any) {
                     <Text style={[styles.copySummaryValue, {
                       color: followingTraders.reduce((s, t) => s + t.totalPnl, 0) >= 0 ? colors.marketUp : colors.marketDown,
                     }]}>
-                      +{(((followingTraders.reduce((s, _t) => s + t.totalPnl, 0)) / followingTraders.reduce((s, _t) => s + 1, 0)) / 100000).toFixed(1)}%
+                      +{(((followingTraders.reduce((s, t) => s + t.totalPnl, 0)) / followingTraders.reduce((s, t) => s + 1, 0)) / 100000).toFixed(1)}%
                     </Text>
                     <Text style={styles.copySummaryLabel}>{t('social.avgReturn')}</Text>
                   </View>

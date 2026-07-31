@@ -23,13 +23,11 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  _Modal,
   TouchableOpacity,
   Animated,
   Dimensions,
   Alert,
   ActivityIndicator,
-  _TextInput,
   Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';

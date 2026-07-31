@@ -143,7 +143,7 @@ export default function HelpScreen({ navigation }: any) {
         <Text style={styles.sectionTitle}>Quick Help</Text>
         <View style={styles.topicsGrid}>
           {quickTopics.map((topic, i) => (
-            <Pressable key={topic.id || i} style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
+            <Pressable key={i} style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
               <View style={[styles.topicIcon, { backgroundColor: topic.color + '20' }]}>
                 <Ionicons name={topic.icon as keyof typeof Ionicons.glyphMap} size={22} color={topic.color} />
               </View>
