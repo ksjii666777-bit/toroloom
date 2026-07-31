@@ -142,45 +142,44 @@ vi.mock('../services/api/education', () => {
 });
 
 // React instance obtained via vi.hoisted — runs before vi.mock factories, so the
-// same React module is used by the mock and the renderer.
-const quizReact = vi.hoisted(() => require('react'));
+// same React module is used by the mocks and the renderer.
+const mockReact = vi.hoisted(() => require('react'));
 
 // Mock QuizComponent — uses the hoisted React instance
 vi.mock('../components/quiz/QuizComponent', () => ({
   default: (props: any) => {
     const questions = props.quiz?.questions || [];
-    return quizReact.createElement('View', null,
-      quizReact.createElement('Text', null, props.quiz?.title || 'Quiz'),
+    return mockReact.createElement('View', null,
+      mockReact.createElement('Text', null, props.quiz?.title || 'Quiz'),
       ...questions.map((q: any, i: number) =>
-        quizReact.createElement('View', { key: i },
-          quizReact.createElement('Text', null, `Q${i + 1}: ${q.question}`),
+        mockReact.createElement('View', { key: i },
+          mockReact.createElement('Text', null, `Q${i + 1}: ${q.question}`),
           ...(q.options || []).map((opt: string, j: number) =>
-            quizReact.createElement('Text', { key: j }, opt)
+            mockReact.createElement('Text', { key: j }, opt)
           )
         )
       ),
-      quizReact.createElement('Text', null, 'Submit Answers')
+      mockReact.createElement('Text', null, 'Submit Answers')
     );
   },
 }));
 
-// Mock VideoLessonPlayer with string-based React.createElement (same pattern as QuizComponent mock)
+// Mock VideoLessonPlayer — uses the hoisted React instance (same pattern as QuizComponent mock)
 // Uses string component names ('View', 'Text', 'Pressable') - no require('react-native') needed
 vi.mock('../components/video/VideoLessonPlayer', () => ({
   default: function MockVideoPlayer(props: any) {
-    const R = require('react');
     const children = [];
     if (props.onDownload && !props.isDownloaded && !props.isDownloading) {
-      children.push(R.createElement('Pressable', {
+      children.push(mockReact.createElement('Pressable', {
         onPress: props.onDownload, key: 'dl',
-      }, R.createElement('Text', { key: 'dl-txt' }, 'Download Video')));
+      }, mockReact.createElement('Text', { key: 'dl-txt' }, 'Download Video')));
     }
     if (props.isDownloaded && props.onRemoveDownload) {
-      children.push(R.createElement('Pressable', {
+      children.push(mockReact.createElement('Pressable', {
         onPress: props.onRemoveDownload, key: 'rm',
-      }, R.createElement('Text', { key: 'rm-txt' }, 'Remove Download')));
+      }, mockReact.createElement('Text', { key: 'rm-txt' }, 'Remove Download')));
     }
-    return R.createElement('View', null, ...children);
+    return mockReact.createElement('View', null, ...children);
   },
 }));
 
