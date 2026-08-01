@@ -2,6 +2,13 @@
 
 > **Goal:** Backend ko Railway ke built-in PostgreSQL plugin par migrate karna — abhi `STORAGE_BACKEND=memory` hai, matlab saara data in-memory hai aur har deploy/restart par gayab ho jata hai.
 
+> **🗂 Canonical Production Project (IMPORTANT):**
+> - **Project:** `friendly-consideration` (production)
+> - **Service:** `toroloom` (backend) + `Postgres` (database)
+> - **URL:** `https://toroloom-production.up.railway.app`
+> - **⚠️ In dono services ko DELETE mat karna** — yeh LIVE production hain. `toroloom` service domain mapping carry karti hai; delete karne par backend offline + domain loss hota hai.
+> - Purana `toroloom-backend` project (FAILED deploys wala) delete ho chuka hai — usse confuse mat hona.
+
 ---
 
 ## 📋 Current State (kyun zaroori hai)
@@ -20,16 +27,17 @@ Backend code **pehle se Postgres-ready hai**: `PostgreSQLStorage` engine (pool +
 
 ### Step 1: Railway Postgres service add karo
 
-1. [Railway Dashboard](https://railway.app/dashboard) → apna **Toroloom project**
+1. [Railway Dashboard](https://railway.app/dashboard) → **`friendly-consideration`** project
 2. **New → Database → PostgreSQL** (ya `+` button → `PostgreSQL`)
 3. Railway Postgres service create karega aur ek `DATABASE_URL` variable generate karega
 4. Database ready hone ke liye 1-2 min wait karo (status `Healthy` hona chahiye)
 
-> 💡 **Postgres service aur backend service ek hi project/environment mein** hone chahiye taaki Railway `DATABASE_URL` auto-link ho sake.
+> 💡 **Postgres service aur backend service (`toroloom`) ek hi project/environment mein** hone chahiye taaki Railway `DATABASE_URL` auto-link ho sake.
+> **CLI tip:** `railway link -p friendly-consideration -e production -s toroloom` — sahi service par link karo, warna galat project ke FAILED deploys dikhenge.
 
-### Step 2: Backend service par vars set karo
+### Step 2: `toroloom` service par vars set karo
 
-Railway Dashboard → **Backend service** → **Variables** tab:
+Railway Dashboard → **`toroloom` service** → **Variables** tab:
 
 | Variable | Value |
 |----------|-------|
@@ -52,18 +60,40 @@ Agar `Migrations:` line dikhe — 001 + 002 SQL files apply ho gayi (`_migration
 
 ### Step 4: Health check verify karo
 
+Railway ka `healthcheckPath` ab **`/ready`** hai (liveness `/health` se alag readiness endpoint). Dono verify karo:
+
 ```bash
+# Readiness — Railway healthcheck yahi hit karta hai
+curl https://toroloom-production.up.railway.app/ready
+
+# Liveness — process up hai ya nahi
 curl https://toroloom-production.up.railway.app/health
 ```
 
 Expected:
 ```json
+// /ready → HTTP 200
+{"status":"ready","storageBackend":"postgres","storageHealthy":true,...}
+
+// /health → HTTP 200
 {"status":"ok","storageBackend":"postgres","storageHealthy":true,...}
 ```
 
 - `storageBackend: "postgres"` → postgres active
 - `storageHealthy: true` → DB connection + schema OK
-- `status: "ok"` → sab kuch healthy
+- `/ready` ka `status: "ready"` + HTTP 200 → Railway healthcheck pass
+
+#### 🚨 `/ready` 503 ka matlab (fail-fast design)
+
+`/ready` **503 return karta hai jab real storage backend (postgres/mongodb) configured ho par DB unreachable ho** (`!storageHealthy`). Memory backend hamesha ready — kabhi 503 nahi.
+
+Railway `healthcheckPath: /ready` + `restartPolicyType: ON_FAILURE` + `restartPolicyMaxRetries: 10` hone se:
+- DB down → `/ready` 503 → Railway **container restart** karta hai (up to 10)
+- 10 restart ke baad deployment **failed** mark hota hai
+
+> Yeh **intentional fail-fast** hai — degraded-but-200 wali misleading health khatam. Outage ke time Railway dashboard mein restart churn dikhega — expected hai.
+
+Config source: [`backend/railway.json`](../backend/railway.json) + [`backend/Dockerfile`](../backend/Dockerfile) (HEALTHCHECK bhi `/ready` hit karta hai).
 
 ### Step 5: Data persistence test
 
@@ -103,7 +133,7 @@ Dono idempotent hain (`CREATE TABLE IF NOT EXISTS`) — conflict nahi karte.
 
 Kuch galat ho toh wapas memory par jao:
 
-1. Railway → Backend → Variables
+1. Railway → `toroloom` service → Variables
 2. `STORAGE_BACKEND = memory` set karo
 3. Railway redeploy — server memory mode mein chalega
 4. Postgres issue fix karo, phir Step 2-4 repeat karo
@@ -137,17 +167,22 @@ npm run dev
 | `Migrations: 0 applied` | Normal hai — schema already hai ya koi pending nahi |
 | `Migration runner failed` | Logs dekho — URL galat ya permission issue |
 | Startup crash `DATABASE_URL is required` | Postgres service se link nahi hua — URL manually paste karo |
+| `/ready` 503 + Railway restart loop | DB down hai — fail-fast by design. Postgres service Healthy hai check karo |
+| `/ready` 404 | Purana container chal raha hai — redeploy complete hone par dobara check karo |
+| `storageBackend: "postgres "` (space) | Railway var mein trailing whitespace — env.ts ab `.trim()` karta hai, redeploy karo |
 
 ---
 
 ## ✅ Done Checklist
 
-- [ ] Railway Postgres service create
-- [ ] `STORAGE_BACKEND=postgres` set
+- [ ] Railway Postgres service create (`friendly-consideration` project)
+- [ ] `STORAGE_BACKEND=postgres` set (bina trailing space)
 - [ ] `DATABASE_URL` set/linked
 - [ ] Logs mein `Storage: POSTGRES` + `Migrations:` line
-- [ ] `/health` → `storageBackend: postgres`, `storageHealthy: true`
+- [ ] `/ready` → HTTP 200, `status: "ready"`, `storageHealthy: true` (Railway healthcheck path)
+- [ ] `/health` → `storageBackend: postgres`, `storageHealthy: true` (liveness)
 - [ ] Redeploy ke baad data persist
+- [ ] `toroloom` + `Postgres` services intact (delete nahi hui)
 
 ---
 
