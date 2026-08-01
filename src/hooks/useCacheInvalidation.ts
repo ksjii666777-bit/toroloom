@@ -32,9 +32,11 @@ export function useCacheInvalidation(): void {
 
   useEffect(() => {
     if (registeredRef.current) return;
-    registeredRef.current = true;
 
     const ws = getActiveWS();
+    if (!ws) return;
+
+    registeredRef.current = true;
 
     ws.onCacheInvalidationCallback(async (data) => {
       const { entities, namespaces } = data;

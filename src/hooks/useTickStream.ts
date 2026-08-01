@@ -50,6 +50,10 @@ export function useTickStream(stockId: string, active: boolean): TickStreamState
   useEffect(() => {
     if (!active || !stockId || subscribedRef.current) return;
 
+    const ws = getActiveWS();
+    // WS may be unavailable — hook stays silent; UI reflects disconnected state.
+    if (!ws) return;
+
     subscribedRef.current = true;
 
     // Reset session counters on new subscription
@@ -58,7 +62,6 @@ export function useTickStream(stockId: string, active: boolean): TickStreamState
     lastTickPriceRef.current = 0;
     startTimeRef.current = Date.now();
 
-    const ws = getActiveWS();
     const conn = ws.connect();
     if (conn && typeof conn.catch === 'function') {
       conn.catch(() => {

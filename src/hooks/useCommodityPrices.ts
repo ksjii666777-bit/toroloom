@@ -123,8 +123,11 @@ export function useCommodityPrices() {
 
       // Subscribe inline — allocation and cleanup in the same effect
       if (subscribedRef.current) return;
-      subscribedRef.current = true;
       const ws = getActiveWS();
+      // WS service always exists in production (mock fallback), but guard
+      // against null mocks in tests.
+      if (!ws) return;
+      subscribedRef.current = true;
       ws.onConnectionChangeCallback((isConnected) => {
         setConnected(isConnected);
       });
@@ -162,6 +165,7 @@ export function useCommodityPrices() {
       if (subscribedRef.current) {
         subscribedRef.current = false;
         const ws = getActiveWS();
+        if (!ws) return;
         for (const symbol of COMMODITY_SYMBOLS) {
           ws.unsubscribe(symbol);
         }
@@ -173,6 +177,7 @@ export function useCommodityPrices() {
   useEffect(() => {
     const interval = setInterval(() => {
       const ws = getActiveWS();
+      if (!ws) return;
       if (ws.getIsAuthenticated()) {
         setConnected(true);
         if (!subscribedRef.current) {

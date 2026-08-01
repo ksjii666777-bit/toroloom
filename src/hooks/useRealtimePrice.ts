@@ -97,9 +97,13 @@ export function useRealtimePrice(stockId: string, basePrice: number) {
   // status also come from the WS stream.
   useEffect(() => {
     if (!stockId || subscriptionRef.current) return;
-    subscriptionRef.current = true;
 
     const ws = getActiveWS();
+    // WS may be unavailable (backend offline / test mocks) — the 3s
+    // simulated-price fallback keeps prices moving in that case.
+    if (!ws) return;
+
+    subscriptionRef.current = true;
     const conn = ws.connect();
     if (conn && typeof conn.catch === 'function') {
       conn.catch(() => {

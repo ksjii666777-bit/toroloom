@@ -300,6 +300,7 @@ export const usePortfolioAnalyticsStore = create<AnalyticsState>((set, get) => (
     if (s.isLive) return;
 
     const ws = getActiveWS();
+    if (!ws) return;
 
     // Connect the WebSocket if it isn't already
     try {

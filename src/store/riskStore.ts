@@ -275,6 +275,7 @@ export const useRiskStore = create<RiskStoreState>((set, get) => ({
   listenToWS: () => {
     const state = get();
     const ws = getActiveWS();
+    if (!ws) return;
 
     // Pass the store's loss limit to the WS service so it can simulate
     // lockdown detection (only relevant for mock — real WS delegates to backend).
@@ -383,6 +384,7 @@ export const useRiskStore = create<RiskStoreState>((set, get) => ({
 
   stopListeningToWS: () => {
     const ws = getActiveWS();
+    if (!ws) return;
     // Clear callbacks by setting no-op handlers.  This is safe because
     // the WS services are singletons; we don't want to null the references
     // since other parts of the app might call listenToWS again.
