@@ -37,6 +37,12 @@ export default {
     whatThisMeans: 'What This Means',
     parametersUsed: 'Parameters Used',
     years: 'years',
+    // Input field placeholders
+    initialInvestmentPlaceholder: 'e.g. 500000',
+    monthlySipPlaceholder: 'e.g. 10000',
+    expectedReturnPlaceholder: 'e.g. 12',
+    volatilityPlaceholder: 'e.g. 18',
+    timeHorizonPlaceholder: 'e.g. 10',
     // Legend
     legendMedian: 'Median (50th)',
     legend25th75th: '25th–75th Percentile',

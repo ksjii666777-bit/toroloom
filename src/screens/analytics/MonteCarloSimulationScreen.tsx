@@ -42,16 +42,16 @@ interface InputField {
   label: string;
   icon: string;
   suffix: string;
-  placeholder: string;
+  placeholderTKey: string;
   info: string;
 }
 
 const INPUT_FIELDS: InputField[] = [
-  { key: 'initialInvestment', label: 'Initial Investment', icon: 'wallet', suffix: '₹', placeholder: 'e.g. 500000', info: 'Your current portfolio value', tKey: 'monteCarlo.initialInvestment' },
-  { key: 'monthlyContribution', label: 'Monthly SIP', icon: 'trending-up', suffix: '₹', placeholder: 'e.g. 10000', info: 'Amount you add each month', tKey: 'monteCarlo.monthlySip' },
-  { key: 'annualReturn', label: 'Expected Return', icon: 'trending-up', suffix: '%', placeholder: 'e.g. 12', info: 'Expected annual return (Nifty ~12-14%)', tKey: 'monteCarlo.expectedReturn' },
-  { key: 'annualVolatility', label: 'Volatility', icon: 'pulse', suffix: '%', placeholder: 'e.g. 18', info: 'Expected annual volatility (Nifty ~15-20%)', tKey: 'monteCarlo.volatility' },
-  { key: 'years', label: 'Time Horizon', icon: 'calendar', suffix: 'yr', placeholder: 'e.g. 10', info: 'Investment horizon in years', tKey: 'monteCarlo.timeHorizon' },
+  { key: 'initialInvestment', label: 'Initial Investment', icon: 'wallet', suffix: '₹', placeholderTKey: 'monteCarlo.initialInvestmentPlaceholder', info: 'Your current portfolio value', tKey: 'monteCarlo.initialInvestment' },
+  { key: 'monthlyContribution', label: 'Monthly SIP', icon: 'trending-up', suffix: '₹', placeholderTKey: 'monteCarlo.monthlySipPlaceholder', info: 'Amount you add each month', tKey: 'monteCarlo.monthlySip' },
+  { key: 'annualReturn', label: 'Expected Return', icon: 'trending-up', suffix: '%', placeholderTKey: 'monteCarlo.expectedReturnPlaceholder', info: 'Expected annual return (Nifty ~12-14%)', tKey: 'monteCarlo.expectedReturn' },
+  { key: 'annualVolatility', label: 'Volatility', icon: 'pulse', suffix: '%', placeholderTKey: 'monteCarlo.volatilityPlaceholder', info: 'Expected annual volatility (Nifty ~15-20%)', tKey: 'monteCarlo.volatility' },
+  { key: 'years', label: 'Time Horizon', icon: 'calendar', suffix: 'yr', placeholderTKey: 'monteCarlo.timeHorizonPlaceholder', info: 'Investment horizon in years', tKey: 'monteCarlo.timeHorizon' },
 ];
 
 // ─── Color palette for percentile bands ───────────────────────
@@ -198,9 +198,9 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
                       onChangeText={(t) => handleParamChange(field.key, t)}
                       keyboardType="numeric"
                       placeholderTextColor={colors.textMuted}
-                      placeholder={field.placeholder}
+                      placeholder={t(field.placeholderTKey)}
                     />
-                    <Text style={styles.inputUnit}>{field.key === 'years' ? 'years' : ''}</Text>
+                    <Text style={styles.inputUnit}>{field.key === 'years' ? t('monteCarlo.years') : ''}</Text>
                   </View>
                 </Animated.View>
               );

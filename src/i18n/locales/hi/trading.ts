@@ -311,4 +311,9 @@ export default {
     searchCrypto: 'क्रिप्टो खोजें...',
     enterNewPrice: 'नया मूल्य दर्ज करें',
     enterNewQty: 'नई मात्रा दर्ज करें',
+    // ── डायनामिक प्लेसहोल्डर ────────────────────────────────────────────
+    sizingShares: '10 शेयर',
+    sizingPercent: '2%',
+    sizingAmount: '₹10000',
+    zeroPlaceholder: '0.00',
 };

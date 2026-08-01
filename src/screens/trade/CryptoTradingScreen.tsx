@@ -259,6 +259,7 @@ function TradeModal({
   action: TradeAction;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new RNAnimated.Value(0)).current;
 
@@ -391,7 +392,7 @@ function TradeModal({
             <View style={[styles.modalInput, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <TextInput
                 style={[styles.modalInputField, { color: colors.text }]}
-                placeholder="0.00"
+                placeholder={t('trading.zeroPlaceholder')}
                 placeholderTextColor={colors.textMuted}
                 value={quantityStr}
                 onChangeText={setQuantityStr}
@@ -427,9 +428,9 @@ function TradeModal({
                 <Text style={[styles.modalInputPrefix, { color: colors.textMuted }]}>$</Text>
                 <TextInput
                   style={[styles.modalInputField, { color: colors.text }]}
-                  placeholder="0.00"
-                  placeholderTextColor={colors.textMuted}
-                  value={limitPriceStr}
+                placeholder={t('trading.zeroPlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                value={limitPriceStr}
                   onChangeText={setLimitPriceStr}
                   keyboardType="decimal-pad"
                 />

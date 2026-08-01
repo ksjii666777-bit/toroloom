@@ -37,6 +37,12 @@ export default {
     whatThisMeans: 'इसका क्या मतलब है',
     parametersUsed: 'उपयोग किए गए पैरामीटर',
     years: 'वर्ष',
+    // इनपुट फ़ील्ड प्लेसहोल्डर
+    initialInvestmentPlaceholder: 'जैसे 500000',
+    monthlySipPlaceholder: 'जैसे 10000',
+    expectedReturnPlaceholder: 'जैसे 12',
+    volatilityPlaceholder: 'जैसे 18',
+    timeHorizonPlaceholder: 'जैसे 10',
     // Legend
     legendMedian: 'माध्यिका (50वां)',
     legend25th75th: '25वां–75वां प्रतिशतक',

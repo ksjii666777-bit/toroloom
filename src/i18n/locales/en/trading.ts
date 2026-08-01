@@ -311,4 +311,9 @@ export default {
     searchCrypto: 'Search crypto...',
     enterNewPrice: 'Enter new price',
     enterNewQty: 'Enter new quantity',
+    // ── Dynamic placeholders ───────────────────────────────────────────
+    sizingShares: '10 shares',
+    sizingPercent: '2%',
+    sizingAmount: '₹10000',
+    zeroPlaceholder: '0.00',
 };

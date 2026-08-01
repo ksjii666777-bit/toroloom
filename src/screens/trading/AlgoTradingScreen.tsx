@@ -27,6 +27,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
@@ -207,6 +208,7 @@ const tradeStyles = StyleSheet.create({
 
 export default function AlgoTradingScreen() {
   const { colors } = useTheme();
+  const { t } = useT();
   const navigation = useNavigation();
 
   const saveStrategy = useAlgoStrategyStore((s) => s.saveStrategy);
@@ -575,7 +577,7 @@ export default function AlgoTradingScreen() {
             value={sizingValue}
             onChangeText={setSizingValue}
             keyboardType="decimal-pad"
-            placeholder={sizingMethod === 'fixed_qty' ? '10 shares' : sizingMethod === 'percent_risk' ? '2%' : '₹10000'}
+            placeholder={sizingMethod === 'fixed_qty' ? t('trading.sizingShares') : sizingMethod === 'percent_risk' ? t('trading.sizingPercent') : t('trading.sizingAmount')}
             placeholderTextColor="#555"
           />
 
