@@ -263,7 +263,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     alignItems: 'flex-end',
-    zIndex: 9999,
+    // Below all modal overlays (IronLockOverlay 9998, UpgradePromptModal 9997,
+    // OfflineBanner 9999, SyncConflictModal 9998) so alerts/modals always win.
+    zIndex: 100,
   },
   banner: {
     flexDirection: 'row',
@@ -295,6 +297,12 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
     alignSelf: 'flex-end',
+    // Soft lift so the compact avatar reads clearly over scrolling content
+    elevation: 6,
+    shadowColor: '#000000',
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
   },
   avatarGlow: {
     position: 'absolute',
