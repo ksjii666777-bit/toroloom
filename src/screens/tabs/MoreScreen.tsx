@@ -412,7 +412,9 @@ export default function MoreScreen({ navigation }: any) {
               </View>
               <View style={styles.profileInfo}>
                 <Text style={styles.profileName}>{user?.name || t('home.investor')}</Text>
-                <Text style={styles.profileEmail}>{user?.email || ''}</Text>
+                {user?.email && (
+                  <Text style={styles.profileEmail}>{user?.email}</Text>
+                )}
                 <View style={styles.profileBadges}>
                   <Badge label={t('gamification.level', { level: userLevel.level })} variant="primary" />
                   <View style={styles.kycVerifiedBadge}>
