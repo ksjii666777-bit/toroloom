@@ -9,13 +9,15 @@ const { width, height } = Dimensions.get('window');
 
 export const COLORS = {
   // Background — Deep midnight canvas
-  bg: '#06080C',
-  bgSecondary: '#0A0D14',
+  bg: '#05070D',
+  bgSecondary: '#0E111A',
+  surface: '#0E111A',
+  surfaceElevated: '#141824',
   bgCard: 'rgba(255,255,255,0.03)',
   bgCardLight: 'rgba(255,255,255,0.045)',
-  bgInput: '#0A0D14',
+  bgInput: '#0E111A',
   bgDark: '#040608',
-  bgOverlay: 'rgba(6,8,12,0.85)',
+  bgOverlay: 'rgba(5,7,13,0.88)',
 
   // Brand — Electric Blue
   primary: '#3B82F6',
@@ -24,39 +26,39 @@ export const COLORS = {
   primaryGradient: ['#3B82F6', '#1D4ED8'] as const,
 
   // Secondary — Rose Crimson for alerts
-  secondary: '#FF5252',
-  secondaryLight: '#FF8A80',
-  secondaryGradient: ['#FF5252', '#D32F2F'] as const,
+  secondary: '#EF4444',
+  secondaryLight: '#F87171',
+  secondaryGradient: ['#EF4444', '#B91C1C'] as const,
 
   // Accent — Muted Emerald for growth indicators
-  accent: '#00E676',
-  accentLight: '#69F0AE',
-  accentGradient: ['#00E676', '#00C853'] as const,
+  accent: '#22C55E',
+  accentLight: '#4ADE80',
+  accentGradient: ['#22C55E', '#16A34A'] as const,
 
   // Success / Risk
-  success: '#00E676',
-  successLight: '#69F0AE',
-  danger: '#FF5252',
-  dangerLight: '#FF8A80',
-  warning: '#FFAB40',
-  warningLight: '#FFD180',
+  success: '#22C55E',
+  successLight: '#4ADE80',
+  danger: '#EF4444',
+  dangerLight: '#F87171',
+  warning: '#F59E0B',
+  warningLight: '#FBBF24',
 
   // Market — muted terminal palette
-  marketUp: '#00E676',
-  marketDown: '#FF5252',
-  marketNeutral: '#FFAB40',
+  marketUp: '#22C55E',
+  marketDown: '#EF4444',
+  marketNeutral: '#F59E0B',
 
   // Text — Platinum Silver & Muted Slate
-  text: '#E0E6ED',
-  textSecondary: '#64748B',
-  textMuted: '#475569',
-  textDark: '#0A0D14',
+  text: '#F8FAFC',
+  textSecondary: '#94A3B8',
+  textMuted: '#64748B',
+  textDark: '#0E111A',
   textOnPrimary: '#FFFFFF',
 
   // UI — Subtle micro-borders
-  border: 'rgba(255,255,255,0.07)',
-  borderLight: 'rgba(255,255,255,0.12)',
-  divider: 'rgba(255,255,255,0.05)',
+  border: 'rgba(255,255,255,0.08)',
+  borderLight: 'rgba(255,255,255,0.14)',
+  divider: 'rgba(255,255,255,0.06)',
   shadow: '#000000',
   white: '#FFFFFF',
   black: '#000000',
@@ -77,28 +79,30 @@ export const LIGHT_COLORS = {
   primaryDark: '#2563EB',
   primaryGradient: ['#3B82F6', '#1D4ED8'] as const,
 
-  secondary: '#FF5252',
-  secondaryLight: '#FF8A80',
-  secondaryGradient: ['#FF5252', '#D32F2F'] as const,
+  secondary: '#EF4444',
+  secondaryLight: '#F87171',
+  secondaryGradient: ['#EF4444', '#B91C1C'] as const,
 
-  accent: '#00E676',
-  accentLight: '#69F0AE',
-  accentGradient: ['#00E676', '#00C853'] as const,
+  accent: '#22C55E',
+  accentLight: '#4ADE80',
+  accentGradient: ['#22C55E', '#16A34A'] as const,
 
-  success: '#00E676',
-  successLight: '#69F0AE',
-  danger: '#FF5252',
-  dangerLight: '#FF8A80',
-  warning: '#FFAB40',
-  warningLight: '#FFD180',
+  success: '#22C55E',
+  successLight: '#4ADE80',
+  danger: '#EF4444',
+  dangerLight: '#F87171',
+  warning: '#F59E0B',
+  warningLight: '#FBBF24',
 
-  marketUp: '#00E676',
-  marketDown: '#FF5252',
-  marketNeutral: '#FFAB40',
+  marketUp: '#22C55E',
+  marketDown: '#EF4444',
+  marketNeutral: '#F59E0B',
 
   // Background — Light mode (crisp white)
   bg: '#F8FAFC',
   bgSecondary: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceElevated: '#F8FAFC',
   bgCard: '#FFFFFF',
   bgCardLight: '#F1F5F9',
   bgInput: '#F1F5F9',

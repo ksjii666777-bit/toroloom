@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Alert, RefreshControl, TextInput, Pressable } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,160 +8,229 @@ import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
-import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS, IS_SMALL_DEVICE } from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
-import { SkeletonBlock} from '../../components/ui/SkeletonLoader';
+import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
+import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 
 const { width } = Dimensions.get('window');
 const BADGE_DISPLAY_COUNT = 8;
 
+// ── Category chips (searchable filter) ────────────────────────────────────
+type CategoryKey = 'trading' | 'portfolio' | 'analytics' | 'markets' | 'learn' | 'account';
+
+const CATEGORIES: { key: CategoryKey | 'all'; labelKey: string }[] = [
+  { key: 'all', labelKey: 'profile.tabAll' },
+  { key: 'trading', labelKey: 'profile.tabTrading' },
+  { key: 'portfolio', labelKey: 'profile.tabPortfolio' },
+  { key: 'analytics', labelKey: 'profile.tabAnalytics' },
+  { key: 'markets', labelKey: 'profile.tabMarkets' },
+  { key: 'learn', labelKey: 'profile.tabLearn' },
+  { key: 'account', labelKey: 'profile.tabAccount' },
+];
+
 // ── Menu label → profile.* key mapping ────────────────────────────────────
 const MENU_LABEL_KEYS: Record<string, string> = {
-  // Investments
+  // Trading
+  'F&O Trading': 'profile.fnoTrading',
+  'Open Orders': 'profile.openOrders',
+  'Trade History': 'profile.tradeHistory',
+  'Op. Strategies': 'profile.opStrategies',
+  'Strategy Perf.': 'profile.strategyPerf',
+  'US Trade': 'profile.usTrade',
+  'Crypto Trading': 'profile.cryptoTrading',
+  'Futures Curve': 'profile.futuresCurve',
+  'Trading Journal': 'profile.tradingJournal',
+  'Iron Lock Trade': 'profile.ironLockTrade',
+  // Portfolio & Wealth
   'Fund Dashboard': 'profile.fundDashboard',
   'Mutual Funds': 'profile.mutualFunds',
   'My SIPs': 'profile.mySips',
-  'F&O Trading': 'profile.fnoTrading',
-  'Op. Strategies': 'profile.opStrategies',
-  'Trade History': 'profile.tradeHistory',
-  'Open Orders': 'profile.openOrders',
+  'Holdings': 'profile.holdings',
+  'US Portfolio': 'profile.usPortfolio',
+  'Bonds': 'profile.bonds',
+  'Dividends': 'profile.dividends',
+  'Wealth Dashboard': 'profile.wealthDashboard',
+  'Rebalance': 'profile.rebalance',
+  'Tax Harvesting': 'profile.taxHarvesting',
+  // Analytics
   'Reports': 'profile.reports',
   'Monte Carlo': 'profile.monteCarlo',
   'Correlation': 'profile.correlation',
-  'Rebalance': 'profile.rebalance',
   'Factor Analysis': 'profile.factorAnalysis',
-  'Strategy Perf.': 'profile.strategyPerf',
+  'NFO Dashboard': 'profile.nfoDashboard',
+  'Economic Calendar': 'profile.economicCalendar',
+  'IPO Calendar': 'profile.ipoCalendar',
+  'AI Insights': 'profile.aiInsights',
+  // Markets & News
+  'Market News': 'profile.marketNews',
   'US Markets': 'profile.usMarkets',
-  'US Portfolio': 'profile.usPortfolio',
-  'US Trade': 'profile.usTrade',
-  'Bonds': 'profile.bonds',
+  'Global Markets': 'profile.globalMarkets',
   'Currency Markets': 'profile.currencyMarkets',
-  'Currency Converter': 'profile.currencyConverter',
-  'Tax Harvesting': 'profile.taxHarvesting',
-  'Dividends': 'profile.dividends',
   'Commodities': 'profile.commodities',
-  'Futures Curve': 'profile.futuresCurve',
-  'Wealth Dashboard': 'profile.wealthDashboard',
-  'Crypto Trading': 'profile.cryptoTrading',
+  'Financial Glossary': 'profile.financialGlossary',
+  'Earnings Calls': 'profile.earningsCalls',
   // Learn & Grow
   'Courses': 'profile.courses',
   'Community': 'profile.community',
-  'Revenue': 'profile.revenue',
   'Community Polls': 'profile.communityPolls',
   'Messages': 'profile.messages',
-  'AI Insights': 'profile.aiInsights',
   'AI Assistant': 'profile.aiAssistant',
-  'Earnings Calls': 'profile.earningsCalls',
-  'Market News': 'profile.marketNews',
-  'NFO Dashboard': 'profile.nfoDashboard',
-  'IPO Calendar': 'profile.ipoCalendar',
-  'Economic Calendar': 'profile.economicCalendar',
-  'Financial Glossary': 'profile.financialGlossary',
-  'Trading Journal': 'profile.tradingJournal',
+  'Trading Psychology': 'profile.tradingPsychology',
   'Achievements': 'profile.achievements',
-  // Account
+  'Revenue': 'profile.revenue',
+  // Account & Settings
   'Profile & KYC': 'profile.profileKyc',
-  'Refer & Earn': 'profile.referral',
-  'Go Premium': 'profile.goPremium',
+  'Connect Broker': 'profile.connectBroker',
   'Payment History': 'profile.paymentHistory',
   'Notifications': 'profile.notifications',
   'Portfolio Alerts': 'profile.portfolioAlerts',
   'Risk Settings': 'profile.riskSettings',
-  'Home Widget': 'profile.homeWidget',
-  'Connect Broker': 'profile.connectBroker',
-  'Telegram Alerts': 'profile.telegramAlerts',
-  'Replay Tour': 'profile.replayTour',
-  'Voice Settings': 'profile.voiceSettings',
-  'AI Settings': 'profile.aiSettings',
   'Security': 'profile.security',
   'Help & Support': 'profile.help',
-  'Tenant Config': 'profile.tenantConfig',
+  'AI Settings': 'profile.aiSettings',
+  'Telegram Alerts': 'profile.telegramAlerts',
+  'Voice Settings': 'profile.voiceSettings',
+  'Webhooks': 'profile.webhooks',
+  'API Keys': 'profile.apiKeys',
   'Feature Flags': 'profile.featureFlags',
-  'A/B Tests': 'profile.abTests',
   'Accessibility': 'profile.accessibility',
+  'Refer & Earn': 'profile.referral',
+  'Go Premium': 'profile.goPremium',
+  'Home Widget': 'profile.homeWidget',
+  'Replay Tour': 'profile.replayTour',
+  'Tenant Config': 'profile.tenantConfig',
+  'A/B Tests': 'profile.abTests',
   'Image Opt.': 'profile.imageOpt',
   'Landscape': 'profile.landscape',
-  'API Keys': 'profile.apiKeys',
-  'Webhooks': 'profile.webhooks',
   'Coupon Manager': 'profile.couponManager',
   'Course Reviews': 'profile.courseReviews',
 };
 
-const menuItems = [
-  { section: 'Investments', items: [
-    { icon: 'wallet', label: 'Fund Dashboard', color: '#00C853', screen: 'FundsDashboard' },
-    { icon: 'pie-chart', label: 'Mutual Funds', color: '#6C63FF', screen: 'MutualFunds' },
-    { icon: 'calendar', label: 'My SIPs', color: '#00D2FF', screen: 'SIPs' },
-    { icon: 'options', label: 'F&O Trading', color: '#FF6B00', screen: 'FnOOptionsChain' },
-    { icon: 'shuffle', label: 'Op. Strategies', color: '#8B5CF6', screen: 'StrategyBuilder' },
-    { icon: 'document-text', label: 'Trade History', color: '#FFC107', screen: 'TradeHistory' },
-    { icon: 'clipboard', label: 'Open Orders', color: '#FF9800', screen: 'OpenOrders' },
-    { icon: 'analytics', label: 'Reports', color: '#FF6B6B', screen: 'Reports' },
-    { icon: 'flask', label: 'Monte Carlo', color: '#6C63FF', screen: 'MonteCarlo' },
-    { icon: 'grid', label: 'Correlation', color: '#8B5CF6', screen: 'CorrelationMatrix' },
-    { icon: 'shuffle', label: 'Rebalance', color: '#FF6B00', screen: 'PortfolioRebalancing' },
-    { icon: 'analytics', label: 'Factor Analysis', color: '#FFC107', screen: 'FactorAnalysis' },
-    { icon: 'trending-up', label: 'Strategy Perf.', color: '#00C853', screen: 'StrategyPerformance' },
-    { icon: 'globe', label: 'US Markets', color: '#3B82F6', screen: 'USMarkets' },
-    { icon: 'briefcase', label: 'US Portfolio', color: '#10B981', screen: 'SnapTradePortfolio' },
-    { icon: 'swap-horizontal', label: 'US Trade', color: '#00C853', screen: 'USStocksTrading' },
-    { icon: 'pricetags', label: 'Bonds', color: '#00E676', screen: 'BondDashboard' },
-    { icon: 'cash', label: 'Currency Markets', color: '#0052CC', screen: 'CurrencyMarkets' },
-    { icon: 'calculator', label: 'Currency Converter', color: '#6C63FF', screen: 'CurrencyConverter' },
-    { icon: 'leaf', label: 'Tax Harvesting', color: '#00E676', screen: 'TaxHarvesting' },
-    { icon: 'cash', label: 'Dividends', color: '#00E676', screen: 'DividendTracker' },
-    { icon: 'diamond', label: 'Wealth Dashboard', color: '#6C63FF', screen: 'WealthDashboard' },
-    { icon: 'flame', label: 'Commodities', color: '#FF6B00', screen: 'CommodityMarkets' },
-    { icon: 'pulse', label: 'Futures Curve', color: '#6C63FF', screen: 'FuturesCurve' },
-    { icon: 'logo-bitcoin', label: 'Crypto Trading', color: '#F7931A', screen: 'CryptoTrading' },
-  ]},
-  { section: 'Learn & Grow', items: [
-    { icon: 'school', label: 'Courses', color: '#00C853', screen: 'Learn' },
-    { icon: 'chatbubbles', label: 'Community', color: '#6C63FF', screen: 'Community' },
-    { icon: 'wallet', label: 'Revenue', color: '#FFC107', screen: 'RevenueDashboard' },
-    { icon: 'bar-chart', label: 'Community Polls', color: '#8B5CF6', screen: 'Polls' },
-    { icon: 'chatbox-ellipses', label: 'Messages', color: '#10B981', screen: 'ChatList' },
-    { icon: 'bulb', label: 'AI Insights', color: '#FFC107', screen: 'AIInsights' },
-    { icon: 'chatbubble-ellipses', label: 'AI Assistant', color: '#3B82F6', screen: 'AIChat' },
-    { icon: 'phone-portrait', label: 'Earnings Calls', color: '#8B5CF6', screen: 'EarningsCall' },
-    { icon: 'newspaper', label: 'Market News', color: '#00D2FF', screen: 'NewsFeed' },
-    { icon: 'leaf', label: 'NFO Dashboard', color: '#00E676', screen: 'NFODashboard' },
-    { icon: 'rocket', label: 'IPO Calendar', color: '#FF6B6B', screen: 'IPOCalendar' },
-    { icon: 'calendar', label: 'Economic Calendar', color: '#00D2FF', screen: 'EconomicCalendar' },
-    { icon: 'book', label: 'Financial Glossary', color: '#06B6D4', screen: 'Glossary' },
-    { icon: 'journal', label: 'Trading Journal', color: '#8B5CF6', screen: 'BehavioralJournal' },
-    { icon: 'trophy', label: 'Achievements', color: '#FF6B6B', screen: 'Achievements' },
-  ]},
-  { section: 'Account', items: [
-    { icon: 'person', label: 'Profile & KYC', color: '#00D2FF', screen: 'Profile' },
-    { icon: 'gift', label: 'Refer & Earn', color: '#6C63FF', screen: 'Referral' },
-    { icon: 'diamond', label: 'Go Premium', color: '#10B981', screen: 'Subscription' },
-    { icon: 'receipt', label: 'Payment History', color: '#6C63FF', screen: 'PaymentHistory' },
-    { icon: 'notifications', label: 'Notifications', color: '#FF6B6B', screen: 'Notifications' },
-    { icon: 'notifications', label: 'Portfolio Alerts', color: '#FFC107', screen: 'PortfolioAlerts' },
-    { icon: 'settings', label: 'Risk Settings', color: '#6E6E9A', screen: 'Settings' },
-    { icon: 'grid', label: 'Home Widget', color: '#3B82F6', screen: 'WidgetSettings' },
-    { icon: 'link', label: 'Connect Broker', color: '#FF6B00', screen: 'BrokerConnect' },
-    { icon: 'paper-plane', label: 'Telegram Alerts', color: '#0088CC', screen: 'TelegramConnect' },
-    { icon: 'compass', label: 'Replay Tour', color: '#8B5CF6', screen: '__onboarding' },
-    { icon: 'volume-high', label: 'Voice Settings', color: '#00D2FF', screen: 'VoiceSettings' },
-    { icon: 'cog', label: 'AI Settings', color: '#8B5CF6', screen: 'AISettings' },
-    { icon: 'shield-checkmark', label: 'Security', color: '#FF6B6B', screen: 'SecuritySettings' },
-    { icon: 'help-circle', label: 'Help & Support', color: '#00C853', screen: 'Help' },
-    { icon: 'settings', label: 'Tenant Config', color: '#8B5CF6', screen: 'TenantConfig' },
-    { icon: 'flask', label: 'Feature Flags', color: '#8B5CF6', screen: 'FeatureFlags' },
-    { icon: 'flask', label: 'A/B Tests', color: '#FF6B6B', screen: 'ABTestRunner' },
-    { icon: 'accessibility', label: 'Accessibility', color: '#8B5CF6', screen: 'Accessibility' },
-    { icon: 'image', label: 'Image Opt.', color: '#8B5CF6', screen: 'CDNOptimization' },
-    { icon: 'phone-landscape', label: 'Landscape', color: '#06B6D4', screen: 'LandscapeMode' },
-    { icon: 'key', label: 'API Keys', color: '#3B82F6', screen: 'ApiKeys' },
-    { icon: 'link', label: 'Webhooks', color: '#10B981', screen: 'Webhooks' },
-    { icon: 'pricetags', label: 'Coupon Manager', color: '#8B5CF6', screen: 'AdminCouponManager', adminOnly: true as const },
-    { icon: 'school', label: 'Course Reviews', color: '#00C9A7', screen: 'AdminCourseReview', adminOnly: true as const },
-  ]},
+interface MenuItem {
+  icon: string;
+  label: string;
+  color: string;
+  screen: string;
+  adminOnly?: true;
+  /** Unique testID override — use when two tiles share the same screen */
+  testID?: string;
+}
+
+interface MenuSection {
+  key: CategoryKey;
+  titleKey: string;
+  items: MenuItem[];
+}
+
+const menuItems: MenuSection[] = [
+  {
+    key: 'trading',
+    titleKey: 'profile.sectionTrading',
+    items: [
+      { icon: 'options', label: 'F&O Trading', color: '#FF6B00', screen: 'FnOOptionsChain' },
+      { icon: 'clipboard', label: 'Open Orders', color: '#FF9800', screen: 'OpenOrders' },
+      { icon: 'document-text', label: 'Trade History', color: '#FFC107', screen: 'TradeHistory' },
+      { icon: 'shuffle', label: 'Op. Strategies', color: '#8B5CF6', screen: 'StrategyBuilder' },
+      { icon: 'trending-up', label: 'Strategy Perf.', color: '#00C853', screen: 'StrategyPerformance' },
+      { icon: 'swap-horizontal', label: 'US Trade', color: '#00C853', screen: 'USStocksTrading' },
+      { icon: 'logo-bitcoin', label: 'Crypto Trading', color: '#F7931A', screen: 'CryptoTrading' },
+      { icon: 'pulse', label: 'Futures Curve', color: '#6C63FF', screen: 'FuturesCurve' },
+      { icon: 'journal', label: 'Trading Journal', color: '#8B5CF6', screen: 'BehavioralJournal' },
+      { icon: 'lock-closed', label: 'Iron Lock Trade', color: '#EF4444', screen: 'FnOOptionsChain', testID: 'menu-iron-lock' },
+    ],
+  },
+  {
+    key: 'portfolio',
+    titleKey: 'profile.sectionPortfolioAndWealth',
+    items: [
+      { icon: 'wallet', label: 'Fund Dashboard', color: '#00C853', screen: 'FundsDashboard' },
+      { icon: 'pie-chart', label: 'Mutual Funds', color: '#6C63FF', screen: 'MutualFunds' },
+      { icon: 'calendar', label: 'My SIPs', color: '#00D2FF', screen: 'SIPs' },
+      { icon: 'briefcase', label: 'Holdings', color: '#10B981', screen: 'Portfolio', testID: 'menu-holdings' },
+      { icon: 'briefcase', label: 'US Portfolio', color: '#10B981', screen: 'SnapTradePortfolio' },
+      { icon: 'pricetags', label: 'Bonds', color: '#00E676', screen: 'BondDashboard' },
+      { icon: 'cash', label: 'Dividends', color: '#00E676', screen: 'DividendTracker' },
+      { icon: 'diamond', label: 'Wealth Dashboard', color: '#6C63FF', screen: 'WealthDashboard' },
+      { icon: 'shuffle', label: 'Rebalance', color: '#FF6B00', screen: 'PortfolioRebalancing' },
+      { icon: 'leaf', label: 'Tax Harvesting', color: '#00E676', screen: 'TaxHarvesting' },
+    ],
+  },
+  {
+    key: 'analytics',
+    titleKey: 'profile.sectionAnalytics',
+    items: [
+      { icon: 'analytics', label: 'Reports', color: '#FF6B6B', screen: 'Reports' },
+      { icon: 'flask', label: 'Monte Carlo', color: '#6C63FF', screen: 'MonteCarlo' },
+      { icon: 'grid', label: 'Correlation', color: '#8B5CF6', screen: 'CorrelationMatrix' },
+      { icon: 'analytics', label: 'Factor Analysis', color: '#FFC107', screen: 'FactorAnalysis' },
+      { icon: 'leaf', label: 'NFO Dashboard', color: '#00E676', screen: 'NFODashboard' },
+      { icon: 'calendar', label: 'Economic Calendar', color: '#00D2FF', screen: 'EconomicCalendar' },
+      { icon: 'rocket', label: 'IPO Calendar', color: '#FF6B6B', screen: 'IPOCalendar' },
+      { icon: 'bulb', label: 'AI Insights', color: '#FFC107', screen: 'AIInsights' },
+    ],
+  },
+  {
+    key: 'markets',
+    titleKey: 'profile.sectionMarketsAndNews',
+    items: [
+      { icon: 'newspaper', label: 'Market News', color: '#00D2FF', screen: 'NewsFeed' },
+      { icon: 'globe', label: 'US Markets', color: '#3B82F6', screen: 'USMarkets' },
+      { icon: 'globe', label: 'Global Markets', color: '#3B82F6', screen: 'USMarkets', testID: 'menu-global-markets' },
+      { icon: 'cash', label: 'Currency Markets', color: '#0052CC', screen: 'CurrencyMarkets' },
+      { icon: 'flame', label: 'Commodities', color: '#FF6B00', screen: 'CommodityMarkets' },
+      { icon: 'book', label: 'Financial Glossary', color: '#06B6D4', screen: 'Glossary' },
+      { icon: 'phone-portrait', label: 'Earnings Calls', color: '#8B5CF6', screen: 'EarningsCall' },
+    ],
+  },
+  {
+    key: 'learn',
+    titleKey: 'profile.sectionLearnAndGrow',
+    items: [
+      { icon: 'school', label: 'Courses', color: '#00C853', screen: 'Learn' },
+      { icon: 'chatbubbles', label: 'Community', color: '#6C63FF', screen: 'Community' },
+      { icon: 'bar-chart', label: 'Community Polls', color: '#8B5CF6', screen: 'Polls' },
+      { icon: 'chatbox-ellipses', label: 'Messages', color: '#10B981', screen: 'ChatList' },
+      { icon: 'chatbubble-ellipses', label: 'AI Assistant', color: '#3B82F6', screen: 'AIChat' },
+      { icon: 'sparkles', label: 'Trading Psychology', color: '#8B5CF6', screen: 'BehavioralJournal', testID: 'menu-trading-psychology' },
+      { icon: 'trophy', label: 'Achievements', color: '#FF6B6B', screen: 'Achievements' },
+      { icon: 'wallet', label: 'Revenue', color: '#FFC107', screen: 'RevenueDashboard' },
+    ],
+  },
+  {
+    key: 'account',
+    titleKey: 'profile.sectionAccountAndSettings',
+    items: [
+      { icon: 'person', label: 'Profile & KYC', color: '#00D2FF', screen: 'Profile' },
+      { icon: 'link', label: 'Connect Broker', color: '#FF6B00', screen: 'BrokerConnect' },
+      { icon: 'receipt', label: 'Payment History', color: '#6C63FF', screen: 'PaymentHistory' },
+      { icon: 'notifications', label: 'Notifications', color: '#FF6B6B', screen: 'Notifications' },
+      { icon: 'notifications', label: 'Portfolio Alerts', color: '#FFC107', screen: 'PortfolioAlerts' },
+      { icon: 'settings', label: 'Risk Settings', color: '#6E6E9A', screen: 'Settings' },
+      { icon: 'shield-checkmark', label: 'Security', color: '#FF6B6B', screen: 'SecuritySettings' },
+      { icon: 'help-circle', label: 'Help & Support', color: '#00C853', screen: 'Help' },
+      { icon: 'cog', label: 'AI Settings', color: '#8B5CF6', screen: 'AISettings' },
+      { icon: 'paper-plane', label: 'Telegram Alerts', color: '#0088CC', screen: 'TelegramConnect' },
+      { icon: 'volume-high', label: 'Voice Settings', color: '#00D2FF', screen: 'VoiceSettings' },
+      { icon: 'link', label: 'Webhooks', color: '#10B981', screen: 'Webhooks' },
+      { icon: 'key', label: 'API Keys', color: '#3B82F6', screen: 'ApiKeys' },
+      { icon: 'flask', label: 'Feature Flags', color: '#8B5CF6', screen: 'FeatureFlags' },
+      { icon: 'accessibility', label: 'Accessibility', color: '#8B5CF6', screen: 'Accessibility' },
+      { icon: 'gift', label: 'Refer & Earn', color: '#6C63FF', screen: 'Referral' },
+      { icon: 'diamond', label: 'Go Premium', color: '#10B981', screen: 'Subscription' },
+      { icon: 'grid', label: 'Home Widget', color: '#3B82F6', screen: 'WidgetSettings' },
+      { icon: 'compass', label: 'Replay Tour', color: '#8B5CF6', screen: '__onboarding' },
+      { icon: 'settings', label: 'Tenant Config', color: '#8B5CF6', screen: 'TenantConfig' },
+      { icon: 'flask', label: 'A/B Tests', color: '#FF6B6B', screen: 'ABTestRunner' },
+      { icon: 'image', label: 'Image Opt.', color: '#8B5CF6', screen: 'CDNOptimization' },
+      { icon: 'phone-landscape', label: 'Landscape', color: '#06B6D4', screen: 'LandscapeMode' },
+      { icon: 'pricetags', label: 'Coupon Manager', color: '#8B5CF6', screen: 'AdminCouponManager', adminOnly: true as const },
+      { icon: 'school', label: 'Course Reviews', color: '#00C9A7', screen: 'AdminCourseReview', adminOnly: true as const },
+    ],
+  },
 ];
 
 export default function MoreScreen({ navigation }: any) {
@@ -174,6 +243,10 @@ export default function MoreScreen({ navigation }: any) {
   const unlockedCount = badges.filter(b => b.unlocked).length;
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // ── Search + category filter ────────────────────────────────────────────
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<CategoryKey | 'all'>('all');
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 400);
@@ -202,15 +275,36 @@ export default function MoreScreen({ navigation }: any) {
   const visibleMenuItems = useMemo(
     () => menuItems.map(section => ({
       ...section,
-      items: section.items.filter((item: any) => !(item as any).adminOnly || isAdmin),
+      items: section.items.filter((item: MenuItem) => !item.adminOnly || isAdmin),
     })).filter(section => section.items.length > 0),
     [isAdmin],
   );
 
+  // Search + category filtering
+  const filteredSections = useMemo(() => {
+    let sections = visibleMenuItems;
+    if (activeCategory !== 'all') {
+      sections = sections.filter(s => s.key === activeCategory);
+    }
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      sections = sections
+        .map(section => ({
+          ...section,
+          items: section.items.filter(item => {
+            const label = t(MENU_LABEL_KEYS[item.label] || item.label).toLowerCase();
+            return label.includes(q) || item.label.toLowerCase().includes(q);
+          }),
+        }))
+        .filter(section => section.items.length > 0);
+    }
+    return sections;
+  }, [visibleMenuItems, activeCategory, searchQuery, t]);
+
   const { animatedStyles: menuSectionStyles } = useStaggeredAnimation(visibleMenuItems.length, {
     initialDelay: 150,
-    staggerDelay: 120,
-    duration: 450,
+    staggerDelay: 100,
+    duration: 400,
   });
 
   const { animatedStyles: badgeStyles } = useStaggeredAnimation(BADGE_DISPLAY_COUNT, {
@@ -245,6 +339,31 @@ export default function MoreScreen({ navigation }: any) {
     }
   };
 
+  const handleMenuPress = (item: MenuItem) => {
+    if (item.screen === '__onboarding') {
+      Alert.alert(
+        t('profile.replayTour'),
+        t('profile.replayTourConfirm'),
+        [
+          { text: t('app.cancel'), style: 'cancel' as const },
+          {
+            text: t('profile.startTour'),
+            onPress: () => {
+              triggerHaptic(ImpactFeedbackStyle.Medium);
+              resetOnboarding();
+            },
+          },
+        ]
+      );
+    } else {
+      navigation.navigate(item.screen);
+    }
+  };
+
+  // Responsive grid — 4 columns mobile, 3 columns small screens
+  const columns = IS_SMALL_DEVICE ? 3 : 4;
+  const tileSize = (width - SPACING.xl * 2 - SPACING.lg * 2 - (columns - 1) * SPACING.md) / columns;
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -253,10 +372,12 @@ export default function MoreScreen({ navigation }: any) {
             <SkeletonBlock width="30%" height={28} />
           </View>
           <View style={{ paddingHorizontal: SPACING.xl }}>
+            <SkeletonBlock width="100%" height={48} borderRadius={BORDER_RADIUS.md} />
+            <View style={{ height: SPACING.md }} />
+            <SkeletonBlock width="70%" height={36} borderRadius={BORDER_RADIUS.full} />
+            <View style={{ height: SPACING.lg }} />
             <SkeletonBlock width="100%" height={100} borderRadius={BORDER_RADIUS.xl} />
             <View style={{ height: SPACING.lg }} />
-            <SkeletonBlock width="100%" height={56} borderRadius={BORDER_RADIUS.md} />
-            <View style={{ height: SPACING.xl }} />
             {[1, 2, 3].map(i => (
               <View key={`skel_more_${i}`}>
                 <SkeletonBlock width="25%" height={12} />
@@ -283,6 +404,7 @@ export default function MoreScreen({ navigation }: any) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -295,11 +417,64 @@ export default function MoreScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title} testID="more-title">{t('profile.more')}</Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.title} testID="more-title">{t('profile.more')}</Text>
+            <SyncStatusIndicator variant="inline" />
+          </View>
         </View>
 
+        {/* Search Bar */}
+        <View style={[styles.searchContainer, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+          <Ionicons name="search" size={18} color={colors.textMuted} />
+          <TextInput
+            testID="more-search-input"
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder={t('profile.searchTools')}
+            placeholderTextColor={colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+            autoCorrect={false}
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery('')} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </Pressable>
+          )}
+        </View>
+
+        {/* Category Chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}
+          style={styles.chipsScroll}
+        >
+          {CATEGORIES.map(cat => {
+            const isActive = activeCategory === cat.key;
+            return (
+              <Pressable
+                key={cat.key}
+                testID={`more-cat-${cat.key}`}
+                onPress={() => setActiveCategory(cat.key)}
+                style={({ pressed }) => [
+                  styles.chip,
+                  {
+                    backgroundColor: isActive ? colors.primary : colors.bgCard,
+                    borderColor: isActive ? colors.primary : colors.border,
+                  },
+                  pressed && { transform: [{ scale: 0.96 }] },
+                ]}
+              >
+                <Text style={[styles.chipText, { color: isActive ? colors.white : colors.textSecondary }]}>
+                  {t(cat.labelKey)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
         {/* Profile Card */}
-        {/* Glassmorphic Profile Card */}
         <AnimatedPressable onPress={() => navigation.navigate('Profile')} haptic="medium" scaleTo={0.97} testID="more-profile-card">
           <View style={styles.glassProfileCard}>
             <View style={styles.glassBg} />
@@ -359,51 +534,49 @@ export default function MoreScreen({ navigation }: any) {
           </View>
         </Card>
 
-        {/* Menu Sections */}
-        {visibleMenuItems.map((section, idx) => (
-          <Animated.View key={`section_${idx}`} style={[styles.menuCardSection, menuSectionStyles[idx]]}>
-            <View style={styles.menuCard}>
-              <Text style={styles.menuSectionTitle}>{t('profile.section' + section.section.replace(/ & /g, 'And'))}</Text>
-              <View style={styles.menuGrid}>
-                {section.items.map((item, i) => (
-                  <AnimatedPressable
-                    key={`mi_${i}`}
-                    onPress={() => {
-                      if (item.screen === '__onboarding') {
-                        Alert.alert(
-                          t('profile.replayTour'),
-                          t('profile.replayTourConfirm'),
-                          [
-                            { text: t('app.cancel'), style: 'cancel' },
-                            {
-                              text: t('profile.startTour'),
-                              onPress: () => {
-                                triggerHaptic(ImpactFeedbackStyle.Medium);
-                                resetOnboarding();
-                              },
-                            },
-                          ]
-                        );
-                      } else {
-                        navigation.navigate(item.screen);
-                      }
-                    }}
-                    haptic="selection"
-                    scaleTo={0.93}
-                    testID={`menu-${item.screen}`}
-                  >
-                    <View style={styles.menuItem}>
-                      <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
-                        <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
-                      </View>
-                      <Text style={styles.menuLabel}>{t(MENU_LABEL_KEYS[item.label] || item.label)}</Text>
-                    </View>
-                  </AnimatedPressable>
-                ))}
-              </View>
+        {/* Menu Sections (filtered) */}
+        {filteredSections.length === 0 ? (
+          <View style={styles.emptyState}>
+            <View style={[styles.emptyIcon, { backgroundColor: colors.bgCard }]}>
+              <Ionicons name="search" size={32} color={colors.textMuted} />
             </View>
-          </Animated.View>
-        ))}
+            <Text style={styles.emptyTitle}>{t('profile.noToolsFound')}</Text>
+            <Text style={styles.emptyHint}>{t('profile.noToolsHint')}</Text>
+          </View>
+        ) : (
+          filteredSections.map((section, idx) => (
+            <Animated.View
+              key={`${activeCategory}_${section.key}`}
+              entering={FadeInDown.duration(280).delay(Math.min(idx, 5) * 45)}
+              style={[styles.menuCardSection, menuSectionStyles[idx]]}
+            >
+              <View style={[styles.menuCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Text style={styles.menuSectionTitle}>{t(section.titleKey)}</Text>
+                <View style={styles.menuGrid}>
+                  {section.items.map((item, i) => (
+                    <AnimatedPressable
+                      key={`mi_${section.key}_${i}`}
+                      onPress={() => handleMenuPress(item)}
+                      haptic="selection"
+                      scaleTo={0.97}
+                      testID={item.testID || `menu-${item.screen}`}
+                      accessibilityLabel={t(MENU_LABEL_KEYS[item.label] || item.label)}
+                    >
+                      <View style={[styles.menuItem, { width: tileSize }]}>
+                        <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
+                          <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
+                        </View>
+                        <Text style={styles.menuLabel} numberOfLines={2}>
+                          {t(MENU_LABEL_KEYS[item.label] || item.label)}
+                        </Text>
+                      </View>
+                    </AnimatedPressable>
+                  ))}
+                </View>
+              </View>
+            </Animated.View>
+          ))
+        )}
 
         {/* Achievements Preview */}
         <AnimatedPressable onPress={() => navigation.navigate('Achievements')} haptic="light" scaleTo={0.98}>
@@ -411,7 +584,6 @@ export default function MoreScreen({ navigation }: any) {
             <View style={styles.badgesGrid}>
               {badges.slice(0, BADGE_DISPLAY_COUNT).map((badge, i) => (
                 <Animated.View key={badge.id} style={badgeStyles[i]}>
-
                   <View style={[styles.badgeItem, !badge.unlocked && styles.badgeLocked]}>
                     <Text style={styles.badgeIcon}>{badge.icon}</Text>
                     {!badge.unlocked && (
@@ -453,10 +625,52 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingTop: 60,
     marginBottom: SPACING.lg,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   title: {
     ...FONTS.bold,
     fontSize: FONTS.size.title,
     color: colors.text,
+  },
+  // ── Search ──
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 0,
+    height: 48,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    marginBottom: SPACING.lg,
+  },
+  searchInput: {
+    flex: 1,
+    ...FONTS.regular,
+    fontSize: FONTS.size.md,
+    paddingVertical: 0,
+  },
+  // ── Chips ──
+  chipsScroll: {
+    marginBottom: SPACING.lg,
+    marginHorizontal: -SPACING.xl,
+  },
+  chipsRow: {
+    paddingHorizontal: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  chip: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm + 2,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+  },
+  chipText: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.sm,
   },
   glassProfileCard: {
     padding: SPACING.xl,
@@ -594,9 +808,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   menuCard: {
-    backgroundColor: '#0D0F14',
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
+    borderWidth: 1,
   },
   menuSectionTitle: {
     ...FONTS.semiBold,
@@ -612,9 +826,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: SPACING.md,
   },
   menuItem: {
-    width: (width - 64 - 48) / 4,
     alignItems: 'center',
     gap: SPACING.sm,
+    minHeight: 76,
   },
   menuIcon: {
     width: 48,
@@ -627,6 +841,31 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.regular,
     fontSize: FONTS.size.xs,
     color: colors.text,
+    textAlign: 'center',
+  },
+  // ── Empty State ──
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: SPACING.huge,
+    gap: SPACING.sm,
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  emptyTitle: {
+    ...FONTS.semiBold,
+    fontSize: FONTS.size.lg,
+    color: colors.text,
+  },
+  emptyHint: {
+    ...FONTS.regular,
+    fontSize: FONTS.size.sm,
+    color: colors.textMuted,
     textAlign: 'center',
   },
   badgesGrid: {

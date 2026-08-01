@@ -176,7 +176,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
       expect(getByText('More')).toBeDefined();
       expect(getByText('TraderJoe')).toBeDefined();
       expect(getByText('Available Balance')).toBeDefined();
-      expect(getByText('Investments')).toBeDefined();
+      expect(getByText('Portfolio & Wealth')).toBeDefined();
       expect(getByText('Learn & Grow')).toBeDefined();
       expect(getByText('Account')).toBeDefined();
       expect(getByText('Log Out')).toBeDefined();

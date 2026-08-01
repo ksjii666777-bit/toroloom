@@ -202,7 +202,7 @@ export default function AvatarWidget() {
       style={[
         styles.container,
         {
-          bottom: 80 + insets.bottom,
+          bottom: 76 + insets.bottom,
         },
         slideUpStyle,
       ]}
@@ -286,27 +286,27 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1.5,
     position: 'relative',
     overflow: 'hidden',
     alignSelf: 'flex-end',
   },
   avatarGlow: {
     position: 'absolute',
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   avatarLabel: {
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: '700',
-    letterSpacing: 1,
+    letterSpacing: 0.6,
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 2,
   },
 });

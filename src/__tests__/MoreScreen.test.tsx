@@ -38,6 +38,10 @@ vi.mock('../store/gamificationStore', () => ({
 
 import MoreScreen from '../screens/tabs/MoreScreen';
 
+vi.mock('../components/ui/SyncStatusIndicator', () => ({
+  default: () => null,
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -78,10 +82,13 @@ describe('MoreScreen', () => {
   });
 
   it('renders menu section titles', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
-    expect(getByText('Investments')).toBeDefined();
+    const { getByText, getAllByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    expect(getByText('Portfolio & Wealth')).toBeDefined();
+    expect(getByText('Markets & News')).toBeDefined();
     expect(getByText('Learn & Grow')).toBeDefined();
-    expect(getByText('Account')).toBeDefined();
+    expect(getByText('Account & Settings')).toBeDefined();
+    expect(getAllByText('Trading').length).toBeGreaterThan(0);
+    expect(getAllByText('Analytics').length).toBeGreaterThan(0);
     cleanup();
   });
 

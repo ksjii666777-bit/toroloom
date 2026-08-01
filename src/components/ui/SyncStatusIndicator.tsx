@@ -16,7 +16,8 @@
  *
  * Usage:
  *   import SyncStatusIndicator from '../components/ui/SyncStatusIndicator';
- *   <SyncStatusIndicator />
+ *   <SyncStatusIndicator />                       // floating overlay (default)
+ *   <SyncStatusIndicator variant="inline" />      // in-header placement
  *
  * ============================================================================
  */
@@ -103,7 +104,12 @@ const FRESHNESS_ICONS: Record<string, { icon: keyof typeof Ionicons.glyphMap; la
 
 // ──── Component ────────────────────────────────────────────────────────────
 
-export default function SyncStatusIndicator() {
+interface SyncStatusIndicatorProps {
+  /** 'floating' overlays the top-center of the screen (legacy). 'inline' renders statically in a header row. */
+  variant?: 'floating' | 'inline';
+}
+
+export default function SyncStatusIndicator({ variant = 'floating' }: SyncStatusIndicatorProps) {
   const insets = useSafeAreaInsets();
   const syncStatus = useOfflineStore((s) => s.syncStatus);
   const pendingTotal = useOfflineStore((s) => s.pendingTotal);
@@ -216,16 +222,18 @@ export default function SyncStatusIndicator() {
             ? `${pendingTotal} pending`
             : 'All synced';
 
+  const isInline = variant === 'inline';
+
   return (
     <View
       style={[
-        styles.container,
-        {
+        isInline ? styles.containerInline : styles.container,
+        !isInline && {
           top: insets.top + 4,
           zIndex: expanded ? 9999 : 9990,
         },
       ]}
-      pointerEvents="box-none"
+      pointerEvents={isInline ? 'auto' : 'box-none'}
     >
       {/* ── Pill Button ── */}
       <Pressable
@@ -346,6 +354,11 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     alignSelf: 'center',
+  },
+  containerInline: {
+    position: 'relative',
+    alignSelf: 'flex-start',
+    zIndex: 10,
   },
   pill: {
     flexDirection: 'row',

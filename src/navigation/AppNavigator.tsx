@@ -10,6 +10,7 @@ import { useOnboardingStore } from '../store/onboardingStore';
 import { useRiskStore } from '../store/riskStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { useTheme } from '../context/ThemeContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { analytics } from '../services/analytics';
 import { authApi } from '../services/api';
@@ -156,7 +157,6 @@ import SnapTradeConnectScreen from '../screens/snaptrade/SnapTradeConnectScreen'
 import SnapTradePortfolioScreen from '../screens/snaptrade/SnapTradePortfolioScreen';
 import SnapTradeOrderScreen from '../screens/snaptrade/SnapTradeOrderScreen';
 import OfflineBanner from '../components/ui/OfflineBanner';
-import SyncStatusIndicator from '../components/ui/SyncStatusIndicator';
 import SyncConflictModal from '../components/ui/SyncConflictModal';
 import { useBackgroundSync } from '../hooks/useBackgroundSync';
 import { startCacheWarming } from '../services/cacheWarmingService';
@@ -258,6 +258,7 @@ const tabStyles = StyleSheet.create({
 
 function MainTabs() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const wsLockdownCount = useRiskStore(s => s.wsLockdownCount);
   const clearLockdownAlert = useRiskStore(s => s.clearLockdownAlert);
   const portfolioAlertBadgeCount = useNotificationStore(s => s.portfolioAlertBadgeCount);
@@ -291,12 +292,18 @@ function MainTabs() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: colors.bgSecondary,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
+          // Dark glass — translucent surface with hairline top border
+          backgroundColor: 'rgba(14, 17, 26, 0.96)',
+          borderTopColor: 'rgba(255,255,255,0.08)',
+          borderTopWidth: StyleSheet.hairlineWidth,
           paddingTop: 6,
           paddingBottom: 8,
-          height: 60,
+          height: 52 + insets.bottom,
+          elevation: 12,
+          shadowColor: '#000000',
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.35,
+          shadowRadius: 20,
         },
         tabBarLabelStyle: {
           fontSize: 10,
@@ -327,7 +334,6 @@ function MainTabs() {
       <AvatarWidget />
       <IronLockOverlay />
       <UpgradePromptModal />
-      <SyncStatusIndicator />
       <OfflineBanner />
       <SyncConflictModal />
     </>

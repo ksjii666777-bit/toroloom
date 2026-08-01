@@ -16,13 +16,14 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { useNotificationStore } from '../../store/notificationStore';
 import { useAIStore } from '../../store/aiStore';
-import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, FONTS, BORDER_RADIUS, IS_SMALL_DEVICE } from '../../constants/theme';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import MarketCard from '../../components/MarketCard';
 import StockItem from '../../components/StockItem';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
 import { getMockAlertRules, getMockAlertTriggers, createDefaultRule } from '../../services/ai/sentimentAlertService';
@@ -113,6 +114,18 @@ export default function HomeScreen({ navigation }: any) {
 
   const topGainers = [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 3);
   const topLosers = [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 3);
+
+  // ── 8 High-Priority Actions (Zerodha Kite style) ───────────────
+  const priorityActions = useMemo(() => [
+    { icon: 'link', label: t('profile.connectBroker'), color: colors.primary, screen: 'BrokerConnect' },
+    { icon: 'lock-closed', label: t('profile.ironLockTrade'), color: '#EF4444', screen: 'FnOOptionsChain' },
+    { icon: 'pie-chart', label: 'Portfolio', color: colors.accent, screen: 'Portfolio' },
+    { icon: 'document-text', label: t('profile.reports'), color: '#8B5CF6', screen: 'Reports' },
+    { icon: 'time', label: t('profile.tradeHistory'), color: '#FFC107', screen: 'TradeHistory' },
+    { icon: 'newspaper', label: t('profile.marketNews'), color: '#00D2FF', screen: 'NewsFeed' },
+    { icon: 'add-circle', label: t('funds.addFunds'), color: colors.success, screen: 'AddFunds' },
+    { icon: 'shield-checkmark', label: t('profile.riskSettings'), color: '#6E6E9A', screen: 'Settings' },
+  ], [t, colors]);
 
   // Calculators data for horizontal list
   const calculatorsData = useMemo(() => [
@@ -309,6 +322,11 @@ export default function HomeScreen({ navigation }: any) {
             </View>
           </View>
 
+          {/* Sync status — inline in header (scrolls with content) */}
+          <View style={styles.headerSyncRow}>
+            <SyncStatusIndicator variant="inline" />
+          </View>
+
           {/* Glow effect behind portfolio card */}
           <ReanimatedAnimated.View style={[styles.portfolioGlow, glowStyle]} />
 
@@ -366,6 +384,29 @@ export default function HomeScreen({ navigation }: any) {
                 </View>
               </AnimatedPressable>
             ))}
+          </View>
+
+          {/* Priority Actions — 8 high-priority tools */}
+          <View style={styles.prioritySection}>
+            <View style={styles.priorityGrid}>
+              {priorityActions.map((item, i) => (
+                <AnimatedPressable
+                  key={i}
+                  testID={`home-priority-${item.screen.toLowerCase()}`}
+                  onPress={() => navigation.navigate(item.screen)}
+                  haptic="light"
+                  scaleTo={0.97}
+                  accessibilityLabel={item.label}
+                >
+                  <View style={[styles.priorityTile, { width: IS_SMALL_DEVICE ? '30%' : '22%' }]}>
+                    <View style={[styles.priorityIcon, { backgroundColor: item.color + '20', borderColor: item.color + '30' }]}>
+                      <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
+                    </View>
+                    <Text style={styles.priorityLabel} numberOfLines={2}>{item.label}</Text>
+                  </View>
+                </AnimatedPressable>
+              ))}
+            </View>
           </View>
         </View>
 
@@ -1284,6 +1325,40 @@ const createStyles = (colors: any) => StyleSheet.create({
     ...FONTS.medium,
     fontSize: FONTS.size.sm,
     color: colors.text,
+  },
+  headerSyncRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+    marginTop: -SPACING.sm,
+  },
+  prioritySection: {
+    marginTop: SPACING.lg,
+  },
+  priorityGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: SPACING.lg,
+  },
+  priorityTile: {
+    alignItems: 'center',
+    gap: SPACING.sm,
+    minHeight: 84,
+  },
+  priorityIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  priorityLabel: {
+    ...FONTS.medium,
+    fontSize: FONTS.size.xs,
+    color: colors.text,
+    textAlign: 'center',
   },
 
   // ── Search Bar ──
