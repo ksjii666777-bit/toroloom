@@ -50,11 +50,11 @@ COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-# Healthcheck (uses the Express /health endpoint)
+# Healthcheck (uses the Express /ready endpoint — 503 when the DB is down)
 # Uses node -e instead of wget because Alpine's busybox wget
 # doesn't support --spider.
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+  CMD node -e "require('http').get('http://localhost:3000/ready', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
 # Switch to non-root user
 USER appuser

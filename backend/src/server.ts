@@ -152,7 +152,7 @@ app.use('/.well-known', express.static(path.join(__dirname, '../public/.well-kno
 
 app.use('/metrics', metricsRoutes);
 
-// ============ Health Check ============
+// ============ Health Check (liveness) ============
 
 app.get('/health', async (_req, res) => {
   const storage = getStorageIfInitialized();
@@ -174,6 +174,31 @@ app.get('/health', async (_req, res) => {
       circuitOpen: syncBridgeFailures >= SEND_FAILURE_THRESHOLD,
       failureThreshold: SEND_FAILURE_THRESHOLD,
     },
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// ============ Readiness Check ============
+// Separate from /health (liveness). Railway's healthcheckPath points here.
+// Returns 503 when a real storage backend (postgres/mongodb) is configured
+// but the DB is unreachable — so a degraded DB surfaces as an unhealthy
+// deployment instead of a misleading 200 (memory backend is always 'healthy').
+// With STORAGE_BACKEND=postgres and a down DB this makes Railway restart the
+// container (restartPolicyType: ON_FAILURE, up to restartPolicyMaxRetries).
+app.get('/ready', async (_req, res) => {
+  const storage = getStorageIfInitialized();
+  let storageHealthy = false;
+  if (storage) {
+    try { storageHealthy = await storage.isHealthy(); } catch { /* not healthy */ }
+  }
+
+  const notReady = env.storageBackend !== 'memory' && !storageHealthy;
+
+  res.status(notReady ? 503 : 200).json({
+    status: notReady ? 'not_ready' : 'ready',
+    storageBackend: env.storageBackend,
+    storageHealthy,
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
