@@ -73,7 +73,7 @@ export default {
     noAppsSub: 'इसे देखने के लिए किसी खुले IPO में आवेदन करें',
     showingCount: '{{count}} IPO दिखाए जा रहे हैं',
     appCount: '{{count}} आवेदन',
-    appCount_plural: '{{count}} आवेदन',
+    appCount_other: '{{count}} आवेदन',
     // ── IPO Calendar ──
     calendarTitle: 'IPO कैलेंडर',
     calendarTabTimeline: 'टाइमलाइन',

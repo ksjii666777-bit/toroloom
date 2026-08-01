@@ -26,7 +26,7 @@ export default {
     yieldChange: 'Yield {dir}{bps} bps today',
     bonds: 'bonds',
     bondCount: '{{count}} bond',
-    bondCount_plural: '{{count}} bonds',
+    bondCount_other: '{{count}} bonds',
     totalBonds: 'Total Bonds',
     avgGovtYtm: 'Avg Govt YTM',
     avgCorpYtm: 'Avg Corp YTM',

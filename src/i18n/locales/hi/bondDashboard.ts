@@ -26,7 +26,7 @@ export default {
     yieldChange: 'आज उपज {dir}{bps} bps',
     bonds: 'बॉन्ड',
     bondCount: '{{count}} बॉन्ड',
-    bondCount_plural: '{{count}} बॉन्ड',
+    bondCount_other: '{{count}} बॉन्ड',
     totalBonds: 'कुल बॉन्ड',
     avgGovtYtm: 'औसत सरकारी YTM',
     avgCorpYtm: 'औसत कॉर्पोरेट YTM',

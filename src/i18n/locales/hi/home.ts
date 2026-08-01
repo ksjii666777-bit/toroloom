@@ -33,7 +33,7 @@ export default {
     waitingForSignals: 'सिग्नल की प्रतीक्षा...',
     sentimentAlerts: 'भावना अलर्ट',
     activeRules: '{{count}} सक्रिय नियम',
-    activeRules_plural: '{{count}} सक्रिय नियम',
+    activeRules_other: '{{count}} सक्रिय नियम',
     quickAdd: 'त्वरित जोड़ें',
     topHoldings: 'टॉप होल्डिंग्स 📊',
     allHoldings: 'सभी होल्डिंग्स',

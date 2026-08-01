@@ -13,7 +13,7 @@ export default {
     tabSummary: 'Summary',
     searchPlaceholder: 'Search commodities...',
     commodityCount: '{{count}} commodity',
-    commodityCount_plural: '{{count}} commodities',
+    commodityCount_other: '{{count}} commodities',
     commoditySingular: 'commodity',
     noCommoditiesFound: 'No commodities found',
     adjustSearch: 'Try adjusting search',

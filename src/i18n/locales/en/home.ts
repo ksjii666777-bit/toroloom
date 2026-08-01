@@ -33,7 +33,7 @@ export default {
     waitingForSignals: 'Waiting for signals...',
     sentimentAlerts: 'Sentiment Alerts',
     activeRules: '{{count}} active rule',
-    activeRules_plural: '{{count}} active rules',
+    activeRules_other: '{{count}} active rules',
     quickAdd: 'Quick Add',
     topHoldings: 'Top Holdings 📊',
     allHoldings: 'All Holdings',

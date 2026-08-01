@@ -11,7 +11,7 @@ export default {
     filterAsian: 'एशियाई',
     filterOther: 'अन्य',
     pairCount: '{{count}} जोड़ा',
-    pairCount_plural: '{{count}} जोड़े',
+    pairCount_other: '{{count}} जोड़े',
     pairSingular: 'जोड़ा',
     noPairsFound: 'कोई जोड़ा नहीं मिला',
     adjustSearch: 'खोज समायोजित करने का प्रयास करें',

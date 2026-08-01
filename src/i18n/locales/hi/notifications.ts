@@ -13,7 +13,7 @@ export default {
     systemUpdates: 'सिस्टम अपडेट',
     // ── Notification Screen ───────────────────────────────────────────
     unread: '{{count}} अपठित',
-    unread_plural: '{{count}} अपठित',
+    unread_other: '{{count}} अपठित',
     allCaughtUp: 'सब पकड़ा गया! ✅',
     activePriceAlerts: 'सक्रिय मूल्य अलर्ट',
     above: '⬆ ऊपर',

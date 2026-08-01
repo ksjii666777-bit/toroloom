@@ -21,13 +21,13 @@ export default {
 
     // Upcoming tab
     upcomingEvents: '{{count}} आगामी घटना',
-    upcomingEvents_plural: '{{count}} आगामी घटनाएँ',
+    upcomingEvents_other: '{{count}} आगामी घटनाएँ',
     noUpcomingTitle: 'कोई आगामी लाभांश नहीं',
     noUpcomingDesc: 'लाभांश देने वाले स्टॉक वाली होल्डिंग्स यहाँ दिखाई देंगी',
 
     // History tab
     historyPayments: '{{count}} भुगतान दर्ज',
-    historyPayments_plural: '{{count}} भुगतान दर्ज',
+    historyPayments_other: '{{count}} भुगतान दर्ज',
     noHistoryTitle: 'कोई लाभांश इतिहास नहीं',
     noHistoryDesc: 'पिछले लाभांश भुगतान यहाँ दिखाई देंगे',
     eventsLabel: 'घटनाएँ',

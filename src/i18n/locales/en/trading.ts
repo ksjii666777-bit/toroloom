@@ -183,7 +183,7 @@ export default {
     riskPercent: 'Risk: {{percent}}%',
     limited: 'Limited',
     oneLeg: '{{count}} leg',
-    oneLeg_plural: '{{count}} legs',
+    oneLeg_other: '{{count}} legs',
 
     // ── Trade History ─────────────────────────────────────────────────────
     totalBuys: 'Total Buys',

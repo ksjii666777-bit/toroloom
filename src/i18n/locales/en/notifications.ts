@@ -13,7 +13,7 @@ export default {
     systemUpdates: 'System Updates',
     // ── Notification Screen ───────────────────────────────────────────
     unread: '{{count}} unread',
-    unread_plural: '{{count}} unreads',
+    unread_other: '{{count}} unreads',
     allCaughtUp: 'All caught up! ✅',
     activePriceAlerts: 'Active Price Alerts',
     above: '⬆ Above',

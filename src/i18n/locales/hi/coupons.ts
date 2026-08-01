@@ -4,7 +4,7 @@ export default {
     noCoupons: 'कोई कूपन उपलब्ध नहीं',
     noCouponsMsg: 'अभी कोई सक्रिय प्रोमो कोड नहीं हैं।\nछूट के लिए बाद में देखें!',
     couponsAvailable: '{{count}} कूपन उपलब्ध',
-    couponsAvailable_plural: '{{count}} कूपन उपलब्ध',
+    couponsAvailable_other: '{{count}} कूपन उपलब्ध',
     useThisCoupon: 'यह कूपन उपयोग करें',
     couponApplied: 'कूपन {{code}} लागू! सब्सक्रिप्शन पर वापस जा रहे हैं...',
     infoText: 'किसी भी प्रोमो कोड पर "यह कूपन उपयोग करें" टैप करें और सब्सक्रिप्शन स्क्रीन पर वापस जाएँ।',

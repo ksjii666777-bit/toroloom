@@ -13,7 +13,7 @@ export default {
     tabSummary: 'सारांश',
     searchPlaceholder: 'कमोडिटी खोजें...',
     commodityCount: '{{count}} कमोडिटी',
-    commodityCount_plural: '{{count}} कमोडिटीज़',
+    commodityCount_other: '{{count}} कमोडिटीज़',
     commoditySingular: 'कमोडिटी',
     noCommoditiesFound: 'कोई कमोडिटी नहीं मिली',
     adjustSearch: 'खोज समायोजित करने का प्रयास करें',

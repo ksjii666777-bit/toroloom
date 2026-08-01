@@ -183,7 +183,7 @@ export default {
     riskPercent: 'जोखिम: {{percent}}%',
     limited: 'सीमित',
     oneLeg: '{{count}} लेग',
-    oneLeg_plural: '{{count}} लेग',
+    oneLeg_other: '{{count}} लेग',
 
     // ── Trade History ─────────────────────────────────────────────────────
     totalBuys: 'कुल खरीद',

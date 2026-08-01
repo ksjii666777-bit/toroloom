@@ -11,7 +11,7 @@ export default {
     filterAsian: 'Asian',
     filterOther: 'Other',
     pairCount: '{{count}} pair',
-    pairCount_plural: '{{count}} pairs',
+    pairCount_other: '{{count}} pairs',
     pairSingular: 'pair',
     noPairsFound: 'No pairs found',
     adjustSearch: 'Try adjusting search',

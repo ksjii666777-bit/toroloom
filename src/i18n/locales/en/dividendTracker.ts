@@ -21,13 +21,13 @@ export default {
 
     // Upcoming tab
     upcomingEvents: '{{count}} upcoming event',
-    upcomingEvents_plural: '{{count}} upcoming events',
+    upcomingEvents_other: '{{count}} upcoming events',
     noUpcomingTitle: 'No Upcoming Dividends',
     noUpcomingDesc: 'Holdings with dividend-paying stocks will appear here',
 
     // History tab
     historyPayments: '{{count}} payment recorded',
-    historyPayments_plural: '{{count}} payments recorded',
+    historyPayments_other: '{{count}} payments recorded',
     noHistoryTitle: 'No Dividend History',
     noHistoryDesc: 'Historical dividend payments will appear here',
     eventsLabel: 'events',

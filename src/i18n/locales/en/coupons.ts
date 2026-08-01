@@ -4,7 +4,7 @@ export default {
     noCoupons: 'No Coupons Available',
     noCouponsMsg: 'There are no active promo codes right now.\nCheck back later for discounts!',
     couponsAvailable: '{{count}} Coupon Available',
-    couponsAvailable_plural: '{{count}} Coupons Available',
+    couponsAvailable_other: '{{count}} Coupons Available',
     useThisCoupon: 'Use This Coupon',
     couponApplied: 'Coupon {{code}} applied! Returning to subscription...',
     infoText: 'Tap "Use This Coupon" on any promo code to apply it and return to the subscription screen.',
