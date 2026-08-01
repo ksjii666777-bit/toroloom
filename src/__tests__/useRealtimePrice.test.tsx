@@ -15,35 +15,51 @@ import { useRealtimePrice } from '../hooks/useRealtimePrice';
 
 // ── Hoisted: Controlled WebSocket mock ──────────────────────
 // Must be vi.hoisted so it's available inside vi.mock factories.
-const { mockWS, mockWsCallbacks } = vi.hoisted(() => {
+// `wsState.activeWS` is the instance getActiveWS() returns. Tests flip it to
+// null via setActiveWS(null) to simulate "WS unavailable" — the guard
+// regression scenario (see useForexRates/useRealtimePrice null-crash fix).
+// Note: vi.mock factories are hoisted above this block, so they can only
+// reference module-scope names — hence the mutable wsState object.
+const { mockWS, mockWsCallbacks, wsState, setActiveWS } = vi.hoisted(() => {
   let connectionCb: ((c: boolean) => void) | null = null;
   let priceCb: ((d: any) => void) | null = null;
   let candleCb: ((d: any) => void) | null = null;
 
+  const wsState: { activeWS: any } = { activeWS: null };
+
+  const mockWS = {
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    subscribe: vi.fn((_stockId: string, onPrice: any, onCandle: any) => {
+      priceCb = onPrice;
+      candleCb = onCandle;
+    }),
+    unsubscribe: vi.fn(),
+    onConnectionChangeCallback: vi.fn((cb: (c: boolean) => void) => {
+      connectionCb = cb;
+    }),
+  };
+
+  // Default: WS available (existing lifecycle tests depend on this).
+  wsState.activeWS = mockWS;
+
   return {
-    mockWS: {
-      connect: vi.fn(),
-      disconnect: vi.fn(),
-      subscribe: vi.fn((_stockId: string, onPrice: any, onCandle: any) => {
-        priceCb = onPrice;
-        candleCb = onCandle;
-      }),
-      unsubscribe: vi.fn(),
-      onConnectionChangeCallback: vi.fn((cb: (c: boolean) => void) => {
-        connectionCb = cb;
-      }),
-    },
+    mockWS,
     mockWsCallbacks: {
       triggerConnection: (c: boolean) => connectionCb?.(c),
       triggerPrice: (d: any) => priceCb?.(d),
       triggerCandle: (d: any) => candleCb?.(d),
+    },
+    wsState,
+    setActiveWS: (ws: any) => {
+      wsState.activeWS = ws;
     },
   };
 });
 
 // Override the global wsRegistry mock with our controllable mock.
 vi.mock('../services/wsRegistry', () => ({
-  getActiveWS: vi.fn(() => mockWS),
+  getActiveWS: vi.fn(() => wsState.activeWS),
 }));
 
 // ── Test Harness ───────────────────────────────────────────────
@@ -458,5 +474,59 @@ describe('useRealtimePrice — loadHistory', () => {
     const len2 = harnessResult.candleHistory.length;
 
     expect(len2).toBeGreaterThan(len1);
+  });
+});
+
+describe('useRealtimePrice — WS Unavailable (getActiveWS → null)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+    // Simulate "no active WebSocket" (e.g. AppNavigator.test.tsx mocks
+    // getActiveWS: () => null — this used to crash the hook).
+    setActiveWS(null);
+  });
+
+  afterEach(() => {
+    // Restore the default WS for the rest of the suite.
+    setActiveWS(mockWS);
+    vi.useRealTimers();
+  });
+
+  it('does not crash when getActiveWS returns null', () => {
+    expect(() => render(<Harness stockId="RELIANCE" basePrice={2890} />)).not.toThrow();
+  });
+
+  it('skips connect / subscribe / callback registration when WS is unavailable', () => {
+    render(<Harness stockId="RELIANCE" basePrice={2890} />);
+    expect(mockWS.connect).not.toHaveBeenCalled();
+    expect(mockWS.subscribe).not.toHaveBeenCalled();
+    expect(mockWS.onConnectionChangeCallback).not.toHaveBeenCalled();
+  });
+
+  it('keeps the simulated-price fallback moving while WS is unavailable', () => {
+    render(<Harness stockId="RELIANCE" basePrice={2890} />);
+    const price1 = harnessResult.currentPrice;
+    advance(3000);
+    expect(harnessResult.currentPrice).not.toBe(price1);
+    expect(harnessResult.isConnected).toBe(false);
+  });
+
+  it('subscribes on a later mount once the WS becomes available', () => {
+    render(<Harness stockId="RELIANCE" basePrice={2890} />);
+    expect(mockWS.subscribe).not.toHaveBeenCalled();
+
+    setActiveWS(mockWS);
+    render(<Harness stockId="RELIANCE" basePrice={2890} />);
+
+    expect(mockWS.subscribe).toHaveBeenCalledWith(
+      'RELIANCE',
+      expect.any(Function),
+      expect.any(Function)
+    );
+  });
+
+  it('unmounts cleanly without a WS (no cleanup leak)', () => {
+    const { unmount } = render(<Harness stockId="RELIANCE" basePrice={2890} />);
+    expect(() => act(() => unmount())).not.toThrow();
   });
 });
