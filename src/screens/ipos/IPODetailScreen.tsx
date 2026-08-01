@@ -478,7 +478,7 @@ export default function IPODetailScreen({ route, navigation }: any) {
               style={styles.bottomApplyGradient}
             >
               <Ionicons name="phone-portrait-outline" size={16} color="#0A0D14" />
-              <Text style={styles.bottomApplyText}>Apply via UPI</Text>
+              <Text style={styles.bottomApplyText}>{t('ipos.applyViaUPI')}</Text>
             </LinearGradient>
           </TouchableOpacity>
         ) : ipo.subscriptionStatus === 'upcoming' ? (

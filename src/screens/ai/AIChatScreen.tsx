@@ -30,13 +30,13 @@ interface ChatMessage {
 // Sample questions for quick access
 // ============================================================================
 
-const SAMPLE_QUESTIONS = [
-  { icon: '💰', label: 'Portfolio value?', query: 'What is my total portfolio value?' },
-  { icon: '📈', label: 'Best performer', query: 'Which is my best performing stock?' },
-  { icon: '📉', label: 'Worst performer', query: 'Which is my worst performing stock?' },
-  { icon: '🏆', label: 'Total P&L', query: 'What is my total profit and loss?' },
-  { icon: '📊', label: 'Sector allocation', query: 'How is my portfolio allocated across sectors?' },
-  { icon: '🔄', label: 'SIP status', query: 'How are my SIP investments doing?' },
+const SAMPLE_QUESTION_KEYS = [
+  { icon: '💰', labelKey: 'ai.qPortfolioValue', query: 'What is my total portfolio value?' },
+  { icon: '📈', labelKey: 'ai.qBestPerformer', query: 'Which is my best performing stock?' },
+  { icon: '📉', labelKey: 'ai.qWorstPerformer', query: 'Which is my worst performing stock?' },
+  { icon: '🏆', labelKey: 'ai.qTotalPnl', query: 'What is my total profit and loss?' },
+  { icon: '📊', labelKey: 'ai.qSectorAllocation', query: 'How is my portfolio allocated across sectors?' },
+  { icon: '🔄', labelKey: 'ai.qSipStatus', query: 'How are my SIP investments doing?' },
 ];
 
 // ============================================================================
@@ -110,7 +110,7 @@ function buildPortfolioContext(): PortfolioContext {
   };
 }
 
-function generateResponse(query: string, ctx: PortfolioContext): string {
+function generateResponse(query: string, ctx: PortfolioContext, t: any): string {
   const q = query.toLowerCase();
 
   // Helper to format response with portfolio context
@@ -119,22 +119,34 @@ function generateResponse(query: string, ctx: PortfolioContext): string {
 
   // Portfolio value
   if (q.includes('portfolio value') || q.includes('worth') || q.includes('total value') || q.includes('how much')) {
-    return `Your portfolio is worth **${formatCurrency(ctx.totalValue)}** across ${ctx.holdingsCount} holdings.\n\n` +
-      `You've invested ${formatCurrency(ctx.totalInvested)} total. ${pnlEmoji} **${pnlSign}${formatCurrency(ctx.totalPnl)}** (${pnlSign}${ctx.totalPnlPercent.toFixed(1)}%) overall ${ctx.totalPnl >= 0 ? 'profit' : 'loss'}.`;
+    return t('ai.chatPortfolioWorth', {
+      value: formatCurrency(ctx.totalValue),
+      count: ctx.holdingsCount,
+      invested: formatCurrency(ctx.totalInvested),
+      emoji: pnlEmoji,
+      sign: pnlSign,
+      pnl: formatCurrency(ctx.totalPnl),
+      pct: ctx.totalPnlPercent.toFixed(1),
+      result: ctx.totalPnl >= 0 ? t('ai.chatProfit') : t('ai.chatLoss'),
+    });
   }
 
   // P&L / profit and loss
   if (q.includes('pnl') || q.includes('profit') || q.includes('loss') || q.includes('return') || q.includes('performance')) {
-    let resp = `📊 **Portfolio Performance**\n\n` +
-      `Total Invested: ${formatCurrency(ctx.totalInvested)}\n` +
-      `Current Value: ${formatCurrency(ctx.totalValue)}\n` +
-      `${pnlEmoji} P&L: ${pnlSign}${formatCurrency(ctx.totalPnl)} (${pnlSign}${ctx.totalPnlPercent.toFixed(1)}%)\n\n` +
-      `📈 Winning: ${ctx.winners} holdings\n` +
-      `📉 Losing: ${ctx.losers} holdings\n` +
-      `💰 Win Rate: ${ctx.holdingsCount > 0 ? ((ctx.winners / ctx.holdingsCount) * 100).toFixed(0) : 0}%`;
+    let resp = t('ai.chatPerformance', {
+      invested: formatCurrency(ctx.totalInvested),
+      value: formatCurrency(ctx.totalValue),
+      emoji: pnlEmoji,
+      sign: pnlSign,
+      pnl: formatCurrency(ctx.totalPnl),
+      pct: ctx.totalPnlPercent.toFixed(1),
+      winners: ctx.winners,
+      losers: ctx.losers,
+      winRate: ctx.holdingsCount > 0 ? ((ctx.winners / ctx.holdingsCount) * 100).toFixed(0) : 0,
+    });
 
-    if (ctx.bestHolding) resp += `\n\n⭐ **Best:** ${ctx.bestHolding.name} (+${ctx.bestHolding.pnlPercent.toFixed(1)}%)`;
-    if (ctx.worstHolding) resp += `\n\n⚠️ **Worst:** ${ctx.worstHolding.name} (${ctx.worstHolding.pnlPercent.toFixed(1)}%)`;
+    if (ctx.bestHolding) resp += '\n\n' + t('ai.chatBestLine', { name: ctx.bestHolding.name, pct: ctx.bestHolding.pnlPercent.toFixed(1) });
+    if (ctx.worstHolding) resp += '\n\n' + t('ai.chatWorstLine', { name: ctx.worstHolding.name, pct: ctx.worstHolding.pnlPercent.toFixed(1) });
 
     return resp;
   }
@@ -142,23 +154,26 @@ function generateResponse(query: string, ctx: PortfolioContext): string {
   // Best performer
   if (q.includes('best') || q.includes('top') || q.includes('highest')) {
     if (ctx.bestHolding) {
-      return `🏆 **Best Performer**\n\nYour top performing holding is **${ctx.bestHolding.name}** with a gain of **+${ctx.bestHolding.pnlPercent.toFixed(1)}%**. Great pick! 🎯`;
+      return t('ai.chatBestPerformer', { name: ctx.bestHolding.name, pct: ctx.bestHolding.pnlPercent.toFixed(1) });
     }
-    return "You don't have any holdings yet. Start investing to see your best performer!";
+    return t('ai.chatNoHoldingsBest');
   }
 
   // Worst performer
   if (q.includes('worst') || q.includes('lowest') || q.includes('underperform')) {
     if (ctx.worstHolding) {
-      return `⚠️ **Needs Attention**\n\nYour worst performing holding is **${ctx.worstHolding.name}** at **${ctx.worstHolding.pnlPercent.toFixed(1)}%**. Consider reviewing your strategy for this stock.`;
+      return t('ai.chatWorstPerformer', { name: ctx.worstHolding.name, pct: ctx.worstHolding.pnlPercent.toFixed(1) });
     }
-    return "You don't have any holdings yet.";
+    return t('ai.chatNoHoldingsShort');
   }
 
   // Sector allocation
   if (q.includes('sector') || q.includes('allocation') || q.includes('diversif') || q.includes('spread')) {
-    return `📊 **Sector Allocation**\n\nYour top sector is **${ctx.topSector}**. You have ${ctx.holdingsCount} holdings across different sectors.\n\n` +
-      `💡 Tip: A well-diversified portfolio across 5+ sectors helps manage risk. ${ctx.holdingsCount < 3 ? 'Consider adding more sectors for better diversification.' : ''}`;
+    return t('ai.chatSectorAllocation', {
+      sector: ctx.topSector,
+      count: ctx.holdingsCount,
+      extra: ctx.holdingsCount < 3 ? t('ai.chatSectorTipExtra') : '',
+    });
   }
 
   // SIP / mutual fund
@@ -166,32 +181,39 @@ function generateResponse(query: string, ctx: PortfolioContext): string {
     if (ctx.sipCount > 0) {
       const sipReturns = ctx.sipTotalValue - ctx.sipTotalInvested;
       const sipReturnsPct = ctx.sipTotalInvested > 0 ? (sipReturns / ctx.sipTotalInvested) * 100 : 0;
-      return `🔄 **SIP Summary**\n\nActive SIPs: ${ctx.sipCount}\n` +
-        `Total Invested: ${formatCurrency(ctx.sipTotalInvested)}\n` +
-        `Current Value: ${formatCurrency(ctx.sipTotalValue)}\n` +
-        `${sipReturns >= 0 ? '📈' : '📉'} Returns: ${sipReturns >= 0 ? '+' : ''}${formatCurrency(sipReturns)} (${sipReturns >= 0 ? '+' : ''}${sipReturnsPct.toFixed(1)}%)\n\n` +
-        `💰 Systematic investing builds wealth over time! Keep it up! 💪`;
+      return t('ai.chatSipSummary', {
+        count: ctx.sipCount,
+        invested: formatCurrency(ctx.sipTotalInvested),
+        value: formatCurrency(ctx.sipTotalValue),
+        emoji: sipReturns >= 0 ? '📈' : '📉',
+        sign: sipReturns >= 0 ? '+' : '',
+        returns: formatCurrency(sipReturns),
+        pct: sipReturnsPct.toFixed(1),
+      });
     }
-    return "You don't have any active SIPs yet. Consider starting one to build wealth systematically! 💰";
+    return t('ai.chatNoSips');
   }
 
   // Holdings count / summary
   if (q.includes('holding') || q.includes('stock') || q.includes('how many') || q.includes('count')) {
-    return `📦 **Holdings Summary**\n\nYou have **${ctx.holdingsCount} holdings** in your portfolio.\n` +
-      `📈 ${ctx.winners} profitable · 📉 ${ctx.losers} at loss\n` +
-      `💰 Total invested: ${formatCurrency(ctx.totalInvested)}\n` +
-      `💵 Current value: ${formatCurrency(ctx.totalValue)}`;
+    return t('ai.chatHoldingsSummary', {
+      count: ctx.holdingsCount,
+      winners: ctx.winners,
+      losers: ctx.losers,
+      invested: formatCurrency(ctx.totalInvested),
+      value: formatCurrency(ctx.totalValue),
+    });
   }
 
   // Market
   if (q.includes('market') || q.includes('nifty') || q.includes('sensex') || q.includes('index')) {
     const indices = useMarketStore.getState().indices;
     if (indices.length > 0) {
-      return `📊 **Market Overview**\n\nMarket is trading **${ctx.marketStatus === 'up' ? '🟢 higher' : ctx.marketStatus === 'down' ? '🔴 lower' : '🟡 mixed'}** today.\n\n` +
-        indices.map(i => `${i.shortName}: ${formatCurrency(i.currentValue)} (${i.isPositive ? '+' : ''}${i.changePercent.toFixed(2)}%)`).join('\n') +
-        '\n\n📌 Data refreshes in real-time.';
+      const status = ctx.marketStatus === 'up' ? t('ai.chatMarketUp') : ctx.marketStatus === 'down' ? t('ai.chatMarketDown') : t('ai.chatMarketMixed');
+      const lines = indices.map(i => `${i.shortName}: ${formatCurrency(i.currentValue)} (${i.isPositive ? '+' : ''}${i.changePercent.toFixed(2)}%)`).join('\n');
+      return t('ai.chatMarketOverview', { status, indices: lines });
     }
-    return 'Market data is currently unavailable. Please check back later.';
+    return t('ai.chatMarketUnavailable');
   }
 
   // AI insights
@@ -199,23 +221,21 @@ function generateResponse(query: string, ctx: PortfolioContext): string {
     const insights = useAIStore.getState().insights;
     if (insights.length > 0) {
       const top = insights.slice(0, 3);
-      return `🤖 **AI Insights Summary**\n\n` +
-        top.map(i => `• *${i.symbol}*: ${i.summary} (${i.type} · ${i.confidence}% confidence)`).join('\n') +
-        `\n\n📌 View all insights in the AI Insights section.`;
+      const items = top.map(i => `• *${i.symbol}*: ${i.summary} (${i.type} · ${i.confidence}% confidence)`).join('\n');
+      return t('ai.chatInsightsSummary', { items });
     }
-    return "No AI insights available right now. Pull to refresh or try again later.";
+    return t('ai.chatNoInsights');
   }
 
   // General / fallback with contextual portfolio summary
-  return `👋 **Portfolio Overview**\n\n` +
-    `Here's a quick snapshot of your investments:\n\n` +
-    `💼 **${ctx.holdingsCount}** holdings · 💰 **${formatCurrency(ctx.totalValue)}** total value\n` +
-    `${pnlEmoji} **${pnlSign}${formatCurrency(ctx.totalPnl)}** (${pnlSign}${ctx.totalPnlPercent.toFixed(1)}%) overall\n\n` +
-    `💡 Try asking:\n` +
-    `• "What is my portfolio value?"\n` +
-    `• "How are my SIPs doing?"\n` +
-    `• "Which stock should I analyze?"\n` +
-    `• "Show me market overview"`;
+  return t('ai.chatPortfolioOverview', {
+    count: ctx.holdingsCount,
+    value: formatCurrency(ctx.totalValue),
+    emoji: pnlEmoji,
+    sign: pnlSign,
+    pnl: formatCurrency(ctx.totalPnl),
+    pct: ctx.totalPnlPercent.toFixed(1),
+  });
 }
 
 // ============================================================================
@@ -231,7 +251,7 @@ export default function AIChatScreen({ navigation }: any) {
     {
       id: 'welcome',
       role: 'assistant',
-      text: "👋 **Welcome to AI Assistant!**\n\nAsk me anything about your portfolio, stocks, market, or investments. I can help you with:\n\n💰 Portfolio value & P&L 📊 Sector allocation 📈 Stock performance 🔄 SIP status\n\nTry one of the quick questions below!",
+      text: t('ai.chatWelcome'),
       timestamp: Date.now(),
     },
   ]);
@@ -266,7 +286,7 @@ export default function AIChatScreen({ navigation }: any) {
     await new Promise(r => setTimeout(r, 800 + Math.random() * 700));
 
     const ctx = buildPortfolioContext();
-    const responseText = generateResponse(query, ctx);
+    const responseText = generateResponse(query, ctx, t);
 
     const assistantMsg: ChatMessage = {
       id: `ai_${Date.now()}`,
@@ -276,7 +296,7 @@ export default function AIChatScreen({ navigation }: any) {
     };
     setMessages(prev => [...prev, assistantMsg]);
     setIsThinking(false);
-  }, [inputText, isThinking]);
+  }, [inputText, isThinking, t]);
 
   const handleQuickQuestion = useCallback((query: string) => {
     handleSend(query);
@@ -338,9 +358,9 @@ export default function AIChatScreen({ navigation }: any) {
             <Ionicons name="bulb" size={18} color={colors.primary} />
           </View>
           <View>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>AI Assistant</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('ai.chatHeaderTitle')}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 1 }}>
-              <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>Portfolio & Market Q&A</Text>
+              <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>{t('ai.chatHeaderSubtitle')}</Text>
               {activeProvider && (
                 <View style={[styles.providerBadge, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '25' }]}>
                   <Text style={[styles.providerBadgeText, { color: colors.primary }]} numberOfLines={1}>
@@ -359,7 +379,7 @@ export default function AIChatScreen({ navigation }: any) {
           onPress={() => setMessages([{
             id: 'welcome',
             role: 'assistant',
-            text: "👋 **Welcome back!**\n\nAsk me anything about your portfolio, stocks, or market.\n\nTry:\n• \"How is my portfolio doing?\"\n• \"Best performing stock?\"\n• \"SIP summary\"",
+            text: t('ai.chatWelcomeBack'),
             timestamp: Date.now(),
           }])}
         >
@@ -381,14 +401,14 @@ export default function AIChatScreen({ navigation }: any) {
             {/* Quick questions (show only when no messages besides welcome) */}
             {messages.length === 1 && (
               <View style={styles.quickGrid}>
-                {SAMPLE_QUESTIONS.map((q, i) => (
+                {SAMPLE_QUESTION_KEYS.map((q, i) => (
                   <Pressable
                     key={`chat_${i}`}
                     style={[styles.quickChip, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
                     onPress={() => handleQuickQuestion(q.query)}
                   >
                     <Text style={styles.quickIcon}>{q.icon}</Text>
-                    <Text style={[styles.quickLabel, { color: colors.textSecondary }]}>{q.label}</Text>
+                    <Text style={[styles.quickLabel, { color: colors.textSecondary }]}>{t(q.labelKey)}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -402,7 +422,7 @@ export default function AIChatScreen({ navigation }: any) {
                 </View>
                 <View style={[styles.bubble, styles.assistantBubble, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                   <ActivityIndicator size="small" color={colors.primary} />
-                  <Text style={[styles.thinkingText, { color: colors.textMuted }]}>Analyzing your portfolio...</Text>
+                  <Text style={[styles.thinkingText, { color: colors.textMuted }]}>{t('ai.chatThinking')}</Text>
                 </View>
               </View>
             )}

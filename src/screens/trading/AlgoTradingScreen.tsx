@@ -697,7 +697,10 @@ export default function AlgoTradingScreen() {
           <View style={[screenStyles.savedInfo, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Ionicons name="archive-outline" size={18} color={colors.primary} />
             <Text style={[screenStyles.savedInfoText, { color: colors.textMuted }]}>
-              {savedStrategies.length} saved {savedStrategies.length === 1 ? 'strategy' : 'strategies'}
+              {t('trading.savedStrategies', {
+                count: savedStrategies.length,
+                plural: t('trading.savedStrategy', { count: savedStrategies.length }),
+              })}
             </Text>
           </View>
         )}

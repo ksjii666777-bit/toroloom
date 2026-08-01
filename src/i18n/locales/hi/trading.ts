@@ -300,6 +300,7 @@ export default {
     slippage: 'स्लिपेज: {{percent}}',
     totalFees: 'कुल शुल्क: {{amount}}',
     savedStrategies: '{{count}} सहेजी {{plural}}',
+    savedStrategy: 'स्ट्रैटेजी',
     savedStrategy_one: 'स्ट्रैटेजी',
     savedStrategy_other: 'स्ट्रैटेजियां',
     missingFormulas: 'गुम फ़ॉर्मूले',

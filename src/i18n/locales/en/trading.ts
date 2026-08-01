@@ -300,6 +300,7 @@ export default {
     slippage: 'Slippage: {{percent}}',
     totalFees: 'Total fees: {{amount}}',
     savedStrategies: '{{count}} saved {{plural}}',
+    savedStrategy: 'strategy',
     savedStrategy_one: 'strategy',
     savedStrategy_other: 'strategies',
     missingFormulas: 'Missing Formulas',

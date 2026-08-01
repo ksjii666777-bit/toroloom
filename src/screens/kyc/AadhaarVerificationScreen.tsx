@@ -143,7 +143,7 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
     } finally {
       setIsLoading(false);
     }
-  }, [cleanedAadhaar, isAadhaarValid, consentGiven, startOtpTimer]);
+  }, [cleanedAadhaar, isAadhaarValid, consentGiven, startOtpTimer, t]);
 
   // Step 2: Verify OTP
   const handleVerifyOtp = useCallback(async () => {
@@ -226,8 +226,7 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
               <View style={styles.infoRow}>
                 <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
                 <Text style={styles.infoText}>
-                  Your Aadhaar details will be verified via UIDAI. Only masked data
-                  (last 4 digits) is stored. We never store your full Aadhaar number.
+                  {t('kyc.aadhaarInfo')}
                 </Text>
               </View>
             </Card>
@@ -352,9 +351,9 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
                 <View style={[styles.resultIcon, { backgroundColor: colors.success + '20' }]}>
                   <Ionicons name="checkmark-circle" size={48} color={colors.success} />
                 </View>
-                <Text style={styles.resultTitle}>Aadhaar Verified ✓</Text>
+                <Text style={styles.resultTitle}>{t('kyc.aadhaarVerifiedTitle')}</Text>
               </View>
-              <Text style={styles.resultSubtitle}>Your Aadhaar has been verified successfully via UIDAI</Text>
+              <Text style={styles.resultSubtitle}>{t('kyc.aadhaarVerifiedMsg')}</Text>
 
               <View style={styles.resultDivider} />
 

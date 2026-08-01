@@ -23,6 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { kycApi } from '../../services/api/kyc';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -41,6 +42,7 @@ const DOCUMENT_TYPES = [
 
 export default function DigiLockerScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [isConnecting, setIsConnecting] = useState(false);
@@ -63,13 +65,13 @@ export default function DigiLockerScreen({ navigation }: any) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch (err: any) {
-      const msg = err?.body?.error || err?.message || 'Failed to fetch documents';
+      const msg = err?.body?.error || err?.message || t('kyc.failedFetch');
       setError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsFetching(false);
     }
-  }, []);
+  }, [t]);
 
   // Step 1: Get DigiLocker auth URL and open consent
   const handleConnect = useCallback(async () => {
@@ -83,23 +85,21 @@ export default function DigiLockerScreen({ navigation }: any) {
       // In production: open in WebView for DigiLocker OAuth consent.
       // For mock: show the consent flow UI directly.
       Alert.alert(
-        'DigiLocker Consent',
-        'You will be redirected to DigiLocker to authorize document sharing.\n\n' +
-        'Toroloom will access:\n• Aadhaar Card\n• PAN Card\n• Voter ID\n• Address Proof\n\n' +
-        'This is a mock — in production, the DigiLocker OAuth window will open here.',
+        t('kyc.digiConsentTitle'),
+        t('kyc.digiConsentMsg'),
         [
-          { text: 'Cancel', style: 'cancel', onPress: () => setIsConnecting(false) },
-          { text: 'Authorize', onPress: () => handleFetchDocuments(data.referenceId) },
+          { text: t('kyc.cancel'), style: 'cancel', onPress: () => setIsConnecting(false) },
+          { text: t('kyc.authorize'), onPress: () => handleFetchDocuments(data.referenceId) },
         ],
       );
     } catch (err: any) {
-      const msg = err?.body?.error || err?.message || 'Failed to connect DigiLocker';
+      const msg = err?.body?.error || err?.message || t('kyc.failedConnect');
       setError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsConnecting(false);
     }
-  }, [handleFetchDocuments]);
+  }, [handleFetchDocuments, t]);
 
   const handleContinue = useCallback(() => {
     kycCallbackStore.invokeStepCallback('digilocker');
@@ -121,7 +121,7 @@ export default function DigiLockerScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>DigiLocker</Text>
+        <Text style={styles.title}>{t('kyc.digilocker')}</Text>
       </View>
 
       {/* Info Card */}
@@ -130,10 +130,9 @@ export default function DigiLockerScreen({ navigation }: any) {
           <View style={styles.heroIcon}>
             <Ionicons name="cloud-done" size={40} color={colors.primary} />
           </View>
-          <Text style={styles.heroTitle}>Verify via DigiLocker</Text>
+          <Text style={styles.heroTitle}>{t('kyc.digiVerifyVia')}</Text>
           <Text style={styles.heroDesc}>
-            Fetch your verified government-issued documents directly from DigiLocker.
-            No need to upload scanned copies.
+            {t('kyc.digiHeroDesc')}
           </Text>
         </View>
 
@@ -147,12 +146,12 @@ export default function DigiLockerScreen({ navigation }: any) {
         </View>
 
         <View style={styles.benefitsSection}>
-          <Text style={styles.benefitsTitle}>Benefits</Text>
+          <Text style={styles.benefitsTitle}>{t('kyc.digiBenefitsTitle')}</Text>
           {[
-            'Instant document verification',
-            'No manual upload required',
-            'Government-certified documents',
-            'One-time consent — auto-renewable',
+            t('kyc.digiBenefitInstant'),
+            t('kyc.digiBenefitNoUpload'),
+            t('kyc.digiBenefitGovt'),
+            t('kyc.digiBenefitConsent'),
           ].map((benefit, i) => (
             <View key={i} style={styles.benefitRow}>
               <Ionicons name="checkmark-circle" size={16} color={colors.success} />
@@ -177,7 +176,7 @@ export default function DigiLockerScreen({ navigation }: any) {
               <Ionicons name="cloud-download" size={22} color={colors.white} />
             )}
             <Text style={styles.connectBtnText}>
-              {isConnecting ? 'Connecting...' : isFetching ? 'Fetching Documents...' : 'Connect DigiLocker'}
+              {isConnecting ? t('kyc.digiConnecting') : isFetching ? t('kyc.digiFetching') : t('kyc.digiConnect')}
             </Text>
           </LinearGradient>
         </AnimatedPressable>
@@ -199,12 +198,12 @@ export default function DigiLockerScreen({ navigation }: any) {
               <Ionicons name="checkmark-circle" size={24} color={colors.success} />
             </View>
             <Text style={styles.documentsTitle}>
-              {documents.length} Document{documents.length > 1 ? 's' : ''} Fetched
+              {t('kyc.documentsFetched', { count: documents.length, plural: documents.length > 1 ? 's' : '' })}
             </Text>
           </View>
 
           <Text style={styles.documentSub}>
-            Verified documents from DigiLocker are used for your KYC verification.
+            {t('kyc.digiDocumentSub')}
           </Text>
 
           {documents.map((doc, i) => (
@@ -230,7 +229,7 @@ export default function DigiLockerScreen({ navigation }: any) {
             style={{ marginTop: SPACING.xl }}
           >
             <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
-              <Text style={styles.continueBtnText}>Complete Verification</Text>
+              <Text style={styles.continueBtnText}>{t('kyc.completeVerification')}</Text>
               <Ionicons name="arrow-forward" size={20} color={colors.white} />
             </LinearGradient>
           </AnimatedPressable>

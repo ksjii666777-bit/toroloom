@@ -658,7 +658,7 @@ export default function USStocksTradingScreen({ navigation }: any) {
           <Ionicons name="search" size={18} color={colors.textMuted} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search stocks by symbol, name, or sector..."
+            placeholder={t('usMarkets.searchStocksBy')}
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}

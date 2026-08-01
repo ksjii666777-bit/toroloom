@@ -34,4 +34,5 @@ export default {
     brokerConnected: 'Broker Connected',
     viewOnly: 'View Only',
     stocksUp: 'stocks up',
+    searchStocksBy: 'Search stocks by symbol, name, or sector...',
 };

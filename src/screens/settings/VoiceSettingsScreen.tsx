@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useVoiceStore, VOICE_MESSAGES } from '../../store/voiceStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -12,33 +13,37 @@ import Card from '../../components/ui/Card';
 
 Dimensions.get('window');
 
-const RATE_PRESETS = [
-  { label: 'Slow', value: 0.6, icon: 'timer-outline' },
-  { label: 'Normal', value: 0.85, icon: 'checkmark-circle' },
-  { label: 'Fast', value: 1.2, icon: 'rocket-outline' },
+const getRatePresets = (t: any) => [
+  { label: t('voiceSettings.slow'), value: 0.6, icon: 'timer-outline' },
+  { label: t('voiceSettings.normal'), value: 0.85, icon: 'checkmark-circle' },
+  { label: t('voiceSettings.fast'), value: 1.2, icon: 'rocket-outline' },
 ];
 
-const PITCH_PRESETS = [
-  { label: 'Low', value: 0.7, icon: 'arrow-down-circle' },
-  { label: 'Normal', value: 1.0, icon: 'checkmark-circle' },
-  { label: 'High', value: 1.5, icon: 'arrow-up-circle' },
+const getPitchPresets = (t: any) => [
+  { label: t('voiceSettings.low'), value: 0.7, icon: 'arrow-down-circle' },
+  { label: t('voiceSettings.normal'), value: 1.0, icon: 'checkmark-circle' },
+  { label: t('voiceSettings.high'), value: 1.5, icon: 'arrow-up-circle' },
 ];
 
-const TEST_MESSAGES = [
-  { label: 'Stop-Loss Alert', message: VOICE_MESSAGES.stopLossBreached },
-  { label: 'Profit Target', message: VOICE_MESSAGES.profitTargetHit },
-  { label: 'Lockdown Lifted', message: VOICE_MESSAGES.lockdownLifted },
-  { label: 'Daily Loss Warning', message: VOICE_MESSAGES.dailyLossWarning },
-  { label: 'Market Volatility', message: VOICE_MESSAGES.marketVolatility },
+const getTestMessages = (t: any) => [
+  { label: t('voiceSettings.testStopLoss'), message: VOICE_MESSAGES.stopLossBreached },
+  { label: t('voiceSettings.testProfitTarget'), message: VOICE_MESSAGES.profitTargetHit },
+  { label: t('voiceSettings.testLockdown'), message: VOICE_MESSAGES.lockdownLifted },
+  { label: t('voiceSettings.testDailyLoss'), message: VOICE_MESSAGES.dailyLossWarning },
+  { label: t('voiceSettings.testVolatility'), message: VOICE_MESSAGES.marketVolatility },
 ];
 
 export default function VoiceSettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
   const {
     enabled, rate, pitch, toggleVoice, setRate, setPitch,
   } = useVoiceStore();
   const speak = useVoiceStore(s => s.speak);
+  const ratePresets = getRatePresets(t);
+  const pitchPresets = getPitchPresets(t);
+  const testMessages = getTestMessages(t);
 
   return (
     <View style={styles.container}>
@@ -49,13 +54,13 @@ export default function VoiceSettingsScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <View>
-            <Text style={styles.title}>Voice Settings</Text>
-            <Text style={styles.subtitle}>AI Companion voice preferences</Text>
+            <Text style={styles.title}>{t('voiceSettings.title')}</Text>
+            <Text style={styles.subtitle}>{t('voiceSettings.subtitle')}</Text>
           </View>
         </View>
 
         {/* Voice Toggle */}
-        <Card title="Voice Announcements" subtitle="Enable or disable AI voice alerts">
+        <Card title={t('voiceSettings.announcementsTitle')} subtitle={t('voiceSettings.announcementsDesc')}>
           <View style={styles.toggleRow}>
             <View style={styles.toggleInfo}>
               <Ionicons
@@ -65,12 +70,12 @@ export default function VoiceSettingsScreen({ navigation }: any) {
               />
               <View>
                 <Text style={[styles.toggleLabel, { color: colors.text }]}>
-                  {enabled ? 'Voice is ON' : 'Voice is OFF'}
+                  {enabled ? t('voiceSettings.voiceOn') : t('voiceSettings.voiceOff')}
                 </Text>
                 <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
                   {enabled
-                    ? 'The AI Companion will announce alerts and events'
-                    : 'All voice announcements are muted'}
+                    ? t('voiceSettings.voiceOnDesc')
+                    : t('voiceSettings.voiceOffDesc')}
                 </Text>
               </View>
             </View>
@@ -84,9 +89,9 @@ export default function VoiceSettingsScreen({ navigation }: any) {
         </Card>
 
         {/* Speech Rate */}
-        <Card title="Speech Rate" subtitle="How fast the AI speaks" style={{ marginTop: SPACING.md }}>
+        <Card title={t('voiceSettings.speechRate')} subtitle={t('voiceSettings.speechRateDesc')} style={{ marginTop: SPACING.md }}>
           <View style={styles.presetsRow}>
-            {RATE_PRESETS.map(p => (
+            {ratePresets.map(p => (
               <TouchableOpacity
                 key={p.value}
                 onPress={() => setRate(p.value)}
@@ -113,9 +118,9 @@ export default function VoiceSettingsScreen({ navigation }: any) {
         </Card>
 
         {/* Pitch */}
-        <Card title="Voice Pitch" subtitle="High or low voice tone" style={{ marginTop: SPACING.md }}>
+        <Card title={t('voiceSettings.voicePitch')} subtitle={t('voiceSettings.voicePitchDesc')} style={{ marginTop: SPACING.md }}>
           <View style={styles.presetsRow}>
-            {PITCH_PRESETS.map(p => (
+            {pitchPresets.map(p => (
               <TouchableOpacity
                 key={p.value}
                 onPress={() => setPitch(p.value)}
@@ -142,9 +147,9 @@ export default function VoiceSettingsScreen({ navigation }: any) {
         </Card>
 
         {/* Test Voice */}
-        <Card title="Test Voice" subtitle="Tap to hear a message" style={{ marginTop: SPACING.md }}>
+        <Card title={t('voiceSettings.testVoice')} subtitle={t('voiceSettings.testVoiceDesc2')} style={{ marginTop: SPACING.md }}>
           <View style={styles.testGrid}>
-            {TEST_MESSAGES.map(test => (
+            {testMessages.map(test => (
               <AnimatedPressable
                 key={test.label}
                 onPress={() => speak(test.message)}
@@ -165,7 +170,7 @@ export default function VoiceSettingsScreen({ navigation }: any) {
         </Card>
 
         {/* Voice Events List */}
-        <Card title="Voice Events" subtitle="Events that trigger voice announcements" style={{ marginTop: SPACING.md }}>
+        <Card title={t('voiceSettings.voiceEvents')} subtitle={t('voiceSettings.voiceEventsDesc')} style={{ marginTop: SPACING.md }}>
           {Object.entries(VOICE_MESSAGES).map(([key, msg], i, arr) => (
             <View key={key}>
               <View style={styles.eventRow}>
@@ -174,7 +179,7 @@ export default function VoiceSettingsScreen({ navigation }: any) {
                     {key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                   </Text>
                   <Text style={[styles.eventCategory, { color: colors.textMuted }]} numberOfLines={1}>
-                    {msg.category} · {msg.priority} priority
+                    {msg.category} · {t('voiceSettings.prioritySuffix', { value: msg.priority })}
                   </Text>
                 </View>
                 <View style={[styles.priorityBadge, {

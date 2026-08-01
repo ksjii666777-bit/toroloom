@@ -357,6 +357,7 @@ const chartStyles = StyleSheet.create({
 
 function EventCard({ event }: { event: LiveFeedEvent }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [shared, setShared] = useState(false);
   const sharedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirColor = event.direction === 'improving' ? '#10B981' : '#EF4444';
@@ -368,9 +369,9 @@ function EventCard({ event }: { event: LiveFeedEvent }) {
 ${event.message}
 Score: ${event.score > 0 ? '+' : ''}${event.score} · ${getSourceLabel(event.source)}
 
-Shared via Toroloom`;
-    return { message: shareMsg, title: `Sentiment Alert: ${event.symbol}` };
-  }, [event]);
+${t('ai.liveFeedSharedVia')}`;
+    return { message: shareMsg, title: t('ai.liveFeedSentimentAlert', { symbol: event.symbol }) };
+  }, [event, t]);
 
   const handleShare = useCallback(async () => {
     triggerHaptic();

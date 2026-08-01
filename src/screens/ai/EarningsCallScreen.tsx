@@ -698,7 +698,7 @@ export default function EarningsCallScreen({ navigation }: any) {
 
         {/* Source */}
         <Text style={[styles.sourceText, { color: colors.textMuted }]}>
-          Source: {selectedEarnings.source} · Generated {formatDate(selectedEarnings.date)}
+          {t('earningsCall.sourceText', { source: selectedEarnings.source, date: formatDate(selectedEarnings.date) })}
         </Text>
 
         <View style={{ height: 60 }} />

@@ -23,6 +23,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useWealthStore, type GoalCategory } from '../../store/wealthStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -66,6 +67,7 @@ const formatCompactINR = (n: number): string => {
 
 export function GoalCreateScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const addGoal = useWealthStore(s => s.addGoal);
 
@@ -290,7 +292,7 @@ export function GoalCreateScreen({ navigation }: any) {
           style={[styles.textArea, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
           value={notes}
           onChangeText={setNotes}
-          placeholder="Add any notes about this goal..."
+          placeholder={t('wealth.goalNotesPlaceholder')}
           placeholderTextColor={colors.textMuted}
           multiline
           numberOfLines={3}

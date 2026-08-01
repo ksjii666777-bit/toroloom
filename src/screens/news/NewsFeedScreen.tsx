@@ -322,6 +322,7 @@ function ArticleDetailModal({
   onBookmark: () => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const handleShare = useCallback(async () => {
@@ -329,12 +330,12 @@ function ArticleDetailModal({
     try {
       await Share.share({
         title: article.title,
-        message: `${article.title}\n\n${article.summary}\n\nvia Toroloom`,
+        message: `${article.title}\n\n${article.summary}\n\n${t('news.viaToroloom')}`,
       });
     } catch {
       // User cancelled share
     }
-  }, [article]);
+  }, [article, t]);
 
   if (!article) return null;
 

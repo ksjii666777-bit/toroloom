@@ -13,6 +13,7 @@ import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useReferralStore } from '../../store/referralStore';
 import { useAuthStore } from '../../store/authStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -25,11 +26,11 @@ const { width } = Dimensions.get('window');
 const REWARD_DISPLAY_COUNT = 20;
 
 // ─── Constants ────────────────────────────────────────────────
-const REFERRAL_BENEFITS = [
-  { icon: '💰', title: '₹100 per Referral', desc: 'Earn ₹100 for every friend who signs up and completes KYC' },
-  { icon: '🚀', title: 'Pro Trial for 7 Days', desc: 'Your friend gets a 7-day free trial of Toroloom Pro' },
-  { icon: '📈', title: 'No Cap on Earnings', desc: 'Refer unlimited friends — earn unlimited rewards' },
-  { icon: '✅', title: 'Instant Crediting', desc: 'Rewards are credited within 48 hours of friend\'s signup' },
+const getReferralBenefits = (t: any) => [
+  { icon: '💰', title: t('referral.benefit1Title'), desc: t('referral.benefit1Desc') },
+  { icon: '🚀', title: t('referral.benefit2Title'), desc: t('referral.benefit2Desc') },
+  { icon: '📈', title: t('referral.benefit3Title'), desc: t('referral.benefit3Desc') },
+  { icon: '✅', title: t('referral.benefit4Title'), desc: t('referral.benefit4Desc') },
 ];
 
 // ─── Status colours ───────────────────────────────────────────
@@ -42,6 +43,7 @@ const STATUS_COLORS: Record<string, string> = {
 // ─── Component ────────────────────────────────────────────────
 export default function ReferralScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user } = useAuthStore();
   const { referralStats, loadReferralStats } = useReferralStore();
@@ -56,11 +58,11 @@ export default function ReferralScreen({ navigation }: any) {
     try {
       await Clipboard.setStringAsync(referralStats.code);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Copied!', `Referral code "${referralStats.code}" copied to clipboard.`);
+      Alert.alert(t('referral.copiedTitle'), t('referral.copiedMsg', { code: referralStats.code }));
     } catch {
       // Fallback
     }
-  }, [referralStats]);
+  }, [referralStats, t]);
 
   // ── Native Share ──────────────────────────────────────────────
   const handleShare = useCallback(async () => {
@@ -68,74 +70,74 @@ export default function ReferralScreen({ navigation }: any) {
     if (!stats) return;
     try {
       await shareNative({
-        title: 'Join me on Toroloom!',
-        message: `Hey! I'm using Toroloom — the ultimate trading & investing app. Use my referral code "${stats.code}" when you sign up! 🚀\n\nApp soon available on Play Store.`,
+        title: t('referral.shareTitle'),
+        message: t('referral.shareMessage', { code: stats.code }),
         url: '',
-        authorName: user?.name || 'Toroloom User',
+        authorName: user?.name || t('referral.userFallback'),
       });
     } catch {
       // fallback
     }
-  }, [referralStats, user]);
+  }, [referralStats, user, t]);
 
   // ── Share via WhatsApp ────────────────────────────────────────
   const handleWhatsApp = useCallback(async () => {
     const stats = referralStats;
     if (!stats) return;
     const sent = await shareWhatsApp({
-      message: `Hey! Join me on Toroloom — the ultimate investing app! 🚀\n\nUse my code "${stats.code}" and we both get ₹100 free!\n\nApp soon available on Play Store.`,
+      message: t('referral.whatsappMessage', { code: stats.code }),
       url: '',
       authorName: user?.name,
     });
     if (!sent) {
-      Alert.alert('WhatsApp Not Found', 'Please install WhatsApp to share via WhatsApp.');
+      Alert.alert(t('referral.whatsappNotFound'), t('referral.whatsappNotFoundMsg'));
     }
-  }, [referralStats, user]);
+  }, [referralStats, user, t]);
 
   // ── Share via Telegram ────────────────────────────────────────
   const handleTelegram = useCallback(async () => {
     const stats = referralStats;
     if (!stats) return;
     const sent = await shareTelegram({
-      message: `Hey! Join me on Toroloom — the ultimate investing app! 🚀\n\nUse my code "${stats.code}" and we both get ₹100 free!\n\nApp soon available on Play Store.`,
+      message: t('referral.telegramMessage', { code: stats.code }),
       url: '',
       authorName: user?.name,
     });
     if (!sent) {
-      Alert.alert('Telegram Not Found', 'Please install Telegram to share via Telegram.');
+      Alert.alert(t('referral.telegramNotFound'), t('referral.telegramNotFoundMsg'));
     }
-  }, [referralStats, user]);
+  }, [referralStats, user, t]);
 
   // ── Invite friend by phone number (mock) ──────────────────────
   const handleInviteByPhone = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     Alert.alert(
-      'Invite via Phone Number',
-      'Enter your friend\'s phone number and we\'ll send them an invite link via SMS.',
+      t('referral.inviteViaPhone'),
+      t('referral.inviteViaPhoneMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Send Invite', onPress: () => {
-          Alert.alert('Invite Sent!', 'Your friend will receive an SMS with your referral link shortly.');
+        { text: t('referral.cancel'), style: 'cancel' },
+        { text: t('referral.sendInvite'), onPress: () => {
+          Alert.alert(t('referral.inviteSent'), t('referral.inviteSentMsg'));
         }},
       ]
     );
-  }, []);
+  }, [t]);
 
   // ── Stats cards ───────────────────────────────────────────────
   const statsCards = useMemo(() => {
     if (!referralStats) return [];
     return [
-      { label: 'Total Referrals', value: referralStats.totalReferrals.toString(), icon: 'people', color: '#6C63FF' },
-      { label: 'Active', value: referralStats.activeReferrals.toString(), icon: 'checkmark-circle', color: '#00C853' },
-      { label: 'Total Earned', value: `₹${referralStats.totalEarned}`, icon: 'wallet', color: '#FFC107' },
-      { label: 'Pending', value: `₹${referralStats.pendingRewards}`, icon: 'time', color: '#FF9800' },
+      { label: t('referral.totalReferrals'), value: referralStats.totalReferrals.toString(), icon: 'people', color: '#6C63FF' },
+      { label: t('referral.active'), value: referralStats.activeReferrals.toString(), icon: 'checkmark-circle', color: '#00C853' },
+      { label: t('referral.totalEarned'), value: `₹${referralStats.totalEarned}`, icon: 'wallet', color: '#FFC107' },
+      { label: t('referral.pending'), value: `₹${referralStats.pendingRewards}`, icon: 'time', color: '#FF9800' },
     ];
-  }, [referralStats]);
+  }, [referralStats, t]);
 
   // ── Reward item component ─────────────────────────────────────
   const RewardRow = useCallback(({ reward, index }: { reward: ReferralReward; index: number }) => {
     const statusColor = STATUS_COLORS[reward.status] || colors.textMuted;
-    const statusLabel = reward.status === 'credited' ? 'Credited' : reward.status === 'pending' ? 'Pending' : 'Expired';
+    const statusLabel = reward.status === 'credited' ? t('referral.credited') : reward.status === 'pending' ? t('referral.pendingStatus') : t('referral.expired');
 
     return (
       <Animated.View
@@ -151,7 +153,7 @@ export default function ReferralScreen({ navigation }: any) {
         <View style={styles.rewardInfo}>
           <Text style={styles.rewardName}>{reward.referredUserName}</Text>
           <Text style={styles.rewardDate}>
-            Joined {new Date(reward.joinedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+            {t('referral.joinedOn', { date: new Date(reward.joinedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) })}
           </Text>
         </View>
         <View style={styles.rewardRight}>
@@ -165,7 +167,7 @@ export default function ReferralScreen({ navigation }: any) {
         </View>
       </Animated.View>
     );
-  }, [colors, styles]);
+  }, [colors, styles, t]);
 
   return (
     <View style={styles.container}>
@@ -180,7 +182,7 @@ export default function ReferralScreen({ navigation }: any) {
               <Ionicons name="arrow-back" size={22} color={colors.text} />
             </View>
           </AnimatedPressable>
-          <Text style={styles.title}>Refer & Earn</Text>
+          <Text style={styles.title}>{t('referral.referEarn')}</Text>
           <View style={{ width: 44 }} />
         </View>
 
@@ -193,9 +195,9 @@ export default function ReferralScreen({ navigation }: any) {
             style={styles.heroBanner}
           >
             <Text style={styles.heroEmoji}>🎉</Text>
-            <Text style={styles.heroTitle}>Refer a Friend, Earn ₹100</Text>
+            <Text style={styles.heroTitle}>{t('referral.heroTitle')}</Text>
             <Text style={styles.heroSubtitle}>
-              Share your unique referral code with friends. When they sign up and complete KYC, you both get ₹100!
+              {t('referral.heroSubtitle')}
             </Text>
 
             {/* ── Referral Code Display ─────────────────────── */}
@@ -214,7 +216,7 @@ export default function ReferralScreen({ navigation }: any) {
                     style={styles.copyBtn}
                   >
                     <Ionicons name="copy-outline" size={20} color="#fff" />
-                    <Text style={styles.copyBtnText}>Copy</Text>
+                    <Text style={styles.copyBtnText}>{t('referral.copy')}</Text>
                   </LinearGradient>
                 </AnimatedPressable>
               </View>
@@ -223,10 +225,10 @@ export default function ReferralScreen({ navigation }: any) {
             {/* ── Share Actions Grid ─────────────────────────── */}
             <View style={styles.shareGrid}>
               {[
-                { icon: 'share-outline', label: 'Share', onPress: handleShare, color: '#fff' },
-                { icon: 'logo-whatsapp', label: 'WhatsApp', onPress: handleWhatsApp, color: '#25D366' },
-                { icon: 'paper-plane', label: 'Telegram', onPress: handleTelegram, color: '#0088CC' },
-                { icon: 'call-outline', label: 'SMS', onPress: handleInviteByPhone, color: '#00D2FF' },
+                { icon: 'share-outline', label: t('referral.share'), onPress: handleShare, color: '#fff' },
+                { icon: 'logo-whatsapp', label: t('referral.whatsapp'), onPress: handleWhatsApp, color: '#25D366' },
+                { icon: 'paper-plane', label: t('referral.telegram'), onPress: handleTelegram, color: '#0088CC' },
+                { icon: 'call-outline', label: t('referral.sms'), onPress: handleInviteByPhone, color: '#00D2FF' },
               ].map((action, i) => (
                 <AnimatedPressable
                   key={i}
@@ -261,9 +263,9 @@ export default function ReferralScreen({ navigation }: any) {
         </View>
 
         {/* ── How It Works ─────────────────────────────────── */}
-        <Card title="How It Works" subtitle="Earn rewards in 3 simple steps" style={styles.sectionCard}>
+        <Card title={t('referral.howItWorks')} subtitle={t('referral.howItWorksSub')} style={styles.sectionCard}>
           <View style={styles.benefitsList}>
-            {REFERRAL_BENEFITS.map((benefit, i) => (
+            {getReferralBenefits(t).map((benefit, i) => (
               <View key={i} style={styles.benefitRow}>
                 <View style={styles.benefitIconBg}>
                   <Text style={styles.benefitIcon}>{benefit.icon}</Text>
@@ -279,8 +281,8 @@ export default function ReferralScreen({ navigation }: any) {
 
         {/* ── Rewards History ──────────────────────────────── */}
         <Card
-          title="Rewards History"
-          subtitle={referralStats?.rewards.length ? `${referralStats.rewards.length} referral(s)` : 'No referrals yet'}
+          title={t('referral.rewardsHistory')}
+          subtitle={referralStats?.rewards.length ? t('referral.rewardsSubtitle', { count: referralStats.rewards.length }) : t('referral.noRewards')}
           style={styles.sectionCard}
         >
           {referralStats && referralStats.rewards.length > 0 ? (
@@ -294,9 +296,9 @@ export default function ReferralScreen({ navigation }: any) {
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="people-outline" size={48} color={colors.textMuted} />
-              <Text style={styles.emptyTitle}>No Referrals Yet</Text>
+              <Text style={styles.emptyTitle}>{t('referral.emptyTitle')}</Text>
               <Text style={styles.emptyDesc}>
-                Share your referral code with friends and start earning rewards!
+                {t('referral.emptyDesc')}
               </Text>
             </View>
           )}
@@ -304,8 +306,7 @@ export default function ReferralScreen({ navigation }: any) {
 
         {/* ── Terms Note ───────────────────────────────────── */}
         <Text style={styles.termsNote}>
-          * Rewards are credited within 48 hours after your friend completes KYC and places their first trade.
-          Referral program is subject to change. T&C apply.
+          {t('referral.termsNote')}
         </Text>
 
         <View style={{ height: 100 }} />
@@ -326,7 +327,7 @@ export default function ReferralScreen({ navigation }: any) {
             style={styles.shareBtn}
           >
             <Ionicons name="share-social" size={20} color="#fff" />
-            <Text style={styles.shareBtnText}>Invite Friends & Earn ₹100 Each</Text>
+            <Text style={styles.shareBtnText}>{t('referral.shareBtnText')}</Text>
           </LinearGradient>
         </AnimatedPressable>
       </LinearGradient>

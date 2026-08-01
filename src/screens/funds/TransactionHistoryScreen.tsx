@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useFundStore, FundTransaction } from '../../store/fundStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatTimestamp } from '../../utils/formatters';
@@ -16,6 +17,7 @@ type TxFilter = 'all' | 'add' | 'withdraw';
 
 export default function TransactionHistoryScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { transactions } = useFundStore();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -64,7 +66,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Transaction History</Text>
+        <Text style={styles.headerTitle}>{t('funds.txHistoryTitle')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -73,13 +75,13 @@ export default function TransactionHistoryScreen({ navigation }: any) {
         <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summaryCard}>
           <View style={styles.summaryTopRow}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Total Added</Text>
+              <Text style={styles.summaryLabel}>{t('funds.txTotalAdded')}</Text>
               <Text style={[styles.summaryValue, { color: colors.marketUp }]}>
                 {formatCurrency(summary.totalAdd, true)}
               </Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Total Withdrawn</Text>
+              <Text style={styles.summaryLabel}>{t('funds.txTotalWithdrawn')}</Text>
               <Text style={[styles.summaryValue, { color: colors.marketDown }]}>
                 {formatCurrency(summary.totalWithdraw, true)}
               </Text>
@@ -87,7 +89,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryNetRow}>
-            <Text style={styles.summaryLabel}>Net Addition</Text>
+            <Text style={styles.summaryLabel}>{t('funds.txNetAddition')}</Text>
             <Text style={[styles.summaryNetValue, {
               color: summary.net >= 0 ? colors.marketUp : colors.marketDown,
             }]}>
@@ -101,7 +103,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
           <View style={styles.statItem}>
             <Ionicons name="swap-horizontal" size={16} color={colors.textMuted} />
             <Text style={styles.statValue}>{transactions.length}</Text>
-            <Text style={styles.statLabel}>Transactions</Text>
+            <Text style={styles.statLabel}>{t('funds.txTransactions')}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
@@ -109,7 +111,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
             <Text style={[styles.statValue, { color: colors.marketUp }]}>
               {transactions.filter(t => t.type === 'add').length}
             </Text>
-            <Text style={styles.statLabel}>Adds</Text>
+            <Text style={styles.statLabel}>{t('funds.txAdds')}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
@@ -117,7 +119,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
             <Text style={[styles.statValue, { color: colors.marketDown }]}>
               {transactions.filter(t => t.type === 'withdraw').length}
             </Text>
-            <Text style={styles.statLabel}>Withdrawals</Text>
+            <Text style={styles.statLabel}>{t('funds.txWithdrawals')}</Text>
           </View>
         </View>
 
@@ -130,7 +132,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
               onPress={() => setFilter(tab)}
             >
               <Text style={[styles.tabText, filter === tab && styles.tabTextActive]}>
-                {tab === 'all' ? 'All' : tab === 'add' ? 'Add Funds' : 'Withdrawals'}
+                {tab === 'all' ? t('funds.txAll') : tab === 'add' ? t('funds.txAddFunds') : t('funds.txWithdrawals')}
               </Text>
             </TouchableOpacity>
           ))}
@@ -140,11 +142,11 @@ export default function TransactionHistoryScreen({ navigation }: any) {
         {grouped.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>No Transactions</Text>
+            <Text style={styles.emptyTitle}>{t('funds.txEmptyTitle')}</Text>
             <Text style={styles.emptySubtitle}>
               {filter === 'all'
-                ? 'Your add/withdraw history will appear here'
-                : `No ${filter} transactions yet`}
+                ? t('funds.txEmptyAll')
+                : t('funds.txEmptyFilter', { filter })}
             </Text>
           </View>
         ) : (
@@ -174,10 +176,10 @@ export default function TransactionHistoryScreen({ navigation }: any) {
                         </View>
                         <View style={styles.txInfo}>
                           <Text style={styles.txTypeLabel}>
-                            {tx.type === 'add' ? 'Funds Added' : 'Funds Withdrawn'}
+                            {tx.type === 'add' ? t('funds.txFundsAdded') : t('funds.txFundsWithdrawn')}
                           </Text>
                           <Text style={styles.txMethod}>
-                            {tx.type === 'add' ? `via ${tx.method}` : `to ${tx.method}`}
+                            {tx.type === 'add' ? t('funds.txVia', { method: tx.method }) : t('funds.txTo', { method: tx.method })}
                           </Text>
                         </View>
                         <View style={styles.txRight}>
@@ -209,25 +211,25 @@ export default function TransactionHistoryScreen({ navigation }: any) {
                         <View style={styles.detailSection}>
                           <View style={styles.detailDivider} />
                           <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Transaction ID</Text>
+                            <Text style={styles.detailLabel}>{t('funds.txTransactionId')}</Text>
                             <Text style={styles.detailValue}>{tx.transactionId}</Text>
                           </View>
                           <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Amount</Text>
+                            <Text style={styles.detailLabel}>{t('funds.txAmount')}</Text>
                             <Text style={styles.detailValue}>{formatCurrency(tx.amount)}</Text>
                           </View>
                           <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Method</Text>
+                            <Text style={styles.detailLabel}>{t('funds.txMethod')}</Text>
                             <Text style={styles.detailValue}>{tx.method}</Text>
                           </View>
                           {tx.account && (
                             <View style={styles.detailRow}>
-                              <Text style={styles.detailLabel}>Account</Text>
+                              <Text style={styles.detailLabel}>{t('funds.txAccount')}</Text>
                               <Text style={styles.detailValue}>{tx.account}</Text>
                             </View>
                           )}
                           <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Status</Text>
+                            <Text style={styles.detailLabel}>{t('funds.txStatus')}</Text>
                             <Text style={[styles.detailValue, {
                               color: tx.status === 'completed' ? colors.marketUp
                                 : tx.status === 'pending' ? colors.warning
@@ -237,7 +239,7 @@ export default function TransactionHistoryScreen({ navigation }: any) {
                             </Text>
                           </View>
                           <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Date & Time</Text>
+                            <Text style={styles.detailLabel}>{t('funds.txDateTime')}</Text>
                             <Text style={styles.detailValue}>
                               {new Date(tx.timestamp).toLocaleString('en-IN')}
                             </Text>

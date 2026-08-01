@@ -79,7 +79,7 @@ export default function PanVerificationScreen({ navigation }: any) {
     } finally {
       setIsVerifying(false);
     }
-  }, [normalizedPan, isFormatValid]);
+  }, [normalizedPan, isFormatValid, t]);
 
   const handleContinue = useCallback(() => {
     kycCallbackStore.invokeStepCallback('pan', normalizedPan);
@@ -107,9 +107,7 @@ export default function PanVerificationScreen({ navigation }: any) {
           <View style={styles.infoRow}>
             <Ionicons name="information-circle" size={20} color={colors.primary} />
             <Text style={styles.infoText}>
-              PAN (Permanent Account Number) is a 10-character alphanumeric identifier
-              issued by the Income Tax Department. Your PAN will be verified via the
-              NSDL database.
+              {t('kyc.panInfo')}
             </Text>
           </View>
           <View style={styles.formatRow}>

@@ -34,4 +34,5 @@ export default {
     brokerConnected: 'ब्रोकर कनेक्टेड',
     viewOnly: 'केवल देखें',
     stocksUp: 'स्टॉक ऊपर',
+    searchStocksBy: 'प्रतीक, नाम या सेक्टर द्वारा स्टॉक खोजें...',
 };
