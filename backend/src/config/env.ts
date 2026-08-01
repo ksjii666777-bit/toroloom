@@ -46,7 +46,9 @@ export const env = {
   // 'memory'   → InMemoryStorage (default, no deps)
   // 'postgres' → PostgreSQLStorage (requires DATABASE_URL)
   // 'mongodb'  → MongoDBStorage (requires MONGODB_URI + MONGODB_DB_NAME)
-  storageBackend: (process.env.STORAGE_BACKEND || 'memory') as 'memory' | 'postgres' | 'mongodb',
+  // Trimmed so dashboard copy-paste whitespace (e.g. "postgres ") doesn't
+  // silently fall back to memory — getStorage() matches values exactly.
+  storageBackend: (process.env.STORAGE_BACKEND?.trim() || 'memory') as 'memory' | 'postgres' | 'mongodb',
 
   // ──── ZERO-HARDCODING ZONE — all blank below ─────────────────────────
   // Each must be set via the execution environment. No fallback values
@@ -56,10 +58,12 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || '',
 
   /** Connection string for the primary database. Provider-agnostic. */
-  databaseUrl: process.env.DATABASE_URL || '',
+  // Trimmed — dashboard copy-paste whitespace would otherwise break the pg
+  // connection string (same risk as STORAGE_BACKEND above).
+  databaseUrl: process.env.DATABASE_URL?.trim() || '',
 
   /** MongoDB URI (alternative storage backend). */
-  mongodbUri: process.env.MONGODB_URI || '',
+  mongodbUri: process.env.MONGODB_URI?.trim() || '',
 
   /** MongoDB database name. */
   mongodbDbName: process.env.MONGODB_DB_NAME || '',
