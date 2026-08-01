@@ -351,7 +351,9 @@ function TradeModal({
                 </Text>
               </View>
               <View>
-                <Text style={[styles.modalCoinName, { color: colors.text }]}>{coin?.name || ''}</Text>
+                {coin?.name && (
+                  <Text style={[styles.modalCoinName, { color: colors.text }]}>{coin.name}</Text>
+                )}
                 <Text style={[styles.modalCoinSymbol, { color: colors.textMuted }]}>
                   {coin?.symbol?.toUpperCase() || ''} · ${formatPrice(coin?.price || 0)}
                 </Text>
@@ -395,9 +397,11 @@ function TradeModal({
                 onChangeText={setQuantityStr}
                 keyboardType="decimal-pad"
               />
-              <Text style={[styles.modalInputSuffix, { color: colors.textMuted }]}>
-                {coin?.symbol?.toUpperCase() || ''}
-              </Text>
+              {coin?.symbol && (
+                <Text style={[styles.modalInputSuffix, { color: colors.textMuted }]}>
+                  {coin.symbol.toUpperCase()}
+                </Text>
+              )}
             </View>
             {/* Quick qty suggestions */}
             <View style={{ flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.xs }}>

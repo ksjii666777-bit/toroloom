@@ -345,7 +345,9 @@ function TradeModal({
                 <Ionicons name={stock ? getSectorIcon(stock.sector) as any : 'business'} size={20} color={stock ? getSectorColor(stock.sector) : '#6C63FF'} />
               </View>
               <View>
-                <Text style={[styles.modalStockName, { color: colors.text }]}>{stock?.symbol || ''}</Text>
+                {stock?.symbol && (
+                  <Text style={[styles.modalStockName, { color: colors.text }]}>{stock.symbol}</Text>
+                )}
                 <Text style={[styles.modalStockMeta, { color: colors.textMuted }]}>
                   {stock?.name || ''} · {formatUSD(stock?.price || 0)}
                 </Text>
