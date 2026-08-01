@@ -11,7 +11,6 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useABTestStore } from '../store/abTestStore';
-import type { ABExperiment } from '../types';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
 

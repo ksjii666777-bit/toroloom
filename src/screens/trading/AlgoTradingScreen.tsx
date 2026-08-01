@@ -27,7 +27,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
 
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
@@ -208,7 +207,6 @@ const tradeStyles = StyleSheet.create({
 
 export default function AlgoTradingScreen() {
   const { colors } = useTheme();
-  const { t } = useT();
   const navigation = useNavigation();
 
   const saveStrategy = useAlgoStrategyStore((s) => s.saveStrategy);

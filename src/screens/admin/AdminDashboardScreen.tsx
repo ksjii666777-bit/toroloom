@@ -12,7 +12,7 @@
  * ============================================================================
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -32,7 +32,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
 import { useAdminStore, SystemService } from '../../store/adminStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';

@@ -29,7 +29,7 @@ import type { PanVerificationResult } from '../../types';
 // PAN regex: 5 uppercase letters, 4 digits, 1 uppercase letter
 const PAN_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
 
-export default function PanVerificationScreen({ navigation, route }: any) {
+export default function PanVerificationScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 

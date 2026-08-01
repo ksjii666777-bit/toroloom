@@ -75,8 +75,7 @@ export default function CreatePollScreen({ navigation }: any) {
 
     Alert.alert(t('createPoll.alertCreated'), t('createPoll.alertCreatedMsg'), [
       { text: t('createPoll.ok'), onPress: () => navigation.goBack() },
-    ]);
-  }, [canSubmit, question, options, tagsText, selectedCategory, selectedDuration, createPoll, navigation]);
+    ]);    }, [canSubmit, question, options, tagsText, selectedCategory, selectedDuration, createPoll, navigation, t]);
 
   return (
     <KeyboardAvoidingView

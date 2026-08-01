@@ -37,7 +37,7 @@ const ACCOUNT_REGEX = /^\d{9,18}$/;
 
 type FlowStep = 'ifsc' | 'account' | 'verify' | 'linked' | 'manage';
 
-export default function BankLinkingScreen({ navigation, route }: any) {
+export default function BankLinkingScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

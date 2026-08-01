@@ -486,7 +486,6 @@ function TradeModal({
 
 export default function CryptoTradingScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const [coins, setCoins] = useState<CryptoAssetData[]>([]);

@@ -39,7 +39,7 @@ const DOCUMENT_TYPES = [
   { key: 'income', icon: 'document-text', label: 'Income Documents' },
 ];
 
-export default function DigiLockerScreen({ navigation, route }: any) {
+export default function DigiLockerScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 

@@ -115,7 +115,6 @@ function MiniChart({ data, width, height, colors, isActive }: MiniChartProps) {
   const chartH = height - pad * 2;
 
   const { path } = useMemo(() => {
-    let minP = 0, maxP = 1;
     if (!data || data.length < 2) {
       return { minP: 0, maxP: 1, path: '' };
     }

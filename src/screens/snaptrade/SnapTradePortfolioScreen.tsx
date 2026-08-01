@@ -17,7 +17,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, ActivityIndicator,
-  RefreshControl, Dimensions, Platform,
+  RefreshControl, Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

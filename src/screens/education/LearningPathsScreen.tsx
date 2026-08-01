@@ -16,7 +16,7 @@
 import React, { useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Dimensions, RefreshControl,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -73,7 +73,7 @@ export default function LearningPathsScreen({ navigation }: any) {
 
       return { ...path, progress, completedCourses, totalCourses: pathCourses.length };
     });
-  }, [courses, lessonProgress]);
+  }, [courses, lessonProgress, pathsData]);
 
   const totalPaths = pathsData.length;
   const totalCourses = courses.length;

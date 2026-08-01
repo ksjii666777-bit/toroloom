@@ -171,7 +171,7 @@ function SectorChip({ label, color }: { label: string; color: string }) {
 
 // ──── Performance Projection Card ──────────────────────────────────────────
 
-function PerformanceProjection({}: { nfo: NFOItem }) {
+function PerformanceProjection(_props: { nfo: NFOItem }) {
   const { colors } = useTheme();
 
   const projections = useMemo(() => {

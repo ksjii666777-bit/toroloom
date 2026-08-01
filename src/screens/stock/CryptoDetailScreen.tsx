@@ -184,8 +184,7 @@ function formatSupply(num: number | null | undefined): string {
 
 // ─── Main Screen ────────────────────────────────────────────────────────
 
-export default function CryptoDetailScreen({ route, navigation }: any) {
-  const { coinId, coinSymbol, coinName } = route.params || {};
+export default function CryptoDetailScreen({ route, navigation }: any) {    const { coinId, coinSymbol } = route.params || {};
   const { colors } = useTheme();
   const { t } = useT();
   // Call unconditionally (Rules of Hooks) — navigation prop is always available inside navigator

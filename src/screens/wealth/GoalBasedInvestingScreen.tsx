@@ -17,8 +17,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, TextInput,
-  Platform, Alert, Dimensions,
+  View, Text, StyleSheet, ScrollView, Pressable, TextInput,    Platform, Alert,
 } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';

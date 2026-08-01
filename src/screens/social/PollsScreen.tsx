@@ -69,9 +69,8 @@ export default function PollsScreen({ navigation }: any) {
     if (poll.userVote) {
       Alert.alert(t('polls.alreadyVoted'), t('polls.alreadyVotedMsg'));
       return;
-    }
-    voteOnPoll(poll.id, optionId);
-  }, [voteOnPoll]);
+    }      voteOnPoll(poll.id, optionId);
+    }, [voteOnPoll, t]);
 
   const handleLike = useCallback((pollId: string) => {
     toggleLikePoll(pollId);
@@ -121,8 +120,7 @@ export default function PollsScreen({ navigation }: any) {
       text: o.label,
       onPress: o.onPress,
       style: o.destructive ? 'destructive' as const : 'default' as const,
-    })));
-  }, [closePoll, deletePoll]);
+    })));    }, [closePoll, deletePoll, t]);
 
   const ALL_CATEGORIES: { key: PollCategory | 'all'; label: string; icon: string; color: string }[] = [
     { key: 'all', label: 'All', icon: 'apps', color: colors.primary },

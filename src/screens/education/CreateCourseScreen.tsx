@@ -10,7 +10,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { UserGeneratedCourse, CourseDraftLesson, QuizQuestion } from '../../types';
+import type { CourseDraftLesson, QuizQuestion } from '../../types';
 
 const COURSE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
 const COURSE_CATEGORIES = [

@@ -277,7 +277,6 @@ function TransactionRow({ txn, colors, styles }: { txn: RevenueTransaction; colo
 // ─── Payout Row Component ─────────────────────────────────────────────────
 
 function PayoutRow({ payout, colors, styles }: { payout: PayoutRequest; colors: any; styles: any }) {
-  const { t } = useT();
   const statusColor = payout.status === 'completed' ? '#00C853' : 
     payout.status === 'processing' ? '#FFC107' :
     payout.status === 'failed' ? '#FF5252' : '#6C63FF';

@@ -19,7 +19,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
-  Alert, Dimensions, Platform, Keyboard,
+  Alert, Platform, Keyboard,
 } from 'react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';

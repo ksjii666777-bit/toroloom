@@ -19,9 +19,8 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, TextInput,
-  Platform, Dimensions,
-} from 'react-native';
+  View, Text, StyleSheet, ScrollView, Pressable, TextInput,    Platform,
+  } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';

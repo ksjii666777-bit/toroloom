@@ -9,7 +9,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { usePatternSettingsStore, ALL_PATTERNS, LOOKBACK_OPTIONS } from '../store/patternSettingsStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { PatternType } from '../components/chart/patternDetection';
 
 const STORAGE_KEY = '@toroloom/patternSettings';
 

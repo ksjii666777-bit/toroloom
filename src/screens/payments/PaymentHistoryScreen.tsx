@@ -12,7 +12,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Share, Alert,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Share, Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';

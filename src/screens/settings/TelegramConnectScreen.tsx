@@ -44,7 +44,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
 import { telegramApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -54,7 +53,6 @@ const BOT_USERNAME = 'ToroloomBot';
 
 export default function TelegramConnectScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = createStyles(colors);
 

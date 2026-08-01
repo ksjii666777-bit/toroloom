@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
 import { useVoiceStore, VOICE_MESSAGES } from '../../store/voiceStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -35,7 +34,6 @@ const TEST_MESSAGES = [
 
 export default function VoiceSettingsScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
   const styles = createStyles(colors);
   const {
     enabled, rate, pitch, toggleVoice, setRate, setPitch,

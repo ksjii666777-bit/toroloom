@@ -14,7 +14,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
-  TextInput, RefreshControl, Dimensions, Platform, ActivityIndicator,
+  TextInput, RefreshControl, Dimensions, Platform,
 } from 'react-native';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -331,7 +331,7 @@ export default function USMarketsScreen() {
   const [usStocks, setUsStocks] = useState<USStock[]>(mockUSStocks);
   const [euStocks, setEuStocks] = useState<InternationalStock[]>(mockEuropeanStocks);
   const [asiaStocks, setAsiaStocks] = useState<InternationalStock[]>(mockAsianStocks);
-  const [stocksLoading, setStocksLoading] = useState(false);
+  const [, setStocksLoading] = useState(false);
   const [stocksLive, setStocksLive] = useState(false);
 
   // Live indices from backend
@@ -340,7 +340,7 @@ export default function USMarketsScreen() {
 
   // Live crypto from backend
   const [cryptoAssets, setCryptoAssets] = useState<CryptoAsset[]>(mockCryptoAssets);
-  const [cryptoLive, setCryptoLive] = useState(false);
+  const [, setCryptoLive] = useState(false);
 
   // Last updated timestamp
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);

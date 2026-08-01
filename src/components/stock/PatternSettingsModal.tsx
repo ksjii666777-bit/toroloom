@@ -180,8 +180,6 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
     lookback,
     setMinConfidence,
     togglePattern,
-    enableAllPatterns,
-    disableAllPatterns,
     setLookback,
     resetDefaults,
   } = usePatternSettingsStore();

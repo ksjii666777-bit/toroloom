@@ -17,7 +17,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
-  Dimensions, RefreshControl,
+  RefreshControl,
 } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withSpring, withSequence,

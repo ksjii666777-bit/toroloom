@@ -12,7 +12,6 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
 import { useNotificationStore } from '../../store/notificationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
@@ -39,7 +38,6 @@ const PREFERENCE_SECTIONS = [
 
 export default function NotificationPreferencesScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     preferences,

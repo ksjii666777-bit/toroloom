@@ -21,14 +21,13 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import { educationApi } from '../../services/api/education';
 
 export default function LearningPathDetailScreen({ navigation, route }: any) {
   const { pathId } = route.params;
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { courses, lessonProgress, fetchCourses, fetchLesson } = useEducationStore();
+  const { courses, lessonProgress, fetchCourses } = useEducationStore();
   const [path, setPath] = React.useState<any>(null);
   const [pathCourses, setPathCourses] = React.useState<any[]>([]);
 
@@ -54,7 +53,7 @@ export default function LearningPathDetailScreen({ navigation, route }: any) {
   // Calculate overall progress
   const pathProgress = useMemo(() => {
     if (!path || pathCourses.length === 0) return { percent: 0, completedCourses: 0, totalCourses: 0 };
-    const completed = pathCourses.filter((c: any) => {
+    const completed = pathCourses.filter((_c: any) => {
       const completedLessons = Object.keys(lessonProgress).length;
       return completedLessons > 0;
     }).length;

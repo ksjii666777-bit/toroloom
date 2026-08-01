@@ -326,8 +326,7 @@ export default function TraderProfileScreen({ navigation, route }: any) {
           },
         },
       ],
-    );
-  }, [trader, hasSocialAccess, startCopyTrading]);
+    );    }, [trader, hasSocialAccess, startCopyTrading, t]);
 
   // ── Share Profile ──
   const handleShare = useCallback(async () => {
@@ -336,9 +335,8 @@ export default function TraderProfileScreen({ navigation, route }: any) {
       await Share.share({
         message: t('traderProfile.shareMessage', { name: trader.name, bio: trader.bio, returns: trader.totalPnlPercent.toFixed(1), winRate: trader.winRate.toFixed(0) }),
         title: t('traderProfile.shareTitle', { name: trader.name }),
-      });
-    } catch { /* ignore */ }
-  }, [trader]);
+      });      } catch { /* ignore */ }
+    }, [trader, t]);
 
   if (!trader) {
     return (

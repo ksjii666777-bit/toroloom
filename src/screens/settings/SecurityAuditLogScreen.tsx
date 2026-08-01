@@ -26,7 +26,6 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { LoginEvent, ActiveSession } from '../../types';
@@ -572,7 +571,6 @@ const chipStyles = StyleSheet.create({
 
 export default function SecurityAuditLogScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
   const [activeFilter, setActiveFilter] = useState<'all' | 'success' | 'failed'>('all');
   const [showAllHistory, setShowAllHistory] = useState(false);
 

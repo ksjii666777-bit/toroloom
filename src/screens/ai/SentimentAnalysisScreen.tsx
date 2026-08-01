@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Pressable, ActivityIndicator,
   Dimensions,
@@ -29,12 +29,10 @@ import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { mockSentimentData } from '../../constants/mockData';
 
 import {
-  classifySentiment,
   generateSentimentOverview,
   computeSentimentStability,
   detectSentimentShift,
 } from '../../services/ai/sentimentAnalyzer';
-import type { StockSentiment } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

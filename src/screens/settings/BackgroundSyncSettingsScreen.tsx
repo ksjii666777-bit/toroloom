@@ -41,7 +41,6 @@ import {
   SYNC_INTERVAL_OPTIONS,
 } from '../../services/backgroundSyncService';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
@@ -76,7 +75,6 @@ function getIntervalLabel(minutes: number): string {
 export default function BackgroundSyncSettingsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { t } = useT();
   const styles = createStyles(colors);
 
   const [enabled, setEnabledState] = useState<boolean>(true);

@@ -1,9 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
-import { useMarketStore } from '../../store/marketStore';
+import { Ionicons } from '@expo/vector-icons';  import { useTheme } from '../../context/ThemeContext';
+  import { useMarketStore } from '../../store/marketStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';

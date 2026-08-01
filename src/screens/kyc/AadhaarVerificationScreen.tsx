@@ -30,7 +30,7 @@ import type { AadhaarOtpResponse, AadhaarVerifyResponse } from '../../types';
 
 type FlowStep = 'aadhaar_input' | 'otp_input' | 'verified';
 
-export default function AadhaarVerificationScreen({ navigation, route }: any) {
+export default function AadhaarVerificationScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 

@@ -24,7 +24,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Dimensions,
   RefreshControl,
   ActivityIndicator,
   Platform,

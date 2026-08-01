@@ -10,7 +10,7 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Path, Circle as SvgCircle, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Circle as SvgCircle, Line } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
@@ -303,7 +303,6 @@ export function CustomIndicatorOverlay({
   minPrice,
   maxPrice,
 }: CustomIndicatorOverlayProps) {
-  const { colors } = useTheme();
   const { focusedIndex } = useChartCrosshair();
 
   const evaluated = useMemo(() => {

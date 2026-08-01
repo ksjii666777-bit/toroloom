@@ -10,7 +10,6 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { useT } from '../../hooks/useT';
 import { couponApi, CouponUsageDisplay } from '../../services/api/coupons';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -86,7 +85,6 @@ function UsageCard({ usage, index }: { usage: CouponUsageDisplay; index: number 
 
 export default function CouponHistoryScreen({ navigation }: any) {
   const { colors } = useTheme();
-  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [usages, setUsages] = useState<CouponUsageDisplay[]>([]);
   const [loading, setLoading] = useState(true);
