@@ -13,6 +13,7 @@ import PortfolioHolding from '../../components/PortfolioHolding';
 import PnLChart from '../../components/PnLChart';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, SkeletonCard, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
 
@@ -122,6 +123,10 @@ export default function PortfolioScreen({ navigation }: any) {
         <View style={styles.header}>
           <Text style={styles.title} testID="portfolio-title">{t('portfolio.title')}</Text>
           <Text style={styles.subtitle} testID="portfolio-subtitle">{t('portfolio.subtitle')}</Text>
+          {/* Sync status — inline in header (scrolls with content) */}
+          <View style={{ flexDirection: 'row', marginTop: SPACING.sm }}>
+            <SyncStatusIndicator variant="inline" />
+          </View>
         </View>
 
         {/* Portfolio Summary — Glassmorphic */}

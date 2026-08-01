@@ -63,6 +63,10 @@ vi.mock('../store/marketStore', () => ({
 
 import MarketsScreen from '../screens/tabs/MarketsScreen';
 
+vi.mock('../components/ui/SyncStatusIndicator', () => ({
+  default: () => null,
+}));
+
 // ==================== Helpers ====================
 
 function advanceAndRender(ms: number) {

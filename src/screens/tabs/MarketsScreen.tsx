@@ -9,6 +9,7 @@ import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import StockItem from '../../components/StockItem';
 import MarketCard from '../../components/MarketCard';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, SkeletonCard } from '../../components/ui/SkeletonLoader';
 
@@ -165,6 +166,10 @@ export default function MarketsScreen({ navigation }: any) {
             </AnimatedPressable>
           </View>
           <Text style={styles.subtitle} testID="markets-subtitle">{t('market.subtitle')}</Text>
+          {/* Sync status — inline in header (scrolls with content) */}
+          <View style={{ flexDirection: 'row', marginTop: SPACING.sm }}>
+            <SyncStatusIndicator variant="inline" />
+          </View>
         </View>
 
         {/* Search Bar — elevated when focused */}

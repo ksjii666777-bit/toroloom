@@ -17,6 +17,7 @@ import { Stock } from '../../types';
 import StockItem from '../../components/StockItem';
 import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton, SkeletonCard } from '../../components/ui/SkeletonLoader';
 import { triggerHaptic } from '../../utils/haptics';
@@ -562,6 +563,10 @@ export default function WatchlistScreen({ navigation }: any) {
                 </View>
               </AnimatedPressable>
             </View>
+          </View>
+          {/* Sync status — inline in header (scrolls with content) */}
+          <View style={{ flexDirection: 'row', marginTop: SPACING.sm }}>
+            <SyncStatusIndicator variant="inline" />
           </View>
         </View>
 
