@@ -23,6 +23,8 @@ import { configureKycPersistence } from './services/kyc';
 import { configureNotificationPersistence } from './services/notifications';
 import { configureCommunityPersistence } from './services/community';
 import { configurePortfolioAlertStorage, configureBadgeCountPersistence } from './services/portfolioAlerts';
+import { configureStockAlertPersistence } from './services/stockAlertService';
+import { startStockAlertPoller } from './services/queue';
 
 // Services
 import { configureMarketStack } from './services/marketstack';
@@ -288,6 +290,39 @@ async function initializeStorage(): Promise<void> {
     const storage = await getStorage();
     if (process.env.NODE_ENV !== 'test') {
       console.log(`   Storage:    ${env.storageBackend.toUpperCase()}`);
+    }
+
+    // ── PostgreSQL: auto-apply pending SQL migrations on startup ──
+    // Only for the postgres backend. Uses a short-lived pool so the main
+    // storage pool is untouched; every migration is idempotent (CREATE TABLE
+    // /INDEX IF NOT EXISTS + _migrations tracking table), so this is safe to
+    // run on every boot and also picks up future numbered SQL files.
+    if (env.storageBackend === 'postgres' && env.databaseUrl) {
+      const { Pool } = await import('pg');
+      const { runMigrations } = await import('./services/migrationRunner');
+      const migrationPool = new Pool({ connectionString: env.databaseUrl });
+      try {
+        const result = await runMigrations(migrationPool, {
+          dir: path.join(__dirname, '../migrations'),
+          silent: process.env.NODE_ENV === 'test',
+        });
+        if (process.env.NODE_ENV !== 'test') {
+          console.log(`   Migrations: ${result.applied} applied, ${result.skipped} skipped`);
+        }
+      } catch (err) {
+        console.error('   ⚠ Migration runner failed:', err);
+      } finally {
+        await migrationPool.end();
+      }
+
+      // Wire stock alerts to the real PostgreSQL pool (persistent) and start
+      // the poller. The pool is exposed by PostgreSQLStorage for direct-SQL
+      // services that aren't part of the StorageEngine interface.
+      if (process.env.NODE_ENV !== 'test') {
+        const pgPool = (storage as unknown as { getPool?: () => import('pg').Pool | null })?.getPool?.() ?? null;
+        configureStockAlertPersistence(pgPool);
+        startStockAlertPoller();
+      }
     }
 
     // Wire storage into the AuditTrail singleton

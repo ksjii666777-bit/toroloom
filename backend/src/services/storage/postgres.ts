@@ -52,6 +52,13 @@
  *   idx_parsed_ledgers_exec_time        ON execution_timestamp DESC INCLUDE (...)
  *   idx_parsed_ledgers_raw_hash         ON raw_text_hash (unique, partial)
  *
+ * stock_alerts (id UUID PK, user_id UUID → users, symbol, target_price,
+ *               direction, status, triggered_at, triggered_price, note,
+ *               created_at, updated_at)
+ *   idx_stock_alerts_user_active    ON (user_id, created_at DESC) WHERE status='active'
+ *   idx_stock_alerts_symbol_active  ON (symbol) WHERE status='active'
+ *   idx_stock_alerts_cleanup        ON (updated_at) WHERE status IN ('triggered','cancelled')
+ *
  * ====================== Auto-migration on connect() ========================
  * Tables and indexes are created via CREATE TABLE/INDEX IF NOT EXISTS
  * every time the app starts. A standalone SQL init script is deliberately
@@ -169,6 +176,14 @@ export class PostgreSQLStorage implements StorageEngine {
       this.pool = null;
       this.initialized = false;
     }
+  }
+
+  /**
+   * Expose the underlying pg Pool for services that need direct SQL
+   * (e.g. stockAlertService). Returns null if not connected.
+   */
+  getPool(): Pool | null {
+    return this.pool;
   }
 
   async isHealthy(): Promise<boolean> {
@@ -501,6 +516,32 @@ export class PostgreSQLStorage implements StorageEngine {
       CREATE INDEX IF NOT EXISTS idx_parsed_ledgers_exec_time
           ON parsed_ledgers (execution_timestamp DESC)
           INCLUDE (user_id, asset_symbol, transaction_type, filled_quantity, execution_price, net_value);
+    `);
+
+    // ──── Stock Price Alerts (mirror of 002_add_stock_alerts.sql) ──
+    // stockAlertService reads/writes this table via direct SQL. Kept in
+    // sync with the numbered migration so the table exists even before the
+    // migration runner runs (and is a no-op when it does).
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS stock_alerts (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        symbol          TEXT NOT NULL,
+        target_price    NUMERIC(18,2) NOT NULL CHECK (target_price > 0),
+        direction       TEXT NOT NULL CHECK (direction IN ('above', 'below')),
+        status          TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'triggered', 'cancelled')),
+        triggered_at    TIMESTAMPTZ,
+        triggered_price NUMERIC(18,2) CHECK (triggered_price IS NULL OR triggered_price > 0),
+        note            TEXT CHECK (note IS NULL OR char_length(note) <= 200),
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+      CREATE INDEX IF NOT EXISTS idx_stock_alerts_user_active
+          ON stock_alerts (user_id, created_at DESC) WHERE status = 'active';
+      CREATE INDEX IF NOT EXISTS idx_stock_alerts_symbol_active
+          ON stock_alerts (symbol) WHERE status = 'active';
+      CREATE INDEX IF NOT EXISTS idx_stock_alerts_cleanup
+          ON stock_alerts (updated_at) WHERE status IN ('triggered', 'cancelled');
     `);
   }
 

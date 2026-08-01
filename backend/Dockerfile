@@ -26,6 +26,8 @@ RUN npm ci
 COPY tsconfig.json ./
 COPY src/ ./src/
 COPY public/ ./public/
+# Numbered SQL migrations — needed at runtime by the startup migration runner
+COPY migrations/ ./migrations/
 
 # Compile TypeScript → dist/
 RUN npm run build
@@ -44,6 +46,7 @@ WORKDIR /app
 # Copy production artifacts from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 

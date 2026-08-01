@@ -7,6 +7,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "npm install --include=dev && tsc",
     "start": "node dist/index.js",
+    "migrate:up": "npx ts-node src/scripts/run-migration.ts up",
+    "migrate:status": "npx ts-node src/scripts/run-migration.ts status",
     "start:cluster": "CLUSTER_MODE=1 node dist/index.js",
     "start:cluster:prod": "NODE_ENV=production CLUSTER_MODE=1 node dist/index.js",
     "test": "vitest run --exclude='**/*.int.test.ts'",
