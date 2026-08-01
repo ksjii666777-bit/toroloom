@@ -349,7 +349,7 @@ function TradeModal({
                   <Text style={[styles.modalStockName, { color: colors.text }]}>{stock.symbol}</Text>
                 )}
                 <Text style={[styles.modalStockMeta, { color: colors.textMuted }]}>
-                  {stock?.name || ''} · {formatUSD(stock?.price || 0)}
+                  {stock?.name && `${stock.name} · `}{formatUSD(stock?.price || 0)}
                 </Text>
               </View>
             </View>
@@ -467,7 +467,7 @@ function TradeModal({
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Text style={styles.modalActionBtnText}>
-                  {action} {stock?.symbol || ''}
+                  {action}{stock?.symbol && ` ${stock.symbol}`}
                 </Text>
               )}
             </LinearGradient>

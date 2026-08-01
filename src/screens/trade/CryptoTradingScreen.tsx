@@ -355,7 +355,7 @@ function TradeModal({
                   <Text style={[styles.modalCoinName, { color: colors.text }]}>{coin.name}</Text>
                 )}
                 <Text style={[styles.modalCoinSymbol, { color: colors.textMuted }]}>
-                  {coin?.symbol?.toUpperCase() || ''} · ${formatPrice(coin?.price || 0)}
+                  {coin?.symbol && `${coin.symbol.toUpperCase()} · `}${formatPrice(coin?.price || 0)}
                 </Text>
               </View>
             </View>
@@ -473,7 +473,7 @@ function TradeModal({
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Text style={styles.modalActionBtnText}>
-                  {action} {coin?.symbol?.toUpperCase() || ''}
+                  {action}{coin?.symbol && ` ${coin.symbol.toUpperCase()}`}
                 </Text>
               )}
             </LinearGradient>
