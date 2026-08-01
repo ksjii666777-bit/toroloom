@@ -38,4 +38,5 @@ export default {
     price: 'Price',
     changePercent: 'Change %',
     volume: 'Volume',
+    enterTargetPrice: 'Enter target price',
 };

@@ -82,4 +82,11 @@ export default {
     nameMismatch: 'खाताधारक का नाम बैंक रिकॉर्ड से मेल नहीं खाता। कृपया जांचें और पुनः प्रयास करें।',
     accountVerifyFailed: 'खाता सत्यापन विफल',
     linkFailed: 'बैंक खाता लिंक करने में विफल',
+    // ── Alert dialogs ─────────────────────────────────────────────────
+    invalidPanTitle: 'अमान्य PAN',
+    invalidPanMsg: 'कृपया एक मान्य 10-अक्षर वाला PAN दर्ज करें (जैसे, ABCDE1234F)',
+    invalidAadhaarTitle: 'अमान्य आधार',
+    invalidAadhaarMsg: 'कृपया एक मान्य 12-अंकीय आधार संख्या दर्ज करें।',
+    consentRequiredTitle: 'सहमति आवश्यक',
+    consentRequiredMsg: 'आगे बढ़ने के लिए कृपया आधार सत्यापन की सहमति दें।',
 };

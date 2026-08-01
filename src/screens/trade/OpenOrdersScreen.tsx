@@ -377,7 +377,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
               value={modifyPrice}
               onChangeText={setModifyPrice}
               keyboardType="decimal-pad"
-              placeholder="Enter new price"
+              placeholder={t('trading.enterNewPrice')}
               placeholderTextColor={colors.textMuted}
             />
 
@@ -388,7 +388,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
               value={modifyQty}
               onChangeText={setModifyQty}
               keyboardType="number-pad"
-              placeholder="Enter new quantity"
+              placeholder={t('trading.enterNewQty')}
               placeholderTextColor={colors.textMuted}
             />
 

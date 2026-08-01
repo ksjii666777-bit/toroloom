@@ -375,7 +375,7 @@ export default function WatchlistScreen({ navigation }: any) {
             value={alertPrice}
             onChangeText={setAlertPrice}
             keyboardType="decimal-pad"
-            placeholder="Enter target price"
+            placeholder={t('watchlist.enterTargetPrice')}
             placeholderTextColor={colors.textMuted}
           />
 
@@ -789,7 +789,7 @@ export default function WatchlistScreen({ navigation }: any) {
           <Animated.View style={styles.createContainer}>
             <TextInput
               style={styles.createInput}
-              placeholder="Watchlist name..."
+              placeholder={t('watchlist.watchlistName')}
               placeholderTextColor={colors.textMuted}
               value={newName}
               onChangeText={setNewName}

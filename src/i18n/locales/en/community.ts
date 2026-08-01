@@ -16,4 +16,7 @@ export default {
     behavioralJournal: 'Behavioral Journal',
     journalEntry: 'Journal Entry',
     howAreYouFeeling: 'How are you feeling today?',
+    searchRooms: 'Search rooms...',
+    shareThoughts: 'Share your thoughts with the community...',
+    addComment: 'Add a comment...',
 };

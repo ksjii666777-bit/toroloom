@@ -715,7 +715,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
               <Ionicons name="search" size={16} color={colors.textMuted} style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search by symbol or name…"
+                placeholder={t('portfolioAlerts.searchPlaceholder')}
                 placeholderTextColor={colors.textMuted + '60'}
                 value={searchQuery}
                 onChangeText={setSearchQuery}

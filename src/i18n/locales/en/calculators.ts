@@ -77,4 +77,14 @@ export default {
     shortTerm: 'Short Term',
     longTerm: 'Long Term',
     taxInfo: 'Tax calculations follow Indian income tax rules for FY 2025-26 (equity with STT paid). Surcharge and cess are estimated. Consult a CA for exact tax planning.',
+    // ── Step-Up SIP alerts ───────────────────────────────────────────
+    invalidPercentTitle: 'Invalid Percent',
+    invalidPercentMsg: 'Step-up percentage must be between 1% and 50%.',
+    stepUpEnabledTitle: 'Step-Up Enabled',
+    stepUpEnabledMsg: 'SIP will increase by {{pct}}% {{frequency}}.',
+    everyYear: 'every year',
+    every6Months: 'every 6 months',
+    disableStepUpTitle: 'Disable Step-Up?',
+    disableStepUpMsg: 'The SIP will continue without auto-increase. Your current amount stays the same.',
+    disable: 'Disable',
 };

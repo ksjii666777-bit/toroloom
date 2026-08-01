@@ -17,6 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS} from '../../constants/theme';
 import { MarketNewsItem } from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -506,6 +507,7 @@ const detailStyles = StyleSheet.create({
 // ─── Main Screen ──────────────────────────────────────────
 export default function NewsFeedScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<NewsCategory>('all');
@@ -676,7 +678,7 @@ export default function NewsFeedScreen({ navigation }: any) {
             <TextInput
               ref={searchRef}
               style={[feedStyles.searchInput, { color: colors.text }]}
-              placeholder="Search news, symbols, sources..."
+              placeholder={t('news.searchPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}

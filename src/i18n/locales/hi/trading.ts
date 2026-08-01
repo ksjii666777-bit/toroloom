@@ -308,4 +308,7 @@ export default {
     invalidExitFormula: 'अमान्य एग्ज़िट फ़ॉर्मूला',
     backtestError: 'बैकटेस्ट त्रुटि',
     missingData: 'पर्याप्त डेटा नहीं',
+    searchCrypto: 'क्रिप्टो खोजें...',
+    enterNewPrice: 'नया मूल्य दर्ज करें',
+    enterNewQty: 'नई मात्रा दर्ज करें',
 };

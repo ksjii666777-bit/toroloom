@@ -82,4 +82,11 @@ export default {
     nameMismatch: 'Account holder name does not match bank records. Please verify and try again.',
     accountVerifyFailed: 'Account verification failed',
     linkFailed: 'Failed to link bank account',
+    // ── Alert dialogs ─────────────────────────────────────────────────
+    invalidPanTitle: 'Invalid PAN',
+    invalidPanMsg: 'Please enter a valid 10-character PAN (e.g., ABCDE1234F)',
+    invalidAadhaarTitle: 'Invalid Aadhaar',
+    invalidAadhaarMsg: 'Please enter a valid 12-digit Aadhaar number.',
+    consentRequiredTitle: 'Consent Required',
+    consentRequiredMsg: 'Please consent to Aadhaar verification to proceed.',
 };

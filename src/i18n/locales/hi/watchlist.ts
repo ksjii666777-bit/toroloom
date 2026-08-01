@@ -38,4 +38,5 @@ export default {
     price: 'मूल्य',
     changePercent: 'परिवर्तन %',
     volume: 'वॉल्यूम',
+    enterTargetPrice: 'लक्ष्य मूल्य दर्ज करें',
 };

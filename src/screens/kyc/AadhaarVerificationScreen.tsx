@@ -21,6 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { kycApi } from '../../services/api/kyc';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -32,6 +33,7 @@ type FlowStep = 'aadhaar_input' | 'otp_input' | 'verified';
 
 export default function AadhaarVerificationScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [flowStep, setFlowStep] = useState<FlowStep>('aadhaar_input');
@@ -115,12 +117,12 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
   const handleSendOtp = useCallback(async () => {
     if (!isAadhaarValid) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Invalid Aadhaar', 'Please enter a valid 12-digit Aadhaar number.');
+      Alert.alert(t('kyc.invalidAadhaarTitle'), t('kyc.invalidAadhaarMsg'));
       return;
     }
     if (!consentGiven) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Consent Required', 'Please consent to Aadhaar verification to proceed.');
+      Alert.alert(t('kyc.consentRequiredTitle'), t('kyc.consentRequiredMsg'));
       return;
     }
 

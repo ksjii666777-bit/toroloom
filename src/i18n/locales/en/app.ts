@@ -18,6 +18,7 @@ export default {
     viewAll: 'View All',
     manage: 'Manage',
     ok: 'OK',
+    errorTitle: 'Error',
     comingSoon: 'Coming Soon',
     na: 'N/A',
     yes: 'Yes',

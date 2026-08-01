@@ -490,6 +490,7 @@ function TradeModal({
 
 export default function CryptoTradingScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const [coins, setCoins] = useState<CryptoAssetData[]>([]);
@@ -648,7 +649,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
           <Ionicons name="search" size={18} color={colors.textMuted} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search crypto..."
+            placeholder={t('trading.searchCrypto')}
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}

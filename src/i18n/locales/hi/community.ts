@@ -16,4 +16,7 @@ export default {
     behavioralJournal: 'व्यवहार पत्रिका',
     journalEntry: 'पत्रिका प्रविष्टि',
     howAreYouFeeling: 'आज आप कैसा महसूस कर रहे हैं?',
+    searchRooms: 'कमरे खोजें...',
+    shareThoughts: 'समुदाय के साथ अपने विचार साझा करें...',
+    addComment: 'टिप्पणी जोड़ें...',
 };

@@ -306,7 +306,7 @@ const builderStyles = StyleSheet.create({
 
 export default function CustomIndicatorEditorScreen() {
   const { colors } = useTheme();
-  const _t = useT();
+  const { t } = useT();
   const navigation = useNavigation();
   const route = useRoute<any>();
 
@@ -478,7 +478,7 @@ export default function CustomIndicatorEditorScreen() {
               style={[editorStyles.input, { color: 'transparent' }]}
               value={formula}
               onChangeText={setFormula}
-              placeholder="e.g. SMA(close, 14)"
+              placeholder={t('customIndicator.formulaPlaceholder')}
               placeholderTextColor="#666"
               multiline
               autoCapitalize="none"
@@ -505,7 +505,7 @@ export default function CustomIndicatorEditorScreen() {
             }]}
             value={label}
             onChangeText={setLabel}
-            placeholder="My Indicator"
+            placeholder={t('customIndicator.namePlaceholder')}
             placeholderTextColor="#666"
           />
         </View>

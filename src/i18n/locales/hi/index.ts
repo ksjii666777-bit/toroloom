@@ -3,6 +3,8 @@ import abTestRunner from './abTestRunner';
 import accessibility from './accessibility';
 import adminCoupon from './adminCoupon';
 import adminCourseReview from './adminCourseReview';
+import adminKyc from './adminKyc';
+import adminUser from './adminUser';
 import advancedMarkets from './advancedMarkets';
 import aiSettings from './aiSettings';
 import ai from './ai';
@@ -23,6 +25,7 @@ import contractNoteUpload from './contractNoteUpload';
 import correlationMatrix from './correlationMatrix';
 import cryptoDetail from './cryptoDetail';
 import currencyMarkets from './currencyMarkets';
+import customIndicator from './customIndicator';
 import dividendTracker from './dividendTracker';
 import darkMode from './darkMode';
 import sectorDetail from './sectorDetail';
@@ -34,6 +37,7 @@ import featureFlags from './featureFlags';
 import funds from './funds';
 import futuresCurve from './futuresCurve';
 import gamification from './gamification';
+import help from './help';
 import home from './home';
 import ipos from './ipos';
 import kyc from './kyc';
@@ -41,6 +45,7 @@ import landscapeSettings from './landscapeSettings';
 import market from './market';
 import monteCarlo from './monteCarlo';
 import mutualFunds from './mutualFunds';
+import news from './news';
 import notificationPrefs from './notificationPrefs';
 import notifications from './notifications';
 import onboarding from './onboarding';
@@ -53,6 +58,7 @@ import performanceChart from './performanceChart';
 import portfolio from './portfolio';
 import portfolioAlerts from './portfolioAlerts';
 import profile from './profile';
+import referral from './referral';
 import reports from './reports';
 import revenueDashboard from './revenueDashboard';
 import risk from './risk';
@@ -63,6 +69,7 @@ import stockScreener from './stockScreener';
 import syncSettings from './syncSettings';
 import security from './security';
 import social from './social';
+import smartAlerts from './smartAlerts';
 import status from './status';
 import telegramConnect from './telegramConnect';
 import subscription from './subscription';
@@ -83,6 +90,8 @@ const hi = {
   accessibility,
   adminCoupon,
   adminCourseReview,
+  adminKyc,
+  adminUser,
   advancedMarkets,
   aiSettings,
   ai,
@@ -103,6 +112,7 @@ const hi = {
   correlationMatrix,
   cryptoDetail,
   currencyMarkets,
+  customIndicator,
   dividendTracker,
   darkMode,
   sectorDetail,
@@ -114,6 +124,7 @@ const hi = {
   funds,
   futuresCurve,
   gamification,
+  help,
   home,
   ipos,
   kyc,
@@ -121,6 +132,7 @@ const hi = {
   market,
   monteCarlo,
   mutualFunds,
+  news,
   notificationPrefs,
   notifications,
   onboarding,
@@ -133,6 +145,7 @@ const hi = {
   portfolio,
   portfolioAlerts,
   profile,
+  referral,
   reports,
   revenueDashboard,
   risk,
@@ -143,6 +156,7 @@ const hi = {
   syncSettings,
   security,
   social,
+  smartAlerts,
   status,
   telegramConnect,
   subscription,

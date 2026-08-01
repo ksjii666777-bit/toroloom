@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 const MOCK_ROOMS = [
@@ -16,6 +17,7 @@ const MOCK_ROOMS = [
 
 export default function ChatRoomListScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [search, setSearch] = useState('');
 
   const filtered = MOCK_ROOMS.filter(r =>
@@ -28,7 +30,7 @@ export default function ChatRoomListScreen({ navigation }: any) {
         <Text style={[styles.title, { color: colors.text }]}>Chat Rooms</Text>
         <TextInput
           style={[styles.searchInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
-          placeholder="Search rooms..."
+          placeholder={t('community.searchRooms')}
           placeholderTextColor={colors.textMuted}
           value={search}
           onChangeText={setSearch}

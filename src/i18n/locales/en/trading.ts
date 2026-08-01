@@ -308,4 +308,7 @@ export default {
     invalidExitFormula: 'Invalid Exit Formula',
     backtestError: 'Backtest Error',
     missingData: 'Not enough data',
+    searchCrypto: 'Search crypto...',
+    enterNewPrice: 'Enter new price',
+    enterNewQty: 'Enter new quantity',
 };

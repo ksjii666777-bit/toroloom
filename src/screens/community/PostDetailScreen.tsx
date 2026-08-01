@@ -25,6 +25,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useCommunityStore } from '../../store/communityStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatTimeAgo } from '../../utils/formatters';
@@ -156,6 +157,7 @@ function AutoGrowingInput({
 
 export default function PostDetailScreen({ navigation, route }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { postId } = route.params;
   const scrollRef = useRef<ScrollView>(null);
@@ -449,7 +451,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
         <View style={[styles.commentInputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
           <AutoGrowingInput
             style={[styles.commentInput, { color: colors.text }]}
-            placeholder="Add a comment..."
+            placeholder={t('community.addComment')}
             placeholderTextColor={colors.textMuted}
             value={commentText}
             onChangeText={setCommentText}

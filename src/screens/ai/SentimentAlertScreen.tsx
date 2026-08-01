@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS, GRADIENTS} from '../../constants/theme';
 import { mockSentimentData } from '../../constants/mockData';
 import {
@@ -519,6 +520,7 @@ const modalStyles = StyleSheet.create({
 
 export default function SentimentAlertScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -556,9 +558,9 @@ export default function SentimentAlertScreen({ navigation }: any) {
   }, []);
 
   const handleDeleteRule = useCallback((ruleId: string) => {
-    Alert.alert('Remove Rule', 'Are you sure you want to remove this sentiment alert rule?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => {
+    Alert.alert(t('ai.removeRuleTitle'), t('ai.removeRuleMsg'), [
+      { text: t('app.cancel'), style: 'cancel' },
+      { text: t('ai.remove'), style: 'destructive', onPress: () => {
         setRules(prev => prev.filter(r => r.id !== ruleId));
       }},
     ]);

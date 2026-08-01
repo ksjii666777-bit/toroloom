@@ -18,6 +18,7 @@ export default {
     viewAll: 'सभी देखें',
     manage: 'प्रबंधित करें',
     ok: 'ठीक है',
+    errorTitle: 'त्रुटि',
     comingSoon: 'जल्द आ रहा है',
     na: 'N/A',
     yes: 'हाँ',

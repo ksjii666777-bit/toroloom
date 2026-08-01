@@ -22,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS} from '../../constants/theme';
 import Svg, { Line, Rect, G, Text as SvgText } from 'react-native-svg';
 import {
@@ -538,6 +539,7 @@ const eventStyles = StyleSheet.create({
 
 export default function LiveFeedScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -636,7 +638,7 @@ export default function LiveFeedScreen({ navigation }: any) {
           <TextInput
             ref={searchInputRef}
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search by symbol, name, or message..."
+            placeholder={t('ai.searchLiveFeed')}
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}

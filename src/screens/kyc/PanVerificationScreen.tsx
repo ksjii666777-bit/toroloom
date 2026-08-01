@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { kycApi } from '../../services/api/kyc';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -31,6 +32,7 @@ const PAN_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
 
 export default function PanVerificationScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [panNumber, setPanNumber] = useState('');
@@ -52,7 +54,7 @@ export default function PanVerificationScreen({ navigation }: any) {
   const handleVerify = useCallback(async () => {
     if (!isFormatValid) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Invalid PAN', 'Please enter a valid 10-character PAN (e.g., ABCDE1234F)');
+      Alert.alert(t('kyc.invalidPanTitle'), t('kyc.invalidPanMsg'));
       return;
     }
 

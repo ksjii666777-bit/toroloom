@@ -25,6 +25,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path, Defs, LinearGradient as SvgGradientDef, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useMutualFundStore } from '../../store/mutualFundStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -161,6 +162,7 @@ function NAVSparkline({ data, width: sparkW = 120, height: sparkH = 40 }: {
 
 export default function FundDetailScreen({ navigation, route }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { fundId } = route.params || {};
 
@@ -188,9 +190,9 @@ export default function FundDetailScreen({ navigation, route }: any) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>Fund not found</Text>
+        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('mutualFunds.fundNotFound')}</Text>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: SPACING.md }}>
-          <Text style={[styles.emptyText, { color: colors.primary }]}>Go Back</Text>
+          <Text style={[styles.emptyText, { color: colors.primary }]}>{t('mutualFunds.goBack')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -238,7 +240,7 @@ export default function FundDetailScreen({ navigation, route }: any) {
               <Badge label={fund.category} variant="primary" size="small" />
               <View style={[styles.riskDot, { backgroundColor: riskColor }]} />
               <Text style={[styles.riskText, { color: riskColor }]}>
-                {fund.riskLevel.charAt(0).toUpperCase() + fund.riskLevel.slice(1)} Risk
+                {t('mutualFunds.riskLabel', { level: fund.riskLevel.charAt(0).toUpperCase() + fund.riskLevel.slice(1) })}
               </Text>
             </View>
             <View style={styles.ratingRow}>
@@ -250,7 +252,7 @@ export default function FundDetailScreen({ navigation, route }: any) {
           {/* NAV Display */}
           <View style={styles.navSection}>
             <View>
-              <Text style={[styles.navLabel, { color: colors.textSecondary }]}>NAV</Text>
+              <Text style={[styles.navLabel, { color: colors.textSecondary }]}>{t('mutualFunds.nav')}</Text>
               <Text style={[styles.navValue, { color: colors.text }]}>
                 ₹{fund.nav.toFixed(2)}
               </Text>
@@ -271,12 +273,12 @@ export default function FundDetailScreen({ navigation, route }: any) {
           {/* AUM & Min Investment */}
           <View style={styles.overviewStats}>
             <View style={styles.overviewStat}>
-              <Text style={[styles.overviewStatLabel, { color: colors.textMuted }]}>AUM</Text>
+              <Text style={[styles.overviewStatLabel, { color: colors.textMuted }]}>{t('mutualFunds.aum')}</Text>
               <Text style={[styles.overviewStatValue, { color: colors.text }]}>{fund.fundSize}</Text>
             </View>
             <View style={[styles.overviewStatDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.overviewStat}>
-              <Text style={[styles.overviewStatLabel, { color: colors.textMuted }]}>Min Investment</Text>
+              <Text style={[styles.overviewStatLabel, { color: colors.textMuted }]}>{t('mutualFunds.minInvestment')}</Text>
               <Text style={[styles.overviewStatValue, { color: colors.text }]}>
                 {formatCurrency(fund.minInvestment)}
               </Text>
@@ -285,7 +287,7 @@ export default function FundDetailScreen({ navigation, route }: any) {
         </LinearGradient>
 
         {/* ── Return Comparison Bars ── */}
-        <Card title="Returns" style={styles.card}>
+        <Card title={t('mutualFunds.returns')} style={styles.card}>
           {returns.map((r, i) => {
             const pct = Math.abs(r.value) / maxReturn;
             return (
@@ -315,7 +317,7 @@ export default function FundDetailScreen({ navigation, route }: any) {
         </Card>
 
         {/* ── NAV Chart ── */}
-        <Card title="NAV History" style={styles.card}>
+        <Card title={t('mutualFunds.navHistory')} style={styles.card}>
           <View style={styles.timeframeRow}>
             {['1M', '3M', '6M', '1Y', 'All'].map(tf => (
               <TouchableOpacity
@@ -338,7 +340,7 @@ export default function FundDetailScreen({ navigation, route }: any) {
         </Card>
 
         {/* ── Sector Allocation ── */}
-        <Card title="Sector Allocation" style={styles.card}>
+        <Card title={t('mutualFunds.sectorAllocation')} style={styles.card}>
           {sectorAllocation.map((item, i) => (
             <Animated.View
               key={item.sector}
@@ -363,24 +365,24 @@ export default function FundDetailScreen({ navigation, route }: any) {
         </Card>
 
         {/* ── Key Stats ── */}
-        <Card title="Fund Details" style={styles.card}>
+        <Card title={t('mutualFunds.fundDetails')} style={styles.card}>
           <View style={styles.statsGrid}>
             <View style={styles.statBox}>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Expense Ratio</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.expenseRatio')}</Text>
               <Text style={[styles.statValue, { color: colors.text }]}>{(Math.random() * 1.5 + 0.5).toFixed(2)}%</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Fund Manager</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.fundManager')}</Text>
               <Text style={[styles.statValue, { color: colors.text }]}>Mr. Sharma</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Launch Date</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.launchDate')}</Text>
               <Text style={[styles.statValue, { color: colors.text }]}>
                 {new Date(Date.now() - Math.random() * 10 * 365 * 86400000).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })}
               </Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exit Load</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.exitLoad')}</Text>
               <Text style={[styles.statValue, { color: colors.text }]}>1% (within 3M)</Text>
             </View>
           </View>
@@ -390,13 +392,13 @@ export default function FundDetailScreen({ navigation, route }: any) {
         <View style={styles.actionsRow}>
           <AnimatedPressable
             onPress={() => {
-              Alert.alert('Invest', `Invest in ${fund.name}?`, [
-                { text: 'Cancel', style: 'cancel' },
+              Alert.alert(t('mutualFunds.investTitle'), t('mutualFunds.investConfirmMsg', { name: fund.name }), [
+                { text: t('app.cancel'), style: 'cancel' },
                 {
-                  text: `Invest ₹${fund.minInvestment}`,
+                  text: t('mutualFunds.investButton', { amount: fund.minInvestment }),
                   onPress: () => {
                     investInFund(fund.id, fund.minInvestment);
-                    Alert.alert('Success', `Invested ₹${fund.minInvestment} in ${fund.name}`);
+                    Alert.alert(t('mutualFunds.investedTitle'), t('mutualFunds.investedMsg', { amount: `₹${fund.minInvestment}`, name: fund.name }));
                   },
                 },
               ]);
@@ -407,25 +409,25 @@ export default function FundDetailScreen({ navigation, route }: any) {
           >
             <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
               <Ionicons name="wallet-outline" size={18} color="#fff" />
-              <Text style={styles.actionBtnText}>Invest Now</Text>
+              <Text style={styles.actionBtnText}>{t('mutualFunds.investNow')}</Text>
             </LinearGradient>
           </AnimatedPressable>
           <AnimatedPressable
             onPress={() => {
-              Alert.alert('Start SIP', `Start SIP in ${fund.name}? Minimum ₹${fund.minInvestment}`, [
-                { text: 'Cancel', style: 'cancel' },
+              Alert.alert(t('mutualFunds.startSipTitle'), t('mutualFunds.startSipConfirmMsg', { name: fund.name, amount: fund.minInvestment }), [
+                { text: t('app.cancel'), style: 'cancel' },
                 {
-                  text: 'Start ₹5,000/mo',
+                  text: t('mutualFunds.start5kButton'),
                   onPress: () => {
                     startSIP(fund.id, 5000, 'monthly');
-                    Alert.alert('SIP Started', `Monthly SIP of ₹5,000 started in ${fund.name}`);
+                    Alert.alert(t('mutualFunds.sipStartedTitle'), t('mutualFunds.sipStartedMonthlyMsg', { amount: '5,000', name: fund.name }));
                   },
                 },
                 {
-                  text: 'Start ₹10,000/mo',
+                  text: t('mutualFunds.start10kButton'),
                   onPress: () => {
                     startSIP(fund.id, 10000, 'monthly');
-                    Alert.alert('SIP Started', `Monthly SIP of ₹10,000 started in ${fund.name}`);
+                    Alert.alert(t('mutualFunds.sipStartedTitle'), t('mutualFunds.sipStartedMonthlyMsg', { amount: '10,000', name: fund.name }));
                   },
                 },
               ]);
@@ -436,7 +438,7 @@ export default function FundDetailScreen({ navigation, route }: any) {
           >
             <View style={[styles.actionBtn, { backgroundColor: colors.bgCard, borderWidth: 1.5, borderColor: colors.primary }]}>
               <Ionicons name="calendar-outline" size={18} color={colors.primary} />
-              <Text style={[styles.actionBtnText, { color: colors.primary }]}>Start SIP</Text>
+              <Text style={[styles.actionBtnText, { color: colors.primary }]}>{t('mutualFunds.startSip')}</Text>
             </View>
           </AnimatedPressable>
         </View>

@@ -84,4 +84,11 @@ export default {
     orderPlacementMsg: 'Navigate to order placement for {{symbol}}?\n{{qty}} shares @ {{price}}',
     goToOrder: 'Go to Order',
     placeOrderCta: 'Place {{type}} Order · {{qty}} shares @ {{price}}',
+    // ── Sentiment alert dialogs ───────────────────────────────────────
+    removeRuleTitle: 'Remove Rule',
+    removeRuleMsg: 'Are you sure you want to remove this sentiment alert rule?',
+    remove: 'Remove',
+    askPortfolio: 'Ask about your portfolio...',
+    symbolsExample: 'e.g. RELIANCE, TCS, HDFCBANK, INFY',
+    searchLiveFeed: 'Search by symbol, name, or message...',
 };

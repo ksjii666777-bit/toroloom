@@ -25,6 +25,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAdminStore, AdminUser } from '../../store/adminStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -101,6 +102,7 @@ function KYCUserCard({
 
 export default function AdminKYCScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { users, refresh, isLoading } = useAdminStore();
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -125,10 +127,10 @@ export default function AdminKYCScreen({ navigation }: any) {
   }, [kycUsers, search]);
 
   const handleApprove = useCallback((user: AdminUser) => {
-    Alert.alert('Approve KYC', `Mark ${user.name}'s KYC as verified?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('adminKyc.approveTitle'), t('adminKyc.approveMsg', { name: user.name }), [
+      { text: t('app.cancel'), style: 'cancel' },
       {
-        text: 'Approve',
+        text: t('adminKyc.approve'),
         onPress: () => {
           setKycUsers((prev) =>
             prev.map((u) => (u.id === user.id ? { ...u, kycStatus: 'verified' as const } : u))
@@ -137,13 +139,13 @@ export default function AdminKYCScreen({ navigation }: any) {
         },
       },
     ]);
-  }, []);
+  }, [t]);
 
   const handleReject = useCallback((user: AdminUser) => {
-    Alert.alert('Reject KYC', `Reject ${user.name}'s KYC verification?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('adminKyc.rejectTitle'), t('adminKyc.rejectMsg', { name: user.name }), [
+      { text: t('app.cancel'), style: 'cancel' },
       {
-        text: 'Reject',
+        text: t('adminKyc.reject'),
         style: 'destructive',
         onPress: () => {
           setKycUsers((prev) =>
@@ -153,7 +155,7 @@ export default function AdminKYCScreen({ navigation }: any) {
         },
       },
     ]);
-  }, []);
+  }, [t]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -179,7 +181,7 @@ export default function AdminKYCScreen({ navigation }: any) {
           style={[styles.searchInput, { color: colors.text }]}
           value={search}
           onChangeText={setSearch}
-          placeholder="Search by name or email..."
+          placeholder={t('adminKyc.searchUsers')}
           placeholderTextColor={colors.textMuted}
           autoCapitalize="none"
           autoCorrect={false}

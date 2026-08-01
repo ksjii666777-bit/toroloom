@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useMutualFundStore } from '../../store/mutualFundStore';
@@ -223,6 +224,7 @@ function generateResponse(query: string, ctx: PortfolioContext): string {
 
 export default function AIChatScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -417,7 +419,7 @@ export default function AIChatScreen({ navigation }: any) {
             style={[styles.input, { color: colors.text }]}
             value={inputText}
             onChangeText={setInputText}
-            placeholder="Ask about your portfolio..."
+            placeholder={t('ai.askPortfolio')}
             placeholderTextColor={colors.textMuted}
             multiline
             maxLength={500}

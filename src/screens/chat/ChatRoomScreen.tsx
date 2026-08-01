@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useChatStore } from '../../store/chatStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { ChatMessage } from '../../types';
@@ -30,6 +31,7 @@ function formatTime(iso: string): string {
 
 export default function ChatRoomScreen({ navigation, route }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const roomId: string = route?.params?.roomId ?? '';
   const [inputText, setInputText] = React.useState('');
@@ -147,7 +149,7 @@ export default function ChatRoomScreen({ navigation, route }: any) {
           style={[styles.chatInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
           value={inputText}
           onChangeText={setInputText}
-          placeholder="Type a message..."
+          placeholder={t('community.typeMessage')}
           placeholderTextColor={colors.textMuted}
         />
         <Pressable

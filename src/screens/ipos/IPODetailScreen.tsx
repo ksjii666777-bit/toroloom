@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { useIPOStore } from '../../store/ipoStore';
 import type { IPOItem } from '../../types';
@@ -151,6 +152,7 @@ function BulletList({ items, color }: { items: string[]; color: string }) {
 
 export default function IPODetailScreen({ route, navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { ipoId } = route.params || {};
   const { ipos, toggleBookmark, applyForIPO } = useIPOStore();
@@ -183,9 +185,9 @@ export default function IPODetailScreen({ route, navigation }: any) {
     return (
       <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
         <Ionicons name="alert-circle" size={48} color={colors.textMuted} />
-        <Text style={[styles.notFoundText, { color: colors.textMuted }]}>IPO not found</Text>
+        <Text style={[styles.notFoundText, { color: colors.textMuted }]}>{t('ipos.ipoNotFound')}</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.notFoundLink, { color: colors.primary }]}>Go back</Text>
+          <Text style={[styles.notFoundLink, { color: colors.primary }]}>{t('ipos.goBack')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -194,19 +196,24 @@ export default function IPODetailScreen({ route, navigation }: any) {
   const handleApply = () => {
     if (!ipo) return;
     if (bidLots < 1) {
-      Alert.alert('Invalid Lots', 'Minimum 1 lot required');
+      Alert.alert(t('ipos.invalidLotsTitle'), t('ipos.invalidLotsMsg'));
       return;
     }
     setSubmitting(true);
     try {
       applyForIPO(ipo, bidLots, ipo.priceBand.min, 'rahul@upi');
       Alert.alert(
-        'Application Submitted ✅',
-        `${ipo.companyName}\n${bidLots} lot(s) • ${bidLots * ipo.lotSize} shares\n₹${(bidLots * ipo.lotSize * ipo.priceBand.min).toLocaleString('en-IN')}`,
+        t('ipos.applicationSubmittedTitle'),
+        t('ipos.applicationSubmittedMsg', {
+          companyName: ipo.companyName,
+          lots: bidLots,
+          shares: bidLots * ipo.lotSize,
+          amount: (bidLots * ipo.lotSize * ipo.priceBand.min).toLocaleString('en-IN'),
+        }),
       );
       setShowApply(false);
     } catch {
-      Alert.alert('Error', 'Failed to submit application.');
+      Alert.alert(t('ipos.submitFailedTitle'), t('ipos.submitFailedMsg'));
     } finally {
       setSubmitting(false);
     }
@@ -257,29 +264,29 @@ export default function IPODetailScreen({ route, navigation }: any) {
 
         {/* ── Price & Stats Row ── */}
         <View style={styles.statsRow}>
-          <StatCard label="Price Band" value={`₹${ipo.priceBand.min} – ₹${ipo.priceBand.max}`} icon="pricetag" />
-          <StatCard label="Lot Size" value={`${ipo.lotSize} shares`} icon="cube" />
-          <StatCard label="Min Invest" value={`₹${ipo.minInvestment.toLocaleString('en-IN')}`} icon="wallet" />
+          <StatCard label={t('ipos.priceBand')} value={`₹${ipo.priceBand.min} – ₹${ipo.priceBand.max}`} icon="pricetag" />
+          <StatCard label={t('ipos.lotSize')} value={`${ipo.lotSize} ${t('ipos.shares')}`} icon="cube" />
+          <StatCard label={t('ipos.minInvest')} value={`₹${ipo.minInvestment.toLocaleString('en-IN')}`} icon="wallet" />
         </View>
 
         {/* ── Issue Details ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Issue Details" icon="stats-chart" />
+          <SectionHeader title={t('ipos.issueDetails')} icon="stats-chart" />
           <View style={styles.issueGrid}>
             <View style={styles.issueItem}>
-              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>Issue Size</Text>
+              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.issueSize')}</Text>
               <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.issueSize.toLocaleString('en-IN')} Cr</Text>
             </View>
             <View style={styles.issueItem}>
-              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>Fresh Issue</Text>
+              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.freshIssue')}</Text>
               <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.freshIssue.toLocaleString('en-IN')} Cr</Text>
             </View>
             <View style={styles.issueItem}>
-              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>OFS</Text>
+              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.ofs')}</Text>
               <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.offerForSale.toLocaleString('en-IN')} Cr</Text>
             </View>
             <View style={styles.issueItem}>
-              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>Total Shares</Text>
+              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.totalShares')}</Text>
               <Text style={[styles.issueValue, { color: colors.text }]}>{(ipo.totalShares / 10000000).toFixed(2)} Cr</Text>
             </View>
           </View>
@@ -288,18 +295,21 @@ export default function IPODetailScreen({ route, navigation }: any) {
         {/* ── Subscription Breakdown ── */}
         {ipo.subscriptionTotal > 0 && (
           <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <SectionHeader title="Subscription" icon="trending-up" color="#00E676" />
+            <SectionHeader title={t('ipos.subscription')} icon="trending-up" color="#00E676" />
             <Text style={[styles.subTotalText, { color: '#00E676' }]}>
-              Overall: {ipo.subscriptionTotal.toFixed(2)}x
+              {t('ipos.overall', { value: ipo.subscriptionTotal.toFixed(2) })}
             </Text>
             <View style={styles.subBars}>
-              <SubscriptionBar label="QIB" value={ipo.subscriptionQIB} maxValue={ipo.subscriptionTotal} color="#3B82F6" />
-              <SubscriptionBar label="HNI" value={ipo.subscriptionHNI} maxValue={ipo.subscriptionTotal} color="#8B5CF6" />
-              <SubscriptionBar label="Retail" value={ipo.subscriptionRetail} maxValue={ipo.subscriptionTotal} color="#00E676" />
+              <SubscriptionBar label={t('ipos.subQIB')} value={ipo.subscriptionQIB} maxValue={ipo.subscriptionTotal} color="#3B82F6" />
+              <SubscriptionBar label={t('ipos.subHNI')} value={ipo.subscriptionHNI} maxValue={ipo.subscriptionTotal} color="#8B5CF6" />
+              <SubscriptionBar label={t('ipos.retail')} value={ipo.subscriptionRetail} maxValue={ipo.subscriptionTotal} color="#00E676" />
             </View>
             <View style={[styles.subMeta, { borderTopColor: colors.border }]}>
               <Text style={[styles.subMetaText, { color: colors.textMuted }]}>
-                {ipo.applications.toLocaleString('en-IN')} applications · {(ipo.sharesApplied / 10000000).toFixed(2)} Cr shares applied
+                {t('ipos.applicationsApplied', {
+                  count: ipo.applications.toLocaleString('en-IN'),
+                  value: (ipo.sharesApplied / 10000000).toFixed(2),
+                })}
               </Text>
             </View>
           </View>
@@ -308,7 +318,7 @@ export default function IPODetailScreen({ route, navigation }: any) {
         {/* ── GMP & Expected Listing ── */}
         {ipo.gmp > 0 && (
           <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <SectionHeader title="Grey Market Premium (GMP)" icon="pulse" color="#FFC107" />
+            <SectionHeader title={t('ipos.gmpTitle')} icon="pulse" color="#FFC107" />
             <View style={styles.gmpHeader}>
               <View>
                 <Text style={[styles.gmpValue, { color: gmpPositive ? '#00E676' : '#FF5252' }]}>
@@ -319,7 +329,7 @@ export default function IPODetailScreen({ route, navigation }: any) {
                 </Text>
               </View>
               <View style={styles.gmpListing}>
-                <Text style={[styles.gmpListingLabel, { color: colors.textMuted }]}>Expected Listing</Text>
+                <Text style={[styles.gmpListingLabel, { color: colors.textMuted }]}>{t('ipos.expectedListing')}</Text>
                 <Text style={[styles.gmpListingValue, { color: colors.text }]}>₹{ipo.expectedListingPrice}</Text>
                 <Text style={[styles.gmpListingGain, { color: ipo.expectedListingGain >= 0 ? '#00E676' : '#FF5252' }]}>
                   {ipo.expectedListingGain >= 0 ? '+' : ''}{ipo.expectedListingGain.toFixed(1)}%
@@ -355,39 +365,39 @@ export default function IPODetailScreen({ route, navigation }: any) {
 
         {/* ── Financials ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Financials" icon="analytics" />
+          <SectionHeader title={t('ipos.financials')} icon="analytics" />
           <View style={styles.finGrid}>
-            <FinMetric label="Revenue (Cr)" value={`₹${ipo.revenue.toLocaleString('en-IN')}`} positive={ipo.revenue > 0} />
-            <FinMetric label="Net Profit (Cr)" value={`₹${Math.abs(ipo.netProfit).toLocaleString('en-IN')}`} positive={isProfitable} negative={!isProfitable} />
-            <FinMetric label="P/E Ratio" value={ipo.peRatio > 0 ? ipo.peRatio.toFixed(1) : 'N/A'} />
-            <FinMetric label="ROE" value={`${ipo.roe.toFixed(1)}%`} positive={ipo.roe > 10} negative={ipo.roe < 0} />
+            <FinMetric label={t('ipos.revenue')} value={`₹${ipo.revenue.toLocaleString('en-IN')}`} positive={ipo.revenue > 0} />
+            <FinMetric label={t('ipos.netProfit')} value={`₹${Math.abs(ipo.netProfit).toLocaleString('en-IN')}`} positive={isProfitable} negative={!isProfitable} />
+            <FinMetric label={t('ipos.peRatio')} value={ipo.peRatio > 0 ? ipo.peRatio.toFixed(1) : 'N/A'} />
+            <FinMetric label={t('ipos.roe')} value={`${ipo.roe.toFixed(1)}%`} positive={ipo.roe > 10} negative={ipo.roe < 0} />
           </View>
         </View>
 
         {/* ── Key Dates Timeline ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Key Dates" icon="calendar" />
+          <SectionHeader title={t('ipos.keyDates')} icon="calendar" />
           <View style={styles.timeline}>
             <TimelineItem
-              label="Open Date"
+              label={t('ipos.openDate')}
               date={ipo.openDate}
               isActive={ipo.subscriptionStatus === 'open' || ipo.subscriptionStatus === 'closed' || ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
               color="#3B82F6"
             />
             <TimelineItem
-              label="Close Date"
+              label={t('ipos.closeDate')}
               date={ipo.closeDate}
               isActive={ipo.subscriptionStatus === 'closed' || ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
               color="#00E676"
             />
             <TimelineItem
-              label="Allotment"
+              label={t('ipos.allotment')}
               date={ipo.allotmentDate || 'TBD'}
               isActive={ipo.subscriptionStatus === 'listed'}
               color="#8B5CF6"
             />
             <TimelineItem
-              label="Listing Date"
+              label={t('ipos.listingDate')}
               date={ipo.listingDate}
               isActive={ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
               isLast
@@ -398,25 +408,25 @@ export default function IPODetailScreen({ route, navigation }: any) {
 
         {/* ── About ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="About" icon="information-circle" />
+          <SectionHeader title={t('ipos.about')} icon="information-circle" />
           <Text style={[styles.aboutText, { color: colors.textSecondary }]}>{ipo.about}</Text>
         </View>
 
         {/* ── Strengths ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Strengths" icon="shield-checkmark" color="#00E676" />
+          <SectionHeader title={t('ipos.strengths')} icon="shield-checkmark" color="#00E676" />
           <BulletList items={ipo.strengths} color="#00E676" />
         </View>
 
         {/* ── Risks ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Risks" icon="warning" color="#FF5252" />
+          <SectionHeader title={t('ipos.risks')} icon="warning" color="#FF5252" />
           <BulletList items={ipo.risks} color="#FF5252" />
         </View>
 
         {/* ── Lead Managers & Registrar ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Lead Managers & Registrar" icon="people" />
+          <SectionHeader title={t('ipos.leadManagers')} icon="people" />
           <View style={styles.managerList}>
             {ipo.leadManagers.map((m, i) => (
               <View key={i} style={[styles.managerChip, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>

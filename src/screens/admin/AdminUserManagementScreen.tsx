@@ -34,6 +34,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAdminStore, AdminUser } from '../../store/adminStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -196,6 +197,7 @@ function UserCard({
 
 export default function AdminUserManagementScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { users, toggleUserStatus, refresh, isLoading } = useAdminStore();
 
   const [search, setSearch] = useState('');
@@ -304,7 +306,7 @@ export default function AdminUserManagementScreen({ navigation }: any) {
             style={[styles.searchInput, { color: colors.text }]}
             value={search}
             onChangeText={setSearch}
-            placeholder="Search by name, email, or phone..."
+            placeholder={t('adminUser.searchUsers')}
             placeholderTextColor={colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}

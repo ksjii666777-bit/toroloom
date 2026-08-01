@@ -27,6 +27,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { aiApi } from '../../services/api/ai';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -49,6 +50,7 @@ const POPULAR_STOCKS = [
 
 export default function BatchAnalysisScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [symbolInput, setSymbolInput] = useState('');
@@ -187,7 +189,7 @@ export default function BatchAnalysisScreen({ navigation }: any) {
             style={[styles.textInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
             value={symbolInput}
             onChangeText={setSymbolInput}
-            placeholder="e.g. RELIANCE, TCS, HDFCBANK, INFY"
+            placeholder={t('ai.symbolsExample')}
             placeholderTextColor={colors.textMuted}
             multiline
             numberOfLines={2}

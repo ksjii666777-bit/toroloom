@@ -27,6 +27,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCommunityStore, FeedSort } from '../../store/communityStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import { formatTimeAgo } from '../../utils/formatters';
@@ -182,6 +183,7 @@ function PostCard({
 
 export default function CommunityScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const {
@@ -271,7 +273,7 @@ export default function CommunityScreen({ navigation }: any) {
           <Animated.View entering={BounceIn.duration(300)} style={styles.createPost}>
             <TextInput
               style={styles.postInput}
-              placeholder="Share your thoughts with the community..."
+              placeholder={t('community.shareThoughts')}
               placeholderTextColor={colors.textMuted}
               value={postContent}
               onChangeText={setPostContent}

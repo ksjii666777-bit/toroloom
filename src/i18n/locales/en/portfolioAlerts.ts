@@ -23,4 +23,5 @@ export default {
     testAlert: 'Test Alert',
     holding: 'holding',
     watched: 'watched',
+    searchPlaceholder: 'Search by symbol or name…',
 };

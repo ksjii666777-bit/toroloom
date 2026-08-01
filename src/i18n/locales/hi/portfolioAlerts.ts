@@ -23,4 +23,5 @@ export default {
     testAlert: 'टेस्ट अलर्ट',
     holding: 'होल्डिंग',
     watched: 'देखी गई',
+    searchPlaceholder: 'प्रतीक या नाम से खोजें…',
 };

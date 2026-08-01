@@ -77,4 +77,14 @@ export default {
     shortTerm: 'अल्पकालिक',
     longTerm: 'दीर्घकालिक',
     taxInfo: 'कर गणनाएँ वित्त वर्ष 2025-26 के भारतीय आयकर नियमों (STT भुगतान सहित इक्विटी) का पालन करती हैं। अधिभार और उपकर अनुमानित हैं। सटीक कर योजना के लिए CA से परामर्श करें।',
+    // ── Step-Up SIP alerts ───────────────────────────────────────────
+    invalidPercentTitle: 'अमान्य प्रतिशत',
+    invalidPercentMsg: 'स्टेप-अप प्रतिशत 1% और 50% के बीच होना चाहिए।',
+    stepUpEnabledTitle: 'स्टेप-अप सक्षम',
+    stepUpEnabledMsg: 'SIP में {{pct}}% की वृद्धि होगी {{frequency}}।',
+    everyYear: 'हर साल',
+    every6Months: 'हर 6 महीने',
+    disableStepUpTitle: 'स्टेप-अप बंद करें?',
+    disableStepUpMsg: 'SIP बिना स्वतः वृद्धि के जारी रहेगा। आपकी वर्तमान राशि समान रहेगी।',
+    disable: 'बंद करें',
 };

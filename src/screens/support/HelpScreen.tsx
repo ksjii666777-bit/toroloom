@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Linking, Dimensions, TextInput, Act
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS, COLORS } from '../../constants/theme';
 import { supportApi, FAQ } from '../../services/api/support';
 
@@ -40,6 +41,7 @@ const contactOptions = [
 
 export default function HelpScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
@@ -124,7 +126,7 @@ export default function HelpScreen({ navigation }: any) {
           <Ionicons name="search" size={18} color={searchQuery ? colors.primary : colors.textMuted} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search help articles..."
+            placeholder={t('help.searchArticles')}
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}

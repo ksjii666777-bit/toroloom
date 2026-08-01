@@ -649,7 +649,7 @@ export default function SmartPriceAlertsScreen() {
                     style={[styles.formInput, { color: colors.text, borderColor: colors.border }]}
                     value={formSymbol}
                     onChangeText={setFormSymbol}
-                    placeholder="RELIANCE"
+                    placeholder={t('smartAlerts.symbolPlaceholder')}
                     placeholderTextColor={colors.textMuted}
                     autoCapitalize="characters"
                   />
@@ -660,7 +660,7 @@ export default function SmartPriceAlertsScreen() {
                     style={[styles.formInput, { color: colors.text, borderColor: colors.border }]}
                     value={formStockName}
                     onChangeText={setFormStockName}
-                    placeholder="Reliance Industries"
+                    placeholder={t('smartAlerts.stockNamePlaceholder')}
                     placeholderTextColor={colors.textMuted}
                   />
                 </View>

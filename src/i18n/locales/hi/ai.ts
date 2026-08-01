@@ -84,4 +84,11 @@ export default {
     orderPlacementMsg: '{{symbol}} के लिए ऑर्डर प्लेसमेंट पर जाएं?\n{{qty}} शेयर @ {{price}}',
     goToOrder: 'ऑर्डर पर जाएं',
     placeOrderCta: '{{type}} ऑर्डर दें · {{qty}} शेयर @ {{price}}',
+    // ── Sentiment alert dialogs ───────────────────────────────────────
+    removeRuleTitle: 'नियम हटाएं',
+    removeRuleMsg: 'क्या आप वाकई इस सेंटिमेंट अलर्ट नियम को हटाना चाहते हैं?',
+    remove: 'हटाएं',
+    askPortfolio: 'अपने पोर्टफोलियो के बारे में पूछें...',
+    symbolsExample: 'जैसे, RELIANCE, TCS, HDFCBANK, INFY',
+    searchLiveFeed: 'प्रतीक, नाम या संदेश से खोजें...',
 };

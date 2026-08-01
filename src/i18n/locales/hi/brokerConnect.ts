@@ -59,4 +59,12 @@ export default {
     apiFailed: '❌ API विफल',
     apiError: '❌ API त्रुटि',
     unexpectedApiError: 'API अनुरोध के दौरान अप्रत्याशित त्रुटि।',
+    // ── Alert dialogs ─────────────────────────────────────────────────
+    errorTitle: 'त्रुटि',
+    failedDisconnect: 'डिस्कनेक्ट करने में विफल',
+    connectionErrorTitle: 'कनेक्शन त्रुटि',
+    failedLoadLogin: 'ब्रोकर लॉगिन पेज लोड करने में विफल। कृपया पुनः प्रयास करें।',
+    limitedConnectionTitle: 'सीमित कनेक्शन',
+    limitedConnectionMsg: 'कनेक्ट हुआ लेकिन टोकन एक्सचेंज विफल: {{error}}। दोबारा कनेक्ट करने तक कुछ सुविधाएँ उपलब्ध नहीं हो सकती हैं।',
+    disconnectBrokerMsg: 'क्या आप वाकई {{label}} से डिस्कनेक्ट करना चाहते हैं?',
 };

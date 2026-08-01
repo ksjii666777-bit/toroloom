@@ -317,6 +317,7 @@ function ReviewCard({
   colors: any;
   styles: any;
 }) {
+  const { t } = useT();
   const isPending = course.submittedForReview && course.publishStatus === 'draft';
   const isApproved = course.publishStatus === 'published';
   const isRejected = !course.submittedForReview && course.publishStatus === 'draft' && !!course.reviewNotes;
@@ -427,7 +428,7 @@ function ReviewCard({
                   borderColor: colors.border,
                   color: colors.text,
                 }]}
-                placeholder="Explain why the course is being rejected..."
+                placeholder={t('adminCourseReview.rejectPlaceholder')}
                 placeholderTextColor={colors.textMuted}
                 value={rejectNotes}
                 onChangeText={setRejectNotes}
