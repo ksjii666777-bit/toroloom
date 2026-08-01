@@ -36,6 +36,8 @@ const CATEGORIES: { key: CategoryKey | 'all'; labelKey: string }[] = [
 
 interface MenuItem {
   icon: string;
+  /** English label — NOT rendered directly; used as the English-name search fallback
+   *  in the filter so English tile names still match while the app is in Hindi. */
   label: string;
   /** i18n key — resolved through useT for the active locale */
   labelKey: string;
@@ -406,13 +408,13 @@ export default function MoreScreen({ navigation }: any) {
             <View style={styles.glassBg} />
             <View style={styles.profileRow}>
               <View style={styles.profileAvatar}>
-                <Text style={styles.avatarText}>{user?.name?.[0] || 'R'}</Text>
+                <Text style={styles.avatarText}>{(user?.name || t('home.investor'))[0] || 'R'}</Text>
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileName}>{user?.name || 'Rahul Sharma'}</Text>
-                <Text style={styles.profileEmail}>{user?.email || 'rahul@email.com'}</Text>
+                <Text style={styles.profileName}>{user?.name || t('home.investor')}</Text>
+                <Text style={styles.profileEmail}>{user?.email || ''}</Text>
                 <View style={styles.profileBadges}>
-                  <Badge label={`Level ${userLevel.level}`} variant="primary" />
+                  <Badge label={t('gamification.level', { level: userLevel.level })} variant="primary" />
                   <View style={styles.kycVerifiedBadge}>
                     <Ionicons name="shield-checkmark" size={12} color="#00D2FF" />
                     <Text style={styles.kycVerifiedText}>{t('profile.kycVerified')}</Text>
@@ -443,7 +445,7 @@ export default function MoreScreen({ navigation }: any) {
           <View style={styles.balanceRow}>
             <View>
               <Text style={styles.balanceLabel}>{t('profile.availableBalance')}</Text>
-              <Text style={styles.balanceValue}>₹{((user?.balance || 2500000) / 100000).toFixed(1)}L</Text>
+              <Text style={styles.balanceValue}>₹{((user?.balance || 2500000) / 100000).toFixed(1)}{t('profile.lakh')}</Text>
             </View>
             <View style={styles.balanceActions}>
               <AnimatedPressable onPress={() => navigation.navigate('AddFunds')} haptic="light" scaleTo={0.95}>

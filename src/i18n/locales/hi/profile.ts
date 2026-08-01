@@ -20,6 +20,7 @@ export default {
     availableBalance: 'उपलब्ध बैलेंस',
     add: 'जोड़ें',
     withdraw: 'निकासी',
+    lakh: 'लाख',
     investments: 'निवेश',
     fundDashboard: 'फंड डैशबोर्ड',
     mutualFunds: 'म्यूचुअल फंड',

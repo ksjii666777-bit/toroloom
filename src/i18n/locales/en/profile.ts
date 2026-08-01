@@ -19,6 +19,7 @@ export default {
     availableBalance: 'Available Balance',
     add: 'Add',
     withdraw: 'Withdraw',
+    lakh: 'L',
     investments: 'Investments',
     fundDashboard: 'Fund Dashboard',
     mutualFunds: 'Mutual Funds',
