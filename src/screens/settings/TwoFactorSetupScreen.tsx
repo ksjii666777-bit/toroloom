@@ -307,12 +307,14 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
                   if (codeInputRef.current) codeInputRef.current.focus();
                 }}
               >
-                <Text style={[
-                  styles.otpDigit,
-                  { color: verificationCode.length > index ? colors.primary : colors.textMuted },
-                ]}>
-                  {digit.trim() || ''}
-                </Text>
+                {digit.trim() && (
+                  <Text style={[
+                    styles.otpDigit,
+                    { color: verificationCode.length > index ? colors.primary : colors.textMuted },
+                  ]}>
+                    {digit.trim()}
+                  </Text>
+                )}
               </TouchableOpacity>
             ))}
           </View>

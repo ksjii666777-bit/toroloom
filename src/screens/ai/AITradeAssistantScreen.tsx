@@ -217,7 +217,7 @@ export default function AITradeAssistantScreen({ navigation }: any) {
               <Text style={styles.inputLabel}>{t('ai.entryPrice')}</Text>
               <TextInput style={[styles.input, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
                 value={entryPrice} onChangeText={v => { setEntryPrice(v); setShowResults(false); }}
-                keyboardType="decimal-pad" placeholder={String(selectedStock?.price || '')}
+                keyboardType="decimal-pad" placeholder={selectedStock?.price ? String(selectedStock.price) : undefined}
                 placeholderTextColor={colors.textMuted} />
             </View>
           </View>
