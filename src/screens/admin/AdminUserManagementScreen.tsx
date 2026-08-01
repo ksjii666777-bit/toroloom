@@ -60,6 +60,7 @@ function UserCard({
   onExpand: () => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const scale = useSharedValue(0);
 
   useEffect(() => {
@@ -125,7 +126,7 @@ function UserCard({
                 </View>
                 <View style={styles.metaItem}>
                   <Ionicons name="swap-horizontal" size={11} color={colors.textMuted} />
-                  <Text style={[styles.metaText, { color: colors.textMuted }]}>{user.totalTrades} trades</Text>
+                  <Text style={[styles.metaText, { color: colors.textMuted }]}>{t('app.trades', { count: user.totalTrades })}</Text>
                 </View>
               </View>
             </View>

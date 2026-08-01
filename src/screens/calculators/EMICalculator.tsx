@@ -184,7 +184,7 @@ export default function EMICalculator() {
             <View style={[styles.tenureInfo, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
               <Text style={[styles.tenureText, { color: colors.textMuted }]}>
-                {months} months ({Math.floor(months / 12)} year{Math.floor(months / 12) !== 1 ? 's' : ''} {months % 12 > 0 ? `${months % 12} mo` : ''})
+                {t('app.months', { count: months })} ({t('app.years', { count: Math.floor(months / 12) })}{months % 12 > 0 ? ` ${t('app.months', { count: months % 12 })}` : ''})
               </Text>
             </View>
           </View>

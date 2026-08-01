@@ -13,17 +13,17 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { UserGeneratedCourse } from '../../types';
 
 /** Format a relative time string */
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: any): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('time.justNow');
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('time.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return `${Math.floor(days / 30)}mo ago`;
+  if (days < 7) return t('time.daysAgo', { count: days });
+  if (days < 30) return t('time.weeksAgo', { count: Math.floor(days / 7) });
+  return t('time.monthsAgo', { count: Math.floor(days / 30) });
 }
 
 /** Get a gradient background for a publish status */
@@ -312,7 +312,7 @@ function CourseCard({
         </View>
 
         {/* Updated time */}
-        <Text style={styles.updatedText}>{formatRelativeTime(course.updatedAt)}</Text>
+        <Text style={styles.updatedText}>{formatRelativeTime(course.updatedAt, t)}</Text>
 
         {/* Action Buttons */}
         <View style={styles.actionsRow}>
@@ -425,7 +425,7 @@ function ReviewStatusSection({
                   </View>
                 </AnimatedPressable>
               </View>
-              <Text style={styles.reviewCourseDate}>{t('education.submitted')} {formatRelativeTime(course.updatedAt)}</Text>
+              <Text style={styles.reviewCourseDate}>{t('education.submitted')} {formatRelativeTime(course.updatedAt, t)}</Text>
             </View>
           ))}
         </View>

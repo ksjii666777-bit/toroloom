@@ -11,4 +11,7 @@ export default {
     next: 'अगला',
     skip: 'छोड़ें',
     done: 'हो गया',
+    orderPlaced: 'ऑर्डर दिया गया! {{count}} शेयर {{action}} ✓',
+    bought: 'खरीदे गए',
+    sold: 'बेचे गए',
 };

@@ -38,4 +38,6 @@ export default {
     relatedEtfs: 'संबंधित ETF',
     regionEuropean: 'यूरोपीय स्टॉक',
     regionAsiaPacific: 'एशिया-प्रशांत स्टॉक',
+    avgVolumeAcross: 'औसत दैनिक वॉल्यूम {{volume}} शेयर {{exchange}} ऑर्डर बुक पर।',
+    avgVolumePlain: 'औसत दैनिक वॉल्यूम {{volume}} शेयर।',
 };

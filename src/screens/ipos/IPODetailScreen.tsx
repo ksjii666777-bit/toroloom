@@ -508,7 +508,7 @@ export default function IPODetailScreen({ route, navigation }: any) {
             </View>
             <Text style={[styles.applyCompanyName, { color: colors.textSecondary }]}>{ipo.companyName}</Text>
             <Text style={[styles.applyRange, { color: colors.textMuted }]}>
-              ₹{ipo.priceBand.min} – ₹{ipo.priceBand.max} · Lot: {ipo.lotSize} shares
+              ₹{ipo.priceBand.min} – ₹{ipo.priceBand.max} · {t('ipos.lot')}: {t('app.shares', { count: ipo.lotSize })}
             </Text>
 
             {/* Lot Selector */}

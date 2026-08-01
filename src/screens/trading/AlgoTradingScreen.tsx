@@ -621,7 +621,7 @@ export default function AlgoTradingScreen() {
               📊 Backtest Results — {strategyName || 'My Strategy'}
             </Text>
             <Text style={[screenStyles.sectionSubtitle, { color: colors.textMuted }]}>
-              {result.trades.length} trades · 1 year mock data · {selectedSymbol}
+              {t('trading.backtestSummary', { count: result.trades.length, symbol: selectedSymbol })}
             </Text>
 
             {/* Errors */}
@@ -671,7 +671,7 @@ export default function AlgoTradingScreen() {
 
             {/* Trade Log */}
             <Text style={[screenStyles.subSectionTitle, { color: colors.text }]}>
-              Trade Log ({result.trades.length} trades)
+              {t('trading.tradeLog', { count: result.trades.length })}
             </Text>
             {result.trades.length === 0 ? (
               <Text style={[screenStyles.emptyText, { color: colors.textMuted }]}>

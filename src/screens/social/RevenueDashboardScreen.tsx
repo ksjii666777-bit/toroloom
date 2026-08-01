@@ -17,17 +17,17 @@ const formatINR = (val: number) =>
   '₹' + val.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
 /** Format relative time */
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: any): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('time.justNow');
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('time.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return `${Math.floor(days / 30)}mo ago`;
+  if (days < 7) return t('time.daysAgo', { count: days });
+  if (days < 30) return t('time.weeksAgo', { count: Math.floor(days / 7) });
+  return t('time.monthsAgo', { count: Math.floor(days / 30) });
 }
 
 /** Format date */  
@@ -263,7 +263,7 @@ function TransactionRow({ txn, colors, styles }: { txn: RevenueTransaction; colo
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.txnDesc} numberOfLines={1}>{txn.description}</Text>
-          <Text style={styles.txnTime}>{formatRelativeTime(txn.createdAt)}</Text>
+          <Text style={styles.txnTime}>{formatRelativeTime(txn.createdAt, t)}</Text>
         </View>
       </View>
       <View style={styles.txnRight}>

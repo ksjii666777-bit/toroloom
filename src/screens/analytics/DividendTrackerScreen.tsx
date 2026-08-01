@@ -100,7 +100,7 @@ function EventCard({ event, colors }: { event: DividendEvent; colors: any }) {
         <Text style={[styles.eventName, { color: colors.textMuted }]}>{event.name}</Text>
         <View style={styles.eventMeta}>
           <Text style={[styles.eventMetaText, { color: colors.textSecondary }]}>
-            ₹{event.amountPerShare.toFixed(2)}/share × {event.quantity} shares
+            ₹{event.amountPerShare.toFixed(2)}{t('app.perShare')} × {t('app.shares', { count: event.quantity })}
           </Text>
           <View style={[styles.freqBadge, { backgroundColor: '#00E67620' }]}>
             <Text style={[styles.freqText, { color: '#00E676' }]}>{event.frequency.replace('_', ' ')}</Text>

@@ -81,14 +81,14 @@ const education = {
   "intermediate": "Intermediate",
   "advanced": "Advanced"
 };
-const time = {"justNow": "just now", "minutesAgo": "{{count}}m ago", "hoursAgo": "{{count}}h ago", "daysAgo": "{{count}}d ago"};
+const time = {"justNow": "just now", "minutesAgo": "{{count}}m ago", "hoursAgo": "{{count}}h ago", "daysAgo": "{{count}}d ago", "weeksAgo": "{{count}}w ago", "monthsAgo": "{{count}}mo ago", "never": "Never", "daysLeft": "{{count}}d left", "monthsLeft": "{{count}}mo left", "noExpiry": "No expiry", "expired": "Expired"};
 
 function resolveT(key: string, params?: Record<string, any>): string {
   const parts = key.split('.');
   const rootNs = parts[0];
   const subKey = parts.slice(1).join('.');
   
-  const translations: Record<string, any> = { education, ...time };
+  const translations: Record<string, any> = { education, time, ...time };
   const obj = translations[rootNs];
   if (!obj) {
     const parts2 = key.split('.');

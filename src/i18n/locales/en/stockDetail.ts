@@ -38,4 +38,6 @@ export default {
     relatedEtfs: 'Related ETFs',
     regionEuropean: 'European Stock',
     regionAsiaPacific: 'Asia-Pacific Stock',
+    avgVolumeAcross: 'with an average daily volume of {{volume}} shares across the {{exchange}} order book.',
+    avgVolumePlain: 'with an average daily volume of {{volume}} shares.',
 };

@@ -57,13 +57,12 @@ function formatDiscount(coupon: CouponCode): string {
   }
 }
 
-function getExpiryStatus(expiresAt?: string): { label: string; urgent: boolean } {
-  if (!expiresAt) return { label: 'No expiry', urgent: false };
+function getExpiryStatus(expiresAt?: string): { status: 'none' | 'expired' | 'days' | 'months'; daysLeft: number; urgent: boolean } {
+  if (!expiresAt) return { status: 'none', daysLeft: 0, urgent: false };
   const daysLeft = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86400000);
-  if (daysLeft <= 0) return { label: 'Expired', urgent: true };
-  if (daysLeft <= 7) return { label: `${daysLeft}d left`, urgent: true };
-  if (daysLeft <= 30) return { label: `${daysLeft}d left`, urgent: false };
-  return { label: `${Math.ceil(daysLeft / 30)}mo left`, urgent: false };
+  if (daysLeft <= 0) return { status: 'expired', daysLeft, urgent: true };
+  if (daysLeft <= 30) return { status: 'days', daysLeft, urgent: daysLeft <= 7 };
+  return { status: 'months', daysLeft, urgent: false };
 }
 
 // ─── Animated Coupon Card ─────────────────────────────────────
@@ -78,11 +77,12 @@ function CouponCard({
   onSelect: (code: string) => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const s = useMemo(() => createCouponCardStyles(colors), [colors]);
   const scaleAnim = useSharedValue(0);
   const typeMeta = getCouponTypeMeta(coupon.type);
   const expiry = getExpiryStatus(coupon.expiresAt);
-  const isExpired = expiry.urgent && expiry.label === 'Expired';
+  const isExpired = expiry.status === 'expired';
   const usesLeft = coupon.maxUses ? Math.max(0, coupon.maxUses - (coupon.currentUses || 0)) : Infinity;
   const usagePercent = coupon.maxUses ? ((coupon.currentUses || 0) / coupon.maxUses) * 100 : 0;
 
@@ -150,7 +150,13 @@ function CouponCard({
               color={expiry.urgent ? colors.danger : colors.textMuted}
             />
             <Text style={[s.metaText, { color: expiry.urgent ? colors.danger : colors.textMuted }]}>
-              {expiry.label}
+              {expiry.status === 'none'
+                ? t('time.noExpiry')
+                : expiry.status === 'expired'
+                  ? t('time.expired')
+                  : expiry.status === 'months'
+                    ? t('time.monthsLeft', { count: Math.ceil(expiry.daysLeft / 30) })
+                    : t('time.daysLeft', { count: expiry.daysLeft })}
             </Text>
           </View>
 

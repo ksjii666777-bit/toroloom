@@ -11,4 +11,7 @@ export default {
     next: 'Next',
     skip: 'Skip',
     done: 'Done',
+    orderPlaced: 'Order placed! {{count}} shares {{action}} ✓',
+    bought: 'bought',
+    sold: 'sold',
 };

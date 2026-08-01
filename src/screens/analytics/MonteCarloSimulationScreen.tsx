@@ -439,7 +439,7 @@ export default function MonteCarloSimulationScreen({ navigation }: any) {
                   <Text style={styles.paramValue}>{formatPercent(result.params.annualVolatility)}</Text>
                 </View>
                 <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.timeHorizon')}</Text>
-                  <Text style={styles.paramValue}>{result.params.years} years</Text>
+                  <Text style={styles.paramValue}>{t('app.years', { count: result.params.years })}</Text>
                 </View>
                 <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.simulations')}</Text>
                   <Text style={styles.paramValue}>{result.params.simulations.toLocaleString()}</Text>

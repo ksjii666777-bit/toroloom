@@ -24,4 +24,16 @@ export default {
     yes: 'Yes',
     no: 'No',
     saved: 'Saved ✅',
+    // ── Units / dynamic strings ──────────────────────────────────────────
+    shares: '{{count}} shares',
+    shares_one: '{{count}} share',
+    stocks: '{{count}} stocks',
+    stocks_one: '{{count}} stock',
+    trades: '{{count}} trades',
+    trades_one: '{{count}} trade',
+    years: '{{count}} years',
+    years_one: '{{count}} year',
+    months: '{{count}} months',
+    months_one: '{{count}} month',
+    perShare: '/share',
 };

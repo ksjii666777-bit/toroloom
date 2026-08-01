@@ -109,17 +109,17 @@ const MOCK_DELIVERY_LOGS: Record<string, WebhookDeliveryLog[]> = {
 };
 
 // Helper
-function formatRelativeTime(iso: string | null): string {
-  if (!iso) return 'Never';
+function formatRelativeTime(iso: string | null, t: any): string {
+  if (!iso) return t('time.never');
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
   const hrs = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  if (hrs < 24) return `${hrs}h ago`;
-  if (days < 30) return `${days}d ago`;
-  return `${Math.floor(days / 30)}mo ago`;
+  if (mins < 1) return t('time.justNow');
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
+  if (hrs < 24) return t('time.hoursAgo', { count: hrs });
+  if (days < 30) return t('time.daysAgo', { count: days });
+  return t('time.monthsAgo', { count: Math.floor(days / 30) });
 }
 
 function maskSecret(secret: string): string {
@@ -249,7 +249,7 @@ function WebhookCard({
           <Text style={[cardStyles.statLabel, { color: colors.textMuted }]}>{t('webhookManagement.successRateLabel')}</Text>
         </View>
         <View style={cardStyles.statItem}>
-          <Text style={[cardStyles.statValue, { color: colors.text }]}>{formatRelativeTime(wh.lastTriggeredAt)}</Text>
+          <Text style={[cardStyles.statValue, { color: colors.text }]}>{formatRelativeTime(wh.lastTriggeredAt, t)}</Text>
           <Text style={[cardStyles.statLabel, { color: colors.textMuted }]}>{t('webhookManagement.lastPing')}</Text>
         </View>
       </View>
@@ -294,7 +294,7 @@ function WebhookCard({
                       }]}>HTTP {log.statusCode}</Text>
                     </View>
                     <Text style={[cardStyles.logMeta, { color: colors.textMuted }]}>
-                      {log.duration}ms · {formatRelativeTime(log.timestamp)}
+                      {log.duration}ms · {formatRelativeTime(log.timestamp, t)}
                     </Text>
                     {!log.success && log.errorMessage && (
                       <Text style={cardStyles.logError}>{log.errorMessage}</Text>

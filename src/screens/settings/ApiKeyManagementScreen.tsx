@@ -99,17 +99,17 @@ const EXPIRY_OPTIONS = [
 // HELPERS
 // ═════════════════════════════════════════════════════════════════════════
 
-function formatRelativeTime(iso: string | null): string {
-  if (!iso) return 'Never';
+function formatRelativeTime(iso: string | null, t: any): string {
+  if (!iso) return t('time.never');
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
   const hrs = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  if (hrs < 24) return `${hrs}h ago`;
-  if (days < 30) return `${days}d ago`;
-  return `${Math.floor(days / 30)}mo ago`;
+  if (mins < 1) return t('time.justNow');
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
+  if (hrs < 24) return t('time.hoursAgo', { count: hrs });
+  if (days < 30) return t('time.daysAgo', { count: days });
+  return t('time.monthsAgo', { count: Math.floor(days / 30) });
 }
 
 function formatDate(iso: string): string {
@@ -206,7 +206,7 @@ function ApiKeyCard({
   const { t } = useT();
   const isExpired = apiKey.expiresAt && new Date(apiKey.expiresAt) < new Date();
   const expiryLabel = apiKey.expiresAt
-    ? (isExpired ? t('apiKeyManagement.expiredLabel', { time: formatRelativeTime(apiKey.expiresAt) }) : t('apiKeyManagement.expiresLabel', { date: formatDate(apiKey.expiresAt) }))
+    ? (isExpired ? t('apiKeyManagement.expiredLabel', { time: formatRelativeTime(apiKey.expiresAt, t) }) : t('apiKeyManagement.expiresLabel', { date: formatDate(apiKey.expiresAt) }))
     : t('apiKeyManagement.noExpiry');
 
   return (
@@ -277,7 +277,7 @@ function ApiKeyCard({
         <View style={keyCardStyles.metaItem}>
           <Ionicons name="time-outline" size={11} color={colors.textMuted} />
           <Text style={[keyCardStyles.metaText, { color: colors.textMuted }]}>
-            {t('apiKeyManagement.lastUsed', { time: formatRelativeTime(apiKey.lastUsedAt) })}
+            {t('apiKeyManagement.lastUsed', { time: formatRelativeTime(apiKey.lastUsedAt, t) })}
           </Text>
         </View>
       </View>

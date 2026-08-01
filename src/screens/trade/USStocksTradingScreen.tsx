@@ -25,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { snapTradeApi, api } from '../../services/api';
@@ -200,6 +201,7 @@ function StockCard({
 // ═════════════════════════════════════════════════════════════════════════
 
 function HoldingRow({ holding, colors }: { holding: StockHolding; colors: any }) {
+  const { t } = useT();
   const isUp = holding.pnl >= 0;
   return (
     <View style={[styles.holdingRow, { borderBottomColor: colors.divider }]}>
@@ -208,7 +210,7 @@ function HoldingRow({ holding, colors }: { holding: StockHolding; colors: any })
         <Text style={[styles.holdingName, { color: colors.textMuted }]} numberOfLines={1}>{holding.name}</Text>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
-        <Text style={[styles.holdingQty, { color: colors.text }]}>{holding.quantity} shares</Text>
+        <Text style={[styles.holdingQty, { color: colors.text }]}>{t('app.shares', { count: holding.quantity })}</Text>
         <Text style={[styles.holdingValue, { color: colors.textMuted }]}>{formatUSD(holding.quantity * holding.price)}</Text>
       </View>
       <View style={{ alignItems: 'flex-end', minWidth: 80 }}>
@@ -271,6 +273,7 @@ function TradeModal({
   action: TradeAction;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new RNAnimated.Value(0)).current;
 
@@ -444,7 +447,7 @@ function TradeModal({
               </View>
               <View style={styles.modalSummaryRow}>
                 <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>Quantity</Text>
-                <Text style={[styles.modalSummaryValue, { color: colors.text }]}>{qty} shares</Text>
+                <Text style={[styles.modalSummaryValue, { color: colors.text }]}>{t('app.shares', { count: qty })}</Text>
               </View>
             </View>
           )}
@@ -484,6 +487,7 @@ function TradeModal({
 
 export default function USStocksTradingScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const [stocks, setStocks] = useState<USStockDisplay[]>([]);
@@ -635,7 +639,7 @@ export default function USStocksTradingScreen({ navigation }: any) {
           <View style={{ flex: 1 }}>
             <Text style={[styles.title, { color: colors.text }]}>US Stocks</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              {stocks.length} stocks · {isBrokerConnected ? 'Broker Connected' : 'View Only'}
+              {t('app.stocks', { count: stocks.length })} · {isBrokerConnected ? t('usMarkets.brokerConnected') : t('usMarkets.viewOnly')}
             </Text>
           </View>
           {!isBrokerConnected && (
@@ -736,7 +740,7 @@ export default function USStocksTradingScreen({ navigation }: any) {
                     <View style={[styles.perfRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                       <Ionicons name="pulse" size={16} color={colors.primary} />
                       <Text style={[styles.perfText, { color: colors.textMuted }]}>
-                        {filteredStocks.filter(s => s.isPositive).length}/{filteredStocks.length} stocks up · 
+                        {filteredStocks.filter(s => s.isPositive).length}/{filteredStocks.length} {t('usMarkets.stocksUp')} · 
                         Market data via MarketStack
                       </Text>
                     </View>

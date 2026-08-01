@@ -238,7 +238,7 @@ export default function LumpsumCalculator() {
                 A one-time investment of{' '}
                 <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{formatCurrency(principal)}</Text> growing at{' '}
                 <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{rate}%</Text> p.a. for{' '}
-                <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{years} year{years !== 1 ? 's' : ''}</Text>{' '}
+                <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{t('app.years', { count: years })}</Text>{' '}
                 would be worth <Text style={{ color: colors.accent, fontFamily: FONTS.semiBold.fontFamily }}>{formatCurrency(maturityAmount)}</Text>.
               </Text>
             </View>

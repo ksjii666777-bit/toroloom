@@ -10,4 +10,11 @@ export default {
     minutesAgo: '{{count}}m ago',
     hoursAgo: '{{count}}h ago',
     daysAgo: '{{count}}d ago',
+    weeksAgo: '{{count}}w ago',
+    monthsAgo: '{{count}}mo ago',
+    daysLeft: '{{count}}d left',
+    monthsLeft: '{{count}}mo left',
+    never: 'Never',
+    noExpiry: 'No expiry',
+    expired: 'Expired',
 };

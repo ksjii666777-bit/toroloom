@@ -3,6 +3,7 @@ import abTestRunner from './abTestRunner';
 import accessibility from './accessibility';
 import adminCoupon from './adminCoupon';
 import adminCourseReview from './adminCourseReview';
+import adminDashboard from './adminDashboard';
 import adminKyc from './adminKyc';
 import adminUser from './adminUser';
 import advancedMarkets from './advancedMarkets';
@@ -82,6 +83,7 @@ import twoFactor from './twoFactor';
 import usMarkets from './usMarkets';
 import voiceSettings from './voiceSettings';
 import watchlist from './watchlist';
+import wealth from './wealth';
 import webhookManagement from './webhookManagement';
 import widgetSettings from './widgetSettings';
 
@@ -90,6 +92,7 @@ const en = {
   accessibility,
   adminCoupon,
   adminCourseReview,
+  adminDashboard,
   adminKyc,
   adminUser,
   advancedMarkets,
@@ -169,6 +172,7 @@ const en = {
   usMarkets,
   voiceSettings,
   watchlist,
+  wealth,
   webhookManagement,
   widgetSettings,
 };

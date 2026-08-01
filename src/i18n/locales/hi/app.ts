@@ -24,4 +24,11 @@ export default {
     yes: 'हाँ',
     no: 'नहीं',
     saved: 'सहेजा गया ✅',
+    // ── इकाइयाँ / डायनामिक स्ट्रिंग्स ─────────────────────────────────────
+    shares: '{{count}} शेयर',
+    stocks: '{{count}} स्टॉक',
+    trades: '{{count}} ट्रेड',
+    years: '{{count}} वर्ष',
+    months: '{{count}} महीने',
+    perShare: '/शेयर',
 };

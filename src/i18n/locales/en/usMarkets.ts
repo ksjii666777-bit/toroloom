@@ -31,4 +31,7 @@ export default {
     cryptoWarning: 'Crypto prices are volatile. Prices shown are indicative and may differ from actual exchange rates. DYOR.',
     lastUpdated: 'Last updated',
     more: 'more',
+    brokerConnected: 'Broker Connected',
+    viewOnly: 'View Only',
+    stocksUp: 'stocks up',
 };

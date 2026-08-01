@@ -50,8 +50,8 @@ const LEVEL_COLORS: Record<string, [string, string]> = {
   if (hours < 24) return t('time.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
   if (days < 7) return t('time.daysAgo', { count: days });
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return `${Math.floor(days / 30)}mo ago`;
+  if (days < 30) return t('time.weeksAgo', { count: Math.floor(days / 7) });
+  return t('time.monthsAgo', { count: Math.floor(days / 30) });
 }
 
 export default function CommunityCoursesScreen({ navigation }: any) {

@@ -10,4 +10,11 @@ export default {
     minutesAgo: '{{count}} मि पहले',
     hoursAgo: '{{count}} घं पहले',
     daysAgo: '{{count}} दिन पहले',
+    weeksAgo: '{{count}} सप्ताह पहले',
+    monthsAgo: '{{count}} महीने पहले',
+    daysLeft: '{{count}} दिन बाकी',
+    monthsLeft: '{{count}} महीने बाकी',
+    never: 'कभी नहीं',
+    noExpiry: 'कोई समाप्ति नहीं',
+    expired: 'समाप्त',
 };

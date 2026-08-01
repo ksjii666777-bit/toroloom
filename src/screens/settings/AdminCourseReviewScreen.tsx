@@ -27,17 +27,17 @@ import type { UserGeneratedCourse } from '../../types';
 type ReviewFilter = 'pending' | 'approved' | 'rejected' | 'all';
 
 /** Format relative time string */
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: any): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('time.justNow');
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('time.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return `${Math.floor(days / 30)}mo ago`;
+  if (days < 7) return t('time.daysAgo', { count: days });
+  if (days < 30) return t('time.weeksAgo', { count: Math.floor(days / 7) });
+  return t('time.monthsAgo', { count: Math.floor(days / 30) });
 }
 
 /** Get submission stats from a list of courses */
@@ -393,7 +393,7 @@ function ReviewCard({
           <View style={styles.detailRow}>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>Submitted</Text>
-              <Text style={styles.detailValue}>{formatRelativeTime(course.updatedAt)}</Text>
+              <Text style={styles.detailValue}>{formatRelativeTime(course.updatedAt, t)}</Text>
             </View>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>Lessons</Text>

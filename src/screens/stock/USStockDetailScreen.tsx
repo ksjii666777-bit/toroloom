@@ -237,7 +237,7 @@ export default function USStockDetailScreen({ route, navigation }: any) {
             stocks in its sector. The stock has a P/E ratio of {stock.pe.toFixed(1)} and 
             {' '}{stock.dividend > 0 ? `offers a dividend yield of ${stock.dividend.toFixed(2)}%.` : 'does not currently pay a dividend.'}
             {'\n\n'}The 52-week trading range is between ${stock.low52.toLocaleString('en-US')} (low) and 
-            ${stock.high52.toLocaleString('en-US')} (high), with an average daily volume of {stock.volume} shares.
+            ${stock.high52.toLocaleString('en-US')} (high), with an average daily volume of {t('app.shares', { count: stock.volume })}.
           </Text>
         </Animated.View>
 

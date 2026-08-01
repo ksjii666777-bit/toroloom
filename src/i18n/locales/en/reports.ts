@@ -12,4 +12,6 @@ export default {
     to: 'To',
     generate: 'Generate Report',
     noData: 'No data for selected period',
+    tradesWithTax: '{{count}} trades · {{rate}}% tax',
+    sharesAt: '{{count}} shares @ {{price}}',
 };

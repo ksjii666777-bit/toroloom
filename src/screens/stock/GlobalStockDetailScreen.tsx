@@ -272,7 +272,7 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
             {stock.name} is a {stock.sector.toLowerCase()} company headquartered in {stock.country} and listed on the {stock.exchange} exchange. 
             With a market capitalization of {formattedMarketCap}, the company is one of the most actively traded stocks on the {stock.exchange}. 
             {'\n\n'}The stock trades in {stock.currency} (Min lot size varies by exchange). P/E ratio stands at {stock.pe.toFixed(1)} with a dividend yield of {stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%.` : 'N/A.'}
-            {'\n\n'}The 52-week trading range is between {currencySymbol}{stock.low52.toLocaleString('en-US')} (low) and {currencySymbol}{stock.high52.toLocaleString('en-US')} (high), with an average daily volume of {stock.volume} shares across the {stock.exchange} order book.
+            {'\n\n'}The 52-week trading range is between {currencySymbol}{stock.low52.toLocaleString('en-US')} (low) and {currencySymbol}{stock.high52.toLocaleString('en-US')} (high), with an average daily volume of {t('app.shares', { count: stock.volume })} across the {stock.exchange} order book.
           </Text>
         </Animated.View>
 

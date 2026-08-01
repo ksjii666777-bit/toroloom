@@ -615,7 +615,7 @@ export default function ReportsScreen({ navigation }: any) {
                 <Text style={[styles.taxCardAmount, { color: cg.shortTerm.gains >= 0 ? colors.marketUp : colors.marketDown }]}>
                   {cg.shortTerm.gains >= 0 ? '+' : ''}{formatCurrency(cg.shortTerm.gains, true)}
                 </Text>
-                <Text style={styles.taxCardDetail}>{cg.shortTerm.count} trades · {cg.shortTerm.taxRate}% tax</Text>
+                <Text style={styles.taxCardDetail}>{t('reports.tradesWithTax', { count: cg.shortTerm.count, rate: cg.shortTerm.taxRate })}</Text>
                 <View style={styles.taxCardLine} />
                 <View style={styles.taxCardRow}>
                   <Text style={styles.taxCardLabel}>{t('reports.estTax')}</Text>
@@ -632,7 +632,7 @@ export default function ReportsScreen({ navigation }: any) {
                 <Text style={[styles.taxCardAmount, { color: cg.longTerm.gains >= 0 ? colors.marketUp : colors.marketDown }]}>
                   {cg.longTerm.gains >= 0 ? '+' : ''}{formatCurrency(cg.longTerm.gains, true)}
                 </Text>
-                <Text style={styles.taxCardDetail}>{cg.longTerm.count} trades · {cg.longTerm.taxRate}% tax</Text>
+                <Text style={styles.taxCardDetail}>{t('reports.tradesWithTax', { count: cg.longTerm.count, rate: cg.longTerm.taxRate })}</Text>
                 <View style={styles.taxCardLine} />
                 <View style={styles.taxCardRow}>
                   <Text style={styles.taxCardLabel}>{t('reports.exempt')}</Text>
@@ -774,7 +774,7 @@ export default function ReportsScreen({ navigation }: any) {
                     </Text>
                   </View>
                   <View style={styles.holdingDetails}>
-                    <Text style={styles.holdingDetail}>{h.quantity} shares @ {formatCurrency(h.buyPrice)}</Text>
+                    <Text style={styles.holdingDetail}>{t('reports.sharesAt', { count: h.quantity, price: formatCurrency(h.buyPrice) })}</Text>
                     <Text style={styles.holdingDetail}>Value: {formatCurrency(h.currentValue, true)}</Text>
                   </View>
                   <View style={styles.holdingProgressBg}>

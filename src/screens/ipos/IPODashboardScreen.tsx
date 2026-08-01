@@ -347,7 +347,7 @@ function ApplicationCard({ app, colors }: {
           <View style={appCardStyles.allotItem}>
             <Text style={[appCardStyles.allotLabel, { color: colors.textMuted }]}>{t('ipos.allottedLabel')}</Text>
             <Text style={[appCardStyles.allotValue, { color: colors.marketUp }]}>
-              {app.sharesAllotted} shares
+              {t('app.shares', { count: app.sharesAllotted })}
             </Text>
           </View>
           <View style={[appCardStyles.detailDivider, { backgroundColor: '#00E67620' }]} />

@@ -146,6 +146,8 @@ const app: Record<string, string> = {
 };
 const reports: Record<string, string> = {
     'addAlertFor': 'Add alert for {symbol}',
+    'tradesWithTax': '{{count}} trades · {{rate}}% tax',
+    'sharesAt': '{{count}} shares @ {{price}}',
     'alertAdded': 'Alert Added',
     'analytics': 'Analytics',
     'averageLoss': 'Average Loss',

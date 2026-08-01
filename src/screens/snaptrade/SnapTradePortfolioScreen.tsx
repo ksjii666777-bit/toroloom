@@ -23,6 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { snapTradeApi } from '../../services/api';
 import type { SnapTradeHolding, SnapTradePosition, SnapTradeStatus } from '../../services/api/snaptrade';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -46,6 +47,7 @@ const formatCompactUSD = (n: number): string => {
 // ──── Main Screen ─────────────────────────────────────────────
 export default function SnapTradePortfolioScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
@@ -302,7 +304,7 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
                       </View>
                       <View style={styles.holdingRight}>
                         <Text style={[styles.holdingQty, { color: colors.text }]}>
-                          {h.quantity} shares
+                          {t('app.shares', { count: h.quantity })}
                         </Text>
                         <Text style={[styles.holdingPrice, { color: colors.text }]}>
                           {formatUSD(h.price)}
@@ -359,7 +361,7 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
                     </View>
                     <View style={styles.holdingRight}>
                       <Text style={[styles.holdingQty, { color: colors.text }]}>
-                        {p.quantity} shares
+                        {t('app.shares', { count: p.quantity })}
                       </Text>
                       <View style={[styles.holdingPnlBadge, {
                         backgroundColor: pnlPositive ? '#00E67620' : '#FF525220',

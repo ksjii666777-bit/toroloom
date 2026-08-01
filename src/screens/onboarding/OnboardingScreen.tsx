@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useOnboardingStore, ONBOARDING_STEPS } from '../../store/onboardingStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { analytics } from '../../services/analytics';
@@ -295,6 +296,7 @@ function MockTradePanel({
   const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
   const [quantity, setQuantity] = useState(10);
   const [confirmed, setConfirmed] = useState(false);
+  const { t } = useT();
   const mockPrice = 2450.50;
   const pulseAnim = useSharedValue(1);
 
@@ -411,7 +413,7 @@ function MockTradePanel({
         <Animated.View entering={BounceIn.duration(400)} style={demoStyles.confirmedBox}>
           <Ionicons name="checkmark-circle" size={28} color="#00E676" />
           <Text style={demoStyles.confirmedText}>
-            Order placed! {quantity} shares {tradeType === 'buy' ? 'bought' : 'sold'} ✓
+            {t('onboarding.orderPlaced', { count: quantity, action: tradeType === 'buy' ? t('onboarding.bought') : t('onboarding.sold') })}
           </Text>
         </Animated.View>
       )}

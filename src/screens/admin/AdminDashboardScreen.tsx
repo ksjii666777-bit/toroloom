@@ -32,6 +32,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useAdminStore, SystemService } from '../../store/adminStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -101,6 +102,7 @@ function ServiceStatusDot({ status }: { status: SystemService['status'] }) {
 
 function ServiceRow({ service, delay }: { service: SystemService; delay: number }) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   const statusLabel =
     service.status === 'healthy' ? 'Healthy' :
@@ -122,7 +124,7 @@ function ServiceRow({ service, delay }: { service: SystemService; delay: number 
         <View>
           <Text style={[styles.serviceName, { color: colors.text }]}>{service.name}</Text>
           <Text style={[styles.serviceLatency, { color: colors.textMuted }]}>
-            {service.latency}ms · {service.uptime}% uptime
+            {service.latency}ms · {t('adminDashboard.uptime', { uptime: service.uptime })}
           </Text>
         </View>
       </View>
@@ -173,6 +175,7 @@ function QuickLink({
 
 export default function AdminDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { stats, services, refresh, isLoading } = useAdminStore();
 
   const [refreshing, setRefreshing] = React.useState(false);
@@ -221,11 +224,11 @@ export default function AdminDashboardScreen({ navigation }: any) {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Overview</Text>
         <View style={styles.statsGrid}>
           <StatCard icon="people" label="Total Users" value={stats.totalUsers.toLocaleString()} color="#3B82F6" delay={0} />
-          <StatCard icon="flash" label="Active Today" value={stats.activeToday.toString()} color="#00E676" delay={80} />
-          <StatCard icon="person-add" label="New Today" value={stats.newSignupsToday.toString()} color="#8B5CF6" delay={160} />
-          <StatCard icon="diamond" label="Subscribers" value={stats.totalSubscriptions.toString()} color="#FFC107" subtitle={`${((stats.totalSubscriptions / stats.totalUsers) * 100).toFixed(1)}% conversion`} delay={240} />
-          <StatCard icon="cash" label="MRR" value={`₹${(stats.mrr / 1000).toFixed(1)}K`} color="#10B981" subtitle={`₹${stats.mrr.toLocaleString()}`} delay={320} />
-          <StatCard icon="trending-down" label="Churn" value={`${stats.monthlyChurn}%`} color="#FF5252" delay={400} />
+          <StatCard icon="flash" label={t('adminDashboard.activeToday')} value={stats.activeToday.toString()} color="#00E676" delay={80} />
+          <StatCard icon="person-add" label={t('adminDashboard.newToday')} value={stats.newSignupsToday.toString()} color="#8B5CF6" delay={160} />
+          <StatCard icon="diamond" label={t('adminDashboard.subscribers')} value={stats.totalSubscriptions.toString()} color="#FFC107" subtitle={t('adminDashboard.conversion', { rate: ((stats.totalSubscriptions / stats.totalUsers) * 100).toFixed(1) })} delay={240} />
+          <StatCard icon="cash" label={t('adminDashboard.mrr')} value={`₹${(stats.mrr / 1000).toFixed(1)}K`} color="#10B981" subtitle={`₹${stats.mrr.toLocaleString()}`} delay={320} />
+          <StatCard icon="trending-down" label={t('adminDashboard.churn')} value={`${stats.monthlyChurn}%`} color="#FF5252" delay={400} />
         </View>
 
         {/* ── KYC Pending ────────────────────────────────────── */}

@@ -129,4 +129,5 @@ export default {
     listingDate: 'Listing Date',
     ipoNotFound: 'IPO not found',
     goBack: 'Go back',
+    lotShares: 'Lot: {{count}} shares',
 };

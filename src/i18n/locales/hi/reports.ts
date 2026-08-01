@@ -12,4 +12,6 @@ export default {
     to: 'तक',
     generate: 'रिपोर्ट जनरेट करें',
     noData: 'चयनित अवधि के लिए कोई डेटा नहीं',
+    tradesWithTax: '{{count}} ट्रेड · {{rate}}% टैक्स',
+    sharesAt: '{{count}} शेयर @ {{price}}',
 };

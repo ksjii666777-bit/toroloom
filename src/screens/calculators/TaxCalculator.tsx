@@ -265,7 +265,7 @@ export default function TaxCalculator() {
                   style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: quantity === String(q) ? colors.primary : colors.border }]}
                   onPress={() => setQuantity(String(q))}
                 >
-                  <Text style={[styles.presetChipText, { color: quantity === String(q) ? colors.primary : colors.textMuted }]}>{q} shares</Text>
+                  <Text style={[styles.presetChipText, { color: quantity === String(q) ? colors.primary : colors.textMuted }]}>{t('app.shares', { count: q })}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -289,7 +289,7 @@ export default function TaxCalculator() {
             <View style={[styles.summaryRow]}>
               <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.quantityLabel')}</Text>
-                <Text style={[styles.summaryItemValue, { color: colors.text }]}>{qty} shares</Text>
+                <Text style={[styles.summaryItemValue, { color: colors.text }]}>{t('app.shares', { count: qty })}</Text>
               </View>
               <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.holding')}</Text>

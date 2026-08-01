@@ -24,6 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useWealthStore, type FinancialGoal } from '../../store/wealthStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -115,6 +116,7 @@ function GoalCard({ goal, index, onPress }: { goal: FinancialGoal; index: number
 
 export default function WealthDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { goals, summary, retirementPlan } = useWealthStore();
   const _getGoalProgress = useWealthStore(s => s.getGoalProgress);
@@ -299,7 +301,7 @@ export default function WealthDashboardScreen({ navigation }: any) {
             <View style={{ flex: 1 }}>
               <Text style={[styles.retirementPreviewTitle, { color: colors.text }]}>Retirement Planning</Text>
               <Text style={[styles.retirementPreviewSub, { color: colors.textMuted }]}>
-                {retirementPlan.currentAge} yrs old · Plan to retire at {retirementPlan.retirementAge}
+                {t('wealth.yrsOld', { count: retirementPlan.currentAge })} · {t('wealth.planToRetire', { count: retirementPlan.retirementAge })}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />

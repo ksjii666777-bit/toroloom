@@ -316,4 +316,6 @@ export default {
     sizingPercent: '2%',
     sizingAmount: '₹10000',
     zeroPlaceholder: '0.00',
+    tradeLogCount: 'Trade Log ({{count}} trades)',
+    backtestSummary: '{{count}} trades · 1 year mock data · {{symbol}}',
 };

@@ -84,12 +84,22 @@ const ipos = {
 };
 const errors = {"unknown": "An unexpected error occurred"};
 
+const app = {
+  "shares": "{{count}} shares",
+  "shares_one": "{{count}} share",
+  "stocks": "{{count}} stocks",
+  "trades": "{{count}} trades",
+  "years": "{{count}} years",
+  "months": "{{count}} months",
+  "perShare": "/share",
+};
+
 function resolveT(key: string, params?: Record<string, any>): string {
   const parts = key.split('.');
   const rootNs = parts[0];
   const subKey = parts.slice(1).join('.');
   
-  const translations: Record<string, any> = { ipos, ...errors };
+  const translations: Record<string, any> = { app, ipos, ...errors };
   const obj = translations[rootNs];
   if (!obj) {
     const parts2 = key.split('.');
