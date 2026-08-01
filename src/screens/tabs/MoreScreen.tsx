@@ -32,87 +32,13 @@ const CATEGORIES: { key: CategoryKey | 'all'; labelKey: string }[] = [
   { key: 'account', labelKey: 'profile.tabAccount' },
 ];
 
-// ── Menu label → profile.* key mapping ────────────────────────────────────
-const MENU_LABEL_KEYS: Record<string, string> = {
-  // Trading
-  'F&O Trading': 'profile.fnoTrading',
-  'Open Orders': 'profile.openOrders',
-  'Trade History': 'profile.tradeHistory',
-  'Op. Strategies': 'profile.opStrategies',
-  'Strategy Perf.': 'profile.strategyPerf',
-  'US Trade': 'profile.usTrade',
-  'Crypto Trading': 'profile.cryptoTrading',
-  'Futures Curve': 'profile.futuresCurve',
-  'Trading Journal': 'profile.tradingJournal',
-  'Iron Lock Trade': 'profile.ironLockTrade',
-  // Portfolio & Wealth
-  'Fund Dashboard': 'profile.fundDashboard',
-  'Mutual Funds': 'profile.mutualFunds',
-  'My SIPs': 'profile.mySips',
-  'Holdings': 'profile.holdings',
-  'US Portfolio': 'profile.usPortfolio',
-  'Bonds': 'profile.bonds',
-  'Dividends': 'profile.dividends',
-  'Wealth Dashboard': 'profile.wealthDashboard',
-  'Rebalance': 'profile.rebalance',
-  'Tax Harvesting': 'profile.taxHarvesting',
-  // Analytics
-  'Reports': 'profile.reports',
-  'Monte Carlo': 'profile.monteCarlo',
-  'Correlation': 'profile.correlation',
-  'Factor Analysis': 'profile.factorAnalysis',
-  'NFO Dashboard': 'profile.nfoDashboard',
-  'Economic Calendar': 'profile.economicCalendar',
-  'IPO Calendar': 'profile.ipoCalendar',
-  'AI Insights': 'profile.aiInsights',
-  // Markets & News
-  'Market News': 'profile.marketNews',
-  'US Markets': 'profile.usMarkets',
-  'Global Markets': 'profile.globalMarkets',
-  'Currency Markets': 'profile.currencyMarkets',
-  'Commodities': 'profile.commodities',
-  'Financial Glossary': 'profile.financialGlossary',
-  'Earnings Calls': 'profile.earningsCalls',
-  // Learn & Grow
-  'Courses': 'profile.courses',
-  'Community': 'profile.community',
-  'Community Polls': 'profile.communityPolls',
-  'Messages': 'profile.messages',
-  'AI Assistant': 'profile.aiAssistant',
-  'Trading Psychology': 'profile.tradingPsychology',
-  'Achievements': 'profile.achievements',
-  'Revenue': 'profile.revenue',
-  // Account & Settings
-  'Profile & KYC': 'profile.profileKyc',
-  'Connect Broker': 'profile.connectBroker',
-  'Payment History': 'profile.paymentHistory',
-  'Notifications': 'profile.notifications',
-  'Portfolio Alerts': 'profile.portfolioAlerts',
-  'Risk Settings': 'profile.riskSettings',
-  'Security': 'profile.security',
-  'Help & Support': 'profile.help',
-  'AI Settings': 'profile.aiSettings',
-  'Telegram Alerts': 'profile.telegramAlerts',
-  'Voice Settings': 'profile.voiceSettings',
-  'Webhooks': 'profile.webhooks',
-  'API Keys': 'profile.apiKeys',
-  'Feature Flags': 'profile.featureFlags',
-  'Accessibility': 'profile.accessibility',
-  'Refer & Earn': 'profile.referral',
-  'Go Premium': 'profile.goPremium',
-  'Home Widget': 'profile.homeWidget',
-  'Replay Tour': 'profile.replayTour',
-  'Tenant Config': 'profile.tenantConfig',
-  'A/B Tests': 'profile.abTests',
-  'Image Opt.': 'profile.imageOpt',
-  'Landscape': 'profile.landscape',
-  'Coupon Manager': 'profile.couponManager',
-  'Course Reviews': 'profile.courseReviews',
-};
+// ── Menu item labels resolve via inline labelKey → t(item.labelKey) ──
 
 interface MenuItem {
   icon: string;
   label: string;
+  /** i18n key — resolved through useT for the active locale */
+  labelKey: string;
   color: string;
   screen: string;
   adminOnly?: true;
@@ -131,104 +57,104 @@ const menuItems: MenuSection[] = [
     key: 'trading',
     titleKey: 'profile.sectionTrading',
     items: [
-      { icon: 'options', label: 'F&O Trading', color: '#FF6B00', screen: 'FnOOptionsChain' },
-      { icon: 'clipboard', label: 'Open Orders', color: '#FF9800', screen: 'OpenOrders' },
-      { icon: 'document-text', label: 'Trade History', color: '#FFC107', screen: 'TradeHistory' },
-      { icon: 'shuffle', label: 'Op. Strategies', color: '#8B5CF6', screen: 'StrategyBuilder' },
-      { icon: 'trending-up', label: 'Strategy Perf.', color: '#00C853', screen: 'StrategyPerformance' },
-      { icon: 'swap-horizontal', label: 'US Trade', color: '#00C853', screen: 'USStocksTrading' },
-      { icon: 'logo-bitcoin', label: 'Crypto Trading', color: '#F7931A', screen: 'CryptoTrading' },
-      { icon: 'pulse', label: 'Futures Curve', color: '#6C63FF', screen: 'FuturesCurve' },
-      { icon: 'journal', label: 'Trading Journal', color: '#8B5CF6', screen: 'BehavioralJournal' },
-      { icon: 'lock-closed', label: 'Iron Lock Trade', color: '#EF4444', screen: 'FnOOptionsChain', testID: 'menu-iron-lock' },
+      { icon: 'options', label: 'F&O Trading', labelKey: 'profile.fnoTrading', color: '#FF6B00', screen: 'FnOOptionsChain' },
+      { icon: 'clipboard', label: 'Open Orders', labelKey: 'profile.openOrders', color: '#FF9800', screen: 'OpenOrders' },
+      { icon: 'document-text', label: 'Trade History', labelKey: 'profile.tradeHistory', color: '#FFC107', screen: 'TradeHistory' },
+      { icon: 'shuffle', label: 'Op. Strategies', labelKey: 'profile.opStrategies', color: '#8B5CF6', screen: 'StrategyBuilder' },
+      { icon: 'trending-up', label: 'Strategy Perf.', labelKey: 'profile.strategyPerf', color: '#00C853', screen: 'StrategyPerformance' },
+      { icon: 'swap-horizontal', label: 'US Trade', labelKey: 'profile.usTrade', color: '#00C853', screen: 'USStocksTrading' },
+      { icon: 'logo-bitcoin', label: 'Crypto Trading', labelKey: 'profile.cryptoTrading', color: '#F7931A', screen: 'CryptoTrading' },
+      { icon: 'pulse', label: 'Futures Curve', labelKey: 'profile.futuresCurve', color: '#6C63FF', screen: 'FuturesCurve' },
+      { icon: 'journal', label: 'Trading Journal', labelKey: 'profile.tradingJournal', color: '#8B5CF6', screen: 'BehavioralJournal' },
+      { icon: 'lock-closed', label: 'Iron Lock Trade', labelKey: 'profile.ironLockTrade', color: '#EF4444', screen: 'FnOOptionsChain', testID: 'menu-iron-lock' },
     ],
   },
   {
     key: 'portfolio',
     titleKey: 'profile.sectionPortfolioAndWealth',
     items: [
-      { icon: 'wallet', label: 'Fund Dashboard', color: '#00C853', screen: 'FundsDashboard' },
-      { icon: 'pie-chart', label: 'Mutual Funds', color: '#6C63FF', screen: 'MutualFunds' },
-      { icon: 'calendar', label: 'My SIPs', color: '#00D2FF', screen: 'SIPs' },
-      { icon: 'briefcase', label: 'Holdings', color: '#10B981', screen: 'Portfolio', testID: 'menu-holdings' },
-      { icon: 'briefcase', label: 'US Portfolio', color: '#10B981', screen: 'SnapTradePortfolio' },
-      { icon: 'pricetags', label: 'Bonds', color: '#00E676', screen: 'BondDashboard' },
-      { icon: 'cash', label: 'Dividends', color: '#00E676', screen: 'DividendTracker' },
-      { icon: 'diamond', label: 'Wealth Dashboard', color: '#6C63FF', screen: 'WealthDashboard' },
-      { icon: 'shuffle', label: 'Rebalance', color: '#FF6B00', screen: 'PortfolioRebalancing' },
-      { icon: 'leaf', label: 'Tax Harvesting', color: '#00E676', screen: 'TaxHarvesting' },
+      { icon: 'wallet', label: 'Fund Dashboard', labelKey: 'profile.fundDashboard', color: '#00C853', screen: 'FundsDashboard' },
+      { icon: 'pie-chart', label: 'Mutual Funds', labelKey: 'profile.mutualFunds', color: '#6C63FF', screen: 'MutualFunds' },
+      { icon: 'calendar', label: 'My SIPs', labelKey: 'profile.mySips', color: '#00D2FF', screen: 'SIPs' },
+      { icon: 'briefcase', label: 'Holdings', labelKey: 'profile.holdings', color: '#10B981', screen: 'Portfolio', testID: 'menu-holdings' },
+      { icon: 'briefcase', label: 'US Portfolio', labelKey: 'profile.usPortfolio', color: '#10B981', screen: 'SnapTradePortfolio' },
+      { icon: 'pricetags', label: 'Bonds', labelKey: 'profile.bonds', color: '#00E676', screen: 'BondDashboard' },
+      { icon: 'cash', label: 'Dividends', labelKey: 'profile.dividends', color: '#00E676', screen: 'DividendTracker' },
+      { icon: 'diamond', label: 'Wealth Dashboard', labelKey: 'profile.wealthDashboard', color: '#6C63FF', screen: 'WealthDashboard' },
+      { icon: 'shuffle', label: 'Rebalance', labelKey: 'profile.rebalance', color: '#FF6B00', screen: 'PortfolioRebalancing' },
+      { icon: 'leaf', label: 'Tax Harvesting', labelKey: 'profile.taxHarvesting', color: '#00E676', screen: 'TaxHarvesting' },
     ],
   },
   {
     key: 'analytics',
     titleKey: 'profile.sectionAnalytics',
     items: [
-      { icon: 'analytics', label: 'Reports', color: '#FF6B6B', screen: 'Reports' },
-      { icon: 'flask', label: 'Monte Carlo', color: '#6C63FF', screen: 'MonteCarlo' },
-      { icon: 'grid', label: 'Correlation', color: '#8B5CF6', screen: 'CorrelationMatrix' },
-      { icon: 'analytics', label: 'Factor Analysis', color: '#FFC107', screen: 'FactorAnalysis' },
-      { icon: 'leaf', label: 'NFO Dashboard', color: '#00E676', screen: 'NFODashboard' },
-      { icon: 'calendar', label: 'Economic Calendar', color: '#00D2FF', screen: 'EconomicCalendar' },
-      { icon: 'rocket', label: 'IPO Calendar', color: '#FF6B6B', screen: 'IPOCalendar' },
-      { icon: 'bulb', label: 'AI Insights', color: '#FFC107', screen: 'AIInsights' },
+      { icon: 'analytics', label: 'Reports', labelKey: 'profile.reports', color: '#FF6B6B', screen: 'Reports' },
+      { icon: 'flask', label: 'Monte Carlo', labelKey: 'profile.monteCarlo', color: '#6C63FF', screen: 'MonteCarlo' },
+      { icon: 'grid', label: 'Correlation', labelKey: 'profile.correlation', color: '#8B5CF6', screen: 'CorrelationMatrix' },
+      { icon: 'analytics', label: 'Factor Analysis', labelKey: 'profile.factorAnalysis', color: '#FFC107', screen: 'FactorAnalysis' },
+      { icon: 'leaf', label: 'NFO Dashboard', labelKey: 'profile.nfoDashboard', color: '#00E676', screen: 'NFODashboard' },
+      { icon: 'calendar', label: 'Economic Calendar', labelKey: 'profile.economicCalendar', color: '#00D2FF', screen: 'EconomicCalendar' },
+      { icon: 'rocket', label: 'IPO Calendar', labelKey: 'profile.ipoCalendar', color: '#FF6B6B', screen: 'IPOCalendar' },
+      { icon: 'bulb', label: 'AI Insights', labelKey: 'profile.aiInsights', color: '#FFC107', screen: 'AIInsights' },
     ],
   },
   {
     key: 'markets',
     titleKey: 'profile.sectionMarketsAndNews',
     items: [
-      { icon: 'newspaper', label: 'Market News', color: '#00D2FF', screen: 'NewsFeed' },
-      { icon: 'globe', label: 'US Markets', color: '#3B82F6', screen: 'USMarkets' },
-      { icon: 'globe', label: 'Global Markets', color: '#3B82F6', screen: 'USMarkets', testID: 'menu-global-markets' },
-      { icon: 'cash', label: 'Currency Markets', color: '#0052CC', screen: 'CurrencyMarkets' },
-      { icon: 'flame', label: 'Commodities', color: '#FF6B00', screen: 'CommodityMarkets' },
-      { icon: 'book', label: 'Financial Glossary', color: '#06B6D4', screen: 'Glossary' },
-      { icon: 'phone-portrait', label: 'Earnings Calls', color: '#8B5CF6', screen: 'EarningsCall' },
+      { icon: 'newspaper', label: 'Market News', labelKey: 'profile.marketNews', color: '#00D2FF', screen: 'NewsFeed' },
+      { icon: 'globe', label: 'US Markets', labelKey: 'profile.usMarkets', color: '#3B82F6', screen: 'USMarkets' },
+      { icon: 'globe', label: 'Global Markets', labelKey: 'profile.globalMarkets', color: '#3B82F6', screen: 'USMarkets', testID: 'menu-global-markets' },
+      { icon: 'cash', label: 'Currency Markets', labelKey: 'profile.currencyMarkets', color: '#0052CC', screen: 'CurrencyMarkets' },
+      { icon: 'flame', label: 'Commodities', labelKey: 'profile.commodities', color: '#FF6B00', screen: 'CommodityMarkets' },
+      { icon: 'book', label: 'Financial Glossary', labelKey: 'profile.financialGlossary', color: '#06B6D4', screen: 'Glossary' },
+      { icon: 'phone-portrait', label: 'Earnings Calls', labelKey: 'profile.earningsCalls', color: '#8B5CF6', screen: 'EarningsCall' },
     ],
   },
   {
     key: 'learn',
     titleKey: 'profile.sectionLearnAndGrow',
     items: [
-      { icon: 'school', label: 'Courses', color: '#00C853', screen: 'Learn' },
-      { icon: 'chatbubbles', label: 'Community', color: '#6C63FF', screen: 'Community' },
-      { icon: 'bar-chart', label: 'Community Polls', color: '#8B5CF6', screen: 'Polls' },
-      { icon: 'chatbox-ellipses', label: 'Messages', color: '#10B981', screen: 'ChatList' },
-      { icon: 'chatbubble-ellipses', label: 'AI Assistant', color: '#3B82F6', screen: 'AIChat' },
-      { icon: 'sparkles', label: 'Trading Psychology', color: '#8B5CF6', screen: 'BehavioralJournal', testID: 'menu-trading-psychology' },
-      { icon: 'trophy', label: 'Achievements', color: '#FF6B6B', screen: 'Achievements' },
-      { icon: 'wallet', label: 'Revenue', color: '#FFC107', screen: 'RevenueDashboard' },
+      { icon: 'school', label: 'Courses', labelKey: 'profile.courses', color: '#00C853', screen: 'Learn' },
+      { icon: 'chatbubbles', label: 'Community', labelKey: 'profile.community', color: '#6C63FF', screen: 'Community' },
+      { icon: 'bar-chart', label: 'Community Polls', labelKey: 'profile.communityPolls', color: '#8B5CF6', screen: 'Polls' },
+      { icon: 'chatbox-ellipses', label: 'Messages', labelKey: 'profile.messages', color: '#10B981', screen: 'ChatList' },
+      { icon: 'chatbubble-ellipses', label: 'AI Assistant', labelKey: 'profile.aiAssistant', color: '#3B82F6', screen: 'AIChat' },
+      { icon: 'sparkles', label: 'Trading Psychology', labelKey: 'profile.tradingPsychology', color: '#8B5CF6', screen: 'BehavioralJournal', testID: 'menu-trading-psychology' },
+      { icon: 'trophy', label: 'Achievements', labelKey: 'profile.achievements', color: '#FF6B6B', screen: 'Achievements' },
+      { icon: 'wallet', label: 'Revenue', labelKey: 'profile.revenue', color: '#FFC107', screen: 'RevenueDashboard' },
     ],
   },
   {
     key: 'account',
     titleKey: 'profile.sectionAccountAndSettings',
     items: [
-      { icon: 'person', label: 'Profile & KYC', color: '#00D2FF', screen: 'Profile' },
-      { icon: 'link', label: 'Connect Broker', color: '#FF6B00', screen: 'BrokerConnect' },
-      { icon: 'receipt', label: 'Payment History', color: '#6C63FF', screen: 'PaymentHistory' },
-      { icon: 'notifications', label: 'Notifications', color: '#FF6B6B', screen: 'Notifications' },
-      { icon: 'notifications', label: 'Portfolio Alerts', color: '#FFC107', screen: 'PortfolioAlerts' },
-      { icon: 'settings', label: 'Risk Settings', color: '#6E6E9A', screen: 'Settings' },
-      { icon: 'shield-checkmark', label: 'Security', color: '#FF6B6B', screen: 'SecuritySettings' },
-      { icon: 'help-circle', label: 'Help & Support', color: '#00C853', screen: 'Help' },
-      { icon: 'cog', label: 'AI Settings', color: '#8B5CF6', screen: 'AISettings' },
-      { icon: 'paper-plane', label: 'Telegram Alerts', color: '#0088CC', screen: 'TelegramConnect' },
-      { icon: 'volume-high', label: 'Voice Settings', color: '#00D2FF', screen: 'VoiceSettings' },
-      { icon: 'link', label: 'Webhooks', color: '#10B981', screen: 'Webhooks' },
-      { icon: 'key', label: 'API Keys', color: '#3B82F6', screen: 'ApiKeys' },
-      { icon: 'flask', label: 'Feature Flags', color: '#8B5CF6', screen: 'FeatureFlags' },
-      { icon: 'accessibility', label: 'Accessibility', color: '#8B5CF6', screen: 'Accessibility' },
-      { icon: 'gift', label: 'Refer & Earn', color: '#6C63FF', screen: 'Referral' },
-      { icon: 'diamond', label: 'Go Premium', color: '#10B981', screen: 'Subscription' },
-      { icon: 'grid', label: 'Home Widget', color: '#3B82F6', screen: 'WidgetSettings' },
-      { icon: 'compass', label: 'Replay Tour', color: '#8B5CF6', screen: '__onboarding' },
-      { icon: 'settings', label: 'Tenant Config', color: '#8B5CF6', screen: 'TenantConfig' },
-      { icon: 'flask', label: 'A/B Tests', color: '#FF6B6B', screen: 'ABTestRunner' },
-      { icon: 'image', label: 'Image Opt.', color: '#8B5CF6', screen: 'CDNOptimization' },
-      { icon: 'phone-landscape', label: 'Landscape', color: '#06B6D4', screen: 'LandscapeMode' },
-      { icon: 'pricetags', label: 'Coupon Manager', color: '#8B5CF6', screen: 'AdminCouponManager', adminOnly: true as const },
-      { icon: 'school', label: 'Course Reviews', color: '#00C9A7', screen: 'AdminCourseReview', adminOnly: true as const },
+      { icon: 'person', label: 'Profile & KYC', labelKey: 'profile.profileKyc', color: '#00D2FF', screen: 'Profile' },
+      { icon: 'link', label: 'Connect Broker', labelKey: 'profile.connectBroker', color: '#FF6B00', screen: 'BrokerConnect' },
+      { icon: 'receipt', label: 'Payment History', labelKey: 'profile.paymentHistory', color: '#6C63FF', screen: 'PaymentHistory' },
+      { icon: 'notifications', label: 'Notifications', labelKey: 'profile.notifications', color: '#FF6B6B', screen: 'Notifications' },
+      { icon: 'notifications', label: 'Portfolio Alerts', labelKey: 'profile.portfolioAlerts', color: '#FFC107', screen: 'PortfolioAlerts' },
+      { icon: 'settings', label: 'Risk Settings', labelKey: 'profile.riskSettings', color: '#6E6E9A', screen: 'Settings' },
+      { icon: 'shield-checkmark', label: 'Security', labelKey: 'profile.security', color: '#FF6B6B', screen: 'SecuritySettings' },
+      { icon: 'help-circle', label: 'Help & Support', labelKey: 'profile.help', color: '#00C853', screen: 'Help' },
+      { icon: 'cog', label: 'AI Settings', labelKey: 'profile.aiSettings', color: '#8B5CF6', screen: 'AISettings' },
+      { icon: 'paper-plane', label: 'Telegram Alerts', labelKey: 'profile.telegramAlerts', color: '#0088CC', screen: 'TelegramConnect' },
+      { icon: 'volume-high', label: 'Voice Settings', labelKey: 'profile.voiceSettings', color: '#00D2FF', screen: 'VoiceSettings' },
+      { icon: 'link', label: 'Webhooks', labelKey: 'profile.webhooks', color: '#10B981', screen: 'Webhooks' },
+      { icon: 'key', label: 'API Keys', labelKey: 'profile.apiKeys', color: '#3B82F6', screen: 'ApiKeys' },
+      { icon: 'flask', label: 'Feature Flags', labelKey: 'profile.featureFlags', color: '#8B5CF6', screen: 'FeatureFlags' },
+      { icon: 'accessibility', label: 'Accessibility', labelKey: 'profile.accessibility', color: '#8B5CF6', screen: 'Accessibility' },
+      { icon: 'gift', label: 'Refer & Earn', labelKey: 'profile.referral', color: '#6C63FF', screen: 'Referral' },
+      { icon: 'diamond', label: 'Go Premium', labelKey: 'profile.goPremium', color: '#10B981', screen: 'Subscription' },
+      { icon: 'grid', label: 'Home Widget', labelKey: 'profile.homeWidget', color: '#3B82F6', screen: 'WidgetSettings' },
+      { icon: 'compass', label: 'Replay Tour', labelKey: 'profile.replayTour', color: '#8B5CF6', screen: '__onboarding' },
+      { icon: 'settings', label: 'Tenant Config', labelKey: 'profile.tenantConfig', color: '#8B5CF6', screen: 'TenantConfig' },
+      { icon: 'flask', label: 'A/B Tests', labelKey: 'profile.abTests', color: '#FF6B6B', screen: 'ABTestRunner' },
+      { icon: 'image', label: 'Image Opt.', labelKey: 'profile.imageOpt', color: '#8B5CF6', screen: 'CDNOptimization' },
+      { icon: 'phone-landscape', label: 'Landscape', labelKey: 'profile.landscape', color: '#06B6D4', screen: 'LandscapeMode' },
+      { icon: 'pricetags', label: 'Coupon Manager', labelKey: 'profile.couponManager', color: '#8B5CF6', screen: 'AdminCouponManager', adminOnly: true as const },
+      { icon: 'school', label: 'Course Reviews', labelKey: 'profile.courseReviews', color: '#00C9A7', screen: 'AdminCourseReview', adminOnly: true as const },
     ],
   },
 ];
@@ -292,7 +218,7 @@ export default function MoreScreen({ navigation }: any) {
         .map(section => ({
           ...section,
           items: section.items.filter(item => {
-            const label = t(MENU_LABEL_KEYS[item.label] || item.label).toLowerCase();
+            const label = t(item.labelKey).toLowerCase();
             return label.includes(q) || item.label.toLowerCase().includes(q);
           }),
         }))
@@ -560,14 +486,14 @@ export default function MoreScreen({ navigation }: any) {
                       haptic="selection"
                       scaleTo={0.97}
                       testID={item.testID || `menu-${item.screen}`}
-                      accessibilityLabel={t(MENU_LABEL_KEYS[item.label] || item.label)}
+                      accessibilityLabel={t(item.labelKey)}
                     >
                       <View style={[styles.menuItem, { width: tileSize }]}>
                         <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
                           <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
                         </View>
                         <Text style={styles.menuLabel} numberOfLines={2}>
-                          {t(MENU_LABEL_KEYS[item.label] || item.label)}
+                          {t(item.labelKey)}
                         </Text>
                       </View>
                     </AnimatedPressable>
