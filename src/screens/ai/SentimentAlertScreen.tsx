@@ -564,7 +564,7 @@ export default function SentimentAlertScreen({ navigation }: any) {
         setRules(prev => prev.filter(r => r.id !== ruleId));
       }},
     ]);
-  }, []);
+  }, [t]);
 
   const handleAddRule = useCallback((rule: SentimentAlertRule) => {
     setRules(prev => [rule, ...prev]);
