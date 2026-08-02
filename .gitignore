@@ -75,5 +75,12 @@ CLAUDE.md
 *.pem
 *.envrc
 
+# ===================== Signing / Store Secrets =====================
+# NEVER commit the EAS keystore or its credentials — losing the keystore
+# means Google Play will never accept a new release under the same package ID.
+*.jks
+*.keystore
+store/keystore-backup/
+
 # CI artifacts
 gh_jobs*.json
