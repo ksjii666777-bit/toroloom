@@ -112,3 +112,30 @@ describe('GET /ready', () => {
     expect(res.body.storageHealthy).toBe(false);
   });
 });
+
+describe('Legal pages (privacy / terms)', () => {
+  // These HTML files are shipped in backend/public/ by the Dockerfile and
+  // served at /privacy, /terms, /legal so Play Console / App Store listings
+  // can point to live HTTPS URLs instead of a local file.
+
+  it('GET /privacy returns the privacy policy HTML', async () => {
+    const res = await request(app).get('/privacy');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/html');
+    expect(res.text).toContain('Privacy Policy');
+    expect(res.text).toContain('Toroloom');
+  });
+
+  it('GET /terms returns the terms of service HTML', async () => {
+    const res = await request(app).get('/terms');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/html');
+    expect(res.text).toContain('Terms');
+  });
+
+  it('GET /legal returns the legal hub index HTML', async () => {
+    const res = await request(app).get('/legal');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/html');
+  });
+});

@@ -148,6 +148,25 @@ app.use('/.well-known', express.static(path.join(__dirname, '../public/.well-kno
   },
 }));
 
+// Serve legal HTML by their natural filenames too (/index.html,
+// /privacy-policy.html, /terms-of-service.html) so the pages' internal
+// cross-links (e.g. 'Back to Toroloom Legal' -> index.html) resolve.
+app.use(express.static(path.join(__dirname, '../public')));
+
+// ============ Legal Pages (privacy / terms) ============
+// Hosted here so the Play Console / App Store listing can point to live
+// HTTPS URLs (https://<host>/privacy and /terms) instead of a local file.
+// Files live in backend/public/ (copied from docs/, shipped by the Dockerfile).
+app.get('/privacy', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../public/privacy-policy.html'));
+});
+app.get('/terms', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../public/terms-of-service.html'));
+});
+app.get('/legal', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
 // ============ Prometheus Metrics ============
 
 app.use('/metrics', metricsRoutes);
