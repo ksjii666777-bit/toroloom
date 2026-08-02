@@ -190,7 +190,9 @@ describe('Forex Quotes — WebSocket subscribeTicks', () => {
     const receivedSymbols = new Set<string>();
 
     await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Timed out waiting for mixed ticks')), 15000);
+      // MockBroker ticks every 1-3s; under full-suite load a single 15s window
+      // can be starved, so keep the timeout well clear like the random-walk test.
+      const timeout = setTimeout(() => reject(new Error('Timed out waiting for mixed ticks')), 30000);
       const unsubscribe = broker.subscribeTicks(symbols, (quote) => {
         receivedSymbols.add(quote.symbol);
         if (receivedSymbols.size >= symbols.length) {

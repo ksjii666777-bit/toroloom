@@ -29,7 +29,10 @@
  *   npx vitest run --reporter=verbose src/__tests__/orderExecutionPipeline.mongodb.int.test.ts
  *
  * Skip:
- *   Tests skip automatically if MongoDB is unreachable.
+ *   Entire suite is skipped via describe.skipIf(!hasTestMongo) when
+ *   MONGODB_URI is not configured (local runs stay 100% green).
+ *   If configured but unreachable, beforeAll marks available=false and
+ *   individual tests no-op, matching the sibling Mongo int-test pattern.
  * ============================================================================
  */
 
@@ -46,7 +49,7 @@ import {
 } from '../services/riskEngine';
 import { MongoDBStorage } from '../services/storage/mongodb';
 import { CONNECT_TIMEOUT } from './testUtils';
-import { TEST_MONGODB_URI, TEST_MONGODB_DB } from './testConfig';
+import { TEST_MONGODB_URI, TEST_MONGODB_DB, hasTestMongo } from './testConfig';
 
 // IMPORTANT: This test file must NOT run in parallel with other *.int.test.ts
 // files that configure riskEngine (e.g. orderExecutionPipeline.postgres.int.test.ts)
@@ -96,17 +99,24 @@ let available = true;
 
 // ──── Test Suite ─────────────────────────────────────────────────────────────
 
-describe('OrderExecutionPipeline — MongoDB Integration', () => {
+describe.skipIf(!hasTestMongo)('OrderExecutionPipeline — MongoDB Integration', () => {
 
   beforeAll(async () => {
     storage = new MongoDBStorage(MONGODB_URI, MONGODB_DB_NAME);
     try {
+      // Absorb a late rejection from connect() so a timeout win doesn't
+      // produce an unhandled-rejection error in the vitest summary.
+      let connectError: Error | null = null;
+      const connectPromise = storage.connect().catch((err: Error) => {
+        connectError = err;
+      });
       await Promise.race([
-        storage.connect(),
+        connectPromise,
         new Promise<void>((_, reject) =>
           setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
+      if (connectError) throw connectError;
     } catch (err: any) {
       console.warn(
         `⚠ MongoDB not available (${err.message}) — skipping OrderExecutionPipeline + Mongo integration tests`,

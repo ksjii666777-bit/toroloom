@@ -24,7 +24,10 @@
  *   npx vitest run --reporter=verbose src/__tests__/brokerFactoryFlow.mongodb.int.test.ts
  *
  * Skip:
- *   Tests skip automatically if MongoDB is unreachable.
+ *   Entire suite is skipped via describe.skipIf(!hasTestMongo) when
+ *   MONGODB_URI is not configured (local runs stay 100% green).
+ *   If configured but unreachable, beforeAll marks available=false and
+ *   individual tests no-op, matching the sibling Mongo int-test pattern.
  * ============================================================================
  */
 
@@ -44,7 +47,7 @@ vi.mock('../config/env', () => ({
 
 import { MongoDBStorage } from '../services/storage/mongodb';
 import { CONNECT_TIMEOUT } from './testUtils';
-import { TEST_MONGODB_URI, TEST_MONGODB_DB } from './testConfig';
+import { TEST_MONGODB_URI, TEST_MONGODB_DB, hasTestMongo } from './testConfig';
 import {
   configureBrokerPersistence,
   loadBrokerStateFromStorage,
@@ -59,19 +62,26 @@ import { auditTrail } from '../services/auditTrail';
 const MONGODB_URI = TEST_MONGODB_URI;
 const MONGODB_DB_NAME = TEST_MONGODB_DB;
 
-describe('Broker Factory Flow — MongoDB', () => {
+describe.skipIf(!hasTestMongo)('Broker Factory Flow — MongoDB', () => {
   let storage: MongoDBStorage;
   let available = true;
 
   beforeAll(async () => {
     storage = new MongoDBStorage(MONGODB_URI, MONGODB_DB_NAME);
     try {
+      // Absorb a late rejection from connect() so a timeout win doesn't
+      // produce an unhandled-rejection error in the vitest summary.
+      let connectError: Error | null = null;
+      const connectPromise = storage.connect().catch((err: Error) => {
+        connectError = err;
+      });
       await Promise.race([
-        storage.connect(),
+        connectPromise,
         new Promise<void>((_, reject) =>
           setTimeout(() => reject(new Error(`connect timeout (${CONNECT_TIMEOUT}ms)`)), CONNECT_TIMEOUT),
         ),
       ]);
+      if (connectError) throw connectError;
     } catch (err: any) {
       console.warn(
         `⚠ MongoDB not available (${err.message}) — skipping Broker Factory Flow + Mongo integration tests`,
