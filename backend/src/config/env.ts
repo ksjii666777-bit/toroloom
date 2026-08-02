@@ -31,7 +31,27 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
+// Snapshot whether the DB URIs were ALREADY provided by the real execution
+// environment (CI / shell) BEFORE dotenv loads backend/.env. dotenv never
+// overrides existing env vars, so these booleans tell us which values would
+// be coming from backend/.env vs. from the environment itself.
+const dbUriPreDotenv = {
+  mongodbUri: !!process.env.MONGODB_URI,
+  databaseUrl: !!process.env.DATABASE_URL,
+};
+
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+// Under Vitest, dev/prod DB URIs loaded from backend/.env must NOT leak into
+// test runs — they would flip hasTestMongo/hasTestPostgres to true and force
+// the Mongo/Postgres integration suites to attempt real connections instead
+// of skipping cleanly. Values explicitly provided by the real environment
+// (e.g. CI) are preserved. All other .env values (JWT_SECRET, BROKER, etc.)
+// still load as before.
+if (process.env.VITEST === 'true') {
+  if (!dbUriPreDotenv.mongodbUri) delete process.env.MONGODB_URI;
+  if (!dbUriPreDotenv.databaseUrl) delete process.env.DATABASE_URL;
+}
 
 export const env = {
   // ──── Safe operational defaults (not credentials) ────────────────────────

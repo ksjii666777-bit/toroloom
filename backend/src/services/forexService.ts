@@ -83,13 +83,24 @@ const MOCK_PAIRS: ForexPair[] = [
 function simulatePair(p: ForexPair): ForexPair {
   const simChange = (Math.random() - 0.5) * p.rate * (p.volatility / 100) * 0.3;
   const simRate = +(p.rate + simChange).toFixed(p.rate < 1 ? 4 : 2);
+  // Generate day high/low with independent jitter, then enforce the OHLC
+  // invariant dayHigh >= dayLow — the two independent random draws can
+  // otherwise cross (e.g. high shrinks while low grows), breaking clients
+  // and the route test.
+  let dayHigh = +(p.dayHigh * (1 + (Math.random() - 0.45) * 0.01)).toFixed(2);
+  let dayLow = +(p.dayLow * (1 + (Math.random() - 0.55) * 0.01)).toFixed(2);
+  if (dayHigh < dayLow) {
+    const tmp = dayHigh;
+    dayHigh = dayLow;
+    dayLow = tmp;
+  }
   return {
     ...p,
     rate: simRate,
     change: +simChange.toFixed(4),
     changePercent: +((simChange / p.rate) * 100).toFixed(2),
-    dayHigh: +(p.dayHigh * (1 + (Math.random() - 0.45) * 0.01)).toFixed(2),
-    dayLow: +(p.dayLow * (1 + (Math.random() - 0.55) * 0.01)).toFixed(2),
+    dayHigh,
+    dayLow,
   };
 }
 

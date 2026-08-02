@@ -26,7 +26,12 @@
  * ============================================================================
  */
 
-import { env } from '../config/env';
+// NOTE: Deliberately NO `import { env } from '../config/env'` here.
+// env.ts runs dotenv.config() as a module-level side effect, which loads
+// backend/.env into process.env — leaking dev/prod MONGODB_URI and
+// DATABASE_URL into test runs and forcing the Mongo/Postgres integration
+// suites to attempt real connections instead of skipping. Test DB config
+// must come ONLY from the execution environment (CI / explicit env vars).
 
 /**
  * PostgreSQL connection string for integration tests.
