@@ -188,7 +188,7 @@ export async function verifyToken(userId: string, token: string): Promise<boolea
 export async function enableTwoFactor(userId: string): Promise<void> {
   const existing = twoFactorStore.get(userId);
   if (!existing) {
-    throw new Error('No _pending 2FA setup found. Please complete setup first.');
+    throw new Error('No pending 2FA setup found. Please complete setup first.');
   }
   if (!existing.verified) {
     throw new Error('2FA setup not verified. Please enter a valid code from your authenticator app.');

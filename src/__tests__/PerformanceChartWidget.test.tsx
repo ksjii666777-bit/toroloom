@@ -11,8 +11,8 @@
  *  - Streaming data merge (pnlHistoryStream)
  *  - Positive vs negative trend colors
  *
- * NOTE: Test data uses dates from Aug 2025–Jul 2026 so they survive the
- * 1Y time-range filter (current date context: July 23, 2026).
+ * NOTE: Test data dates are generated relative to the current date so they
+ * always survive the 1Y time-range filter (cutoff = today − 365 days).
  *
  * ============================================================================
  */
@@ -84,30 +84,38 @@ vi.spyOn(Dimensions, 'get').mockImplementation(() => ({
 }));
 
 // ==================== Test Data ====================
-// Dates must be >= 2025-07-23 (1 year before July 23, 2026)
+// Dates are generated relative to "today" so every point survives the
+// widget's 1Y time-range filter (cutoff = today − 365 days) no matter when
+// the suite runs. Values are fixed; only the day offsets change.
+
+const daysAgo = (n: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+};
 
 const POSITIVE_HISTORY = [
-  { date: '2025-08-01', value: 623500, cumulativePnl: 0 },
-  { date: '2025-09-01', value: 635000, cumulativePnl: 11500 },
-  { date: '2025-10-01', value: 658000, cumulativePnl: 34500 },
-  { date: '2025-11-01', value: 692000, cumulativePnl: 68500 },
-  { date: '2025-12-01', value: 724000, cumulativePnl: 100500 },
-  { date: '2026-01-01', value: 758000, cumulativePnl: 134500 },
-  { date: '2026-02-01', value: 795000, cumulativePnl: 171500 },
+  { date: daysAgo(360), value: 623500, cumulativePnl: 0 },
+  { date: daysAgo(330), value: 635000, cumulativePnl: 11500 },
+  { date: daysAgo(300), value: 658000, cumulativePnl: 34500 },
+  { date: daysAgo(270), value: 692000, cumulativePnl: 68500 },
+  { date: daysAgo(240), value: 724000, cumulativePnl: 100500 },
+  { date: daysAgo(210), value: 758000, cumulativePnl: 134500 },
+  { date: daysAgo(180), value: 795000, cumulativePnl: 171500 },
 ];
 
 const NEGATIVE_HISTORY = [
-  { date: '2025-08-01', value: 795000, cumulativePnl: 171500 },
-  { date: '2025-09-01', value: 780000, cumulativePnl: 156500 },
-  { date: '2025-10-01', value: 745000, cumulativePnl: 121500 },
-  { date: '2025-11-01', value: 710000, cumulativePnl: 86500 },
-  { date: '2025-12-01', value: 685000, cumulativePnl: 61500 },
-  { date: '2026-01-01', value: 652000, cumulativePnl: 28500 },
-  { date: '2026-02-01', value: 640000, cumulativePnl: 16500 },
+  { date: daysAgo(360), value: 795000, cumulativePnl: 171500 },
+  { date: daysAgo(330), value: 780000, cumulativePnl: 156500 },
+  { date: daysAgo(300), value: 745000, cumulativePnl: 121500 },
+  { date: daysAgo(270), value: 710000, cumulativePnl: 86500 },
+  { date: daysAgo(240), value: 685000, cumulativePnl: 61500 },
+  { date: daysAgo(210), value: 652000, cumulativePnl: 28500 },
+  { date: daysAgo(180), value: 640000, cumulativePnl: 16500 },
 ];
 
 const SINGLE_POINT = [
-  { date: '2026-02-01', value: 795000, cumulativePnl: 171500 },
+  { date: daysAgo(10), value: 795000, cumulativePnl: 171500 },
 ];
 
 const POSITIVE_METRICS = {
@@ -324,9 +332,9 @@ describe('PerformanceChartWidget', () => {
     it('renders correctly when switching to 1W with limited data', () => {
       mockAnalyticsStore = buildStoreState({
         pnlHistory: [
-          { date: '2026-07-20', value: 700000, cumulativePnl: 76500 },
-          { date: '2026-07-21', value: 720000, cumulativePnl: 96500 },
-          { date: '2026-07-22', value: 710000, cumulativePnl: 86500 },
+          { date: daysAgo(3), value: 700000, cumulativePnl: 76500 },
+          { date: daysAgo(2), value: 720000, cumulativePnl: 96500 },
+          { date: daysAgo(1), value: 710000, cumulativePnl: 86500 },
         ],
       });
       const { toJSON } = render(<PerformanceChartWidget size="medium" />);
@@ -354,15 +362,20 @@ describe('PerformanceChartWidget', () => {
 
   describe('streaming data merge', () => {
     it('renders with pnlHistoryStream data included', () => {
-      const streamPoint = { date: '2026-07-22T14:30:00.000Z', value: 810000, cumulativePnl: 186500 };
+      const streamPoint = { date: `${daysAgo(1)}T14:30:00.000Z`, value: 810000, cumulativePnl: 186500 };
       mockAnalyticsStore = buildStoreState({ pnlHistoryStream: [streamPoint] });
       const { getByText } = render(<PerformanceChartWidget size="medium" />);
       expect(getByText('₹8.10L')).toBeDefined();
     });
 
     it('does not duplicate dates already in pnlHistory', () => {
-      // 2026-02-01 already in history → stream point with same date should be deduped
-      const streamPoint = { date: '2026-02-01T14:30:00.000Z', value: 800000, cumulativePnl: 176500 };
+      // Derive from the actual last history point so the dedup match is structural,
+      // not timing-dependent (avoids UTC-midnight drift between module load and test run)
+      const streamPoint = {
+        date: `${POSITIVE_HISTORY[POSITIVE_HISTORY.length - 1].date}T14:30:00.000Z`,
+        value: 800000,
+        cumulativePnl: 176500,
+      };
       mockAnalyticsStore = buildStoreState({ pnlHistoryStream: [streamPoint] });
       const { getByText } = render(<PerformanceChartWidget size="medium" />);
       // Should still show the history's latest value: 795000 → ₹7.95L
@@ -371,9 +384,9 @@ describe('PerformanceChartWidget', () => {
 
     it('merges multiple stream points correctly', () => {
       const stream = [
-        { date: '2026-07-20T10:00:00.000Z', value: 805000, cumulativePnl: 181500 },
-        { date: '2026-07-21T11:30:00.000Z', value: 820000, cumulativePnl: 196500 },
-        { date: '2026-07-22T09:15:00.000Z', value: 815000, cumulativePnl: 191500 },
+        { date: `${daysAgo(3)}T10:00:00.000Z`, value: 805000, cumulativePnl: 181500 },
+        { date: `${daysAgo(2)}T11:30:00.000Z`, value: 820000, cumulativePnl: 196500 },
+        { date: `${daysAgo(1)}T09:15:00.000Z`, value: 815000, cumulativePnl: 191500 },
       ];
       mockAnalyticsStore = buildStoreState({ pnlHistoryStream: stream });
       const { getByText } = render(<PerformanceChartWidget size="medium" />);
@@ -406,8 +419,8 @@ describe('PerformanceChartWidget', () => {
 
     it('shows zero-change trend as not negative', () => {
       const flatHistory = [
-        { date: '2025-08-01', value: 500000, cumulativePnl: 0 },
-        { date: '2026-02-01', value: 500000, cumulativePnl: 0 },
+        { date: daysAgo(300), value: 500000, cumulativePnl: 0 },
+        { date: daysAgo(60), value: 500000, cumulativePnl: 0 },
       ];
       mockAnalyticsStore = buildStoreState({ pnlHistory: flatHistory });
       const { getByText } = render(<PerformanceChartWidget size="small" />);
