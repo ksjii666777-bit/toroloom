@@ -185,14 +185,14 @@ describe('POST /api/broker-link/connect', () => {
   it('should reject without auth', async () => {
     const { status } = await post('/api/broker-link/connect', {
       brokerType: 'zerodha',
-      credentials: { apiKey: 'key', apiSecret: 'secret' },
+      credentials: { accessToken: 'key' },
     });
     expect(status).toBe(401);
   });
 
   it('should reject missing brokerType', async () => {
     const { status, body } = await post('/api/broker-link/connect', {
-      credentials: { apiKey: 'key' },
+      credentials: { accessToken: 'key' },
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
@@ -202,7 +202,7 @@ describe('POST /api/broker-link/connect', () => {
   it('should reject invalid brokerType', async () => {
     const { status, body } = await post('/api/broker-link/connect', {
       brokerType: 'unknown',
-      credentials: { apiKey: 'key' },
+      credentials: { accessToken: 'key' },
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
@@ -218,10 +218,10 @@ describe('POST /api/broker-link/connect', () => {
     expect(body.error).toContain('credentials');
   });
 
-  it('should connect to Zerodha with valid credentials', async () => {
+  it('should connect to Zerodha with valid session credentials', async () => {
     const { status, body } = await post('/api/broker-link/connect', {
       brokerType: 'zerodha',
-      credentials: { apiKey: 'test_key', apiSecret: 'test_secret' },
+      credentials: { accessToken: 'test_access_token' },
     }, AUTH_HEADER);
 
     expect(status).toBe(200);
@@ -229,79 +229,75 @@ describe('POST /api/broker-link/connect', () => {
     expect(body.brokerType).toBe('zerodha');
     expect(body.label).toBe('Zerodha');
     expect(body.connectedAt).toBeDefined();
+    expect(body.hasSessionCredentials).toBe(true);
   });
 
-  it('should connect to Angel One with valid credentials', async () => {
+  it('should connect to Angel One with valid session credentials', async () => {
     const { status, body } = await post('/api/broker-link/connect', {
       brokerType: 'angel',
-      credentials: { apiKey: 'key', clientId: 'client1' },
+      credentials: { sessionToken: 'session_token', clientId: 'client1' },
     }, AUTH_HEADER);
 
     expect(status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.brokerType).toBe('angel');
     expect(body.label).toBe('Angel One');
+    expect(body.hasSessionCredentials).toBe(true);
   });
 
-  it('should reject Angel One without clientId', async () => {
+  it('should reject Angel One without a session credential', async () => {
     const { status, body } = await post('/api/broker-link/connect', {
       brokerType: 'angel',
-      credentials: { apiKey: 'key' },
+      credentials: { clientId: 'client1' },
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('clientId');
+    expect(body.error).toContain('At least one session credential required');
   });
 
-  it('should connect to Zerodha via OAuth flow (apiKey empty, apiSecret provided)', async () => {
+  it('should connect to Zerodha via sessionToken (Zero-API session credential)', async () => {
     const { status, body } = await post('/api/broker-link/connect', {
       brokerType: 'zerodha',
-      credentials: { apiSecret: 'oauth_secret' },
+      credentials: { sessionToken: 'zero_api_session' },
     }, AUTH_HEADER);
 
     expect(status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.brokerType).toBe('zerodha');
-    // In test mode (no Kite Connect credentials), the exchange is skipped
-    // so hasAccessToken will be false
-    expect(body).toHaveProperty('hasAccessToken');
-    expect(body.hasAccessToken).toBe(false);
+    expect(body.hasSessionCredentials).toBe(true);
   });
 
-  it('should report hasAccessToken=false when exchange is skipped (no Kite credentials configured)', async () => {
-    // Without ZERODHA_API_KEY / ZERODHA_API_SECRET env vars, the
-    // Kite Connect token exchange is skipped, so hasAccessToken=false
-    // and exchangeError contains the reason.
-    const { body } = await post('/api/broker-link/connect', {
+  it('should reject developer API keys (apiKey/apiSecret are not supported)', async () => {
+    const { status, body } = await post('/api/broker-link/connect', {
       brokerType: 'zerodha',
-      credentials: { apiSecret: 'valid_request_token' },
+      credentials: { apiKey: 'key', apiSecret: 'secret' },
     }, AUTH_HEADER);
 
-    expect(body.success).toBe(true);
-    expect(body.hasAccessToken).toBe(false);
-    expect(body.exchangeError).toBe('Zerodha API credentials not configured on server');
+    expect(status).toBe(400);
+    expect(body.error).toContain('Developer API keys are not supported');
   });
 
-  it('should connect to Groww with valid credentials', async () => {
+  it('should connect to Groww with valid session credentials', async () => {
     const { status, body } = await post('/api/broker-link/connect', {
       brokerType: 'groww',
-      credentials: { apiKey: 'key', accessToken: 'token' },
+      credentials: { accessToken: 'groww_access_token' },
     }, AUTH_HEADER);
 
     expect(status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.brokerType).toBe('groww');
     expect(body.label).toBe('Groww');
+    expect(body.hasSessionCredentials).toBe(true);
   });
 
-  it('should reject Groww without accessToken', async () => {
+  it('should reject Groww without a session credential', async () => {
     const { status, body } = await post('/api/broker-link/connect', {
       brokerType: 'groww',
-      credentials: { apiKey: 'key' },
+      credentials: {},
     }, AUTH_HEADER);
 
     expect(status).toBe(400);
-    expect(body.error).toContain('accessToken');
+    expect(body.error).toContain('At least one session credential required');
   });
 });
 
@@ -315,7 +311,7 @@ describe('POST /api/broker-link/disconnect', () => {
     // Connect first
     await post('/api/broker-link/connect', {
       brokerType: 'zerodha',
-      credentials: { apiKey: 'k', apiSecret: 's' },
+      credentials: { accessToken: 'k' },
     }, AUTH_HEADER);
 
     // Then disconnect
@@ -330,7 +326,7 @@ describe('POST /api/broker-link/disconnect', () => {
     // Connect
     await post('/api/broker-link/connect', {
       brokerType: 'angel',
-      credentials: { apiKey: 'k', clientId: 'c' },
+      credentials: { sessionToken: 'k', clientId: 'c' },
     }, AUTH_HEADER);
     // Disconnect
     await post('/api/broker-link/disconnect', {}, AUTH_HEADER);
@@ -361,15 +357,15 @@ describe('GET /api/broker-link/oauth-url', () => {
     expect(body.error).toContain('only supported for zerodha');
   });
 
-  it('should return an OAuth URL for zerodha', async () => {
+  it('should return Zero-API guidance for zerodha (no server-side OAuth URL)', async () => {
     const { status, body } = await get('/api/broker-link/oauth-url?brokerType=zerodha', AUTH_HEADER);
 
     expect(status).toBe(200);
-    expect(body.oauthUrl).toBeDefined();
-    expect(body.oauthUrl).toContain('kite.trade/connect/login');
+    expect(body.oauthUrl).toBeNull();
+    expect(body.redirectUri).toBeNull();
     expect(body.brokerType).toBe('zerodha');
     expect(body.label).toBe('Zerodha');
-    expect(body.redirectUri).toBeDefined();
+    expect(body.zeroApiMode).toBe(true);
   });
 });
 
