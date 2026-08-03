@@ -569,12 +569,15 @@ jobs:
             api-level: 34
             target: google_apis
             arch: x86_64
-            avd-name: Pixel_6_Pro
+            avd-name: pixel
+            profile: pixel
             # KVM is enabled by default on GitHub-hosted Linux runners; the
             # 'Enable KVM' step above grants /dev/kvm access. The action's
             # KVM control input is disable-linux-hw-accel (default false = ON).
+            # Boot tuning: smaller 'pixel' AVD, -accel auto (falls back if KVM
+            # unavailable), -gpu auto (swiftshader on headless), -no-metrics.
             emulator-boot-timeout: 900
-            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
+            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 1536 -cores 2 -no-metrics
             disable-animations: true
             script: |
               adb wait-for-device
@@ -715,12 +718,15 @@ jobs:
             api-level: 34
             target: google_apis
             arch: x86_64
-            avd-name: Pixel_6_Pro
+            avd-name: pixel
+            profile: pixel
             # KVM is enabled by default on GitHub-hosted Linux runners; the
             # 'Enable KVM' step above grants /dev/kvm access. The action's
             # KVM control input is disable-linux-hw-accel (default false = ON).
+            # Boot tuning: smaller 'pixel' AVD, -accel auto (falls back if KVM
+            # unavailable), -gpu auto (swiftshader on headless), -no-metrics.
             emulator-boot-timeout: 900
-            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
+            emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 1536 -cores 2 -no-metrics
             disable-animations: true
             script: |
               adb wait-for-device
