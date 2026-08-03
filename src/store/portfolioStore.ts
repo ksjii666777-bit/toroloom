@@ -11,6 +11,16 @@ import { log } from '../utils/logger';
 import { analytics } from '../services/analytics';
 import { offlineMutationQueue } from '../services/offlineMutationQueue';
 
+/**
+ * Unique ID generator for locally-created holdings/trades.
+ * Date.now() alone collides when two mutations run in the same millisecond
+ * (e.g. rapid successive buys in fast CI runs), which corrupts holding lookups
+ * by id — both holdings end up with the same id and a single sell updates both.
+ * Appending a monotonic counter guarantees uniqueness within a session.
+ */
+let _localIdSeq = 0;
+const genLocalId = (prefix: string) => `${prefix}_${Date.now()}_${_localIdSeq++}`;
+
 interface PortfolioState {
   holdings: Holding[];
   trades: Trade[];
@@ -225,7 +235,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
             : h
         ),
         trades: [{
-          id: `t_${Date.now()}`,
+          id: genLocalId('t'),
           stockId: stock.id,
           symbol: stock.symbol,
           name: stock.name,
@@ -238,7 +248,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       });
     } else {
       const newHolding: Holding = {
-        id: `h_${Date.now()}`,
+        id: genLocalId('h'),
         stockId: stock.id,
         symbol: stock.symbol,
         name: stock.name,
@@ -256,7 +266,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       set({
         holdings: [...state.holdings, newHolding],
         trades: [{
-          id: `t_${Date.now()}`,
+          id: genLocalId('t'),
           stockId: stock.id,
           symbol: stock.symbol,
           name: stock.name,
@@ -334,7 +344,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       set({
         holdings: state.holdings.filter(h => h.id !== holdingId),
         trades: [{
-          id: `t_${Date.now()}`,
+          id: genLocalId('t'),
           stockId: holding.stockId,
           symbol: holding.symbol,
           name: holding.name,
@@ -363,7 +373,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
             : h
         ),
         trades: [{
-          id: `t_${Date.now()}`,
+          id: genLocalId('t'),
           stockId: holding.stockId,
           symbol: holding.symbol,
           name: holding.name,

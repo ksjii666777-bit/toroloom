@@ -246,6 +246,34 @@ describe('PortfolioStore — Multiple Holdings', () => {
     expect(state.holdings[1].quantity).toBe(20); // unchanged
   });
 
+  it('assigns unique holding ids even when buys land in the same millisecond', async () => {
+    // Reproduces the CI-only flake: both buys resolve within one Date.now()
+    // tick, so a bare `h_${Date.now()}` id would collide and a later sell
+    // would update BOTH holdings (quantities 25/25 instead of 25/20).
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
+    try {
+      await usePortfolioStore.getState().buyStock(mockStock, 50, 2650);
+      await usePortfolioStore.getState().buyStock(mockStock2, 20, 3800);
+    } finally {
+      nowSpy.mockRestore();
+    }
+
+    let state = usePortfolioStore.getState();
+    expect(state.holdings).toHaveLength(2);
+    // Distinct ids — the actual invariant the flake was breaking
+    expect(new Set(state.holdings.map(h => h.id)).size).toBe(2);
+
+    // Selling one holding must not touch the other
+    await usePortfolioStore.getState().sellStock(
+      state.holdings.find(h => h.symbol === 'RELIANCE')!.id,
+      25,
+      2900,
+    );
+    state = usePortfolioStore.getState();
+    expect(state.holdings[0].quantity).toBe(25); // 50 - 25
+    expect(state.holdings[1].quantity).toBe(20); // untouched
+  });
+
   it('increases trade count on each buy', async () => {
     await usePortfolioStore.getState().buyStock(mockStock, 10, 2600);
     await usePortfolioStore.getState().buyStock(mockStock2, 5, 3800);
