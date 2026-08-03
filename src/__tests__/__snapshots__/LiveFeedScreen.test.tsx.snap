@@ -587,7 +587,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         x={40.4}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -597,7 +597,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         x={135.8}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -607,7 +607,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         x={231.20000000000002}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -617,7 +617,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot after clearing sea
         x={326.59999999999997}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
     </View>
     <View
@@ -3744,7 +3744,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         x={40.4}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -3754,7 +3754,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         x={135.8}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -3764,7 +3764,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         x={231.20000000000002}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -3774,7 +3774,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with empty search 
         x={326.59999999999997}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
     </View>
     <View
@@ -6901,7 +6901,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         x={40.4}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -6911,7 +6911,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         x={135.8}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -6921,7 +6921,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         x={231.20000000000002}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
       <SvgText
         fill="#6B728E"
@@ -6931,7 +6931,7 @@ exports[`LiveFeedScreen - search snapshots > matches snapshot with search query 
         x={326.59999999999997}
         y={127}
       >
-        17:29
+        11:59
       </SvgText>
     </View>
     <View

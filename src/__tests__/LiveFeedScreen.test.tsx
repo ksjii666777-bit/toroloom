@@ -9,6 +9,14 @@
 
 import React, { act } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+// Pin the timezone so the chart's x-axis hour labels (d.getHours()) render
+// deterministically on every runner. The snapshot was generated under UTC;
+// without this, a local IST machine renders 17:29 while CI (UTC) renders
+// 11:59, producing a cross-machine snapshot mismatch. Runs before any test
+// executes (imports are hoisted, so the assignment lands after import eval).
+process.env.TZ = 'UTC';
+
 import LiveFeedScreen from '../screens/ai/LiveFeedScreen';
 import { generateInitialFeedEvents } from '../services/ai/sentimentLiveFeed';
 import { render, fireEvent } from './testUtils';
