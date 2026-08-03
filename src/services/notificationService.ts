@@ -9,6 +9,11 @@ import { Platform } from 'react-native';
 import { AppNotification } from '../types';
 import { log } from '../utils/logger';
 
+/** Monotonic counter — keeps locally-created notification ids unique even when
+ * two notifications land in the same Date.now() tick (CI-fast collisions). */
+let _notificationSeq = 0;
+const genNotificationId = (prefix: string) => `${prefix}_${Date.now()}_${_notificationSeq++}`;
+
 // =============================================================================
 // =============================================================================
 // Lazy module helpers — native modules loaded on first use, not at import time
@@ -453,7 +458,7 @@ export async function sendPriceAlert(
   }
 
   return sendLocalNotification({
-    id: `pa_${Date.now()}`,
+    id: genNotificationId('pa'),
     type: 'price_alert',
     title,
     message,
@@ -475,7 +480,7 @@ export async function sendTradeConfirmation(
   const formattedTotal = `₹${total.toLocaleString('en-IN')}`;
 
   return sendLocalNotification({
-    id: `tr_${Date.now()}`,
+    id: genNotificationId('tr'),
     type: 'trade',
     title: type === 'buy' ? '✅ Order Executed' : '✅ Sell Order Executed',
     message: `${action} ${quantity} shares of ${symbol} @ ${formattedPrice}. Total: ${formattedTotal}`,
@@ -513,7 +518,7 @@ export async function sendEducationalReminder(
   }
 
   return sendLocalNotification({
-    id: `ed_${Date.now()}`,
+    id: genNotificationId('ed'),
     type: 'educational',
     title,
     message,
@@ -529,7 +534,7 @@ export async function sendPortfolioAlert(
   data?: any,
 ): Promise<string | undefined> {
   return sendLocalNotification({
-    id: `pal_${Date.now()}`,
+    id: genNotificationId('pal'),
     type: 'portfolio_alert',
     title,
     message,
@@ -544,7 +549,7 @@ export async function sendSystemNotification(
   message: string,
 ): Promise<string | undefined> {
   return sendLocalNotification({
-    id: `sys_${Date.now()}`,
+    id: genNotificationId('sys'),
     type: 'system',
     title,
     message,
@@ -676,7 +681,7 @@ export async function sendSentimentAlert(
   data?: any,
 ): Promise<string | undefined> {
   return sendLocalNotification({
-    id: `sa_${Date.now()}`,
+    id: genNotificationId('sa'),
     type: 'sentiment_alert',
     title,
     message,

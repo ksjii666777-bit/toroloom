@@ -131,7 +131,7 @@ describe('CommunityStore — addPost', () => {
     expect(state.posts[0].userId).toBe('user_1');
     expect(state.posts[0].userName).toBe('Rahul Sharma');
     expect(state.posts[0].likes).toBe(0);
-    expect(state.posts[0].id).toMatch(/^p_\d+$/);
+    expect(state.posts[0].id).toMatch(/^p_\d+_\d+$/); // ts + monotonic counter
   });
 
   it('prepends new post to the beginning of the list', async () => {

@@ -493,7 +493,7 @@ export class AngelBroker implements IBroker {
         return status === 'OPEN' || status === 'PENDING' || status === 'TRIGGER_PENDING' || status === 'PARTIALLY_FILLED';
       })
       .map((o: any) => ({
-        id: String(o.orderid || o.order_id || `ang_${Date.now()}`),
+        id: String(o.orderid || o.order_id || `ang_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`),
         symbol: o.tradingsymbol || o.symbol || '',
         exchange: o.exchange || 'NSE',
         transactionType: (o.transactiontype || o.transaction_type || 'BUY').toUpperCase() as 'BUY' | 'SELL',
@@ -602,7 +602,7 @@ export class AngelBroker implements IBroker {
 
     if (!result) throw new Error('Angel One placeOrder returned no result');
 
-    const orderId = result.data?.orderid || result.data?.order_id || `ang_${Date.now()}`;
+    const orderId = result.data?.orderid || result.data?.order_id || `ang_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const status = result.status === 'success' ? 'confirmed' : result.message?.includes('reject') ? 'rejected' : 'pending';
 
     return {
@@ -638,7 +638,7 @@ export class AngelBroker implements IBroker {
     if (!result?.data || !Array.isArray(result.data)) return [];
 
     return result.data.map((t: any) => ({
-      id: String(t.tradeid || t.id || t.order_id || `t_${Date.now()}`),
+      id: String(t.tradeid || t.id || t.order_id || `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`),
       symbol: t.tradingsymbol || t.symbol || '',
       type: (t.transactiontype || t.transaction_type || 'BUY').toLowerCase() as 'buy' | 'sell',
       quantity: parseInt(t.quantity || t.filled_quantity || t.qty || 0),

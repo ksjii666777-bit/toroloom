@@ -14,6 +14,11 @@ import {
   RevenueSource, PayoutStatus,
 } from '../types';
 
+/** Monotonic counter — keeps locally-created payout ids unique even when two
+ * payouts land in the same Date.now() tick (CI-fast collisions). */
+let _revenueIdSeq = 0;
+const genRevenueId = (prefix: string) => `${prefix}_${Date.now()}_${_revenueIdSeq++}`;
+
 // ─── Mock Data ─────────────────────────────────────────────────────────────
 
 const now = Date.now();
@@ -143,7 +148,7 @@ export const useRevenueStore = create<RevenueStoreState>((set, _get) => ({
   requestPayout: async (amount, method, destination) => {
     // Simulate API call
     const newPayout: PayoutRequest = {
-      id: `pay_${Date.now()}`,
+      id: genRevenueId('pay'),
       amount,
       status: 'processing',
       method,
@@ -169,7 +174,7 @@ export const useRevenueStore = create<RevenueStoreState>((set, _get) => ({
         isPayoutInProgress: false,
         payoutHistory: s.dashboard.payoutHistory.map(p =>
           p.id === newPayout.id
-            ? { ...p, status: 'completed' as PayoutStatus, processedAt: new Date().toISOString(), transactionId: `txn_pay_${Date.now()}` }
+            ? { ...p, status: 'completed' as PayoutStatus, processedAt: new Date().toISOString(), transactionId: genRevenueId('txn_pay') }
             : p
         ),
       },

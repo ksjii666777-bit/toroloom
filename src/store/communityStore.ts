@@ -6,6 +6,11 @@ import { offlineCache } from '../services/offlineCache';
 import { registerCacheWarming } from '../services/cacheWarmingService';
 import { log } from '../utils/logger';
 
+/** Monotonic counter — keeps locally-created post/comment ids unique even when
+ * two creations land in the same Date.now() tick (CI-fast collisions). */
+let _communityIdSeq = 0;
+const genCommunityId = (prefix: string) => `${prefix}_${Date.now()}_${_communityIdSeq++}`;
+
 export type FeedSort = 'hot' | 'new' | 'top';
 
 interface CommunityState {
@@ -110,7 +115,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
 
     set(state => ({
       posts: [{
-        id: `p_${Date.now()}`,
+        id: genCommunityId('p'),
         userId: 'user_1',
         userName: 'Rahul Sharma',
         content,
@@ -201,7 +206,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
 
   addComment: async (postId, content) => {
     const newComment: Comment = {
-      id: `c_${postId}_${Date.now()}`,
+      id: genCommunityId(`c_${postId}`),
       postId,
       userId: 'user_1',
       userName: 'Rahul Sharma',

@@ -108,10 +108,12 @@ router.post('/signup', (req: Request, res: Response) => {
     return;
   }
 
-  const token = generateToken({ userId: `user_${Date.now()}`, email });
+  // Single shared id so the token subject and the returned user always match
+  const userId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+  const token = generateToken({ userId, email });
   res.json({
     token,
-    user: { ...mockUser, id: `user_${Date.now()}`, name, email, phone },
+    user: { ...mockUser, id: userId, name, email, phone },
   });
 });
 

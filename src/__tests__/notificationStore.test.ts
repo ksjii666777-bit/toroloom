@@ -582,7 +582,7 @@ describe('NotificationStore — addPortfolioAlertRule', () => {
     expect(rule.enabled).toBe(true);
     expect(rule.badge).toBe(true);
     expect(rule.triggered).toBe(false);
-    expect(rule.id).toMatch(/^par_\d+$/);
+    expect(rule.id).toMatch(/^par_\d+_\d+$/); // ts + monotonic counter
     expect(rule.createdAt).toBeDefined();
     expect(() => new Date(rule.createdAt)).not.toThrow();
   });

@@ -292,7 +292,7 @@ export class GrowwBroker implements IBroker {
         return status === 'OPEN' || status === 'PENDING' || status === 'TRIGGER_PENDING' || status === 'PARTIALLY_FILLED';
       })
       .map((o: any) => ({
-        id: o.groww_order_id || `groww_${Date.now()}`,
+        id: o.groww_order_id || `groww_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         symbol: o.trading_symbol || '',
         exchange: o.exchange || 'NSE',
         transactionType: (o.transaction_type || 'BUY').toUpperCase() as 'BUY' | 'SELL',
@@ -414,7 +414,7 @@ export class GrowwBroker implements IBroker {
 
     const payload = response.payload || {};
     return {
-      id: payload.groww_order_id || `groww_${Date.now()}`,
+      id: payload.groww_order_id || `groww_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       status: this.mapOrderStatus(payload.order_status),
       message: payload.remark || 'Order placed successfully',
       timestamp: new Date().toISOString(),
@@ -453,7 +453,7 @@ export class GrowwBroker implements IBroker {
     const orders = response.payload.order_list || response.payload.orders || [];
 
     return (Array.isArray(orders) ? orders : []).map((o: any) => ({
-      id: o.groww_order_id || o.groww_trade_id || `t_${Date.now()}`,
+      id: o.groww_order_id || o.groww_trade_id || `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       symbol: o.trading_symbol || '',
       type: (o.transaction_type || 'BUY').toLowerCase() as 'buy' | 'sell',
       quantity: parseInt(o.filled_quantity || o.quantity || 0),

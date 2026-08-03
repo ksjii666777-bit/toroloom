@@ -4,6 +4,11 @@ import { mockMutualFunds, mockSIPs } from '../constants/mockData';
 import { mutualFundApi } from '../services/api/mutualFunds';
 import { log } from '../utils/logger';
 
+/** Monotonic counter — keeps locally-created SIP ids unique even when two SIPs
+ * land in the same Date.now() tick (CI-fast collisions). */
+let _sipIdSeq = 0;
+const genSipId = () => `sip_${Date.now()}_${_sipIdSeq++}`;
+
 interface MutualFundState {
   funds: MutualFund[];
   sipPlans: SIPPlan[];
@@ -69,7 +74,7 @@ export const useMutualFundStore = create<MutualFundState>((set) => ({
 
     set(state => ({
       sipPlans: [...state.sipPlans, {
-        id: `sip_${Date.now()}`,
+        id: genSipId(),
         fundId,
         fundName: fund.name,
         amount,

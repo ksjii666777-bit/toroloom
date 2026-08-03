@@ -165,7 +165,7 @@ function toAIInsight(raw: any, symbol: string): AIInsight | null {
   ) : [];
 
   return {
-    id: `ai_${Date.now()}_${symbol}`,
+    id: `ai_${Date.now()}_${symbol}_${Math.random().toString(36).slice(2, 6)}`,
     stockId: symbol,
     symbol,
     name: symbol,

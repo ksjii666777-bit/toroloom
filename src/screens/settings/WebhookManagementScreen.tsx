@@ -410,7 +410,7 @@ export default function WebhookManagementScreen({ navigation }: any) {
 
     const generatedSecret = newSecret.trim() || `whsec_${Math.random().toString(36).slice(2, 10)}...${Math.random().toString(36).slice(-4)}`;
     const newWebhook: WebhookConfig = {
-      id: `wh_${Date.now()}`,
+      id: `wh_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       name: newName.trim(),
       url: newUrl.trim(),
       secret: maskSecret(generatedSecret),

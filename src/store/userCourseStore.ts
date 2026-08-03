@@ -6,6 +6,10 @@ import { log } from '../utils/logger';
 
 let courseIdCounter = 122; // Continue from existing mock courses
 let lessonIdCounter = 220;
+/** Monotonic counter — keeps quiz/question/review ids unique even when two
+ * creations land in the same Date.now() tick (CI-fast collisions). */
+let _userCourseIdSeq = 0;
+const genUserCourseId = (prefix: string) => `${prefix}_${Date.now()}_${_userCourseIdSeq++}`;
 
 /** Generate a unique course ID */
 function genCourseId(): string {
@@ -277,11 +281,11 @@ export const useUserCourseStore = create<UserCourseState>()(
 
       addQuizToLesson: (courseId, lessonId) => {
         const newQuiz: Quiz = {
-          id: `qz_${Date.now()}`,
+          id: genUserCourseId('qz'),
           title: 'Untitled Quiz',
           questions: [
             {
-              id: `qq_${Date.now()}_1`,
+              id: genUserCourseId('qq'),
               question: '',
               options: ['', '', '', ''],
               correctAnswer: 0,
@@ -328,7 +332,7 @@ export const useUserCourseStore = create<UserCourseState>()(
 
       addQuestionToQuiz: (courseId, lessonId) => {
         const newQuestion: QuizQuestion = {
-          id: `qq_${Date.now()}`,
+          id: genUserCourseId('qq'),
           question: '',
           options: ['', '', '', ''],
           correctAnswer: 0,
@@ -453,7 +457,7 @@ export const useUserCourseStore = create<UserCourseState>()(
         if (course) {
           import('./notificationStore').then(({ useNotificationStore }) => {
             useNotificationStore.getState().addNotification({
-              id: `cr_app_${Date.now()}`,
+              id: genUserCourseId('cr_app'),
               type: 'course_review',
               title: '✅ Course Approved!',
               message: `Your course "${course.title}" has been approved and is now published! 🎉`,
@@ -487,7 +491,7 @@ export const useUserCourseStore = create<UserCourseState>()(
         if (course) {
           import('./notificationStore').then(({ useNotificationStore }) => {
             useNotificationStore.getState().addNotification({
-              id: `cr_rej_${Date.now()}`,
+              id: genUserCourseId('cr_rej'),
               type: 'course_review',
               title: '📝 Course Update — Needs Changes',
               message: `Your course "${course.title}" was not approved. Feedback: ${notes}`,

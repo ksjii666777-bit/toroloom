@@ -404,7 +404,7 @@ export class MockBroker implements IBroker {
     // Remove from open orders & add to trade history
     mockOpenOrders = mockOpenOrders.filter(o => o.id !== order.orderId);
     mockTradeHistory.unshift({
-      id: `t_cancel_${Date.now()}`,
+      id: `t_cancel_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       symbol: existing.symbol,
       type: existing.transactionType === 'BUY' ? 'buy' : 'sell',
       quantity: existing.quantity - existing.filledQuantity,
@@ -427,7 +427,7 @@ export class MockBroker implements IBroker {
     const stock = mockStocks.find(s => s.symbol === order.symbol);
     if (!stock) {
       const result: OrderResult = {
-        id: `ord_${Date.now()}`,
+        id: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         status: 'rejected',
         message: `Symbol ${order.symbol} not found`,
         timestamp: new Date().toISOString(),
@@ -470,7 +470,7 @@ export class MockBroker implements IBroker {
 
     // Record trade
     mockTradeHistory.unshift({
-      id: `t_${Date.now()}`,
+      id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       symbol: order.symbol,
       type: order.transactionType === 'BUY' ? 'buy' : 'sell',
       quantity: order.quantity,
@@ -480,7 +480,7 @@ export class MockBroker implements IBroker {
     });
 
     const result: OrderResult = {
-      id: `ord_${Date.now()}`,
+      id: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       status: 'confirmed',
       message: `${order.transactionType} order for ${order.quantity} ${order.symbol} @ ₹${executedPrice} executed successfully`,
       timestamp: new Date().toISOString(),
@@ -551,11 +551,11 @@ export class MockBroker implements IBroker {
   async verifyEDIS(request: EDISVerifyRequest): Promise<EDISVerifyResponse> {
     await this.delay(400);
     return {
-      ReqId: `REQ_${Date.now()}`,
+      ReqId: `REQ_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       ReturnURL: 'https://cdslindia.com/verify',
       DPId: '12345',
       BOID: `BO_${request.isin}`,
-      TransDtls: `TRAN_${Date.now()}`,
+      TransDtls: `TRAN_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     };
   }
 

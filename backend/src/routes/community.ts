@@ -45,7 +45,7 @@ router.post('/posts', authMiddleware, async (req: Request, res: Response) => {
     return;
   }
 
-  const id = `p_${Date.now()}`;
+  const id = `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
   const userId = req.user!.userId;
   const userName = 'Current User';
 

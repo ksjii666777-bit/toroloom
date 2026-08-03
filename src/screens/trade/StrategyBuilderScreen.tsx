@@ -121,7 +121,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
         : premiumAdjustment - (legStrike - atmStrike > 0 ? Math.abs(legStrike - atmStrike) * 0.3 : 0);
 
       const newLeg: StrategyLeg = {
-        id: `leg_${Date.now()}_${i}`,
+        id: `leg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}_${i}`,
         action: leg.action as 'buy' | 'sell',
         type: leg.type as 'CE' | 'PE' | 'FUTURE',
         strike: legStrike,
@@ -139,7 +139,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
 
   const handleAddCustomLeg = useCallback(() => {
     const newLeg: StrategyLeg = {
-      id: `leg_${Date.now()}`,
+      id: `leg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       action: 'buy',
       type: 'CE',
       strike: Math.round(spotPrice / 50) * 50,

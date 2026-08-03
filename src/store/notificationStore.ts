@@ -5,6 +5,11 @@ import { mockNotifications } from '../constants/mockData';
 import { notificationApi } from '../services/api/notifications';
 import { sendLocalNotification, cancelNotification, cancelAllNotifications, sendPortfolioAlert, updateAppIconBadge } from '../services/notificationService';
 
+/** Monotonic counter — keeps locally-created rule/notification ids unique even
+ * when two creations land in the same Date.now() tick (CI-fast collisions). */
+let _notificationIdSeq = 0;
+const genNotificationId = (prefix: string) => `${prefix}_${Date.now()}_${_notificationIdSeq++}`;
+
 // ============ Notification Preferences ============
 
 export interface NotificationPreferences {
@@ -320,7 +325,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       priceAlertRules: [
         ...state.priceAlertRules,
         {
-          id: `par_${Date.now()}`,
+          id: genNotificationId('par'),
           symbol,
           stockName,
           targetPrice,
@@ -346,7 +351,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         ...state.portfolioAlertRules,
         {
           ...rule,
-          id: `par_${Date.now()}`,
+          id: genNotificationId('par'),
           triggered: false,
           createdAt: new Date().toISOString(),
         },
@@ -604,7 +609,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
         if (hit) {
           get().addNotification({
-            id: `pa_${Date.now()}`,
+            id: genNotificationId('pa'),
             type: 'price_alert',
             title: `🎯 Price Alert: ${rule.symbol}`,
             message: `${rule.stockName} ${rule.direction === 'above' ? 'rose to' : 'dropped to'} ₹${currentPrice.toFixed(2)} (target: ₹${rule.targetPrice.toFixed(2)})`,

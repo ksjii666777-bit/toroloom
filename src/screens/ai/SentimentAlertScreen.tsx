@@ -580,7 +580,7 @@ export default function SentimentAlertScreen({ navigation }: any) {
 
         // Add to notification store — fires push notification + appears in NotificationsScreen
         useNotificationStore.getState().addNotification({
-          id: `sat_${Date.now()}`,
+          id: `sat_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
           type: 'sentiment_alert',
           title,
           message: triggerMsg,

@@ -31,7 +31,7 @@ router.post('/sips', (req: Request, res: Response) => {
   }
 
   const newSip = {
-    id: `sip_${Date.now()}`,
+    id: `sip_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     fundId,
     fundName: fund.name,
     amount,

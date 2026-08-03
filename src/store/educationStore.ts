@@ -64,6 +64,10 @@ interface EducationState {
 }
 
 let bookmarkIdCounter = 0;
+/** Monotonic counter — keeps reminder/certificate ids unique even when two
+ * creations land in the same Date.now() tick (CI-fast collisions). */
+let _educationIdSeq = 0;
+const genEducationId = (prefix: string) => `${prefix}_${Date.now()}_${_educationIdSeq++}`;
 
 export const useEducationStore = create<EducationState>()(
   persist(
@@ -309,7 +313,7 @@ export const useEducationStore = create<EducationState>()(
   scheduleDailyReminder: async () => {
     const { useNotificationStore } = await import('./notificationStore');
     useNotificationStore.getState().addNotification({
-      id: `rem_${Date.now()}`,
+      id: genEducationId('rem'),
       type: 'educational',
       title: '📚 Daily Learning Reminder',
       message: 'Time for your daily stock market lesson! Keep learning and growing.',
@@ -371,7 +375,7 @@ export const useEducationStore = create<EducationState>()(
       const { generateSerialNumber, calculateGrade, generateCertificatePDF } = await import('../utils/certificateGenerator');
 
       const cert: CourseCertificate = {
-        id: `cert_${courseId}_${Date.now()}`,
+        id: genEducationId(`cert_${courseId}`),
         courseId,
         courseTitle: course.title,
         userName: 'Student', // Will be replaced with actual user name

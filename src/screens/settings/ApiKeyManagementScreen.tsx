@@ -419,7 +419,7 @@ export default function ApiKeyManagementScreen({ navigation }: any) {
 
     const fullKey = generateMockKey();
     const newKey: ApiKey = {
-      id: `key_${Date.now()}`,
+      id: `key_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       name: newKeyName.trim(),
       maskedKey: maskKey(fullKey),
       fullKey,

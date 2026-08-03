@@ -67,7 +67,7 @@ router.post('/', (req: Request, res: Response) => {
 
   const userWatchlists = getUserWatchlists(req.user!.userId);
   const newWatchlist: WatchlistItem = {
-    id: `w_${Date.now()}`,
+    id: `w_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     name,
     stocks: [],
     createdAt: new Date().toISOString(),

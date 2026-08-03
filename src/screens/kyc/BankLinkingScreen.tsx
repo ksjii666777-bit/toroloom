@@ -176,7 +176,7 @@ export default function BankLinkingScreen({ navigation }: any) {
     try {
       const maskedAccount = 'XXXX' + accountResult.accountNumber.slice(-4);
       const newAccount: LinkedBankStoreAccount = {
-        id: `bank_${Date.now()}`,
+        id: `bank_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         bankName: ifscResult.bankName,
         accountNumber: maskedAccount,
         ifsc: ifscResult.ifsc,

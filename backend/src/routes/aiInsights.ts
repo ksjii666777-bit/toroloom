@@ -149,7 +149,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
     // AI not configured — return simulated insight
     await new Promise(r => setTimeout(r, 2000));
     const fallback = {
-      id: `ai_${Date.now()}`,
+      id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       stockId: symbol,
       symbol,
       name: symbol,
@@ -199,7 +199,7 @@ router.post('/analyze/batch', async (req: Request, res: Response) => {
   if (!isAIConfigured()) {
     // AI not configured — return simulated insights for each symbol
     const fallbacks = symbols.map((symbol: string) => ({
-      id: `ai_${Date.now()}_${symbol}`,
+      id: `ai_${Date.now()}_${symbol}_${Math.random().toString(36).slice(2, 6)}`,
       stockId: symbol,
       symbol,
       name: symbol,

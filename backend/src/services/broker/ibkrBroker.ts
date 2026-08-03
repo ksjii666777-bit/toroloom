@@ -497,14 +497,14 @@ export class IbkrBroker implements IBroker {
       }
 
       return {
-        id: `ibkr_${Date.now()}`,
+        id: `ibkr_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         status: 'pending',
         message: data?.message || 'Order submitted to IBKR',
         timestamp: new Date().toISOString(),
       };
     } catch (error: any) {
       return {
-        id: `ibkr_${Date.now()}`,
+        id: `ibkr_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         status: 'rejected',
         message: error.message || 'Failed to place order',
         timestamp: new Date().toISOString(),
@@ -592,7 +592,7 @@ export class IbkrBroker implements IBroker {
       if (!Array.isArray(data)) return [];
 
       return data.map((t: IbkrTrade) => ({
-        id: t.executionId || `t_${Date.now()}`,
+        id: t.executionId || `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         symbol: t.symbol || t.contractDescription || '',
         type: (t.side || 'BUY').toLowerCase() as 'buy' | 'sell',
         quantity: t.amount || 0,

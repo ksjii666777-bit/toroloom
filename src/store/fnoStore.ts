@@ -15,6 +15,11 @@ import type { BacktestResult } from '../services/backtestEngine';
 
 const COMPARISON_CACHE_KEY = 'fno-comparison-slots';
 
+/** Monotonic counter — keeps locally-created comparison-slot ids unique even
+ * when two additions land in the same Date.now() tick (CI-fast collisions). */
+let _fnoIdSeq = 0;
+const genFnoId = (prefix: string) => `${prefix}_${Date.now()}_${_fnoIdSeq++}`;
+
 // ──── Strategy Comparison ──────────────────────────────────────────────────
 
 export const MAX_COMPARISON_SLOTS = 3;
@@ -594,7 +599,7 @@ export const useFnoStore = create<FnoState>((set, get) => ({
     }
 
     const slot: StrategyComparisonSlot = {
-      id: `comp_${Date.now()}`,
+      id: genFnoId('comp'),
       name,
       legs,
       backtestResult: {

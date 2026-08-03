@@ -418,7 +418,7 @@ export class ZerodhaBroker implements IBroker {
         return status === 'OPEN' || status === 'PENDING' || status === 'TRIGGER_PENDING' || status === 'PARTIALLY_FILLED';
       })
       .map((o: any) => ({
-        id: String(o.order_id || o.id || `zer_${Date.now()}`),
+        id: String(o.order_id || o.id || `zer_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`),
         symbol: o.tradingsymbol || o.symbol || '',
         exchange: o.exchange || 'NSE',
         transactionType: (o.transaction_type || 'BUY').toUpperCase() as 'BUY' | 'SELL',
@@ -516,7 +516,7 @@ export class ZerodhaBroker implements IBroker {
     if (!result) throw new Error('Zerodha placeOrder returned no result');
 
     // Kite placeOrder returns the order_id directly as a string
-    const orderId = typeof result === 'string' ? result : result.order_id || result.data?.order_id || `zer_${Date.now()}`;
+    const orderId = typeof result === 'string' ? result : result.order_id || result.data?.order_id || `zer_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     const status: 'confirmed' | 'pending' | 'rejected' = 
       result.status === 'success' || result.status === 'confirmed' ? 'confirmed' :
       result.status === 'rejected' ? 'rejected' : 'pending';
@@ -568,7 +568,7 @@ export class ZerodhaBroker implements IBroker {
     if (!Array.isArray(trades)) return [];
 
     return trades.map((t: any) => ({
-      id: String(t.trade_id || t.id || `t_${Date.now()}`),
+      id: String(t.trade_id || t.id || `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`),
       symbol: t.tradingsymbol || t.symbol || '',
       type: (t.transaction_type || t.transactiontype || 'buy').toLowerCase() as 'buy' | 'sell',
       quantity: parseInt(t.quantity || t.filled_quantity || 0),

@@ -201,7 +201,7 @@ async function applyMutation(
   if (_mutationDedup.has(mutation.mutationId)) {
     // Find the result from a previous application
     // For simplicity, treat as applied (idempotent)
-    return { status: 'applied', entityId: mutation.entityId || `entity_${Date.now()}`, newVersion: 0 };
+    return { status: 'applied', entityId: mutation.entityId || `entity_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, newVersion: 0 };
   }
 
   // 2. Conflict check

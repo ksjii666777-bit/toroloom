@@ -99,7 +99,7 @@ router.post('/create-order', async (req: Request, res: Response) => {
       const order = await razorpay.orders.create({
         amount,
         currency: 'INR',
-        receipt: `toroloom_${planId}_${Date.now()}`,
+        receipt: `toroloom_${planId}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         notes: {
           userId: req.user!.userId,
           planId,
@@ -118,7 +118,7 @@ router.post('/create-order', async (req: Request, res: Response) => {
     } else {
       // Development fallback — return mock order
       res.json({
-        orderId: `order_mock_${Date.now()}`,
+        orderId: `order_mock_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         keyId: keyId || 'rzp_test_placeholder',
         amount,
         currency: 'INR',
@@ -161,7 +161,7 @@ router.post('/create-fund-order', async (req: Request, res: Response) => {
       const order = await razorpay.orders.create({
         amount: amountInPaise,
         currency,
-        receipt: `toroloom_fund_${Date.now()}`,
+        receipt: `toroloom_fund_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         notes: {
           userId: req.user!.userId,
           type: 'fund_add',
@@ -177,7 +177,7 @@ router.post('/create-fund-order', async (req: Request, res: Response) => {
     } else {
       // Development fallback — return mock order
       res.json({
-        orderId: `order_mock_${Date.now()}`,
+        orderId: `order_mock_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         keyId: keyId || 'rzp_test_placeholder',
         amount: amountInPaise,
         currency,
@@ -330,7 +330,7 @@ router.post('/create-subscription', async (req: Request, res: Response) => {
     } else {
       // Development fallback — return mock subscription
       res.json({
-        subscriptionId: `sub_mock_${Date.now()}`,
+        subscriptionId: `sub_mock_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         keyId: keyId || 'rzp_test_placeholder',
         status: 'created',
         currentStart: Math.floor(Date.now() / 1000),
@@ -368,7 +368,7 @@ router.post('/create-mandate', async (req: Request, res: Response) => {
       const order = await razorpay.orders.create({
         amount,
         currency: 'INR',
-        receipt: `mandate_${planId}_${Date.now()}`,
+        receipt: `mandate_${planId}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         notes: {
           userId: req.user!.userId,
           planId,
@@ -388,12 +388,12 @@ router.post('/create-mandate', async (req: Request, res: Response) => {
     } else {
       // Development fallback — return mock mandate setup
       res.json({
-        orderId: `order_mandate_mock_${Date.now()}`,
+        orderId: `order_mandate_mock_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         keyId: keyId || 'rzp_test_placeholder',
         amount,
         currency: 'INR',
         method: 'upi',
-        mandateId: `mand_mock_${Date.now()}`,
+        mandateId: `mand_mock_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       });
     }
   } catch (error: unknown) {
@@ -421,7 +421,7 @@ router.post('/create-paid-order', async (req: Request, res: Response) => {
       const order = await razorpay.orders.create({
         amount,
         currency,
-        receipt: receipt || `paid_${Date.now()}`,
+        receipt: receipt || `paid_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         notes: {
           userId: req.user!.userId,
           type: 'direct_payment',
@@ -437,7 +437,7 @@ router.post('/create-paid-order', async (req: Request, res: Response) => {
       });
     } else {
       res.json({
-        orderId: `order_mock_${Date.now()}`,
+        orderId: `order_mock_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         keyId: keyId || 'rzp_test_placeholder',
         amount,
         currency,

@@ -24,6 +24,11 @@ import {
 } from '../services/smartAlertEngine';
 import { sendLocalNotification } from '../services/notificationService';
 
+/** Monotonic counter — keeps notification ids unique even when two triggers
+ * land in the same Date.now() tick (CI-fast collisions). */
+let _smartAlertIdSeq = 0;
+const genSmartAlertId = (prefix: string) => `${prefix}_${Date.now()}_${_smartAlertIdSeq++}`;
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -292,7 +297,7 @@ export const useSmartAlertStore = create<SmartAlertState>()(
 
         // Fire local notification
         sendLocalNotification({
-          id: `smart_${Date.now()}`,
+          id: genSmartAlertId('smart'),
           type: 'smart_alert',
           title: `🎯 Smart Alert: ${alert.name}`,
           message: `${alert.symbol} at ₹${price.toFixed(2)} — ${summary}`,

@@ -57,7 +57,7 @@ router.post('/price-alert', async (req: Request, res: Response) => {
     const quote = await broker.getQuote(symbol);
 
     const newNotification = {
-      id: `n_${Date.now()}`,
+      id: `n_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       userId,
       type: 'price_alert' as const,
       title: `Price Alert: ${symbol}`,

@@ -273,7 +273,7 @@ export default function AIChatScreen({ navigation }: any) {
     if (!query || isThinking) return;
 
     const userMsg: ChatMessage = {
-      id: `user_${Date.now()}`,
+      id: `user_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       role: 'user',
       text: query,
       timestamp: Date.now(),
@@ -289,7 +289,7 @@ export default function AIChatScreen({ navigation }: any) {
     const responseText = generateResponse(query, ctx, t);
 
     const assistantMsg: ChatMessage = {
-      id: `ai_${Date.now()}`,
+      id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       role: 'assistant',
       text: responseText,
       timestamp: Date.now(),
