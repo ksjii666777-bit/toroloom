@@ -579,42 +579,14 @@ jobs:
             emulator-boot-timeout: 900
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 1536 -cores 2 -no-metrics
             disable-animations: true
+            # Boot/Expo/Maestro logic lives in .github/scripts/e2e-boot.sh
+            # (standalone file) — inline multi-line scripts with embedded
+            # single-quoted bash -c blocks get mangled by wretry.action's
+            # YAML-string re-parsing ("Syntax error: expecting done").
             script: |
-              adb wait-for-device
-              echo "Waiting for sys.boot_completed..."
-              for i in $(seq 1 120); do
-                BOOT_COMPLETED=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
-                if [ "$BOOT_COMPLETED" = "1" ]; then
-                  echo "Boot completed!"
-                  break
-                fi
-                if [ $i -eq 120 ]; then
-                  echo "Timed out waiting for boot completion."
-                  adb devices -l
-                  adb shell getprop 2>/dev/null | head -20 || true
-                  exit 1
-                fi
-                sleep 5
-              done
-              adb shell settings put global window_animation_scale 0.0
-              adb shell settings put global transition_animation_scale 0.0
-              adb shell settings put global animator_duration_scale 0.0
-              echo "Animations disabled."
-              echo "Starting Expo dev server..."
-              npx expo start --android 2>&1 | tee /tmp/expo.log &
-              EXPO_PID=$!
-              echo "Waiting for Metro bundler..."
-              timeout 180 bash -c '
-                until grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; do
-                  sleep 5
-                  printf "."
-                done
-                echo ""
-                echo "Expo/Metro server is ready!"
-              '
-              sleep 15
-              echo "Running ALL Maestro E2E flows..."
-              maestro test .maestro/flows --app-id host.exp.exponent --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
+              TEST_EMAIL="${{ secrets.TEST_EMAIL }}" \
+              TEST_PASSWORD="${{ secrets.TEST_PASSWORD }}" \
+              bash .github/scripts/e2e-boot.sh .maestro/flows
 
   # ── E2E — Maestro (Android) PR Critical Flows ───────────────────────────
   # Fast PR-level E2E: runs 5 key flows to catch critical regressions before
@@ -728,42 +700,14 @@ jobs:
             emulator-boot-timeout: 900
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu auto -accel auto -memory 1536 -cores 2 -no-metrics
             disable-animations: true
+            # Boot/Expo/Maestro logic lives in .github/scripts/e2e-boot.sh
+            # (standalone file) — inline multi-line scripts with embedded
+            # single-quoted bash -c blocks get mangled by wretry.action's
+            # YAML-string re-parsing ("Syntax error: expecting done").
             script: |
-              adb wait-for-device
-              echo "Waiting for sys.boot_completed..."
-              for i in $(seq 1 120); do
-                BOOT_COMPLETED=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
-                if [ "$BOOT_COMPLETED" = "1" ]; then
-                  echo "Boot completed!"
-                  break
-                fi
-                if [ $i -eq 120 ]; then
-                  echo "Timed out waiting for boot completion."
-                  adb devices -l
-                  adb shell getprop 2>/dev/null | head -20 || true
-                  exit 1
-                fi
-                sleep 5
-              done
-              adb shell settings put global window_animation_scale 0.0
-              adb shell settings put global transition_animation_scale 0.0
-              adb shell settings put global animator_duration_scale 0.0
-              echo "Animations disabled."
-              echo "Starting Expo dev server..."
-              npx expo start --android 2>&1 | tee /tmp/expo.log &
-              EXPO_PID=$!
-              echo "Waiting for Metro bundler..."
-              timeout 180 bash -c '
-                until grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; do
-                  sleep 5
-                  printf "."
-                done
-                echo ""
-                echo "Expo/Metro server is ready!"
-              '
-              sleep 15
-              echo "Running Maestro E2E critical flows (smoke + nav + trade + KYC + stock)..."
-              maestro test \
+              TEST_EMAIL="${{ secrets.TEST_EMAIL }}" \
+              TEST_PASSWORD="${{ secrets.TEST_PASSWORD }}" \
+              bash .github/scripts/e2e-boot.sh \
                 .maestro/flows/smoke/smokeTest.yaml \
                 .maestro/flows/navigation/tabNavigation.yaml \
                 .maestro/flows/trade/placeOrder.yaml \
@@ -772,10 +716,7 @@ jobs:
                 .maestro/flows/settings/twoFactorSetup.yaml \
                 .maestro/flows/trade/fnoOptionsChain.yaml \
                 .maestro/flows/ui/calculators.yaml \
-                .maestro/flows/ai/aiInsights.yaml \
-                --app-id host.exp.exponent \
-                --env TEST_EMAIL=${{ secrets.TEST_EMAIL }} \
-                --env TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
+                .maestro/flows/ai/aiInsights.yaml
 
   # ── Coverage badge deployment ────────────────────────────────────────────
   # Runs after frontend and backend (with their coverage data) finish.
