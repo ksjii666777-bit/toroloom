@@ -33,8 +33,17 @@ if [ -z "${TEST_EMAIL:-}" ] || [ -z "${TEST_PASSWORD:-}" ]; then
   exit 1
 fi
 
-# ── 1. Wait for the device to appear ────────────────────────────────────────
-adb wait-for-device
+# ── 1. Wait for the device to appear (max 120s — do NOT hang forever) ───────
+# The android-emulator-runner action boots the emulator asynchronously; if
+# the adb daemon cannot connect ("Unable to connect to adb daemon on port
+# 5037"), wait-for-device would otherwise block until the 900s action
+# timeout. Failing fast with diagnostics makes the cause visible.
+adb start-server || true
+if ! timeout 120 adb wait-for-device; then
+  echo "::error::adb never connected to a device within 120s."
+  adb devices -l || true
+  exit 1
+fi
 
 # ── 2. Poll until sys.boot_completed=1 (max 120 × 5s = 10 min) ─────────────
 echo "Waiting for sys.boot_completed..."
