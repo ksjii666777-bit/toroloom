@@ -163,14 +163,23 @@ describe('Forex Quotes — WebSocket subscribeTicks', () => {
 
   it('subscribeTicks generates different prices on subsequent calls (random walk)', async () => {
     const symbols = ['EURUSD'];
-    const ticks: number[] = [];
+    // EURUSD is 4-decimal precision — compare on the 4-decimal grid
+    const uniquePrices = new Set<number>();
 
     await new Promise<void>((resolve, reject) => {
-      // 5 ticks × up to 3s per interval (1000 + rand*2000ms) — keep timeout well clear
-      const timeout = setTimeout(() => reject(new Error('Timed out collecting forex ticks')), 25000);
+      // Deterministic: wait until the random walk produces 2 distinct prices
+      // instead of asserting after a fixed tick count. A fixed N-tick window is
+      // flaky because EURUSD's per-tick shock (±~0.00009) frequently rounds to
+      // the SAME 4-decimal value (grid spacing 0.0001), so 5 consecutive ticks
+      // can all land on one price under CI timing. Waiting on the invariant
+      // (2 distinct prices) only fails if the walk is genuinely stuck.
+      const timeout = setTimeout(
+        () => reject(new Error(`Random walk produced only ${uniquePrices.size} distinct price(s) in time`)),
+        30000,
+      );
       const unsubscribe = broker.subscribeTicks(symbols, (quote) => {
-        ticks.push(quote.lastPrice);
-        if (ticks.length >= 5) {
+        uniquePrices.add(Math.round(quote.lastPrice * 10000));
+        if (uniquePrices.size >= 2) {
           clearTimeout(timeout);
           unsubscribe();
           resolve();
@@ -178,9 +187,6 @@ describe('Forex Quotes — WebSocket subscribeTicks', () => {
       });
     });
 
-    expect(ticks.length).toBe(5);
-    // EURUSD is 4-decimal precision — compare on the 4-decimal grid
-    const uniquePrices = new Set(ticks.map(t => Math.round(t * 10000)));
     expect(uniquePrices.size).toBeGreaterThanOrEqual(2);
   });
 
