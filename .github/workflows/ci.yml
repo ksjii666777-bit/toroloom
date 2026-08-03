@@ -63,7 +63,10 @@ jobs:
         # job (cross-file-isolation) with singleFork=true so the singleton
         # is shared across files. Running them here (separate forks) would
         # produce a false pass trivially.
-        run: npx vitest run --reporter=verbose --coverage --exclude='**/*.int.test.ts' --exclude='**/*CrossFile*.test.ts'
+        # Also exclude the WebSocket stress test — it has its own dedicated
+        # job (stress) with a 25-minute timeout and routinely exceeds the
+        # global 30s hookTimeout under coverage on slow runners.
+        run: npx vitest run --reporter=verbose --coverage --exclude='**/*.int.test.ts' --exclude='**/*CrossFile*.test.ts' --exclude='**/*.stress.test.ts'
         env:
           NODE_ENV: test
 

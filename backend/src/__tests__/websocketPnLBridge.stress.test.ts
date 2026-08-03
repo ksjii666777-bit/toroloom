@@ -230,7 +230,9 @@ describe('WebSocket → RiskEngine P&L Bridge — Stress Test', () => {
     client.ws.send(JSON.stringify({ type: 'auth', token: VALID_TOKEN }));
     await client.nextMessage(); // pnl_update
     await client.nextMessage(); // authenticated
-  });
+    // Generous hook budget: slow CI runners + coverage instrumentation
+    // routinely exceed the global 30s hookTimeout (vitest.config.ts).
+  }, 120_000);
 
   afterAll(async () => {
     await riskEngine.resetForTesting();

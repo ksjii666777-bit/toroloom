@@ -81,6 +81,12 @@ describe.skipIf(!hasTestMongo)('Community Persistence — MongoDB', () => {
     if (!available) return;
     await storage.clearForTesting();
     resetCommunityService();
+    // configureCommunityPersistence() migrates 10 demo mock posts into the DB
+    // on its first call (mockInitialized flag). Configure + wipe so each test
+    // starts from a truly empty DB while the module-level seed flag is consumed
+    // and won't re-seed during the test's own configure() call.
+    await configureCommunityPersistence(storage);
+    await storage.clearForTesting();
   });
 
   // ──────────────── 1. Configure + Empty Posts ────────────────

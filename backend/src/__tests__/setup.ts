@@ -23,6 +23,15 @@ vi.hoisted(() => {
   // side effects during import don't interfere with test setup.
 });
 
+// ──── JWT_SECRET Default ────────────────────────────────────────────────────
+// CI checkouts don't include backend/.env (gitignored), so JWT_SECRET would
+// be empty and generateToken() would throw "secretOrPrivateKey must have a
+// value" in ~10 route/int suites (routes, kyc, twoFactor, webhooks,
+// websocketPnLBridge, brokerEDIS, ibkr, syncInvalidation, routesExtended…).
+// Provide a stable test default here (this setup file runs before every test
+// file, so env.ts picks it up at import). Individual files may still override.
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'toroloom-backend-test-jwt-secret';
+
 // ──── Shared Mocks ──────────────────────────────────────────────────────────
 
 // If any backend module tries to read .env directly during import,

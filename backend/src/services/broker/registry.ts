@@ -286,8 +286,14 @@ class BrokerRegistry {
       }
     }
 
+    // Build a per-broker circuit state summary (e.g. "mock=OPEN") so the
+    // error names each broker and its circuit state for quick diagnosis.
+    const circuitStates = Array.from(this.plugins.keys())
+      .map(type => `${type}=${getCircuitBreaker(`broker-${type}`).snapshot().state}`)
+      .join(', ');
+
     throw new Error(
-      `All brokers unavailable. Last error: ${lastError?.message || 'Unknown'}`,
+      `All brokers unavailable. Circuit states: ${circuitStates}. Last error: ${lastError?.message || 'Unknown'}`,
     );
   }
 

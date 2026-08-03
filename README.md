@@ -1,6 +1,7 @@
 # Toroloom
 
 [![CI](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml/badge.svg)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml)
+[![Backend Integration (PG + Mongo)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml)
 [![Broker Integration CI](https://github.com/ksjii666777-bit/toroloom/actions/workflows/broker-integration-ci.yml/badge.svg)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/broker-integration-ci.yml)
 [![Calculator / Chat / Broker CI](https://github.com/ksjii666777-bit/toroloom/actions/workflows/calculator-broker-chat-ci.yml/badge.svg)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/calculator-broker-chat-ci.yml)
 [![Coverage — Frontend](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ksjii666777-bit/toroloom/gh-pages/badges/frontend-coverage.json)](https://github.com/ksjii666777-bit/toroloom/actions/workflows/ci.yml)
@@ -60,6 +61,12 @@ A full-stack trading platform built with **React Native (Expo)** and **Node.js**
 ## Badges
 
 The coverage badges above are updated automatically by CI. They reflect the **lines** coverage percentage from the latest `master` build.
+
+> **Note:** GitHub Actions status badges reflect the entire workflow run — per-job
+> filtering (`?job=`) is not supported. The *Backend Integration (PG + Mongo)* badge
+> therefore tracks the main `ci.yml` workflow, which includes the `backend-integration`
+> job (PostgreSQL + MongoDB integration tests). A red badge means that job (or any
+> other job in the workflow) failed on the latest `master` run.
 
 ---
 

@@ -2,8 +2,7 @@ import { env } from '../../config/env';
 import { IBroker } from './interface';
 import { registry } from './registry';
 import { registerDefaultPlugins, updatePluginEnvConfig } from './plugins/registerDefaults';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { getCircuitBreaker, CircuitOpenError } from '../circuitBreaker';
+import { getCircuitBreaker } from '../circuitBreaker';
 import { auditTrail } from '../auditTrail';
 import type { StorageEngine } from '../storage/types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -77,26 +76,73 @@ async function persistBrokerState(): Promise<void> {
 async function createBrokerWithFallback(): Promise<IBroker> {
   const configuredBroker = env.broker !== 'mock' ? env.broker : undefined;
 
-  const { broker, type } = await registry.createWithFallback(configuredBroker, {
-    // Only provide env-based config overrides; the registry uses
-    // defaultConfig from each plugin, which was populated by updatePluginEnvConfig
-  });
+  try {
+    const { broker, type } = await registry.createWithFallback(configuredBroker, {
+      // Only provide env-based config overrides; the registry uses
+      // defaultConfig from each plugin, which was populated by updatePluginEnvConfig
+    });
 
-  // Connection successful — record it
-  currentBrokerType = type;
-  brokerStateCache.set(type, {
-    lastEvent: 'BROKER_CONNECTED',
-    timestamp: Date.now(),
-  });
-  setBrokerConnected(type, true);
-  await auditTrail.append({
-    userId: 'system',
-    eventType: 'BROKER_CONNECTED',
-    data: { brokerType: type, mode: env.isMock ? 'mock' : 'live' },
-  });
-  await persistBrokerState();
+    // Connection successful — record it
+    currentBrokerType = type;
+    brokerStateCache.set(type, {
+      lastEvent: 'BROKER_CONNECTED',
+      timestamp: Date.now(),
+    });
+    setBrokerConnected(type, true);
+    await auditTrail.append({
+      userId: 'system',
+      eventType: 'BROKER_CONNECTED',
+      data: { brokerType: type, mode: env.isMock ? 'mock' : 'live' },
+    });
+    await persistBrokerState();
 
-  return broker;
+    return broker;
+  } catch (error) {
+    // All brokers unavailable — record the disconnection (deduped) so the
+    // persisted state and audit trail reflect the outage.
+    await recordBrokerDisconnected(configuredBroker);
+    throw error;
+  }
+}
+
+/**
+ * Record BROKER_DISCONNECTED for broker types whose circuits are unavailable,
+ * deduplicating consecutive disconnections so the audit trail isn't flooded
+ * while a circuit stays OPEN across repeated getBroker() calls. Also persists
+ * the updated dedup cache so a restart knows the broker went down.
+ */
+async function recordBrokerDisconnected(preferredType?: string): Promise<void> {
+  const affected = new Set<string>();
+  if (preferredType) affected.add(preferredType);
+  for (const plugin of registry.getAllPlugins()) {
+    if (!getCircuitBreaker(`broker-${plugin.type}`).isAvailable()) {
+      affected.add(plugin.type);
+    }
+  }
+  if (affected.size === 0) return;
+
+  const primary = preferredType || [...affected][0];
+  let transitioned = false;
+  for (const type of affected) {
+    if (brokerStateCache.get(type)?.lastEvent !== 'BROKER_DISCONNECTED') {
+      brokerStateCache.set(type, {
+        lastEvent: 'BROKER_DISCONNECTED',
+        timestamp: Date.now(),
+      });
+      transitioned = true;
+    }
+  }
+  // Only write when something actually changed: the state was already
+  // persisted on the transition, so a no-op (repeat circuit-open call)
+  // can safely skip both the audit append and the DB write.
+  if (transitioned) {
+    await auditTrail.append({
+      userId: 'system',
+      eventType: 'BROKER_DISCONNECTED',
+      data: { brokerType: primary, mode: env.isMock ? 'mock' : 'live' },
+    });
+    await persistBrokerState();
+  }
 }
 
 /**
