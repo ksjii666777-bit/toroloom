@@ -570,7 +570,9 @@ jobs:
             target: google_apis
             arch: x86_64
             avd-name: Pixel_6_Pro
-            enable-kvm: true
+            # KVM is enabled by default on GitHub-hosted Linux runners; the
+            # 'Enable KVM' step above grants /dev/kvm access. The action's
+            # KVM control input is disable-linux-hw-accel (default false = ON).
             emulator-boot-timeout: 900
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
             disable-animations: true
@@ -714,7 +716,9 @@ jobs:
             target: google_apis
             arch: x86_64
             avd-name: Pixel_6_Pro
-            enable-kvm: true
+            # KVM is enabled by default on GitHub-hosted Linux runners; the
+            # 'Enable KVM' step above grants /dev/kvm access. The action's
+            # KVM control input is disable-linux-hw-accel (default false = ON).
             emulator-boot-timeout: 900
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
             disable-animations: true
