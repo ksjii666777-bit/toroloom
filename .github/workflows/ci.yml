@@ -481,10 +481,12 @@ jobs:
   # are logged but don't block the build. For fast PR-level feedback, see the
   # e2e-pr job below.
   #
-  # Uses macos-13 (Intel) runner for native HAXM hardware acceleration.
-  # macOS GitHub runners support Android emulator acceleration via
-  # Hypervisor.framework (Apple Silicon) or HAXM (Intel). macos-13 is
-  # used here for maximum x86_64 emulator compatibility.
+  # Uses ubuntu-latest with KVM hardware acceleration (GitHub has supported
+  # hardware-accelerated Android virtualization on standard Linux runners
+  # since April 2024). macos-13 was previously used but has been RETIRED by
+  # GitHub (Dec 2025) — jobs on it queue forever waiting for a runner.
+  #
+  # KVM is enabled via the "Enable KVM" step before booting the emulator.
   #
   # If the job consistently fails due to emulator timeout, consider:
   #   1. Using Maestro Cloud (https://maestro.mobile.dev/cloud)
@@ -494,7 +496,7 @@ jobs:
   e2e:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     name: E2E — Full Suite (master)
-    runs-on: macos-13
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     continue-on-error: true
     strategy:
@@ -546,6 +548,15 @@ jobs:
           fi
           echo "E2E secrets are configured."
 
+      # Enable KVM hardware acceleration on the Linux runner so the Android
+      # emulator can use -accel on (same acceleration macOS HAXM provided).
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm
+
       # Wrapped in Wandalen/wretry.action so if the emulator boot times out,
       # it is retried once automatically before failing the step.
       - name: Boot Android emulator and run E2E full suite (retry once on failure)
@@ -559,6 +570,7 @@ jobs:
             target: google_apis
             arch: x86_64
             avd-name: Pixel_6_Pro
+            enable-kvm: true
             emulator-boot-timeout: 900
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
             disable-animations: true
@@ -621,7 +633,7 @@ jobs:
     if: github.event_name == 'pull_request'
     name: E2E — Critical Flows (PR)
     needs: [frontend]
-    runs-on: macos-13
+    runs-on: ubuntu-latest
     timeout-minutes: 40
     continue-on-error: false
     strategy:
@@ -684,6 +696,13 @@ jobs:
           fi
           echo "E2E secrets are configured."
 
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm
+
       - name: Boot Android emulator and run E2E critical flows (retry once on failure)
         uses: Wandalen/wretry.action@v3.1.0
         with:
@@ -695,6 +714,7 @@ jobs:
             target: google_apis
             arch: x86_64
             avd-name: Pixel_6_Pro
+            enable-kvm: true
             emulator-boot-timeout: 900
             emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -accel on -memory 2048 -cores 4
             disable-animations: true
