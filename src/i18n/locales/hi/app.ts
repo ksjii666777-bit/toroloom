@@ -26,9 +26,14 @@ export default {
     saved: 'सहेजा गया ✅',
     // ── इकाइयाँ / डायनामिक स्ट्रिंग्स ─────────────────────────────────────
     shares: '{{count}} शेयर',
+    shares_one: '{{count}} शेयर',
     stocks: '{{count}} स्टॉक',
+    stocks_one: '{{count}} स्टॉक',
     trades: '{{count}} ट्रेड',
+    trades_one: '{{count}} ट्रेड',
     years: '{{count}} वर्ष',
+    years_one: '{{count}} वर्ष',
     months: '{{count}} महीने',
+    months_one: '{{count}} महीना',
     perShare: '/शेयर',
 };
