@@ -32,7 +32,7 @@ const openApiSpec = {
   },
   servers: [
     { url: API_BASE_URL, description: 'API v1' },
-    { url: 'https://toroloom.up.railway.app/api/v1', description: 'Production' },
+    { url: 'https://toroloom-backend.onrender.com/api/v1', description: 'Production' },
   ],
   security: [
     { ApiKeyAuth: [] },

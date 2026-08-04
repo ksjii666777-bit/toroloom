@@ -24,6 +24,7 @@ import { configureNotificationPersistence } from './services/notifications';
 import { configureCommunityPersistence } from './services/community';
 import { configurePortfolioAlertStorage, configureBadgeCountPersistence } from './services/portfolioAlerts';
 import { configureStockAlertPersistence } from './services/stockAlertService';
+import { configureApiKeyPersistence } from './services/apiKeyService';
 import { startStockAlertPoller } from './services/queue';
 
 // Services
@@ -75,6 +76,9 @@ import globalStocksRoutes from './routes/globalStocks';
 import forexRoutes from './routes/forex';
 import commoditiesRoutes from './routes/commodities';
 import bondsRoutes from './routes/bonds';
+import apiDocsRoutes from './routes/apiDocs';
+import apiKeyRoutes from './routes/apiKeys';
+import publicApiRoutes from './routes/publicApi';
 import { setWSS, getFailureCount, SEND_FAILURE_THRESHOLD } from './services/syncInvalidationBridge';
 
 // ============ Sentry Initialization ============
@@ -244,6 +248,9 @@ app.use('/api/support', readLimiter, supportRoutes);
 app.use('/api/system', readLimiter, systemRoutes);
 app.use('/api/system', readLimiter, wsStatusRoutes);
 
+// ── API Docs — public OpenAPI spec + Swagger UI ────────────────────
+app.use('/api/docs', readLimiter, apiDocsRoutes);
+
 // ── Writes — 50 req / min ────────────────────────────────────────────
 // Replay protection ensures idempotency for fund transfers and order placement
 app.use('/api/funds', writeLimiter, replayProtection, fundsRoutes);
@@ -281,6 +288,9 @@ app.use('/api/kyc', writeLimiter, authMiddleware, replayProtection, kycRoutes);
 // Replay protection prevents reuse of intercepted 2FA setup/verify requests
 app.use('/api/auth/2fa', writeLimiter, authMiddleware, replayProtection, twoFactorRoutes);
 
+// ── API Keys — user-managed (JWT auth applied inside router) ────────
+app.use('/api/user/api-keys', writeLimiter, apiKeyRoutes);
+
 // ── News — 100 req / min ──────────────────────────────────────────
 app.use('/api/news', readLimiter, newsRoutes);
 
@@ -302,6 +312,9 @@ app.use('/api/global-stocks', readLimiter, globalStocksRoutes);
 app.use('/api/forex', readLimiter, forexRoutes);
 app.use('/api/commodities', readLimiter, commoditiesRoutes);
 app.use('/api/bonds', readLimiter, bondsRoutes);
+
+// ── Public API v1 — X-API-Key auth (router-internal), 200 req/min ────
+app.use('/api/v1', readLimiter, publicApiRoutes);
 
 // ── Analytics — 200 req / min — Redis-cached endpoints ─────────────────────
 app.use('/api/analytics', readLimiter, authMiddleware, requireSubscription('pro'), analyticsRoutes);
@@ -398,6 +411,9 @@ async function initializeStorage(): Promise<void> {
 
     // Wire storage into the Coupon service for persistence
     configureCouponPersistence(storage);
+
+    // Wire storage into the API key service for persistence
+    configureApiKeyPersistence(storage);
 
     // Wire storage into the SnapTrade persistence layer
     configureSnapTradePersistence(storage);
