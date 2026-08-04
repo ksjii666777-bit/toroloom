@@ -560,6 +560,9 @@ jobs:
       # Wrapped in Wandalen/wretry.action so if the emulator boot times out,
       # it is retried once automatically before failing the step.
       - name: Boot Android emulator and run E2E full suite (retry once on failure)
+        env:
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
         uses: Wandalen/wretry.action@v3.1.0
         with:
           action: reactivecircus/android-emulator-runner@v2
@@ -584,8 +587,6 @@ jobs:
             # single-quoted bash -c blocks get mangled by wretry.action's
             # YAML-string re-parsing ("Syntax error: expecting done").
             script: |
-              TEST_EMAIL="${{ secrets.TEST_EMAIL }}" \
-              TEST_PASSWORD="${{ secrets.TEST_PASSWORD }}" \
               bash .github/scripts/e2e-boot.sh .maestro/flows
 
   # ── E2E — Maestro (Android) PR Critical Flows ───────────────────────────
@@ -681,6 +682,9 @@ jobs:
           ls -l /dev/kvm
 
       - name: Boot Android emulator and run E2E critical flows (retry once on failure)
+        env:
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
         uses: Wandalen/wretry.action@v3.1.0
         with:
           action: reactivecircus/android-emulator-runner@v2
@@ -705,18 +709,7 @@ jobs:
             # single-quoted bash -c blocks get mangled by wretry.action's
             # YAML-string re-parsing ("Syntax error: expecting done").
             script: |
-              TEST_EMAIL="${{ secrets.TEST_EMAIL }}" \
-              TEST_PASSWORD="${{ secrets.TEST_PASSWORD }}" \
-              bash .github/scripts/e2e-boot.sh \
-                .maestro/flows/smoke/smokeTest.yaml \
-                .maestro/flows/navigation/tabNavigation.yaml \
-                .maestro/flows/trade/placeOrder.yaml \
-                .maestro/flows/kyc/bankLinking.yaml \
-                .maestro/flows/stock/stockDetail.yaml \
-                .maestro/flows/settings/twoFactorSetup.yaml \
-                .maestro/flows/trade/fnoOptionsChain.yaml \
-                .maestro/flows/ui/calculators.yaml \
-                .maestro/flows/ai/aiInsights.yaml
+              bash .github/scripts/e2e-boot.sh .maestro/flows/smoke/smokeTest.yaml .maestro/flows/navigation/tabNavigation.yaml .maestro/flows/trade/placeOrder.yaml .maestro/flows/kyc/bankLinking.yaml .maestro/flows/stock/stockDetail.yaml .maestro/flows/settings/twoFactorSetup.yaml .maestro/flows/trade/fnoOptionsChain.yaml .maestro/flows/ui/calculators.yaml .maestro/flows/ai/aiInsights.yaml
 
   # ── Coverage badge deployment ────────────────────────────────────────────
   # Runs after frontend and backend (with their coverage data) finish.
