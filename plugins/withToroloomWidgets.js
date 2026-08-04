@@ -746,7 +746,7 @@ function withAndroidWidget(config) {
             console.log(`[${PLUGIN_NAME}] Added widget_description string`);
           }
         } catch (error) {
-          console.warn(`[${PLUGIN_NAME}] Failed to update strings.xml: ${error.message}`);
+          console.warn(`[${PLUGIN_NAME}] ::error:: Failed to update strings.xml (widget_description string missing - AAPT will fail): ${error.message}`);
         }
 
         // ── Test receiver (for ADB data injection) ──

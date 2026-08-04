@@ -56,9 +56,19 @@ fi
 # ready yet). adb wait-for-device returns as soon as the device is listed,
 # so explicitly wait for a 'device' state and bounce the daemon if stuck.
 for attempt in $(seq 1 6); do
-  STATE=$(adb devices | awk 'NR>1 && $2=="device" {found=1} END {print found ? "ready" : "offline"}')
+  STATE=$(adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {found=1} END {print found ? "ready" : "offline"}') || true
   if [ "$STATE" = "ready" ]; then
     break
+  fi
+  if [ "$attempt" -eq 1 ]; then
+    # Grace period: right after wait-for-device the device may be listed as
+    # 'offline' for a few seconds while adbd finishes starting. Do not kill
+    # a healthy daemon on the very first observation.
+    sleep 5
+    STATE=$(adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {found=1} END {print found ? "ready" : "offline"}') || true
+    if [ "$STATE" = "ready" ]; then
+      break
+    fi
   fi
   echo "  device not ready (attempt ${attempt}/6) - bouncing adb daemon..."
   adb kill-server 2>/dev/null || true
@@ -110,6 +120,20 @@ echo "Dev client installed."
 echo "Starting Expo dev server..."
 npx expo start 2>&1 | tee /tmp/expo.log &
 EXPO_PID=$!
+
+# Kill the background Expo/Metro process when this script exits (success or
+# failure). If we leak it, a wretry retry attempt re-runs the whole action on
+# the same runner and the orphaned Metro on :8081 poisons the second boot
+# (attempt 2 hung for 43 min until the 60-min job timeout).
+cleanup() {
+  if [ -n "${EXPO_PID:-}" ]; then
+    kill "$EXPO_PID" 2>/dev/null || true
+    # also kill the npm/node children of the expo pipeline
+    pkill -f 'expo start' 2>/dev/null || true
+    pkill -f 'metro' 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
 
 # ── 6. Wait for Metro to be ready (max 180s) ────────────────────────────────
 echo "Waiting for Metro bundler..."

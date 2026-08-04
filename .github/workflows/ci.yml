@@ -587,7 +587,7 @@ jobs:
             # single-quoted bash -c blocks get mangled by wretry.action's
             # YAML-string re-parsing ("Syntax error: expecting done").
             script: |
-              bash .github/scripts/e2e-boot.sh .maestro/flows
+              bash .github/scripts/e2e-boot.sh .maestro
 
   # ── E2E — Maestro (Android) PR Critical Flows ───────────────────────────
   # Fast PR-level E2E: runs 5 key flows to catch critical regressions before
