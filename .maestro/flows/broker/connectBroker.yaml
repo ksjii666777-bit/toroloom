@@ -203,7 +203,7 @@ appId: com.toroloom.app
 # ═══════════════════════════════════════════════════════════════════════════
 # Tap the back arrow (Ionicons arrow-back in header)
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 # Confirm we're back on the More screen

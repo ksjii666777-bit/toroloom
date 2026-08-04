@@ -53,7 +53,7 @@ def main():
     if not os.path.isdir(RAW_DIR):
         print(f"Error: Raw screenshots directory not found: {RAW_DIR}")
         print("Run the Maestro capture flow first or check the path.")
-        print("  maestro test .maestro/flows/screenshots/capture.yaml")
+        print("  maestro test .maestro/screenshots/capture.yaml")
         return
     
     # Ensure output directories exist

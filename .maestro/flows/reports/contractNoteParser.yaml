@@ -221,7 +221,7 @@ appId: com.toroloom.app
 # 9. Navigate Back to More
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 # Verify back on Reports screen
@@ -230,7 +230,7 @@ appId: com.toroloom.app
 
 # Go back to More
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 # Verify back on More screen

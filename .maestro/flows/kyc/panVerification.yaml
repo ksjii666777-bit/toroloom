@@ -77,7 +77,7 @@ appId: com.toroloom.app
 
 # ── 7. Navigate Back ──────────────────────────────────────────────────────
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 - assertVisible:
     text: "KYC Verification"

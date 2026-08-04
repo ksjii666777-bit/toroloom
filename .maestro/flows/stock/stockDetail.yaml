@@ -84,8 +84,7 @@ appId: com.toroloom.app
     text: "LTP"
 
 # ── 5. Scroll to verify Sector Context and Peer Comparison ─────────────────
-- scroll:
-    direction: DOWN
+- scroll
 - waitForAnimationToEnd
 
 # Verify sector context section
@@ -93,8 +92,7 @@ appId: com.toroloom.app
     text: "Sector Context"
     optional: true
 
-- scroll:
-    direction: DOWN
+- scroll
 - waitForAnimationToEnd
 
 # Verify Peer Comparison section
@@ -103,8 +101,7 @@ appId: com.toroloom.app
     optional: true
 
 # ── 6. Verify AI Analysis section ──────────────────────────────────────────
-- scroll:
-    direction: DOWN
+- scroll
 - waitForAnimationToEnd
 
 - assertVisible:
@@ -112,12 +109,12 @@ appId: com.toroloom.app
     optional: true
 
 # ── 7. Scroll back to top and go back ──────────────────────────────────────
-- scroll:
+- swipe:
     direction: UP
 - waitForAnimationToEnd
 
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 - assertVisible:

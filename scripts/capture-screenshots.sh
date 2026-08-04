@@ -31,7 +31,7 @@
 #   - Phone: 1080 × 1920 px (9:16) minimum
 #
 # iOS Capture: To capture on iOS simulator, run Maestro directly:
-#   maestro test .maestro/flows/screenshots/capture.yaml --app-id host.exp.Exponent
+#   maestro test .maestro/screenshots/capture.yaml --app-id host.exp.Exponent
 # Then use this script with --ios-only to resize the outputs.
 # =============================================================================
 
@@ -81,7 +81,7 @@ for arg in "$@"; do
       echo ""
       echo "For iOS capture, run Maestro directly with iOS appId, then use --android-only"
       echo "to resize only the iOS outputs:"
-      echo "  maestro test .maestro/flows/screenshots/capture.yaml --app-id host.exp.Exponent"
+      echo "  maestro test .maestro/screenshots/capture.yaml --app-id host.exp.Exponent"
       echo "  $0 --android-only"
       exit 0
       ;;
@@ -132,7 +132,7 @@ rm -f "$MAESTRO_OUTPUT_DIR"/*.png
 
 log "Running Maestro screenshot flow on Android emulator..."
 log "  appId: host.exp.exponent (Expo Go)"
-maestro test "$PROJECT_DIR/.maestro/flows/screenshots/capture.yaml" \
+maestro test "$PROJECT_DIR/.maestro/screenshots/capture.yaml" \
   --app-id host.exp.exponent \
   --env TEST_EMAIL="test@toroloom.com" \
   --env TEST_PASSWORD="password123"

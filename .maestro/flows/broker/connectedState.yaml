@@ -165,7 +165,7 @@ appId: com.toroloom.app
 # Confirm disconnect
 - tapOn:
     text: "Disconnect"
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
     timeout: 5000
 
 # Verify connected banner is gone
@@ -190,7 +190,7 @@ appId: com.toroloom.app
 # 8. Navigate Back to More
 # ═══════════════════════════════════════════════════════════════════════════
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 - assertVisible:
     text: "More"

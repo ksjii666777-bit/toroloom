@@ -82,7 +82,7 @@ appId: com.toroloom.app
 
 # ── 8. Navigate Back to Messages List ──────────────────────────────────────
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 # Verify back on Messages list
@@ -93,7 +93,7 @@ appId: com.toroloom.app
 
 # ── 9. Navigate Back to More Screen ───────────────────────────────────────
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 - assertVisible:

@@ -50,8 +50,7 @@ appId: com.toroloom.app
     text: "All Courses"
 
 # Scroll down to see course cards
-- scroll:
-    direction: DOWN
+- scroll
 
 # ── 4. Tap on First Visible Course ─────────────────────────────────────────
 # Tap on the first course card's level badge (e.g., "Beginner")
@@ -80,8 +79,7 @@ appId: com.toroloom.app
     text: "Lessons"
 
 # ── 6. Scroll to lessons and tap first lesson ──────────────────────────────
-- scroll:
-    direction: DOWN
+- scroll
 - waitForAnimationToEnd
 
 # Tap on the first lesson number (identified by "01")
@@ -102,8 +100,7 @@ appId: com.toroloom.app
     text: "Summary"
 
 # Scroll down to see more content
-- scroll:
-    direction: DOWN
+- scroll
 
 # Verify "Mark as Complete" button exists
 - assertVisible:
@@ -111,7 +108,7 @@ appId: com.toroloom.app
 
 # ── 8. Navigate Back to Course Detail ──────────────────────────────────────
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 # Verify back on Course Detail screen
@@ -120,7 +117,7 @@ appId: com.toroloom.app
 
 # ── 9. Navigate Back to Learn Screen ──────────────────────────────────────
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 - assertVisible:

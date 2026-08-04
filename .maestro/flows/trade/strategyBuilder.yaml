@@ -74,7 +74,7 @@ appId: com.toroloom.app
 
 # ── 5. Navigate Back ──────────────────────────────────────────────────────
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 - assertVisible:
     text: "Strategy Builder"

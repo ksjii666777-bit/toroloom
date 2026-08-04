@@ -5,7 +5,7 @@
 # App Store and Google Play Store listings.
 #
 # Usage:
-#   maestro test .maestro/flows/screenshots/capture.yaml --app-id host.exp.exponent
+#   maestro test .maestro/screenshots/capture.yaml --app-id host.exp.exponent
 #
 # Output: screenshots saved to .maestro/screenshots/ directory.
 #         Use scripts/capture-screenshots.sh to automate the full pipeline
@@ -112,7 +112,7 @@ appId: com.toroloom.app
 
 # Go back
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
     optional: true
 - pressKey: BACK
 - waitForAnimationToEnd
@@ -170,7 +170,7 @@ appId: com.toroloom.app
 
 # Go back
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
     optional: true
 - pressKey: BACK
 - waitForAnimationToEnd
@@ -194,7 +194,7 @@ appId: com.toroloom.app
 
 # Go back
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
     optional: true
 - pressKey: BACK
 - waitForAnimationToEnd
@@ -218,7 +218,7 @@ appId: com.toroloom.app
 
 # Go back
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
     optional: true
 - pressKey: BACK
 - waitForAnimationToEnd
@@ -242,7 +242,7 @@ appId: com.toroloom.app
 
 # Go back
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
     optional: true
 - pressKey: BACK
 - waitForAnimationToEnd
@@ -265,7 +265,7 @@ appId: com.toroloom.app
 
 # Go back
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
     optional: true
 - pressKey: BACK
 - waitForAnimationToEnd

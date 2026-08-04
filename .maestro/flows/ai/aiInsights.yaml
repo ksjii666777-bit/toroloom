@@ -69,8 +69,7 @@ appId: com.toroloom.app
     text: "Stock Analysis"
 
 # Scroll down to see all insight cards
-- scroll:
-    direction: DOWN
+- scroll
 - waitForAnimationToEnd
 
 # Each insight card shows symbol, sentiment, confidence, and target levels
@@ -80,8 +79,7 @@ appId: com.toroloom.app
     text: "Target 1"
     optional: true
 
-- scroll:
-    direction: DOWN
+- scroll
 - waitForAnimationToEnd
 
 # ── 6. Navigate back ───────────────────────────────────────────────────────

@@ -81,7 +81,7 @@ appId: com.toroloom.app
 
 # ── 7. Navigate Back to More Screen ───────────────────────────────────────
 - tapOn:
-    accessibilityLabel: "Go back"
+    text: "Go back"
 - waitForAnimationToEnd
 
 - assertVisible:
