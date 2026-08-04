@@ -9,7 +9,7 @@
 #   5. Switch to Sell — no holdings edge case
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── Login first ──────────────────────────────────────────────────────────
 - assertVisible:

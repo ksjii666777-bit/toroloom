@@ -9,7 +9,7 @@
 #   5. Test invalid PAN validation
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:

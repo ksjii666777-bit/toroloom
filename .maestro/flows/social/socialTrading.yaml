@@ -14,7 +14,7 @@
 #   10. Navigate back to More screen
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:

@@ -16,7 +16,7 @@
 # flow is fully automatable and exercises the same parse pipeline.
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ═══════════════════════════════════════════════════════════════════════════
 # 1. Login

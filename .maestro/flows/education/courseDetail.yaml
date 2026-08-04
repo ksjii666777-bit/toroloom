@@ -13,7 +13,7 @@
 #   9. Navigate back to Learn screen
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:

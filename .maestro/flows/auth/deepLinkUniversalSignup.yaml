@@ -18,7 +18,7 @@
 #   - The app must be rebuilt with associatedDomains (iOS) / intentFilters (Android)
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 1. Open the universal link ────────────────────────────────────────────
 # This triggers https://toroloom.com/signup?ref=test123 which the OS intercepts

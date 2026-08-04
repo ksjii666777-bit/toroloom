@@ -1,10 +1,10 @@
 # =============================================================================
 # Maestro E2E Test Configuration — DEV BUILD
 # =============================================================================
-# appId: com.anonymous.Toroloom (development build)
+# appId: com.toroloom.app (development build)
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 flows:
   - "flows/**/*.yaml"
 env:

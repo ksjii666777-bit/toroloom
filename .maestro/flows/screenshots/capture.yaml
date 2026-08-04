@@ -28,11 +28,11 @@
 #  14. More Screen (Menu)
 # =============================================================================
 
-appId: host.exp.exponent
+appId: com.toroloom.app
 ---
 # Launch the app (ensure it's running before capturing)
 - launchApp:
-    appId: host.exp.exponent
+    appId: com.toroloom.app
 - waitForAnimationToEnd:
     timeout: 15000
 

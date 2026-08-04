@@ -8,7 +8,7 @@
 # Falls back to text-based targeting for non-i18n elements (stock symbols).
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # Wait for the login screen to load — target the app name text
 - assertVisible:

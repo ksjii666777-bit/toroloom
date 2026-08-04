@@ -19,7 +19,7 @@
 # text labels or testIDs (e.g., +/- quantity adjust buttons).
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
 - stopApp

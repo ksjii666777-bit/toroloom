@@ -12,7 +12,7 @@
 #   4. Full registration flow works from a deep-link origin
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 1. Open the deep link ──────────────────────────────────────────────────
 # This triggers toroloom://signup?ref=test123 which React Navigation resolves

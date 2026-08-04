@@ -9,7 +9,7 @@
 #   5. Fund Dashboard — "No transactions yet"
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── Login first ──────────────────────────────────────────────────────────
 - assertVisible:

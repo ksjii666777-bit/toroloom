@@ -10,9 +10,9 @@
 # 6. Logout
 # =============================================================================
 
-# NOTE: Use com.anonymous.Toroloom for dev builds.
+# NOTE: Use com.toroloom.app for dev builds.
 # Change to host.exp.exponent when running via Expo Go.
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
 - stopApp

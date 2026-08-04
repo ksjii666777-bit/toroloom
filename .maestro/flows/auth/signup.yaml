@@ -7,7 +7,7 @@
 # Uses testID-based targeting for i18n-independent robustness.
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # Start from the Login screen and navigate to Signup
 - tapOn:

@@ -15,7 +15,7 @@
 #   11. Tap "Continue" to go back
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 1. Login ───────────────────────────────────────────────────────────────
 - assertVisible:

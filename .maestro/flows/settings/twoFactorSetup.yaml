@@ -11,7 +11,7 @@
 #   7. Tap "Done" → navigate back
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 0. Kill app → relaunch fresh (prevents state leakage between sequential flows) ──
 - stopApp

@@ -6,7 +6,7 @@
 #   2. Invalid credentials → "Invalid credentials. Try again."
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ── 1. Empty fields validation ────────────────────────────────────────────
 - assertVisible:

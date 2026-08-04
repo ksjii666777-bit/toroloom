@@ -68,12 +68,23 @@ adb shell settings put global transition_animation_scale 0.0 || true
 adb shell settings put global animator_duration_scale 0.0 || true
 echo "Animations disabled."
 
-# ── 4. Start Expo dev server (Metro) in the background ──────────────────────
+# ── 4. Build & install the dev client (Gradle) ──────────────────────────────
+# The project uses expo-dev-client (bundle id com.toroloom.app); Maestro can
+# only drive the app once a dev build is installed on the emulator.
+echo "Building and installing dev client (expo run:android)..."
+if ! npx expo run:android --no-bundler 2>&1 | tee /tmp/expobuild.log; then
+  echo "::error::expo run:android failed to build/install the dev client."
+  tail -80 /tmp/expobuild.log || true
+  exit 1
+fi
+echo "Dev client installed."
+
+# ── 5. Start Expo dev server (Metro) in the background ──────────────────────
 echo "Starting Expo dev server..."
-npx expo start --android 2>&1 | tee /tmp/expo.log &
+npx expo start 2>&1 | tee /tmp/expo.log &
 EXPO_PID=$!
 
-# ── 5. Wait for Metro to be ready (max 180s) ────────────────────────────────
+# ── 6. Wait for Metro to be ready (max 180s) ────────────────────────────────
 echo "Waiting for Metro bundler..."
 if ! timeout 180 bash -c '
   until grep -qi "Metro\|bundler\|ready\|exp://" /tmp/expo.log 2>/dev/null; do
@@ -91,9 +102,10 @@ fi
 
 sleep 15
 
-# ── 6. Run the requested Maestro flows ──────────────────────────────────────
+# ── 7. Run the requested Maestro flows ──────────────────────────────────────
+# appId is read from each flow file (com.toroloom.app); the --app-id CLI flag
+# was removed in modern Maestro versions.
 echo "Running Maestro E2E flows: $*"
 maestro test "$@" \
-  --app-id host.exp.exponent \
   --env "TEST_EMAIL=${TEST_EMAIL}" \
   --env "TEST_PASSWORD=${TEST_PASSWORD}"

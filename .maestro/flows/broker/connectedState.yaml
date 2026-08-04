@@ -5,7 +5,7 @@
 # keychain with a mock Zerodha session via the E2E deep link.
 #
 # Prerequisites:
-#   - Dev build installed on emulator (appId: com.anonymous.Toroloom)
+#   - Dev build installed on emulator (appId: com.toroloom.app)
 #   - __DEV__ mode enabled (E2E deep link handler is dev-only)
 #
 # Flow:
@@ -22,7 +22,7 @@
 #  10. Verify UI returns to disconnected state
 # =============================================================================
 
-appId: com.anonymous.Toroloom
+appId: com.toroloom.app
 ---
 # ═══════════════════════════════════════════════════════════════════════════
 # 1. Login
