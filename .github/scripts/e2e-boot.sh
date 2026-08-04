@@ -40,10 +40,37 @@ fi
 # timeout. Failing fast with diagnostics makes the cause visible.
 adb start-server || true
 if ! timeout 120 adb wait-for-device; then
-  echo "::error::adb never connected to a device within 120s."
-  adb devices -l || true
-  exit 1
+  echo "::warning::adb did not connect within 120s - restarting daemon and retrying."
+  adb kill-server 2>/dev/null || true
+  sleep 3
+  adb start-server || true
+  if ! timeout 120 adb wait-for-device; then
+    echo "::error::adb never connected to a device after daemon restart."
+    adb devices -l || true
+    exit 1
+  fi
 fi
+
+# ── 1b. Recover from a device stuck in 'offline' state ─────────────────────
+# The emulator can register with adb as 'offline' (kernel booted, adbd not
+# ready yet). adb wait-for-device returns as soon as the device is listed,
+# so explicitly wait for a 'device' state and bounce the daemon if stuck.
+for attempt in $(seq 1 6); do
+  STATE=$(adb devices | awk 'NR>1 && $2=="device" {found=1} END {print found ? "ready" : "offline"}')
+  if [ "$STATE" = "ready" ]; then
+    break
+  fi
+  echo "  device not ready (attempt ${attempt}/6) - bouncing adb daemon..."
+  adb kill-server 2>/dev/null || true
+  sleep 2
+  adb start-server || true
+  sleep 5
+  if [ "$attempt" -eq 6 ]; then
+    echo "::error::Device stayed offline after 6 adb bounce attempts."
+    adb devices -l || true
+    exit 1
+  fi
+done
 
 # ── 2. Poll until sys.boot_completed=1 (max 120 × 5s = 10 min) ─────────────
 echo "Waiting for sys.boot_completed..."

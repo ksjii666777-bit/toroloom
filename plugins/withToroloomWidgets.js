@@ -721,6 +721,34 @@ function withAndroidWidget(config) {
           console.log(`[${PLUGIN_NAME}] Created widget info XML`);
         }
 
+        // ── Widget background drawable (referenced by the layouts) ──
+        const drawableDir = path.join(projectDir, 'app/src/main/res/drawable');
+        if (!fs.existsSync(drawableDir)) {
+          fs.mkdirSync(drawableDir, { recursive: true });
+        }
+
+        const bgPath = path.join(drawableDir, 'widget_background.xml');
+        if (!fs.existsSync(bgPath)) {
+          fs.writeFileSync(bgPath, getAndroidWidgetBackground(), 'utf-8');
+          console.log(`[${PLUGIN_NAME}] Created widget background drawable`);
+        }
+
+        // ── Widget description string (referenced by the info XML) ──
+        const stringsPath = path.join(projectDir, 'app/src/main/res/values/strings.xml');
+        try {
+          let stringsXml = fs.readFileSync(stringsPath, 'utf-8');
+          if (!stringsXml.includes('name="widget_description"')) {
+            stringsXml = stringsXml.replace(
+              '</resources>',
+              '    <string name="widget_description">View your Toroloom portfolio at a glance</string>\n</resources>',
+            );
+            fs.writeFileSync(stringsPath, stringsXml, 'utf-8');
+            console.log(`[${PLUGIN_NAME}] Added widget_description string`);
+          }
+        } catch (error) {
+          console.warn(`[${PLUGIN_NAME}] Failed to update strings.xml: ${error.message}`);
+        }
+
         // ── Test receiver (for ADB data injection) ──
         const testReceiverPath = path.join(widgetDir, 'WidgetTestReceiver.java');
         if (!fs.existsSync(testReceiverPath)) {
@@ -888,6 +916,19 @@ public class ToroloomWidgetProvider extends AppWidgetProvider {
         return sign + String.format("%.1f", value) + "%";
     }
 }
+`;
+}
+
+function getAndroidWidgetBackground() {
+  return `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="16dp" />
+    <solid android:color="#0D1117" />
+    <stroke
+        android:width="1px"
+        android:color="#1AFFFFFF" />
+</shape>
 `;
 }
 
