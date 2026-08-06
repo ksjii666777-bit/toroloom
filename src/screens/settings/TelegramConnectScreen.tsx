@@ -44,6 +44,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { telegramApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -54,6 +55,7 @@ const BOT_USERNAME = 'ToroloomBot';
 export default function TelegramConnectScreen({ navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   // ── State ──
@@ -150,7 +152,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch {
-      Alert.alert('Error', 'Failed to generate link code. Please try again.');
+      Alert.alert(t('telegramConnect.errTitle'), t('telegramConnect.genCodeFailed'));
     } finally {
       setLinking(false);
     }
@@ -162,7 +164,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
     try {
       await Clipboard.setStringAsync(`/start ${linkCode}`);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      Alert.alert('Copied!', `Code copied! Now open Telegram and send:\n\n/start ${linkCode}\n\nto @${BOT_USERNAME}`);
+      Alert.alert(t('telegramConnect.copiedTitle'), t('telegramConnect.copiedMsg', { code: linkCode, bot: BOT_USERNAME }));
     } catch {
       // Clipboard not available
     }
@@ -199,12 +201,12 @@ export default function TelegramConnectScreen({ navigation }: any) {
     try {
       const result = await telegramApi.sendTest();
       if (result.success) {
-        Alert.alert('✅ Sent!', 'Check your Telegram for the test message.');
+        Alert.alert(t('telegramConnect.sentTitle'), t('telegramConnect.sentMsg'));
       } else {
-        Alert.alert('⚠️ Failed', result.message || 'Could not send test message. Make sure you have started the bot.');
+        Alert.alert(t('telegramConnect.failedTitle'), result.message || t('telegramConnect.testMsgFailed'));
       }
     } catch {
-      Alert.alert('Error', 'Failed to send test message.');
+      Alert.alert(t('telegramConnect.errTitle'), t('telegramConnect.sendFailed'));
     } finally {
       setSendingTest(false);
     }
@@ -214,12 +216,12 @@ export default function TelegramConnectScreen({ navigation }: any) {
   const handleUnlink = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
-      'Unlink Telegram?',
-      'You will stop receiving notifications via Telegram. You can reconnect anytime.',
+      t('telegramConnect.unlinkTitle'),
+      t('telegramConnect.unlinkMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('telegramConnect.cancel'), style: 'cancel' },
         {
-          text: 'Unlink',
+          text: t('telegramConnect.unlinkBtn'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -229,7 +231,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
               setTelegramInfo({});
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             } catch {
-              Alert.alert('Error', 'Failed to unlink Telegram.');
+              Alert.alert(t('telegramConnect.errTitle'), t('telegramConnect.unlinkFailed'));
             }
           },
         },
@@ -253,11 +255,11 @@ export default function TelegramConnectScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Connect Telegram</Text>
+          <Text style={styles.title}>{t('telegramConnect.connect')}</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Checking connection status...</Text>
+          <Text style={styles.loadingText}>{t('telegramConnect.loading')}</Text>
         </View>
       </View>
     );
@@ -271,7 +273,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Connect Telegram</Text>
+          <Text style={styles.title}>{t('telegramConnect.connect')}</Text>
         </View>
 
         {/* Hero Section */}
@@ -284,19 +286,19 @@ export default function TelegramConnectScreen({ navigation }: any) {
           <Animated.View style={[styles.telegramIconContainer, pulseStyle]}>
             <Ionicons name="paper-plane" size={48} color="#0088CC" />
           </Animated.View>
-          <Text style={styles.heroTitle}>Get Trading Alerts on Telegram</Text>
+          <Text style={styles.heroTitle}>{t('telegramConnect.heroTitle')}</Text>
           <Text style={styles.heroSubtitle}>
-            Receive real-time price alerts, trade confirmations, portfolio updates, and market news directly on your Telegram.
+            {t('telegramConnect.heroSubtitle')}
           </Text>
         </LinearGradient>
 
         {/* Features */}
         <View style={styles.featuresRow}>
           {[
-            { icon: 'trending-up', label: 'Price Alerts', color: '#00C853' },
-            { icon: 'checkmark-circle', label: 'Trade Confirms', color: '#3B82F6' },
-            { icon: 'pie-chart', label: 'Portfolio Updates', color: '#8B5CF6' },
-            { icon: 'newspaper', label: 'Market News', color: '#FFC107' },
+            { icon: 'trending-up', label: t('telegramConnect.priceAlerts'), color: '#00C853' },
+            { icon: 'checkmark-circle', label: t('telegramConnect.featTradeConfirms'), color: '#3B82F6' },
+            { icon: 'pie-chart', label: t('telegramConnect.featPortfolioUpdates'), color: '#8B5CF6' },
+            { icon: 'newspaper', label: t('telegramConnect.featMarketNews'), color: '#FFC107' },
           ].map((feat) => (
             <View key={feat.label} style={styles.featureItem}>
               <View style={[styles.featureIcon, { backgroundColor: feat.color + '20' }]}>
@@ -317,17 +319,15 @@ export default function TelegramConnectScreen({ navigation }: any) {
                   <Ionicons name="checkmark-circle" size={32} color="#22C55E" />
                 </View>
                 <View style={styles.statusInfo}>
-                  <Text style={styles.statusTitle}>Connected</Text>
+                  <Text style={styles.statusTitle}>{t('telegramConnect.connected')}</Text>
                   <Text style={styles.statusSubtitle}>
-                    {telegramInfo.firstName || 'User'}{telegramInfo.username ? ` (@${telegramInfo.username})` : ''}
+                    {telegramInfo.firstName || t('telegramConnect.userFallback')}{telegramInfo.username ? ` (@${telegramInfo.username})` : ''}
                   </Text>
                 </View>
               </View>
               {telegramInfo.linkedAt && (
                 <Text style={styles.linkedDate}>
-                  Linked on {new Date(telegramInfo.linkedAt).toLocaleDateString('en-IN', {
-                    day: 'numeric', month: 'short', year: 'numeric',
-                  })}
+                  {t('telegramConnect.linkedOn', { date: new Date(telegramInfo.linkedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) })}
                 </Text>
               )}
 
@@ -346,7 +346,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
                 ) : (
                   <>
                     <Ionicons name="send" size={18} color={colors.primary} />
-                    <Text style={styles.actionBtnText}>Send Test Message</Text>
+                    <Text style={styles.actionBtnText}>{t('telegramConnect.sendTest')}</Text>
                   </>
                 )}
               </AnimatedPressable>
@@ -359,7 +359,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
                 scaleTo={0.97}
               >
                 <Ionicons name="link-outline" size={18} color={colors.danger} />
-                <Text style={[styles.actionBtnText, { color: colors.danger }]}>Unlink Telegram</Text>
+                <Text style={[styles.actionBtnText, { color: colors.danger }]}>{t('telegramConnect.unlink')}</Text>
               </AnimatedPressable>
             </View>
 
@@ -367,7 +367,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
             <View style={styles.infoNote}>
               <Ionicons name="information-circle" size={16} color={colors.primary} />
               <Text style={styles.infoNoteText}>
-                To stop receiving notifications, go to Telegram and block @{BOT_USERNAME}, or unlink here.
+                {t('telegramConnect.blockNote', { bot: BOT_USERNAME })}
               </Text>
             </View>
           </Animated.View>
@@ -375,7 +375,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
           // ── Code Display ──
           <Animated.View entering={FadeIn.duration(300)} style={styles.codeSection}>
             <View style={styles.codeCard}>
-              <Text style={styles.codeTitle}>Your Link Code</Text>
+              <Text style={styles.codeTitle}>{t('telegramConnect.linkCodeTitle')}</Text>
               <Animated.View style={[styles.codeBox, codeStyle]}>
                 <Text style={styles.codeText}>{linkCode}</Text>
               </Animated.View>
@@ -387,7 +387,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
                     <Text style={styles.stepDotText}>1</Text>
                   </View>
                   <Text style={styles.instructionText}>
-                    Open Telegram and search for <Text style={styles.bold}>@{BOT_USERNAME}</Text>
+                    {t('telegramConnect.step1Prefix')}<Text style={styles.bold}>@{BOT_USERNAME}</Text>
                   </Text>
                 </View>
                 <View style={styles.instructionStep}>
@@ -395,7 +395,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
                     <Text style={styles.stepDotText}>2</Text>
                   </View>
                   <Text style={styles.instructionText}>
-                    Send this message: <Text style={styles.codeInline}>/start {linkCode}</Text>
+                    {t('telegramConnect.step2Prefix')}<Text style={styles.codeInline}>/start {linkCode}</Text>
                   </Text>
                 </View>
                 <View style={styles.instructionStep}>
@@ -403,7 +403,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
                     <Text style={styles.stepDotText}>3</Text>
                   </View>
                   <Text style={styles.instructionText}>
-                    Wait for confirmation from the bot, then tap "Check Connection" below
+                    {t('telegramConnect.step3Text')}
                   </Text>
                 </View>
               </View>
@@ -411,20 +411,20 @@ export default function TelegramConnectScreen({ navigation }: any) {
               {/* Copy button */}
               <AnimatedPressable onPress={handleCopyCode} style={styles.copyBtn} haptic="light" scaleTo={0.97}>
                 <Ionicons name="copy-outline" size={18} color="#0D0D0D" />
-                <Text style={styles.copyBtnText}>Copy to Clipboard</Text>
+                <Text style={styles.copyBtnText}>{t('telegramConnect.copyToClipboard')}</Text>
               </AnimatedPressable>
 
               {/* Check connection */}
               <AnimatedPressable onPress={handleCheckLinked} style={styles.checkBtn} haptic="medium" scaleTo={0.97}>
                 <Ionicons name="refresh-outline" size={18} color="#FFFFFF" />
-                <Text style={styles.checkBtnText}>Check Connection</Text>
+                <Text style={styles.checkBtnText}>{t('telegramConnect.checkConnection')}</Text>
               </AnimatedPressable>
 
               {/* Expiry timer */}
               <View style={styles.expiryRow}>
                 <Ionicons name="time-outline" size={14} color={codeExpiresIn <= 60 ? '#EF4444' : colors.textMuted} />
                 <Text style={[styles.expiryText, codeExpiresIn <= 60 && { color: '#EF4444' }]}>
-                  Code expires in {formatExpiry(codeExpiresIn)}
+                  {t('telegramConnect.codeExpiresIn', { time: formatExpiry(codeExpiresIn) })}
                 </Text>
               </View>
 
@@ -433,7 +433,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
                 onPress={() => setLinkCode(null)}
                 style={styles.cancelLinkBtn}
               >
-                <Text style={styles.cancelLinkText}>Cancel</Text>
+                <Text style={styles.cancelLinkText}>{t('telegramConnect.cancel')}</Text>
               </TouchableOpacity>
             </View>
           </Animated.View>
@@ -441,23 +441,23 @@ export default function TelegramConnectScreen({ navigation }: any) {
           // ── Connect Button ──
           <Animated.View entering={FadeIn.duration(400)}>
             <View style={styles.connectCard}>
-              <Text style={styles.connectTitle}>Ready to Connect?</Text>
+              <Text style={styles.connectTitle}>{t('telegramConnect.readyToConnect')}</Text>
               <Text style={styles.connectSubtitle}>
-                Link your Telegram account in 3 simple steps. You'll receive instant notifications for all your trading activity.
+                {t('telegramConnect.connectSubtitle')}
               </Text>
 
               <View style={styles.connectSteps}>
                 <View style={styles.connectStep}>
                   <Ionicons name="link-outline" size={16} color="#3B82F6" />
-                  <Text style={styles.connectStepText}>Generate a unique link code</Text>
+                  <Text style={styles.connectStepText}>{t('telegramConnect.connectStep1')}</Text>
                 </View>
                 <View style={styles.connectStep}>
                   <Ionicons name="send" size={16} color="#3B82F6" />
-                  <Text style={styles.connectStepText}>Send it to @{BOT_USERNAME} on Telegram</Text>
+                  <Text style={styles.connectStepText}>{t('telegramConnect.connectStep2', { bot: BOT_USERNAME })}</Text>
                 </View>
                 <View style={styles.connectStep}>
                   <Ionicons name="checkmark-circle" size={16} color="#3B82F6" />
-                  <Text style={styles.connectStepText}>Receive alerts automatically</Text>
+                  <Text style={styles.connectStepText}>{t('telegramConnect.connectStep3')}</Text>
                 </View>
               </View>
 
@@ -479,7 +479,7 @@ export default function TelegramConnectScreen({ navigation }: any) {
                   ) : (
                     <>
                       <Ionicons name="paper-plane" size={20} color="#FFFFFF" />
-                      <Text style={styles.connectBtnText}>Connect Telegram</Text>
+                      <Text style={styles.connectBtnText}>{t('telegramConnect.connect')}</Text>
                     </>
                   )}
                 </LinearGradient>

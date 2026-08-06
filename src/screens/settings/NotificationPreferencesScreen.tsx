@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useNotificationStore } from '../../store/notificationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
@@ -19,19 +20,19 @@ Dimensions.get('window');
 
 const PREFERENCE_SECTIONS = [
   {
-    title: 'Notification Types',
+    titleKey: 'notificationPrefs.notifTypes',
     items: [
-      { key: 'priceAlerts' as const, icon: 'trending-up', color: '#FFC107', label: 'Price Alerts', desc: 'Stock price movements & target alerts' },
-      { key: 'tradeConfirmations' as const, icon: 'swap-horizontal', color: '#00C853', label: 'Trade Confirmations', desc: 'Buy/sell order execution updates' },
-      { key: 'educationalReminders' as const, icon: 'school', color: '#6C63FF', label: 'Learning Reminders', desc: 'Course, lesson & quiz notifications' },
-      { key: 'systemUpdates' as const, icon: 'settings', color: '#6E6E9A', label: 'System Updates', desc: 'KYC, account & app version updates' },
+      { key: 'priceAlerts' as const, icon: 'trending-up', color: '#FFC107', labelKey: 'notificationPrefs.priceAlerts', descKey: 'notificationPrefs.priceAlertsScreenDesc' },
+      { key: 'tradeConfirmations' as const, icon: 'swap-horizontal', color: '#00C853', labelKey: 'notificationPrefs.tradeConfirmations', descKey: 'notificationPrefs.tradeConfirmationsScreenDesc' },
+      { key: 'educationalReminders' as const, icon: 'school', color: '#6C63FF', labelKey: 'notificationPrefs.learningReminders', descKey: 'notificationPrefs.learningRemindersDesc' },
+      { key: 'systemUpdates' as const, icon: 'settings', color: '#6E6E9A', labelKey: 'notificationPrefs.systemUpdates', descKey: 'notificationPrefs.systemUpdatesDesc' },
     ],
   },
   {
-    title: 'Alert Behavior',
+    titleKey: 'notificationPrefs.alertBehavior',
     items: [
-      { key: 'soundEnabled' as const, icon: 'volume-high', color: '#00D2FF', label: 'Sound', desc: 'Play a sound for new notifications' },
-      { key: 'vibrationEnabled' as const, icon: 'phone-portrait', color: '#FF6B6B', label: 'Vibration', desc: 'Vibrate on incoming notifications' },
+      { key: 'soundEnabled' as const, icon: 'volume-high', color: '#00D2FF', labelKey: 'notificationPrefs.soundLabel', descKey: 'notificationPrefs.soundDesc' },
+      { key: 'vibrationEnabled' as const, icon: 'phone-portrait', color: '#FF6B6B', labelKey: 'notificationPrefs.vibrationLabel', descKey: 'notificationPrefs.vibrationDesc' },
     ],
   },
 ];
@@ -39,6 +40,7 @@ const PREFERENCE_SECTIONS = [
 export default function NotificationPreferencesScreen({ navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { t } = useT();
   const {
     preferences,
     updatePreference,
@@ -58,14 +60,14 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
 
   const handleReset = useCallback(() => {
     Alert.alert(
-      'Reset Preferences',
-      'This will reset all notification preferences to their default values.',
+      t('notificationPrefs.resetTitle'),
+      t('notificationPrefs.resetMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Reset', style: 'destructive', onPress: resetPreferences },
+        { text: t('notificationPrefs.cancel'), style: 'cancel' },
+        { text: t('notificationPrefs.reset'), style: 'destructive', onPress: resetPreferences },
       ],
     );
-  }, [resetPreferences]);
+  }, [resetPreferences, t]);
 
   const _adjustThreshold = useCallback((delta: number) => {
     const newVal = Math.max(0.5, Math.min(10, preferences.priceAlertThreshold + delta));
@@ -81,8 +83,8 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={styles.headerInfo}>
-            <Text style={styles.title}>Notification Preferences</Text>
-            <Text style={styles.subtitle}>Control how and when you get notified</Text>
+            <Text style={styles.title}>{t('notificationPrefs.title')}</Text>
+            <Text style={styles.subtitle}>{t('notificationPrefs.subtitle')}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -90,8 +92,8 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Preference Sections */}
         {PREFERENCE_SECTIONS.map(section => (
-          <View key={section.title} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
+          <View key={section.titleKey} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t(section.titleKey)}</Text>
             <View style={styles.card}>
               {section.items.map((item, i) => (
                 <React.Fragment key={item.key}>
@@ -100,8 +102,8 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
                       <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={item.color} />
                     </View>
                     <View style={styles.prefInfo}>
-                      <Text style={styles.prefLabel}>{item.label}</Text>
-                      <Text style={styles.prefDesc}>{item.desc}</Text>
+                      <Text style={styles.prefLabel}>{t(item.labelKey)}</Text>
+                      <Text style={styles.prefDesc}>{t(item.descKey)}</Text>
                     </View>
                     <Switch
                       value={preferences[item.key] as boolean}
@@ -120,17 +122,16 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
 
         {/* Alert Threshold */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Price Alert Threshold</Text>
+          <Text style={styles.sectionTitle}>{t('notificationPrefs.priceAlertThreshold')}</Text>
           <View style={styles.card}>
             <View style={styles.thresholdRow}>
               <View style={[styles.prefIcon, { backgroundColor: '#FFC10720' }]}>
                 <Ionicons name="speedometer" size={20} color="#FFC107" />
               </View>
               <View style={styles.thresholdInfo}>
-                <Text style={styles.prefLabel}>Price Change Threshold</Text>
+                <Text style={styles.prefLabel}>{t('notificationPrefs.priceChangeThreshold')}</Text>
                 <Text style={styles.prefDesc}>
-                  Alert me when a stock moves by{' '}
-                  <Text style={styles.prefDescBold}>{preferences.priceAlertThreshold}%</Text>
+                  {t('notificationPrefs.alertWhenMoves', { value: preferences.priceAlertThreshold })}
                 </Text>
               </View>
             </View>
@@ -162,18 +163,18 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
 
         {/* Quiet Hours */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quiet Hours</Text>
+          <Text style={styles.sectionTitle}>{t('notificationPrefs.quietHours')}</Text>
           <View style={styles.card}>
             <View style={styles.prefRow}>
               <View style={[styles.prefIcon, { backgroundColor: '#6C63FF20' }]}>
                 <Ionicons name="moon" size={20} color="#6C63FF" />
               </View>
               <View style={styles.prefInfo}>
-                <Text style={styles.prefLabel}>Quiet Hours</Text>
+                <Text style={styles.prefLabel}>{t('notificationPrefs.quietHours')}</Text>
                 <Text style={styles.prefDesc}>
                   {showQuietHours
-                    ? `Silent from ${preferences.quietHoursStart || '10:00 PM'} to ${preferences.quietHoursEnd || '7:00 AM'}`
-                    : 'Receive notifications at all times'}
+                    ? t('notificationPrefs.quietHoursDescOn', { start: preferences.quietHoursStart || '10:00 PM', end: preferences.quietHoursEnd || '7:00 AM' })
+                    : t('notificationPrefs.quietHoursDescOff')}
                 </Text>
               </View>
               <Switch
@@ -194,7 +195,7 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
                 <View style={styles.divider} />
                 <View style={styles.quietTimeRow}>
                   <View style={styles.quietTimeBlock}>
-                    <Text style={styles.quietTimeLabel}>From</Text>
+                    <Text style={styles.quietTimeLabel}>{t('notificationPrefs.from')}</Text>
                     <Pressable style={styles.quietTimePicker}>
                       <Text style={styles.quietTimeValue}>{preferences.quietHoursStart || '10:00 PM'}</Text>
                       <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
@@ -204,7 +205,7 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
                     <Ionicons name="arrow-forward" size={18} color={colors.textMuted} />
                   </View>
                   <View style={styles.quietTimeBlock}>
-                    <Text style={styles.quietTimeLabel}>To</Text>
+                    <Text style={styles.quietTimeLabel}>{t('notificationPrefs.to')}</Text>
                     <Pressable style={styles.quietTimePicker}>
                       <Text style={styles.quietTimeValue}>{preferences.quietHoursEnd || '7:00 AM'}</Text>
                       <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
@@ -218,19 +219,19 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
 
         {/* Email Notifications Summary */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Email Notifications</Text>
+          <Text style={styles.sectionTitle}>{t('notificationPrefs.emailNotifications')}</Text>
           <View style={styles.card}>
             <View style={styles.emailRow}>
               <View style={[styles.prefIcon, { backgroundColor: '#00D2FF20' }]}>
                 <Ionicons name="mail" size={20} color="#00D2FF" />
               </View>
               <View style={styles.prefInfo}>
-                <Text style={styles.prefLabel}>Email Summary</Text>
+                <Text style={styles.prefLabel}>{t('notificationPrefs.emailSummary')}</Text>
                 <Text style={styles.prefDesc}>
-                  Receive a daily summary of your portfolio activity
+                  {t('notificationPrefs.emailSummaryDesc')}
                 </Text>
               </View>
-              <Text style={styles.emailBadge}>Coming Soon</Text>
+              <Text style={styles.emailBadge}>{t('notificationPrefs.comingSoon')}</Text>
             </View>
           </View>
         </View>
@@ -238,7 +239,7 @@ export default function NotificationPreferencesScreen({ navigation }: any) {
         {/* Reset Button */}
         <Pressable style={({pressed}) => [styles.resetBtn, {opacity: pressed ? 0.7 : 1}]} onPress={handleReset}>
           <Ionicons name="refresh" size={18} color={colors.danger} />
-          <Text style={styles.resetText}>Reset to Defaults</Text>
+          <Text style={styles.resetText}>{t('notificationPrefs.resetToDefaults')}</Text>
         </Pressable>
 
         <View style={{ height: 60 }} />

@@ -90,6 +90,7 @@ import usMarkets from './usMarkets';
 import voiceSettings from './voiceSettings';
 import watchlist from './watchlist';
 import wealth from './wealth';
+import webhookHealth from './webhookHealth';
 import webhookManagement from './webhookManagement';
 import widgetSettings from './widgetSettings';
 
@@ -185,6 +186,7 @@ const hi = {
   voiceSettings,
   watchlist,
   wealth,
+  webhookHealth,
   webhookManagement,
   widgetSettings,
 };

@@ -37,6 +37,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { api } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -86,27 +87,27 @@ interface WebhookFailuresResponse {
 
 // ─── Status Config ──────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  processed: { label: 'Processed', icon: 'checkmark-circle', color: '#00C853' },
-  received: { label: 'Received', icon: 'time', color: '#FFC107' },
-  failed: { label: 'Failed', icon: 'close-circle', color: '#FF5252' },
-  duplicate: { label: 'Duplicate', icon: 'copy', color: '#9E9E9E' },
-  invalid_signature: { label: 'Invalid Sig', icon: 'shield-outline', color: '#FF6B6B' },
+const STATUS_CONFIG: Record<string, { labelKey: string; icon: string; color: string }> = {
+  processed: { labelKey: 'webhookHealth.statusProcessed', icon: 'checkmark-circle', color: '#00C853' },
+  received: { labelKey: 'webhookHealth.statusReceived', icon: 'time', color: '#FFC107' },
+  failed: { labelKey: 'webhookHealth.statusFailed', icon: 'close-circle', color: '#FF5252' },
+  duplicate: { labelKey: 'webhookHealth.statusDuplicate', icon: 'copy', color: '#9E9E9E' },
+  invalid_signature: { labelKey: 'webhookHealth.statusInvalidSig', icon: 'shield-outline', color: '#FF6B6B' },
 };
 
-const EVENT_DISPLAY_NAMES: Record<string, string> = {
-  'payment.captured': 'Payment Captured',
-  'order.paid': 'Order Paid',
-  'subscription.charged': 'Subscription Charged',
-  'subscription.activated': 'Subscription Activated',
-  'subscription.cancelled': 'Subscription Cancelled',
-  'payment.failed': 'Payment Failed',
-  'mandate.authorized': 'Mandate Authorized',
-  'mandate.revoked': 'Mandate Revoked',
+const EVENT_KEY_MAP: Record<string, string> = {
+  'payment.captured': 'webhookHealth.eventPaymentCaptured',
+  'order.paid': 'webhookHealth.eventOrderPaid',
+  'subscription.charged': 'webhookHealth.eventSubscriptionCharged',
+  'subscription.activated': 'webhookHealth.eventSubscriptionActivated',
+  'subscription.cancelled': 'webhookHealth.eventSubscriptionCancelled',
+  'payment.failed': 'webhookHealth.eventPaymentFailed',
+  'mandate.authorized': 'webhookHealth.eventMandateAuthorized',
+  'mandate.revoked': 'webhookHealth.eventMandateRevoked',
 };
 
-function getEventDisplay(event: string): string {
-  return EVENT_DISPLAY_NAMES[event] || event;
+function getEventDisplay(event: string, t: (k: string) => string): string {
+  return EVENT_KEY_MAP[event] ? t(EVENT_KEY_MAP[event]) : event;
 }
 
 function getEventIcon(event: string): string {
@@ -133,19 +134,19 @@ function formatDuration(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-function formatTimestamp(ts: string): string {
+function formatTimestamp(ts: string, t: (k: string, p?: Record<string, any>) => string): string {
   try {
     const d = new Date(ts);
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
     const diffMin = Math.floor(diffMs / 60000);
 
-    if (diffMin < 1) return 'Just now';
-    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffMin < 1) return t('webhookHealth.justNow');
+    if (diffMin < 60) return t('webhookHealth.minAgo', { n: diffMin });
     const diffHrs = Math.floor(diffMin / 60);
-    if (diffHrs < 24) return `${diffHrs}h ago`;
+    if (diffHrs < 24) return t('webhookHealth.hourAgo', { n: diffHrs });
     const diffDays = Math.floor(diffHrs / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 7) return t('webhookHealth.dayAgo', { n: diffDays });
 
     return d.toLocaleDateString('en-IN', {
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
@@ -166,6 +167,7 @@ function formatId(id: string): string {
 
 export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const s = useMemo(() => createStyles(colors), [colors]);
 
   const [loading, setLoading] = useState(true);
@@ -189,12 +191,12 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
       setFailures((failuresRes as unknown as WebhookFailuresResponse).failures || []);
       setError(null);
     } catch (err: any) {
-      setError(err?.message || 'Failed to load webhook data');
+      setError(err?.message || t('webhookHealth.loadFailed'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -211,12 +213,12 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
   const handleRetry = useCallback(async (entry: WebhookLogEntry) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
-      'Retry Webhook Event',
-      `Re-process "${getEventDisplay(entry.event)}" (${formatId(entry.id)})?\n\nThis will queue the event for re-processing. A fresh Razorpay webhook call may be needed to complete the action.`,
+      t('webhookHealth.retryTitle'),
+      t('webhookHealth.retryMsg', { event: getEventDisplay(entry.event, t), id: formatId(entry.id) }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('webhookHealth.cancel'), style: 'cancel' },
         {
-          text: 'Retry',
+          text: t('webhookHealth.retry'),
           style: 'destructive',
           onPress: async () => {
             setRetrying(entry.id);
@@ -224,15 +226,15 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
               const res: any = await api.post(`/api/webhooks/razorpay/retry/${entry.id}`, {});
               if (res.success) {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                Alert.alert('Retry Scheduled', res.message || 'Event queued for re-processing.');
+                Alert.alert(t('webhookHealth.retryScheduled'), res.message || t('webhookHealth.retryQueued'));
                 fetchData();
               } else {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-                Alert.alert('Retry Failed', res.error || 'Unknown error');
+                Alert.alert(t('webhookHealth.retryFailedTitle'), res.error || t('webhookHealth.unknownError'));
               }
             } catch (err: any) {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert('Retry Failed', err?.message || 'Network error');
+              Alert.alert(t('webhookHealth.retryFailedTitle'), err?.message || t('webhookHealth.networkError'));
             } finally {
               setRetrying(null);
             }
@@ -240,7 +242,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
         },
       ],
     );
-  }, [fetchData]);
+  }, [fetchData, t]);
 
   // ── Loading State ─────────────────────────────────────────────────
 
@@ -276,7 +278,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
         <View style={[s.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="cloud-offline-outline" size={48} color={colors.danger} />
         </View>
-        <Text style={[s.emptyTitle, { color: colors.text, marginTop: SPACING.lg }]}>Webhook Monitor Unavailable</Text>
+        <Text style={[s.emptyTitle, { color: colors.text, marginTop: SPACING.lg }]}>{t('webhookHealth.monitorUnavailable')}</Text>
         <Text style={[s.emptySubtitle, { color: colors.textMuted, textAlign: 'center', marginTop: SPACING.sm }]}>
           {error}
         </Text>
@@ -285,7 +287,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
             style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, paddingHorizontal: SPACING.xl, paddingVertical: SPACING.md, borderRadius: BORDER_RADIUS.full }}
           >
             <Ionicons name="refresh" size={18} color="#fff" />
-            <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.md, color: '#fff' }}>Retry</Text>
+            <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.md, color: '#fff' }}>{t('webhookHealth.retry')}</Text>
           </LinearGradient>
         </AnimatedPressable>
       </View>
@@ -314,15 +316,15 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
               <Ionicons name="pulse" size={24} color={colors.primary} />
             </View>
             <View>
-              <Text style={[s.title, { color: colors.text }]}>Webhook Health</Text>
-              <Text style={[s.subtitle, { color: colors.textMuted }]}>Razorpay Event Monitor</Text>
+              <Text style={[s.title, { color: colors.text }]}>{t('webhookHealth.title')}</Text>
+              <Text style={[s.subtitle, { color: colors.textMuted }]}>{t('webhookHealth.subtitle')}</Text>
             </View>
           </View>
           {health && (
             <View style={[s.liveBadge, { backgroundColor: health.successRate >= 90 ? colors.marketUp + '20' : colors.warning + '20' }]}>
               <View style={[s.liveDot, { backgroundColor: health.successRate >= 90 ? colors.marketUp : colors.warning }]} />
               <Text style={[s.liveBadgeText, { color: health.successRate >= 90 ? colors.marketUp : colors.warning }]}>
-                Live
+                {t('webhookHealth.live')}
               </Text>
             </View>
           )}
@@ -336,28 +338,28 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
                 <Ionicons name="pulse" size={18} color={colors.primary} />
               </View>
               <Text style={[s.statValue, { color: colors.text }]}>{health?.total || 0}</Text>
-              <Text style={[s.statLabel, { color: colors.textMuted }]}>Total</Text>
+              <Text style={[s.statLabel, { color: colors.textMuted }]}>{t('webhookHealth.total')}</Text>
             </View>
             <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={[s.statIcon, { backgroundColor: colors.marketUp + '20' }]}>
                 <Ionicons name="checkmark-circle" size={18} color={colors.marketUp} />
               </View>
               <Text style={[s.statValue, { color: colors.text }]}>{health?.processed || 0}</Text>
-              <Text style={[s.statLabel, { color: colors.textMuted }]}>Processed</Text>
+              <Text style={[s.statLabel, { color: colors.textMuted }]}>{t('webhookHealth.processed')}</Text>
             </View>
             <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={[s.statIcon, { backgroundColor: colors.danger + '20' }]}>
                 <Ionicons name="close-circle" size={18} color={colors.danger} />
               </View>
               <Text style={[s.statValue, { color: colors.text }]}>{health?.failed || 0}</Text>
-              <Text style={[s.statLabel, { color: colors.textMuted }]}>Failed</Text>
+              <Text style={[s.statLabel, { color: colors.textMuted }]}>{t('webhookHealth.failed')}</Text>
             </View>
             <View style={[s.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={[s.statIcon, { backgroundColor: (health?.successRate ?? 100) >= 90 ? colors.marketUp + '20' : colors.warning + '20' }]}>
                 <Ionicons name="analytics" size={18} color={(health?.successRate ?? 100) >= 90 ? colors.marketUp : colors.warning} />
               </View>
               <Text style={[s.statValue, { color: colors.text }]}>{health?.successRate ?? 100}%</Text>
-              <Text style={[s.statLabel, { color: colors.textMuted }]}>Rate</Text>
+              <Text style={[s.statLabel, { color: colors.textMuted }]}>{t('webhookHealth.rate')}</Text>
             </View>
           </View>
         </Animated.View>
@@ -367,22 +369,22 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
           <View style={[s.secondaryStats, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={s.secondaryStat}>
               <Text style={[s.secondaryStatValue, { color: colors.warning }]}>{health?.duplicates || 0}</Text>
-              <Text style={[s.secondaryStatLabel, { color: colors.textMuted }]}>Duplicates</Text>
+              <Text style={[s.secondaryStatLabel, { color: colors.textMuted }]}>{t('webhookHealth.duplicates')}</Text>
             </View>
             <View style={[s.statDivider, { backgroundColor: colors.border }]} />
             <View style={s.secondaryStat}>
               <Text style={[s.secondaryStatValue, { color: colors.danger }]}>{health?.invalidSignatures || 0}</Text>
-              <Text style={[s.secondaryStatLabel, { color: colors.textMuted }]}>Invalid Sig</Text>
+              <Text style={[s.secondaryStatLabel, { color: colors.textMuted }]}>{t('webhookHealth.invalidSig')}</Text>
             </View>
             <View style={[s.statDivider, { backgroundColor: colors.border }]} />
             <View style={s.secondaryStat}>
               <Text style={[s.secondaryStatValue, { color: colors.text }]}>{health?.logSize || 0}</Text>
-              <Text style={[s.secondaryStatLabel, { color: colors.textMuted }]}>Log Size</Text>
+              <Text style={[s.secondaryStatLabel, { color: colors.textMuted }]}>{t('webhookHealth.logSize')}</Text>
             </View>
             <View style={[s.statDivider, { backgroundColor: colors.border }]} />
             <View style={s.secondaryStat}>
               <Text style={[s.secondaryStatValue, { color: colors.textMuted }]}>/{health?.maxLogSize || 1000}</Text>
-              <Text style={[s.secondaryStatLabel, { color: colors.textMuted }]}>Max Log</Text>
+              <Text style={[s.secondaryStatLabel, { color: colors.textMuted }]}>{t('webhookHealth.maxLog')}</Text>
             </View>
           </View>
         </Animated.View>
@@ -391,16 +393,16 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
         <Animated.View entering={FadeInUp.delay(250).springify()}>
           <View style={[s.activityRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={{ flex: 1 }}>
-              <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted }}>Last Received</Text>
+              <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted }}>{t('webhookHealth.lastReceived')}</Text>
               <Text style={{ ...FONTS.medium, fontSize: FONTS.size.sm, color: colors.text, marginTop: 2 }}>
-                {health?.lastReceived ? formatTimestamp(health.lastReceived) : 'N/A'}
+                {health?.lastReceived ? formatTimestamp(health.lastReceived, t) : t('webhookHealth.na')}
               </Text>
             </View>
             <View style={[s.statDivider, { backgroundColor: colors.border }]} />
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted }}>Last Failed</Text>
+              <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted }}>{t('webhookHealth.lastFailed')}</Text>
               <Text style={{ ...FONTS.medium, fontSize: FONTS.size.sm, color: health?.lastFailed ? colors.danger : colors.text, marginTop: 2 }}>
-                {health?.lastFailed ? formatTimestamp(health.lastFailed) : 'None'}
+                {health?.lastFailed ? formatTimestamp(health.lastFailed, t) : t('webhookHealth.none')}
               </Text>
             </View>
           </View>
@@ -410,7 +412,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
         {health && Object.keys(health.eventsByType).length > 0 && (
           <Animated.View entering={FadeInUp.delay(300).springify()}>
             <View style={{ marginHorizontal: SPACING.xl, marginBottom: SPACING.lg }}>
-              <Text style={[s.sectionTitle, { color: colors.text }]}>Events by Type</Text>
+              <Text style={[s.sectionTitle, { color: colors.text }]}>{t('webhookHealth.eventsByType')}</Text>
               <View style={{ backgroundColor: colors.bgCard, borderRadius: BORDER_RADIUS.md, borderWidth: 1, borderColor: colors.border, padding: SPACING.md }}>
                 {Object.entries(health.eventsByType)
                   .sort(([, a], [, b]) => b - a)
@@ -425,7 +427,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
                       >
                         <Ionicons name={getEventIcon(event) as any} size={14} color={getEventColor(event)} />
                         <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.text, flex: 1 }} numberOfLines={1}>
-                          {getEventDisplay(event)}
+                          {getEventDisplay(event, t)}
                         </Text>
                         <View style={{ width: 60, height: 14, backgroundColor: colors.border, borderRadius: 3, overflow: 'hidden' }}>
                           <View style={{ width: `${barWidth}%`, height: '100%', backgroundColor: getEventColor(event), borderRadius: 3, opacity: 0.7 }} />
@@ -444,7 +446,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
           <Animated.View entering={FadeInUp.delay(350).springify()}>
             <View style={{ marginHorizontal: SPACING.xl, marginBottom: SPACING.lg }}>
               <Text style={[s.sectionTitle, { color: colors.text }]}>
-                Failure Analysis
+                {t('webhookHealth.failureAnalysis')}
                 <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted }}> ({failures.length})</Text>
               </Text>
               {failures.slice(0, 10).map((entry, i) => (
@@ -461,11 +463,11 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
                           {formatId(entry.id)}
                         </Text>
                         <Text style={{ ...FONTS.regular, fontSize: 9, color: colors.textMuted }}>
-                          {formatTimestamp(entry.timestamp)}
+                          {formatTimestamp(entry.timestamp, t)}
                         </Text>
                       </View>
                       <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textSecondary, marginTop: 2 }}>
-                        {getEventDisplay(entry.event)}
+                        {getEventDisplay(entry.event, t)}
                       </Text>
                       {entry.error && (
                         <Text style={{ ...FONTS.regular, fontSize: 9, color: colors.danger, marginTop: 2 }} numberOfLines={2}>
@@ -496,7 +498,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
 
         {/* ── Recent Events Log ──────────────────────────────────── */}
         <Text style={[s.sectionTitle, { color: colors.text, marginHorizontal: SPACING.xl }]}>
-          Recent Events
+          {t('webhookHealth.recentEvents')}
           <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted }}> ({events.length})</Text>
         </Text>
         {events.length === 0 ? (
@@ -504,14 +506,14 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
             <View style={[s.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="pulse-outline" size={36} color={colors.textMuted} />
             </View>
-            <Text style={[s.emptyTitle, { color: colors.text, marginTop: SPACING.md }]}>No Events Yet</Text>
+            <Text style={[s.emptyTitle, { color: colors.text, marginTop: SPACING.md }]}>{t('webhookHealth.noEventsYet')}</Text>
             <Text style={[s.emptySubtitle, { color: colors.textMuted }]}>
-              Webhook events will appear here as they arrive.
+              {t('webhookHealth.noEventsSubtitle')}
             </Text>
           </View>
         ) : (
           events.map((entry, i) => {
-            const cfg = STATUS_CONFIG[entry.status] || { label: entry.status, icon: 'ellipse', color: colors.textMuted };
+            const cfg = STATUS_CONFIG[entry.status] || { labelKey: 'webhookHealth.status' + (entry.status.charAt(0).toUpperCase() + entry.status.slice(1)), icon: 'ellipse', color: colors.textMuted };
             return (
               <Animated.View
                 key={entry.id}
@@ -528,11 +530,11 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Text style={{ ...FONTS.semiBold, fontSize: FONTS.size.xs, color: colors.text }}>
-                        {getEventDisplay(entry.event)}
+                        {getEventDisplay(entry.event, t)}
                       </Text>
                       <View style={[s.eventStatusBadge, { backgroundColor: cfg.color + '20' }]}>
                         <Text style={{ ...FONTS.bold, fontSize: 8, color: cfg.color, letterSpacing: 0.5 }}>
-                          {cfg.label.toUpperCase()}
+                          {t(cfg.labelKey).toUpperCase()}
                         </Text>
                       </View>
                     </View>
@@ -545,7 +547,7 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
                         {formatDuration(entry.durationMs)}
                       </Text>
                       <Text style={{ ...FONTS.regular, fontSize: 9, color: colors.textMuted }}>
-                        {formatTimestamp(entry.timestamp)}
+                        {formatTimestamp(entry.timestamp, t)}
                       </Text>
                     </View>
 
@@ -559,12 +561,12 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
                       <View style={{ flexDirection: 'row', gap: 8, marginTop: 3 }}>
                         {entry.userId && (
                           <Text style={{ ...FONTS.regular, fontSize: 8, color: colors.textMuted }}>
-                            User: {formatId(entry.userId)}
+                            {t('webhookHealth.userPrefix', { id: formatId(entry.userId) })}
                           </Text>
                         )}
                         {entry.planId && (
                           <Text style={{ ...FONTS.regular, fontSize: 8, color: colors.textMuted }}>
-                            Plan: {entry.planId}
+                            {t('webhookHealth.planPrefix', { id: entry.planId })}
                           </Text>
                         )}
                       </View>
@@ -597,10 +599,10 @@ export default function RazorpayWebhookHealthScreen({ _navigation }: any) {
         {/* Log capacity info */}
         <View style={{ marginHorizontal: SPACING.xl, marginVertical: SPACING.lg, alignItems: 'center' }}>
           <Text style={{ ...FONTS.regular, fontSize: 9, color: colors.textMuted }}>
-            In-memory log · Max {health?.maxLogSize || 1000} events · Oldest events are trimmed
+            {t('webhookHealth.logFooter', { max: health?.maxLogSize || 1000 })}
           </Text>
           <Text style={{ ...FONTS.regular, fontSize: 9, color: colors.textMuted, marginTop: 2 }}>
-            Full history available in Razorpay Dashboard
+            {t('webhookHealth.dashboardNote')}
           </Text>
         </View>
 
