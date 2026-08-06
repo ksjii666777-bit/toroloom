@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, PanResponder, Pressable } from 'react-native';
 import Svg, { Path, Line, Rect, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
+import { useT } from '../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { formatCurrency } from '../utils/formatters';
 import { useChartCrosshair } from './ChartCrosshairContext';
@@ -240,6 +241,7 @@ const RSIPanel = React.memo(({
   width: number;
 }) => {
   const { rsi } = data;
+  const { t } = useT();
   const { focusedIndex, setFocusedIndex } = useChartCrosshair();
   const panelHeight = PANEL_HEIGHT;
   const pad = CHART_PADDING;
@@ -252,7 +254,7 @@ const RSIPanel = React.memo(({
   if (validPoints.length < 2) {
     return (
       <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
-        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>Not enough data</Text>
+        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>{t('components.stockAnalysis.notEnoughData')}</Text>
       </View>
     );
   }
@@ -290,8 +292,8 @@ const RSIPanel = React.memo(({
         </Text>
         <Text style={[indicatorStyles.panelStatus, { color: colors.textMuted }]}>
           {crosshairRSI !== null
-            ? (crosshairRSI > 70 ? 'Overbought' : crosshairRSI < 30 ? 'Oversold' : 'Neutral')
-            : (isOverbought ? 'Overbought' : isOversold ? 'Oversold' : 'Neutral')}
+            ? (crosshairRSI > 70 ? t('components.stockAnalysis.overbought') : crosshairRSI < 30 ? t('components.stockAnalysis.oversold') : t('components.stockAnalysis.neutral'))
+            : (isOverbought ? t('components.stockAnalysis.overbought') : isOversold ? t('components.stockAnalysis.oversold') : t('components.stockAnalysis.neutral'))}
         </Text>
       </View>
       <View {...touchPan.panHandlers} style={{ flex: 1 }}>
@@ -343,6 +345,7 @@ const MACDPanel = React.memo(({
   width: number;
 }) => {
   const { macd, signal, histogram } = data;
+  const { t } = useT();
   const { focusedIndex, setFocusedIndex } = useChartCrosshair();
   const panelHeight = PANEL_HEIGHT;
   const pad = CHART_PADDING;
@@ -360,7 +363,7 @@ const MACDPanel = React.memo(({
   if (allValues.length < 2) {
     return (
       <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
-        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>Not enough data</Text>
+        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>{t('components.stockAnalysis.notEnoughData')}</Text>
       </View>
     );
   }
@@ -405,7 +408,7 @@ const MACDPanel = React.memo(({
           {(crosshairMACD ?? lastMACD) >= 0 ? '+' : ''}{(crosshairMACD ?? lastMACD).toFixed(1)}
         </Text>
         <Text style={[indicatorStyles.panelValue, { color: colors.textSecondary, fontSize: 11 }]}>
-          Signal: {(crosshairSignal ?? lastSignal).toFixed(1)}
+          {t('components.stockAnalysis.signal', { value: (crosshairSignal ?? lastSignal).toFixed(1) })}
         </Text>
       </View>
       <View {...touchPan.panHandlers} style={{ flex: 1 }}>
@@ -475,6 +478,7 @@ const BollingerPanel = React.memo(({
   candleData: StockHistoryPoint[];
 }) => {
   const { upper, middle, lower } = data;
+  const { t } = useT();
   const { focusedIndex, setFocusedIndex } = useChartCrosshair();
   const panelHeight = PANEL_HEIGHT;
   const pad = CHART_PADDING;
@@ -488,7 +492,7 @@ const BollingerPanel = React.memo(({
   if (validUpper.length < 2) {
     return (
       <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
-        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>Not enough data</Text>
+        <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>{t('components.stockAnalysis.notEnoughData')}</Text>
       </View>
     );
   }
@@ -550,7 +554,7 @@ const BollingerPanel = React.memo(({
   return (
     <View style={[indicatorStyles.panel, { height: panelHeight, width, borderColor: colors.border, backgroundColor: colors.bgCard }]}>
       <View style={indicatorStyles.panelHeader}>
-        <Text style={[indicatorStyles.panelTitle, { color: colors.textMuted }]}>Bollinger (20,2)</Text>
+        <Text style={[indicatorStyles.panelTitle, { color: colors.textMuted }]}>{t('components.stockAnalysis.bollinger')} (20,2)</Text>
         <Text style={[indicatorStyles.panelValue, { fontSize: 11, color: colors.text }]}>
           U: {formatCurrency(crosshairUpper ?? lastUpperVal, true)}
         </Text>
@@ -635,6 +639,7 @@ export default function TechnicalIndicators({
   compact: _compact = false,
 }: TechnicalIndicatorsProps) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   // Extract close prices
   const closes = useMemo(() => data.map(d => d.close), [data]);
@@ -662,7 +667,7 @@ export default function TechnicalIndicators({
     return (
       <View style={indicatorStyles.emptyContainer}>
         <Text style={[indicatorStyles.emptyText, { color: colors.textMuted }]}>
-          Need at least 15 data points for indicators
+          {t('components.stockAnalysis.needDataPoints')}
         </Text>
       </View>
     );
@@ -691,7 +696,7 @@ export default function TechnicalIndicators({
                 isActive && indicatorStyles.toggleTextActive,
                 { color: isActive ? colors.primary : colors.textMuted },
               ]}>
-                {type === 'rsi' ? 'RSI' : type === 'macd' ? 'MACD' : 'Bollinger'}
+                {type === 'rsi' ? 'RSI' : type === 'macd' ? 'MACD' : t('components.stockAnalysis.bollinger')}
               </Text>
             </Pressable>
           );

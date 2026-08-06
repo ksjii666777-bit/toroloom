@@ -7,6 +7,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { formatCurrency, formatTimeAgo } from '../../utils/formatters';
 
@@ -18,6 +19,7 @@ interface RecentTradesWidgetProps {
 
 export default function RecentTradesWidget({ size }: RecentTradesWidgetProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { trades } = usePortfolioStore();
 
   const recentTrades = useMemo(() => {
@@ -29,7 +31,7 @@ export default function RecentTradesWidget({ size }: RecentTradesWidgetProps) {
   if (trades.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>No trades yet</Text>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('components.widgets.tradesEmpty')}</Text>
       </View>
     );
   }

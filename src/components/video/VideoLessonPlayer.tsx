@@ -17,6 +17,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING , BORDER_RADIUS } from '../../constants/theme';
 import type { TranscriptEntry, VideoBookmark, VideoProgress } from '../../types';
 
@@ -119,6 +120,7 @@ export default function VideoLessonPlayer({
   isDownloaded, isDownloading, downloadProgress, onDownload, onRemoveDownload,
 }: VideoLessonPlayerProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const player = useVideoPlayer(videoUrl, (p) => { p.loop = false; });
@@ -184,10 +186,10 @@ export default function VideoLessonPlayer({
   const handleAddBookmark = useCallback(() => {
     if (onAddBookmark && currentTime > 1) {
       const active = transcript ? getActiveTranscript(transcript, currentTime) : null;
-      const label = active ? active.text.substring(0, 60) + '...' : `At ${formatTime(currentTime)}`;
+      const label = active ? active.text.substring(0, 60) + '...' : t('components.video.atTime', { time: formatTime(currentTime) });
       onAddBookmark(currentTime, label);
     }
-  }, [currentTime, transcript, onAddBookmark]);
+  }, [currentTime, transcript, onAddBookmark, t]);
 
   const handleSeekBack = useCallback(() => handleSeek(Math.max(0, currentTime - 10)), [currentTime, handleSeek]);
   const handleSeekFwd = useCallback(() => handleSeek(Math.min(duration, currentTime + 10)), [currentTime, duration, handleSeek]);
@@ -308,7 +310,7 @@ export default function VideoLessonPlayer({
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text style={styles.speedTextInfo}>{playbackSpeed}x speed</Text>
+          <Text style={styles.speedTextInfo}>{t('components.video.speed', { speed: playbackSpeed })}</Text>
           {onDownload && !isDownloaded && !isDownloading && (
             <Pressable onPress={onDownload} style={styles.ctrlBtn}>
               <Ionicons name="cloud-download-outline" size={14} color={colors.textMuted} />
@@ -335,7 +337,7 @@ export default function VideoLessonPlayer({
               onPress={() => { setShowTranscript(true); setShowBookmarks(false); setShowChapters(false); }}>
               <Ionicons name="chatbubbles-outline" size={14}
                 color={showTranscript ? colors.primary : colors.textMuted} />
-              <Text style={[styles.tabText, showTranscript && styles.tabTextActive]}>Transcript</Text>
+              <Text style={[styles.tabText, showTranscript && styles.tabTextActive]}>{t('components.video.transcript')}</Text>
             </Pressable>
           )}
           {chapters.length > 1 && (
@@ -344,7 +346,7 @@ export default function VideoLessonPlayer({
               <Ionicons name="list-outline" size={14}
                 color={showChapters ? colors.primary : colors.textMuted} />
               <Text style={[styles.tabText, showChapters && styles.tabTextActive]}>
-                Chapters ({chapters.length})
+                {t('components.video.chapters', { count: chapters.length })}
               </Text>
             </Pressable>
           )}
@@ -353,7 +355,7 @@ export default function VideoLessonPlayer({
             <Ionicons name="bookmark" size={14}
               color={showBookmarks ? colors.primary : colors.textMuted} />
             <Text style={[styles.tabText, showBookmarks && styles.tabTextActive]}>
-              Bookmarks ({bookmarks.length})
+              {t('components.video.bookmarks', { count: bookmarks.length })}
             </Text>
           </Pressable>
         </View>
@@ -423,7 +425,7 @@ export default function VideoLessonPlayer({
             <View style={styles.emptyState}>
               <Ionicons name="bookmark-outline" size={32} color={colors.textMuted} />
               <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                No bookmarks yet. Tap the bookmark icon while watching.
+                {t('components.video.noBookmarks')}
               </Text>
             </View>
           ) : (

@@ -23,6 +23,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useWidgetStore } from '../../store/widgetStore';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { getWidgetMeta } from './WidgetRegistry';
+import { useT } from '../../hooks/useT';
 import type { WidgetType, WidgetSize } from '../../types/widgets';
 import type { SubscriptionTier } from '../../types';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
@@ -59,6 +60,7 @@ export default function BaseWidget({
   widgetId, type, title, size, children, onLongPress,
 }: BaseWidgetProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -74,14 +76,14 @@ export default function BaseWidget({
   const handleRemove = useCallback(() => {
     setMenuVisible(false);
     Alert.alert(
-      'Remove Widget',
-      `Remove "${title}" from the dashboard?`,
+      t('components.widgets.baseRemoveTitle'),
+      t('components.widgets.baseRemoveMsg', { title }),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove', style: 'destructive', onPress: () => removeWidget(widgetId) },
+        { text: t('components.widgets.cancel'), style: 'cancel' },
+        { text: t('components.widgets.remove'), style: 'destructive', onPress: () => removeWidget(widgetId) },
       ],
     );
-  }, [widgetId, title, removeWidget]);
+  }, [widgetId, title, removeWidget, t]);
 
   const handleCloseMenu = useCallback(() => setMenuVisible(false), []);
 
@@ -133,10 +135,10 @@ export default function BaseWidget({
                 <Ionicons name="lock-closed" size={20} color={colors.textMuted} />
               </View>
               <Text style={[styles.lockedLabel, { color: colors.textSecondary }]}>
-                {meta.minTier === 'elite' ? 'Elite plan' : 'Pro plan'} required
+                {meta.minTier === 'elite' ? t('components.widgets.eliteRequired') : t('components.widgets.proRequired')}
               </Text>
               <Text style={[styles.lockedDesc, { color: colors.textMuted }]}>
-                Upgrade to unlock this widget
+                {t('components.widgets.upgradeToUnlock')}
               </Text>
             </View>
           </View>
@@ -177,7 +179,7 @@ export default function BaseWidget({
             <Text style={[styles.menuTitle, { color: colors.text }]}>{title}</Text>
 
             {/* Size options */}
-            <Text style={[styles.menuSection, { color: colors.textMuted }]}>Size</Text>
+            <Text style={[styles.menuSection, { color: colors.textMuted }]}>{t('components.widgets.size')}</Text>
             <View style={styles.sizeRow}>
               {availableSizes.map(s => {
                 const isActive = s === size;
@@ -205,7 +207,7 @@ export default function BaseWidget({
                       styles.sizeLabel,
                       { color: isActive ? meta.color : colors.textSecondary },
                     ]}>
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                      {s === 'small' ? t('components.widgets.small') : s === 'medium' ? t('components.widgets.medium') : t('components.widgets.large')}
                     </Text>
                   </Pressable>
                 );
@@ -213,17 +215,17 @@ export default function BaseWidget({
             </View>
 
             {/* Actions */}
-            <Text style={[styles.menuSection, { color: colors.textMuted }]}>Actions</Text>
+            <Text style={[styles.menuSection, { color: colors.textMuted }]}>{t('components.widgets.actions')}</Text>
             <Pressable
               style={[styles.actionRow, { borderBottomColor: colors.divider }]}
               onPress={() => { toggleVisibility(widgetId); handleCloseMenu(); }}
             >
               <Ionicons name="eye-off" size={18} color={colors.textSecondary} />
-              <Text style={[styles.actionText, { color: colors.text }]}>Hide Widget</Text>
+              <Text style={[styles.actionText, { color: colors.text }]}>{t('components.widgets.hideWidget')}</Text>
             </Pressable>
             <Pressable style={styles.actionRow} onPress={handleRemove}>
               <Ionicons name="trash" size={18} color="#FF5252" />
-              <Text style={[styles.actionText, { color: '#FF5252' }]}>Remove Widget</Text>
+              <Text style={[styles.actionText, { color: '#FF5252' }]}>{t('components.widgets.removeWidget')}</Text>
             </Pressable>
           </Animated.View>
         </Pressable>

@@ -47,6 +47,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useUpgradePromptStore } from '../store/subscriptionUIStore';
 import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../store/subscriptionStore';
 import { BORDER_RADIUS, SPACING } from '../constants/theme';
+import { useT } from '../hooks/useT';
 import Button from './ui/Button';
 
 const { width } = Dimensions.get('window');
@@ -63,6 +64,7 @@ const TIER_DISPLAY: Record<string, { label: string; color: string; icon: string 
 
 export default function UpgradePromptModal() {
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const navigation = useNavigation<any>();
   const {
     visible,
@@ -236,17 +238,13 @@ export default function UpgradePromptModal() {
           </View>
 
           {/* Text Content */}
-          <Text style={styles.title}>Upgrade Required</Text>
+          <Text style={styles.title}>{t('components.upgradePrompt.title')}</Text>
           <Text style={styles.description}>
-            <Text style={styles.featureName}>{featureName}</Text> requires a{' '}
-            <Text style={[styles.tierHighlight, { color: requiredDisplay.color }]}>
-              {requiredDisplay.label}
-            </Text>{' '}
-            subscription. You're currently on the{' '}
-            <Text style={[styles.tierHighlight, { color: currentDisplay.color }]}>
-              {currentDisplay.label}
-            </Text>{' '}
-            plan.
+            {t('components.upgradePrompt.requiresFeature', {
+              feature: featureName,
+              required: requiredDisplay.label,
+              current: currentDisplay.label,
+            })}
           </Text>
 
           {/* Tier Comparison */}
@@ -257,10 +255,10 @@ export default function UpgradePromptModal() {
                 <Ionicons name={currentDisplay.icon as keyof typeof Ionicons.glyphMap} size={18} color={currentDisplay.color} />
                 <Text style={[styles.tierLabel, { color: currentDisplay.color }]}>{currentDisplay.label}</Text>
               </View>
-              <Text style={styles.tierStatusLabel}>Current</Text>
+              <Text style={styles.tierStatusLabel}>{t('components.upgradePrompt.current')}</Text>
               <View style={styles.featureCheckRow}>
                 <Ionicons name="close-circle" size={16} color="#EF4444" />
-                <Text style={styles.featureCheckText}>Not available</Text>
+                <Text style={styles.featureCheckText}>{t('components.upgradePrompt.notAvailable')}</Text>
               </View>
             </View>
 
@@ -275,10 +273,10 @@ export default function UpgradePromptModal() {
                 <Ionicons name={requiredDisplay.icon as keyof typeof Ionicons.glyphMap} size={18} color={requiredDisplay.color} />
                 <Text style={[styles.tierLabel, { color: requiredDisplay.color }]}>{requiredDisplay.label}</Text>
               </View>
-              <Text style={styles.tierStatusLabel}>Required</Text>
+              <Text style={styles.tierStatusLabel}>{t('components.upgradePrompt.required')}</Text>
               <View style={styles.featureCheckRow}>
                 <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-                <Text style={[styles.featureCheckText, { color: '#10B981' }]}>Unlocked</Text>
+                <Text style={[styles.featureCheckText, { color: '#10B981' }]}>{t('components.upgradePrompt.unlocked')}</Text>
               </View>
             </View>
           </View>
@@ -286,14 +284,14 @@ export default function UpgradePromptModal() {
           {/* Pricing Info */}
           {requiredPlan && requiredPlan.tier !== 'free' && (
             <Text style={styles.pricingText}>
-              From ₹{requiredPrice.monthly.toLocaleString('en-IN')}/month — Cancel anytime
+              {t('components.upgradePrompt.pricingFrom', { price: requiredPrice.monthly.toLocaleString('en-IN') })}
             </Text>
           )}
 
           {/* CTA Buttons */}
           <View style={styles.actions}>
             <Button
-              title={`Upgrade to ${requiredDisplay.label}`}
+              title={t('components.upgradePrompt.upgradeTo', { tier: requiredDisplay.label })}
               onPress={handleUpgrade}
               variant="primary"
               size="large"
@@ -311,7 +309,7 @@ export default function UpgradePromptModal() {
               }
             />
             <Button
-              title="Maybe Later"
+              title={t('components.upgradePrompt.maybeLater')}
               onPress={handleDismiss}
               variant="ghost"
               size="medium"

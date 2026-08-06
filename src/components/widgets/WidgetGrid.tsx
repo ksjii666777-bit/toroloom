@@ -25,6 +25,7 @@ import DraggableFlatList, {
   RenderItemParams,
 } from 'react-native-draggable-flatlist';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useWidgetStore } from '../../store/widgetStore';
 import BaseWidget from './BaseWidget';
 import PnLWidget from './PnLWidget';
@@ -99,14 +100,15 @@ const rowStyles = StyleSheet.create({
 
 function EmptyState({ onAddWidget }: { onAddWidget: () => void }) {
   const { colors } = useTheme();
+  const { t } = useT();
   return (
     <View style={emptyStyles.container}>
       <View style={[emptyStyles.iconWrap, { backgroundColor: colors.primary + '20' }]}>
         <Ionicons name="grid-outline" size={32} color={colors.primary} />
       </View>
-      <Text style={[emptyStyles.title, { color: colors.text }]}>No Widgets Yet</Text>
+      <Text style={[emptyStyles.title, { color: colors.text }]}>{t('components.widgets.gridEmpty')}</Text>
       <Text style={[emptyStyles.subtitle, { color: colors.textMuted }]}>
-        Add widgets to customize your analytics dashboard
+        {t('components.widgets.gridSubtitle')}
       </Text>
       <Pressable
         style={({ pressed }) => [
@@ -116,7 +118,7 @@ function EmptyState({ onAddWidget }: { onAddWidget: () => void }) {
         onPress={onAddWidget}
       >
         <Ionicons name="add" size={20} color="#FFF" />
-        <Text style={emptyStyles.addBtnText}>Browse Widgets</Text>
+        <Text style={emptyStyles.addBtnText}>{t('components.widgets.browseWidgets')}</Text>
       </Pressable>
     </View>
   );
@@ -154,6 +156,7 @@ const emptyStyles = StyleSheet.create({
 // ──── Footer: Add Widget Button ───────────────────────────────────────────
 
 function ListFooter({ onAddWidget, colors }: { onAddWidget: () => void; colors: any }) {
+  const { t } = useT();
   return (
     <Pressable
       style={({ pressed }) => [
@@ -167,7 +170,7 @@ function ListFooter({ onAddWidget, colors }: { onAddWidget: () => void; colors: 
       onPress={onAddWidget}
     >
       <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
-      <Text style={[footerStyles.text, { color: colors.primary }]}>Add Widget</Text>
+      <Text style={[footerStyles.text, { color: colors.primary }]}>{t('components.widgets.addWidget')}</Text>
     </Pressable>
   );
 }

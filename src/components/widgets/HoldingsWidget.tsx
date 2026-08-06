@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 
@@ -17,6 +18,7 @@ interface HoldingsWidgetProps {
 
 export default function HoldingsWidget({ size }: HoldingsWidgetProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { holdings } = usePortfolioStore();
 
   const sorted = useMemo(() => {
@@ -29,7 +31,7 @@ export default function HoldingsWidget({ size }: HoldingsWidgetProps) {
   if (holdings.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>No holdings yet</Text>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('components.widgets.holdingsEmpty')}</Text>
       </View>
     );
   }
@@ -41,7 +43,7 @@ export default function HoldingsWidget({ size }: HoldingsWidgetProps) {
           {formatCurrency(totalValue, true)}
         </Text>
         <Text style={[styles.totalLabel, { color: colors.textMuted }]}>
-          {holdings.length} holding{holdings.length !== 1 ? 's' : ''}
+          {t('components.widgets.holdingCount', { count: holdings.length })}
         </Text>
         {sorted.slice(0, 2).map(h => (
           <View key={h.id} style={styles.miniRow}>
@@ -62,7 +64,7 @@ export default function HoldingsWidget({ size }: HoldingsWidgetProps) {
           {formatCurrency(totalValue, true)}
         </Text>
         <Text style={[styles.countLabel, { color: colors.textMuted }]}>
-          {holdings.length} holdings
+          {t('components.widgets.holdingsCount', { count: holdings.length })}
         </Text>
       </View>
 
@@ -95,7 +97,7 @@ export default function HoldingsWidget({ size }: HoldingsWidgetProps) {
         })}
         {sorted.length > displayCount && (
           <Text style={[styles.moreText, { color: colors.textMuted }]}>
-            +{sorted.length - displayCount} more holdings
+            {t('components.widgets.moreHoldings', { count: sorted.length - displayCount })}
           </Text>
         )}
       </ScrollView>

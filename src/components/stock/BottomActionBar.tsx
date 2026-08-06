@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, hexToRgba } from '../../utils/formatters';
 
@@ -14,6 +15,7 @@ interface BottomActionBarProps {
 
 export default function BottomActionBar({ displayPrice, onBuy, onSell, isUSStock = false }: BottomActionBarProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   const formattedPrice = isUSStock
@@ -24,7 +26,7 @@ export default function BottomActionBar({ displayPrice, onBuy, onSell, isUSStock
     <LinearGradient colors={[hexToRgba(colors.bg, 0), colors.bg]} style={styles.container}>
       <View style={styles.row}>
         <View style={styles.priceInfo}>
-          <Text style={styles.ltpLabel}>LTP</Text>
+          <Text style={styles.ltpLabel}>{t('components.stockAnalysis.ltp')}</Text>
           <Text style={styles.ltpValue}>{formattedPrice}</Text>
         </View>
         <View style={styles.actions}>
@@ -33,7 +35,7 @@ export default function BottomActionBar({ displayPrice, onBuy, onSell, isUSStock
             onPress={onSell}
             testID="stock-sell-btn"
           >
-            <Text style={[styles.tradeBtnText, { color: colors.white }]}>Sell</Text>
+            <Text style={[styles.tradeBtnText, { color: colors.white }]}>{t('components.stockAnalysis.sell')}</Text>
           </Pressable>
           <Pressable
             style={[styles.tradeBtn, { padding: 0, overflow: 'hidden' }]}
@@ -41,7 +43,7 @@ export default function BottomActionBar({ displayPrice, onBuy, onSell, isUSStock
             testID="stock-buy-btn"
           >
             <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.buyGrad}>
-              <Text style={[styles.tradeBtnText, { color: colors.white }]}>Buy</Text>
+              <Text style={[styles.tradeBtnText, { color: colors.white }]}>{t('components.stockAnalysis.buy')}</Text>
             </LinearGradient>
           </Pressable>
         </View>

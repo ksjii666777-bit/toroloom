@@ -1047,8 +1047,7 @@ exports[`WidgetGrid — Integration > matches snapshot with populated widget gri
                               ]
                             },
                             "children": [
-                              "5",
-                              " holdings"
+                              "5 holdings"
                             ]
                           }
                         ]

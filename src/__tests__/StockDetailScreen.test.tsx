@@ -24,7 +24,18 @@ const { resolveT } = vi.hoisted(() => {
     'live': 'Live',
     'offline': 'Offline',
   };
-  const translations: Record<string, any> = { app, status };
+  const components: Record<string, string> = {
+    'stockAnalysis.aiAnalysis': 'AI Analysis',
+    'stockAnalysis.ltp': 'LTP',
+    'stockAnalysis.you': 'YOU',
+    'stockAnalysis.bullish': 'Bullish',
+    'stockAnalysis.bearish': 'Bearish',
+    'stockAnalysis.confidence': 'Confidence',
+    'stockAnalysis.targetLevels': 'Target Levels',
+    'stockAnalysis.sectorContext': 'Sector Context',
+    'stockAnalysis.peerComparison': 'Peer Comparison',
+  };
+  const translations: Record<string, any> = { app, status, components };
 
   function resolveT(key: string, params?: Record<string, any>): string {
     const parts = key.split('.');

@@ -21,6 +21,7 @@ import { View, Text, StyleSheet, ActivityIndicator, Pressable, } from 'react-nat
 import Svg, { Path, Line, Text as SvgText, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { useT } from '../../hooks/useT';
 import { formatCurrency } from '../../utils/formatters';
 import RiskRewardCharts from './RiskRewardCharts';
 import type { BacktestResult } from '../../services/backtestEngine';
@@ -41,7 +42,7 @@ interface BacktestPanelProps {
 // ──── Metric Display Helpers ───────────────────────────────────────────────
 
 interface MetricItem {
-  label: string;
+  labelKey: string;
   value: string;
   color: string;
   icon: string;
@@ -61,12 +62,12 @@ function getShorthand(value: number): string {
   return value.toFixed(2);
 }
 
-function getRiskLabel(sharpe: number, maxDD: number): { label: string; color: string } {
-  if (sharpe >= 2 && maxDD < 15) return { label: 'Excellent', color: '#00C853' };
-  if (sharpe >= 1 && maxDD < 25) return { label: 'Good', color: '#4CAF50' };
-  if (sharpe >= 0.5 && maxDD < 35) return { label: 'Fair', color: '#FFC107' };
-  if (sharpe > 0) return { label: 'Poor', color: '#FF9800' };
-  return { label: 'High Risk', color: '#FF1744' };
+function getRiskLabel(sharpe: number, maxDD: number): { labelKey: string; color: string } {
+  if (sharpe >= 2 && maxDD < 15) return { labelKey: 'fno.riskReward.ratingExcellent', color: '#00C853' };
+  if (sharpe >= 1 && maxDD < 25) return { labelKey: 'fno.riskReward.ratingGood', color: '#4CAF50' };
+  if (sharpe >= 0.5 && maxDD < 35) return { labelKey: 'fno.riskReward.ratingFair', color: '#FFC107' };
+  if (sharpe > 0) return { labelKey: 'fno.riskReward.ratingPoor', color: '#FF9800' };
+  return { labelKey: 'fno.riskReward.ratingHighRisk', color: '#FF1744' };
 }
 
 // ──── Component ────────────────────────────────────────────────────────────
@@ -78,6 +79,7 @@ export default function BacktestPanel({
   onClose,
 }: BacktestPanelProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // ── Equity Curve Mini Chart ──
@@ -111,7 +113,7 @@ export default function BacktestPanel({
 
     return (
       <View style={styles.equityChartContainer}>
-        <Text style={styles.equityChartTitle}>Equity Curve</Text>
+        <Text style={styles.equityChartTitle}>{t('fno.backtest.equityCurve')}</Text>
         <Svg width={chartW} height={chartH}>
           {/* Zero line */}
           {min < 0 && max > 0 && (
@@ -144,7 +146,7 @@ export default function BacktestPanel({
           {/* Labels */}
           <SvgText x={chartW / 2} y={chartH - 2}
             fill={colors.textMuted} fontSize={7} fontFamily="monospace" textAnchor="middle">
-            {curve.length} trading days
+            {t('fno.backtest.tradingDays', { count: curve.length })}
           </SvgText>
         </Svg>
       </View>
@@ -156,7 +158,7 @@ export default function BacktestPanel({
       <View style={[styles.container, { borderColor: colors.border }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="small" color={colors.primary} />
-          <Text style={styles.loadingText}>Running backtest...</Text>
+          <Text style={styles.loadingText}>{t('fno.backtest.running')}</Text>
         </View>
       </View>
     );
@@ -166,10 +168,10 @@ export default function BacktestPanel({
     return (
       <Pressable style={({pressed}) => [[styles.runContainer, { borderColor: colors.primary + '40' }], {opacity: pressed ? 0.7 : 1}]} onPress={onRerun}>
         <Text style={styles.runIcon}>🔬</Text>
-        <Text style={styles.runTitle}>Backtest Strategy</Text>
-        <Text style={styles.runSubtitle}>Simulate against historical data to see win rate, Sharpe ratio & drawdown</Text>
+        <Text style={styles.runTitle}>{t('fno.backtest.runTitle')}</Text>
+        <Text style={styles.runSubtitle}>{t('fno.backtest.runSubtitle')}</Text>
         <View style={[styles.runButton, { backgroundColor: colors.primary }]}>
-          <Text style={styles.runButtonText}>Run Backtest</Text>
+          <Text style={styles.runButtonText}>{t('fno.backtest.runButton')}</Text>
         </View>
       </Pressable>
     );
@@ -180,20 +182,20 @@ export default function BacktestPanel({
   const riskLabel = getRiskLabel(metrics.sharpeRatio, metrics.maxDrawdownPercent);
 
   const summaryMetrics: MetricItem[] = [
-    { label: 'Total P&L', value: formatCurrency(metrics.totalPnl, true), color: getMetricColor(metrics.totalPnl), icon: '💰' },
-    { label: 'Return', value: `${metrics.totalReturnPercent.toFixed(1)}%`, color: getMetricColor(metrics.totalReturnPercent), icon: '📈' },
-    { label: 'Win Rate', value: `${metrics.winRate.toFixed(0)}%`, color: getMetricColor(metrics.winRate), icon: '🎯' },
+    { labelKey: 'fno.backtest.totalPnl', value: formatCurrency(metrics.totalPnl, true), color: getMetricColor(metrics.totalPnl), icon: '💰' },
+    { labelKey: 'fno.backtest.return', value: `${metrics.totalReturnPercent.toFixed(1)}%`, color: getMetricColor(metrics.totalReturnPercent), icon: '📈' },
+    { labelKey: 'fno.backtest.winRate', value: `${metrics.winRate.toFixed(0)}%`, color: getMetricColor(metrics.winRate), icon: '🎯' },
   ];
 
   const detailMetrics: MetricItem[] = [
-    { label: 'Sharpe', value: metrics.sharpeRatio.toFixed(2), color: getMetricColor(metrics.sharpeRatio), icon: '📊' },
-    { label: 'Sortino', value: metrics.sortinoRatio.toFixed(2), color: getMetricColor(metrics.sortinoRatio), icon: '📉' },
-    { label: 'Profit Factor', value: metrics.profitFactor === Infinity ? '∞' : metrics.profitFactor.toFixed(2), color: getMetricColor(metrics.profitFactor), icon: '⚡' },
-    { label: 'Max DD', value: `${metrics.maxDrawdownPercent.toFixed(1)}%`, color: getMetricColor(-metrics.maxDrawdownPercent, true), icon: '🔻' },
-    { label: 'Calmar', value: metrics.calmarRatio.toFixed(2), color: getMetricColor(metrics.calmarRatio), icon: '🏔️' },
-    { label: 'Avg Win', value: getShorthand(metrics.avgWin), color: getMetricColor(metrics.avgWin), icon: '✅' },
-    { label: 'Avg Loss', value: getShorthand(metrics.avgLoss), color: getMetricColor(-metrics.avgLoss), icon: '❌' },
-    { label: 'Best/Worst', value: `${getShorthand(metrics.bestPeriod)}/${getShorthand(metrics.worstPeriod)}`, color: colors.textMuted, icon: '📌' },
+    { labelKey: 'fno.backtest.sharpe', value: metrics.sharpeRatio.toFixed(2), color: getMetricColor(metrics.sharpeRatio), icon: '📊' },
+    { labelKey: 'fno.backtest.sortino', value: metrics.sortinoRatio.toFixed(2), color: getMetricColor(metrics.sortinoRatio), icon: '📉' },
+    { labelKey: 'fno.backtest.profitFactor', value: metrics.profitFactor === Infinity ? '∞' : metrics.profitFactor.toFixed(2), color: getMetricColor(metrics.profitFactor), icon: '⚡' },
+    { labelKey: 'fno.backtest.maxDD', value: `${metrics.maxDrawdownPercent.toFixed(1)}%`, color: getMetricColor(-metrics.maxDrawdownPercent, true), icon: '🔻' },
+    { labelKey: 'fno.backtest.calmar', value: metrics.calmarRatio.toFixed(2), color: getMetricColor(metrics.calmarRatio), icon: '🏔️' },
+    { labelKey: 'fno.backtest.avgWin', value: getShorthand(metrics.avgWin), color: getMetricColor(metrics.avgWin), icon: '✅' },
+    { labelKey: 'fno.backtest.avgLoss', value: getShorthand(metrics.avgLoss), color: getMetricColor(-metrics.avgLoss), icon: '❌' },
+    { labelKey: 'fno.backtest.bestWorst', value: `${getShorthand(metrics.bestPeriod)}/${getShorthand(metrics.worstPeriod)}`, color: colors.textMuted, icon: '📌' },
   ];
 
   return (
@@ -202,7 +204,7 @@ export default function BacktestPanel({
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.headerIcon}>🔬</Text>
-          <Text style={styles.headerTitle}>Backtest Results</Text>
+          <Text style={styles.headerTitle}>{t('fno.backtest.resultsTitle')}</Text>
         </View>
         <View style={styles.headerActions}>
           <Pressable onPress={onRerun} style={styles.headerBtn}>
@@ -220,7 +222,7 @@ export default function BacktestPanel({
       <View style={styles.badgeRow}>
         <View style={[styles.riskBadge, { backgroundColor: riskLabel.color + '20' }]}>
           <Text style={[styles.riskBadgeText, { color: riskLabel.color }]}>
-            Risk: {riskLabel.label}
+            {t('fno.backtest.risk', { label: t(riskLabel.labelKey) })}
           </Text>
         </View>
         <View style={[styles.popBadge, {
@@ -233,7 +235,7 @@ export default function BacktestPanel({
               : metrics.probabilityOfProfit >= 50 ? '#FFC107'
               : '#FF1744',
           }]}>
-            🎯 POP {metrics.probabilityOfProfit.toFixed(0)}%
+            {t('fno.backtest.pop', { pct: metrics.probabilityOfProfit.toFixed(0) })}
           </Text>
         </View>
       </View>
@@ -241,10 +243,10 @@ export default function BacktestPanel({
       {/* Summary row */}
       <View style={[styles.summaryRow, { backgroundColor: isProfitable ? '#00C85310' : '#FF174410' }]}>
         {summaryMetrics.map((m, _i) => (
-          <View key={m.label} style={styles.summaryItem}>
+          <View key={m.labelKey} style={styles.summaryItem}>
             <Text style={styles.summaryIcon}>{m.icon}</Text>
             <Text style={[styles.summaryValue, { color: m.color }]}>{m.value}</Text>
-            <Text style={styles.summaryLabel}>{m.label}</Text>
+            <Text style={styles.summaryLabel}>{t(m.labelKey)}</Text>
           </View>
         ))}
       </View>
@@ -252,10 +254,10 @@ export default function BacktestPanel({
       {/* Detail metrics grid */}
       <View style={styles.metricsGrid}>
         {detailMetrics.map((m, _i) => (
-          <View key={m.label} style={[styles.metricCell, { backgroundColor: colors.bgCard + '60' }]}>
+          <View key={m.labelKey} style={[styles.metricCell, { backgroundColor: colors.bgCard + '60' }]}>
             <Text style={styles.metricIcon}>{m.icon}</Text>
             <Text style={[styles.metricValue, { color: m.color }]}>{m.value}</Text>
-            <Text style={styles.metricLabel}>{m.label}</Text>
+            <Text style={styles.metricLabel}>{t(m.labelKey)}</Text>
           </View>
         ))}
       </View>
@@ -269,10 +271,10 @@ export default function BacktestPanel({
       {/* Period stats */}
       <View style={styles.periodRow}>
         <Text style={styles.periodText}>
-          Periods: {metrics.totalPeriods} | Win: {metrics.winningPeriods} / Loss: {metrics.losingPeriods}
+          {t('fno.backtest.periods', { total: metrics.totalPeriods, win: metrics.winningPeriods, loss: metrics.losingPeriods })}
         </Text>
         <Text style={styles.periodText}>
-          Std Dev: ₹{getShorthand(metrics.returnStdDev)}
+          {t('fno.backtest.stdDev', { value: getShorthand(metrics.returnStdDev) })}
         </Text>
       </View>
     </View>

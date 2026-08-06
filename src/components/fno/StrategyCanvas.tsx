@@ -54,6 +54,7 @@ import Svg, {
   ClipPath,
 } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 // ──── Local type (matches StrategyPnLPoint from types)
@@ -110,6 +111,7 @@ export default function StrategyCanvas({
   legColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'],
 }: StrategyCanvasProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // ── Dimensions ──
@@ -351,9 +353,9 @@ export default function StrategyCanvas({
       <View style={[styles.container, { height }]} onLayout={onLayout}>
         <View style={styles.emptyState}>
           <Text style={styles.emptyIcon}>📊</Text>
-          <Text style={styles.emptyTitle}>No Strategy Data</Text>
+          <Text style={styles.emptyTitle}>{t('fno.canvas.noData')}</Text>
           <Text style={styles.emptySubtitle}>
-            Add legs and tap Analyze to see the P&L diagram
+            {t('fno.canvas.noDataSub')}
           </Text>
         </View>
       </View>
@@ -366,21 +368,21 @@ export default function StrategyCanvas({
       {/* ── Metrics Summary Bar ── */}
       <View style={styles.metricsBar}>
         <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Max Profit</Text>
+          <Text style={styles.metricLabel}>{t('fno.canvas.maxProfit')}</Text>
           <Text style={[styles.metricValue, { color: colors.marketUp }]}>
             +{formatCurrency(maxProfit, true)}
           </Text>
         </View>
         <View style={styles.metricDivider} />
         <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Max Loss</Text>
+          <Text style={styles.metricLabel}>{t('fno.canvas.maxLoss')}</Text>
           <Text style={[styles.metricValue, { color: colors.marketDown }]}>
             {formatCurrency(maxLoss, true)}
           </Text>
         </View>
         <View style={styles.metricDivider} />
         <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Risk/Reward</Text>
+          <Text style={styles.metricLabel}>{t('fno.canvas.riskReward')}</Text>
           <Text style={[styles.metricValue, { color: colors.text }]}>
             {maxLoss < 0
               ? `${(Math.abs(maxProfit / maxLoss)).toFixed(2)}:1`

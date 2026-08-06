@@ -7,6 +7,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Path, Text as SvgText, Circle as SvgCircle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 
 
@@ -23,6 +24,7 @@ interface SectorAllocationWidgetProps {
 
 export default function SectorAllocationWidget({ size }: SectorAllocationWidgetProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { sectorAllocation } = usePortfolioAnalyticsStore(s => s.getAnalytics());
 
   const donutSize = size === 'small' ? 100 : size === 'medium' ? 120 : 160;
@@ -63,7 +65,7 @@ export default function SectorAllocationWidget({ size }: SectorAllocationWidgetP
   if (sectorAllocation.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>No sector data</Text>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('components.widgets.sectorNoData')}</Text>
       </View>
     );
   }
@@ -95,7 +97,7 @@ export default function SectorAllocationWidget({ size }: SectorAllocationWidgetP
             fontWeight="500"
             textAnchor="middle"
           >
-            Sectors
+            {t('components.widgets.sectors')}
           </SvgText>
         </Svg>
 
@@ -115,14 +117,16 @@ export default function SectorAllocationWidget({ size }: SectorAllocationWidgetP
             </View>
           ))}
           {sectorAllocation.length > displayCount && (
-            <Text style={[styles.legendMore, { color: colors.textMuted }]}>+{sectorAllocation.length - displayCount} more</Text>
+            <Text style={[styles.legendMore, { color: colors.textMuted }]}>
+              {t('components.widgets.moreItems', { count: sectorAllocation.length - displayCount })}
+            </Text>
           )}
         </ScrollView>
       </View>
 
       {size === 'large' && (
         <View style={[styles.detailRow, { borderTopColor: colors.divider }]}>
-          <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Total invested across</Text>
+          <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('components.widgets.sectorTotalInvested')}</Text>
           <Text style={[styles.detailValue, { color: colors.text }]}>
             {sectorAllocation.length} sectors
           </Text>

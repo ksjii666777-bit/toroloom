@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { formatPercent } from '../../utils/formatters';
 
@@ -23,9 +24,10 @@ function getRiskColor(value: number, thresholds: { good: number; ok: number }): 
 
 function MetricPill({ label, value, color, barValue }: { label: string; value: string; color: string; barValue?: number }) {
   const { colors } = useTheme();
+  const { t } = useT();
   return (
     <View style={[pillStyles.container, { backgroundColor: colors.bgInput }]}>
-      <Text style={pillStyles.label}>{label}</Text>
+      <Text style={pillStyles.label}>{t(label)}</Text>
       <Text style={[pillStyles.value, { color }]}>{value}</Text>
       {barValue !== undefined && (
         <View style={[pillStyles.bar, { backgroundColor: colors.border }]}>
@@ -51,6 +53,7 @@ const pillStyles = StyleSheet.create({
 
 export default function RiskMetricsWidget({ size }: RiskMetricsWidgetProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { metrics, pnlHistory } = usePortfolioAnalyticsStore(s => s.getAnalytics());
 
   // Compute Sortino
@@ -84,19 +87,19 @@ export default function RiskMetricsWidget({ size }: RiskMetricsWidgetProps) {
       <View style={styles.container}>
         <View style={styles.compactRow}>
           <View style={styles.compactItem}>
-            <Text style={[styles.compactLabel, { color: colors.textMuted }]}>Sharpe</Text>
+            <Text style={[styles.compactLabel, { color: colors.textMuted }]}>{t('components.widgets.pnlSharpe')}</Text>
             <Text style={[styles.compactValue, { color: sharpeColor }]}>
-              {metrics.sharpeRatio > 0 ? metrics.sharpeRatio.toFixed(2) : 'N/A'}
+              {metrics.sharpeRatio > 0 ? metrics.sharpeRatio.toFixed(2) : t('app.na')}
             </Text>
           </View>
           <View style={styles.compactItem}>
-            <Text style={[styles.compactLabel, { color: colors.textMuted }]}>Win Rate</Text>
+            <Text style={[styles.compactLabel, { color: colors.textMuted }]}>{t('components.widgets.pnlWinRate')}</Text>
             <Text style={[styles.compactValue, { color: winRateColor }]}>
               {formatPercent(metrics.winRate)}
             </Text>
           </View>
           <View style={styles.compactItem}>
-            <Text style={[styles.compactLabel, { color: colors.textMuted }]}>Drawdown</Text>
+            <Text style={[styles.compactLabel, { color: colors.textMuted }]}>{t('components.widgets.pnlDrawdown')}</Text>
             <Text style={[styles.compactValue, { color: drawdownColor }]}>
               {formatPercent(metrics.maxDrawdownPercent)}
             </Text>
@@ -109,17 +112,17 @@ export default function RiskMetricsWidget({ size }: RiskMetricsWidgetProps) {
   return (
     <View style={styles.container}>
       <View style={styles.grid2}>
-        <MetricPill label="Sharpe Ratio" value={metrics.sharpeRatio > 0 ? metrics.sharpeRatio.toFixed(2) : 'N/A'} color={sharpeColor} barValue={metrics.sharpeRatio > 0 ? Math.min((metrics.sharpeRatio / 3) * 100, 100) : 0} />
-        <MetricPill label="Sortino Ratio" value={sortinoRatio > 0 ? sortinoRatio.toFixed(2) : 'N/A'} color={sortinoColor} barValue={sortinoRatio > 0 ? Math.min((sortinoRatio / 3) * 100, 100) : 0} />
+        <MetricPill label="components.widgets.sharpeRatio" value={metrics.sharpeRatio > 0 ? metrics.sharpeRatio.toFixed(2) : t('app.na')} color={sharpeColor} barValue={metrics.sharpeRatio > 0 ? Math.min((metrics.sharpeRatio / 3) * 100, 100) : 0} />
+        <MetricPill label="components.widgets.sortinoRatio" value={sortinoRatio > 0 ? sortinoRatio.toFixed(2) : t('app.na')} color={sortinoColor} barValue={sortinoRatio > 0 ? Math.min((sortinoRatio / 3) * 100, 100) : 0} />
       </View>
       <View style={styles.grid2}>
-        <MetricPill label="Win Rate" value={formatPercent(metrics.winRate)} color={winRateColor} barValue={metrics.winRate} />
-        <MetricPill label="Max Drawdown" value={formatPercent(metrics.maxDrawdownPercent)} color={drawdownColor} barValue={Math.min((metrics.maxDrawdownPercent / 40) * 100, 100)} />
+        <MetricPill label="components.widgets.winRate" value={formatPercent(metrics.winRate)} color={winRateColor} barValue={metrics.winRate} />
+        <MetricPill label="components.widgets.maxDrawdown" value={formatPercent(metrics.maxDrawdownPercent)} color={drawdownColor} barValue={Math.min((metrics.maxDrawdownPercent / 40) * 100, 100)} />
       </View>
       {size === 'large' && (
         <View style={styles.grid2}>
-          <MetricPill label="Profit Factor" value={metrics.profitFactor > 0 ? metrics.profitFactor.toFixed(2) : 'N/A'} color={getRiskColor(metrics.profitFactor, { good: 2.0, ok: 1.2 })} barValue={metrics.profitFactor > 0 ? Math.min((metrics.profitFactor / 4) * 100, 100) : 0} />
-          <MetricPill label="Avg Holding" value={`${metrics.avgHoldingDays}d`} color="#3B82F6" barValue={Math.min((metrics.avgHoldingDays / 90) * 100, 100)} />
+          <MetricPill label="components.widgets.profitFactor" value={metrics.profitFactor > 0 ? metrics.profitFactor.toFixed(2) : t('app.na')} color={getRiskColor(metrics.profitFactor, { good: 2.0, ok: 1.2 })} barValue={metrics.profitFactor > 0 ? Math.min((metrics.profitFactor / 4) * 100, 100) : 0} />
+          <MetricPill label={'components.widgets.avgHolding'} value={`${metrics.avgHoldingDays}d`} color="#3B82F6" barValue={Math.min((metrics.avgHoldingDays / 90) * 100, 100)} />
         </View>
       )}
     </View>

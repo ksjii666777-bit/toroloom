@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Badge from '../ui/Badge';
 
@@ -25,6 +26,7 @@ interface SectorContextProps {
 
 export default function SectorContext({ data }: SectorContextProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   const isGreen = data.avgChange >= 0;
@@ -33,7 +35,7 @@ export default function SectorContext({ data }: SectorContextProps) {
   return (
     <View style={{ marginBottom: SPACING.lg }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md }}>
-        <Text style={styles.sectionTitle} testID="stock-sector-context">Sector Context</Text>
+        <Text style={styles.sectionTitle} testID="stock-sector-context">{t('components.stockAnalysis.sectorContext')}</Text>
         <Badge
           label={`#${data.rank} of ${data.totalSectors}`}
           variant={data.rank <= 3 ? 'success' : data.rank >= data.totalSectors - 2 ? 'danger' : 'info'}
@@ -44,7 +46,7 @@ export default function SectorContext({ data }: SectorContextProps) {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Ionicons name="business" size={18} color={isGreen ? colors.marketUp : colors.marketDown} />
-            <Text style={[styles.sectorName, { color: colors.text }]}>{data.sectorName} Sector</Text>
+            <Text style={[styles.sectorName, { color: colors.text }]}>{t('components.stockAnalysis.sectorSuffix', { name: data.sectorName })}</Text>
           </View>
           <View style={[styles.changeBadge, {
             backgroundColor: isGreen
@@ -70,17 +72,17 @@ export default function SectorContext({ data }: SectorContextProps) {
         <View style={[styles.statsRow, { borderTopColor: colors.divider }]}>
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: colors.text }]}>{data.stockCount}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Stocks</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('components.stockAnalysis.stocks')}</Text>
           </View>
           <View style={[styles.divider, { backgroundColor: colors.divider }]} />
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: colors.marketUp }]}>{data.bestStockSymbol}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Best</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('components.stockAnalysis.best')}</Text>
           </View>
           <View style={[styles.divider, { backgroundColor: colors.divider }]} />
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: colors.marketDown }]}>{data.worstStockSymbol}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Worst</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('components.stockAnalysis.worst')}</Text>
           </View>
         </View>
 
@@ -88,8 +90,8 @@ export default function SectorContext({ data }: SectorContextProps) {
         <View style={[styles.rankRow, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
           <Ionicons name="podium" size={14} color={colors.textMuted} />
           <Text style={[styles.rankText, { color: colors.textMuted }]}>
-            {data.sectorName} is #{data.rank} of {data.totalSectors} sectors
-            {' (+'}{data.bestSectorChange.toFixed(1)}% best — {data.worstSectorChange.toFixed(1)}% worst)
+            {t('components.stockAnalysis.rankText', { name: data.sectorName, rank: data.rank, total: data.totalSectors })}
+            {t('components.stockAnalysis.rankRange', { best: data.bestSectorChange.toFixed(1), worst: data.worstSectorChange.toFixed(1) })}
           </Text>
         </View>
       </View>

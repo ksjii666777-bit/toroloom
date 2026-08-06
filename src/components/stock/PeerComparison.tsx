@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { Stock } from '../../types';
 
@@ -21,6 +22,7 @@ export default function PeerComparison({
   sectorName,
 }: PeerComparisonProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   if (peers.length === 0) return null;
@@ -31,7 +33,7 @@ export default function PeerComparison({
   return (
     <View style={{ marginBottom: SPACING.lg }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md }}>
-        <Text style={styles.sectionTitle} testID="stock-peer-comparison">Peer Comparison</Text>
+        <Text style={styles.sectionTitle} testID="stock-peer-comparison">{t('components.stockAnalysis.peerComparison')}</Text>
         {sectorName && (
           <Text style={{ ...FONTS.regular, fontSize: FONTS.size.xs, color: colors.textMuted }}>{sectorName}</Text>
         )}
@@ -39,7 +41,7 @@ export default function PeerComparison({
 
       {/* Table header */}
       <View style={[styles.header, { borderColor: colors.border }]}>
-        <Text style={[styles.headerCell, styles.cellSymbol, { color: colors.textMuted }]}>Symbol</Text>
+        <Text style={[styles.headerCell, styles.cellSymbol, { color: colors.textMuted }]}>{t('components.stockAnalysis.symbol')}</Text>
         <Text style={[styles.headerCell, { color: colors.textMuted }]}>P/E</Text>
         <Text style={[styles.headerCell, { color: colors.textMuted }]}>M.Cap</Text>
         <Text style={[styles.headerCell, { color: colors.textMuted }]}>Chg%</Text>
@@ -50,7 +52,7 @@ export default function PeerComparison({
         <View style={styles.cellSymbol}>
           <Text style={[styles.symbolText, { color: colors.primary }]}>{currentStock.symbol}</Text>
           <View style={[styles.youBadge, { backgroundColor: colors.primary + '20' }]}>
-            <Text style={[styles.youBadgeText, { color: colors.primary }]}>YOU</Text>
+            <Text style={[styles.youBadgeText, { color: colors.primary }]}>{t('components.stockAnalysis.you')}</Text>
           </View>
         </View>
         <View style={styles.cellWithBar}>

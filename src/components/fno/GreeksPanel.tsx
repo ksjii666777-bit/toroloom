@@ -27,6 +27,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path, Line, Text as SvgText, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { useT } from '../../hooks/useT';
 import type { LegGreeks, NetStrategyGreeks } from '../../services/greeksCalculator';
 import { generateThetaDecay } from '../../services/greeksCalculator';
 
@@ -76,6 +77,7 @@ export default function GreeksPanel({
   compact = false,
 }: GreeksPanelProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const hasGreeks = legGreeks.length > 0;
@@ -142,7 +144,7 @@ export default function GreeksPanel({
               x={getX(thetaDecayData.length - 1)} y={chartH - 2}
               fill={colors.textMuted} fontSize={7} fontFamily="System" textAnchor="middle"
             >
-              Expiry
+              {t('fno.greeks.expiry')}
             </SvgText>
           </G>
           {/* Starting theta value */}
@@ -163,8 +165,8 @@ export default function GreeksPanel({
       <View style={[styles.container, { borderColor: colors.border }]}>
         <View style={styles.emptyState}>
           <Text style={styles.emptyIcon}>📐</Text>
-          <Text style={styles.emptyTitle}>Greeks</Text>
-          <Text style={styles.emptySubtitle}>Analyze strategy to see Greeks</Text>
+          <Text style={styles.emptyTitle}>{t('fno.greeks.title')}</Text>
+          <Text style={styles.emptySubtitle}>{t('fno.greeks.emptySub')}</Text>
         </View>
       </View>
     );
@@ -174,14 +176,14 @@ export default function GreeksPanel({
     <View style={[styles.container, { borderColor: colors.border }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Greeks</Text>
+        <Text style={styles.headerTitle}>{t('fno.greeks.title')}</Text>
         <View style={styles.headerMeta}>
           <Text style={styles.headerDays}>
-            {daysToExpiry}d to expiry
+            {t('fno.greeks.daysToExpiry', { count: daysToExpiry })}
           </Text>
           <View style={[styles.marginBadge, { backgroundColor: colors.primary + '20' }]}>
             <Text style={[styles.marginText, { color: colors.primary }]}>
-              Margin: ₹{(netGreeks.estimatedMargin / 1000).toFixed(1)}K
+              {t('fno.greeks.margin', { value: (netGreeks.estimatedMargin / 1000).toFixed(1) })}
             </Text>
           </View>
         </View>
@@ -211,7 +213,7 @@ export default function GreeksPanel({
               <Text style={[styles.legLabel, {
                 color: g.delta > 0 ? colors.marketUp : colors.marketDown,
               }]}>
-                {legLabels[legIdx] || `Leg ${legIdx + 1}`}
+                {legLabels[legIdx] || t('fno.greeks.leg', { count: legIdx + 1 })}
               </Text>
             </View>
             <View style={[styles.moneynessBadge, {
@@ -243,21 +245,21 @@ export default function GreeksPanel({
       {/* ── Directional Bias ── */}
       <View style={[styles.biasContainer, { borderTopColor: colors.divider }]}>
         <View style={styles.biasRow}>
-          <Text style={styles.biasLabel}>Directional Bias</Text>
+          <Text style={styles.biasLabel}>{t('fno.greeks.directionalBias')}</Text>
           <Text style={[styles.biasValue, {
             color: Math.abs(netGreeks.delta) < 0.1 ? colors.textMuted :
               netGreeks.delta > 0 ? colors.marketUp : colors.marketDown,
           }]}>
-            {Math.abs(netGreeks.delta) < 0.1 ? 'Neutral' :
-             netGreeks.delta > 0 ? `Bullish (Δ ${netGreeks.delta.toFixed(2)})` :
-             `Bearish (Δ ${netGreeks.delta.toFixed(2)})`}
+            {Math.abs(netGreeks.delta) < 0.1 ? t('fno.greeks.neutral') :
+             netGreeks.delta > 0 ? t('fno.greeks.bullishDelta', { value: netGreeks.delta.toFixed(2) }) :
+             t('fno.greeks.bearishDelta', { value: netGreeks.delta.toFixed(2) })}
           </Text>
         </View>
         {netGreeks.theta < -20 && (
           <View style={styles.warningRow}>
             <Text style={styles.warningIcon}>⚠️</Text>
             <Text style={styles.warningText}>
-              High theta decay ({netGreeks.theta.toFixed(1)}/d) — consider shorter duration
+              {t('fno.greeks.thetaWarning', { value: netGreeks.theta.toFixed(1) })}
             </Text>
           </View>
         )}

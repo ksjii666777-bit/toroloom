@@ -21,6 +21,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, } from 'react-native';
 import Svg, { Path, Line, Text as SvgText, Rect } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { useT } from '../../hooks/useT';
 import { formatCurrency } from '../../utils/formatters';
 import type { StrategyComparisonSlot } from '../../store/fnoStore';
 
@@ -36,7 +37,7 @@ interface CompareStrategiesPanelProps {
 
 interface CompareMetric {
   key: string;
-  label: string;
+  labelKey: string;
   icon: string;
   getValue: (slot: StrategyComparisonSlot) => number;
   format: (v: number) => string;
@@ -45,14 +46,14 @@ interface CompareMetric {
 }
 
 const METRICS: CompareMetric[] = [
-  { key: 'totalPnl', label: 'Total P&L', icon: '💰', getValue: s => s.backtestResult.totalPnl, format: v => formatCurrency(v, true), higherIsBetter: true, color: v => v >= 0 ? '#00C853' : '#FF1744' },
-  { key: 'return', label: 'Return', icon: '📈', getValue: s => s.backtestResult.totalReturnPercent, format: v => `${v.toFixed(1)}%`, higherIsBetter: true, color: v => v >= 0 ? '#00C853' : '#FF1744' },
-  { key: 'winRate', label: 'Win Rate', icon: '🎯', getValue: s => s.backtestResult.winRate, format: v => `${v.toFixed(0)}%`, higherIsBetter: true, color: v => v >= 50 ? '#00C853' : '#FFC107' },
-  { key: 'sharpe', label: 'Sharpe', icon: '📊', getValue: s => s.backtestResult.sharpeRatio, format: v => v.toFixed(2), higherIsBetter: true, color: v => v >= 1 ? '#00C853' : v >= 0 ? '#FFC107' : '#FF1744' },
-  { key: 'profitFactor', label: 'PF', icon: '⚡', getValue: s => s.backtestResult.profitFactor, format: v => v === Infinity ? '∞' : v.toFixed(2), higherIsBetter: true, color: v => v >= 1.5 ? '#00C853' : v >= 1 ? '#FFC107' : '#FF1744' },
-  { key: 'maxDD', label: 'Max DD', icon: '🔻', getValue: s => s.backtestResult.maxDrawdownPercent, format: v => `${v.toFixed(1)}%`, higherIsBetter: false, color: v => v <= 15 ? '#00C853' : v <= 30 ? '#FFC107' : '#FF1744' },
-  { key: 'calmar', label: 'Calmar', icon: '🏔️', getValue: s => s.backtestResult.calmarRatio, format: v => v.toFixed(2), higherIsBetter: true, color: v => v >= 1 ? '#00C853' : v >= 0 ? '#FFC107' : '#FF1744' },
-  { key: 'sortino', label: 'Sortino', icon: '📉', getValue: s => s.backtestResult.sortinoRatio, format: v => v.toFixed(2), higherIsBetter: true, color: v => v >= 1 ? '#00C853' : v >= 0 ? '#FFC107' : '#FF1744' },
+  { key: 'totalPnl', labelKey: 'fno.compare.metricTotalPnl', icon: '💰', getValue: s => s.backtestResult.totalPnl, format: v => formatCurrency(v, true), higherIsBetter: true, color: v => v >= 0 ? '#00C853' : '#FF1744' },
+  { key: 'return', labelKey: 'fno.compare.metricReturn', icon: '📈', getValue: s => s.backtestResult.totalReturnPercent, format: v => `${v.toFixed(1)}%`, higherIsBetter: true, color: v => v >= 0 ? '#00C853' : '#FF1744' },
+  { key: 'winRate', labelKey: 'fno.compare.metricWinRate', icon: '🎯', getValue: s => s.backtestResult.winRate, format: v => `${v.toFixed(0)}%`, higherIsBetter: true, color: v => v >= 50 ? '#00C853' : '#FFC107' },
+  { key: 'sharpe', labelKey: 'fno.compare.metricSharpe', icon: '📊', getValue: s => s.backtestResult.sharpeRatio, format: v => v.toFixed(2), higherIsBetter: true, color: v => v >= 1 ? '#00C853' : v >= 0 ? '#FFC107' : '#FF1744' },
+  { key: 'profitFactor', labelKey: 'fno.compare.metricPF', icon: '⚡', getValue: s => s.backtestResult.profitFactor, format: v => v === Infinity ? '∞' : v.toFixed(2), higherIsBetter: true, color: v => v >= 1.5 ? '#00C853' : v >= 1 ? '#FFC107' : '#FF1744' },
+  { key: 'maxDD', labelKey: 'fno.compare.metricMaxDD', icon: '🔻', getValue: s => s.backtestResult.maxDrawdownPercent, format: v => `${v.toFixed(1)}%`, higherIsBetter: false, color: v => v <= 15 ? '#00C853' : v <= 30 ? '#FFC107' : '#FF1744' },
+  { key: 'calmar', labelKey: 'fno.compare.metricCalmar', icon: '🏔️', getValue: s => s.backtestResult.calmarRatio, format: v => v.toFixed(2), higherIsBetter: true, color: v => v >= 1 ? '#00C853' : v >= 0 ? '#FFC107' : '#FF1744' },
+  { key: 'sortino', labelKey: 'fno.compare.metricSortino', icon: '📉', getValue: s => s.backtestResult.sortinoRatio, format: v => v.toFixed(2), higherIsBetter: true, color: v => v >= 1 ? '#00C853' : v >= 0 ? '#FFC107' : '#FF1744' },
 ];
 
 // ──── Component ────────────────────────────────────────────────────────────
@@ -63,6 +64,7 @@ export default function CompareStrategiesPanel({
   onClear,
 }: CompareStrategiesPanelProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const hasData = slots.length >= 2;
@@ -102,7 +104,7 @@ export default function CompareStrategiesPanel({
 
     return (
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Equity Curve Comparison</Text>
+        <Text style={styles.chartTitle}>{t('fno.compare.equityCurve')}</Text>
         <Svg width={chartW} height={chartH}>
           {/* Zero line */}
           {min < 0 && max > 0 && (
@@ -201,19 +203,18 @@ export default function CompareStrategiesPanel({
   return (
     <View style={[styles.container, { borderColor: colors.border }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.headerIcon}>⚖️</Text>
+      <View style={styles.header}>          <View style={styles.headerLeft}>
+            <Text style={styles.headerIcon}>⚖️</Text>
           <View>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Compare Strategies</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('fno.compare.title')}</Text>
             <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-              {slots.length} of {3} slots filled
+              {t('fno.compare.slotsFilled', { count: slots.length, total: 3 })}
             </Text>
           </View>
         </View>
         {slots.length > 0 && (
           <Pressable onPress={onClear} style={styles.clearBtn}>
-            <Text style={[styles.clearBtnText, { color: colors.danger }]}>Clear All</Text>
+            <Text style={[styles.clearBtnText, { color: colors.danger }]}>{t('fno.compare.clearAll')}</Text>
           </Pressable>
         )}
       </View>
@@ -223,10 +224,10 @@ export default function CompareStrategiesPanel({
         <View style={styles.emptyState}>
           <Text style={styles.emptyIcon}>📋</Text>
           <Text style={[styles.emptyTitle, { color: colors.text }]}>
-            Add {2 - slots.length} More Strategy{2 - slots.length !== 1 ? 'ies' : 'y'}
+            {t('fno.compare.addMore', { count: 2 - slots.length })}
           </Text>
           <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-            Run a backtest on a strategy, then tap "Add to Comparison" to save it for side-by-side analysis.
+            {t('fno.compare.emptySub')}
           </Text>
           {slots.length === 1 && (
             <View style={[styles.slotPreview, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -234,7 +235,7 @@ export default function CompareStrategiesPanel({
               <View style={{ flex: 1 }}>
                 <Text style={[styles.slotName, { color: colors.text }]}>{slots[0].name}</Text>
                 <Text style={[styles.slotMeta, { color: colors.textMuted }]}>
-                  {slots[0].legSummary} · Win Rate {slots[0].backtestResult.winRate.toFixed(0)}%
+                  {slots[0].legSummary} · {t('fno.compare.winRate')} {slots[0].backtestResult.winRate.toFixed(0)}%
                 </Text>
               </View>
               {onRemove && (
@@ -270,19 +271,19 @@ export default function CompareStrategiesPanel({
                     <Text style={[styles.slotCardValue, { color: slot.backtestResult.totalPnl >= 0 ? '#00C853' : '#FF1744' }]}>
                       {formatCurrency(slot.backtestResult.totalPnl, true)}
                     </Text>
-                    <Text style={[styles.slotCardLabel, { color: colors.textMuted }]}>P&L</Text>
+                    <Text style={[styles.slotCardLabel, { color: colors.textMuted }]}>{t('fno.compare.pnl')}</Text>
                   </View>
                   <View style={styles.slotCardMetric}>
                     <Text style={[styles.slotCardValue, { color: colors.text }]}>
                       {slot.backtestResult.winRate.toFixed(0)}%
                     </Text>
-                    <Text style={[styles.slotCardLabel, { color: colors.textMuted }]}>Win Rate</Text>
+                    <Text style={[styles.slotCardLabel, { color: colors.textMuted }]}>{t('fno.compare.winRate')}</Text>
                   </View>
                   <View style={styles.slotCardMetric}>
                     <Text style={[styles.slotCardValue, { color: slot.backtestResult.sharpeRatio >= 1 ? '#00C853' : '#FFC107' }]}>
                       {slot.backtestResult.sharpeRatio.toFixed(2)}
                     </Text>
-                    <Text style={[styles.slotCardLabel, { color: colors.textMuted }]}>Sharpe</Text>
+                    <Text style={[styles.slotCardLabel, { color: colors.textMuted }]}>{t('fno.compare.sharpe')}</Text>
                   </View>
                 </View>
               </View>
@@ -291,7 +292,7 @@ export default function CompareStrategiesPanel({
 
           {/* Bar Charts for All Metrics */}
           <View style={styles.barChartSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Metric Comparison</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('fno.compare.metricComparison')}</Text>
             <View style={[styles.barChartCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               {METRICS.map(metric => renderBarChart(metric))}
             </View>
@@ -299,14 +300,14 @@ export default function CompareStrategiesPanel({
 
           {/* Wins/Losses Summary */}
           <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Period Analysis</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('fno.compare.periodAnalysis')}</Text>
             {slots.map((slot, _i) => (
               <View key={slot.id} style={styles.summaryRow}>
                 <View style={[styles.summaryDot, { backgroundColor: slot.color }]} />
                 <Text style={[styles.summaryName, { color: colors.text }]}>{slot.name}</Text>
                 <Text style={[styles.summaryDetail, { color: colors.textMuted }]}>
                   {slot.backtestResult.winningPeriods}W / {slot.backtestResult.losingPeriods}L
-                  {' · '}{slot.backtestResult.totalPeriods} periods
+                  {' · '}{t('fno.compare.periods', { count: slot.backtestResult.totalPeriods })}
                 </Text>
               </View>
             ))}

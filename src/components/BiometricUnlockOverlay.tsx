@@ -42,10 +42,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
 import { useBiometricStore } from '../store/biometricStore';
 import { biometricAuth } from '../services/biometricService';
+import { useT } from '../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../constants/theme';
 
 export default function BiometricUnlockOverlay() {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   const enabled = useBiometricStore((s) => s.enabled);
@@ -105,7 +107,7 @@ export default function BiometricUnlockOverlay() {
     setError(null);
 
     const result = await biometricAuth.authenticate(
-      `Unlock Toroloom with ${biometricLabel}`,
+      t('components.biometric.unlockPrompt', { label: biometricLabel }),
       true,
     );
 
@@ -113,11 +115,11 @@ export default function BiometricUnlockOverlay() {
       unlock();
       setVisible(false);
     } else {
-      setError(result.error || 'Authentication failed');
+      setError(result.error || t('components.biometric.authFailed'));
     }
 
     setIsAuthenticating(false);
-  }, [isAuthenticating, biometricLabel, unlock]);
+  }, [isAuthenticating, biometricLabel, unlock, t]);
 
   // Handle AppState changes — show overlay when app comes to foreground
   useEffect(() => {
@@ -136,7 +138,7 @@ export default function BiometricUnlockOverlay() {
       setError(null);
 
       biometricAuth.authenticate(
-        `Unlock Toroloom with ${biometricLabel}`,
+        t('components.biometric.unlockPrompt', { label: biometricLabel }),
         true,
       ).then((result) => {
         isAuthInProgress = false;
@@ -144,7 +146,7 @@ export default function BiometricUnlockOverlay() {
           unlock();
           setVisible(false);
         } else {
-          setError(result.error || 'Authentication failed');
+          setError(result.error || t('components.biometric.authFailed'));
         }
       });
     };
@@ -170,7 +172,7 @@ export default function BiometricUnlockOverlay() {
     }
 
     return () => subscription.remove();
-  }, [enabled, isUnlocked, biometricLabel, lock, unlock]);
+  }, [enabled, isUnlocked, biometricLabel, lock, unlock, t]);
 
   if (!visible || !enabled) return null;
 
@@ -199,7 +201,7 @@ export default function BiometricUnlockOverlay() {
         </View>
 
         <Text style={styles.title}>Toroloom</Text>
-        <Text style={styles.subtitle}>Biometric authentication required</Text>
+        <Text style={styles.subtitle}>{t('components.biometric.authRequired')}</Text>
 
         {/* Biometric Icon (pulsing) */}
         <Animated.View style={[styles.biometricContainer, pulseStyle]}>
@@ -220,8 +222,8 @@ export default function BiometricUnlockOverlay() {
 
         <Text style={styles.promptText}>
           {isAuthenticating
-            ? 'Authenticating...'
-            : `Tap to authenticate with ${biometricLabel}`}
+            ? t('components.biometric.authenticating')
+            : t('components.biometric.tapToAuthenticate', { label: biometricLabel })}
         </Text>
 
         {/* Error message */}
@@ -233,7 +235,7 @@ export default function BiometricUnlockOverlay() {
             <Ionicons name="alert-circle" size={18} color={colors.marketDown} />
             <Text style={styles.errorText}>
               {error === 'Authentication cancelled'
-                ? `Authentication cancelled. Use passcode or tap to retry with ${biometricLabel}.`
+                ? t('components.biometric.authCancelled', { label: biometricLabel })
                 : error}
             </Text>
           </Animated.View>
@@ -248,7 +250,7 @@ export default function BiometricUnlockOverlay() {
               disabled={isAuthenticating}
             >
               <Ionicons name="refresh" size={18} color={colors.white} />
-              <Text style={styles.actionBtnText}>Retry</Text>
+              <Text style={styles.actionBtnText}>{t('components.biometric.retry')}</Text>
             </Pressable>
           )}
 
@@ -258,15 +260,14 @@ export default function BiometricUnlockOverlay() {
           >
             <Ionicons name="keypad-outline" size={18} color={colors.text} />
             <Text style={[styles.actionBtnText, { color: colors.text }]}>
-              Use Passcode
+              {t('components.biometric.usePasscode')}
             </Text>
           </Pressable>
         </View>
 
         {Platform.OS === 'ios' && (
           <Text style={styles.hint}>
-            Face ID permission is required. You can change this in
-            Settings {'>'} Toroloom {'>'} Face ID & Passcode.
+            {t('components.biometric.faceIdHint')}
           </Text>
         )}
       </LinearGradient>

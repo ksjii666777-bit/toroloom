@@ -35,6 +35,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOfflineStore, type CacheNamespace } from '../../store/offlineStore';
 
 import { runSyncCycle } from '../../hooks/useBackgroundSync';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 // ──── Config ────────────────────────────────────────────────────────────────
@@ -44,7 +45,7 @@ type StatusConfig = {
   bgColor: string;
   borderColor: string;
   icon: keyof typeof Ionicons.glyphMap;
-  label: string;
+  labelKey: string;
   pulse: boolean;
 };
 
@@ -54,7 +55,7 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
     bgColor: 'rgba(34, 197, 94, 0.1)',
     borderColor: 'rgba(34, 197, 94, 0.2)',
     icon: 'checkmark-circle',
-    label: 'All synced',
+    labelKey: 'components.offlineBanner.allSynced',
     pulse: false,
   },
   pending: {
@@ -62,7 +63,7 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
     bgColor: 'rgba(255, 171, 64, 0.1)',
     borderColor: 'rgba(255, 171, 64, 0.2)',
     icon: 'sync-outline',
-    label: 'Pending',
+    labelKey: 'components.syncStatus.pending',
     pulse: false,
   },
   syncing: {
@@ -70,7 +71,7 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
     bgColor: 'rgba(96, 165, 250, 0.1)',
     borderColor: 'rgba(96, 165, 250, 0.2)',
     icon: 'sync',
-    label: 'Syncing...',
+    labelKey: 'components.offlineBanner.syncing',
     pulse: true,
   },
   offline: {
@@ -78,7 +79,7 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
     bgColor: 'rgba(239, 68, 68, 0.1)',
     borderColor: 'rgba(239, 68, 68, 0.2)',
     icon: 'cloud-offline',
-    label: 'Offline',
+    labelKey: 'components.syncStatus.offline',
     pulse: false,
   },
   conflict: {
@@ -86,20 +87,20 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
     bgColor: 'rgba(249, 115, 22, 0.1)',
     borderColor: 'rgba(249, 115, 22, 0.2)',
     icon: 'warning',
-    label: 'Conflicts',
+    labelKey: 'components.syncStatus.conflicts',
     pulse: false,
   },
 };
 
-const FRESHNESS_ICONS: Record<string, { icon: keyof typeof Ionicons.glyphMap; label: string }> = {
-  portfolio: { icon: 'pie-chart', label: 'Portfolio' },
-  market: { icon: 'trending-up', label: 'Market' },
-  watchlist: { icon: 'heart', label: 'Watchlist' },
-  education: { icon: 'school', label: 'Courses' },
-  openOrders: { icon: 'document-text', label: 'Orders' },
-  fno: { icon: 'git-network', label: 'F&O' },
-  community: { icon: 'people', label: 'Community' },
-  aiInsights: { icon: 'bulb', label: 'AI' },
+const FRESHNESS_ICONS: Record<string, { icon: keyof typeof Ionicons.glyphMap; labelKey: string }> = {
+  portfolio: { icon: 'pie-chart', labelKey: 'components.offlineBanner.freshnessPortfolio' },
+  market: { icon: 'trending-up', labelKey: 'components.offlineBanner.freshnessMarket' },
+  watchlist: { icon: 'heart', labelKey: 'components.offlineBanner.freshnessWatchlist' },
+  education: { icon: 'school', labelKey: 'components.offlineBanner.freshnessEducation' },
+  openOrders: { icon: 'document-text', labelKey: 'components.offlineBanner.freshnessOrders' },
+  fno: { icon: 'git-network', labelKey: 'components.offlineBanner.freshnessFno' },
+  community: { icon: 'people', labelKey: 'components.offlineBanner.freshnessCommunity' },
+  aiInsights: { icon: 'bulb', labelKey: 'components.offlineBanner.freshnessAiInsights' },
 };
 
 // ──── Component ────────────────────────────────────────────────────────────
@@ -111,6 +112,7 @@ interface SyncStatusIndicatorProps {
 
 export default function SyncStatusIndicator({ variant = 'floating' }: SyncStatusIndicatorProps) {
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const syncStatus = useOfflineStore((s) => s.syncStatus);
   const pendingTotal = useOfflineStore((s) => s.pendingTotal);
   const conflicts = useOfflineStore((s) => s.conflicts);
@@ -213,14 +215,14 @@ export default function SyncStatusIndicator({ variant = 'floating' }: SyncStatus
   // Count what to show on the pill
   const statusLabel =
     syncStatus === 'offline'
-      ? 'Offline'
+      ? t('components.syncStatus.offline')
       : syncStatus === 'conflict'
-        ? `${pendingConflicts} conflict${pendingConflicts !== 1 ? 's' : ''}`
+        ? t('components.syncStatus.conflictCount', { count: pendingConflicts })
         : syncStatus === 'syncing'
-          ? 'Syncing'
+          ? t('components.syncStatus.syncing')
           : pendingTotal > 0
-            ? `${pendingTotal} pending`
-            : 'All synced';
+            ? t('components.syncStatus.pendingCount', { count: pendingTotal })
+            : t('components.offlineBanner.allSynced');
 
   const isInline = variant === 'inline';
 
@@ -285,16 +287,16 @@ export default function SyncStatusIndicator({ variant = 'floating' }: SyncStatus
               />
               <Text style={[styles.summaryText, { color: config.color }]}>
                 {syncStatus === 'offline'
-                  ? 'You\'re offline — viewing cached data'
+                  ? t('components.syncStatus.offlineViewing')
                   : pendingTotal > 0
-                    ? `${pendingTotal} mutation${pendingTotal !== 1 ? 's' : ''} pending`
-                    : 'All data synced'}
+                    ? t('components.syncStatus.pendingMutations', { count: pendingTotal })
+                    : t('components.syncStatus.allDataSynced')}
               </Text>
             </View>
             {pendingTotal > 0 && !isSyncing && (
               <Pressable onPress={handleSyncNow} style={styles.syncNowBtn}>
                 <Ionicons name="sync-outline" size={11} color="#0D0D0D" />
-                <Text style={styles.syncNowText}>Sync</Text>
+                <Text style={styles.syncNowText}>{t('components.syncStatus.sync')}</Text>
               </Pressable>
             )}
           </View>
@@ -314,7 +316,7 @@ export default function SyncStatusIndicator({ variant = 'floating' }: SyncStatus
                   <View key={ns} style={styles.freshnessRow}>
                     <Ionicons name={info.icon} size={10} color={dotColor} />
                     <Text style={[styles.freshnessLabel, { color: dotColor }]}>
-                      {info.label}
+                      {t(info.labelKey)}
                     </Text>
                     <Text style={[styles.freshnessTime, { color: dotColor }]}>
                       {f.ageLabel}
@@ -330,7 +332,7 @@ export default function SyncStatusIndicator({ variant = 'floating' }: SyncStatus
             <View style={styles.warningRow}>
               <Ionicons name="information-circle" size={10} color="#FFAB40" />
               <Text style={styles.warningText}>
-                {staleCount} stale
+                {t('components.syncStatus.staleCount', { count: staleCount })}
               </Text>
             </View>
           )}
@@ -338,7 +340,7 @@ export default function SyncStatusIndicator({ variant = 'floating' }: SyncStatus
             <View style={[styles.warningRow, { borderColor: 'rgba(249, 115, 22, 0.3)' }]}>
               <Ionicons name="warning" size={10} color="#F97316" />
               <Text style={[styles.warningText, { color: '#F97316' }]}>
-                {pendingConflicts} conflict{pendingConflicts !== 1 ? 's' : ''} — tap banner to resolve
+                {t('components.syncStatus.conflictResolve', { count: pendingConflicts })}
               </Text>
             </View>
           )}

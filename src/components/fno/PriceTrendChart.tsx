@@ -30,6 +30,7 @@ import React, { useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import Svg, { Path, Line, Text as SvgText, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -60,6 +61,7 @@ export default function PriceTrendChart({
   height = 180,
 }: PriceTrendChartProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   // ── Compute chart metrics ──
@@ -193,7 +195,7 @@ export default function PriceTrendChart({
       <View style={[styles.container, { borderColor: colors.border, height }]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="small" color={colors.primary} />
-          <Text style={styles.loadingText}>Loading price data...</Text>
+          <Text style={styles.loadingText}>{t('fno.priceTrend.loading')}</Text>
         </View>
       </View>
     );
@@ -205,7 +207,7 @@ export default function PriceTrendChart({
       <View style={[styles.container, { borderColor: colors.border, height }]}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>📈</Text>
-          <Text style={styles.emptyTitle}>No Price Data</Text>
+          <Text style={styles.emptyTitle}>{t('fno.priceTrend.noData')}</Text>
           <Text style={styles.emptySubtitle}>
             Select a data range above to see the price trend
           </Text>

@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import {
   usePatternSettingsStore,
@@ -173,6 +174,7 @@ interface PatternSettingsModalProps {
 
 export default function PatternSettingsModal({ visible, onClose }: PatternSettingsModalProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
   const {
     minConfidence,
@@ -252,7 +254,7 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
             <Pressable onPress={onClose} style={styles.closeBtn} hitSlop={8}>
               <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
-            <Text style={[styles.title, { color: colors.text }]}>Pattern Settings</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('components.stockAnalysis.patternSettings')}</Text>
             <Pressable onPress={handleReset} style={styles.resetBtn} hitSlop={8}>
               <Ionicons name="refresh" size={20} color={colors.primary} />
             </Pressable>
@@ -265,7 +267,7 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
               min={0}
               max={100}
               step={5}
-              label="Min Confidence"
+              label={t('components.stockAnalysis.minConfidence')}
               suffix="%"
               onValueChange={handleSliderChange}
               colors={colors}
@@ -273,14 +275,14 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
 
             {/* ── Lookback Period ── */}
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Lookback Period</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('components.stockAnalysis.lookbackPeriod')}</Text>
               <Text style={[styles.sectionSub, { color: colors.textMuted }]}>
-                Number of candles to analyze
+                {t('components.stockAnalysis.lookbackSub')}
               </Text>
               <View style={styles.chipRow}>
                 {LOOKBACK_OPTIONS.map(opt => {
                   const active = localLookback === opt;
-                  const label = opt === 0 ? 'All Data' : `${opt}`;
+                  const label = opt === 0 ? t('components.stockAnalysis.allData') : `${opt}`;
                   return (
                     <Pressable
                       key={opt}
@@ -302,19 +304,19 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
             {/* ── Pattern Toggles ── */}
             <View style={styles.section}>
               <View style={styles.sectionHeaderRow}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Pattern Types</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('components.stockAnalysis.patternTypes')}</Text>
                 <View style={styles.sectionActions}>
                   <Pressable onPress={() => { setLocalEnabled(ALL_PATTERNS.map(p => p)); if (!hasChanges) setHasChanges(true); }}>
-                    <Text style={[styles.actionLink, { color: colors.primary }]}>All</Text>
+                    <Text style={[styles.actionLink, { color: colors.primary }]}>{t('components.stockAnalysis.all')}</Text>
                   </Pressable>
                   <Text style={{ color: colors.textMuted }}> · </Text>
                   <Pressable onPress={() => { setLocalEnabled([]); if (!hasChanges) setHasChanges(true); }}>
-                    <Text style={[styles.actionLink, { color: colors.primary }]}>None</Text>
+                    <Text style={[styles.actionLink, { color: colors.primary }]}>{t('components.stockAnalysis.none')}</Text>
                   </Pressable>
                 </View>
               </View>
               <Text style={[styles.sectionSub, { color: colors.textMuted }]}>
-                {enabledCount}/{allCount} enabled
+                {t('components.stockAnalysis.enabledCount', { enabled: enabledCount, total: allCount })}
               </Text>
 
               {CATEGORIES.map(category => {
@@ -349,11 +351,11 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
               <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
               <Text style={[styles.previewText, { color: colors.textSecondary }]}>
                 {localMinConf > 0
-                  ? `Only patterns with ≥${localMinConf}% confidence will appear. `
-                  : 'All confidence levels shown. '}
+                  ? t('components.stockAnalysis.confAbove', { value: localMinConf })
+                  : t('components.stockAnalysis.confAll')}
                 {localEnabled.length < allCount
-                  ? `${allCount - localEnabled.length} pattern type(s) disabled.`
-                  : 'All pattern types enabled.'}
+                  ? t('components.stockAnalysis.disabledCount', { count: allCount - localEnabled.length })
+                  : t('components.stockAnalysis.allEnabled')}
               </Text>
             </View>
           </ScrollView>
@@ -365,7 +367,7 @@ export default function PatternSettingsModal({ visible, onClose }: PatternSettin
               onPress={handleApply}
               disabled={!hasChanges}
             >
-              <Text style={styles.applyBtnText}>Apply Settings</Text>
+              <Text style={styles.applyBtnText}>{t('components.stockAnalysis.applySettings')}</Text>
             </Pressable>
           </View>
         </View>

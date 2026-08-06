@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Dimensions,
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Line, Rect, Text as SvgText, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
+import { useT } from '../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { formatCurrency } from '../utils/formatters';
 
@@ -37,6 +38,7 @@ export default function PnLChart({
   streamData = [],
 }: PnLChartProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; point: PnLPoint } | null>(null);
   const fadeAnim = useSharedValue(1);
@@ -149,7 +151,7 @@ export default function PnLChart({
     return (
       <View style={[styles.container, { height }]}>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Not enough data for chart</Text>
+          <Text style={styles.emptyText}>{t('components.stockAnalysis.notEnoughDataChart')}</Text>
         </View>
       </View>
     );
@@ -244,7 +246,7 @@ export default function PnLChart({
         {autoRefresh && (
           <View style={styles.liveIndicator}>
             <Circle cx={4} cy={4} r={4} fill={colors.marketUp} opacity={0.8} />
-            <Text style={styles.liveText}>LIVE</Text>
+            <Text style={styles.liveText}>{t('components.stockAnalysis.live')}</Text>
           </View>
         )}
         {TIMEFRAMES.map(tf => (

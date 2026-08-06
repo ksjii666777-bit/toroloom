@@ -13,6 +13,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { usePortfolioAnalyticsStore } from '../../store/portfolioAnalyticsStore';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import { FONTS } from '../../constants/theme';
@@ -24,6 +25,7 @@ interface PnLWidgetProps {
 
 export default function PnLWidget({ size }: PnLWidgetProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { metrics, pnlHistory } = usePortfolioAnalyticsStore(s => s.getAnalytics());
   const screenWidth = Dimensions.get('window').width;
 
@@ -66,7 +68,7 @@ export default function PnLWidget({ size }: PnLWidgetProps) {
           {formatPercent(metrics.totalReturnPercent)}
         </Text>
         <View style={styles.smallDayRow}>
-          <Text style={[styles.smallDayLabel, { color: colors.textMuted }]}>Day</Text>
+          <Text style={[styles.smallDayLabel, { color: colors.textMuted }]}>{t('components.widgets.pnlDay')}</Text>
           <Text style={[styles.smallDayValue, { color: metrics.dayChange >= 0 ? '#00E676' : '#FF5252' }]}>
             {formatCurrency(metrics.dayChange, true)}
           </Text>
@@ -80,7 +82,7 @@ export default function PnLWidget({ size }: PnLWidgetProps) {
       {/* Top row: Total Return + Day Change */}
       <View style={styles.topRow}>
         <View style={styles.metricBlock}>
-          <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Total Return</Text>
+          <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('components.widgets.pnlTotalReturn')}</Text>
           <Text style={[styles.metricValue, { color: pnlColor }]}>
             {formatCurrency(metrics.totalReturn, true)}
           </Text>
@@ -89,7 +91,7 @@ export default function PnLWidget({ size }: PnLWidgetProps) {
           </Text>
         </View>
         <View style={styles.metricBlockRight}>
-          <Text style={[styles.metricLabel, { color: colors.textMuted }]}>Day Change</Text>
+          <Text style={[styles.metricLabel, { color: colors.textMuted }]}>{t('components.widgets.pnlDayChange')}</Text>
           <Text style={[styles.metricValue, { color: metrics.dayChange >= 0 ? '#00E676' : '#FF5252' }]}>
             {formatCurrency(metrics.dayChange, true)}
           </Text>
@@ -134,14 +136,14 @@ export default function PnLWidget({ size }: PnLWidgetProps) {
         <View style={styles.breakdown}>
           <View style={styles.breakItem}>
             <View style={[styles.breakDot, { backgroundColor: '#3B82F6' }]} />
-            <Text style={[styles.breakLabel, { color: colors.textMuted }]}>Realized</Text>
+            <Text style={[styles.breakLabel, { color: colors.textMuted }]}>{t('components.widgets.pnlRealized')}</Text>
             <Text style={[styles.breakValue, { color: colors.text }]}>
               {formatCurrency(metrics.realizedPnl, true)}
             </Text>
           </View>
           <View style={styles.breakItem}>
             <View style={[styles.breakDot, { backgroundColor: '#8B5CF6' }]} />
-            <Text style={[styles.breakLabel, { color: colors.textMuted }]}>Unrealized</Text>
+            <Text style={[styles.breakLabel, { color: colors.textMuted }]}>{t('components.widgets.pnlUnrealized')}</Text>
             <Text style={[styles.breakValue, { color: colors.text }]}>
               {formatCurrency(metrics.unrealizedPnl, true)}
             </Text>

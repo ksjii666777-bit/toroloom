@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Holding } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { useT } from '../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../constants/theme';
 import AnimatedPressable from './ui/AnimatedPressable';
 import { formatCurrency, formatPercent } from '../utils/formatters';
@@ -15,6 +16,7 @@ interface PortfolioHoldingProps {
 
 export default function PortfolioHolding({ holding, onPress }: PortfolioHoldingProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const pnlColor = holding.pnl >= 0 ? colors.marketUp : colors.marketDown;
@@ -30,7 +32,7 @@ export default function PortfolioHolding({ holding, onPress }: PortfolioHoldingP
           </View>
           <View>
             <Text style={styles.symbol}>{holding.symbol}</Text>
-            <Text style={styles.qty}>{holding.quantity} shares</Text>
+            <Text style={styles.qty}>{t('components.stockAnalysis.shares', { count: holding.quantity })}</Text>
           </View>
         </View>
         <View style={styles.pnlContainer}>
@@ -45,19 +47,19 @@ export default function PortfolioHolding({ holding, onPress }: PortfolioHoldingP
 
       <View style={styles.detailsRow}>
         <View style={styles.detail}>
-          <Text style={styles.detailLabel}>Avg Cost</Text>
+          <Text style={styles.detailLabel}>{t('components.stockAnalysis.avgCost')}</Text>
           <Text style={styles.detailValue}>{formatCurrency(holding.buyPrice)}</Text>
         </View>
         <View style={styles.detail}>
-          <Text style={styles.detailLabel}>LTP</Text>
+          <Text style={styles.detailLabel}>{t('components.stockAnalysis.ltp')}</Text>
           <Text style={styles.detailValue}>{formatCurrency(holding.currentPrice)}</Text>
         </View>
         <View style={styles.detail}>
-          <Text style={styles.detailLabel}>Invested</Text>
+          <Text style={styles.detailLabel}>{t('components.stockAnalysis.invested')}</Text>
           <Text style={styles.detailValue}>{formatCurrency(holding.totalInvested, true)}</Text>
         </View>
         <View style={styles.detail}>
-          <Text style={styles.detailLabel}>Current</Text>
+          <Text style={styles.detailLabel}>{t('components.stockAnalysis.current')}</Text>
           <Text style={styles.detailValue}>{formatCurrency(holding.currentValue, true)}</Text>
         </View>
       </View>
@@ -69,7 +71,7 @@ export default function PortfolioHolding({ holding, onPress }: PortfolioHoldingP
           color={dayColor}
         />
         <Text style={[styles.dayChangeText, { color: dayColor }]}>
-          Day: {formatPercent(holding.dayChangePercent)}
+          {t('components.stockAnalysis.dayLabel', { value: formatPercent(holding.dayChangePercent) })}
         </Text>
       </View>
       </View>

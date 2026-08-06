@@ -26,6 +26,7 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRiskStore, selectIsLockdownActive } from '../store/riskStore';
 import { useVoiceStore, VOICE_MESSAGES } from '../store/voiceStore';
+import { useT } from '../hooks/useT';
 import { BORDER_RADIUS} from '../constants/theme';
 
 const { width } = Dimensions.get('window');
@@ -36,6 +37,7 @@ const ALERT_RED = '#FF3366';
 
 export default function IronLockOverlay() {
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const isLockdown = useRiskStore(selectIsLockdownActive);
   const lockdown = useRiskStore(s => s.lockdown);
   const speak = useVoiceStore(s => s.speak);
@@ -173,7 +175,7 @@ export default function IronLockOverlay() {
       const diff = lifts - now;
 
       if (diff <= 0) {
-        setTimeRemaining('Lifting soon...');
+        setTimeRemaining(t('components.ironLock.liftingSoon'));
         // Check if lockdown is expiring soon
         if (diff > -300000) { // within 5 min of expiry
           speak(VOICE_MESSAGES.lockdownExpiring);
@@ -190,7 +192,7 @@ export default function IronLockOverlay() {
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, [lockdown.liftsAt, fadeAnim, glowPulse, pulseAnim, scaleAnim, speak, visible]);
+  }, [lockdown.liftsAt, t, fadeAnim, glowPulse, pulseAnim, scaleAnim, speak, visible]);
 
   if (!visible || (!isLockdown)) return null;
 
@@ -233,12 +235,12 @@ export default function IronLockOverlay() {
 
         {/* Lockdown Status */}
         <Text style={styles.lockdownStatus}>
-          {lockdown.status === 'cooldown' ? 'COOLDOWN' : 'LOCKDOWN'}
+          {lockdown.status === 'cooldown' ? t('components.ironLock.cooldown') : t('components.ironLock.lockdown')}
         </Text>
         <Text style={styles.lockdownDesc}>
           {lockdown.status === 'cooldown'
-            ? 'Exit-only mode continuing in cooldown'
-            : 'Financial Bodyguard engaged'}
+            ? t('components.ironLock.cooldownDesc')
+            : t('components.ironLock.engagedDesc')}
         </Text>
 
         {/* Divider */}
@@ -247,31 +249,31 @@ export default function IronLockOverlay() {
         {/* Countdown Timer */}
         <View style={styles.timerSection}>
           <Ionicons name="time-outline" size={18} color={NEO_CYAN} />
-          <Text style={styles.timerLabel}>Lockdown lifts in</Text>
-          <Text style={styles.timerValue}>{timeRemaining || 'Calculating...'}</Text>
+          <Text style={styles.timerLabel}>{t('components.ironLock.liftsIn')}</Text>
+          <Text style={styles.timerValue}>{timeRemaining || t('components.ironLock.calculating')}</Text>
         </View>
 
         {/* Breach Details */}
         <View style={styles.detailsGrid}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Trigger Loss</Text>
+            <Text style={styles.detailLabel}>{t('components.ironLock.triggerLoss')}</Text>
             <Text style={styles.detailValue}>
               ₹{lockdown.triggerLoss?.toLocaleString() || '—'}
             </Text>
           </View>
           <View style={styles.detailDivider} />
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Limit Breached</Text>
+            <Text style={styles.detailLabel}>{t('components.ironLock.limitBreached')}</Text>
             <Text style={styles.detailValue}>
-              {lockdown.breachedLimit === 'daily_loss' ? '₹ Limit' :
-               lockdown.breachedLimit === 'daily_loss_percent' ? '% Limit' : '—'}
+              {lockdown.breachedLimit === 'daily_loss' ? t('components.ironLock.rupeeLimit') :
+               lockdown.breachedLimit === 'daily_loss_percent' ? t('components.ironLock.percentLimit') : '—'}
             </Text>
           </View>
           <View style={styles.detailDivider} />
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Status</Text>
+            <Text style={styles.detailLabel}>{t('components.ironLock.status')}</Text>
             <Text style={styles.detailValue}>
-              {lockdown.status === 'active' ? 'Active' : 'Cooldown'}
+              {lockdown.status === 'active' ? t('components.ironLock.active') : t('components.ironLock.cooldownStatus')}
             </Text>
           </View>
         </View>
@@ -280,7 +282,7 @@ export default function IronLockOverlay() {
         <View style={styles.instructions}>
           <Ionicons name="information-circle-outline" size={16} color={NEO_CYAN} />
           <Text style={styles.instructionText}>
-            Only SQUARE OFF orders are permitted. All other actions are blocked until the lockdown period ends.
+            {t('components.ironLock.instructions')}
           </Text>
         </View>
 

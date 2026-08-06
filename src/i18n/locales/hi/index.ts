@@ -20,6 +20,7 @@ import calculators from './calculators';
 import capitalGains from './capitalGains';
 import cdnOptimization from './cdnOptimization';
 import commodityMarkets from './commodityMarkets';
+import components from './components';
 import copyAnalytics from './copyAnalytics';
 import createPoll from './createPoll';
 import community from './community';
@@ -38,6 +39,7 @@ import economicCalendar from './economicCalendar';
 import errors from './errors';
 import factorAnalysis from './factorAnalysis';
 import featureFlags from './featureFlags';
+import fno from './fno';
 import funds from './funds';
 import fundamentals from './fundamentals';
 import futuresCurve from './futuresCurve';
@@ -124,6 +126,7 @@ const hi = {
   capitalGains,
   cdnOptimization,
   commodityMarkets,
+  components,
   copyAnalytics,
   createPoll,
   community,
@@ -142,6 +145,7 @@ const hi = {
   errors,
   factorAnalysis,
   featureFlags,
+  fno,
   funds,
   fundamentals,
   futuresCurve,

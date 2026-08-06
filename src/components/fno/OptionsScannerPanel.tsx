@@ -30,6 +30,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
 import { scanMarket, type ScannerResult, type StrategySuggestion} from '../../services/optionsScanner';
+import { useT } from '../../hooks/useT';
 import type { OptionChain } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -49,11 +50,12 @@ interface OptionsScannerPanelProps {
 
 /** A single signal stat card */
 function SignalCard({ label, value, color, icon }: { label: string; value: string; color: string; icon: string }) {
+  const { t } = useT();
   return (
     <View style={[signalStyles.card, { borderColor: color + '30' }]}>
       <Text style={signalStyles.icon}>{icon}</Text>
       <Text style={[signalStyles.value, { color }]}>{value}</Text>
-      <Text style={[signalStyles.label, { color: color + 'AA' }]}>{label}</Text>
+      <Text style={[signalStyles.label, { color: color + 'AA' }]}>{t(label)}</Text>
     </View>
   );
 }
@@ -74,6 +76,7 @@ const signalStyles = StyleSheet.create({
 
 /** Visual gauge for IV level */
 function IVGauge({ iv, ivState }: { iv: number; ivState: string }) {
+  const { t } = useT();
   const colors = { low: '#3B82F6', moderate: '#FFC107', high: '#FF5252' };
   const gaugeColor = colors[ivState as keyof typeof colors] || '#888';
   const pct = Math.min(100, (iv / 35) * 100);
@@ -88,7 +91,7 @@ function IVGauge({ iv, ivState }: { iv: number; ivState: string }) {
         <View style={[gaugeStyles.fill, { width: `${pct}%`, backgroundColor: gaugeColor }]} />
       </View>
       <Text style={gaugeStyles.stateText}>
-        {ivState === 'high' ? '🔥 Elevated' : ivState === 'low' ? '❄️ Low' : '📊 Normal'}
+        {ivState === 'high' ? t('fno.scanner.ivElevated') : ivState === 'low' ? t('fno.scanner.ivLow') : t('fno.scanner.ivNormal')}
       </Text>
     </View>
   );
@@ -114,6 +117,7 @@ function SuggestionCard({
   colors: any;
   onApply: (id: string, name: string) => void;
 }) {
+  const { t } = useT();
   const dirColor = suggestion.direction === 'bullish' ? '#00C853'
     : suggestion.direction === 'bearish' ? '#FF1744' : '#FFC107';
   const riskColor = suggestion.riskCategory === 'low' ? '#00C853'
@@ -150,7 +154,7 @@ function SuggestionCard({
           onPress={() => onApply(suggestion.strategyId, suggestion.strategyName)}
         >
           <Ionicons name="flash" size={14} color={colors.white} />
-          <Text style={[sugStyles.applyText, { color: colors.white }]}>Apply</Text>
+          <Text style={[sugStyles.applyText, { color: colors.white }]}>{t('fno.scanner.apply')}</Text>
         </Pressable>
       </View>
     </View>
@@ -230,6 +234,7 @@ const sugStyles = StyleSheet.create({
 
 /** OI Profile mini-chart — shows where OI is concentrated across strikes */
 function OIProfileChart({ chain, colors, spotPrice, supportLevel, resistanceLevel }: { chain: OptionChain; colors: any; spotPrice: number; supportLevel: number; resistanceLevel: number }) {
+  const { t } = useT();
   if (!chain.rows || chain.rows.length < 3) return null;
 
   // Sample every Nth row to keep chart readable
@@ -247,7 +252,7 @@ function OIProfileChart({ chain, colors, spotPrice, supportLevel, resistanceLeve
 
   return (
     <View style={oiStyles.container}>
-      <Text style={oiStyles.title}>OI Concentration</Text>
+      <Text style={oiStyles.title}>{t('fno.scanner.oiConcentration')}</Text>
       <Svg width={chartW} height={chartH}>
         {sampled.map((row, i) => {
           const x = 4 + i * (barW + 1);
@@ -300,7 +305,10 @@ function OIProfileChart({ chain, colors, spotPrice, supportLevel, resistanceLeve
           <Text style={[oiStyles.legendText, { color: colors.textMuted }]}>PE OI</Text>
         </View>
         <Text style={[oiStyles.legendText, { color: colors.textMuted }]}>
-          Support: {supportLevel > 0 ? formatCurrency(supportLevel, true) : '—'} · Resistance: {resistanceLevel > 0 ? formatCurrency(resistanceLevel, true) : '—'}
+          {t('fno.scanner.supportResistance', {
+            support: supportLevel > 0 ? formatCurrency(supportLevel, true) : '—',
+            resistance: resistanceLevel > 0 ? formatCurrency(resistanceLevel, true) : '—',
+          })}
         </Text>
       </View>
     </View>
@@ -326,6 +334,7 @@ export default function OptionsScannerPanel({
   onNavigateToBuilder,
 }: OptionsScannerPanelProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const result = useMemo<ScannerResult | null>(() => {
@@ -337,7 +346,7 @@ export default function OptionsScannerPanel({
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textMuted }]}>Analyzing market conditions...</Text>
+        <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('fno.scanner.analyzing')}</Text>
       </View>
     );
   }
@@ -346,9 +355,9 @@ export default function OptionsScannerPanel({
     return (
       <View style={styles.centered}>
         <Ionicons name="options-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyTitle, { color: colors.text }]}>No Data</Text>
+        <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('fno.scanner.noData')}</Text>
         <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-          Select a symbol and expiry to view the options scanner
+          {t('fno.scanner.noDataSub')}
         </Text>
       </View>
     );
@@ -358,9 +367,9 @@ export default function OptionsScannerPanel({
     return (
       <View style={styles.centered}>
         <Ionicons name="analytics-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyTitle, { color: colors.text }]}>Insufficient Data</Text>
+        <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('fno.scanner.insufficientData')}</Text>
         <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-          Need at least 5 strike rows to analyze market conditions
+          {t('fno.scanner.insufficientSub')}
         </Text>
       </View>
     );
@@ -377,10 +386,14 @@ export default function OptionsScannerPanel({
         <View style={[styles.biasGlow, { backgroundColor: biasColor }]} />
         <View style={styles.biasContent}>
           <Text style={[styles.biasLabel, { color: biasColor }]}>
-            {mc.bias === 'bullish' ? '📈 BULLISH' : mc.bias === 'bearish' ? '📉 BEARISH' : '↔️ NEUTRAL'}
+            {mc.bias === 'bullish' ? t('fno.scanner.bullish') : mc.bias === 'bearish' ? t('fno.scanner.bearish') : t('fno.scanner.neutral')}
           </Text>
           <Text style={[styles.biasSignals, { color: colors.textSecondary }]}>
-            {mc.bullishSignals}/{mc.totalSignals} bullish signals · {mc.bearishSignals}/{mc.totalSignals} bearish signals
+            {t('fno.scanner.biasSignals', {
+              bullish: mc.bullishSignals,
+              total: mc.totalSignals,
+              bearish: mc.bearishSignals,
+            })}
           </Text>
           <Text style={[styles.summaryLine, { color: colors.text }]} numberOfLines={1}>
             {result.summaryLine}
@@ -390,11 +403,11 @@ export default function OptionsScannerPanel({
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ── Signal Cards ── */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Market Signals</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('fno.scanner.marketSignals')}</Text>
         <View style={styles.signalRow}>
-          <SignalCard label="Put-Call Ratio" value={mc.pcr.toFixed(2)} color={mc.pcr >= 1.2 ? '#FF1744' : mc.pcr <= 0.7 ? '#00C853' : '#FFC107'} icon="📊" />
-          <SignalCard label="Max Pain" value={formatCurrency(mc.maxPain, true)} color={mc.maxPainDistancePercent > 0.5 ? '#3B82F6' : '#FFC107'} icon="🎯" />
-          <SignalCard label="Bias Signals" value={`${mc.bullishSignals}-${mc.bearishSignals}`} color={biasColor} icon="⚡" />
+          <SignalCard label="fno.scanner.putCallRatio" value={mc.pcr.toFixed(2)} color={mc.pcr >= 1.2 ? '#FF1744' : mc.pcr <= 0.7 ? '#00C853' : '#FFC107'} icon="📊" />
+          <SignalCard label="fno.scanner.maxPain" value={formatCurrency(mc.maxPain, true)} color={mc.maxPainDistancePercent > 0.5 ? '#3B82F6' : '#FFC107'} icon="🎯" />
+          <SignalCard label="fno.scanner.biasSignalsShort" value={`${mc.bullishSignals}-${mc.bearishSignals}`} color={biasColor} icon="⚡" />
         </View>
 
         {/* IV Gauge */}
@@ -411,21 +424,21 @@ export default function OptionsScannerPanel({
         <View style={styles.srRow}>
           <View style={[styles.srCard, { backgroundColor: '#00C85310', borderColor: '#00C85330' }]}>
             <Text style={styles.srIcon}>🛡️</Text>
-            <Text style={[styles.srLabel, { color: '#00C853' }]}>Support</Text>
+            <Text style={[styles.srLabel, { color: '#00C853' }]}>{t('fno.scanner.support')}</Text>
             <Text style={[styles.srValue, { color: colors.text }]}>
               {mc.supportLevel > 0 ? formatCurrency(mc.supportLevel, true) : '—'}
             </Text>
           </View>
           <View style={[styles.srCard, { backgroundColor: '#FF174410', borderColor: '#FF174430' }]}>
             <Text style={styles.srIcon}>🔴</Text>
-            <Text style={[styles.srLabel, { color: '#FF1744' }]}>Resistance</Text>
+            <Text style={[styles.srLabel, { color: '#FF1744' }]}>{t('fno.scanner.resistance')}</Text>
             <Text style={[styles.srValue, { color: colors.text }]}>
               {mc.resistanceLevel > 0 ? formatCurrency(mc.resistanceLevel, true) : '—'}
             </Text>
           </View>
           <View style={[styles.srCard, { backgroundColor: '#3B82F610', borderColor: '#3B82F630' }]}>
             <Text style={styles.srIcon}>📌</Text>
-            <Text style={[styles.srLabel, { color: '#3B82F6' }]}>Spot</Text>
+            <Text style={[styles.srLabel, { color: '#3B82F6' }]}>{t('fno.scanner.spot')}</Text>
             <Text style={[styles.srValue, { color: colors.text }]}>
               {formatCurrency(mc.spotPrice, true)}
             </Text>
@@ -434,12 +447,12 @@ export default function OptionsScannerPanel({
 
         {/* ── Strategy Suggestions ── */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Recommended Strategies ({suggestions.length})
+          {t('fno.scanner.recommendedStrategies', { count: suggestions.length })}
         </Text>
         {suggestions.length === 0 ? (
           <View style={styles.centered}>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              No strategies match current market conditions
+              {t('fno.scanner.noStrategies')}
             </Text>
           </View>
         ) : (

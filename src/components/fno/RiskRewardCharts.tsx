@@ -20,6 +20,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { useT } from '../../hooks/useT';
 
 import type { BacktestMetrics } from '../../services/backtestEngine';
 
@@ -40,29 +41,30 @@ function getRRColor(rr: number): string {
   return '#6E6E9A';
 }
 
-function getRRRating(rr: number): { label: string; emoji: string } {
-  if (rr >= 3) return { label: 'Excellent', emoji: '🏆' };
-  if (rr >= 2) return { label: 'Great', emoji: '💪' };
-  if (rr >= 1.5) return { label: 'Good', emoji: '👍' };
-  if (rr >= 1) return { label: 'Fair', emoji: '👌' };
-  if (rr > 0) return { label: 'Poor', emoji: '⚠️' };
-  return { label: 'N/A', emoji: '—' };
+function getRRRating(rr: number): { labelKey: string; emoji: string } {
+  if (rr >= 3) return { labelKey: 'fno.riskReward.ratingExcellent', emoji: '🏆' };
+  if (rr >= 2) return { labelKey: 'fno.riskReward.ratingGreat', emoji: '💪' };
+  if (rr >= 1.5) return { labelKey: 'fno.riskReward.ratingGood', emoji: '👍' };
+  if (rr >= 1) return { labelKey: 'fno.riskReward.ratingFair', emoji: '👌' };
+  if (rr > 0) return { labelKey: 'fno.riskReward.ratingPoor', emoji: '⚠️' };
+  return { labelKey: 'fno.riskReward.ratingNa', emoji: '—' };
 }
 
 /** Mini drawdown timeline bar — shows depth and duration of each DD episode */
 function DrawdownBar({ metrics }: { metrics: BacktestMetrics }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const depthPct = Math.min(100, metrics.maxDrawdownPercent * 2); // Scale for visibility
 
   return (
     <View style={ddStyles.container}>
       <View style={ddStyles.headerRow}>
-        <Text style={[ddStyles.title, { color: colors.text }]}>Drawdown Analysis</Text>
+        <Text style={[ddStyles.title, { color: colors.text }]}>{t('fno.riskReward.drawdownAnalysis')}</Text>
       </View>
 
       {/* Max DD bar */}
       <View style={ddStyles.metricRow}>
-        <Text style={[ddStyles.label, { color: colors.textMuted }]}>Max Depth</Text>
+        <Text style={[ddStyles.label, { color: colors.textMuted }]}>{t('fno.riskReward.maxDepth')}</Text>
         <View style={ddStyles.barTrack}>
           <View style={[ddStyles.barFill, { width: `${depthPct}%`, backgroundColor: metrics.maxDrawdownPercent < 15 ? '#00C853' : metrics.maxDrawdownPercent < 25 ? '#FFC107' : '#FF1744' }]} />
         </View>
@@ -73,15 +75,15 @@ function DrawdownBar({ metrics }: { metrics: BacktestMetrics }) {
       <View style={ddStyles.statsRow}>
         <View style={ddStyles.statItem}>
           <Text style={[ddStyles.statValue, { color: colors.text }]}>{metrics.drawdownEpisodes}</Text>
-          <Text style={[ddStyles.statLabel, { color: colors.textMuted }]}>Episodes</Text>
+          <Text style={[ddStyles.statLabel, { color: colors.textMuted }]}>{t('fno.riskReward.episodes')}</Text>
         </View>
         <View style={ddStyles.statItem}>
           <Text style={[ddStyles.statValue, { color: colors.text }]}>{metrics.avgDrawdownDepth.toFixed(1)}%</Text>
-          <Text style={[ddStyles.statLabel, { color: colors.textMuted }]}>Avg Depth</Text>
+          <Text style={[ddStyles.statLabel, { color: colors.textMuted }]}>{t('fno.riskReward.avgDepth')}</Text>
         </View>
         <View style={ddStyles.statItem}>
           <Text style={[ddStyles.statValue, { color: colors.text }]}>{metrics.maxDrawdownDuration}</Text>
-          <Text style={[ddStyles.statLabel, { color: colors.textMuted }]}>Longest (days)</Text>
+          <Text style={[ddStyles.statLabel, { color: colors.textMuted }]}>{t('fno.riskReward.longestDays')}</Text>
         </View>
       </View>
     </View>
@@ -106,12 +108,13 @@ const ddStyles = StyleSheet.create({
 /** Win/Loss distribution bar */
 function WinLossBar({ win, loss, total }: { win: number; loss: number; total: number }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const winPct = total > 0 ? (win / total) * 100 : 0;
   const lossPct = total > 0 ? (loss / total) * 100 : 0;
 
   return (
     <View style={wlStyles.container}>
-      <Text style={[wlStyles.title, { color: colors.text }]}>Win / Loss Distribution</Text>
+      <Text style={[wlStyles.title, { color: colors.text }]}>{t('fno.riskReward.winLossDistribution')}</Text>
       <View style={wlStyles.barContainer}>
         <View style={[wlStyles.barSegment, { flex: winPct, backgroundColor: '#00C853', opacity: 0.8 }]} />
         <View style={[wlStyles.barSegment, { flex: Math.max(1, lossPct), backgroundColor: '#FF1744', opacity: 0.6 }]} />
@@ -120,13 +123,13 @@ function WinLossBar({ win, loss, total }: { win: number; loss: number; total: nu
         <View style={wlStyles.labelItem}>
           <View style={[wlStyles.dot, { backgroundColor: '#00C853' }]} />
           <Text style={[wlStyles.labelText, { color: colors.textMuted }]}>
-            Win {winPct.toFixed(0)}% ({win})
+            {t('fno.riskReward.winPct', { pct: winPct.toFixed(0), count: win })}
           </Text>
         </View>
         <View style={wlStyles.labelItem}>
           <View style={[wlStyles.dot, { backgroundColor: '#FF1744' }]} />
           <Text style={[wlStyles.labelText, { color: colors.textMuted }]}>
-            Loss {lossPct.toFixed(0)}% ({loss})
+            {t('fno.riskReward.lossPct', { pct: lossPct.toFixed(0), count: loss })}
           </Text>
         </View>
       </View>
@@ -148,6 +151,7 @@ const wlStyles = StyleSheet.create({
 /** R:R Ratio big card */
 function RRRatioCard({ rr }: { rr: number }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const color = getRRColor(rr);
   const rating = getRRRating(rr);
   const displayValue = rr === Infinity ? '∞' : rr.toFixed(2);
@@ -156,12 +160,12 @@ function RRRatioCard({ rr }: { rr: number }) {
     <View style={[rrStyles.card, { borderColor: color + '30', backgroundColor: color + '08' }]}>
       <View style={rrStyles.iconRow}>
         <Text style={rrStyles.icon}>⚖️</Text>
-        <Text style={[rrStyles.ratingBadge, { color }]}>{rating.emoji} {rating.label}</Text>
+        <Text style={[rrStyles.ratingBadge, { color }]}>{rating.emoji} {t(rating.labelKey)}</Text>
       </View>
       <Text style={[rrStyles.value, { color }]}>{displayValue}</Text>
-      <Text style={[rrStyles.label, { color: colors.textMuted }]}>R:R Ratio</Text>
+      <Text style={[rrStyles.label, { color: colors.textMuted }]}>{t('fno.riskReward.rrRatio')}</Text>
       <View style={rrStyles.subRow}>
-        <Text style={[rrStyles.subText, { color: colors.textMuted }]}>Win / Loss</Text>
+        <Text style={[rrStyles.subText, { color: colors.textMuted }]}>{t('fno.riskReward.winLoss')}</Text>
       </View>
     </View>
   );
@@ -181,20 +185,21 @@ const rrStyles = StyleSheet.create({
 /** Consecutive streaks display */
 function ConsecutiveStreaks({ wins, losses }: { wins: number; losses: number }) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   return (
     <View style={csStyles.container}>
-      <Text style={[csStyles.title, { color: colors.text }]}>Consecutive Streaks</Text>
+      <Text style={[csStyles.title, { color: colors.text }]}>{t('fno.riskReward.consecutiveStreaks')}</Text>
       <View style={csStyles.row}>
         <View style={[csStyles.streakCard, { backgroundColor: '#00C85310', borderColor: '#00C85330' }]}>
           <Text style={csStyles.streakIcon}>🔥</Text>
           <Text style={[csStyles.streakValue, { color: '#00C853' }]}>{wins}</Text>
-          <Text style={[csStyles.streakLabel, { color: colors.textMuted }]}>Max Win Streak</Text>
+          <Text style={[csStyles.streakLabel, { color: colors.textMuted }]}>{t('fno.riskReward.maxWinStreak')}</Text>
         </View>
         <View style={[csStyles.streakCard, { backgroundColor: '#FF174410', borderColor: '#FF174430' }]}>
           <Text style={csStyles.streakIcon}>💧</Text>
           <Text style={[csStyles.streakValue, { color: '#FF1744' }]}>{losses}</Text>
-          <Text style={[csStyles.streakLabel, { color: colors.textMuted }]}>Max Loss Streak</Text>
+          <Text style={[csStyles.streakLabel, { color: colors.textMuted }]}>{t('fno.riskReward.maxLossStreak')}</Text>
         </View>
       </View>
     </View>
@@ -215,13 +220,14 @@ const csStyles = StyleSheet.create({
 
 export default function RiskRewardCharts({ metrics }: RiskRewardChartsProps) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   return (
     <View style={[mainStyles.container, { borderTopColor: colors.divider }]}>
       {/* Section header */}
       <View style={mainStyles.headerRow}>
         <Text style={mainStyles.headerIcon}>📊</Text>
-        <Text style={[mainStyles.headerTitle, { color: colors.text }]}>Risk / Reward Profile</Text>
+        <Text style={[mainStyles.headerTitle, { color: colors.text }]}>{t('fno.riskReward.profile')}</Text>
       </View>
 
       {/* R:R Ratio Card + Consecutive Streaks */}

@@ -41,30 +41,34 @@ import { useOfflineStore, type SyncConflict } from '../../store/offlineStore';
 import { offlineMutationQueue } from '../../services/offlineMutationQueue';
 
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { useT } from '../../hooks/useT';
 import _Button from './Button';
 
 const { width } = Dimensions.get('window');
 
 // ──── Formatted conflict type labels ───────────────────────────────────────
 
-const MUTATION_LABELS: Record<string, string> = {
-  BUY_STOCK: 'Buy Order',
-  SELL_STOCK: 'Sell Order',
-  ADD_TO_WATCHLIST: 'Add to Watchlist',
-  REMOVE_FROM_WATCHLIST: 'Remove from Watchlist',
-  CREATE_WATCHLIST: 'Create Watchlist',
-  DELETE_WATCHLIST: 'Delete Watchlist',
-  MODIFY_ORDER: 'Modify Order',
-  CANCEL_ORDER: 'Cancel Order',
-};
+function getMutationLabel(type: string, t: (k: string, p?: Record<string, any>) => string): string {
+  const keyMap: Record<string, string> = {
+    BUY_STOCK: 'components.syncConflict.buyOrder',
+    SELL_STOCK: 'components.syncConflict.sellOrder',
+    ADD_TO_WATCHLIST: 'components.syncConflict.addToWatchlist',
+    REMOVE_FROM_WATCHLIST: 'components.syncConflict.removeFromWatchlist',
+    CREATE_WATCHLIST: 'components.syncConflict.createWatchlist',
+    DELETE_WATCHLIST: 'components.syncConflict.deleteWatchlist',
+    MODIFY_ORDER: 'components.syncConflict.modifyOrder',
+    CANCEL_ORDER: 'components.syncConflict.cancelOrder',
+  };
+  return t(keyMap[type] || type);
+}
 
-function formatTimestamp(iso: string): string {
+function formatTimestamp(iso: string, t: (k: string, p?: Record<string, any>) => string): string {
   try {
     const d = new Date(iso);
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
-    if (diffMs < 60_000) return 'just now';
-    if (diffMs < 3_600_000) return `${Math.round(diffMs / 60_000)}m ago`;
+    if (diffMs < 60_000) return t('components.syncConflict.justNow');
+    if (diffMs < 3_600_000) return t('components.syncConflict.minutesAgo', { count: Math.round(diffMs / 60_000) });
     return d.toLocaleDateString('en-IN', {
       day: 'numeric',
       month: 'short',
@@ -72,15 +76,15 @@ function formatTimestamp(iso: string): string {
       minute: '2-digit',
     });
   } catch {
-    return 'unknown';
+    return t('components.syncConflict.unknown');
   }
 }
 
-function summarizePayload(payload?: Record<string, unknown>): string {
+function summarizePayload(payload?: Record<string, unknown>, t?: (k: string, p?: Record<string, any>) => string): string {
   if (!payload) return '';
   const parts: string[] = [];
   if (payload.symbol) parts.push(String(payload.symbol));
-  if (payload.quantity) parts.push(`Qty: ${payload.quantity}`);
+  if (payload.quantity) parts.push(t ? t('components.syncConflict.qty', { qty: payload.quantity }) : `Qty: ${payload.quantity}`);
   if (payload.price) parts.push(`₹${Number(payload.price).toLocaleString('en-IN')}`);
   return parts.join(' · ');
 }
@@ -89,6 +93,7 @@ function summarizePayload(payload?: Record<string, unknown>): string {
 
 export default function SyncConflictModal() {
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const conflicts = useOfflineStore((s) => s.conflicts);
   const pendingConflicts = useMemo(
     () => conflicts.filter((c) => c.status === 'pending'),
@@ -231,9 +236,9 @@ export default function SyncConflictModal() {
                 <Ionicons name="warning" size={22} color="#F97316" />
               </View>
               <View>
-                <Text style={styles.title}>Sync Conflicts</Text>
+                <Text style={styles.title}>{t('components.syncConflict.title')}</Text>
                 <Text style={styles.subtitle}>
-                  {pendingConflicts.length} mutation{pendingConflicts.length !== 1 ? 's' : ''} failed to sync
+                  {t('components.syncConflict.subtitle', { count: pendingConflicts.length })}
                 </Text>
               </View>
             </View>
@@ -258,18 +263,18 @@ export default function SyncConflictModal() {
                       color="#F97316"
                     />
                     <Text style={styles.conflictTypeText}>
-                      {MUTATION_LABELS[conflict.mutationType] || conflict.mutationType}
+                      {getMutationLabel(conflict.mutationType, t)}
                     </Text>
                   </View>
                   <Text style={styles.conflictTime}>
-                    {formatTimestamp(conflict.enqueuedAt)}
+                    {formatTimestamp(conflict.enqueuedAt, t)}
                   </Text>
                 </View>
 
                 {/* Payload summary */}
                 {conflict.localPayload && (
                   <Text style={styles.payloadText}>
-                    {summarizePayload(conflict.localPayload)}
+                    {summarizePayload(conflict.localPayload, t)}
                   </Text>
                 )}
 
@@ -286,7 +291,7 @@ export default function SyncConflictModal() {
                     onPress={() => handleResolve(conflict.id, 'dismissed')}
                     disabled={actionLoading === conflict.id}
                   >
-                    <Text style={styles.resolveDismissText}>Dismiss</Text>
+                    <Text style={styles.resolveDismissText}>{t('components.syncConflict.dismiss')}</Text>
                   </Pressable>
                   <Pressable
                     style={[styles.resolveBtn, styles.resolveRetry]}
@@ -294,7 +299,7 @@ export default function SyncConflictModal() {
                     disabled={actionLoading === conflict.id}
                   >
                     <Ionicons name="refresh-outline" size={11} color="#22C55E" />
-                    <Text style={styles.resolveRetryText}>Retry</Text>
+                    <Text style={styles.resolveRetryText}>{t('components.syncConflict.retry')}</Text>
                   </Pressable>
                   <Pressable
                     style={[styles.resolveBtn, styles.resolveKeep]}
@@ -302,7 +307,7 @@ export default function SyncConflictModal() {
                     disabled={actionLoading === conflict.id}
                   >
                     <Ionicons name="checkmark-outline" size={11} color="#3B82F6" />
-                    <Text style={styles.resolveKeepText}>Keep</Text>
+                    <Text style={styles.resolveKeepText}>{t('components.syncConflict.keep')}</Text>
                   </Pressable>
                 </View>
               </View>
@@ -315,22 +320,20 @@ export default function SyncConflictModal() {
               style={styles.bulkDismissBtn}
               onPress={handleResolveAll}
             >
-              <Text style={styles.bulkDismissText}>Dismiss All</Text>
+              <Text style={styles.bulkDismissText}>{t('components.syncConflict.dismissAll')}</Text>
             </Pressable>
             <Pressable
               style={styles.bulkRetryBtn}
               onPress={handleRetryAll}
             >
               <Ionicons name="refresh-outline" size={14} color="#0D0D0D" />
-              <Text style={styles.bulkRetryText}>Retry All</Text>
+              <Text style={styles.bulkRetryText}>{t('components.syncConflict.retryAll')}</Text>
             </Pressable>
           </View>
 
           {/* ── Footnote ── */}
           <Text style={styles.footnote}>
-            Conflicts occur when your local data is older than the server version.
-            Choose "Keep" to preserve your local changes, "Retry" to re-send, or
-            "Dismiss" to discard.
+            {t('components.syncConflict.footnote')}
           </Text>
         </LinearGradient>
       </Animated.View>

@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../ui/AnimatedPressable';
+import { useT } from '../../hooks/useT';
 import type { Quiz, QuizResult } from '../../types';
 
 const OPTION_HEIGHT = 52;
@@ -42,6 +43,7 @@ export default function QuizComponent({
   instantFeedback = false,
 }: QuizComponentProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -232,12 +234,12 @@ export default function QuizComponent({
             />
           </View>
           <Text style={styles.resultTitle}>
-            {quizResult.passed ? '🎉 Quiz Passed!' : 'Needs Improvement'}
+            {quizResult.passed ? t('components.quiz.passed') : t('components.quiz.needsImprovement')}
           </Text>
           <Text style={styles.resultSubtitle}>
             {quizResult.passed
-              ? `Great job! You scored ${quizResult.percentage}%`
-              : `You scored ${quizResult.percentage}% — passing is ${passingPercent}%`}
+              ? t('components.quiz.greatJob', { pct: quizResult.percentage })
+              : t('components.quiz.scored', { pct: quizResult.percentage, pass: passingPercent })}
           </Text>
         </LinearGradient>
 
@@ -246,7 +248,7 @@ export default function QuizComponent({
           <Text style={[styles.scoreValue, { color: quizResult.passed ? '#00E676' : '#FF5252' }]}>
             {quizResult.percentage}%
           </Text>
-          <Text style={styles.scoreLabel}>Score</Text>
+          <Text style={styles.scoreLabel}>{t('components.quiz.score')}</Text>
         </View>
 
         {/* Stats Grid */}
@@ -254,22 +256,22 @@ export default function QuizComponent({
           <View style={[styles.statBox, { backgroundColor: colors.bgCard }]}>
             <Ionicons name="checkmark-circle" size={20} color="#00E676" />
             <Text style={styles.statValue}>{quizResult.correctAnswers}</Text>
-            <Text style={styles.statLabel}>Correct</Text>
+            <Text style={styles.statLabel}>{t('components.quiz.correct')}</Text>
           </View>
           <View style={[styles.statBox, { backgroundColor: colors.bgCard }]}>
             <Ionicons name="close-circle" size={20} color="#FF5252" />
             <Text style={styles.statValue}>{quizResult.wrongAnswers}</Text>
-            <Text style={styles.statLabel}>Wrong</Text>
+            <Text style={styles.statLabel}>{t('components.quiz.wrong')}</Text>
           </View>
           <View style={[styles.statBox, { backgroundColor: colors.bgCard }]}>
             <Ionicons name="help-circle" size={20} color="#FFC107" />
             <Text style={styles.statValue}>{quizResult.unanswered}</Text>
-            <Text style={styles.statLabel}>Skipped</Text>
+            <Text style={styles.statLabel}>{t('components.quiz.skipped')}</Text>
           </View>
           <View style={[styles.statBox, { backgroundColor: colors.bgCard }]}>
             <Ionicons name="time-outline" size={20} color="#6C63FF" />
             <Text style={styles.statValue}>{formatTime(quizResult.timeTaken)}</Text>
-            <Text style={styles.statLabel}>Time</Text>
+            <Text style={styles.statLabel}>{t('components.quiz.time')}</Text>
           </View>
         </View>
 
@@ -284,7 +286,7 @@ export default function QuizComponent({
         }]}>
           <Ionicons name="flash" size={20} color={quizResult.passed ? '#00E676' : '#FFC107'} />
           <Text style={[styles.xpText, { color: quizResult.passed ? '#00E676' : '#FFC107' }]}>
-            {quizResult.passed ? `+${passXp} XP` : `+${attemptXp} XP for attempting`}
+            {quizResult.passed ? t('components.quiz.xp', { xp: passXp }) : t('components.quiz.xpAttempt', { xp: attemptXp })}
           </Text>
         </View>
 
@@ -295,7 +297,7 @@ export default function QuizComponent({
         >
           <Ionicons name="list-outline" size={18} color={colors.text} />
           <Text style={[styles.reviewToggleText, { color: colors.text }]}>
-            {showExplanation ? 'Hide' : 'Review'} Answers
+            {showExplanation ? t('components.quiz.hide') : t('components.quiz.review')} {t('components.quiz.reviewAnswers')}
           </Text>
           <Ionicons
             name={showExplanation ? 'chevron-up' : 'chevron-down'}
@@ -335,7 +337,7 @@ export default function QuizComponent({
                       <Text style={[styles.reviewBadgeText, {
                         color: isCorrect ? '#00C853' : isSkipped ? '#FFC107' : '#FF5252',
                       }]}>
-                        {isCorrect ? 'Correct' : isSkipped ? 'Skipped' : 'Incorrect'}
+                        {isCorrect ? t('components.quiz.correct') : isSkipped ? t('components.quiz.skipped') : t('components.quiz.incorrect')}
                       </Text>
                     </View>
                   </View>
@@ -396,7 +398,7 @@ export default function QuizComponent({
         <View style={styles.quizHeaderLeft}>
           <Text style={[styles.quizTitle, { color: colors.text }]}>{quiz.title}</Text>
           <Text style={[styles.quizMeta, { color: colors.textMuted }]}>
-            Question {currentQuestionIndex + 1} of {totalQuestions}
+            {t('components.quiz.questionOf', { current: currentQuestionIndex + 1, total: totalQuestions })}
           </Text>
         </View>
         {timerMinutes > 0 && (
@@ -559,7 +561,7 @@ export default function QuizComponent({
               onPress={handlePrevious}
             >
               <Ionicons name="chevron-back" size={18} color={colors.text} />
-              <Text style={[styles.navBtnText, { color: colors.text }]}>Previous</Text>
+              <Text style={[styles.navBtnText, { color: colors.text }]}>{t('components.quiz.previous')}</Text>
             </Pressable>
           )}
           <View style={{ flex: 1 }} />
@@ -568,7 +570,7 @@ export default function QuizComponent({
               style={[styles.navBtn, styles.navBtnNext, { backgroundColor: colors.primary }]}
               onPress={handleNext}
             >
-              <Text style={[styles.navBtnText, { color: '#FFF' }]}>Next</Text>
+              <Text style={[styles.navBtnText, { color: '#FFF' }]}>{t('components.quiz.next')}</Text>
               <Ionicons name="chevron-forward" size={18} color="#FFF" />
             </Pressable>
           ) : (
@@ -581,7 +583,7 @@ export default function QuizComponent({
             >
               <Ionicons name="checkmark-done" size={20} color="#FFF" />
               <Text style={[styles.submitBtnText, { color: '#FFF' }]}>
-                Submit ({answeredCount}/{totalQuestions})
+                {t('components.quiz.submit', { answered: answeredCount, total: totalQuestions })}
               </Text>
             </Pressable>
           )}

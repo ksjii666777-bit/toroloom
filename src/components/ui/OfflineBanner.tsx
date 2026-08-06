@@ -36,6 +36,7 @@ import { offlineMutationQueue } from '../../services/offlineMutationQueue';
 import { offlineCache } from '../../services/offlineCache';
 import { log } from '../../utils/logger';
 import { analytics } from '../../services/analytics';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 // ──── Synchronised re-fetch across all offline-aware stores ────────────────
@@ -63,15 +64,15 @@ const RECONNECT_DEBOUNCE_MS = 5_000;
 
 // ──── Freshness helpers ──────────────────────────────────────────────────
 
-const FRESHNESS_ICONS: Record<CacheNamespace, { icon: keyof typeof Ionicons.glyphMap; label: string }> = {
-  portfolio: { icon: 'pie-chart', label: 'Portfolio' },
-  market: { icon: 'trending-up', label: 'Market' },
-  watchlist: { icon: 'heart', label: 'Watchlist' },
-  education: { icon: 'school', label: 'Courses' },
-  openOrders: { icon: 'document-text', label: 'Orders' },
-  fno: { icon: 'git-network', label: 'F&O' },
-  community: { icon: 'people', label: 'Community' },
-  aiInsights: { icon: 'bulb', label: 'AI Insights' },
+const FRESHNESS_ICONS: Record<CacheNamespace, { icon: keyof typeof Ionicons.glyphMap; labelKey: string }> = {
+  portfolio: { icon: 'pie-chart', labelKey: 'components.offlineBanner.freshnessPortfolio' },
+  market: { icon: 'trending-up', labelKey: 'components.offlineBanner.freshnessMarket' },
+  watchlist: { icon: 'heart', labelKey: 'components.offlineBanner.freshnessWatchlist' },
+  education: { icon: 'school', labelKey: 'components.offlineBanner.freshnessEducation' },
+  openOrders: { icon: 'document-text', labelKey: 'components.offlineBanner.freshnessOrders' },
+  fno: { icon: 'git-network', labelKey: 'components.offlineBanner.freshnessFno' },
+  community: { icon: 'people', labelKey: 'components.offlineBanner.freshnessCommunity' },
+  aiInsights: { icon: 'bulb', labelKey: 'components.offlineBanner.freshnessAiInsights' },
 };
 
 function getFreshnessColor(isStale: boolean, ageLabel: string): string {
@@ -83,6 +84,7 @@ function getFreshnessColor(isStale: boolean, ageLabel: string): string {
 
 export default function OfflineBanner() {
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const { combinedOffline, refresh: checkConnectivity } = useConnectivity();
 
   const [dismissed, setDismissed] = useState(false);
@@ -179,15 +181,15 @@ export default function OfflineBanner() {
 
         // Toast messages
         if (failedCount > 0 && syncedCount > 0) {
-          showToast(`${syncedCount} synced \u2022 ${failedCount} failed`, 'error');
+          showToast(t('components.offlineBanner.syncedAndFailed', { count: syncedCount, failed: failedCount }), 'error');
         } else if (failedCount > 0) {
-          showToast(`${failedCount} mutation${failedCount !== 1 ? 's' : ''} failed to sync`, 'error');
+          showToast(t('components.offlineBanner.stillFailed', { count: failedCount }), 'error');
         } else if (syncedCount > 0 && refreshSuccess) {
-          showToast(`${syncedCount} mutation${syncedCount !== 1 ? 's' : ''} synced \u2022 Data refreshed`, 'success');
+          showToast(t('components.offlineBanner.syncedAndRefreshed', { count: syncedCount }), 'success');
         } else if (syncedCount > 0) {
-          showToast(`${syncedCount} mutation${syncedCount !== 1 ? 's' : ''} synced \u2713`, 'success');
+          showToast(t('components.offlineBanner.syncedCount', { count: syncedCount }), 'success');
         } else if (refreshSuccess) {
-          showToast('Data refreshed \u2713', 'success');
+          showToast(t('components.offlineBanner.upToDate'), 'success');
         }
       } catch (err) {
         log.warn('[OfflineBanner] Auto-refresh on reconnect failed:', err);
@@ -195,7 +197,7 @@ export default function OfflineBanner() {
       }
     });
     return unsub;
-  }, [showToast, markSynced, refreshFreshness]);
+  }, [showToast, markSynced, refreshFreshness, t]);
 
   // Poll pending mutation count and freshness
   useEffect(() => {
@@ -300,9 +302,9 @@ export default function OfflineBanner() {
 
       if (remaining === 0) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        showToast(`${synced} mutation${synced !== 1 ? 's' : ''} synced \u2713`, 'success');
+        showToast(t('components.offlineBanner.syncedCount', { count: synced }), 'success');
       } else if (failed > 0) {
-        showToast(`${failed} still pending`, 'error');
+        showToast(t('components.offlineBanner.stillPending', { count: failed }), 'error');
       }
     } catch {
       useOfflineStore.getState().setSyncResult('failed');
@@ -365,16 +367,16 @@ export default function OfflineBanner() {
       await refreshFreshness();
 
       if (failed > 0 && synced > 0) {
-        showToast(`${synced} synced \u2022 ${failed} still failed`, 'error');
+        showToast(t('components.offlineBanner.refreshFailed', { count: synced, failed }), 'error');
       } else if (failed > 0) {
-        showToast(`${failed} mutation${failed !== 1 ? 's' : ''} still failed`, 'error');
+        showToast(t('components.offlineBanner.stillFailed', { count: failed }), 'error');
       } else if (synced > 0) {
-        showToast(`${synced} mutation${synced !== 1 ? 's' : ''} synced \u2713`, 'success');
+        showToast(t('components.offlineBanner.syncedCount', { count: synced }), 'success');
       }
     } catch {
-      showToast('Retry failed \u2014 network error', 'error');
+      showToast(t('components.offlineBanner.retryFailed'), 'error');
     }
-  }, [toast?.type, showToast, refreshFreshness]);
+  }, [toast?.type, showToast, refreshFreshness, t]);
 
   const handleToastDismiss = useCallback(() => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -411,17 +413,17 @@ export default function OfflineBanner() {
             <View style={styles.textContainer}>
               <Text style={styles.title}>
                 {combinedOffline
-                  ? "You're offline"
+                  ? t('components.offlineBanner.youReOffline')
                   : pendingCount > 0
-                    ? `${pendingCount} change${pendingCount !== 1 ? 's' : ''} pending`
-                    : 'All synced'}
+                    ? t('components.offlineBanner.changesPending', { count: pendingCount })
+                    : t('components.offlineBanner.allSynced')}
               </Text>
               <Text style={styles.subtitle}>
                 {combinedOffline
-                  ? 'Viewing cached data'
+                  ? t('components.offlineBanner.viewingCached')
                   : pendingCount > 0
-                    ? 'Waiting for network to sync'
-                    : 'All data is up to date'}
+                    ? t('components.offlineBanner.waitingForNetwork')
+                    : t('components.offlineBanner.upToDate')}
               </Text>
             </View>
             <View style={styles.actionsRow}>
@@ -452,7 +454,7 @@ export default function OfflineBanner() {
           {expanded && (
             <View style={styles.freshnessSection}>
               <View style={styles.freshnessDivider} />
-              <Text style={styles.freshnessTitle}>Data Freshness</Text>
+              <Text style={styles.freshnessTitle}>{t('components.offlineBanner.dataFreshness')}</Text>
               <View style={styles.freshnessGrid}>
                 {(Object.entries(FRESHNESS_ICONS) as [CacheNamespace, typeof FRESHNESS_ICONS[CacheNamespace]][]).map(([ns, info]) => {
                   const f = freshness[ns];
@@ -461,7 +463,7 @@ export default function OfflineBanner() {
                     <View key={ns} style={styles.freshnessItem}>
                       <Ionicons name={info.icon} size={12} color={dotColor} style={{ marginRight: 4 }} />
                       <View style={styles.freshnessTextCol}>
-                        <Text style={styles.freshnessLabel}>{info.label}</Text>
+                        <Text style={styles.freshnessLabel}>{t(info.labelKey)}</Text>
                         <Text style={[styles.freshnessAge, { color: dotColor }]}>{f.ageLabel}</Text>
                       </View>
                       <View style={[styles.freshnessDot, { backgroundColor: dotColor }]} />
@@ -475,7 +477,7 @@ export default function OfflineBanner() {
                 <View style={styles.staleWarning}>
                   <Ionicons name="information-circle" size={12} color="#FFAB40" />
                   <Text style={styles.staleWarningText}>
-                    {staleCount} data set{staleCount !== 1 ? 's' : ''} stale — pull to refresh
+                    {t('components.offlineBanner.staleCount', { count: staleCount })}
                   </Text>
                 </View>
               )}
@@ -484,7 +486,7 @@ export default function OfflineBanner() {
               {pendingCount > 0 && (
                 <View style={styles.pendingSection}>
                   <View style={styles.freshnessDivider} />
-                  <Text style={styles.freshnessTitle}>Pending Sync</Text>
+                  <Text style={styles.freshnessTitle}>{t('components.offlineBanner.pendingSync')}</Text>
             <Pressable
               style={({ pressed }) => [styles.syncAllBtn, pressed && { opacity: 0.7 }]}
               onPress={handleSync}
@@ -492,7 +494,7 @@ export default function OfflineBanner() {
             >
                     <Ionicons name="sync-outline" size={14} color="#0D0D0D" />
                     <Text style={styles.syncAllText}>
-                      {syncing ? 'Syncing...' : `Sync ${pendingCount} pending`}
+                      {syncing ? t('components.offlineBanner.syncing') : t('components.offlineBanner.syncPending', { count: pendingCount })}
                     </Text>
                   </Pressable>
                 </View>
@@ -506,11 +508,11 @@ export default function OfflineBanner() {
                   await offlineCache.clearAll();
                   await refreshFreshness();
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  showToast('Cache cleared', 'info');
+                  showToast(t('components.offlineBanner.cacheCleared'), 'info');
                 }}
               >
                 <Ionicons name="trash-outline" size={13} color="#EF4444" />
-                <Text style={styles.cacheClearText}>Clear offline cache</Text>
+                <Text style={styles.cacheClearText}>{t('components.offlineBanner.clearCache')}</Text>
               </Pressable>
             </View>
           )}

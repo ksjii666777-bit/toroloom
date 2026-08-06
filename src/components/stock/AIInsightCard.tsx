@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -25,6 +26,7 @@ interface AIInsightCardProps {
 
 export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsightCardProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   const sentimentColor = insight.type === 'bullish' ? '#00C853'
@@ -33,8 +35,8 @@ export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsight
     : insight.type === 'bearish' ? '#FF174420' : '#FFC10720';
   const sentimentIcon = insight.type === 'bullish' ? 'trending-up'
     : insight.type === 'bearish' ? 'trending-down' : 'remove';
-  const sentimentLabel = insight.type === 'bullish' ? 'Bullish'
-    : insight.type === 'bearish' ? 'Bearish' : 'Neutral';
+  const sentimentLabel = insight.type === 'bullish' ? t('components.stockAnalysis.bullish')
+    : insight.type === 'bearish' ? t('components.stockAnalysis.bearish') : t('components.stockAnalysis.neutral');
 
   return (
     <View style={[styles.card, { borderLeftColor: sentimentColor }]}>
@@ -45,8 +47,8 @@ export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsight
             <Ionicons name="bulb" size={18} color={sentimentColor} />
           </View>
           <View>
-            <Text style={styles.title} testID="stock-ai-analysis">AI Analysis</Text>
-            <Text style={styles.subtitle}>Powered by Deep Learning</Text>
+            <Text style={styles.title} testID="stock-ai-analysis">{t('components.stockAnalysis.aiAnalysis')}</Text>
+            <Text style={styles.subtitle}>{t('components.stockAnalysis.poweredBy')}</Text>
           </View>
         </View>
         <View style={[styles.sentimentBadge, { backgroundColor: sentimentBg }]}>
@@ -58,7 +60,7 @@ export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsight
       {/* Confidence bar */}
       <View style={styles.confidenceRow}>
         <View style={styles.confidenceLabelRow}>
-          <Text style={styles.confidenceLabel}>Confidence</Text>
+          <Text style={styles.confidenceLabel}>{t('components.stockAnalysis.confidence')}</Text>
           <Text style={[styles.confidenceValue, { color: sentimentColor }]}>{insight.confidence}%</Text>
         </View>
         <View style={[styles.confidenceBar, { backgroundColor: colors.bgInput }]}>
@@ -78,7 +80,7 @@ export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsight
       {/* Target Levels */}
       {insight.targets.length > 0 && (
         <View style={styles.targetsSection}>
-          <Text style={styles.targetsLabel}>Target Levels</Text>
+          <Text style={styles.targetsLabel}>{t('components.stockAnalysis.targetLevels')}</Text>
           <View style={styles.targetsRow}>
             {insight.targets.map((t, i) => (
               <View key={t.target} style={[styles.targetItem, { backgroundColor: colors.bgCardLight }]}>
@@ -100,7 +102,7 @@ export default function AIInsightCard({ insight, onViewFullAnalysis }: AIInsight
       {/* CTA */}
       {onViewFullAnalysis && (
         <Pressable style={[styles.cta, { borderColor: colors.border }]} onPress={onViewFullAnalysis}>
-          <Text style={[styles.ctaText, { color: colors.primary }]}>View Full Analysis</Text>
+          <Text style={[styles.ctaText, { color: colors.primary }]}>{t('components.stockAnalysis.viewFullAnalysis')}</Text>
           <Ionicons name="arrow-forward" size={16} color={colors.primary} />
         </Pressable>
       )}

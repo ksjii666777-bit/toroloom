@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { getPatternDescription, type DetectedPattern } from '../chart/patternDetection';
 
@@ -10,13 +11,14 @@ interface PatternSummaryProps {
 
 export default function PatternSummary({ patterns }: PatternSummaryProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   if (patterns.length === 0) return null;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-      <Text style={[styles.title, { color: colors.text }]}>Detected Patterns</Text>
+      <Text style={[styles.title, { color: colors.text }]}>{t('components.stockAnalysis.detectedPatterns')}</Text>
       {patterns.map((p) => {
         const pColor = p.direction === 'bullish' ? colors.marketUp
           : p.direction === 'bearish' ? colors.marketDown : colors.warning;
