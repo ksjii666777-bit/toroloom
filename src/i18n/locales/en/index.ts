@@ -36,12 +36,16 @@ import errors from './errors';
 import factorAnalysis from './factorAnalysis';
 import featureFlags from './featureFlags';
 import funds from './funds';
+import fundamentals from './fundamentals';
 import futuresCurve from './futuresCurve';
 import gamification from './gamification';
 import help from './help';
 import home from './home';
 import ipos from './ipos';
+import journal from './journal';
 import kyc from './kyc';
+import learn from './learn';
+import sentiment from './sentiment';
 import landscapeSettings from './landscapeSettings';
 import market from './market';
 import monteCarlo from './monteCarlo';
@@ -62,6 +66,7 @@ import portfolioAlerts from './portfolioAlerts';
 import profile from './profile';
 import referral from './referral';
 import reports from './reports';
+import retirement from './retirement';
 import revenueDashboard from './revenueDashboard';
 import risk from './risk';
 import riskSettings from './riskSettings';
@@ -126,12 +131,16 @@ const en = {
   factorAnalysis,
   featureFlags,
   funds,
+  fundamentals,
   futuresCurve,
   gamification,
   help,
   home,
   ipos,
+  journal,
   kyc,
+  learn,
+  sentiment,
   landscapeSettings,
   market,
   monteCarlo,
@@ -152,6 +161,7 @@ const en = {
   profile,
   referral,
   reports,
+  retirement,
   revenueDashboard,
   risk,
   riskSettings,

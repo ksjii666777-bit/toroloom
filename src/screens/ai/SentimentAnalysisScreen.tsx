@@ -25,6 +25,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { mockSentimentData } from '../../constants/mockData';
 
@@ -56,6 +57,7 @@ function formatCompactNumber(num: number): string {
 
 function SentimentGauge({ score, label }: { score: number; label: string }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const sc = getSentimentColors(label);
   const absScore = Math.abs(score);
 
@@ -68,7 +70,7 @@ function SentimentGauge({ score, label }: { score: number; label: string }) {
             {score > 0 ? '+' : ''}{score}
           </Text>
           <Text style={[gaugeStyles.scoreLabel, { color: sc.color }]}>
-            {label.charAt(0).toUpperCase() + label.slice(1)}
+            {t('sentiment.' + label)}
           </Text>
         </View>
       </View>
@@ -97,9 +99,9 @@ function SentimentGauge({ score, label }: { score: number; label: string }) {
           )}
         </View>
         <View style={gaugeStyles.barLabels}>
-          <Text style={[gaugeStyles.barLabel, { color: colors.marketDown }]}>Bearish</Text>
+          <Text style={[gaugeStyles.barLabel, { color: colors.marketDown }]}>{t('sentiment.bearish')}</Text>
           <Text style={[gaugeStyles.barLabelCenter, { color: colors.textMuted }]}>0</Text>
-          <Text style={[gaugeStyles.barLabel, { color: colors.marketUp }]}>Bullish</Text>
+          <Text style={[gaugeStyles.barLabel, { color: colors.marketUp }]}>{t('sentiment.bullish')}</Text>
         </View>
       </View>
     </View>
@@ -246,6 +248,7 @@ function SentimentMiniChart({
   const { colors } = useTheme();
   const sc = getSentimentColors(label);
 
+  const { t } = useT();
   if (history.length < 2) return null;
 
   const scores = history.map(h => h.overallScore);
@@ -281,8 +284,8 @@ function SentimentMiniChart({
 
       {/* Labels */}
       <View style={chartStyles.labelsRow}>
-        <Text style={[chartStyles.labelText, { color: colors.textMuted }]}>30d ago</Text>
-        <Text style={[chartStyles.labelText, { color: colors.textMuted }]}>Today</Text>
+        <Text style={[chartStyles.labelText, { color: colors.textMuted }]}>{t('sentiment.chart30dAgo')}</Text>
+        <Text style={[chartStyles.labelText, { color: colors.textMuted }]}>{t('sentiment.chartToday')}</Text>
       </View>
     </View>
   );
@@ -329,15 +332,16 @@ const chartStyles = StyleSheet.create({
 
 function ArticleCard({ article }: { article: { title: string; summary: string; source: string; sentiment: string; score: number; publishedAt: string } }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const sc = getSentimentColors(article.sentiment);
 
   function formatRelativeTime(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 60) return t('sentiment.minAgo', { n: mins });
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
+    if (hours < 24) return t('sentiment.hourAgo', { n: hours });
+    return t('sentiment.dayAgo', { n: Math.floor(hours / 24) });
   }
 
   return (
@@ -408,6 +412,7 @@ const articleStyles = StyleSheet.create({
 export default function SentimentAnalysisScreen({ navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [activeFilter, setActiveFilter] = useState<'all' | 'bullish' | 'bearish' | 'neutral'>('all');
@@ -450,10 +455,10 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
   const filterOptions = useMemo(() =>
     (['all', 'bullish', 'bearish', 'neutral'] as const).map(f => ({
       key: f,
-      label: f.charAt(0).toUpperCase() + f.slice(1),
+      label: t('sentiment.' + f),
       count: filtered.length,
     })),
-    [filtered.length],
+    [filtered.length, t],
   );
 
   // Loading state
@@ -461,7 +466,7 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textMuted }]}>Analyzing sentiment data...</Text>
+        <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('sentiment.loading')}</Text>
       </View>
     );
   }
@@ -471,7 +476,7 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <Ionicons name="analytics-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>No sentiment data available</Text>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('sentiment.noData')}</Text>
       </View>
     );
   }
@@ -501,8 +506,8 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
             <Ionicons name="notifications" size={20} color={colors.primary} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>Sentiment Analysis</Text>
-            <Text style={styles.headerSubtitle}>News + social media sentiment</Text>
+            <Text style={styles.headerTitle}>{t('sentiment.title')}</Text>
+            <Text style={styles.headerSubtitle}>{t('sentiment.subtitle')}</Text>
           </View>
         </View>
 
@@ -563,17 +568,17 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
               <SentimentGauge score={selectedSentiment.currentScore} label={selectedSentiment.label} />
 
               {/* Source Breakdown */}
-              <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Source Breakdown</Text>
+              <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t('sentiment.sourceBreakdown')}</Text>
               <View style={[styles.sourceCard, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
-                <SourceBar label="News" score={selectedSentiment.sourceBreakdown.newsScore} color="#3B82F6" />
-                <SourceBar label="Social" score={selectedSentiment.sourceBreakdown.socialScore} color="#8B5CF6" />
-                <SourceBar label="Analyst" score={selectedSentiment.sourceBreakdown.analystScore} color="#10B981" />
+                <SourceBar label={t('sentiment.news')} score={selectedSentiment.sourceBreakdown.newsScore} color="#3B82F6" />
+                <SourceBar label={t('sentiment.social')} score={selectedSentiment.sourceBreakdown.socialScore} color="#8B5CF6" />
+                <SourceBar label={t('sentiment.analyst')} score={selectedSentiment.sourceBreakdown.analystScore} color="#10B981" />
                 <SourceBar label="AI" score={selectedSentiment.sourceBreakdown.aiScore} color="#F59E0B" />
               </View>
 
               {/* Confidence bar */}
               <View style={styles.confidenceRow}>
-                <Text style={styles.confidenceLabel}>Confidence</Text>
+                <Text style={styles.confidenceLabel}>{t('sentiment.confidence')}</Text>
                 <View style={[styles.confidenceBar, { backgroundColor: colors.bgInput }]}>
                   <View style={[styles.confidenceFill, { width: `${selectedSentiment.confidence}%`, backgroundColor: sc.color }]} />
                 </View>
@@ -584,7 +589,7 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
             {/* Metrics Row */}
             <View style={styles.metricsRow}>
               <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={styles.metricLabel}>Mentions Today</Text>
+                <Text style={styles.metricLabel}>{t('sentiment.mentionsToday')}</Text>
                 <Text style={styles.metricValue}>{formatCompactNumber(selectedSentiment.mentionVolume)}</Text>
                 <View style={styles.metricChangeRow}>
                   <Ionicons name={selectedSentiment.mentionChange >= 0 ? 'arrow-up' : 'arrow-down'} size={10} color={selectedSentiment.mentionChange >= 0 ? colors.marketUp : colors.marketDown} />
@@ -594,14 +599,14 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
                 </View>
               </View>
               <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={styles.metricLabel}>Stability</Text>
+                <Text style={styles.metricLabel}>{t('sentiment.stability')}</Text>
                 <Text style={[styles.metricValue, { color: stability.volatility === 'high' ? colors.marketDown : stability.volatility === 'low' ? colors.marketUp : colors.warning }]}>
                   {stability.stabilityScore}%
                 </Text>
-                <Text style={[styles.metricSub, { color: colors.textMuted }]}>{stability.volatility} volatility</Text>
+                <Text style={[styles.metricSub, { color: colors.textMuted }]}>{stability.volatility === 'high' ? t('sentiment.highVolatility') : stability.volatility === 'low' ? t('sentiment.lowVolatility') : t('sentiment.moderateVolatility')}</Text>
               </View>
               <View style={[styles.metricCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={styles.metricLabel}>Keywords</Text>
+                <Text style={styles.metricLabel}>{t('sentiment.keywords')}</Text>
                 <View style={styles.keywordRow}>
                   {selectedSentiment.topKeywords.slice(0, 3).map((kw, i) => (
                     <View key={i} style={[styles.keywordChip, { backgroundColor: sc.color + '15' }]}>
@@ -619,12 +624,12 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
                   <View style={[styles.sectionIcon, { backgroundColor: colors.primary + '20' }]}>
                     <Ionicons name="pulse" size={16} color={colors.primary} />
                   </View>
-                  <Text style={styles.sectionCardTitle}>30-Day Trend</Text>
+                  <Text style={styles.sectionCardTitle}>{t('sentiment.trend30Day')}</Text>
                 </View>
                 {shift.hasShifted && (
                   <View style={[styles.shiftBadge, { backgroundColor: shift.direction === 'improving' ? colors.marketUp + '20' : colors.marketDown + '20' }]}>
                     <Text style={[styles.shiftText, { color: shift.direction === 'improving' ? colors.marketUp : colors.marketDown }]}>
-                      {shift.direction === 'improving' ? '↑' : '↓'} {Math.round(shift.magnitude)}pts
+                      {shift.direction === 'improving' ? '↑' : '↓'} {t('sentiment.points', { pts: Math.round(shift.magnitude) })}
                     </Text>
                   </View>
                 )}
@@ -641,7 +646,7 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
             <View style={[styles.overviewCard, { borderColor: colors.border }]}>
               <View style={styles.overviewHeader}>
                 <Ionicons name="globe" size={16} color={colors.primary} />
-                <Text style={styles.overviewTitle}>Market Sentiment Overview</Text>
+                <Text style={styles.overviewTitle}>{t('sentiment.marketOverview')}</Text>
               </View>
               <Text style={[styles.overviewText, { color: colors.textSecondary }]}>{overviewText}</Text>
 
@@ -710,7 +715,7 @@ export default function SentimentAnalysisScreen({ navigation }: any) {
           <View>
             {/* Top Keywords */}
             <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-              <Text style={styles.sectionCardTitle}>Trending Keywords</Text>
+              <Text style={styles.sectionCardTitle}>{t('sentiment.trendingKeywords')}</Text>
               <View style={styles.keywordsGrid}>
                 {selectedSentiment.topKeywords.map((kw, i) => (
                   <View key={i} style={[styles.keywordChip, { backgroundColor: sc.color + '10', borderColor: sc.color + '25' }]}>

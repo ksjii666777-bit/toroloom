@@ -4,6 +4,7 @@ import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -16,6 +17,7 @@ Dimensions.get('window');
 
 export default function LearnScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { courses, fetchCourses } = useEducationStore();
   const [isLoading, setIsLoading] = useState(true);
@@ -99,14 +101,14 @@ export default function LearnScreen({ navigation }: any) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title} testID="learn-title">Learning Hub</Text>
-          <Text style={styles.subtitle} testID="learn-subtitle">Master the markets, one lesson at a time</Text>
+          <Text style={styles.title} testID="learn-title">{t('learn.title')}</Text>
+          <Text style={styles.subtitle} testID="learn-subtitle">{t('learn.subtitle')}</Text>
         </View>
 
         {/* Continue Learning */}
         {continueCourses.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Continue Learning</Text>
+            <Text style={styles.sectionTitle}>{t('learn.continueLearning')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {continueCourses.map((course, i) => (
                 <Animated.View key={course.id} style={continueStyles[i]}>
@@ -121,7 +123,7 @@ export default function LearnScreen({ navigation }: any) {
                       <View style={styles.progressBar}>
                         <View style={[styles.progressFill, { width: `${course.progress}%` }]} />
                       </View>
-                      <Text style={styles.progressText}>{course.progress}% complete</Text>
+                      <Text style={styles.progressText}>{t('learn.percentComplete', { percent: course.progress })}</Text>
                     </LinearGradient>
                   </AnimatedPressable>
                 </Animated.View>
@@ -150,10 +152,10 @@ export default function LearnScreen({ navigation }: any) {
                 <Text style={{ fontSize: 36 }}>🛤️</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>
-                    Learning Paths
+                    {t('learn.learningPaths')}
                   </Text>
                   <Text style={{ ...FONTS.regular, fontSize: FONTS.size.sm, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
-                    Curated sequences to master the markets
+                    {t('learn.learningPathsSub')}
                   </Text>
                 </View>
                 <Ionicons name="arrow-forward-circle" size={28} color="rgba(255,255,255,0.9)" />
@@ -163,19 +165,19 @@ export default function LearnScreen({ navigation }: any) {
               <View style={{ flexDirection: 'row', marginTop: SPACING.lg, gap: SPACING.sm }}>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{Math.ceil(courses.length / 3) || 3}</Text>
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Paths</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{t('learn.statPaths')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{courses.length}</Text>
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Courses</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{t('learn.statCourses')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{courses.reduce((s, p) => s + p.lessons, 0)}</Text>
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Lessons</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{t('learn.statLessons')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>{(courses.reduce((s, p) => s + p.enrolledCount, 0)) >= 1000 ? `${(courses.reduce((s, p) => s + p.enrolledCount, 0) / 1000).toFixed(0)}K` : '5K'}</Text>
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Learners</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>{t('learn.statLearners')}</Text>
                 </View>
               </View>
             </LinearGradient>
@@ -202,10 +204,10 @@ export default function LearnScreen({ navigation }: any) {
                 <Text style={{ fontSize: 36 }}>📝</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>
-                    My Courses
+                    {t('learn.myCourses')}
                   </Text>
                   <Text style={{ ...FONTS.regular, fontSize: FONTS.size.sm, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
-                    Create and manage your own courses
+                    {t('learn.myCoursesSub')}
                   </Text>
                 </View>
                 <Ionicons name="add-circle" size={28} color="rgba(255,255,255,0.9)" />
@@ -215,19 +217,19 @@ export default function LearnScreen({ navigation }: any) {
               <View style={{ flexDirection: 'row', marginTop: SPACING.lg, gap: SPACING.sm }}>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Ionicons name="create-outline" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Create</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>{t('learn.featCreate')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Ionicons name="document-text-outline" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Lessons</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>{t('learn.statLessons')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Ionicons name="help-circle-outline" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Quizzes</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>{t('learn.featQuizzes')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Ionicons name="globe-outline" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Publish</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>{t('learn.featPublish')}</Text>
                 </View>
               </View>
             </LinearGradient>
@@ -254,10 +256,10 @@ export default function LearnScreen({ navigation }: any) {
                 <Text style={{ fontSize: 36 }}>🌍</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ ...FONTS.bold, fontSize: FONTS.size.lg, color: '#fff' }}>
-                    Community Courses
+                    {t('learn.communityCourses')}
                   </Text>
                   <Text style={{ ...FONTS.regular, fontSize: FONTS.size.sm, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
-                    Discover courses by fellow traders
+                    {t('learn.communityCoursesSub')}
                   </Text>
                 </View>
                 <Ionicons name="compass-outline" size={28} color="rgba(255,255,255,0.9)" />
@@ -267,19 +269,19 @@ export default function LearnScreen({ navigation }: any) {
               <View style={{ flexDirection: 'row', marginTop: SPACING.lg, gap: SPACING.sm }}>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Ionicons name="star" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Featured</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>{t('learn.featFeatured')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Ionicons name="funnel-outline" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Filter</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>{t('learn.featFilter')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Ionicons name="search-outline" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Search</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>{t('learn.featSearch')}</Text>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: BORDER_RADIUS.sm, padding: SPACING.sm }}>
                   <Ionicons name="people-outline" size={18} color="rgba(255,255,255,0.9)" />
-                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>Enroll</Text>
+                  <Text style={{ ...FONTS.regular, fontSize: 9, color: 'rgba(255,255,255,0.7)', marginTop: 2, textAlign: 'center' }}>{t('learn.featEnroll')}</Text>
                 </View>
               </View>
             </LinearGradient>
@@ -288,7 +290,7 @@ export default function LearnScreen({ navigation }: any) {
 
         {/* All Courses */}
         <View style={styles.allCoursesSection}>
-          <Text style={styles.sectionTitle}>All Courses</Text>
+          <Text style={styles.sectionTitle}>{t('learn.allCourses')}</Text>
           <View style={styles.coursesGrid}>
             {courses.map((course, i) => (
               <Animated.View key={course.id} style={courseStyles[i]}>
@@ -314,7 +316,7 @@ export default function LearnScreen({ navigation }: any) {
                       </View>
                       <View style={styles.courseStats}>
                         <Ionicons name="book-outline" size={12} color={colors.textMuted} />
-                        <Text style={styles.courseStatText}>{course.lessons} lessons</Text>
+                        <Text style={styles.courseStatText}>{t('learn.lessonCount', { count: course.lessons })}</Text>
                         <Ionicons name="people-outline" size={12} color={colors.textMuted} />
                         <Text style={styles.courseStatText}>{course.enrolledCount.toLocaleString()}</Text>
                       </View>

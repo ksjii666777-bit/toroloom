@@ -26,6 +26,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { useWealthStore } from '../../store/wealthStore';
 import _AnimatedPressable from '../../components/ui/AnimatedPressable';
@@ -47,6 +48,7 @@ const CHART_HEIGHT = 160;
 export default function RetirementPlannerScreen({ navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const { retirementPlan, updateRetirementPlan, getRetirementProjection } = useWealthStore();
 
   const [currentAge, setCurrentAge] = useState(String(retirementPlan.currentAge));
@@ -101,10 +103,10 @@ export default function RetirementPlannerScreen({ navigation }: any) {
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={[styles.title, { color: colors.text }]}>Retirement Planner</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('retirement.title')}</Text>
         </View>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-          Plan your golden years with confidence
+          {t('retirement.subtitle')}
         </Text>
       </LinearGradient>
 
@@ -117,27 +119,27 @@ export default function RetirementPlannerScreen({ navigation }: any) {
             end={{ x: 1, y: 1 }}
             style={styles.summaryCard}
           >
-            <Text style={styles.summaryLabel}>Projected Retirement Corpus</Text>
+            <Text style={styles.summaryLabel}>{t('retirement.projectedCorpus')}</Text>
             <Text style={styles.summaryValue}>{formatCompactINR(projection.corpusAtRetirement)}</Text>
 
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Ionicons name="cash" size={14} color="rgba(255,255,255,0.7)" />
-                <Text style={styles.summaryItemLabel}>Monthly Income</Text>
+                <Text style={styles.summaryItemLabel}>{t('retirement.monthlyIncome')}</Text>
                 <Text style={styles.summaryItemValue}>{formatCompactINR(projection.monthlyRetirementIncome)}</Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
                 <Ionicons name="calendar" size={14} color="rgba(255,255,255,0.7)" />
-                <Text style={styles.summaryItemLabel}>Years to Go</Text>
-                <Text style={styles.summaryItemValue}>{projection.yearsToRetirement}yrs</Text>
+                <Text style={styles.summaryItemLabel}>{t('retirement.yearsToGo')}</Text>
+                <Text style={styles.summaryItemValue}>{t('retirement.years', { count: projection.yearsToRetirement })}</Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
                 <Ionicons name="pulse" size={14} color={isOnTrack ? '#00E676' : '#FF5252'} />
-                <Text style={styles.summaryItemLabel}>Status</Text>
+                <Text style={styles.summaryItemLabel}>{t('retirement.status')}</Text>
                 <Text style={[styles.summaryItemValue, { color: isOnTrack ? '#00E676' : '#FF5252' }]}>
-                  {isOnTrack ? 'On Track' : 'Gap'}
+                  {isOnTrack ? t('retirement.onTrack') : t('retirement.gap')}
                 </Text>
               </View>
             </View>
@@ -149,10 +151,9 @@ export default function RetirementPlannerScreen({ navigation }: any) {
           <Animated.View entering={FadeInUp.duration(450)} style={[styles.gapCard, { backgroundColor: '#FF525210', borderColor: '#FF525230' }]}>
             <Ionicons name="warning" size={20} color="#FF5252" />
             <View style={{ flex: 1 }}>
-              <Text style={[styles.gapTitle, { color: '#FF5252' }]}>Retirement Gap Detected</Text>
+              <Text style={[styles.gapTitle, { color: '#FF5252' }]}>{t('retirement.gapDetected')}</Text>
               <Text style={[styles.gapText, { color: colors.textMuted }]}>
-                You'll be short by {formatCompactINR(projection.gap)}/month. Increase your monthly SIP to{' '}
-                {formatCompactINR(projection.requiredMonthlySIP)} to close this gap.
+                {t('retirement.gapText', { shortfall: formatCompactINR(projection.gap), required: formatCompactINR(projection.requiredMonthlySIP) })}
               </Text>
             </View>
           </Animated.View>
@@ -161,7 +162,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
         {/* ── Yearly Growth Chart ── */}
         {projection.yearlyData.length > 0 && (
           <Animated.View entering={FadeInUp.duration(500)} style={[styles.chartCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Retirement Corpus Growth</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('retirement.corpusGrowth')}</Text>
             <View style={styles.chartContainer}>
               <View style={styles.chartBars}>
                 {projection.yearlyData.map((d, i) => {
@@ -179,9 +180,9 @@ export default function RetirementPlannerScreen({ navigation }: any) {
               <View style={[styles.chartLegend, { borderTopColor: colors.divider }]}>
                 <View style={styles.chartLegendItem}>
                   <View style={[styles.chartLegendDot, { backgroundColor: colors.primary }]} />
-                  <Text style={[styles.chartLegendText, { color: colors.textMuted }]}>Corpus</Text>
+                  <Text style={[styles.chartLegendText, { color: colors.textMuted }]}>{t('retirement.corpus')}</Text>
                 </View>
-                <Text style={[styles.chartNote, { color: colors.textMuted }]}>Age →</Text>
+                <Text style={[styles.chartNote, { color: colors.textMuted }]}>{t('retirement.ageNote')}</Text>
               </View>
             </View>
           </Animated.View>
@@ -189,12 +190,12 @@ export default function RetirementPlannerScreen({ navigation }: any) {
 
         {/* ── Input Form ── */}
         <Animated.View entering={FadeInUp.duration(550)} style={[styles.formCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Details</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('retirement.yourDetails')}</Text>
 
           {/* Age & Life Expectancy */}
           <View style={styles.formRow}>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Current Age</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('retirement.currentAge')}</Text>
               <View style={[styles.inputRow, inputStyle(currentAge), { width: '100%' }]}>
                 <TextInput
                   style={[styles.inputField, { color: colors.text }]}
@@ -205,7 +206,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
               </View>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Retire At</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('retirement.retireAt')}</Text>
               <View style={[styles.inputRow, inputStyle(retirementAge), { width: '100%' }]}>
                 <TextInput
                   style={[styles.inputField, { color: colors.text }]}
@@ -216,7 +217,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
               </View>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Life Expectancy</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('retirement.lifeExpectancy')}</Text>
               <View style={[styles.inputRow, inputStyle(lifeExpectancy), { width: '100%' }]}>
                 <TextInput
                   style={[styles.inputField, { color: colors.text }]}
@@ -229,7 +230,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
           </View>
 
           {/* Current Savings */}
-          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Current Retirement Savings</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>{t('retirement.currentSavings')}</Text>
           <View style={[styles.inputRow, inputStyle(currentSavings)]}>
             <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
             <TextInput
@@ -241,7 +242,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
           </View>
 
           {/* Monthly Contribution */}
-          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Monthly Contribution (SIP)</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>{t('retirement.monthlyContribution')}</Text>
           <View style={[styles.inputRow, inputStyle(monthlyContribution)]}>
             <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
             <TextInput
@@ -266,7 +267,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
           {/* Expected Return & Inflation */}
           <View style={styles.formRow}>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Expected Return</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>{t('retirement.expectedReturn')}</Text>
               <View style={[styles.inputRow, inputStyle(expectedReturn), { width: '100%' }]}>
                 <TextInput
                   style={[styles.inputField, { color: colors.text }]}
@@ -278,7 +279,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
               </View>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Inflation</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>{t('retirement.inflation')}</Text>
               <View style={[styles.inputRow, inputStyle(inflationRate), { width: '100%' }]}>
                 <TextInput
                   style={[styles.inputField, { color: colors.text }]}
@@ -292,7 +293,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
           </View>
 
           {/* Expected Monthly Expense */}
-          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Expected Monthly Expense (today's value)</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>{t('retirement.expectedExpense')}</Text>
           <View style={[styles.inputRow, inputStyle(expectedExpense)]}>
             <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
             <TextInput
@@ -315,7 +316,7 @@ export default function RetirementPlannerScreen({ navigation }: any) {
           </View>
 
           {/* Other Income */}
-          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>Other Monthly Income (pension/rental)</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.md }]}>{t('retirement.otherIncome')}</Text>
           <View style={[styles.inputRow, inputStyle(otherIncome)]}>
             <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
             <TextInput
@@ -329,62 +330,62 @@ export default function RetirementPlannerScreen({ navigation }: any) {
 
         {/* ── Summary ── */}
         <Animated.View entering={FadeInUp.duration(600)} style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Retirement Summary</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('retirement.summary')}</Text>
           <View style={styles.summaryDetailRow}>
-            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>Corpus at Retirement</Text>
+            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>{t('retirement.corpusAtRetirement')}</Text>
             <Text style={[styles.summaryDetailValue, { color: colors.text }]}>{formatCompactINR(projection.corpusAtRetirement)}</Text>
           </View>
           <View style={[styles.summaryDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.summaryDetailRow}>
-            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>Monthly Income (inflation-adjusted)</Text>
+            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>{t('retirement.monthlyIncomeAdjusted')}</Text>
             <Text style={[styles.summaryDetailValue, { color: colors.text }]}>{formatCompactINR(projection.monthlyRetirementIncome)}</Text>
           </View>
           <View style={[styles.summaryDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.summaryDetailRow}>
-            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>Monthly Expenses (inflation-adjusted)</Text>
+            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>{t('retirement.monthlyExpensesAdjusted')}</Text>
             <Text style={[styles.summaryDetailValue, { color: colors.text }]}>
               {formatCompactINR(parseFloat(expectedExpense) * Math.pow(1 + parseFloat(inflationRate) / 100, parseInt(retirementAge) - parseInt(currentAge)) || 0)}
             </Text>
           </View>
           <View style={[styles.summaryDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.summaryDetailRow}>
-            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>Monthly Gap (deficit if any)</Text>
+            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>{t('retirement.monthlyGap')}</Text>
             <Text style={[styles.summaryDetailValue, { color: projection.gap > 0 ? '#FF5252' : '#00E676' }]}>
-              {projection.gap > 0 ? `-${formatCompactINR(projection.gap)}` : '✅ No Gap'}
+              {projection.gap > 0 ? `-${formatCompactINR(projection.gap)}` : t('retirement.noGap')}
             </Text>
           </View>
           <View style={[styles.summaryDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.summaryDetailRow}>
-            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>Required SIP to Close Gap</Text>
+            <Text style={[styles.summaryDetailLabel, { color: colors.textMuted }]}>{t('retirement.requiredSip')}</Text>
             <Text style={[styles.summaryDetailValue, { color: '#FFC107' }]}>{formatCompactINR(projection.requiredMonthlySIP)}</Text>
           </View>
         </Animated.View>
 
         {/* ── Tips ── */}
         <Animated.View entering={FadeInUp.duration(650)} style={[styles.tipsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>💡 Retirement Tips</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('retirement.tips')}</Text>
           <View style={styles.tipRow}>
             <Text style={styles.tipBullet}>•</Text>
             <Text style={[styles.tipText, { color: colors.textSecondary }]}>
-              Start early! A 25-year-old needs to save ~15% of income. A 35-year-old needs ~25%.
+              {t('retirement.tip1')}
             </Text>
           </View>
           <View style={styles.tipRow}>
             <Text style={styles.tipBullet}>•</Text>
             <Text style={[styles.tipText, { color: colors.textSecondary }]}>
-              Equity-heavy allocation when young (80/20), shift to debt as you near retirement.
+              {t('retirement.tip2')}
             </Text>
           </View>
           <View style={styles.tipRow}>
             <Text style={styles.tipBullet}>•</Text>
             <Text style={[styles.tipText, { color: colors.textSecondary }]}>
-              Max out EPF/VPF for risk-free ~8% returns. Use NPS for additional ₹50K tax benefit.
+              {t('retirement.tip3')}
             </Text>
           </View>
           <View style={styles.tipRow}>
             <Text style={styles.tipBullet}>•</Text>
             <Text style={[styles.tipText, { color: colors.textSecondary }]}>
-              Review and rebalance your retirement portfolio annually.
+              {t('retirement.tip4')}
             </Text>
           </View>
         </Animated.View>

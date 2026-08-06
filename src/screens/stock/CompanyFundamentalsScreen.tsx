@@ -6,6 +6,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { SkeletonBlock, SkeletonCard } from '../../components/ui/SkeletonLoader';
+import { useT } from '../../hooks/useT';
 import { marketApi } from '../../services/api/market';
 import { mockFundamentals } from '../../constants/mockData';
 import type { CompanyFundamentals, FinancialQuarter } from '../../types';
@@ -24,6 +25,7 @@ function MetricRow({
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
+  const { t } = useT();
   const formatted = unit === '%' ? formatPercent(value)
     : unit === 'x' ? `${formatRatio(value)}x`
     : unit === 'days' ? `${Math.round(value)}d`
@@ -39,7 +41,7 @@ function MetricRow({
       <View style={styles.metricLeft}>
         <Text style={styles.metricLabel}>{label}</Text>
         {sectorAvg !== undefined && (
-          <Text style={styles.metricSector}>Sector: {unit === '%' ? formatPercent(sectorAvg) : formatRatio(sectorAvg)}</Text>
+          <Text style={styles.metricSector}>{t('fundamentals.sectorPrefix', { value: unit === '%' ? formatPercent(sectorAvg) : formatRatio(sectorAvg) })}</Text>
         )}
       </View>
       <View style={styles.metricRight}>
@@ -144,6 +146,7 @@ function ShareholdingChart({ data }: { data: { label: string; value: number; col
 export default function CompanyFundamentalsScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { t } = useT();
   const { symbol, stockId } = route.params || {};
   const { stocks } = useMarketStore();
   const stock = stocks.find(s => s.id === stockId || s.symbol === symbol);
@@ -156,7 +159,7 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
   const fetchFundamentals = useCallback(async () => {
     if (!symbol) {
       setIsLoading(false);
-      setError('No symbol provided');
+      setError(t('fundamentals.noSymbol'));
       return;
     }
 
@@ -173,7 +176,7 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
       if (mockData) {
         setFundamentals(mockData);
       } else {
-        setError(`Fundamentals data not available for ${symbol}`);
+        setError(t('fundamentals.dataNotAvailable', { symbol }));
       }
     } finally {
       setIsLoading(false);
@@ -209,18 +212,18 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
       <View style={[styles.container, styles.centerContent]}>
         <Ionicons name="analytics-outline" size={64} color={colors.textMuted} />
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          {error || `Fundamentals data not available for ${symbol}`}
+          {error || t('fundamentals.dataNotAvailable', { symbol })}
         </Text>
         <View style={{ flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.md }}>
           <AnimatedPressable onPress={fetchFundamentals} haptic="medium" scaleTo={0.95}>
             <View style={[styles.retryBtn, { backgroundColor: colors.primary }]}>
               <Ionicons name="refresh" size={18} color={colors.white} />
-              <Text style={styles.retryBtnText}>Retry</Text>
+              <Text style={styles.retryBtnText}>{t('fundamentals.retry')}</Text>
             </View>
           </AnimatedPressable>
           <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.95}>
             <View style={[styles.backBtnOutlined, { borderColor: colors.border }]}>
-              <Text style={[styles.backBtnOutlinedText, { color: colors.text }]}>Go Back</Text>
+              <Text style={[styles.backBtnOutlinedText, { color: colors.text }]}>{t('fundamentals.goBack')}</Text>
             </View>
           </AnimatedPressable>
         </View>
@@ -231,10 +234,10 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
   const quarters = fundamentals.quarterlyResults;
   const visibleQuarters = showAllQuarters ? quarters : quarters.slice(0, 2);
   const shareholdingData = [
-    { label: 'Promoters', value: fundamentals.promotersHolding, color: '#6C63FF' },
-    { label: 'FII', value: fundamentals.fiiHolding, color: '#00D2FF' },
-    { label: 'MF', value: fundamentals.mutualFundHolding, color: '#00E676' },
-    { label: 'Public', value: fundamentals.publicHolding, color: '#FFC107' },
+    { label: t('fundamentals.promoters'), value: fundamentals.promotersHolding, color: '#6C63FF' },
+    { label: t('fundamentals.fii'), value: fundamentals.fiiHolding, color: '#00D2FF' },
+    { label: t('fundamentals.mf'), value: fundamentals.mutualFundHolding, color: '#00E676' },
+    { label: t('fundamentals.publicHolding'), value: fundamentals.publicHolding, color: '#FFC107' },
   ];
 
   return (
@@ -269,60 +272,60 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
         </View>
 
         {/* Section 1: Valuation Ratios */}
-        <SectionCard title="Valuation Ratios" icon="pricetags-outline">
-          <MetricRow label="P/E Ratio" value={fundamentals.peRatio} unit="x" goodUp={false} sectorAvg={fundamentals.sectorAvgPe} />
-          <MetricRow label="P/B Ratio" value={fundamentals.pbRatio} unit="x" goodUp={false} sectorAvg={fundamentals.sectorAvgPb} />
-          <MetricRow label="P/S Ratio" value={fundamentals.psRatio} unit="x" goodUp={false} />
-          <MetricRow label="EV/EBITDA" value={fundamentals.evEbitda} unit="x" goodUp={false} />
+        <SectionCard title={t('fundamentals.valuationRatios')} icon="pricetags-outline">
+          <MetricRow label={t('fundamentals.peRatio')} value={fundamentals.peRatio} unit="x" goodUp={false} sectorAvg={fundamentals.sectorAvgPe} />
+          <MetricRow label={t('fundamentals.pbRatio')} value={fundamentals.pbRatio} unit="x" goodUp={false} sectorAvg={fundamentals.sectorAvgPb} />
+          <MetricRow label={t('fundamentals.psRatio')} value={fundamentals.psRatio} unit="x" goodUp={false} />
+          <MetricRow label={t('fundamentals.evEbitda')} value={fundamentals.evEbitda} unit="x" goodUp={false} />
         </SectionCard>
 
         {/* Section 2: Profitability Ratios */}
-        <SectionCard title="Profitability Ratios" icon="trending-up-outline">
-          <MetricRow label="ROE" value={fundamentals.roe} unit="%" goodUp sectorAvg={undefined} />
-          <MetricRow label="ROA" value={fundamentals.roa} unit="%" goodUp />
-          <MetricRow label="ROCE" value={fundamentals.roce} unit="%" goodUp sectorAvg={fundamentals.sectorAvgRoce} />
-          <MetricRow label="Operating Margin" value={fundamentals.operatingMargin} unit="%" goodUp />
-          <MetricRow label="Net Margin" value={fundamentals.netMargin} unit="%" goodUp />
+        <SectionCard title={t('fundamentals.profitabilityRatios')} icon="trending-up-outline">
+          <MetricRow label={t('fundamentals.roe')} value={fundamentals.roe} unit="%" goodUp sectorAvg={undefined} />
+          <MetricRow label={t('fundamentals.roa')} value={fundamentals.roa} unit="%" goodUp />
+          <MetricRow label={t('fundamentals.roce')} value={fundamentals.roce} unit="%" goodUp sectorAvg={fundamentals.sectorAvgRoce} />
+          <MetricRow label={t('fundamentals.operatingMargin')} value={fundamentals.operatingMargin} unit="%" goodUp />
+          <MetricRow label={t('fundamentals.netMargin')} value={fundamentals.netMargin} unit="%" goodUp />
         </SectionCard>
 
         {/* Section 3: Efficiency & Liquidity */}
-        <SectionCard title="Efficiency & Liquidity" icon="fitness-outline">
-          <MetricRow label="Asset Turnover" value={fundamentals.assetTurnover} unit="x" goodUp />
-          <MetricRow label="Debt-to-Equity" value={fundamentals.debtToEquity} unit="x" goodUp={false} sectorAvg={fundamentals.sectorAvgDebtEquity} />
-          <MetricRow label="Current Ratio" value={fundamentals.currentRatio} unit="x" goodUp />
-          <MetricRow label="Quick Ratio" value={fundamentals.quickRatio} unit="x" goodUp />
-          <MetricRow label="Interest Coverage" value={fundamentals.interestCoverage} unit="x" goodUp />
-          <MetricRow label="Inventory Turnover" value={fundamentals.inventoryTurnover} unit="x" goodUp />
+        <SectionCard title={t('fundamentals.efficiencyLiquidity')} icon="fitness-outline">
+          <MetricRow label={t('fundamentals.assetTurnover')} value={fundamentals.assetTurnover} unit="x" goodUp />
+          <MetricRow label={t('fundamentals.debtToEquity')} value={fundamentals.debtToEquity} unit="x" goodUp={false} sectorAvg={fundamentals.sectorAvgDebtEquity} />
+          <MetricRow label={t('fundamentals.currentRatio')} value={fundamentals.currentRatio} unit="x" goodUp />
+          <MetricRow label={t('fundamentals.quickRatio')} value={fundamentals.quickRatio} unit="x" goodUp />
+          <MetricRow label={t('fundamentals.interestCoverage')} value={fundamentals.interestCoverage} unit="x" goodUp />
+          <MetricRow label={t('fundamentals.inventoryTurnover')} value={fundamentals.inventoryTurnover} unit="x" goodUp />
         </SectionCard>
 
         {/* Section 4: Growth */}
-        <SectionCard title="Growth Metrics (YoY)" icon="rocket-outline">
-          <MetricRow label="Revenue Growth" value={fundamentals.revenueGrowth} unit="%" goodUp />
-          <MetricRow label="Profit Growth" value={fundamentals.profitGrowth} unit="%" goodUp />
-          <MetricRow label="EPS Growth" value={fundamentals.epsGrowth} unit="%" goodUp />
+        <SectionCard title={t('fundamentals.growthMetrics')} icon="rocket-outline">
+          <MetricRow label={t('fundamentals.revenueGrowth')} value={fundamentals.revenueGrowth} unit="%" goodUp />
+          <MetricRow label={t('fundamentals.profitGrowth')} value={fundamentals.profitGrowth} unit="%" goodUp />
+          <MetricRow label={t('fundamentals.epsGrowth')} value={fundamentals.epsGrowth} unit="%" goodUp />
         </SectionCard>
 
         {/* Section 5: Cash Flow & Dividend */}
-        <SectionCard title="Cash Flow & Dividend" icon="cash-outline">
-          <MetricRow label="Operating Cash Flow" value={fundamentals.operatingCashFlow} />
-          <MetricRow label="Free Cash Flow" value={fundamentals.freeCashFlow} />
-          <MetricRow label="Dividend Yield" value={fundamentals.dividendYield} unit="%" goodUp />
-          <MetricRow label="Payout Ratio" value={fundamentals.dividendPayout} unit="%" goodUp={false} />
+        <SectionCard title={t('fundamentals.cashFlowDividend')} icon="cash-outline">
+          <MetricRow label={t('fundamentals.operatingCashFlow')} value={fundamentals.operatingCashFlow} />
+          <MetricRow label={t('fundamentals.freeCashFlow')} value={fundamentals.freeCashFlow} />
+          <MetricRow label={t('fundamentals.dividendYield')} value={fundamentals.dividendYield} unit="%" goodUp />
+          <MetricRow label={t('fundamentals.payoutRatio')} value={fundamentals.dividendPayout} unit="%" goodUp={false} />
         </SectionCard>
 
         {/* Section 6: Shareholding Pattern */}
-        <SectionCard title="Shareholding Pattern" icon="people-outline">
+        <SectionCard title={t('fundamentals.shareholdingPattern')} icon="people-outline">
           <ShareholdingChart data={shareholdingData} />
         </SectionCard>
 
         {/* Section 7: Quarterly Results */}
-        <SectionCard title="Quarterly Results" icon="calendar-outline">
-          <QuarterlyChart quarters={visibleQuarters} label="Revenue (Cr)" />
+        <SectionCard title={t('fundamentals.quarterlyResults')} icon="calendar-outline">
+          <QuarterlyChart quarters={visibleQuarters} label={t('fundamentals.revenueCr')} />
           {quarters.length > 2 && (
             <AnimatedPressable onPress={() => setShowAllQuarters(!showAllQuarters)} haptic="light" scaleTo={0.97}>
               <View style={[styles.showMoreBtn, { borderColor: colors.border }]}>
                 <Text style={[styles.showMoreText, { color: colors.primary }]}>
-                  {showAllQuarters ? 'Show Less' : `Show All (${quarters.length} quarters)`}
+                  {showAllQuarters ? t('fundamentals.showLess') : t('fundamentals.showAll', { count: quarters.length })}
                 </Text>
                 <Ionicons name={showAllQuarters ? 'chevron-up' : 'chevron-down'} size={16} color={colors.primary} />
               </View>
@@ -332,11 +335,11 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
           {/* Quarterly Data Table */}
           <View style={styles.quarterTable}>
             <View style={[styles.quarterTableHeader, { backgroundColor: `${colors.primary}10` }]}>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>Quarter</Text>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>Revenue</Text>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>Profit</Text>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>EPS</Text>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>Margin</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.quarter')}</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.revenue')}</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.profit')}</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.eps')}</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.margin')}</Text>
             </View>
             {(showAllQuarters ? quarters : quarters.slice(0, 4)).map((q, i) => (
               <View key={q.quarter} style={[styles.quarterTableRow, i % 2 === 0 && { backgroundColor: `${colors.bgInput}` }]}>
@@ -357,15 +360,15 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
         </SectionCard>
 
         {/* Section 8: Annual Results */}
-        <SectionCard title="Annual Results (Last 3 Years)" icon="bar-chart-outline">
-          <QuarterlyChart quarters={fundamentals.annualResults} label="Annual Revenue (Cr)" />
+        <SectionCard title={t('fundamentals.annualResults')} icon="bar-chart-outline">
+          <QuarterlyChart quarters={fundamentals.annualResults} label={t('fundamentals.annualRevenueCr')} />
           <View style={styles.quarterTable}>
             <View style={[styles.quarterTableHeader, { backgroundColor: `${colors.primary}10` }]}>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>Year</Text>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>Revenue</Text>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>Profit</Text>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>EPS</Text>
-              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>Margin</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.year')}</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.revenue')}</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.profit')}</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.eps')}</Text>
+              <Text style={[styles.quarterTableCell, styles.quarterTableHeaderText, { color: colors.textSecondary }]}>{t('fundamentals.margin')}</Text>
             </View>
             {fundamentals.annualResults.map((q, i) => (
               <View key={q.quarter} style={[styles.quarterTableRow, i % 2 === 0 && { backgroundColor: `${colors.bgInput}` }]}>
@@ -386,10 +389,10 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
         </SectionCard>
 
         {/* Section 9: About the Company */}
-        <SectionCard title="About the Company" icon="information-circle-outline">
+        <SectionCard title={t('fundamentals.aboutCompany')} icon="information-circle-outline">
           <Text style={[styles.aboutText, { color: colors.textSecondary }]}>{fundamentals.about}</Text>
           <View style={{ height: SPACING.md }} />
-          <Text style={[styles.strengthTitle, { color: colors.marketUp }]}>Strengths</Text>
+          <Text style={[styles.strengthTitle, { color: colors.marketUp }]}>{t('fundamentals.strengths')}</Text>
           {fundamentals.strengths.map((s, i) => (
             <View key={i} style={styles.bulletRow}>
               <Text style={[styles.bullet, { color: colors.marketUp }]}>+</Text>
@@ -397,7 +400,7 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
             </View>
           ))}
           <View style={{ height: SPACING.md }} />
-          <Text style={[styles.strengthTitle, { color: colors.marketDown }]}>Risks</Text>
+          <Text style={[styles.strengthTitle, { color: colors.marketDown }]}>{t('fundamentals.risks')}</Text>
           {fundamentals.risks.map((r, i) => (
             <View key={i} style={styles.bulletRow}>
               <Text style={[styles.bullet, { color: colors.marketDown }]}>-</Text>
@@ -407,22 +410,22 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
         </SectionCard>
 
         {/* Section 10: Peer Comparison Overview */}
-        <SectionCard title="Peer Comparison" icon="git-compare-outline">
+        <SectionCard title={t('fundamentals.peerComparison')} icon="git-compare-outline">
           <View style={styles.peerComparison}>
             <View style={styles.peerRow}>
-              <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>Metric</Text>
-              <Text style={[styles.peerVal, { color: colors.primary }]}>This Stock</Text>
-              <Text style={[styles.peerVal, { color: colors.textMuted }]}>Sector Avg</Text>
+              <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>{t('fundamentals.metric')}</Text>
+              <Text style={[styles.peerVal, { color: colors.primary }]}>{t('fundamentals.thisStock')}</Text>
+              <Text style={[styles.peerVal, { color: colors.textMuted }]}>{t('fundamentals.sectorAvg')}</Text>
             </View>
             <View style={styles.peerRow}>
-              <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>P/E</Text>
+              <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>{t('fundamentals.peRatio')}</Text>
               <Text style={[styles.peerVal, {
                 color: fundamentals.peRatio <= fundamentals.sectorAvgPe ? colors.marketUp : colors.marketDown,
               }]}>{fundamentals.peRatio.toFixed(1)}x</Text>
               <Text style={[styles.peerVal, { color: colors.textMuted }]}>{fundamentals.sectorAvgPe.toFixed(1)}x</Text>
             </View>
             <View style={styles.peerRow}>
-              <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>P/B</Text>
+              <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>{t('fundamentals.pbRatio')}</Text>
               <Text style={[styles.peerVal, {
                 color: fundamentals.pbRatio <= fundamentals.sectorAvgPb ? colors.marketUp : colors.marketDown,
               }]}>{fundamentals.pbRatio.toFixed(1)}x</Text>
@@ -430,7 +433,7 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
             </View>
             {fundamentals.sectorAvgRoce > 0 && (
               <View style={styles.peerRow}>
-                <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>ROCE</Text>
+                <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>{t('fundamentals.roce')}</Text>
                 <Text style={[styles.peerVal, {
                   color: fundamentals.roce >= fundamentals.sectorAvgRoce ? colors.marketUp : colors.marketDown,
                 }]}>{fundamentals.roce.toFixed(1)}%</Text>
@@ -438,7 +441,7 @@ export default function CompanyFundamentalsScreen({ route, navigation }: any) {
               </View>
             )}
             <View style={styles.peerRow}>
-              <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>D/E</Text>
+              <Text style={[styles.peerLabel, { color: colors.textSecondary }]}>{t('fundamentals.debtToEquity')}</Text>
               <Text style={[styles.peerVal, {
                 color: fundamentals.debtToEquity <= fundamentals.sectorAvgDebtEquity ? colors.marketUp : colors.marketDown,
               }]}>{fundamentals.debtToEquity.toFixed(2)}x</Text>

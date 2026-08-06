@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useBehaviorJournalStore, MISTAKE_LABELS } from '../../store/behavioralJournalStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
@@ -19,6 +20,7 @@ type TabKey = 'Dashboard' | 'Entries' | 'Reports';
 export default function BehavioralJournalScreen({ _navigation }: any) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabKey>('Dashboard');
 
   const entries = useBehaviorJournalStore(s => s.entries);
@@ -47,29 +49,34 @@ export default function BehavioralJournalScreen({ _navigation }: any) {
     : '';
 
   const tabs: TabKey[] = ['Dashboard', 'Entries', 'Reports'];
+  const tabLabels: Record<TabKey, string> = {
+    Dashboard: t('journal.tabDashboard'),
+    Entries: t('journal.tabEntries'),
+    Reports: t('journal.tabReports'),
+  };
 
   const renderDashboard = () => (
     <>
       {/* Performance Overview */}
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>Performance Overview</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('journal.perfOverview')}</Text>
       <View style={styles.metricsGrid}>
-        <MetricCard label="Win Rate" value={`${Math.round(allMetrics.winRate)}%`} color={colors.success} />
-        <MetricCard label="Avg P&L" value={`₹${Math.round(allMetrics.avgPnl).toLocaleString()}`} color={allMetrics.avgPnl >= 0 ? colors.success : colors.danger} />
-        <MetricCard label="Profit Factor" value={allMetrics.profitFactor === Infinity ? '∞' : allMetrics.profitFactor.toFixed(2)} color={colors.primary} />
-        <MetricCard label="Plan Compliance" value={`${Math.round(allMetrics.planComplianceRate)}%`} color={colors.accent} />
+        <MetricCard label={t('journal.winRate')} value={`${Math.round(allMetrics.winRate)}%`} color={colors.success} />
+        <MetricCard label={t('journal.avgPnl')} value={`₹${Math.round(allMetrics.avgPnl).toLocaleString()}`} color={allMetrics.avgPnl >= 0 ? colors.success : colors.danger} />
+        <MetricCard label={t('journal.profitFactor')} value={allMetrics.profitFactor === Infinity ? '∞' : allMetrics.profitFactor.toFixed(2)} color={colors.primary} />
+        <MetricCard label={t('journal.planCompliance')} value={`${Math.round(allMetrics.planComplianceRate)}%`} color={colors.accent} />
       </View>
 
       {/* Streak Metrics */}
-      <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>Streak Metrics</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>{t('journal.streakMetrics')}</Text>
       <View style={styles.metricsGrid}>
-        <MetricCard label="Max Win Streak" value={`${allMetrics.maxConsecutiveWins}`} color={colors.success} />
-        <MetricCard label="Max Loss Streak" value={`${allMetrics.maxConsecutiveLosses}`} color={colors.danger} />
-        <MetricCard label="Max Drawdown" value={`₹${allMetrics.maxDrawdown.toLocaleString()}`} color={colors.warning} />
-        <MetricCard label="Total Trades" value={`${allMetrics.totalTrades}`} color={colors.primary} />
+        <MetricCard label={t('journal.maxWinStreak')} value={`${allMetrics.maxConsecutiveWins}`} color={colors.success} />
+        <MetricCard label={t('journal.maxLossStreak')} value={`${allMetrics.maxConsecutiveLosses}`} color={colors.danger} />
+        <MetricCard label={t('journal.maxDrawdown')} value={`₹${allMetrics.maxDrawdown.toLocaleString()}`} color={colors.warning} />
+        <MetricCard label={t('journal.totalTrades')} value={`${allMetrics.totalTrades}`} color={colors.primary} />
       </View>
 
       {/* Emotional State Breakdown */}
-      <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>Emotional State Breakdown</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>{t('journal.emotionalBreakdown')}</Text>
       <View style={styles.emotionList}>
         {topEmotionFreq.map(([emotion, count]) => (
           <View key={emotion} style={[styles.emotionRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -81,12 +88,12 @@ export default function BehavioralJournalScreen({ _navigation }: any) {
           </View>
         ))}
         {topEmotionFreq.length === 0 && (
-          <Text style={[styles.emptySection, { color: colors.textMuted }]}>No entries yet</Text>
+          <Text style={[styles.emptySection, { color: colors.textMuted }]}>{t('journal.noEntriesYet')}</Text>
         )}
       </View>
 
       {/* Most Common Mistakes */}
-      <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>Most Common Mistakes</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>{t('journal.mostCommonMistakes')}</Text>
       <View style={styles.mistakeList}>
         {topMistakeFreq.map(([mistake, count]) => (
           <View key={mistake} style={[styles.mistakeRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -98,7 +105,7 @@ export default function BehavioralJournalScreen({ _navigation }: any) {
           </View>
         ))}
         {topMistakeFreq.length === 0 && (
-          <Text style={[styles.emptySection, { color: colors.textMuted }]}>No mistakes! Great trading.</Text>
+          <Text style={[styles.emptySection, { color: colors.textMuted }]}>{t('journal.noMistakes')}</Text>
         )}
       </View>
 
@@ -107,7 +114,7 @@ export default function BehavioralJournalScreen({ _navigation }: any) {
         <View style={[styles.improvementCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={styles.improvementHeader}>
             <Ionicons name="bulb" size={18} color={colors.warning} />
-            <Text style={[styles.improvementLabel, { color: colors.text }]}>Improvement Tip</Text>
+            <Text style={[styles.improvementLabel, { color: colors.text }]}>{t('journal.improvementTip')}</Text>
           </View>
           <Text style={[styles.improvementText, { color: colors.textSecondary }]}>
             {latestReport.improvementTip}
@@ -140,7 +147,7 @@ export default function BehavioralJournalScreen({ _navigation }: any) {
       )}
       ListEmptyComponent={
         <Text style={[styles.emptySection, { color: colors.textMuted, textAlign: 'center', paddingVertical: 60 }]}>
-          No journal entries yet
+          {t('journal.noJournalEntries')}
         </Text>
       }
     />
@@ -150,20 +157,20 @@ export default function BehavioralJournalScreen({ _navigation }: any) {
     <View style={styles.reportsList}>
       {reports.length === 0 ? (
         <Text style={[styles.emptySection, { color: colors.textMuted, textAlign: 'center', paddingVertical: 60 }]}>
-          No reports yet
+          {t('journal.noReportsYet')}
         </Text>
       ) : (
         reports.map((report) => (
           <View key={report.weekStart} style={[styles.reportCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Text style={[styles.weekOfText, { color: colors.primary }]}>
-              {`Week of ${new Date(report.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+              {t('journal.weekOf', { date: new Date(report.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) })}
             </Text>
             <View style={styles.reportMetrics}>
               <Text style={[styles.reportMetric, { color: colors.text }]}>
-                Win Rate: <Text style={{ color: colors.success }}>{Math.round(report.metrics.winRate)}%</Text>
+                {t('journal.winRateLabel')}<Text style={{ color: colors.success }}>{Math.round(report.metrics.winRate)}%</Text>
               </Text>
               <Text style={[styles.reportMetric, { color: colors.text }]}>
-                Trades: <Text style={{ color: colors.primary }}>{report.metrics.totalTrades}</Text>
+                {t('journal.tradesLabel')}<Text style={{ color: colors.primary }}>{report.metrics.totalTrades}</Text>
               </Text>
             </View>
             {report.improvementTip && (
@@ -184,8 +191,8 @@ export default function BehavioralJournalScreen({ _navigation }: any) {
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.bgSecondary, paddingTop: insets.top + 12 }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Behavioural Journal</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>Track your trading psychology</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('journal.title')}</Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('journal.subtitle')}</Text>
       </View>
 
       {/* Tab Bar */}
@@ -206,7 +213,7 @@ export default function BehavioralJournalScreen({ _navigation }: any) {
                 activeTab === tab && { color: colors.primary, fontWeight: '700' },
               ]}
             >
-              {tab}
+              {tabLabels[tab]}
             </Text>
           </Pressable>
         ))}
