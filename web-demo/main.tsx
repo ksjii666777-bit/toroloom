@@ -17,7 +17,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import i18n, { toggleLanguage } from '../src/i18n';
-import { ThemeProvider } from '../src/context/ThemeContext';
+import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 import PortfolioHolding from '../src/components/PortfolioHolding';
 import { useT } from '../src/hooks/useT';
 import type { Holding } from '../src/types';
@@ -93,6 +93,14 @@ function LanguageBadge() {
 
 function DemoApp() {
   const { t } = useT();
+  // REAL theme from the app's ThemeContext — toggleTheme() drives the zustand store.
+  const { isDark, toggleTheme } = useTheme();
+
+  // Flip the page shell CSS variables to match the app theme.
+  useEffect(() => {
+    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+  }, [isDark]);
+
   // Force re-render on languageChanged (react-i18next already triggers one via
   // useTranslation, this is a belt-and-suspenders listener for the badge).
   const [, setTick] = useState(0);
@@ -112,7 +120,19 @@ function DemoApp() {
         <div className="logo">
           Toro<span>loom</span> · i18n Live Demo
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <span className={`badge ${isDark ? 'hi' : 'en'}`} data-testid="theme-badge">
+            {t(isDark ? 'darkMode.dark' : 'darkMode.light')}
+          </span>
+          <button
+            type="button"
+            className="toggle-btn secondary"
+            data-testid="theme-toggle"
+            onClick={() => toggleTheme()}
+          >
+            {isDark ? '☀️ ' : '🌙 '}
+            {t(isDark ? 'darkMode.light' : 'darkMode.dark')}
+          </button>
           <LanguageBadge />
           <button
             type="button"
@@ -131,6 +151,9 @@ function DemoApp() {
           {current === 'hi'
             ? 'अभी Hindi चालू है — नीचे सभी स्ट्रिंग्स Devanagari में हैं'
             : 'Currently English — click the button above to switch live'}
+          <span style={{ color: 'var(--text-muted)' }}>
+            {' '}· {t('darkMode.subtitle')}
+          </span>
         </span>
       </div>
 

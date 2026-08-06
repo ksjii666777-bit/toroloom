@@ -17,9 +17,21 @@
         --border: rgba(255, 255, 255, 0.08);
         --text: #f8fafc;
         --text-muted: #64748b;
+        --cell-bg: rgba(255, 255, 255, 0.02);
+        --header-grad: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(34,197,94,0.06));
         --primary: #3b82f6;
         --green: #22c55e;
         --red: #ef4444;
+      }
+      /* Light theme — flipped via data-theme on <html> by the real ThemeProvider */
+      html[data-theme='light'] {
+        --bg: #f4f6fb;
+        --bg-card: #ffffff;
+        --border: #e2e8f0;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --cell-bg: rgba(15, 23, 42, 0.03);
+        --header-grad: linear-gradient(135deg, rgba(59,130,246,0.10), rgba(34,197,94,0.05));
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -28,6 +40,7 @@
         font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
         min-height: 100vh;
         padding: 24px;
+        transition: background 0.2s ease, color 0.2s ease;
       }
       .wrap { max-width: 860px; margin: 0 auto; }
       header {
@@ -39,7 +52,7 @@
         padding: 16px 20px;
         border: 1px solid var(--border);
         border-radius: 16px;
-        background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(34,197,94,0.06));
+        background: var(--header-grad);
         margin-bottom: 20px;
       }
       .logo { font-weight: 800; font-size: 20px; letter-spacing: -0.3px; }
@@ -70,6 +83,17 @@
       }
       .toggle-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(59, 130, 246, 0.45); }
       .toggle-btn:active { transform: translateY(0) scale(0.97); }
+      .toggle-btn.secondary {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+        box-shadow: none;
+      }
+      .toggle-btn.secondary:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        box-shadow: none;
+      }
       section { margin-bottom: 24px; }
       h2 {
         font-size: 13px;
@@ -94,7 +118,7 @@
         border: 1px solid var(--border);
         border-radius: 10px;
         padding: 10px 12px;
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--cell-bg);
       }
       .cell .key {
         font-size: 11px;

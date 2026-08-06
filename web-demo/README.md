@@ -15,9 +15,13 @@ can be verified live — without booting the full native app.
 
 1. **Real component render** — two `PortfolioHolding` cards (labels like
    `Avg Cost` → `औसत लागत` flip on toggle).
-2. **Strings across 16 namespaces** — live `t()` output with the English
+2. **Real theme toggle** — the outlined button calls the app's real
+   `useTheme().toggleTheme()` (zustand store + persistence), flipping
+   `PortfolioHolding` between dark (`COLORS`) and light (`LIGHT_COLORS`).
+   Badges use the real `darkMode.*` namespace keys.
+3. **Strings across 16 namespaces** — live `t()` output with the English
    original shown below each key.
-3. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
+4. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
    `components.stockAnalysis.shares` with `{{count}}`.
 
 ## Run
@@ -28,7 +32,9 @@ npx vite preview --config web-demo/vite.config.ts --port 4175
 # open http://localhost:4175
 ```
 
-Click **हिन्दी में देखें** to switch to Hindi, click again to switch back.
+Click **हिन्दी में देखें** to switch to Hindi, **🌙/☀️ Dark/Light Mode** to
+switch the theme. All four combinations (en/hi × dark/light) are verified to
+render correctly.
 
 ## How it works
 
