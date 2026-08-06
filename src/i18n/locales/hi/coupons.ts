@@ -16,7 +16,7 @@ export default {
     noExpiry: 'कोई समाप्ति नहीं',
     expired: 'समाप्त',
     daysLeft: '{{count}} दिन शेष',
-    monthsLeft: '{{count}} माह शेष',
+    monthsLeft: '{{count}} महीने शेष',
     unlimited: 'असीमित',
     usesLeft: '{{count}} शेष',
     usedCount: '{{count}}/{{max}} उपयोग',
