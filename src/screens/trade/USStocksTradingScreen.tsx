@@ -136,6 +136,7 @@ function StockCard({
   onTrade: (stock: USStockDisplay, action: TradeAction) => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const sectorColor = getSectorColor(stock.sector);
   const sectorIcon = getSectorIcon(stock.sector);
 
@@ -182,13 +183,13 @@ function StockCard({
             onPress={() => onTrade(stock, 'BUY')}
             style={[styles.stockActionBtn, { backgroundColor: '#00E67620' }]}
           >
-            <Text style={[styles.stockActionText, { color: '#00E676' }]}>Buy</Text>
+            <Text style={[styles.stockActionText, { color: '#00E676' }]}>{t('trading.buy')}</Text>
           </Pressable>
           <Pressable
             onPress={() => onTrade(stock, 'SELL')}
             style={[styles.stockActionBtn, { backgroundColor: '#FF525220' }]}
           >
-            <Text style={[styles.stockActionText, { color: '#FF5252' }]}>Sell</Text>
+            <Text style={[styles.stockActionText, { color: '#FF5252' }]}>{t('trading.sell')}</Text>
           </Pressable>
         </View>
       </Pressable>
@@ -315,16 +316,16 @@ function TradeModal({
         timeInForce: 'Day',
       });
       Alert.alert(
-        `${action} Order Placed`,
-        `Order ID: ${result.orderId.substring(0, 12)}...\nStatus: ${result.status}`,
-        [{ text: 'OK', onPress: onClose }],
+        t('trading.usOrderPlaced', { action: action === 'BUY' ? t('trading.buy') : t('trading.sell') }),
+        `${t('trading.orderIdPrefix')}${result.orderId.substring(0, 12)}...\n${t('trading.statusPrefix')}${result.status}`,
+        [{ text: t('app.ok'), onPress: onClose }],
       );
     } catch (err: any) {
-      Alert.alert('Order Failed', err?.message || 'Failed to place order');
+      Alert.alert(t('trading.usOrderFailed'), err?.message || t('trading.usOrderFailedMsg'));
     } finally {
       setIsPlacing(false);
     }
-  }, [stock, action, orderType, qty, limitPrice, canPlace, onClose]);
+  }, [stock, action, orderType, qty, limitPrice, canPlace, onClose, t]);
 
   const overlayOpacity = slideAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.5] });
   const translateY = slideAnim.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
@@ -363,7 +364,7 @@ function TradeModal({
 
           {/* Order Type */}
           <View style={styles.modalField}>
-            <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>Order Type</Text>
+            <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>{t('trading.orderTypeLabel')}</Text>
             <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
               {(['Market', 'Limit', 'StopLoss'] as OrderType[]).map(ot => (
                 <Pressable
@@ -375,7 +376,7 @@ function TradeModal({
                   onPress={() => setOrderType(ot)}
                 >
                   <Text style={[styles.modalChipText, { color: orderType === ot ? actionColor : colors.textMuted }]}>
-                    {ot === 'StopLoss' ? 'Stop Loss' : ot}
+                    {ot === 'StopLoss' ? t('trading.stopLossLabel') : ot}
                   </Text>
                 </Pressable>
               ))}
@@ -384,7 +385,7 @@ function TradeModal({
 
           {/* Quantity */}
           <View style={styles.modalField}>
-            <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>Quantity (shares)</Text>
+            <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>{t('trading.qtyShares')}</Text>
             <View style={[styles.modalInput, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <TextInput
                 style={[styles.modalInputField, { color: colors.text }]}
@@ -409,7 +410,7 @@ function TradeModal({
                 style={[styles.qtyChip, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
                 onPress={() => setQuantityStr('Max')}
               >
-                <Text style={[styles.qtyChipText, { color: colors.textMuted }]}>Max</Text>
+                <Text style={[styles.qtyChipText, { color: colors.textMuted }]}>{t('trading.max')}</Text>
               </Pressable>
             </View>
           </View>
@@ -418,7 +419,7 @@ function TradeModal({
           {orderType !== 'Market' && (
             <View style={styles.modalField}>
               <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>
-                {orderType === 'StopLoss' ? 'Stop Price' : 'Limit Price'}
+                {orderType === 'StopLoss' ? t('trading.stopPrice') : t('trading.usLimitPrice')}
               </Text>
               <View style={[styles.modalInput, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
                 <Text style={[styles.modalInputPrefix, { color: colors.textMuted }]}>$</Text>
@@ -438,15 +439,15 @@ function TradeModal({
           {qty > 0 && (
             <View style={[styles.modalSummary, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={styles.modalSummaryRow}>
-                <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>Estimated Total</Text>
+                <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>{t('trading.estimatedTotal')}</Text>
                 <Text style={[styles.modalSummaryValue, { color: colors.text }]}>{formatUSD(estimatedTotal)}</Text>
               </View>
               <View style={styles.modalSummaryRow}>
-                <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>Price per share</Text>
+                <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>{t('trading.pricePerShare')}</Text>
                 <Text style={[styles.modalSummaryValue, { color: colors.text }]}>{formatUSD(displayPrice)}</Text>
               </View>
               <View style={styles.modalSummaryRow}>
-                <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>Quantity</Text>
+                <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>{t('trading.quantityLabel')}</Text>
                 <Text style={[styles.modalSummaryValue, { color: colors.text }]}>{t('app.shares', { count: qty })}</Text>
               </View>
             </View>
@@ -618,9 +619,9 @@ export default function USStocksTradingScreen({ navigation }: any) {
 
   // Tabs
   const tabs: { key: typeof selectedTab; label: string; icon: string }[] = [
-    { key: 'market', label: 'Market', icon: 'trending-up' },
-    { key: 'portfolio', label: 'Portfolio', icon: 'wallet' },
-    { key: 'orders', label: 'Orders', icon: 'receipt' },
+    { key: 'market', label: t('trading.market'), icon: 'trending-up' },
+    { key: 'portfolio', label: t('trading.portfolio'), icon: 'wallet' },
+    { key: 'orders', label: t('trading.ordersTab'), icon: 'receipt' },
   ];
 
   return (
@@ -637,7 +638,7 @@ export default function USStocksTradingScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>US Stocks</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('trading.usStocks')}</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
               {t('app.stocks', { count: stocks.length })} · {isBrokerConnected ? t('usMarkets.brokerConnected') : t('usMarkets.viewOnly')}
             </Text>
@@ -648,7 +649,7 @@ export default function USStocksTradingScreen({ navigation }: any) {
               style={[styles.connectBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
             >
               <Ionicons name="link" size={16} color={colors.primary} />
-              <Text style={[styles.connectBtnText, { color: colors.primary }]}>Connect</Text>
+              <Text style={[styles.connectBtnText, { color: colors.primary }]}>{t('trading.connect')}</Text>
             </Pressable>
           )}
         </View>
@@ -699,7 +700,7 @@ export default function USStocksTradingScreen({ navigation }: any) {
         {isLoading ? (
           <View style={{ paddingVertical: 60, alignItems: 'center' }}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading US markets...</Text>
+            <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('trading.loadingMarkets')}</Text>
           </View>
         ) : (
           <>
@@ -709,19 +710,19 @@ export default function USStocksTradingScreen({ navigation }: any) {
                 {/* Stats Banner */}
                 <View style={[styles.statsBanner, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                   <View style={styles.statItem}>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>Available Stocks</Text>
+                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('trading.availableStocks')}</Text>
                     <Text style={[styles.statValue, { color: colors.text }]}>{stocks.length}</Text>
                   </View>
                   <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
                   <View style={styles.statItem}>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>Sectors</Text>
+                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('trading.sectors')}</Text>
                     <Text style={[styles.statValue, { color: colors.text }]}>
                       {new Set(stocks.map(s => s.sector)).size}
                     </Text>
                   </View>
                   <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
                   <View style={styles.statItem}>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exchanges</Text>
+                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('trading.exchanges')}</Text>
                     <Text style={[styles.statValue, { color: colors.text }]}>
                       {new Set(stocks.map(s => s.exchange)).size}
                     </Text>
@@ -732,7 +733,7 @@ export default function USStocksTradingScreen({ navigation }: any) {
                 {filteredStocks.length === 0 ? (
                   <View style={{ paddingVertical: 40, alignItems: 'center' }}>
                     <Ionicons name="search" size={48} color={colors.textMuted} />
-                    <Text style={[styles.emptyText, { color: colors.textMuted }]}>No stocks found</Text>
+                    <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('trading.noStocksFound')}</Text>
                   </View>
                 ) : (
                   <View style={{ gap: SPACING.sm }}>
@@ -741,7 +742,7 @@ export default function USStocksTradingScreen({ navigation }: any) {
                       <Ionicons name="pulse" size={16} color={colors.primary} />
                       <Text style={[styles.perfText, { color: colors.textMuted }]}>
                         {filteredStocks.filter(s => s.isPositive).length}/{filteredStocks.length} {t('usMarkets.stocksUp')} · 
-                        Market data via MarketStack
+                        {t('trading.marketDataVia')}
                       </Text>
                     </View>
                     {filteredStocks.map((stock, i) => (
@@ -765,30 +766,30 @@ export default function USStocksTradingScreen({ navigation }: any) {
                   <View style={{ paddingVertical: 40, alignItems: 'center' }}>
                     <Ionicons name="briefcase-outline" size={48} color={colors.textMuted} />
                     <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>
-                      Connect your broker to see US stock holdings
+                      {t('trading.connectBrokerToSee')}
                     </Text>
                     <Pressable
                       onPress={() => navigation.navigate('BrokerConnect')}
                       style={[styles.connectNowBtn, { backgroundColor: colors.primary }]}
                     >
-                      <Text style={styles.connectNowText}>Connect Broker</Text>
+                      <Text style={styles.connectNowText}>{t('trading.connectBroker')}</Text>
                     </Pressable>
                   </View>
                 ) : holdings.length === 0 ? (
                   <View style={{ paddingVertical: 40, alignItems: 'center' }}>
                     <Ionicons name="file-tray-outline" size={48} color={colors.textMuted} />
                     <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>
-                      No US stock holdings found
+                      {t('trading.noHoldingsFound')}
                     </Text>
                     <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
-                      Start trading to build your portfolio
+                      {t('trading.startTradingPortfolio')}
                     </Text>
                   </View>
                 ) : (
                   <>
                     {/* Portfolio Summary */}
                     <View style={[styles.portfolioSummary, { borderBottomColor: colors.divider }]}>
-                      <Text style={[styles.portfolioSummaryLabel, { color: colors.textMuted }]}>Portfolio Value</Text>
+                      <Text style={[styles.portfolioSummaryLabel, { color: colors.textMuted }]}>{t('trading.portfolioValue')}</Text>
                       <Text style={[styles.portfolioSummaryValue, { color: colors.text }]}>
                         {formatUSD(totalPortfolioValue)}
                       </Text>
@@ -800,13 +801,13 @@ export default function USStocksTradingScreen({ navigation }: any) {
                       </View>
                       {accountBalance > 0 && (
                         <Text style={[styles.portfolioMeta, { color: colors.textMuted }]}>
-                          Buying Power: {formatUSD(accountBalance)}
+                          {t('trading.buyingPower', { amount: formatUSD(accountBalance) })}
                         </Text>
                       )}
                     </View>
 
                     <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.md }]}>
-                      Holdings ({holdings.length})
+                      {t('trading.holdingsWithCount', { count: holdings.length })}
                     </Text>
                     {holdings.map((h, i) => (
                       <HoldingRow key={h.symbol + i} holding={h} colors={colors} />
@@ -823,20 +824,20 @@ export default function USStocksTradingScreen({ navigation }: any) {
                   <View style={{ paddingVertical: 40, alignItems: 'center' }}>
                     <Ionicons name="receipt-outline" size={48} color={colors.textMuted} />
                     <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>
-                      Connect broker to view orders
+                      {t('trading.connectBrokerOrders')}
                     </Text>
                   </View>
                 ) : orders.length === 0 ? (
                   <View style={{ paddingVertical: 40, alignItems: 'center' }}>
                     <Ionicons name="time-outline" size={48} color={colors.textMuted} />
-                    <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>No orders yet</Text>
+                    <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>{t('trading.noOrdersYet')}</Text>
                     <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
-                      Your US stock orders will appear here
+                      {t('trading.ordersWillAppear')}
                     </Text>
                   </View>
                 ) : (
                   <>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Orders</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('trading.recentOrders')}</Text>
                     {orders.map((o, i) => (
                       <OrderRow key={o.id || i} order={o} colors={colors} />
                     ))}
@@ -849,10 +850,9 @@ export default function USStocksTradingScreen({ navigation }: any) {
             <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="information-circle" size={16} color={colors.primary} />
               <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                US stock prices and data are provided by MarketStack. 
-                {isBrokerConnected
-                  ? ' Orders are placed through your connected broker via SnapTrade.'
-                  : ' Connect a broker via SnapTrade to start trading US stocks.'}
+                {t('trading.infoNoteUS', {
+                  brokerNote: isBrokerConnected ? t('trading.brokerNoteConnected') : t('trading.brokerNoteDisconnected'),
+                })}
               </Text>
             </View>
 

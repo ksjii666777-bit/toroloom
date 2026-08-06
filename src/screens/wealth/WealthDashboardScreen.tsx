@@ -59,6 +59,7 @@ const GOAL_COLORS: Record<string, string> = {
 
 function GoalCard({ goal, index, onPress }: { goal: FinancialGoal; index: number; onPress: (g: FinancialGoal) => void }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const progress = useWealthStore(s => s.getGoalProgress(goal));
   const color = GOAL_COLORS[goal.category] || '#6C63FF';
   const icon = GOAL_ICONS[goal.category] || '🎯';
@@ -72,7 +73,7 @@ function GoalCard({ goal, index, onPress }: { goal: FinancialGoal; index: number
             <View>
               <Text style={[styles.goalName, { color: colors.text }]}>{goal.name}</Text>
               <Text style={[styles.goalTarget, { color: colors.textMuted }]}>
-                Target: {formatCompactINR(goal.targetAmount)}
+                {t('wealth.goalTargetLabel', { amount: formatCompactINR(goal.targetAmount) })}
               </Text>
             </View>
           </View>
@@ -89,7 +90,7 @@ function GoalCard({ goal, index, onPress }: { goal: FinancialGoal; index: number
         </View>
 
         <View style={styles.goalFooter}>
-          <Text style={[styles.goalProgressText, { color: colors.text }]}>{progress.toFixed(0)}% complete</Text>
+          <Text style={[styles.goalProgressText, { color: colors.text }]}>{t('wealth.completePct', { pct: progress.toFixed(0) })}</Text>
           <Text style={[styles.goalAmount, { color }]}>{formatCompactINR(goal.currentAmount)}</Text>
         </View>
 
@@ -102,7 +103,7 @@ function GoalCard({ goal, index, onPress }: { goal: FinancialGoal; index: number
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Ionicons name="trending-up" size={12} color={colors.textMuted} />
-            <Text style={[styles.goalMetaText, { color: colors.textMuted }]}>{goal.expectedReturn}% p.a.</Text>
+            <Text style={[styles.goalMetaText, { color: colors.textMuted }]}>{t('wealth.returnPerAnnum', { rate: goal.expectedReturn })}</Text>
           </View>
         </View>
       </Pressable>
@@ -134,10 +135,10 @@ export default function WealthDashboardScreen({ navigation }: any) {
   }, [navigation]);
 
   const quickActions = [
-    { icon: 'flag', label: 'New Goal', color: '#6C63FF', screen: 'GoalCreate', gradient: ['#6C63FF', '#4F46E5'] as const },
-    { icon: 'umbrella', label: 'Retirement', color: '#3B82F6', screen: 'RetirementPlanner', gradient: ['#3B82F6', '#1D4ED8'] as const },
-    { icon: 'calculator', label: 'SIP Calc', color: '#00C853', screen: 'SIPCalculator', gradient: ['#00C853', '#009624'] as const },
-    { icon: 'trending-up', label: 'Lumpsum', color: '#FFC107', screen: 'LumpsumCalculator', gradient: ['#FFC107', '#F59E0B'] as const },
+    { icon: 'flag', label: t('wealth.newGoal'), color: '#6C63FF', screen: 'GoalCreate', gradient: ['#6C63FF', '#4F46E5'] as const },
+    { icon: 'umbrella', label: t('wealth.retirement'), color: '#3B82F6', screen: 'RetirementPlanner', gradient: ['#3B82F6', '#1D4ED8'] as const },
+    { icon: 'calculator', label: t('wealth.sipCalc'), color: '#00C853', screen: 'SIPCalculator', gradient: ['#00C853', '#009624'] as const },
+    { icon: 'trending-up', label: t('wealth.lumpsum'), color: '#FFC107', screen: 'LumpsumCalculator', gradient: ['#FFC107', '#F59E0B'] as const },
   ];
 
   return (
@@ -149,10 +150,10 @@ export default function WealthDashboardScreen({ navigation }: any) {
             <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
-            <Text style={[styles.title, { color: colors.text }]}>Wealth Dashboard</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('wealth.dashboardTitle')}</Text>
           </View>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Track your goals, plan your retirement, build your future
+            {t('wealth.dashboardSubtitle')}
           </Text>
         </View>
 
@@ -164,25 +165,25 @@ export default function WealthDashboardScreen({ navigation }: any) {
             end={{ x: 1, y: 1 }}
             style={styles.netWorthCard}
           >
-            <Text style={styles.netWorthLabel}>Net Worth</Text>
+            <Text style={styles.netWorthLabel}>{t('wealth.netWorth')}</Text>
             <Text style={styles.netWorthValue}>{formatCompactINR(summary.totalNetWorth)}</Text>
 
             <View style={styles.netWorthRow}>
               <View style={styles.netWorthItem}>
                 <Ionicons name="arrow-up-circle" size={16} color="#00E676" />
-                <Text style={styles.netWorthItemLabel}>Assets</Text>
+                <Text style={styles.netWorthItemLabel}>{t('wealth.assets')}</Text>
                 <Text style={styles.netWorthItemValue}>{formatCompactINR(summary.totalAssets)}</Text>
               </View>
               <View style={[styles.netWorthDivider, { backgroundColor: 'rgba(255,255,255,0.15)' }]} />
               <View style={styles.netWorthItem}>
                 <Ionicons name="arrow-down-circle" size={16} color="#FF5252" />
-                <Text style={styles.netWorthItemLabel}>Liabilities</Text>
+                <Text style={styles.netWorthItemLabel}>{t('wealth.liabilities')}</Text>
                 <Text style={styles.netWorthItemValue}>{formatCompactINR(summary.totalLiabilities)}</Text>
               </View>
               <View style={[styles.netWorthDivider, { backgroundColor: 'rgba(255,255,255,0.15)' }]} />
               <View style={styles.netWorthItem}>
                 <Ionicons name="trending-up" size={16} color="#FFC107" />
-                <Text style={styles.netWorthItemLabel}>Savings Rate</Text>
+                <Text style={styles.netWorthItemLabel}>{t('wealth.savingsRate')}</Text>
                 <Text style={styles.netWorthItemValue}>{summary.savingsRate.toFixed(0)}%</Text>
               </View>
             </View>
@@ -213,20 +214,20 @@ export default function WealthDashboardScreen({ navigation }: any) {
 
         {/* ── Monthly Overview ── */}
         <Animated.View entering={FadeInUp.duration(500)} style={[styles.overviewCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Monthly Overview</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('wealth.monthlyOverview')}</Text>
           <View style={styles.overviewRow}>
             <View style={styles.overviewItem}>
-              <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Income</Text>
+              <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('wealth.income')}</Text>
               <Text style={[styles.overviewValue, { color: '#00E676' }]}>{formatCompactINR(summary.monthlyIncome)}</Text>
             </View>
             <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.overviewItem}>
-              <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Expenses</Text>
+              <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('wealth.expenses')}</Text>
               <Text style={[styles.overviewValue, { color: '#FF5252' }]}>{formatCompactINR(summary.monthlyExpenses)}</Text>
             </View>
             <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.overviewItem}>
-              <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>Savings</Text>
+              <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('wealth.savings')}</Text>
               <Text style={[styles.overviewValue, { color: '#FFC107' }]}>{formatCompactINR(summary.monthlyIncome - summary.monthlyExpenses)}</Text>
             </View>
           </View>
@@ -235,8 +236,10 @@ export default function WealthDashboardScreen({ navigation }: any) {
             <View style={[styles.rateBarFill, { width: `${Math.min(100, summary.savingsRate)}%`, backgroundColor: '#00E676' }]} />
           </View>
           <Text style={[styles.rateLabel, { color: colors.textMuted }]}>
-            {summary.savingsRate.toFixed(0)}% savings rate ·{' '}
-            {summary.savingsRate >= 30 ? 'Excellent 🎉' : summary.savingsRate >= 20 ? 'Good 👍' : 'Room for improvement 💪'}
+            {t('wealth.rateSummary', {
+              rate: summary.savingsRate.toFixed(0),
+              status: summary.savingsRate >= 30 ? t('wealth.savingsExcellent') : summary.savingsRate >= 20 ? t('wealth.savingsGood') : t('wealth.savingsImprove'),
+            })}
           </Text>
         </Animated.View>
 
@@ -244,10 +247,10 @@ export default function WealthDashboardScreen({ navigation }: any) {
         <Animated.View entering={FadeInUp.duration(550)}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Financial Goals
+              {t('wealth.financialGoals')}
             </Text>
             <Pressable onPress={() => navigation.navigate('GoalCreate')}>
-              <Text style={[styles.seeAllText, { color: colors.primary }]}>+ Add Goal</Text>
+              <Text style={[styles.seeAllText, { color: colors.primary }]}>{t('wealth.addGoal')}</Text>
             </Pressable>
           </View>
 
@@ -255,17 +258,17 @@ export default function WealthDashboardScreen({ navigation }: any) {
           <View style={[styles.goalsSummary, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={styles.goalsSummaryRow}>
               <View style={styles.goalsSummaryItem}>
-                <Text style={[styles.goalsSummaryLabel, { color: colors.textMuted }]}>Goals</Text>
+                <Text style={[styles.goalsSummaryLabel, { color: colors.textMuted }]}>{t('wealth.goals')}</Text>
                 <Text style={[styles.goalsSummaryValue, { color: colors.text }]}>{goals.length}</Text>
               </View>
               <View style={[styles.goalsSummaryDivider, { backgroundColor: colors.divider }]} />
               <View style={styles.goalsSummaryItem}>
-                <Text style={[styles.goalsSummaryLabel, { color: colors.textMuted }]}>Completed</Text>
+                <Text style={[styles.goalsSummaryLabel, { color: colors.textMuted }]}>{t('wealth.completed')}</Text>
                 <Text style={[styles.goalsSummaryValue, { color: '#00E676' }]}>{stats.completedGoals}</Text>
               </View>
               <View style={[styles.goalsSummaryDivider, { backgroundColor: colors.divider }]} />
               <View style={styles.goalsSummaryItem}>
-                <Text style={[styles.goalsSummaryLabel, { color: colors.textMuted }]}>Total Target</Text>
+                <Text style={[styles.goalsSummaryLabel, { color: colors.textMuted }]}>{t('wealth.totalTarget')}</Text>
                 <Text style={[styles.goalsSummaryValue, { color: colors.text }]}>{formatCompactINR(stats.totalGoalTarget)}</Text>
               </View>
             </View>
@@ -274,7 +277,7 @@ export default function WealthDashboardScreen({ navigation }: any) {
               <View style={[styles.progressBarFill, { width: `${Math.min(100, stats.overallProgress)}%`, backgroundColor: '#6C63FF' }]} />
             </View>
             <Text style={[styles.goalsProgressOverall, { color: colors.textMuted }]}>
-              Overall: {stats.overallProgress.toFixed(1)}% funded
+              {t('wealth.overallFunded', { pct: stats.overallProgress.toFixed(1) })}
             </Text>
           </View>
 
@@ -282,9 +285,9 @@ export default function WealthDashboardScreen({ navigation }: any) {
           {goals.length === 0 ? (
             <View style={[styles.emptyState, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="flag-outline" size={48} color={colors.textMuted} />
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>No goals yet</Text>
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('wealth.noGoals')}</Text>
               <Pressable onPress={() => navigation.navigate('GoalCreate')} style={[styles.createGoalBtn, { backgroundColor: colors.primary }]}>
-                <Text style={styles.createGoalBtnText}>Create Your First Goal</Text>
+                <Text style={styles.createGoalBtnText}>{t('wealth.createFirstGoal')}</Text>
               </Pressable>
             </View>
           ) : (
@@ -299,7 +302,7 @@ export default function WealthDashboardScreen({ navigation }: any) {
           <View style={styles.retirementPreviewHeader}>
             <Text style={{ fontSize: 28 }}>🏖️</Text>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.retirementPreviewTitle, { color: colors.text }]}>Retirement Planning</Text>
+              <Text style={[styles.retirementPreviewTitle, { color: colors.text }]}>{t('wealth.retirementPlanning')}</Text>
               <Text style={[styles.retirementPreviewSub, { color: colors.textMuted }]}>
                 {t('wealth.yrsOld', { count: retirementPlan.currentAge })} · {t('wealth.planToRetire', { count: retirementPlan.retirementAge })}
               </Text>
@@ -310,7 +313,7 @@ export default function WealthDashboardScreen({ navigation }: any) {
             onPress={() => navigation.navigate('RetirementPlanner')}
             style={[styles.retirementPreviewBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}
           >
-            <Text style={[styles.retirementPreviewBtnText, { color: colors.primary }]}>View Retirement Planner →</Text>
+            <Text style={[styles.retirementPreviewBtnText, { color: colors.primary }]}>{t('wealth.viewPlanner')}</Text>
           </Pressable>
         </Animated.View>
 
@@ -318,9 +321,9 @@ export default function WealthDashboardScreen({ navigation }: any) {
         <View style={[styles.tipCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="bulb" size={18} color="#FFC107" />
           <View style={{ flex: 1 }}>
-            <Text style={[styles.tipTitle, { color: colors.text }]}>💰 Wealth Tip</Text>
+            <Text style={[styles.tipTitle, { color: colors.text }]}>{t('wealth.wealthTip')}</Text>
             <Text style={[styles.tipText, { color: colors.textMuted }]}>
-              Start investing early — even ₹5,000/month at 12% grows to over ₹1.5 Cr in 25 years!
+              {t('wealth.wealthTipText')}
             </Text>
           </View>
         </View>

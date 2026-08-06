@@ -34,6 +34,7 @@ export default {
     feature: 'Feature',
     creatorInfo: 'Creator will see the review notes and can resubmit after making changes.',
     approveCourse: 'Approve Course',
+    publishedTitle: '✅ Published',
     approveConfirm: 'Publish "{{title}}" to the course catalog?',
     cancel: 'Cancel',
     approveAndPublish: 'Approve & Publish',

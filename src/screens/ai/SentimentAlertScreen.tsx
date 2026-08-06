@@ -41,27 +41,27 @@ const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 // ─── Sensitivity Config ────────────────────────────────────
 
 const SENSITIVITY_OPTIONS: { key: SentimentAlertSensitivity; label: string; desc: string; icon: string; color: string }[] = [
-  { key: 'low', label: 'Low', desc: '25+ point shift', icon: 'shield-checkmark', color: '#10B981' },
-  { key: 'medium', label: 'Medium', desc: '15+ point shift', icon: 'speedometer', color: '#F59E0B' },
-  { key: 'high', label: 'High', desc: '10+ point shift', icon: 'refresh', color: '#EF4444' },
+  { key: 'low', label: 'sentimentAlerts.sensLow', desc: 'sentimentAlerts.sensLowDesc', icon: 'shield-checkmark', color: '#10B981' },
+  { key: 'medium', label: 'sentimentAlerts.sensMedium', desc: 'sentimentAlerts.sensMediumDesc', icon: 'speedometer', color: '#F59E0B' },
+  { key: 'high', label: 'sentimentAlerts.sensHigh', desc: 'sentimentAlerts.sensHighDesc', icon: 'refresh', color: '#EF4444' },
 ];
 
 const DIRECTION_OPTIONS: { key: SentimentAlertDirection; label: string; icon: string }[] = [
-  { key: 'both', label: 'Both', icon: 'swap-vertical' },
-  { key: 'improving', label: 'Improving', icon: 'trending-up' },
-  { key: 'deteriorating', label: 'Deteriorating', icon: 'trending-down' },
+  { key: 'both', label: 'sentimentAlerts.dirBoth', icon: 'swap-vertical' },
+  { key: 'improving', label: 'sentimentAlerts.dirImproving', icon: 'trending-up' },
+  { key: 'deteriorating', label: 'sentimentAlerts.dirDeteriorating', icon: 'trending-down' },
 ];
 
 // ─── Helpers ───────────────────────────────────────────────
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, t: (key: string, params?: Record<string, any>) => string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return t('time.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('time.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return t('time.daysAgo', { count: days });
   return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
@@ -87,6 +87,7 @@ function RuleCard({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const sensOpt = SENSITIVITY_OPTIONS.find(s => s.key === rule.sensitivity)!;
   const dirOpt = DIRECTION_OPTIONS.find(d => d.key === rule.direction)!;
 
@@ -114,23 +115,30 @@ function RuleCard({
       <View style={ruleCardStyles.badgesRow}>
         <View style={[ruleCardStyles.badge, { backgroundColor: sensOpt.color + '15', borderColor: sensOpt.color + '30' }]}>
           <Ionicons name={sensOpt.icon as any} size={12} color={sensOpt.color} />
-          <Text style={[ruleCardStyles.badgeText, { color: sensOpt.color }]}>{sensOpt.label}</Text>
+          <Text style={[ruleCardStyles.badgeText, { color: sensOpt.color }]}>{t(sensOpt.label)}</Text>
         </View>
         <View style={[ruleCardStyles.badge, { backgroundColor: getDirectionColor(rule.direction === 'both' ? 'improving' : rule.direction) + '15', borderColor: getDirectionColor(rule.direction === 'both' ? 'improving' : rule.direction) + '30' }]}>
           <Ionicons name={dirOpt.icon as any} size={12} color={getDirectionColor(rule.direction === 'both' ? 'improving' : rule.direction)} />
-          <Text style={[ruleCardStyles.badgeText, { color: getDirectionColor(rule.direction === 'both' ? 'improving' : rule.direction) }]}>{dirOpt.label}</Text>
+          <Text style={[ruleCardStyles.badgeText, { color: getDirectionColor(rule.direction === 'both' ? 'improving' : rule.direction) }]}>{t(dirOpt.label)}</Text>
         </View>
         {rule.triggered && (
           <View style={[ruleCardStyles.badge, { backgroundColor: '#F59E0B15', borderColor: '#F59E0B30' }]}>
             <Ionicons name="checkmark-circle" size={12} color="#F59E0B" />
-            <Text style={[ruleCardStyles.badgeText, { color: '#F59E0B' }]}>Triggered</Text>
+            <Text style={[ruleCardStyles.badgeText, { color: '#F59E0B' }]}>{t('sentimentAlerts.triggered')}</Text>
           </View>
         )}
       </View>
 
       <View style={ruleCardStyles.bottomRow}>
         <Text style={[ruleCardStyles.thresholdLabel, { color: colors.textMuted }]}>
-          Threshold: {getSensitivityThreshold(rule.sensitivity)}pt {rule.direction === 'both' ? 'shift' : rule.direction}
+          {t('sentimentAlerts.threshold', {
+            threshold: getSensitivityThreshold(rule.sensitivity),
+            direction: rule.direction === 'both'
+              ? t('sentimentAlerts.shift')
+              : rule.direction === 'improving'
+                ? t('sentimentAlerts.dirImproving')
+                : t('sentimentAlerts.dirDeteriorating'),
+          })}
         </Text>
         <Pressable onPress={onDelete} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Ionicons name="trash-outline" size={16} color={colors.danger || '#EF4444'} />
@@ -206,6 +214,7 @@ const ruleCardStyles = StyleSheet.create({
 
 function TriggerItem({ trigger }: { trigger: SentimentAlertTrigger }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const dirColor = getDirectionColor(trigger.direction);
 
   return (
@@ -228,7 +237,7 @@ function TriggerItem({ trigger }: { trigger: SentimentAlertTrigger }) {
       </View>
       <View style={triggerStyles.bottomRow}>
         <Text style={[triggerStyles.time, { color: colors.textMuted }]}>
-          {formatRelativeTime(trigger.timestamp)}
+          {formatRelativeTime(trigger.timestamp, t)}
         </Text>
         <View style={[triggerStyles.magnitudeBadge, { backgroundColor: dirColor + '15' }]}>
           <Text style={[triggerStyles.magnitudeText, { color: dirColor }]}>
@@ -314,6 +323,7 @@ function AddRuleModal({
   onAdd: (rule: SentimentAlertRule) => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [selectedSymbol, setSelectedSymbol] = useState<string>('RELIANCE');
   const [sensitivity, setSensitivity] = useState<SentimentAlertSensitivity>('medium');
   const [direction, setDirection] = useState<SentimentAlertDirection>('both');
@@ -338,7 +348,7 @@ function AddRuleModal({
       <View style={modalStyles.overlay}>
         <View style={[modalStyles.content, { backgroundColor: colors.bgSecondary }]}>
           <View style={modalStyles.header}>
-            <Text style={[modalStyles.title, { color: colors.text }]}>New Sentiment Alert</Text>
+            <Text style={[modalStyles.title, { color: colors.text }]}>{t('sentimentAlerts.newAlert')}</Text>
             <Pressable onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
             </Pressable>
@@ -346,7 +356,7 @@ function AddRuleModal({
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Stock Picker */}
-            <Text style={[modalStyles.sectionLabel, { color: colors.textSecondary }]}>Stock</Text>
+            <Text style={[modalStyles.sectionLabel, { color: colors.textSecondary }]}>{t('sentimentAlerts.stock')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={modalStyles.stockPicker}>
               {availableStocks.map(s => {
                 const isActive = s.symbol === selectedSymbol;
@@ -369,7 +379,7 @@ function AddRuleModal({
 
             {/* Sensitivity */}
             <Text style={[modalStyles.sectionLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>
-              Sensitivity
+              {t('sentimentAlerts.sensitivity')}
             </Text>
             <Text style={[modalStyles.sectionDesc, { color: colors.textMuted }]}>
               {getSensitivityLabel(sensitivity)}
@@ -385,15 +395,15 @@ function AddRuleModal({
                   }]}
                 >
                   <Ionicons name={opt.icon as any} size={20} color={sensitivity === opt.key ? opt.color : colors.textMuted} />
-                  <Text style={[modalStyles.optionLabel, { color: sensitivity === opt.key ? opt.color : colors.text }]}>{opt.label}</Text>
-                  <Text style={[modalStyles.optionDesc, { color: sensitivity === opt.key ? opt.color + 'CC' : colors.textMuted }]}>{opt.desc}</Text>
+                  <Text style={[modalStyles.optionLabel, { color: sensitivity === opt.key ? opt.color : colors.text }]}>{t(opt.label)}</Text>
+                  <Text style={[modalStyles.optionDesc, { color: sensitivity === opt.key ? opt.color + 'CC' : colors.textMuted }]}>{t(opt.desc)}</Text>
                 </Pressable>
               ))}
             </View>
 
             {/* Direction */}
             <Text style={[modalStyles.sectionLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>
-              Alert Direction
+              {t('sentimentAlerts.alertDirection')}
             </Text>
             <View style={modalStyles.optionsRow}>
               {DIRECTION_OPTIONS.map(opt => {
@@ -409,7 +419,7 @@ function AddRuleModal({
                     }]}
                   >
                     <Ionicons name={opt.icon as any} size={20} color={isActive ? activeColor : colors.textMuted} />
-                    <Text style={[modalStyles.optionLabel, { color: isActive ? activeColor : colors.text }]}>{opt.label}</Text>
+                    <Text style={[modalStyles.optionLabel, { color: isActive ? activeColor : colors.text }]}>{t(opt.label)}</Text>
                   </Pressable>
                 );
               })}
@@ -419,7 +429,7 @@ function AddRuleModal({
             <AnimatedPressable onPress={handleAdd} scaleTo={0.97} style={modalStyles.addBtn}>
               <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={modalStyles.addGradient}>
                 <Ionicons name="add-circle" size={20} color="#FFF" />
-                <Text style={modalStyles.addText}>Add Alert Rule</Text>
+                <Text style={modalStyles.addText}>{t('sentimentAlerts.addRule')}</Text>
               </LinearGradient>
             </AnimatedPressable>
           </ScrollView>
@@ -634,9 +644,9 @@ export default function SentimentAlertScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>Sentiment Alerts</Text>
+            <Text style={styles.headerTitle}>{t('sentimentAlerts.title')}</Text>
             <Text style={styles.headerSubtitle}>
-              {rules.length} rule{rules.length !== 1 ? 's' : ''} · {unreadTriggerCount > 0 ? `${unreadTriggerCount} new alert${unreadTriggerCount > 1 ? 's' : ''}` : 'No new alerts'}
+              {t('sentimentAlerts.rulesCount', { count: rules.length })} · {unreadTriggerCount > 0 ? t('sentimentAlerts.newAlertsCount', { count: unreadTriggerCount }) : t('sentimentAlerts.noNewAlerts')}
             </Text>
           </View>
           <Pressable onPress={() => setShowAddModal(true)} style={styles.addBtn}>
@@ -651,14 +661,14 @@ export default function SentimentAlertScreen({ navigation }: any) {
             onPress={() => setActiveTab('rules')}
           >
             <Ionicons name="notifications" size={16} color={activeTab === 'rules' ? colors.primary : colors.textMuted} />
-            <Text style={[styles.tabLabel, activeTab === 'rules' && styles.tabLabelActive]}>Rules</Text>
+            <Text style={[styles.tabLabel, activeTab === 'rules' && styles.tabLabelActive]}>{t('sentimentAlerts.rules')}</Text>
           </Pressable>
           <Pressable
             style={[styles.tab, activeTab === 'history' && styles.tabActive]}
             onPress={() => setActiveTab('history')}
           >
             <Ionicons name="time" size={16} color={activeTab === 'history' ? colors.primary : colors.textMuted} />
-            <Text style={[styles.tabLabel, activeTab === 'history' && styles.tabLabelActive]}>History</Text>
+            <Text style={[styles.tabLabel, activeTab === 'history' && styles.tabLabelActive]}>{t('sentimentAlerts.history')}</Text>
             {unreadTriggerCount > 0 && (
               <View style={styles.badgeCount}>
                 <Text style={styles.badgeCountText}>{unreadTriggerCount}</Text>
@@ -672,7 +682,7 @@ export default function SentimentAlertScreen({ navigation }: any) {
         {activeTab === 'rules' ? (
           <>
             {/* Active Rules */}
-            <Text style={styles.sectionTitle}>Active Rules ({activeRules.length})</Text>
+            <Text style={styles.sectionTitle}>{t('sentimentAlerts.activeRules', { count: activeRules.length })}</Text>
             {activeRules.length > 0 ? (
               activeRules.map(rule => (
                 <RuleCard
@@ -686,15 +696,15 @@ export default function SentimentAlertScreen({ navigation }: any) {
             ) : (
               <View style={styles.emptyCard}>
                 <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>No Active Rules</Text>
-                <Text style={styles.emptyDesc}>Tap + to add a sentiment alert rule for your stocks</Text>
+                <Text style={styles.emptyTitle}>{t('sentimentAlerts.noActiveRules')}</Text>
+                <Text style={styles.emptyDesc}>{t('sentimentAlerts.noActiveRulesDesc')}</Text>
               </View>
             )}
 
             {/* Inactive Rules */}
             {inactiveRules.length > 0 && (
               <>
-                <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>Inactive ({inactiveRules.length})</Text>
+                <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>{t('sentimentAlerts.inactiveRules', { count: inactiveRules.length })}</Text>
                 {inactiveRules.map(rule => (
                   <RuleCard
                     key={rule.id}
@@ -712,11 +722,11 @@ export default function SentimentAlertScreen({ navigation }: any) {
             {/* History Header */}
             <View style={styles.historyHeader}>
               <Text style={styles.sectionTitle}>
-                Trigger History ({triggers.length})
+                {t('sentimentAlerts.triggerHistory', { count: triggers.length })}
               </Text>
               {unreadTriggerCount > 0 && (
                 <Pressable onPress={handleMarkAllRead}>
-                  <Text style={[styles.markAllRead, { color: colors.primary }]}>Mark all read</Text>
+                  <Text style={[styles.markAllRead, { color: colors.primary }]}>{t('sentimentAlerts.markAllRead')}</Text>
                 </Pressable>
               )}
             </View>
@@ -730,8 +740,8 @@ export default function SentimentAlertScreen({ navigation }: any) {
             ) : (
               <View style={styles.emptyCard}>
                 <Ionicons name="pulse-outline" size={40} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>No Triggers Yet</Text>
-                <Text style={styles.emptyDesc}>Sentiment alerts will appear here when they fire</Text>
+                <Text style={styles.emptyTitle}>{t('sentimentAlerts.noTriggers')}</Text>
+                <Text style={styles.emptyDesc}>{t('sentimentAlerts.noTriggersDesc')}</Text>
               </View>
             )}
           </>

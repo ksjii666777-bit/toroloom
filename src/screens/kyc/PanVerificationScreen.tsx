@@ -73,7 +73,7 @@ export default function PanVerificationScreen({ navigation }: any) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err: any) {
-      const msg = err?.body?.error || err?.message || 'Verification failed. Please try again.';
+      const msg = err?.body?.error || err?.message || t('kyc.verificationFailedMsg');
       setError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -99,7 +99,7 @@ export default function PanVerificationScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>PAN Verification</Text>
+          <Text style={styles.title}>{t('kyc.panVerification')}</Text>
         </View>
 
         {/* Info Section */}
@@ -111,14 +111,14 @@ export default function PanVerificationScreen({ navigation }: any) {
             </Text>
           </View>
           <View style={styles.formatRow}>
-            <Text style={styles.formatLabel}>Format:</Text>
+            <Text style={styles.formatLabel}>{t('kyc.panFormatLabel')}</Text>
             <Text style={styles.formatExample}>ABCDE1234F</Text>
           </View>
         </Card>
 
         {/* Input Section */}
         <View style={styles.inputSection}>
-          <Text style={styles.inputLabel}>Enter PAN Number</Text>
+          <Text style={styles.inputLabel}>{t('kyc.enterPanNumber')}</Text>
           <View style={[styles.inputContainer, { borderColor: error ? colors.danger : result?.isVerified ? colors.success : colors.border }]}>
             <TextInput
               style={styles.input}
@@ -147,10 +147,10 @@ export default function PanVerificationScreen({ navigation }: any) {
           </View>
           <Text style={styles.inputHint}>
             {panNumber.length === 0
-              ? 'Enter your 10-digit PAN number'
+              ? t('kyc.panHintEmpty')
               : isFormatValid
-                ? '✓ Valid PAN format'
-                : `Enter ${10 - panNumber.length} more characters`}
+                ? t('kyc.panValidFormat')
+                : t('kyc.panHintChars', { count: 10 - panNumber.length })}
           </Text>
         </View>
 
@@ -174,7 +174,7 @@ export default function PanVerificationScreen({ navigation }: any) {
               <Ionicons name="shield-checkmark" size={22} color={colors.white} />
             )}
             <Text style={styles.verifyBtnText}>
-              {isVerifying ? 'Verifying...' : 'Verify PAN'}
+              {isVerifying ? t('kyc.verifying') : t('kyc.verifyPan')}
             </Text>
           </LinearGradient>
         </AnimatedPressable>
@@ -195,8 +195,8 @@ export default function PanVerificationScreen({ navigation }: any) {
                 <Ionicons name="checkmark-circle" size={32} color={colors.success} />
               </View>
               <View style={styles.resultInfo}>
-                <Text style={styles.resultTitle}>PAN Verified ✓</Text>
-                <Text style={styles.resultSubtitle}>Your PAN has been verified successfully</Text>
+                <Text style={styles.resultTitle}>{t('kyc.panVerifiedTitle')}</Text>
+                <Text style={styles.resultSubtitle}>{t('kyc.panVerifiedSuccess')}</Text>
               </View>
             </View>
 
@@ -204,21 +204,21 @@ export default function PanVerificationScreen({ navigation }: any) {
 
             <View style={styles.resultDetails}>
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>PAN Number</Text>
+                <Text style={styles.resultLabel}>{t('kyc.panNumberLabel')}</Text>
                 <Text style={styles.resultValue}>{result.panNumber}</Text>
               </View>
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>Name on PAN</Text>
+                <Text style={styles.resultLabel}>{t('kyc.nameOnPan')}</Text>
                 <Text style={styles.resultValue}>{result.nameOnPan || result.fullName}</Text>
               </View>
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>Category</Text>
-                <Text style={styles.resultValue}>{result.category || 'Individual'}</Text>
+                <Text style={styles.resultLabel}>{t('kyc.category')}</Text>
+                <Text style={styles.resultValue}>{result.category || t('kyc.individual')}</Text>
               </View>
               <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>Status</Text>
+                <Text style={styles.resultLabel}>{t('kyc.status')}</Text>
                 <View style={[styles.statusBadge, { backgroundColor: colors.success + '20' }]}>
-                  <Text style={[styles.statusBadgeText, { color: colors.success }]}>VALID</Text>
+                  <Text style={[styles.statusBadgeText, { color: colors.success }]}>{t('kyc.valid')}</Text>
                 </View>
               </View>
             </View>
@@ -231,7 +231,7 @@ export default function PanVerificationScreen({ navigation }: any) {
               style={{ marginTop: SPACING.lg }}
             >
               <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
-                <Text style={styles.continueBtnText}>Continue</Text>
+                <Text style={styles.continueBtnText}>{t('kyc.continueAction')}</Text>
                 <Ionicons name="arrow-forward" size={20} color={colors.white} />
               </LinearGradient>
             </AnimatedPressable>
@@ -246,11 +246,11 @@ export default function PanVerificationScreen({ navigation }: any) {
                 <Ionicons name="close-circle" size={32} color={colors.danger} />
               </View>
               <View style={styles.resultInfo}>
-                <Text style={[styles.resultTitle, { color: colors.danger }]}>Verification Failed</Text>
+                <Text style={[styles.resultTitle, { color: colors.danger }]}>{t('kyc.verificationFailed')}</Text>
                 <Text style={styles.resultSubtitle}>
                   {result.status === 'INVALID'
-                    ? 'The PAN format is invalid. Please check and try again.'
-                    : 'PAN not found in NSDL database. Please verify your PAN.'}
+                    ? t('kyc.panInvalid')
+                    : t('kyc.panNotFound')}
                 </Text>
               </View>
             </View>

@@ -34,6 +34,7 @@ export default {
     feature: 'फ़ीचर्ड',
     creatorInfo: 'निर्माता समीक्षा नोट्स देख सकेगा और बदलाव करने के बाद पुनः सबमिट कर सकेगा।',
     approveCourse: 'कोर्स स्वीकृत करें',
+    publishedTitle: '✅ प्रकाशित',
     approveConfirm: 'कोर्स कैटलॉग में "{{title}}" प्रकाशित करें?',
     cancel: 'रद्द करें',
     approveAndPublish: 'स्वीकृत करें और प्रकाशित करें',

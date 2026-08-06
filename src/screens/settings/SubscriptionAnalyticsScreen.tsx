@@ -294,12 +294,12 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
       const overview = await fetchOverview();
       setData(overview);
     } catch (err: any) {
-      setError(err?.message || 'Failed to load analytics');
+      setError(err?.message || t('subscriptionAnalytics.loadFailed'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadData();
@@ -321,7 +321,7 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
     return (
       <View style={[styles.container, styles.center]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading analytics...</Text>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>{t('subscriptionAnalytics.loading')}</Text>
       </View>
     );
   }
@@ -366,9 +366,9 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </AnimatedPressable>
             <View style={{ flex: 1, marginLeft: SPACING.md }}>
-              <Text style={[styles.title, { color: colors.text }]}>Subscription Analytics</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t('subscriptionAnalytics.title')}</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                Overview of all subscription data
+                {t('subscriptionAnalytics.subtitle')}
               </Text>
             </View>
           </View>
@@ -378,16 +378,16 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
         <View style={styles.statsRow}>
           <StatCard
             icon="people"
-            label="Total Users"
+            label={t('subscriptionAnalytics.totalUsers')}
             value={data.totalSubscriptions.toLocaleString()}
             color="#6C63FF"
           />
           <StatCard
             icon="checkmark-circle"
-            label="Active Subs"
+            label={t('subscriptionAnalytics.activeSubs')}
             value={data.activeSubscriptions.toLocaleString()}
             color="#10B981"
-            subtitle={`${data.statusBreakdown.trial} in trial`}
+            subtitle={t('subscriptionAnalytics.inTrial', { count: data.statusBreakdown.trial })}
           />
         </View>
 
@@ -395,16 +395,16 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
         <View style={styles.statsRow}>
           <StatCard
             icon="cash"
-            label="MRR"
+            label={t('subscriptionAnalytics.mrr')}
             value={`₹${data.mrr.toLocaleString()}`}
             color="#3B82F6"
           />
           <StatCard
             icon="trending-up"
-            label="ARPU"
+            label={t('subscriptionAnalytics.arpu')}
             value={`₹${data.averageRevenuePerUser.toLocaleString()}`}
             color="#8B5CF6"
-            subtitle="per active user"
+            subtitle={t('subscriptionAnalytics.perActiveUser')}
           />
         </View>
 
@@ -412,16 +412,16 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
         <View style={styles.statsRow}>
           <StatCard
             icon="warning"
-            label="30-Day Churn"
+            label={t('subscriptionAnalytics.churn30')}
             value={`${data.churnRate30Day}%`}
             color={data.churnRate30Day > 10 ? '#EF4444' : '#F59E0B'}
           />
           <StatCard
             icon="refresh"
-            label="Trial Conv."
+            label={t('subscriptionAnalytics.trialConv')}
             value={`${data.trialConversionRate}%`}
             color="#10B981"
-            subtitle={`${data.trialUsers} trial users`}
+            subtitle={t('subscriptionAnalytics.trialUsers', { count: data.trialUsers })}
           />
         </View>
 
@@ -429,41 +429,41 @@ export default function SubscriptionAnalyticsScreen({ navigation }: any) {
         <View style={styles.statsRow}>
           <StatCard
             icon="alert-circle"
-            label="Payment Failures"
+            label={t('subscriptionAnalytics.paymentFailures')}
             value={`${data.paymentFailureRate}%`}
             color={data.paymentFailureRate > 5 ? '#EF4444' : '#F59E0B'}
-            subtitle={`${data.usersInGracePeriod} in grace period`}
+            subtitle={t('subscriptionAnalytics.inGrace', { count: data.usersInGracePeriod })}
           />
           <StatCard
             icon="trending-down"
-            label="90-Day Churn"
+            label={t('subscriptionAnalytics.churn90')}
             value={`${data.churnRate90Day}%`}
             color={data.churnRate90Day > 20 ? '#EF4444' : '#F59E0B'}
           />
         </View>
 
         {/* Tier Breakdown */}
-        <Card title="Tier Breakdown" style={styles.card}>
-          <TierBar label="Free" count={data.tierBreakdown.free} total={data.totalSubscriptions} color={tierColors.free} />
-          <TierBar label="Pro" count={data.tierBreakdown.pro} total={data.totalSubscriptions} color={tierColors.pro} />
-          <TierBar label="Elite" count={data.tierBreakdown.elite} total={data.totalSubscriptions} color={tierColors.elite} />
+        <Card title={t('subscriptionAnalytics.tierBreakdown')} style={styles.card}>
+          <TierBar label={t('subscriptionAnalytics.free')} count={data.tierBreakdown.free} total={data.totalSubscriptions} color={tierColors.free} />
+          <TierBar label={t('subscriptionAnalytics.pro')} count={data.tierBreakdown.pro} total={data.totalSubscriptions} color={tierColors.pro} />
+          <TierBar label={t('subscriptionAnalytics.elite')} count={data.tierBreakdown.elite} total={data.totalSubscriptions} color={tierColors.elite} />
         </Card>
 
         {/* Status Breakdown */}
-        <Card title="Status Breakdown" style={styles.card}>
-          <TierBar label="Active" count={data.statusBreakdown.active} total={data.totalSubscriptions} color="#10B981" />
-          <TierBar label="Trial" count={data.statusBreakdown.trial} total={data.totalSubscriptions} color="#3B82F6" />
-          <TierBar label="Expired" count={data.statusBreakdown.expired} total={data.totalSubscriptions} color="#F59E0B" />
-          <TierBar label="Cancelled" count={data.statusBreakdown.cancelled} total={data.totalSubscriptions} color="#EF4444" />
+        <Card title={t('subscriptionAnalytics.statusBreakdown')} style={styles.card}>
+          <TierBar label={t('subscriptionAnalytics.active')} count={data.statusBreakdown.active} total={data.totalSubscriptions} color="#10B981" />
+          <TierBar label={t('subscriptionAnalytics.trial')} count={data.statusBreakdown.trial} total={data.totalSubscriptions} color="#3B82F6" />
+          <TierBar label={t('subscriptionAnalytics.expired')} count={data.statusBreakdown.expired} total={data.totalSubscriptions} color="#F59E0B" />
+          <TierBar label={t('subscriptionAnalytics.cancelled')} count={data.statusBreakdown.cancelled} total={data.totalSubscriptions} color="#EF4444" />
         </Card>
 
         {/* Monthly Revenue Chart */}
-        <Card title="Monthly Revenue (Last 6 Months)" style={styles.card}>
+        <Card title={t('subscriptionAnalytics.monthlyRevenue')} style={styles.card}>
           <RevenueBarChart data={data.monthlyRevenue} />
           <View style={styles.chartLegend}>
             {data.monthlyRevenue.map((item, i) => (
               <Text key={i} style={[styles.legendText, { color: colors.textMuted }]}>
-                {item.month}: ₹{(item.revenue / 1000).toFixed(0)}K ({item.newSubscribers} new, {item.churnedSubscribers} churned)
+                {item.month}: ₹{(item.revenue / 1000).toFixed(0)}K ({t('subscriptionAnalytics.newSubs', { count: item.newSubscribers })}, {t('subscriptionAnalytics.churnedSubs', { count: item.churnedSubscribers })})
               </Text>
             ))}
           </View>

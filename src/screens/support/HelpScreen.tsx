@@ -25,18 +25,18 @@ const fallbackFAQs: FAQ[] = [
 ];
 
 const quickTopics = [
-  { icon: 'person-add', label: 'Open Account', color: '#6C63FF', search: 'open account' },
-  { icon: 'card', label: 'Add Funds', color: '#00C853', search: 'add funds invest' },
-  { icon: 'swap-horizontal', label: 'Transfer', color: '#00D2FF', search: 'withdraw transfer money' },
-  { icon: 'document-text', label: 'KYC Status', color: '#FFC107', search: 'kyc verification' },
-  { icon: 'shield-checkmark', label: 'Account Safety', color: '#6C63FF', search: 'safe money security' },
-  { icon: 'receipt', label: 'Charges', color: '#FF6B6B', search: 'charges brokerage fees' },
+  { icon: 'person-add', label: 'topicOpenAccount', color: '#6C63FF', search: 'open account' },
+  { icon: 'card', label: 'topicAddFunds', color: '#00C853', search: 'add funds invest' },
+  { icon: 'swap-horizontal', label: 'topicTransfer', color: '#00D2FF', search: 'withdraw transfer money' },
+  { icon: 'document-text', label: 'topicKycStatus', color: '#FFC107', search: 'kyc verification' },
+  { icon: 'shield-checkmark', label: 'topicAccountSafety', color: '#6C63FF', search: 'safe money security' },
+  { icon: 'receipt', label: 'topicCharges', color: '#FF6B6B', search: 'charges brokerage fees' },
 ];
 
 const contactOptions = [
-  { icon: 'call', label: 'Call Support', detail: '1800-123-4567', hours: 'Mon-Sat, 9AM - 6PM', gradient: GRADIENTS.success, link: 'tel:18001234567' },
-  { icon: 'mail', label: 'Email Us', detail: 'support@toroloom.com', hours: 'Response within 24 hrs', gradient: GRADIENTS.primary, link: 'mailto:support@toroloom.com' },
-  { icon: 'chatbubbles', label: 'Live Chat', detail: 'Chat with our team', hours: 'Available 24/7', gradient: GRADIENTS.accent, link: '' },
+  { icon: 'call', label: 'callSupport', detail: 'callDetail', hours: 'callHours', gradient: GRADIENTS.success, link: 'tel:18001234567' },
+  { icon: 'mail', label: 'emailUs', detail: 'emailDetail', hours: 'emailHours', gradient: GRADIENTS.primary, link: 'mailto:support@toroloom.com' },
+  { icon: 'chatbubbles', label: 'liveChat', detail: 'chatDetail', hours: 'chatHours', gradient: GRADIENTS.accent, link: '' },
 ];
 
 export default function HelpScreen({ navigation }: any) {
@@ -116,8 +116,8 @@ export default function HelpScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={styles.headerContent}>
-            <Text style={styles.title}>Help & Support</Text>
-            <Text style={styles.subtitle}>We're here to help you</Text>
+            <Text style={styles.title}>{t('help.title')}</Text>
+            <Text style={styles.subtitle}>{t('help.subtitle')}</Text>
           </View>
         </View>
 
@@ -142,20 +142,20 @@ export default function HelpScreen({ navigation }: any) {
         </View>
 
         {/* Quick Topics */}
-        <Text style={styles.sectionTitle}>Quick Help</Text>
+        <Text style={styles.sectionTitle}>{t('help.quickHelp')}</Text>
         <View style={styles.topicsGrid}>
           {quickTopics.map((topic) => (
             <Pressable key={topic.label} style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
               <View style={[styles.topicIcon, { backgroundColor: topic.color + '20' }]}>
                 <Ionicons name={topic.icon as keyof typeof Ionicons.glyphMap} size={22} color={topic.color} />
               </View>
-              <Text style={styles.topicLabel}>{topic.label}</Text>
+              <Text style={styles.topicLabel}>{t(`help.${topic.label}`)}</Text>
             </Pressable>
           ))}
         </View>
 
         {/* Contact Options */}
-        <Text style={styles.sectionTitle}>Contact Us</Text>
+        <Text style={styles.sectionTitle}>{t('help.contactUs')}</Text>
         <View style={styles.contactRow}>
           {contactOptions.map((option) => (
             <Pressable key={option.label}
@@ -163,9 +163,9 @@ export default function HelpScreen({ navigation }: any) {
               <LinearGradient colors={option.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
                 <Ionicons name={option.icon as keyof typeof Ionicons.glyphMap} size={22} color={COLORS.white} />
               </LinearGradient>
-              <Text style={styles.contactLabel}>{option.label}</Text>
-              <Text style={styles.contactDetail}>{option.detail}</Text>
-              <Text style={styles.contactHours}>{option.hours}</Text>
+              <Text style={styles.contactLabel}>{t(`help.${option.label}`)}</Text>
+              <Text style={styles.contactDetail}>{t(`help.${option.detail}`)}</Text>
+              <Text style={styles.contactHours}>{t(`help.${option.hours}`)}</Text>
             </Pressable>
           ))}
         </View>
@@ -173,20 +173,20 @@ export default function HelpScreen({ navigation }: any) {
         {/* FAQ Section */}
         <View style={styles.faqSection} onLayout={onFaqSectionLayout}>
           <View style={styles.faqHeader}>
-            <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+            <Text style={styles.sectionTitle}>{t('help.faq')}</Text>
             <Text style={styles.faqCount}>
               {loadingFaqs
-                ? 'Loading...'
+                ? t('help.loading')
                 : filteredFaqs.length < faqs.length
-                  ? `${filteredFaqs.length} of ${faqs.length}`
-                  : `${faqs.length} articles`}
+                  ? t('help.ofCount', { count: filteredFaqs.length, total: faqs.length })
+                  : t('help.articlesCount', { count: faqs.length })}
             </Text>
           </View>
 
           {loadingFaqs ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={styles.loadingText}>Loading articles...</Text>
+              <Text style={styles.loadingText}>{t('help.loadingArticles')}</Text>
             </View>
           ) : filteredFaqs.length > 0 ? (
             filteredFaqs.map((faq, _i) => {
@@ -212,9 +212,9 @@ export default function HelpScreen({ navigation }: any) {
           ) : (
             <View style={styles.noResults}>
               <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-              <Text style={styles.noResultsTitle}>No results found</Text>
+              <Text style={styles.noResultsTitle}>{t('help.noResults')}</Text>
               <Text style={styles.noResultsSubtitle}>
-                Try a different search term or browse the topics above
+                {t('help.noResultsSubtitle')}
               </Text>
             </View>
           )}
@@ -224,29 +224,29 @@ export default function HelpScreen({ navigation }: any) {
         <View style={styles.appInfoCard}>
           <View style={styles.appInfoRow}>
             <View>
-              <Text style={styles.appInfoLabel}>App Version</Text>
-              <Text style={styles.appInfoValue}>2.1.0 (Build 42)</Text>
+              <Text style={styles.appInfoLabel}>{t('help.appVersion')}</Text>
+              <Text style={styles.appInfoValue}>{t('help.appVersionValue')}</Text>
             </View>
             <View style={styles.appInfoDivider} />
             <View>
-              <Text style={styles.appInfoLabel}>Last Updated</Text>
-              <Text style={styles.appInfoValue}>May 2025</Text>
+              <Text style={styles.appInfoLabel}>{t('help.lastUpdated')}</Text>
+              <Text style={styles.appInfoValue}>{t('help.lastUpdatedValue')}</Text>
             </View>
           </View>
           <View style={styles.footerLinks}>
             <Pressable style={styles.footerLink}>
-              <Text style={styles.footerLinkText}>Privacy Policy</Text>
+              <Text style={styles.footerLinkText}>{t('help.privacyPolicy')}</Text>
             </Pressable>
             <View style={styles.footerLinkDot} />
             <Pressable style={styles.footerLink}>
-              <Text style={styles.footerLinkText}>Terms of Service</Text>
+              <Text style={styles.footerLinkText}>{t('help.termsOfService')}</Text>
             </Pressable>
             <View style={styles.footerLinkDot} />
             <Pressable style={styles.footerLink}>
-              <Text style={styles.footerLinkText}>Licenses</Text>
+              <Text style={styles.footerLinkText}>{t('help.licenses')}</Text>
             </Pressable>
           </View>
-          <Text style={styles.copyright}>© 2025 Toroloom. All rights reserved.</Text>
+          <Text style={styles.copyright}>{t('help.copyright')}</Text>
         </View>
 
         <View style={{ height: 60 }} />

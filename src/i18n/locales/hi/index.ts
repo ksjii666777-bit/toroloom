@@ -53,6 +53,7 @@ import journal from './journal';
 import kyc from './kyc';
 import learn from './learn';
 import sentiment from './sentiment';
+import sentimentAlerts from './sentimentAlerts';
 import landscapeSettings from './landscapeSettings';
 import market from './market';
 import monteCarlo from './monteCarlo';
@@ -89,6 +90,7 @@ import snaptrade from './snaptrade';
 import status from './status';
 import telegramConnect from './telegramConnect';
 import subscription from './subscription';
+import subscriptionAnalytics from './subscriptionAnalytics';
 import taxHarvesting from './taxHarvesting';
 import tenantConfig from './tenantConfig';
 import time from './time';
@@ -159,6 +161,7 @@ const hi = {
   kyc,
   learn,
   sentiment,
+  sentimentAlerts,
   landscapeSettings,
   market,
   monteCarlo,
@@ -195,6 +198,7 @@ const hi = {
   status,
   telegramConnect,
   subscription,
+  subscriptionAnalytics,
   taxHarvesting,
   tenantConfig,
   time,

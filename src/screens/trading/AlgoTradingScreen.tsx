@@ -69,10 +69,11 @@ function MiniEquityCurve({
   height?: number;
   color?: string;
 }) {
+  const { t } = useT();
   if (equityCurve.length < 2) {
     return (
       <View style={{ height, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontFamily: 'System', fontSize: 12, color: '#888' }}>Not enough data</Text>
+        <Text style={{ fontFamily: 'System', fontSize: 12, color: '#888' }}>{t('trading.missingData')}</Text>
       </View>
     );
   }
@@ -154,6 +155,7 @@ const metricStyles = StyleSheet.create({
 // ============================================================================
 
 function TradeRow({ trade, colors }: { trade: AlgoTrade; colors: any }) {
+  const { t } = useT();
   const isWin = (trade.netPnl ?? 0) > 0;
   return (
     <View style={[tradeStyles.row, { borderBottomColor: colors.borderLight }]}>
@@ -170,10 +172,10 @@ function TradeRow({ trade, colors }: { trade: AlgoTrade; colors: any }) {
         </View>
         <View style={tradeStyles.info}>
           <Text style={[tradeStyles.date, { color: colors.text }]}>
-            {trade.entryDate} → {trade.exitDate || 'Open'}
+            {trade.entryDate} → {trade.exitDate || t('trading.statusOpen')}
           </Text>
           <Text style={[tradeStyles.reason, { color: colors.textMuted }]}>
-            {trade.exitReason || 'Open'} · {trade.holdingPeriod ?? '-'} bars
+            {trade.exitReason || t('trading.statusOpen')} · {trade.holdingPeriod ?? '-'} bars
           </Text>
         </View>
       </View>
@@ -250,15 +252,15 @@ export default function AlgoTradingScreen() {
   // Run backtest
   const handleRunBacktest = useCallback(async () => {
     if (!entryFormula.trim() || !exitFormula.trim()) {
-      Alert.alert('Missing Formulas', 'Please enter both entry and exit conditions.');
+      Alert.alert(t('trading.missingFormulas'), t('trading.missingFormulasMsg'));
       return;
     }
     if (!entryValid.valid) {
-      Alert.alert('Invalid Entry Formula', entryValid.error);
+      Alert.alert(t('trading.invalidEntryFormula'), entryValid.error);
       return;
     }
     if (!exitValid.valid) {
-      Alert.alert('Invalid Exit Formula', exitValid.error);
+      Alert.alert(t('trading.invalidExitFormula'), exitValid.error);
       return;
     }
 
@@ -331,13 +333,13 @@ export default function AlgoTradingScreen() {
       setResult(backtestResult);
       setResultId(id);
     } catch (err: any) {
-      Alert.alert('Backtest Error', err.message || 'An error occurred during backtesting.');
+      Alert.alert(t('trading.backtestError'), err.message || t('trading.errorGeneric'));
     } finally {
       setBacktestRunning(false);
     }
   }, [entryFormula, exitFormula, strategyName, selectedSymbol, stopLoss, takeProfit,
       trailingStop, trailingActivation, trailingDistance, sizingMethod, sizingValue,
-      allowShort, entryValid, exitValid, saveStrategy]);
+      allowShort, entryValid, exitValid, saveStrategy, t]);
 
   // Import template
   const handleImportTemplate = useCallback((template: typeof STRATEGY_TEMPLATES[0]) => {
@@ -355,9 +357,9 @@ export default function AlgoTradingScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <View style={screenStyles.headerInfo}>
-          <Text style={[screenStyles.headerTitle, { color: colors.text }]}>Algo Trading</Text>
+          <Text style={[screenStyles.headerTitle, { color: colors.text }]}>{t('trading.algoTrading')}</Text>
           <Text style={[screenStyles.headerSubtitle, { color: colors.textMuted }]}>
-            Strategy Backtesting Engine
+            {t('trading.strategyBacktesting')}
           </Text>
         </View>
       </View>
@@ -374,7 +376,7 @@ export default function AlgoTradingScreen() {
         >
           <Ionicons name="bookmarks-outline" size={18} color={colors.primary} />
           <Text style={[screenStyles.templateToggleText, { color: colors.primary }]}>
-            {showTemplates ? 'Hide Templates' : 'Choose a Strategy Template'}
+            {showTemplates ? t('trading.hideTemplates') : t('trading.chooseTemplate')}
           </Text>
           <Ionicons name={showTemplates ? 'chevron-up' : 'chevron-down'} size={16} color={colors.primary} />
         </Pressable>
@@ -401,18 +403,18 @@ export default function AlgoTradingScreen() {
 
         {/* ── Strategy Definition ── */}
         <View style={[screenStyles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>1. Strategy</Text>
+          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>{t('trading.strategySection')}</Text>
 
-          <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary }]}>Name</Text>
+          <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary }]}>{t('trading.nameField')}</Text>
           <TextInput
             style={[screenStyles.input, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
             value={strategyName}
             onChangeText={setStrategyName}
-            placeholder="My SMA Crossover Strategy"
+            placeholder={t('trading.namePlaceholder')}
             placeholderTextColor="#666"
           />
 
-          <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary }]}>Symbol</Text>
+          <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary }]}>{t('trading.symbolField')}</Text>
           <Pressable
             style={[screenStyles.symbolPicker, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
             onPress={() => setShowSymbolPicker(!showSymbolPicker)}
@@ -441,7 +443,7 @@ export default function AlgoTradingScreen() {
           )}
 
           <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary }]}>
-            Entry Condition <Text style={{ color: colors.textMuted, fontSize: 10 }}>(formula returns {'>'}0.5)</Text>
+            {t('trading.entryCondition')} <Text style={{ color: colors.textMuted, fontSize: 10 }}>(formula returns {'>'}0.5)</Text>
           </Text>
           <TextInput
             style={[screenStyles.formulaInput, {
@@ -461,7 +463,7 @@ export default function AlgoTradingScreen() {
           </Text>
 
           <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary }]}>
-            Exit Condition <Text style={{ color: colors.textMuted, fontSize: 10 }}>(formula returns {'>'}0.5)</Text>
+            {t('trading.exitCondition')} <Text style={{ color: colors.textMuted, fontSize: 10 }}>(formula returns {'>'}0.5)</Text>
           </Text>
           <TextInput
             style={[screenStyles.formulaInput, {
@@ -483,11 +485,11 @@ export default function AlgoTradingScreen() {
 
         {/* ── Risk Parameters ── */}
         <View style={[screenStyles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>2. Risk Parameters</Text>
+          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>{t('trading.riskSection')}</Text>
 
           <View style={screenStyles.paramRow}>
             <View style={screenStyles.paramField}>
-              <Text style={[screenStyles.paramLabel, { color: colors.textSecondary }]}>Stop Loss %</Text>
+              <Text style={[screenStyles.paramLabel, { color: colors.textSecondary }]}>{t('trading.stopLossPercent')}</Text>
               <TextInput
                 style={[screenStyles.paramInput, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
                 value={stopLoss}
@@ -498,7 +500,7 @@ export default function AlgoTradingScreen() {
               />
             </View>
             <View style={screenStyles.paramField}>
-              <Text style={[screenStyles.paramLabel, { color: colors.textSecondary }]}>Take Profit %</Text>
+              <Text style={[screenStyles.paramLabel, { color: colors.textSecondary }]}>{t('trading.takeProfitPercent')}</Text>
               <TextInput
                 style={[screenStyles.paramInput, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
                 value={takeProfit}
@@ -520,13 +522,13 @@ export default function AlgoTradingScreen() {
               size={20}
               color={trailingStop ? colors.primary : colors.textMuted}
             />
-            <Text style={[screenStyles.toggleLabel, { color: colors.text }]}>Enable Trailing Stop Loss</Text>
+            <Text style={[screenStyles.toggleLabel, { color: colors.text }]}>{t('trading.enableTrailingStop')}</Text>
           </Pressable>
 
           {trailingStop && (
             <View style={screenStyles.paramRow}>
               <View style={screenStyles.paramField}>
-                <Text style={[screenStyles.paramLabel, { color: colors.textSecondary }]}>Activate After %</Text>
+                <Text style={[screenStyles.paramLabel, { color: colors.textSecondary }]}>{t('trading.activateAfter')}</Text>
                 <TextInput
                   style={[screenStyles.paramInput, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
                   value={trailingActivation}
@@ -537,7 +539,7 @@ export default function AlgoTradingScreen() {
                 />
               </View>
               <View style={screenStyles.paramField}>
-                <Text style={[screenStyles.paramLabel, { color: colors.textSecondary }]}>Trail Distance %</Text>
+                <Text style={[screenStyles.paramLabel, { color: colors.textSecondary }]}>{t('trading.trailDistance')}</Text>
                 <TextInput
                   style={[screenStyles.paramInput, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
                   value={trailingDistance}
@@ -551,7 +553,7 @@ export default function AlgoTradingScreen() {
           )}
 
           <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.sm }]}>
-            Position Sizing
+            {t('trading.positionSizing')}
           </Text>
           <View style={screenStyles.sizingRow}>
             {(['fixed_qty', 'percent_risk', 'fixed_capital'] as const).map((method) => (
@@ -567,7 +569,7 @@ export default function AlgoTradingScreen() {
                   color: sizingMethod === method ? colors.primary : colors.textMuted,
                   fontWeight: sizingMethod === method ? '700' : '500',
                 }]}>
-                  {method === 'fixed_qty' ? 'Qty' : method === 'percent_risk' ? '% Risk' : 'Capital'}
+                  {method === 'fixed_qty' ? t('trading.sizingQty') : method === 'percent_risk' ? t('trading.sizingPercentRisk') : t('trading.sizingCapital')}
                 </Text>
               </Pressable>
             ))}
@@ -591,7 +593,7 @@ export default function AlgoTradingScreen() {
               size={20}
               color={allowShort ? colors.primary : colors.textMuted}
             />
-            <Text style={[screenStyles.toggleLabel, { color: colors.text }]}>Allow Short Positions</Text>
+            <Text style={[screenStyles.toggleLabel, { color: colors.text }]}>{t('trading.allowShort')}</Text>
           </Pressable>
         </View>
 
@@ -610,7 +612,7 @@ export default function AlgoTradingScreen() {
             <Ionicons name="play-circle" size={22} color="#fff" />
           )}
           <Text style={screenStyles.runBtnText}>
-            {backtestRunning ? 'Running Backtest...' : 'Run Backtest'}
+            {backtestRunning ? t('trading.runningBacktest') : t('trading.runBacktest')}
           </Text>
         </Pressable>
 
@@ -618,7 +620,7 @@ export default function AlgoTradingScreen() {
         {result && (
           <View style={[screenStyles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>
-              📊 Backtest Results — {strategyName || 'My Strategy'}
+              {t('trading.backtestResults', { name: strategyName || 'My Strategy' })}
             </Text>
             <Text style={[screenStyles.sectionSubtitle, { color: colors.textMuted }]}>
               {t('trading.backtestSummary', { count: result.trades.length, symbol: selectedSymbol })}
@@ -635,37 +637,37 @@ export default function AlgoTradingScreen() {
 
             {/* Summary metrics */}
             <View style={screenStyles.metricsRow}>
-              <MetricCard label="Net P&L" value={formatCurrency(result.metrics.totalNetPnl, true)}
+              <MetricCard label={t('trading.netPnl')} value={formatCurrency(result.metrics.totalNetPnl, true)}
                 color={result.metrics.totalNetPnl >= 0 ? '#4CAF50' : '#FF5252'} icon="💰" />
-              <MetricCard label="Win Rate" value={`${result.metrics.winRate.toFixed(0)}%`}
+              <MetricCard label={t('trading.winRate')} value={`${result.metrics.winRate.toFixed(0)}%`}
                 color={result.metrics.winRate >= 50 ? '#4CAF50' : '#FF5252'} icon="🎯" />
-              <MetricCard label="Trades" value={`${result.metrics.totalTrades}`}
+              <MetricCard label={t('trading.trades')} value={`${result.metrics.totalTrades}`}
                 icon="📊" />
             </View>
 
             <View style={screenStyles.metricsRow}>
-              <MetricCard label="Sharpe" value={result.metrics.sharpeRatio.toFixed(2)}
+              <MetricCard label={t('trading.sharpe')} value={result.metrics.sharpeRatio.toFixed(2)}
                 color={result.metrics.sharpeRatio >= 1 ? '#4CAF50' : '#FFC107'} icon="📈" />
-              <MetricCard label="Profit Factor" value={result.metrics.profitFactor === Infinity ? '∞' : result.metrics.profitFactor.toFixed(2)}
+              <MetricCard label={t('trading.profitFactor')} value={result.metrics.profitFactor === Infinity ? '∞' : result.metrics.profitFactor.toFixed(2)}
                 color={result.metrics.profitFactor >= 1.5 ? '#4CAF50' : '#FFC107'} icon="⚡" />
-              <MetricCard label="Avg Trade" value={formatCurrency(result.metrics.avgReturnPerTrade, true)}
+              <MetricCard label={t('trading.avgTrade')} value={formatCurrency(result.metrics.avgReturnPerTrade, true)}
                 color={result.metrics.avgReturnPerTrade >= 0 ? '#4CAF50' : '#FF5252'} icon="📌" />
             </View>
 
             <View style={screenStyles.metricsRow}>
-              <MetricCard label="Avg Win" value={formatCurrency(result.metrics.avgWin, true)} icon="✅" color="#4CAF50" />
-              <MetricCard label="Avg Loss" value={formatCurrency(result.metrics.avgLoss, true)} icon="❌" color="#FF5252" />
-              <MetricCard label="Avg Hold" value={`${result.metrics.avgHoldingPeriod.toFixed(0)}d`} icon="⏱" />
+              <MetricCard label={t('trading.avgWin')} value={formatCurrency(result.metrics.avgWin, true)} icon="✅" color="#4CAF50" />
+              <MetricCard label={t('trading.avgLoss')} value={formatCurrency(result.metrics.avgLoss, true)} icon="❌" color="#FF5252" />
+              <MetricCard label={t('trading.avgHold')} value={`${result.metrics.avgHoldingPeriod.toFixed(0)}d`} icon="⏱" />
             </View>
 
             <View style={screenStyles.metricsRow}>
-              <MetricCard label="Sortino" value={result.metrics.sortinoRatio.toFixed(2)} icon="📉" />
-              <MetricCard label="Consec Wins" value={`${result.metrics.maxConsecutiveWins}`} icon="🔥" color="#4CAF50" />
-              <MetricCard label="Consec Losses" value={`${result.metrics.maxConsecutiveLosses}`} icon="💧" color="#FF5252" />
+              <MetricCard label={t('trading.sortino')} value={result.metrics.sortinoRatio.toFixed(2)} icon="📉" />
+              <MetricCard label={t('trading.consecWins')} value={`${result.metrics.maxConsecutiveWins}`} icon="🔥" color="#4CAF50" />
+              <MetricCard label={t('trading.consecLosses')} value={`${result.metrics.maxConsecutiveLosses}`} icon="💧" color="#FF5252" />
             </View>
 
             {/* Equity Curve */}
-            <Text style={[screenStyles.subSectionTitle, { color: colors.text }]}>Equity Curve</Text>
+            <Text style={[screenStyles.subSectionTitle, { color: colors.text }]}>{t('trading.equityCurve')}</Text>
             <MiniEquityCurve equityCurve={result.equityCurve}
               color={result.metrics.totalNetPnl >= 0 ? '#4CAF50' : '#FF5252'} />
 
@@ -675,7 +677,7 @@ export default function AlgoTradingScreen() {
             </Text>
             {result.trades.length === 0 ? (
               <Text style={[screenStyles.emptyText, { color: colors.textMuted }]}>
-                No trades generated. Try adjusting your entry/exit conditions.
+                {t('trading.noTradesGenerated')}
               </Text>
             ) : (
               <View style={screenStyles.tradeList}>
@@ -687,7 +689,7 @@ export default function AlgoTradingScreen() {
 
             {/* Commission info */}
             <Text style={[screenStyles.footerInfo, { color: colors.textMuted }]}>
-              Commission: 0.1% · Slippage: 0.1% · Total fees: {formatCurrency(result.metrics.totalCommission, true)}
+              {t('trading.commission', { percent: '0.1%' })} · {t('trading.slippage', { percent: '0.1%' })} · {t('trading.totalFees', { amount: formatCurrency(result.metrics.totalCommission, true) })}
             </Text>
           </View>
         )}

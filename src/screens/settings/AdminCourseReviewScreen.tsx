@@ -73,10 +73,10 @@ export default function AdminCourseReviewScreen({ navigation }: any) {
   useFocusEffect(
     useCallback(() => {
       if (!isAdmin) {
-        Alert.alert('Access Denied', 'You do not have admin privileges.');
+        Alert.alert(t('adminCourseReview.accessDenied'), t('adminCourseReview.accessDeniedMsg'));
         navigation.goBack();
       }
-    }, [isAdmin, navigation])
+    }, [isAdmin, navigation, t])
   );
 
   const stats = useMemo(() => getSubmissionStats(myCourses), [myCourses]);
@@ -104,51 +104,52 @@ export default function AdminCourseReviewScreen({ navigation }: any) {
   }, [filteredCourses]);
 
   const handleApprove = useCallback((course: UserGeneratedCourse) => {
+    const title = course.title || t('adminCourseReview.untitledCourse');
     Alert.alert(
-      'Approve Course',
-      `Publish "${course.title || 'Untitled Course'}" to the course catalog?`,
+      t('adminCourseReview.approveCourse'),
+      t('adminCourseReview.approveConfirm', { title }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('adminCourseReview.cancel'), style: 'cancel' },
         {
-          text: 'Approve & Publish',
+          text: t('adminCourseReview.approveAndPublish'),
           onPress: () => {
             approveCourse(course.id);
-            Alert.alert('✅ Published', `${course.title || 'Course'} has been published to the catalog.`);
+            Alert.alert(t('adminCourseReview.publishedTitle'), t('adminCourseReview.publishedMsg', { title }));
           },
         },
       ]
     );
-  }, [approveCourse]);
+  }, [approveCourse, t]);
 
   const handleRejectWithNotes = useCallback((course: UserGeneratedCourse) => {
     Alert.alert(
-      'Reject Course',
-      'Are you sure you want to reject this course? The creator will see your feedback notes.',
+      t('adminCourseReview.rejectCourse'),
+      t('adminCourseReview.rejectConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('adminCourseReview.cancel'), style: 'cancel' },
         {
-          text: 'Submit Rejection',
+          text: t('adminCourseReview.submitRejection'),
           onPress: () => {
             const notes = rejectNotes.trim();
             if (!notes) {
-              Alert.alert('Notes Required', 'Please provide feedback explaining why the course was rejected.');
+              Alert.alert(t('adminCourseReview.notesRequired'), t('adminCourseReview.notesRequiredMsg'));
               return;
             }
             rejectCourse(course.id, notes);
             setRejectNotes('');
             setExpandedCourseId(null);
-            Alert.alert('❌ Rejected', 'The course has been rejected. The creator will see your feedback.');
+            Alert.alert(t('adminCourseReview.rejected'), t('adminCourseReview.rejectedMsg'));
           },
         },
       ]
     );
-  }, [rejectCourse, rejectNotes]);
+  }, [rejectCourse, rejectNotes, t]);
 
   const handleToggleFeatured = useCallback((course: UserGeneratedCourse) => {
     toggleFeatured(course.id);
-    const action = course.isFeatured ? 'removed from' : 'added to';
-    Alert.alert('⭐ Updated', `Course ${action} featured.`);
-  }, [toggleFeatured]);
+    const action = course.isFeatured ? t('adminCourseReview.removedFrom') : t('adminCourseReview.addedTo');
+    Alert.alert(t('adminCourseReview.updatedFeatured'), t('adminCourseReview.featuredAction', { action }));
+  }, [toggleFeatured, t]);
 
   return (
     <View style={styles.container}>
@@ -323,7 +324,7 @@ function ReviewCard({
   const isRejected = !course.submittedForReview && course.publishStatus === 'draft' && !!course.reviewNotes;
 
   const statusColor = isPending ? colors.warning : isApproved ? colors.success : colors.danger;
-  const statusLabel = isPending ? 'Pending Review' : isApproved ? 'Published' : 'Rejected';
+  const statusLabel = isPending ? t('adminCourseReview.pendingReview') : isApproved ? t('adminCourseReview.published') : t('adminCourseReview.rejected');
   const statusIcon = isPending ? 'time' : isApproved ? 'checkmark-circle' : 'close-circle';
 
   return (
@@ -339,19 +340,19 @@ function ReviewCard({
           </View>
           <View style={styles.cardInfo}>
             <Text style={styles.courseTitle} numberOfLines={1}>
-              {course.title || 'Untitled Course'}
+              {course.title || t('adminCourseReview.untitledCourse')}
             </Text>
-            <Text style={styles.creatorName}>by {course.creatorName}</Text>
+            <Text style={styles.creatorName}>{t('adminCourseReview.byCreator', { name: course.creatorName })}</Text>
             <View style={styles.cardMetaRow}>
               <View style={[styles.statusBadge, { backgroundColor: statusColor + '20', borderColor: statusColor + '40' }]}>
                 <Ionicons name={statusIcon} size={11} color={statusColor} />
                 <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
               </View>
-              <Text style={styles.metaText}>{course.lessonsCount} lessons</Text>
+              <Text style={styles.metaText}>{t('adminCourseReview.lessonsCount', { count: course.lessonsCount })}</Text>
               {course.isFeatured && (
                 <View style={[styles.featuredBadge, { backgroundColor: colors.warning + '20', borderColor: colors.warning + '40' }]}>
                   <Ionicons name="star" size={10} color={colors.warning} />
-                  <Text style={[styles.featuredText, { color: colors.warning }]}>Featured</Text>
+                  <Text style={[styles.featuredText, { color: colors.warning }]}>{t('adminCourseReview.featured')}</Text>
                 </View>
               )}
             </View>
@@ -369,38 +370,38 @@ function ReviewCard({
         <Animated.View entering={FadeInDown.springify()} style={styles.cardExpanded}>
           {/* Course Details */}
           <View style={styles.detailSection}>
-            <Text style={styles.detailLabel}>Description</Text>
+            <Text style={styles.detailLabel}>{t('adminCourseReview.description')}</Text>
             <Text style={styles.detailText} numberOfLines={3}>
-              {course.description || 'No description'}
+              {course.description || t('adminCourseReview.noDescription')}
             </Text>
           </View>
 
           <View style={styles.detailRow}>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Category</Text>
+              <Text style={styles.detailLabel}>{t('adminCourseReview.category')}</Text>
               <Text style={styles.detailValue}>{course.category}</Text>
             </View>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Level</Text>
+              <Text style={styles.detailLabel}>{t('adminCourseReview.level')}</Text>
               <Text style={styles.detailValue}>{course.level}</Text>
             </View>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Duration</Text>
+              <Text style={styles.detailLabel}>{t('adminCourseReview.duration')}</Text>
               <Text style={styles.detailValue}>{course.duration}</Text>
             </View>
           </View>
 
           <View style={styles.detailRow}>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Submitted</Text>
+              <Text style={styles.detailLabel}>{t('adminCourseReview.submitted')}</Text>
               <Text style={styles.detailValue}>{formatRelativeTime(course.updatedAt, t)}</Text>
             </View>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Lessons</Text>
+              <Text style={styles.detailLabel}>{t('adminCourseReview.lessons')}</Text>
               <Text style={styles.detailValue}>{course.lessonsCount}</Text>
             </View>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Tags</Text>
+              <Text style={styles.detailLabel}>{t('adminCourseReview.tags')}</Text>
               <Text style={styles.detailValue} numberOfLines={1}>
                 {course.tags?.length ? course.tags.slice(0, 2).join(', ') + (course.tags.length > 2 ? '...' : '') : '-'}
               </Text>
@@ -412,7 +413,7 @@ function ReviewCard({
             <View style={[styles.notesBox, { backgroundColor: colors.danger + '10', borderColor: colors.danger + '20' }]}>
               <Ionicons name="chatbubble-ellipses" size={14} color={colors.danger} />
               <View style={styles.notesContent}>
-                <Text style={[styles.notesLabel, { color: colors.danger }]}>Review Notes</Text>
+                <Text style={[styles.notesLabel, { color: colors.danger }]}>{t('adminCourseReview.reviewNotes')}</Text>
                 <Text style={[styles.notesText, { color: colors.text }]}>{course.reviewNotes}</Text>
               </View>
             </View>
@@ -421,7 +422,7 @@ function ReviewCard({
           {/* Rejection Input (for pending courses) */}
           {isPending && (
             <View style={styles.rejectInputSection}>
-              <Text style={styles.detailLabel}>Rejection Notes (required for rejection)</Text>
+              <Text style={styles.detailLabel}>{t('adminCourseReview.rejectNotesRequired')}</Text>
               <TextInput
                 style={[styles.rejectInput, {
                   backgroundColor: colors.bgCard,
@@ -444,20 +445,20 @@ function ReviewCard({
               <>
                 <AnimatedPressable onPress={() => {
                   if (!rejectNotes.trim()) {
-                    Alert.alert('Notes Required', 'Please provide feedback before rejecting.');
+                    Alert.alert(t('adminCourseReview.notesRequiredShort'), t('adminCourseReview.notesRequiredShortMsg'));
                     return;
                   }
                   onReject();
                 }} haptic="warning" scaleTo={0.94}>
                   <View style={[styles.actionBtn, { backgroundColor: colors.danger + '20' }]}>
                     <Ionicons name="close-circle" size={16} color={colors.danger} />
-                    <Text style={[styles.actionBtnText, { color: colors.danger }]}>Reject</Text>
+                    <Text style={[styles.actionBtnText, { color: colors.danger }]}>{t('adminCourseReview.reject')}</Text>
                   </View>
                 </AnimatedPressable>
                 <AnimatedPressable onPress={onApprove} haptic="medium" scaleTo={0.94}>
                   <View style={[styles.actionBtn, { backgroundColor: colors.success + '20' }]}>
                     <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-                    <Text style={[styles.actionBtnText, { color: colors.success }]}>Approve & Publish</Text>
+                    <Text style={[styles.actionBtnText, { color: colors.success }]}>{t('adminCourseReview.approvePublish')}</Text>
                   </View>
                 </AnimatedPressable>
               </>
@@ -475,7 +476,7 @@ function ReviewCard({
                     <Text style={[styles.actionBtnText, {
                       color: course.isFeatured ? colors.warning : colors.textMuted,
                     }]}>
-                      {course.isFeatured ? 'Unfeature' : 'Feature'}
+                      {course.isFeatured ? t('adminCourseReview.unfeature') : t('adminCourseReview.feature')}
                     </Text>
                   </View>
                 </AnimatedPressable>
@@ -484,7 +485,7 @@ function ReviewCard({
               <View style={styles.rejectedInfo}>
                 <Ionicons name="information-circle" size={16} color={colors.textMuted} />
                 <Text style={[styles.rejectedInfoText, { color: colors.textMuted }]}>
-                  Creator will see the review notes and can resubmit after making changes.
+                  {t('adminCourseReview.creatorInfo')}
                 </Text>
               </View>
             ) : null}
