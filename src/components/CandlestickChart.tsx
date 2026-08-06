@@ -1050,7 +1050,7 @@ export default function CandlestickChart({
         </Pressable>
         {zoomLevel > 0 && (
           <Pressable style={({pressed}) => [styles.zoomResetBtn, {opacity: pressed ? 0.6 : 1}]} onPress={resetZoom}>
-            <Text style={styles.zoomResetText}>Reset</Text>
+            <Text style={styles.zoomResetText}>{t('charts.reset')}</Text>
           </Pressable>
         )}
       </View>
