@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Modal, Dimensions } from
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatDate } from '../../utils/formatters';
@@ -24,14 +25,15 @@ const titleColors: { [key: string]: [string, string] } = {
 };
 
 const nextRewards = [
-  { icon: '🎯', label: 'Place 10 trades', xp: 200 },
-  { icon: '📚', label: 'Complete 10 lessons', xp: 150 },
-  { icon: '💎', label: 'Hold through a dip', xp: 300 },
-  { icon: '⭐', label: 'Get 100 likes', xp: 250 },
+  { icon: '🎯', key: 'reward1', xp: 200 },
+  { icon: '📚', key: 'reward2', xp: 150 },
+  { icon: '💎', key: 'reward3', xp: 300 },
+  { icon: '⭐', key: 'reward4', xp: 250 },
 ];
 
 export default function AchievementsScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { userLevel, badges } = useGamificationStore();
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
@@ -51,8 +53,8 @@ export default function AchievementsScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>Achievements</Text>
-          <Text style={styles.subtitle}>{unlockedBadges.length} of {badges.length} badges unlocked</Text>
+          <Text style={styles.title}>{t('achievements.title')}</Text>
+          <Text style={styles.subtitle}>{t('achievements.subtitle', { unlocked: unlockedBadges.length, total: badges.length })}</Text>
         </View>
       </View>
 
@@ -65,15 +67,15 @@ export default function AchievementsScreen({ navigation }: any) {
             </View>
             <View style={styles.levelInfo}>
               <Text style={styles.levelTitle}>{userLevel.title}</Text>
-              <Text style={styles.levelXp}>{userLevel.totalXp.toLocaleString()} Total XP</Text>
+              <Text style={styles.levelXp}>{t('achievements.totalXp', { xp: userLevel.totalXp.toLocaleString() })}</Text>
             </View>
           </View>
 
           {/* XP Progress */}
           <View style={styles.xpSection}>
             <View style={styles.xpRow}>
-              <Text style={styles.xpLabel}>Level {userLevel.level} → {userLevel.level + 1}</Text>
-              <Text style={styles.xpValue}>{userLevel.xp.toLocaleString()} / {userLevel.xpToNext.toLocaleString()} XP</Text>
+              <Text style={styles.xpLabel}>{t('achievements.levelLabel', { current: userLevel.level, next: userLevel.level + 1 })}</Text>
+              <Text style={styles.xpValue}>{t('achievements.xpProgress', { current: userLevel.xp.toLocaleString(), next: userLevel.xpToNext.toLocaleString() })}</Text>
             </View>
             <View style={styles.xpBarBg}>
               <View style={[styles.xpBarFill, { width: `${xpProgress}%` }]} />
@@ -85,22 +87,22 @@ export default function AchievementsScreen({ navigation }: any) {
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{badges.length}</Text>
-            <Text style={styles.statLabel}>Total Badges</Text>
+            <Text style={styles.statLabel}>{t('achievements.statTotalBadges')}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: colors.marketUp }]}>{unlockedBadges.length}</Text>
-            <Text style={styles.statLabel}>Unlocked</Text>
+            <Text style={styles.statLabel}>{t('achievements.statUnlocked')}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: colors.textMuted }]}>{lockedBadges.length}</Text>
-            <Text style={styles.statLabel}>Locked</Text>
+            <Text style={styles.statLabel}>{t('achievements.statLocked')}</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
             <Text style={[styles.statValue, { color: colors.accent }]}>{Math.round((unlockedBadges.length / badges.length) * 100)}%</Text>
-            <Text style={styles.statLabel}>Completion</Text>
+            <Text style={styles.statLabel}>{t('achievements.statCompletion')}</Text>
           </View>
         </View>
 
@@ -110,14 +112,14 @@ export default function AchievementsScreen({ navigation }: any) {
             style={[styles.tabBtn, showTab === 'all' && styles.tabBtnActive]}
             onPress={() => setShowTab('all')}
           >
-            <Text style={[styles.tabText, showTab === 'all' && styles.tabTextActive]}>All Badges</Text>
+            <Text style={[styles.tabText, showTab === 'all' && styles.tabTextActive]}>{t('achievements.tabAllBadges')}</Text>
           </Pressable>
           <Pressable
             style={[styles.tabBtn, showTab === 'unlocked' && styles.tabBtnActive]}
             onPress={() => setShowTab('unlocked')}
           >
             <Text style={[styles.tabText, showTab === 'unlocked' && styles.tabTextActive]}>
-              Unlocked ({unlockedBadges.length})
+              {t('achievements.tabUnlocked', { count: unlockedBadges.length })}
             </Text>
           </Pressable>
         </View>
@@ -148,13 +150,13 @@ export default function AchievementsScreen({ navigation }: any) {
         </View>
 
         {/* Next Rewards Preview */}
-        <Text style={styles.sectionTitle}>Upcoming Challenges</Text>
+        <Text style={styles.sectionTitle}>{t('achievements.upcomingChallenges')}</Text>
         <View style={styles.rewardsRow}>
           {nextRewards.map((reward) => (
-            <View key={reward.label} style={styles.rewardCard}>
+            <View key={reward.key} style={styles.rewardCard}>
               <Text style={styles.rewardIcon}>{reward.icon}</Text>
-              <Text style={styles.rewardLabel}>{reward.label}</Text>
-              <Text style={styles.rewardXp}>+{reward.xp} XP</Text>
+              <Text style={styles.rewardLabel}>{t('achievements.' + reward.key)}</Text>
+              <Text style={styles.rewardXp}>{t('achievements.rewardXp', { xp: reward.xp })}</Text>
             </View>
           ))}
         </View>
@@ -188,20 +190,20 @@ export default function AchievementsScreen({ navigation }: any) {
                 <View style={styles.modalDivider} />
 
                 <View style={styles.modalRow}>
-                  <Text style={styles.modalRowLabel}>Requirement</Text>
+                  <Text style={styles.modalRowLabel}>{t('achievements.modalRequirement')}</Text>
                   <Text style={styles.modalRowValue}>{selectedBadge.requirement}</Text>
                 </View>
                 <View style={styles.modalRow}>
-                  <Text style={styles.modalRowLabel}>Status</Text>
+                  <Text style={styles.modalRowLabel}>{t('achievements.modalStatus')}</Text>
                   <Text style={[styles.modalRowValue, {
                     color: selectedBadge.unlocked ? colors.marketUp : colors.textMuted,
                   }]}>
-                    {selectedBadge.unlocked ? 'Unlocked' : 'Locked'}
+                    {selectedBadge.unlocked ? t('achievements.unlocked') : t('achievements.locked')}
                   </Text>
                 </View>
                 {selectedBadge.unlocked && selectedBadge.unlockedAt && (
                   <View style={styles.modalRow}>
-                    <Text style={styles.modalRowLabel}>Date Earned</Text>
+                    <Text style={styles.modalRowLabel}>{t('achievements.modalDateEarned')}</Text>
                     <Text style={styles.modalRowValue}>
                       {formatDate(selectedBadge.unlockedAt, 'dd MMM yyyy')}
                     </Text>
@@ -212,7 +214,7 @@ export default function AchievementsScreen({ navigation }: any) {
                   style={styles.modalCloseBtn}
                   onPress={() => setSelectedBadge(null)}
                 >
-                  <Text style={styles.modalCloseText}>Got it!</Text>
+                  <Text style={styles.modalCloseText}>{t('achievements.gotIt')}</Text>
                 </Pressable>
               </>
             )}

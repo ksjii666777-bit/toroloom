@@ -11,6 +11,7 @@ import aiSettings from './aiSettings';
 import ai from './ai';
 import alerts from './alerts';
 import apiKeyManagement from './apiKeyManagement';
+import achievements from './achievements';
 import app from './app';
 import auth from './auth';
 import bondDashboard from './bondDashboard';
@@ -39,6 +40,8 @@ import funds from './funds';
 import fundamentals from './fundamentals';
 import futuresCurve from './futuresCurve';
 import gamification from './gamification';
+import quizResult from './quizResult';
+import stepUpSip from './stepUpSip';
 import help from './help';
 import home from './home';
 import ipos from './ipos';
@@ -107,6 +110,7 @@ const en = {
   ai,
   alerts,
   apiKeyManagement,
+  achievements,
   app,
   auth,
   bondDashboard,
@@ -135,6 +139,8 @@ const en = {
   fundamentals,
   futuresCurve,
   gamification,
+  quizResult,
+  stepUpSip,
   help,
   home,
   ipos,

@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
@@ -29,6 +30,7 @@ interface QuizResultScreenProps {
 export default function QuizResultScreen({ route, navigation }: QuizResultScreenProps) {
   const { result, lessonId, courseId } = route.params;
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { recordQuizAttempt, getQuizAttempts, courses, currentLesson, fetchLesson } = useEducationStore();
   const { addXp } = useGamificationStore();
@@ -55,9 +57,9 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
   );
   const isBest = bestAttempt.quizId === result.quizId && bestAttempt.percentage === result.percentage;
 
-  const gradeLabel = result.percentage >= 90 ? 'A — Distinction' :
-    result.percentage >= 75 ? 'B — Merit' :
-    result.percentage >= 60 ? 'C — Pass' : 'Needs Improvement';
+  const gradeLabel = result.percentage >= 90 ? t('quizResult.gradeA') :
+    result.percentage >= 75 ? t('quizResult.gradeB') :
+    result.percentage >= 60 ? t('quizResult.gradeC') : t('quizResult.gradeFail');
 
   const gradeColor = result.percentage >= 90 ? '#FFD700' :
     result.percentage >= 75 ? '#C0C0C0' :
@@ -94,7 +96,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
           <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
             <Ionicons name="close" size={22} color={colors.text} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Quiz Results</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('quizResult.headerTitle')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -113,13 +115,13 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
             />
           </View>
           <Text style={styles.heroTitle}>
-            {result.passed ? '🎉 Congratulations!' : 'Keep Going!'}
+            {result.passed ? t('quizResult.heroPassed') : t('quizResult.heroFailed')}
           </Text>
           <Text style={styles.heroSubtitle}>{result.quizTitle}</Text>
           <Text style={styles.heroDesc}>
             {result.passed
-              ? `You passed with ${result.percentage}%! ${isBest ? 'This is your best score! 🏆' : ''}`
-              : `You scored ${result.percentage}% — passing is 60%. Try again!`}
+              ? t('quizResult.passedDesc', { percent: result.percentage, best: isBest ? t('quizResult.bestScore') : '' })
+              : t('quizResult.failedDesc', { percent: result.percentage })}
           </Text>
         </LinearGradient>
 
@@ -136,7 +138,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
                 {result.passed && (
                   <View style={styles.passBadge}>
                     <Ionicons name="checkmark" size={14} color="#FFF" />
-                    <Text style={styles.passBadgeText}>PASSED</Text>
+                    <Text style={styles.passBadgeText}>{t('quizResult.passedBadge')}</Text>
                   </View>
                 )}
               </View>
@@ -148,25 +150,25 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
             <View style={styles.statItem}>
               <Ionicons name="checkmark-circle" size={18} color="#00C853" />
               <Text style={[styles.statValue, { color: colors.text }]}>{result.correctAnswers}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Correct</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statCorrect')}</Text>
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.statItem}>
               <Ionicons name="close-circle" size={18} color="#FF5252" />
               <Text style={[styles.statValue, { color: colors.text }]}>{result.wrongAnswers}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Wrong</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statWrong')}</Text>
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.statItem}>
               <Ionicons name="help-circle" size={18} color="#FFC107" />
               <Text style={[styles.statValue, { color: colors.text }]}>{result.unanswered}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Skipped</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statSkipped')}</Text>
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.statItem}>
               <Ionicons name="time-outline" size={18} color="#6C63FF" />
               <Text style={[styles.statValue, { color: colors.text }]}>{formatTime(result.timeTaken)}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Time</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statTime')}</Text>
             </View>
           </View>
         </View>
@@ -179,12 +181,12 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
           <Ionicons name="flash" size={24} color={result.passed ? '#00C853' : '#FFC107'} />
           <View style={styles.xpInfo}>
             <Text style={[styles.xpTitle, { color: result.passed ? '#00C853' : '#FFC107' }]}>
-              {result.passed ? `+${passXp} XP Earned!` : `+${attemptXp} XP for Attempt`}
+              {result.passed ? t('quizResult.xpEarned', { xp: passXp }) : t('quizResult.xpAttempt', { xp: attemptXp })}
             </Text>
             <Text style={[styles.xpDesc, { color: colors.textSecondary }]}>
               {result.passed
-                ? 'Great job completing the quiz! Keep learning to earn more XP.'
-                : 'Every attempt is a step forward. Review your answers and try again!'}
+                ? t('quizResult.xpDescPassed')
+                : t('quizResult.xpDescFailed')}
             </Text>
           </View>
         </View>
@@ -194,7 +196,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
           <View style={[styles.attemptCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Ionicons name="repeat" size={18} color={colors.textMuted} />
             <Text style={[styles.attemptText, { color: colors.textSecondary }]}>
-              Attempt #{allAttempts.length} · Best: {bestAttempt.percentage}%
+              {t('quizResult.attemptInfo', { num: allAttempts.length, best: bestAttempt.percentage })}
             </Text>
           </View>
         )}
@@ -210,8 +212,8 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
             <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.certBtn}>
               <Ionicons name="ribbon" size={22} color="#FFF" />
               <View style={{ flex: 1 }}>
-                <Text style={styles.certBtnTitle}>View Course Certificate</Text>
-                <Text style={styles.certBtnSub}>See your progress & earn your certificate</Text>
+                <Text style={styles.certBtnTitle}>{t('quizResult.certTitle')}</Text>
+                <Text style={styles.certBtnSub}>{t('quizResult.certSub')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
             </LinearGradient>
@@ -225,7 +227,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
         >
           <Ionicons name="list-outline" size={18} color={colors.text} />
           <Text style={[styles.reviewToggleText, { color: colors.text }]}>
-            {showReview ? 'Hide' : 'Review'} All Answers
+            {t(showReview ? 'quizResult.hideAnswers' : 'quizResult.reviewAnswers')}
           </Text>
           <Ionicons
             name={showReview ? 'chevron-up' : 'chevron-down'}
@@ -263,7 +265,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
                       <Text style={[styles.reviewBadgeText, {
                         color: isCorrect ? '#00C853' : isSkipped ? '#FFC107' : '#FF5252',
                       }]}>
-                        {isCorrect ? 'Correct' : isSkipped ? 'Skipped' : 'Wrong'}
+                        {isCorrect ? t('quizResult.badgeCorrect') : isSkipped ? t('quizResult.badgeSkipped') : t('quizResult.badgeWrong')}
                       </Text>
                     </View>
                   </View>
@@ -315,7 +317,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
               style={[styles.actionBtn, { backgroundColor: colors.primary }]}
             >
               <Ionicons name="refresh" size={20} color="#FFF" />
-              <Text style={styles.actionBtnText}>Try Again</Text>
+              <Text style={styles.actionBtnText}>{t('quizResult.tryAgain')}</Text>
             </AnimatedPressable>
           )}
           <AnimatedPressable
@@ -325,7 +327,7 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
             style={[styles.actionBtn, { backgroundColor: colors.bgCard, borderColor: colors.border, borderWidth: 1 }]}
           >
             <Ionicons name="arrow-back" size={20} color={colors.text} />
-            <Text style={[styles.actionBtnText, { color: colors.text }]}>Back to Lesson</Text>
+            <Text style={[styles.actionBtnText, { color: colors.text }]}>{t('quizResult.backToLesson')}</Text>
           </AnimatedPressable>
         </View>
 

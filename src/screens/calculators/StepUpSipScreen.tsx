@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { useMutualFundStore } from '../../store/mutualFundStore';
 import { FONTS, SPACING, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
@@ -21,9 +22,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 type StepUpFrequency = StepUpConfig['frequency'];
 
-const frequencyOptions: { label: string; value: StepUpFrequency }[] = [
-  { label: 'Yearly', value: 'yearly' },
-  { label: 'Half-Yearly', value: 'half_yearly' },
+const frequencyOptions: { labelKey: string; value: StepUpFrequency }[] = [
+  { labelKey: 'stepUpSip.yearly', value: 'yearly' },
+  { labelKey: 'stepUpSip.halfYearly', value: 'half_yearly' },
 ];
 
 const percentPresets = [5, 10, 15, 20, 25];
@@ -31,6 +32,7 @@ const percentPresets = [5, 10, 15, 20, 25];
 export default function StepUpSipScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useT();
   const navigation = useNavigation();
   const { sipPlans, enableStepUp, disableStepUp } = useMutualFundStore();
 
@@ -45,22 +47,22 @@ export default function StepUpSipScreen() {
     if (!selectedSip) return;
     const pct = parseFloat(percent);
     if (isNaN(pct) || pct < 1 || pct > 50) {
-      Alert.alert('Invalid Percent', 'Step-up percentage must be between 1% and 50%.');
+      Alert.alert(t('stepUpSip.invalidPercent'), t('stepUpSip.invalidPercentMsg'));
       return;
     }
     enableStepUp(selectedSip, pct, frequency);
-    Alert.alert('Step-Up Enabled', `SIP will increase by ${pct}% ${frequency === 'yearly' ? 'every year' : 'every 6 months'}.`);
+    Alert.alert(t('stepUpSip.enabledTitle'), t('stepUpSip.enabledMsg', { pct, period: t(frequency === 'yearly' ? 'stepUpSip.year' : 'stepUpSip.sixMonths') }));
     setShowModal(false);
     setSelectedSip(null);
   };
 
   const handleDisable = (sipId: string) => {
     Alert.alert(
-      'Disable Step-Up?',
-      'The SIP will continue without auto-increase. Your current amount stays the same.',
+      t('stepUpSip.disableTitle'),
+      t('stepUpSip.disableMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Disable', style: 'destructive', onPress: () => disableStepUp(sipId) },
+        { text: t('stepUpSip.cancel'), style: 'cancel' },
+        { text: t('stepUpSip.disable'), style: 'destructive', onPress: () => disableStepUp(sipId) },
       ]
     );
   };
@@ -80,11 +82,11 @@ export default function StepUpSipScreen() {
   };
 
   const getStepUpSummary = (config: StepUpConfig): string => {
-    const freqLabel = config.frequency === 'yearly' ? 'year' : '6 months';
+    const freqLabel = t(config.frequency === 'yearly' ? 'stepUpSip.year' : 'stepUpSip.sixMonths');
     const nextDate = new Date(config.nextStepDate).toLocaleDateString('en-IN', {
       day: 'numeric', month: 'short', year: 'numeric',
     });
-    return `${config.percent}% every ${freqLabel} · Next increase: ${nextDate}`;
+    return t('stepUpSip.stepUpSummary', { percent: config.percent, period: freqLabel, date: nextDate });
   };
 
   return (
@@ -96,7 +98,7 @@ export default function StepUpSipScreen() {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Ionicons name="trending-up" size={20} color={colors.accent} />
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Step-Up SIP</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('stepUpSip.title')}</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -105,7 +107,7 @@ export default function StepUpSipScreen() {
       <View style={[styles.infoBanner, { backgroundColor: colors.accent + '12', borderColor: colors.accent + '30' }]}>
         <Ionicons name="information-circle" size={18} color={colors.accent} />
         <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-          Step-Up SIP auto-increases your investment amount periodically (e.g. 10% every year). This accelerates wealth creation by investing more as your income grows.
+          {t('stepUpSip.infoText')}
         </Text>
       </View>
 
@@ -117,9 +119,9 @@ export default function StepUpSipScreen() {
         {activeSips.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="calendar-outline" size={64} color={colors.textMuted} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Active SIPs</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('stepUpSip.noActiveSips')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              Start a SIP first from the Mutual Funds section, then come back to set up auto-increase.
+              {t('stepUpSip.noActiveSipsSub')}
             </Text>
           </View>
         ) : (
@@ -165,15 +167,15 @@ export default function StepUpSipScreen() {
                     <View style={[styles.stepUpActive, { backgroundColor: colors.accent + '15', borderColor: colors.accent + '30' }]}>
                       <View style={styles.stepUpActiveHeader}>
                         <Ionicons name="checkmark-circle" size={16} color={colors.accent} />
-                        <Text style={[styles.stepUpActiveLabel, { color: colors.accent }]}>Step-Up Active</Text>
+                        <Text style={[styles.stepUpActiveLabel, { color: colors.accent }]}>{t('stepUpSip.stepUpActive')}</Text>
                       </View>
                       <Text style={[styles.stepUpActiveDetail, { color: colors.textSecondary }]}>
                         {getStepUpSummary(sip.stepUp)}
                       </Text>
                       {sip.stepUp.projectedAmount ? (
                         <Text style={[styles.stepUpProjection, { color: colors.text }]}>
-                          After 10 years: <Text style={{ color: colors.accent, fontFamily: FONTS.bold.fontFamily, fontWeight: FONTS.bold.fontWeight }}>
-                            {formatCurrency(sip.stepUp.projectedAmount)}</Text>/month
+                          {t('stepUpSip.after10Years')}: <Text style={{ color: colors.accent, fontFamily: FONTS.bold.fontFamily, fontWeight: FONTS.bold.fontWeight }}>
+                            {formatCurrency(sip.stepUp.projectedAmount)}</Text>{t('stepUpSip.perMonth')}
                         </Text>
                       ) : null}
                       {/* Mini Projection Chart */}
@@ -196,14 +198,14 @@ export default function StepUpSipScreen() {
                         style={[styles.disableBtn, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}
                         onPress={() => handleDisable(sip.id)}
                       >
-                        <Text style={[styles.disableBtnText, { color: colors.danger }]}>Disable Step-Up</Text>
+                        <Text style={[styles.disableBtnText, { color: colors.danger }]}>{t('stepUpSip.disableStepUp')}</Text>
                       </TouchableOpacity>
                     </View>
                   ) : (
                     <View style={[styles.stepUpInactive, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                       <Ionicons name="add-circle-outline" size={24} color={colors.textMuted} />
                       <Text style={[styles.stepUpInactiveText, { color: colors.textMuted }]}>
-                        Tap to set up auto-increase
+                        {t('stepUpSip.tapToSetup')}
                       </Text>
                     </View>
                   )}
@@ -215,23 +217,23 @@ export default function StepUpSipScreen() {
 
         {/* Education Card */}
         <View style={[styles.educationCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.eduTitle, { color: colors.text }]}>Why Step-Up SIP?</Text>
+          <Text style={[styles.eduTitle, { color: colors.text }]}>{t('stepUpSip.whyStepUp')}</Text>
           <View style={styles.eduRow}>
             <Ionicons name="rocket-outline" size={16} color={colors.accent} />
             <Text style={[styles.eduText, { color: colors.textSecondary }]}>
-              A 10% yearly step-up on a ₹10,000 monthly SIP can grow your investment to ₹3.2 Cr in 20 years vs ₹1.2 Cr without step-up.
+              {t('stepUpSip.edu1')}
             </Text>
           </View>
           <View style={styles.eduRow}>
             <Ionicons name="wallet-outline" size={16} color={colors.accent} />
             <Text style={[styles.eduText, { color: colors.textSecondary }]}>
-              Step-up aligns your SIP with income growth — invest more as your salary increases, without feeling the pinch.
+              {t('stepUpSip.edu2')}
             </Text>
           </View>
           <View style={styles.eduRow}>
             <Ionicons name="flash-outline" size={16} color={colors.accent} />
             <Text style={[styles.eduText, { color: colors.textSecondary }]}>
-              Start small, increase gradually. Even 5% yearly step-up makes a significant difference over 15-20 year horizons.
+              {t('stepUpSip.edu3')}
             </Text>
           </View>
         </View>
@@ -243,7 +245,7 @@ export default function StepUpSipScreen() {
           <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.text }]}>
-                {sipPlans.find(s => s.id === selectedSip)?.stepUp?.enabled ? 'Modify Step-Up' : 'Enable Step-Up'}
+                {sipPlans.find(s => s.id === selectedSip)?.stepUp?.enabled ? t('stepUpSip.modifyStepUp') : t('stepUpSip.enableStepUp')}
               </Text>
               <TouchableOpacity onPress={() => { setShowModal(false); setSelectedSip(null); }}>
                 <Ionicons name="close" size={24} color={colors.text} />
@@ -258,12 +260,12 @@ export default function StepUpSipScreen() {
                     {sipPlans.find(s => s.id === selectedSip)?.fundName}
                   </Text>
                   <Text style={[styles.modalSipDetail, { color: colors.textSecondary }]}>
-                    Current: {formatCurrency(sipPlans.find(s => s.id === selectedSip)?.amount || 0)}/month
+                    {t('stepUpSip.currentLabel')}: {formatCurrency(sipPlans.find(s => s.id === selectedSip)?.amount || 0)}{t('stepUpSip.perMonth')}
                   </Text>
                 </View>
 
                 {/* Step-Up Percent */}
-                <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>Increase by (%)</Text>
+                <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>{t('stepUpSip.increaseBy')}</Text>
                 <View style={styles.percentInputRow}>
                   <Ionicons name="pricetag" size={20} color={colors.textMuted} />
                   <TextInput
@@ -271,7 +273,7 @@ export default function StepUpSipScreen() {
                     value={percent}
                     onChangeText={setPercent}
                     keyboardType="decimal-pad"
-                    placeholder="e.g. 10"
+                    placeholder={t('stepUpSip.percentPlaceholder')}
                     placeholderTextColor={colors.textMuted}
                   />
                 </View>
@@ -295,7 +297,7 @@ export default function StepUpSipScreen() {
                 </View>
 
                 {/* Frequency */}
-                <Text style={[styles.modalLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>Frequency</Text>
+                <Text style={[styles.modalLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('stepUpSip.frequency')}</Text>
                 <View style={styles.frequencyRow}>
                   {frequencyOptions.map(opt => (
                     <TouchableOpacity
@@ -309,7 +311,7 @@ export default function StepUpSipScreen() {
                       <Text style={[styles.freqBtnText, {
                         color: frequency === opt.value ? colors.accent : colors.textMuted,
                       }]}>
-                        {opt.label}
+                        {t(opt.labelKey)}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -327,12 +329,12 @@ export default function StepUpSipScreen() {
                   return (
                     <View style={[styles.projectionPreview, { backgroundColor: colors.accent + '10', borderColor: colors.accent + '25' }]}>
                       <View style={styles.projectionRow}>
-                        <Text style={[styles.projectionLabel, { color: colors.textMuted }]}>Now</Text>
+                        <Text style={[styles.projectionLabel, { color: colors.textMuted }]}>{t('stepUpSip.now')}</Text>
                         <Text style={[styles.projectionValue, { color: colors.text }]}>{formatCurrency(base)}</Text>
                       </View>
                       <View style={[styles.projectionArrow, { borderBottomColor: colors.accent + '40' }]} />
                       <View style={styles.projectionRow}>
-                        <Text style={[styles.projectionLabel, { color: colors.textMuted }]}>After 10 yrs</Text>
+                        <Text style={[styles.projectionLabel, { color: colors.textMuted }]}>{t('stepUpSip.after10Yrs')}</Text>
                         <Text style={[styles.projectionValue, { color: colors.accent, fontFamily: FONTS.bold.fontFamily, fontWeight: FONTS.bold.fontWeight }]}>
                           {formatCurrency(Math.round(projected))}
                         </Text>
@@ -347,7 +349,7 @@ export default function StepUpSipScreen() {
                     style={[styles.cancelBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
                     onPress={() => { setShowModal(false); setSelectedSip(null); }}
                   >
-                    <Text style={[styles.cancelBtnText, { color: colors.text }]}>Cancel</Text>
+                    <Text style={[styles.cancelBtnText, { color: colors.text }]}>{t('stepUpSip.cancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.confirmBtn}
@@ -360,7 +362,7 @@ export default function StepUpSipScreen() {
                       style={styles.confirmBtnGradient}
                     >
                       <Text style={styles.confirmBtnText}>
-                        {sipPlans.find(s => s.id === selectedSip)?.stepUp?.enabled ? 'Update' : 'Enable Step-Up'}
+                        {sipPlans.find(s => s.id === selectedSip)?.stepUp?.enabled ? t('stepUpSip.update') : t('stepUpSip.enableStepUp')}
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
