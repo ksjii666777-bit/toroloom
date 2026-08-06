@@ -411,7 +411,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
             {/* Action Buttons */}
             <View style={styles.modalActions}>
               <Button
-                title="Cancel"
+                title={t('app.cancel')}
                 onPress={() => { setShowModifyModal(false); setSelectedOrder(null); }}
                 variant="secondary"
                 size="medium"

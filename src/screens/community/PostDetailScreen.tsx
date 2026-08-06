@@ -243,7 +243,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
           <View style={[styles.notFoundIcon, { backgroundColor: colors.textMuted + '15' }]}>
             <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
           </View>
-          <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>Post not found</Text>
+          <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('community.postNotFound')}</Text>
           <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
             This post may have been deleted or doesn't exist.
           </Text>
@@ -252,7 +252,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="arrow-back" size={16} color="#FFF" style={{ marginRight: 6 }} />
-            <Text style={styles.goBackText}>Go Back</Text>
+            <Text style={styles.goBackText}>{t('community.goBack')}</Text>
           </Pressable>
         </Animated.View>
       </View>
@@ -275,7 +275,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
         <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Post</Text>
+        <Text style={styles.headerTitle}>{t('community.post')}</Text>
         <Pressable onPress={handleShare} style={styles.shareBtn}>
           <Ionicons name="share-outline" size={20} color={colors.text} />
         </Pressable>
@@ -420,7 +420,7 @@ export default function PostDetailScreen({ navigation, route }: any) {
                       {isCopied && (
                         <View style={styles.copiedBadge}>
                           <Ionicons name="checkmark" size={10} color="#FFF" />
-                          <Text style={styles.copiedBadgeText}>Copied</Text>
+                          <Text style={styles.copiedBadgeText}>{t('community.copied')}</Text>
                         </View>
                       )}
                     </View>

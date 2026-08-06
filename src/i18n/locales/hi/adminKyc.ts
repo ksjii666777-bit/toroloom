@@ -7,4 +7,5 @@ export default {
     rejectMsg: '{{name}} की KYC सत्यापन अस्वीकार करें?',
     reject: 'अस्वीकार करें',
     searchUsers: 'नाम या ईमेल से खोजें...',
+    queueTitle: 'KYC कतार',
 };

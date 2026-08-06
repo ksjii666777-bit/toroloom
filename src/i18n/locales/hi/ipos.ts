@@ -130,4 +130,7 @@ export default {
     ipoNotFound: 'IPO नहीं मिला',
     goBack: 'वापस जाएं',
     lotShares: 'लॉट: {{count}} शेयर',
+    registrar: 'रजिस्ट्रार',
+    rating: 'रेटिंग',
+    closed: 'बंद',
 };

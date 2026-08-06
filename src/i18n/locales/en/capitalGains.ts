@@ -18,4 +18,10 @@ export default {
     taxRules: 'Tax Rules (India FY 2025-26)',
     stclOffset: 'STCL Offset',
     ltclOffset: 'LTCL Offset',
+    loadingTaxData: 'Loading tax data...',
+    stcgShort: 'STCG (15%)',
+    ltcgShort: 'LTCG (10%)',
+    stcgTaxLabel: 'STCG Tax (15%)',
+    stcgEquity: 'STCG (Equity)',
+    ltcgEquity: 'LTCG (Equity)',
 };

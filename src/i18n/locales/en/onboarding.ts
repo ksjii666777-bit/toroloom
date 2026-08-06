@@ -14,4 +14,11 @@ export default {
     orderPlaced: 'Order placed! {{count}} shares {{action}} ✓',
     bought: 'bought',
     sold: 'sold',
+    portfolioAllocation: 'Your Portfolio Allocation',
+    sell: 'Sell',
+    total: 'Total',
+    tapToConnectBroker: 'Tap to Connect Your Broker',
+    connected: 'Connected',
+    sync: 'Sync',
+    tapBadgesToUnlock: 'Tap Badges to Unlock',
 };

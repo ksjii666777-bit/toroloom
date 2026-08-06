@@ -134,4 +134,11 @@ export default {
     verificationFailed: 'सत्यापन विफल',
     panInvalid: 'PAN फ़ॉर्मेट अमान्य है। कृपया जाँच कर पुनः प्रयास करें।',
     panNotFound: 'NSDL डेटाबेस में PAN नहीं मिला। कृपया अपना PAN सत्यापित करें।',
+    aadhaarTitle: 'आधार eKYC',
+    enterAadhaarNumber: 'आधार नंबर दर्ज करें',
+    otpExpired: 'OTP समाप्त हो गया। नया OTP अनुरोध करें',
+    aadhaarNumberLabel: 'आधार नंबर',
+    yearOfBirth: 'जन्म वर्ष',
+    gender: 'लिंग',
+    state: 'राज्य',
 };

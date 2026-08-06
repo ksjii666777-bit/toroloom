@@ -436,11 +436,11 @@ export default function IPODetailScreen({ route, navigation }: any) {
             ))}
           </View>
           <View style={[styles.registrarRow, { borderTopColor: colors.border }]}>
-            <Text style={[styles.registrarLabel, { color: colors.textMuted }]}>Registrar</Text>
+            <Text style={[styles.registrarLabel, { color: colors.textMuted }]}>{t('ipos.registrar')}</Text>
             <Text style={[styles.registrarValue, { color: colors.text }]}>{ipo.registrar}</Text>
           </View>
           <View style={styles.ratingRow}>
-            <Text style={[styles.ratingLabel, { color: colors.textMuted }]}>Rating</Text>
+            <Text style={[styles.ratingLabel, { color: colors.textMuted }]}>{t('ipos.rating')}</Text>
             <View style={styles.stars}>
               {[1, 2, 3, 4, 5].map(s => (
                 <Ionicons
@@ -491,7 +491,7 @@ export default function IPODetailScreen({ route, navigation }: any) {
         ) : (
           <View style={[styles.bottomStatus, { backgroundColor: '#64748B20' }]}>
             <Ionicons name="lock-closed" size={16} color="#64748B" />
-            <Text style={[styles.bottomStatusText, { color: '#64748B' }]}>Closed</Text>
+            <Text style={[styles.bottomStatusText, { color: '#64748B' }]}>{t('ipos.closed')}</Text>
           </View>
         )}
       </View>
@@ -501,7 +501,7 @@ export default function IPODetailScreen({ route, navigation }: any) {
         <View style={styles.applyOverlay}>
           <View style={[styles.applySheet, { backgroundColor: colors.bgSecondary }]}>
             <View style={styles.applyHeader}>
-              <Text style={[styles.applyTitle, { color: colors.text }]}>Apply for IPO</Text>
+              <Text style={[styles.applyTitle, { color: colors.text }]}>{t('ipos.applyTitle')}</Text>
               <TouchableOpacity onPress={() => setShowApply(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
@@ -512,7 +512,7 @@ export default function IPODetailScreen({ route, navigation }: any) {
             </Text>
 
             {/* Lot Selector */}
-            <Text style={[styles.applyLabel, { color: colors.textSecondary }]}>Number of Lots</Text>
+            <Text style={[styles.applyLabel, { color: colors.textSecondary }]}>{t('ipos.numberOfLots')}</Text>
             <View style={styles.applyLotsRow}>
               {[1, 2, 3, 5, 10].map(n => (
                 <TouchableOpacity
@@ -531,14 +531,14 @@ export default function IPODetailScreen({ route, navigation }: any) {
             {/* Summary */}
             <View style={[styles.applySummary, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={styles.applySummaryRow}>
-                <Text style={[styles.applySummaryLabel, { color: colors.textMuted }]}>Shares</Text>
+                <Text style={[styles.applySummaryLabel, { color: colors.textMuted }]}>{t('ipos.shares')}</Text>
                 <Text style={[styles.applySummaryValue, { color: colors.text }]}>
                   {(bidLots * ipo.lotSize).toLocaleString('en-IN')}
                 </Text>
               </View>
               <View style={[styles.applySummaryDivider, { backgroundColor: colors.divider }]} />
               <View style={styles.applySummaryRow}>
-                <Text style={[styles.applySummaryLabel, { color: colors.textMuted }]}>Amount</Text>
+                <Text style={[styles.applySummaryLabel, { color: colors.textMuted }]}>{t('ipos.amount')}</Text>
                 <Text style={[styles.applySummaryValue, { color: colors.primary, fontSize: 18 }]}>
                   ₹{(bidLots * ipo.lotSize * ipo.priceBand.min).toLocaleString('en-IN')}
                 </Text>

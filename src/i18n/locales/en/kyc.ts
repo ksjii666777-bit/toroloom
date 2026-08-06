@@ -134,4 +134,11 @@ export default {
     verificationFailed: 'Verification Failed',
     panInvalid: 'The PAN format is invalid. Please check and try again.',
     panNotFound: 'PAN not found in NSDL database. Please verify your PAN.',
+    aadhaarTitle: 'Aadhaar eKYC',
+    enterAadhaarNumber: 'Enter Aadhaar Number',
+    otpExpired: 'OTP expired. Request new OTP',
+    aadhaarNumberLabel: 'Aadhaar Number',
+    yearOfBirth: 'Year of Birth',
+    gender: 'Gender',
+    state: 'State',
 };

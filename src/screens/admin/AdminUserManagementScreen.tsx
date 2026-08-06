@@ -139,19 +139,19 @@ function UserCard({
             <Animated.View entering={FadeIn.duration(200)} style={[styles.expandedSection, { borderTopColor: colors.divider }]}>
               <View style={styles.expandedGrid}>
                 <View style={styles.expandedItem}>
-                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Phone</Text>
+                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('adminUser.phone')}</Text>
                   <Text style={[styles.expandedValue, { color: colors.text }]}>{user.phone}</Text>
                 </View>
                 <View style={styles.expandedItem}>
-                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Joined</Text>
+                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('adminUser.joined')}</Text>
                   <Text style={[styles.expandedValue, { color: colors.text }]}>{user.joinedAt}</Text>
                 </View>
                 <View style={styles.expandedItem}>
-                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Last Active</Text>
+                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('adminUser.lastActive')}</Text>
                   <Text style={[styles.expandedValue, { color: colors.text }]}>{user.lastActive}</Text>
                 </View>
                 <View style={styles.expandedItem}>
-                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>Total P&L</Text>
+                  <Text style={[styles.expandedLabel, { color: colors.textMuted }]}>{t('adminUser.totalPnl')}</Text>
                   <Text style={[styles.expandedValue, { color: pnlColor }]}>
                     {user.totalPnl >= 0 ? '+' : ''}₹{Math.abs(user.totalPnl).toLocaleString()}
                   </Text>
@@ -292,7 +292,7 @@ export default function AdminUserManagementScreen({ navigation }: any) {
           </View>
         </AnimatedPressable>
         <View style={{ flex: 1, marginLeft: SPACING.md }}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>User Management</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminUser.title')}</Text>
           <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
             {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
           </Text>
@@ -410,7 +410,7 @@ export default function AdminUserManagementScreen({ navigation }: any) {
             <View style={[styles.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="people-outline" size={40} color={colors.textMuted} />
             </View>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No users found</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('adminUser.noUsersFound')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
               Try adjusting your search or filters
             </Text>

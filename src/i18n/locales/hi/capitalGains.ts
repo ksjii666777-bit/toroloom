@@ -18,4 +18,10 @@ export default {
     taxRules: 'कर नियम (भारत वित्त वर्ष 2025-26)',
     stclOffset: 'STCL ऑफ़सेट',
     ltclOffset: 'LTCL ऑफ़सेट',
+    loadingTaxData: 'टैक्स डेटा लोड हो रहा है...',
+    stcgShort: 'STCG (15%)',
+    ltcgShort: 'LTCG (10%)',
+    stcgTaxLabel: 'STCG टैक्स (15%)',
+    stcgEquity: 'STCG (इक्विटी)',
+    ltcgEquity: 'LTCG (इक्विटी)',
 };

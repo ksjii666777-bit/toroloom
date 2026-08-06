@@ -371,7 +371,7 @@ function ReviewStatusSection({
       {/* Header */}
       <View style={styles.reviewHeader}>
         <Ionicons name="shield-checkmark" size={18} color={colors.warning} />
-        <Text style={styles.reviewTitle}>Review Status</Text>
+        <Text style={styles.reviewTitle}>{t('education.reviewStatus')}</Text>
       </View>
 
       {/* Summary chips row */}

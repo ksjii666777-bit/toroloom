@@ -175,7 +175,7 @@ export default function BatchAnalysisScreen({ navigation }: any) {
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </AnimatedPressable>
             <View style={{ flex: 1, marginLeft: SPACING.md }}>
-              <Text style={[styles.title, { color: colors.text }]}>Batch Analysis</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t('ai.batchTitle')}</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                 AI analysis for multiple stocks at once
               </Text>
@@ -184,7 +184,7 @@ export default function BatchAnalysisScreen({ navigation }: any) {
         </View>
 
         {/* ── Input Section ── */}
-        <Card title="Enter Stock Symbols" style={styles.inputCard}>
+        <Card title={t('ai.enterSymbols')} style={styles.inputCard}>
           <TextInput
             style={[styles.textInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
             value={symbolInput}
@@ -282,19 +282,19 @@ export default function BatchAnalysisScreen({ navigation }: any) {
             <View style={[styles.summaryRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={styles.summaryItem}>
                 <Text style={[styles.summaryCount, { color: '#10B981' }]}>{analysisCounts.bullish}</Text>
-                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Bullish</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.bullish')}</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Text style={[styles.summaryCount, { color: '#EF4444' }]}>{analysisCounts.bearish}</Text>
-                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Bearish</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.bearish')}</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Text style={[styles.summaryCount, { color: '#F59E0B' }]}>{analysisCounts.neutral}</Text>
-                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Neutral</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.neutral')}</Text>
               </View>
               <View style={styles.summaryItem}>
                 <Text style={[styles.summaryCount, { color: colors.text }]}>{analysisCounts.total}</Text>
-                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>Total</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.total')}</Text>
               </View>
             </View>
 

@@ -128,4 +128,10 @@ export default {
     chatPortfolioOverview: '👋 **Portfolio Overview**\n\nHere\'s a quick snapshot of your investments:\n\n💼 **{{count}}** holdings · 💰 **{{value}}** total value\n{{emoji}} **{{sign}}{{pnl}}** ({{sign}}{{pct}}%) overall\n\n💡 Try asking:\n• "What is my portfolio value?"\n• "How are my SIPs doing?"\n• "Which stock should I analyze?"\n• "Show me market overview"',
     liveFeedSharedVia: 'Shared via Toroloom',
     liveFeedSentimentAlert: 'Sentiment Alert: {{symbol}}',
+    batchTitle: 'Batch Analysis',
+    enterSymbols: 'Enter Stock Symbols',
+    total: 'Total',
+    frequency: 'Frequency',
+    noEvents: 'No Events',
+    pullToRefresh: 'Pull to refresh to generate insights for your watchlist stocks.',
 };

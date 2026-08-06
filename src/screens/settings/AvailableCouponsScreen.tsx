@@ -113,7 +113,7 @@ function CouponCard({
                     </View>
                     {isExpired && (
                       <View style={s.expiredBadge}>
-                        <Text style={s.expiredBadgeText}>EXPIRED</Text>
+                        <Text style={s.expiredBadgeText}>{t('coupons.expiredBadge')}</Text>
                       </View>
                     )}
                   </View>
@@ -208,7 +208,7 @@ function CouponCard({
               style={s.applyBtn}
             >
               <Ionicons name="pricetag" size={16} color="#fff" />
-              <Text style={s.applyBtnText}>Use This Coupon</Text>
+              <Text style={s.applyBtnText}>{t('coupons.useThisCoupon')}</Text>
             </LinearGradient>
           </AnimatedPressable>
         )}
@@ -311,7 +311,7 @@ export default function AvailableCouponsScreen({ navigation }: any) {
             <View style={[styles.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="pricetag-outline" size={40} color={colors.textMuted} />
             </View>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Coupons Available</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('coupons.noCoupons')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
               There are no active promo codes right now.{'\n'}Check back later for discounts!
             </Text>

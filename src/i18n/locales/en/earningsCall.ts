@@ -41,4 +41,5 @@ export default {
     consensusHold: 'Hold',
     consensusSell: 'Sell',
     consensusStrongSell: 'Strong Sell',
+    loading: 'Loading earnings data...',
 };

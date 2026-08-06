@@ -19,4 +19,12 @@ export default {
     searchRooms: 'Search rooms...',
     shareThoughts: 'Share your thoughts with the community...',
     addComment: 'Add a comment...',
+    trendingTopics: 'Trending Topics',
+    postNotFound: 'Post not found',
+    goBack: 'Go Back',
+    copied: 'Copied',
+    noMessages: 'No messages yet',
+    tradeIdea: 'Trade Idea',
+    alertTag: 'Alert',
+    noRoomsFound: 'No rooms found',
 };

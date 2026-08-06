@@ -387,7 +387,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
         {loading && !taxData && (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading tax data...</Text>
+            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>{t('capitalGains.loadingTaxData')}</Text>
           </View>
         )}
 
@@ -412,7 +412,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
                 <Text style={[styles.statValue, { color: colors.text }]}>
                   ₹{taxData.shortTermGains.toLocaleString()}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>STCG (15%)</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('capitalGains.stcgShort')}</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 <View style={[styles.statIcon, { backgroundColor: '#3B82F618' }]}>
@@ -421,7 +421,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
                 <Text style={[styles.statValue, { color: colors.text }]}>
                   ₹{taxData.longTermGains.toLocaleString()}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>LTCG (10%)</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('capitalGains.ltcgShort')}</Text>
               </View>
             </View>
 
@@ -478,7 +478,7 @@ export default function CapitalGainsScreen({ navigation }: any) {
             {/* ── Tax Liability Breakdown ── */}
             <Card title={t('capitalGains.estimatedTaxLiability')} style={styles.card}>
               <View style={styles.taxRow}>
-                <Text style={[styles.taxLabel, { color: colors.textSecondary }]}>STCG Tax (15%)</Text>
+                <Text style={[styles.taxLabel, { color: colors.textSecondary }]}>{t('capitalGains.stcgTaxLabel')}</Text>
                 <Text style={[styles.taxValue, { color: '#FFC107' }]}>
                   ₹{taxData.estimatedTaxSTCG.toLocaleString()}
                 </Text>
@@ -565,14 +565,14 @@ export default function CapitalGainsScreen({ navigation }: any) {
             <Card title={t('capitalGains.taxRules')} style={styles.card}>
               <View style={styles.ruleRow}>
                 <View style={[styles.ruleDot, { backgroundColor: '#FFC107' }]} />
-                <Text style={[styles.ruleLabel, { color: colors.text }]}>STCG (Equity)</Text>
+                <Text style={[styles.ruleLabel, { color: colors.text }]}>{t('capitalGains.stcgEquity')}</Text>
                 <Text style={[styles.ruleDesc, { color: colors.textMuted }]}>
                   Held ≤12 months · 15% tax
                 </Text>
               </View>
               <View style={styles.ruleRow}>
                 <View style={[styles.ruleDot, { backgroundColor: '#3B82F6' }]} />
-                <Text style={[styles.ruleLabel, { color: colors.text }]}>LTCG (Equity)</Text>
+                <Text style={[styles.ruleLabel, { color: colors.text }]}>{t('capitalGains.ltcgEquity')}</Text>
                 <Text style={[styles.ruleDesc, { color: colors.textMuted }]}>
                   Held &gt;12 months · 10% over ₹1L exemption
                 </Text>

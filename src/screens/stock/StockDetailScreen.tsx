@@ -288,7 +288,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
               }}
             >
               <Ionicons name="settings-outline" size={14} color={colors.textSecondary} />
-              <Text style={[styles.advancedLabel, { color: colors.textSecondary }]}>Advanced</Text>
+              <Text style={[styles.advancedLabel, { color: colors.textSecondary }]}>{t('stockDetail.advanced')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -378,7 +378,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
                 <Ionicons name="analytics" size={22} color={colors.primary} />
               </View>
               <View style={styles.fundamentalsInfo}>
-                <Text style={[styles.fundamentalsTitle, { color: colors.text }]}>Company Fundamentals</Text>
+                <Text style={[styles.fundamentalsTitle, { color: colors.text }]}>{t('stockDetail.companyFundamentals')}</Text>
                 <Text style={[styles.fundamentalsSub, { color: colors.textSecondary }]}>
                   P/E {stock.pe.toFixed(1)}x · P/B {stock.pb.toFixed(1)}x · ROCE · Debt Ratios · Quarterly Results
                 </Text>
@@ -390,7 +390,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
 
         {/* About Company */}
         <View testID="stock-about-company">
-        <Card title="About Company" style={styles.aboutCard}>
+        <Card title={t('stockDetail.aboutCompany')} style={styles.aboutCard}>
           <Text style={styles.aboutText}>
             {stock.name} is a leading company in the {stock.sector} sector with a market
             capitalization of {stock.marketCap}. The company has a P/E ratio of {stock.pe.toFixed(1)}

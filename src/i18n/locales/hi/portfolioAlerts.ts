@@ -24,4 +24,13 @@ export default {
     holding: 'होल्डिंग',
     watched: 'देखी गई',
     searchPlaceholder: 'प्रतीक या नाम से खोजें…',
+    threshold: 'सीमा',
+    quietHours: 'शांत घंटे',
+    quickAddDefaults: 'क्विक-ऐड डिफ़ॉल्ट (लॉन्ग-प्रेस)',
+    dayGainThreshold: 'दिन के लाभ की सीमा',
+    dayGainThresholdDesc: 'लॉन्ग-प्रेस दिन लाभ अलर्ट के लिए डिफ़ॉल्ट %',
+    pnlThreshold: 'P&L सीमा',
+    pnlThresholdDesc: 'लॉन्ग-प्रेस P&L अलर्ट के लिए डिफ़ॉल्ट %',
+    selectHoldings: 'होल्डिंग्स चुनें',
+    none: 'कोई नहीं',
 };

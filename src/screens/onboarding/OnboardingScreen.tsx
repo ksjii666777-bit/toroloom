@@ -70,6 +70,7 @@ function MiniPieChart({
   onInteract: () => void;
   onDemoComplete?: () => void;
 }) {
+  const { t } = useT();
   const [selectedSector, setSelectedSector] = useState<number | null>(null);
   const [exploredSectors, setExploredSectors] = useState<Set<number>>(new Set());
   const total = MOCK_SECTORS.reduce((sum, s) => sum + s.value, 0);
@@ -86,7 +87,7 @@ function MiniPieChart({
 
   return (
     <View style={demoStyles.pieContainer}>
-      <Text style={demoStyles.pieTitle}>Your Portfolio Allocation</Text>
+      <Text style={demoStyles.pieTitle}>{t('onboarding.portfolioAllocation')}</Text>
       <View style={demoStyles.pieRow}>
         {/* Segmented bar visualization (horizontal stacked bar as pie alternative) */}
         <View style={demoStyles.pieBar}>
@@ -362,7 +363,7 @@ function MockTradePanel({
           }}
         >
           <Ionicons name="trending-down" size={16} color={tradeType === 'sell' ? '#fff' : '#FF5252'} />
-          <Text style={[demoStyles.tradeToggleText, tradeType === 'sell' && demoStyles.tradeToggleTextActive]}>Sell</Text>
+          <Text style={[demoStyles.tradeToggleText, tradeType === 'sell' && demoStyles.tradeToggleTextActive]}>{t('onboarding.sell')}</Text>
         </Pressable>
       </View>
 
@@ -388,7 +389,7 @@ function MockTradePanel({
 
       {/* Order Total */}
       <View style={demoStyles.orderTotal}>
-        <Text style={demoStyles.orderTotalLabel}>Total</Text>
+        <Text style={demoStyles.orderTotalLabel}>{t('onboarding.total')}</Text>
         <Text style={demoStyles.orderTotalValue}>
           ₹{(mockPrice * quantity).toLocaleString()}
         </Text>
@@ -434,6 +435,7 @@ function MiniBrokerConnect({
   onDemoComplete?: () => void;
   interacted: boolean;
 }) {
+  const { t } = useT();
   const [connectedBroker, setConnectedBroker] = useState<string | null>(null);
   const [connectingBroker, setConnectingBroker] = useState<string | null>(null);
 
@@ -454,7 +456,7 @@ function MiniBrokerConnect({
 
   return (
     <View style={demoStyles.brokerContainer}>
-      <Text style={demoStyles.pieTitle}>Tap to Connect Your Broker</Text>
+      <Text style={demoStyles.pieTitle}>{t('onboarding.tapToConnectBroker')}</Text>
 
       <View style={demoStyles.brokerRow}>
         {MOCK_BROKERS.map((broker) => {
@@ -490,13 +492,13 @@ function MiniBrokerConnect({
                 {isConnected && (
                   <Animated.View entering={BounceIn.duration(300)} style={demoStyles.brokerMiniConnected}>
                     <Ionicons name="checkmark-circle" size={14} color="#FFFFFF" />
-                    <Text style={demoStyles.brokerMiniConnectedText}>Connected</Text>
+                    <Text style={demoStyles.brokerMiniConnectedText}>{t('onboarding.connected')}</Text>
                   </Animated.View>
                 )}
                 {!isConnected && !isConnecting && (
                   <View style={demoStyles.brokerMiniSyncBadge}>
                     <Ionicons name="wifi" size={8} color="rgba(255,255,255,0.6)" />
-                    <Text style={demoStyles.brokerMiniSyncText}>Sync</Text>
+                    <Text style={demoStyles.brokerMiniSyncText}>{t('onboarding.sync')}</Text>
                   </View>
                 )}
               </LinearGradient>
@@ -528,6 +530,7 @@ function InteractiveBadges({
   onInteract: () => void;
   onDemoComplete?: () => void;
 }) {
+  const { t } = useT();
   const [unlocked, setUnlocked] = useState<Record<string, boolean>>({});
 
   const handleBadgeTap = (id: string) => {
@@ -544,7 +547,7 @@ function InteractiveBadges({
 
   return (
     <View style={demoStyles.badgesContainer}>
-      <Text style={demoStyles.pieTitle}>Tap Badges to Unlock</Text>
+      <Text style={demoStyles.pieTitle}>{t('onboarding.tapBadgesToUnlock')}</Text>
       <Text style={demoStyles.badgesProgress}>
         {unlockedCount} / {MOCK_BADGES.length} unlocked
       </Text>
@@ -725,6 +728,7 @@ function AnimatedStepCard({ index, style, children }: {
 
 export default function OnboardingScreen({ _navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const {
     currentStep, setCurrentStep, skipOnboarding,
@@ -992,7 +996,7 @@ export default function OnboardingScreen({ _navigation }: any) {
       {/* Top Bar — Skip + Page Indicator + Lottie Toggle */}
       <Animated.View style={[styles.topBar, contentStyle]}>
         <Pressable onPress={handleSkip} style={styles.skipBtn}>
-          <Text style={styles.skipText}>Skip</Text>
+          <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
         </Pressable>
 
         {/* Progress dots with completion checkmarks */}

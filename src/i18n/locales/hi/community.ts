@@ -19,4 +19,12 @@ export default {
     searchRooms: 'कमरे खोजें...',
     shareThoughts: 'समुदाय के साथ अपने विचार साझा करें...',
     addComment: 'टिप्पणी जोड़ें...',
+    trendingTopics: 'ट्रेंडिंग विषय',
+    postNotFound: 'पोस्ट नहीं मिला',
+    goBack: 'वापस जाएँ',
+    copied: 'कॉपी हो गया',
+    noMessages: 'अभी कोई संदेश नहीं',
+    tradeIdea: 'ट्रेड आइडिया',
+    alertTag: 'अलर्ट',
+    noRoomsFound: 'कोई रूम नहीं मिला',
 };

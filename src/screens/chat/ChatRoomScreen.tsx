@@ -103,7 +103,7 @@ export default function ChatRoomScreen({ navigation, route }: any) {
         )}
         {roomMessages.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>No messages yet</Text>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('community.noMessages')}</Text>
           </View>
         ) : (
           roomMessages.map((msg) => {
@@ -117,12 +117,12 @@ export default function ChatRoomScreen({ navigation, route }: any) {
                 )}
                 {msg.type === 'trade' && (
                   <View style={[styles.tag, { backgroundColor: colors.success + '20' }]}>
-                    <Text style={[styles.tagText, { color: colors.success }]}>Trade Idea</Text>
+                    <Text style={[styles.tagText, { color: colors.success }]}>{t('community.tradeIdea')}</Text>
                   </View>
                 )}
                 {msg.type === 'alert' && (
                   <View style={[styles.tag, { backgroundColor: colors.danger + '20' }]}>
-                    <Text style={[styles.tagText, { color: colors.danger }]}>Alert</Text>
+                    <Text style={[styles.tagText, { color: colors.danger }]}>{t('community.alertTag')}</Text>
                   </View>
                 )}
                 <Text style={[styles.msgContent, { color: colors.text }]}>{msg.content}</Text>

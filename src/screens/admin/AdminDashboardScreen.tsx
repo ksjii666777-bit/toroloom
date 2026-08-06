@@ -197,7 +197,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
           </View>
         </AnimatedPressable>
         <View style={{ flex: 1, marginLeft: SPACING.md }}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Admin Dashboard</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminDashboard.title')}</Text>
           <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
             Platform overview & management
           </Text>
@@ -221,7 +221,7 @@ export default function AdminDashboardScreen({ navigation }: any) {
         }
       >
         {/* ── Overview Stats ─────────────────────────────────── */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Overview</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('adminDashboard.overview')}</Text>
         <View style={styles.statsGrid}>
           <StatCard icon="people" label="Total Users" value={stats.totalUsers.toLocaleString()} color="#3B82F6" delay={0} />
           <StatCard icon="flash" label={t('adminDashboard.activeToday')} value={stats.activeToday.toString()} color="#00E676" delay={80} />

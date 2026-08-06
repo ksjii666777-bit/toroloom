@@ -135,12 +135,12 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </AnimatedPressable>
           <View style={{ marginLeft: SPACING.md }}>
-            <Text style={[styles.title, { color: colors.text }]}>US Portfolio</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('snaptrade.usPortfolio')}</Text>
           </View>
         </View>
         <View style={styles.emptyContainer}>
           <Ionicons name="briefcase-outline" size={64} color={colors.textMuted} />
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>No Broker Connected</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('snaptrade.noBrokerConnected')}</Text>
           <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
             Connect a US brokerage via SnapTrade to view your portfolio.
           </Text>
@@ -150,7 +150,7 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
             scaleTo={0.95}
             style={[styles.connectBtn, { backgroundColor: colors.primary }]}
           >
-            <Text style={styles.connectBtnText}>Connect Broker</Text>
+            <Text style={styles.connectBtnText}>{t('snaptrade.connectBroker')}</Text>
           </AnimatedPressable>
         </View>
       </View>
@@ -165,7 +165,7 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
           <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </AnimatedPressable>
-          <Text style={[styles.title, { color: colors.text, flex: 1, marginLeft: SPACING.md }]}>US Portfolio</Text>
+          <Text style={[styles.title, { color: colors.text, flex: 1, marginLeft: SPACING.md }]}>{t('snaptrade.usPortfolio')}</Text>
           <AnimatedPressable onPress={() => navigation.navigate('SnapTradeOrder')} haptic="medium" scaleTo={0.93}>
             <View style={[styles.headerAction, { backgroundColor: colors.primary + '20' }]}>
               <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
@@ -202,7 +202,7 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
           end={{ x: 1, y: 1 }}
           style={styles.summaryCard}
         >
-          <Text style={styles.summaryLabel}>Total Portfolio Value</Text>
+          <Text style={styles.summaryLabel}>{t('snaptrade.totalPortfolioValue')}</Text>
           <Text style={styles.summaryValue}>
             {totalValue > 0 ? formatUSD(totalValue) : accountBalance > 0 ? formatUSD(accountBalance) : '—'}
           </Text>
@@ -226,19 +226,19 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
           <View style={styles.summaryGrid}>
             <View style={styles.summaryGridItem}>
               <Text style={styles.summaryGridValue}>{stats.totalSecurities}</Text>
-              <Text style={styles.summaryGridLabel}>Holdings</Text>
+              <Text style={styles.summaryGridLabel}>{t('snaptrade.holdings')}</Text>
             </View>
             <View style={styles.summaryGridDivider} />
             <View style={styles.summaryGridItem}>
               <Text style={styles.summaryGridValue}>{stats.totalAccounts}</Text>
-              <Text style={styles.summaryGridLabel}>Accounts</Text>
+              <Text style={styles.summaryGridLabel}>{t('snaptrade.accounts')}</Text>
             </View>
             <View style={styles.summaryGridDivider} />
             <View style={styles.summaryGridItem}>
               <Text style={styles.summaryGridValue}>
                 {accountBalance > 0 ? formatCompactUSD(accountBalance) : '—'}
               </Text>
-              <Text style={styles.summaryGridLabel}>Buying Power</Text>
+              <Text style={styles.summaryGridLabel}>{t('snaptrade.buyingPower')}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -256,7 +256,7 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
           <Animated.View entering={FadeInUp.duration(400)} style={styles.emptySection}>
             <View style={[styles.emptyCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="file-tray-outline" size={48} color={colors.textMuted} />
-              <Text style={[styles.emptyCardTitle, { color: colors.text }]}>No Holdings Yet</Text>
+              <Text style={[styles.emptyCardTitle, { color: colors.text }]}>{t('snaptrade.noHoldingsYet')}</Text>
               <Text style={[styles.emptyCardDesc, { color: colors.textMuted }]}>
                 Your connected brokerage account doesn't have any positions yet. 
                 Place your first US stock trade to get started.
@@ -268,7 +268,7 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
                 style={[styles.startTradeBtn, { backgroundColor: colors.primary }]}
               >
                 <Ionicons name="swap-horizontal" size={16} color="#fff" />
-                <Text style={styles.startTradeBtnText}>Start Trading</Text>
+                <Text style={styles.startTradeBtnText}>{t('snaptrade.startTrading')}</Text>
               </AnimatedPressable>
             </View>
           </Animated.View>

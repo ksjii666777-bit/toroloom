@@ -153,7 +153,7 @@ export default function PollsScreen({ navigation }: any) {
           </View>
           <View style={[styles.statCard, { borderLeftColor: colors.textMuted }]}>
             <Text style={[styles.statValue, { color: colors.textMuted }]}>{stats.closed}</Text>
-            <Text style={styles.statLabel}>Closed</Text>
+            <Text style={styles.statLabel}>{t('polls.closed')}</Text>
           </View>
           <View style={[styles.statCard, { borderLeftColor: '#8B5CF6' }]}>
             <Text style={[styles.statValue, { color: '#8B5CF6' }]}>{stats.myVotes}</Text>

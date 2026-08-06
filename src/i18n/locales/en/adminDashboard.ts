@@ -7,4 +7,6 @@ export default {
     uptime: '{{uptime}}% uptime',
     conversion: '{{rate}}% conversion',
     churn: 'Churn',
+    title: 'Admin Dashboard',
+    overview: 'Overview',
 };

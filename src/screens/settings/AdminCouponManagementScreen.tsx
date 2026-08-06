@@ -385,7 +385,7 @@ function CouponFormModal({
   const validate = useCallback((): boolean => {
     const errs: Partial<Record<keyof CouponFormData, string>> = {};
     if (!isEditing && !form.code.trim()) errs.code = 'Code is required';
-    if (!form.description.trim()) errs.description = 'Description is required';
+    if (!form.description.trim()) errs.description = t('adminCoupon.errorDescRequired');
     if (form.type !== 'free_trial') {
       const v = parseFloat(form.value);
       if (isNaN(v) || v <= 0) errs.value = 'Enter a valid discount value';
@@ -398,7 +398,7 @@ function CouponFormModal({
     if (isNaN(m) || m < 0) errs.maxUses = 'Enter valid max uses';
     setErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [form, isEditing]);
+  }, [form, isEditing, t]);
 
   const handleSave = useCallback(async () => {
     if (!validate()) return;
@@ -547,7 +547,7 @@ function CouponFormModal({
 
             {/* Active toggle */}
             <View style={s.toggleRow}>
-              <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>Active</Text>
+              <Text style={[s.fieldLabel, { color: colors.textSecondary }]}>{t('adminCoupon.activeLabel')}</Text>
               <AnimatedPressable
                 onPress={() => set('isActive', !form.isActive)}
                 haptic="light"
@@ -907,7 +907,7 @@ function UsageAnalyticsTab({
     return (
       <View style={{ paddingVertical: 80, alignItems: 'center' }}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[s.loadingText, { color: colors.textMuted, marginTop: 12 }]}>Loading usage data...</Text>
+        <Text style={[s.loadingText, { color: colors.textMuted, marginTop: 12 }]}>{t('adminCoupon.loadingUsage')}</Text>
       </View>
     );
   }
@@ -1074,7 +1074,7 @@ function UsageAnalyticsTab({
       })()}
 
       {/* Per-Coupon Breakdown */}
-      <Text style={[s.listTitle, { color: colors.text, marginTop: 8 }]}>Per-Coupon Details</Text>
+      <Text style={[s.listTitle, { color: colors.text, marginTop: 8 }]}>{t('adminCoupon.perCouponDetails')}</Text>
       {breakdownEntries.map(([code, breakdown], i) => (
         <Animated.View
           key={code}

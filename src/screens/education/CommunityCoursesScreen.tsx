@@ -200,7 +200,7 @@ export default function CommunityCoursesScreen({ navigation }: any) {
         {showFilters && (
           <Animated.View entering={FadeInDown.springify()} style={styles.filtersSection}>
             {/* Level Filter */}
-            <Text style={styles.filterLabel}>Level</Text>
+            <Text style={styles.filterLabel}>{t('education.level')}</Text>
             <View style={styles.chipRow}>
               {(['all', 'beginner', 'intermediate', 'advanced'] as const).map(level => {
                 const isActive = activeLevel === level;

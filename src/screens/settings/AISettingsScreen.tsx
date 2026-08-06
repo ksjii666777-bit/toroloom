@@ -153,7 +153,7 @@ export default function AISettingsScreen({ navigation }: any) {
             <Ionicons name="alert-circle" size={18} color={colors.danger} />
             <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
             <TouchableOpacity onPress={loadStatus}>
-              <Text style={[styles.retryLink, { color: colors.primary }]}>Retry</Text>
+              <Text style={[styles.retryLink, { color: colors.primary }]}>{t('aiSettings.retry')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -180,7 +180,7 @@ export default function AISettingsScreen({ navigation }: any) {
         </View>
 
         {/* Provider Cards */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Available Providers</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('aiSettings.availableProviders')}</Text>
 
         {status?.availableProviders.map((provider) => {
           const meta = PROVIDER_META[provider.id] || {
@@ -209,7 +209,7 @@ export default function AISettingsScreen({ navigation }: any) {
                     <Text style={[styles.providerName, { color: colors.text }]}>{provider.name}</Text>
                     {provider.active && (
                       <View style={[styles.activeBadge, { backgroundColor: '#00E67620' }]}>
-                        <Text style={styles.activeBadgeText}>Active</Text>
+                        <Text style={styles.activeBadgeText}>{t('aiSettings.aiProviderActive')}</Text>
                       </View>
                     )}
                     <View style={[styles.statusDot, {
@@ -225,7 +225,7 @@ export default function AISettingsScreen({ navigation }: any) {
               {/* Provider Details */}
               <View style={[styles.providerDetails, { borderTopColor: colors.divider }]}>
                 <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Status</Text>
+                  <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.statusLabel')}</Text>
                   <View style={styles.detailValue}>
                     <View style={[styles.statusDotSm, {
                       backgroundColor: provider.configured ? '#00E676' : colors.textMuted,
@@ -238,14 +238,14 @@ export default function AISettingsScreen({ navigation }: any) {
                   </View>
                 </View>
                 <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Model</Text>
+                  <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.modelLabel')}</Text>
                   <Text style={[styles.detailText, { color: colors.text }]} numberOfLines={1}>
                     {provider.model || 'Default'}
                   </Text>
                 </View>
                 {provider.endpoint && (
                   <View style={styles.detailRow}>
-                    <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Endpoint</Text>
+                    <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.endpointLabel')}</Text>
                     <Text style={[styles.detailText, { color: colors.text, fontSize: FONTS.size.xs }]} numberOfLines={2}>
                       {provider.endpoint}
                     </Text>
@@ -276,8 +276,8 @@ export default function AISettingsScreen({ navigation }: any) {
           Test Connection
         </Text>
         <Card
-          title="Test AI Provider"
-          subtitle="Verify your AI provider is working correctly"
+          title={t('aiSettings.testTitle')}
+          subtitle={t('aiSettings.testSubtitle')}
           style={{ marginBottom: SPACING.md }}
         >
           <AnimatedPressable
@@ -306,7 +306,7 @@ export default function AISettingsScreen({ navigation }: any) {
         </Card>
 
         {/* Info Card */}
-        <Card title="About AI Providers" subtitle="How AI insights are generated">
+        <Card title={t('aiSettings.aboutTitle')} subtitle={t('aiSettings.aboutSubtitle')}>
           <Text style={[styles.infoText, { color: colors.textSecondary }]}>
             Toroloom supports multiple AI providers. The active provider is determined by the backend
             configuration. AI insights are generated using a sophisticated multi-factor model that

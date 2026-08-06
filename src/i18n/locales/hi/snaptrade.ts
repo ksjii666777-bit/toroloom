@@ -23,4 +23,13 @@ export default {
     failedDisconnect: 'डिस्कनेक्ट नहीं हो पाया।',
     connecting: 'कनेक्ट हो रहा है...',
     completeLoginBrowser: 'अपने ब्राउज़र में लॉगिन पूरा करें',
+    usPortfolio: 'US पोर्टफोलियो',
+    noBrokerConnected: 'कोई ब्रोकर कनेक्ट नहीं',
+    connectBroker: 'ब्रोकर कनेक्ट करें',
+    totalPortfolioValue: 'कुल पोर्टफोलियो मूल्य',
+    holdings: 'होल्डिंग्स',
+    accounts: 'खाते',
+    buyingPower: 'खरीद क्षमता',
+    noHoldingsYet: 'अभी कोई होल्डिंग नहीं',
+    startTrading: 'ट्रेडिंग शुरू करें',
 };

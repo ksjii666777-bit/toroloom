@@ -41,4 +41,5 @@ export default {
     consensusHold: 'होल्ड',
     consensusSell: 'सेल',
     consensusStrongSell: 'स्ट्रॉन्ग सेल',
+    loading: 'कमाई का डेटा लोड हो रहा है...',
 };

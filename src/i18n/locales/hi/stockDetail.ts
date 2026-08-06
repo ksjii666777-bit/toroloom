@@ -40,4 +40,7 @@ export default {
     regionAsiaPacific: 'एशिया-प्रशांत स्टॉक',
     avgVolumeAcross: 'औसत दैनिक वॉल्यूम {{volume}} शेयर {{exchange}} ऑर्डर बुक पर।',
     avgVolumePlain: 'औसत दैनिक वॉल्यूम {{volume}} शेयर।',
+    advanced: 'उन्नत',
+    companyFundamentals: 'कंपनी फंडामेंटल्स',
+    aboutCompany: 'कंपनी के बारे में',
 };

@@ -27,7 +27,7 @@ export default function ChatRoomListScreen({ navigation }: any) {
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Chat Rooms</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('community.chatRooms')}</Text>
         <TextInput
           style={[styles.searchInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
           placeholder={t('community.searchRooms')}
@@ -59,7 +59,7 @@ export default function ChatRoomListScreen({ navigation }: any) {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>No rooms found</Text>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('community.noRoomsFound')}</Text>
           </View>
         }
       />

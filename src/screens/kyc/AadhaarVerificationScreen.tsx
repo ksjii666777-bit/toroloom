@@ -202,7 +202,7 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Aadhaar eKYC</Text>
+          <Text style={styles.title}>{t('kyc.aadhaarTitle')}</Text>
           <View style={styles.stepIndicator}>
             <Text style={styles.stepText}>
               {flowStep === 'aadhaar_input' ? 'Step 1 of 2' : flowStep === 'otp_input' ? 'Step 2 of 2' : 'Complete'}
@@ -233,7 +233,7 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
 
             {/* Aadhaar Input */}
             <View style={styles.inputSection}>
-              <Text style={styles.inputLabel}>Enter Aadhaar Number</Text>
+              <Text style={styles.inputLabel}>{t('kyc.enterAadhaarNumber')}</Text>
               <View style={[styles.inputContainer, { borderColor: error ? colors.danger : colors.border }]}>
                 <Ionicons name="finger-print" size={20} color={colors.primary} />
                 <TextInput
@@ -296,7 +296,7 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
               )}
               {otpTimer === 0 && (
                 <TouchableOpacity onPress={handleResendOtp}>
-                  <Text style={styles.resendText}>OTP expired. Request new OTP</Text>
+                  <Text style={styles.resendText}>{t('kyc.otpExpired')}</Text>
                 </TouchableOpacity>
               )}
             </Card>
@@ -359,19 +359,19 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
 
               <View style={styles.resultDetails}>
                 <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>Aadhaar Number</Text>
+                  <Text style={styles.resultLabel}>{t('kyc.aadhaarNumberLabel')}</Text>
                   <Text style={styles.resultValue}>XXXX XXXX {verifyResponse.lastFourDigits}</Text>
                 </View>
                 <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>Year of Birth</Text>
+                  <Text style={styles.resultLabel}>{t('kyc.yearOfBirth')}</Text>
                   <Text style={styles.resultValue}>{verifyResponse.yearOfBirth || 'N/A'}</Text>
                 </View>
                 <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>Gender</Text>
+                  <Text style={styles.resultLabel}>{t('kyc.gender')}</Text>
                   <Text style={styles.resultValue}>{verifyResponse.gender || 'N/A'}</Text>
                 </View>
                 <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>State</Text>
+                  <Text style={styles.resultLabel}>{t('kyc.state')}</Text>
                   <Text style={styles.resultValue}>{verifyResponse.state || 'N/A'}</Text>
                 </View>
               </View>
@@ -380,7 +380,7 @@ export default function AadhaarVerificationScreen({ navigation }: any) {
             {/* Continue */}
             <AnimatedPressable onPress={handleContinue} haptic="medium" scaleTo={0.97}>
               <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
-                <Text style={styles.continueBtnText}>Continue</Text>
+                <Text style={styles.continueBtnText}>{t('kyc.continueAction')}</Text>
                 <Ionicons name="arrow-forward" size={20} color={colors.white} />
               </LinearGradient>
             </AnimatedPressable>

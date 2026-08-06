@@ -367,7 +367,7 @@ function TradeModal({
 
           {/* Order Type */}
           <View style={styles.modalField}>
-            <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>Order Type</Text>
+            <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>{t('trading.orderType')}</Text>
             <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
               {(['Market', 'Limit', 'StopLoss'] as OrderType[]).map(ot => (
                 <Pressable
@@ -388,7 +388,7 @@ function TradeModal({
 
           {/* Quantity */}
           <View style={styles.modalField}>
-            <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>Quantity</Text>
+            <Text style={[styles.modalFieldLabel, { color: colors.textSecondary }]}>{t('trading.quantity')}</Text>
             <View style={[styles.modalInput, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <TextInput
                 style={[styles.modalInputField, { color: colors.text }]}
@@ -442,7 +442,7 @@ function TradeModal({
           {qty > 0 && (
             <View style={[styles.modalSummary, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={styles.modalSummaryRow}>
-                <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>Estimated Total</Text>
+                <Text style={[styles.modalSummaryLabel, { color: colors.textMuted }]}>{t('trading.estimatedTotal')}</Text>
                 <Text style={[styles.modalSummaryValue, { color: colors.text }]}>
                   ${estimatedTotal.toFixed(2)}
                 </Text>
@@ -629,7 +629,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Crypto Trading</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('trading.cryptoTitle')}</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
               {coins.length} coins · {isBrokerConnected ? 'Broker Connected' : 'View Only'}
             </Text>
@@ -640,7 +640,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
               style={[styles.connectBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
             >
               <Ionicons name="link" size={16} color={colors.primary} />
-              <Text style={[styles.connectText, { color: colors.primary }]}>Connect</Text>
+              <Text style={[styles.connectText, { color: colors.primary }]}>{t('trading.connect')}</Text>
             </Pressable>
           )}
         </View>
@@ -703,7 +703,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
         {isLoading ? (
           <View style={{ paddingVertical: 60, alignItems: 'center' }}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading crypto markets...</Text>
+            <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('trading.loadingMarkets')}</Text>
           </View>
         ) : (
           <>
@@ -713,7 +713,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
                 {/* Stats Banner */}
                 <View style={[styles.statsBanner, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                   <View style={styles.statItem}>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>Market Cap</Text>
+                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('trading.marketCap')}</Text>
                     <Text style={[styles.statValue, { color: colors.text }]}>
                       ${formatLargeNumber(coins.reduce((s, c) => s + (c.marketCap ? parseFloat(c.marketCap.replace(/[^0-9.]/g, '')) * (c.marketCap.includes('T') ? 1e12 : c.marketCap.includes('B') ? 1e9 : 1e6) : 0), 0))}
                     </Text>
@@ -731,7 +731,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
                 {filteredCoins.length === 0 ? (
                   <View style={{ paddingVertical: 40, alignItems: 'center' }}>
                     <Ionicons name="search" size={48} color={colors.textMuted} />
-                    <Text style={[styles.emptyText, { color: colors.textMuted }]}>No coins found</Text>
+                    <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('trading.noCoinsFound')}</Text>
                   </View>
                 ) : (
                   <View style={{ gap: SPACING.sm }}>
@@ -762,7 +762,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
                       onPress={() => navigation.navigate('BrokerConnect')}
                       style={[styles.connectNowBtn, { backgroundColor: colors.primary }]}
                     >
-                      <Text style={styles.connectNowText}>Connect Broker</Text>
+                      <Text style={styles.connectNowText}>{t('trading.connectBroker')}</Text>
                     </Pressable>
                   </View>
                 ) : holdings.length === 0 ? (
@@ -777,7 +777,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
                   </View>
                 ) : (
                   <>
-                    <Text style={[styles.portfolioTitle, { color: colors.text }]}>Crypto Holdings</Text>
+                    <Text style={[styles.portfolioTitle, { color: colors.text }]}>{t('trading.cryptoHoldings')}</Text>
                     {holdings.map((h, i) => (
                       <HoldingRow key={h.symbol + i} holding={h} colors={colors} />
                     ))}
@@ -808,7 +808,7 @@ export default function CryptoTradingScreen({ navigation }: any) {
                   </View>
                 ) : (
                   <>
-                    <Text style={[styles.portfolioTitle, { color: colors.text }]}>Recent Orders</Text>
+                    <Text style={[styles.portfolioTitle, { color: colors.text }]}>{t('trading.recentOrders')}</Text>
                     {orders.map((o, i) => (
                       <OrderRow key={o.id || i} order={o} colors={colors} />
                     ))}

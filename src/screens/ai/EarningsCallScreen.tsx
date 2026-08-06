@@ -270,7 +270,7 @@ export default function EarningsCallScreen({ navigation }: any) {
     return (
       <View style={[styles.container, styles.centerContent, { gap: SPACING.md }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>Loading earnings data...</Text>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('earningsCall.loading')}</Text>
       </View>
     );
   }
@@ -508,7 +508,7 @@ export default function EarningsCallScreen({ navigation }: any) {
           <View style={styles.analystRow}>
             <View style={styles.analystLeft}>
               <ConsensusBadge consensus={selectedEarnings.analystConsensus} />
-              <Text style={styles.analystFirms}>Based on 28 analyst ratings</Text>
+              <Text style={styles.analystFirms}>{t('earningsCall.basedOnAnalysts', { count: 28 })}</Text>
             </View>
             <View style={styles.analystRight}>
               <Text style={styles.analystPriceLabel}>{t('earningsCall.targetPrice')}</Text>
@@ -655,7 +655,7 @@ export default function EarningsCallScreen({ navigation }: any) {
               <View style={[styles.sectionIcon, { backgroundColor: colors.warning + '20' }]}>
                 <Ionicons name="bar-chart" size={16} color={colors.warning} />
               </View>
-              <Text style={styles.sectionCardTitle}>Historical Trend (4 Quarters)</Text>
+              <Text style={styles.sectionCardTitle}>{t('earningsCall.historicalTrend', { count: 4 })}</Text>
             </View>
             <Ionicons
               name={expandedSections.history ? 'chevron-up' : 'chevron-down'}

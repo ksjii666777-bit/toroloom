@@ -75,7 +75,7 @@ export default function AIInsightsScreen({ _navigation }: any) {
           <View style={styles.stateContainer}>
             <Ionicons name="bulb-outline" size={48} color={colors.textMuted} />
             <Text style={[styles.stateTitle, { color: colors.text }]}>{t('ai.noInsights')}</Text>
-            <Text style={[styles.stateText, { color: colors.textMuted }]}>Pull to refresh to generate insights for your watchlist stocks.</Text>
+            <Text style={[styles.stateText, { color: colors.textMuted }]}>{t('ai.pullToRefresh')}</Text>
           </View>
         )}
 

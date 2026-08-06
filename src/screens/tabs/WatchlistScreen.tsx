@@ -797,12 +797,12 @@ export default function WatchlistScreen({ navigation }: any) {
             />
             <View style={styles.createActions}>
               <Button
-                title="Cancel"
+                title={t('app.cancel')}
                 variant="ghost"
                 size="small"
                 onPress={() => { setShowCreate(false); setNewName(''); }}
               />
-              <Button title="Create" size="small" onPress={handleCreate} />
+              <Button title={t('watchlist.create')} size="small" onPress={handleCreate} />
             </View>
           </Animated.View>
         )}
@@ -884,7 +884,7 @@ export default function WatchlistScreen({ navigation }: any) {
                           style={[styles.stockActionBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}
                         >
                           <Ionicons name="notifications-outline" size={16} color={colors.primary} />
-                          <Text style={[styles.stockActionBtnText, { color: colors.primary }]}>Alert</Text>
+                          <Text style={[styles.stockActionBtnText, { color: colors.primary }]}>{t('watchlist.alert')}</Text>
                         </TouchableOpacity>
                       </View>
                     </View>

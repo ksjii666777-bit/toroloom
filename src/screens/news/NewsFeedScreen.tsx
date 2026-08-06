@@ -651,7 +651,7 @@ export default function NewsFeedScreen({ navigation }: any) {
       <View style={[feedStyles.header, { paddingTop: insets.top + 12 }]}>
         <View style={feedStyles.headerTop}>
           <View>
-            <Text style={[feedStyles.title, { color: colors.text }]}>Market News</Text>
+            <Text style={[feedStyles.title, { color: colors.text }]}>{t('news.marketNews')}</Text>
             <Text style={[feedStyles.subtitle, { color: colors.textMuted }]}>
               {unreadCount > 0
                 ? `${unreadCount} unread · ${filteredNews.length} articles`
@@ -713,7 +713,7 @@ export default function NewsFeedScreen({ navigation }: any) {
                 >
                   <View style={feedStyles.breakingTop}>
                     <View style={feedStyles.breakingBadge}>
-                      <Text style={feedStyles.breakingBadgeText}>BREAKING</Text>
+                      <Text style={feedStyles.breakingBadgeText}>{t('news.breaking')}</Text>
                     </View>
                     <Text style={feedStyles.breakingCategory}>{categoryLabel}</Text>
                   </View>
@@ -781,7 +781,7 @@ export default function NewsFeedScreen({ navigation }: any) {
           <View style={feedStyles.trendingSection}>
             <View style={feedStyles.trendingHeader}>
               <Ionicons name="trending-up" size={14} color={colors.textMuted} />
-              <Text style={[feedStyles.trendingLabel, { color: colors.textMuted }]}>Trending</Text>
+              <Text style={[feedStyles.trendingLabel, { color: colors.textMuted }]}>{t('news.trending')}</Text>
               <View style={{ flex: 1 }} />
               <AnimatedPressable
                 onPress={() => navigation.navigate('SentimentAnalysis')}
@@ -790,7 +790,7 @@ export default function NewsFeedScreen({ navigation }: any) {
               >
                 <View style={[feedStyles.sentimentBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
                   <Ionicons name="pulse" size={14} color={colors.primary} />
-                  <Text style={[feedStyles.sentimentBtnText, { color: colors.primary }]}>Sentiment</Text>
+                  <Text style={[feedStyles.sentimentBtnText, { color: colors.primary }]}>{t('news.sentiment')}</Text>
                 </View>
               </AnimatedPressable>
             </View>
@@ -829,7 +829,7 @@ export default function NewsFeedScreen({ navigation }: any) {
                   onPress={() => setActiveSymbol(null)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[feedStyles.trendingChipText, { color: colors.textMuted, fontSize: 11 }]}>Clear</Text>
+                  <Text style={[feedStyles.trendingChipText, { color: colors.textMuted, fontSize: 11 }]}>{t('news.clear')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -846,7 +846,7 @@ export default function NewsFeedScreen({ navigation }: any) {
         ) : filteredNews.length === 0 ? (
           <View style={feedStyles.emptyState}>
             <Ionicons name="newspaper-outline" size={48} color={colors.textMuted} />
-            <Text style={[feedStyles.emptyTitle, { color: colors.textMuted }]}>No articles found</Text>
+            <Text style={[feedStyles.emptyTitle, { color: colors.textMuted }]}>{t('news.noArticlesFound')}</Text>
             <Text style={[feedStyles.emptySubtitle, { color: colors.textMuted }]}>
               {searchQuery
                 ? 'Try a different search term or category'
@@ -910,7 +910,7 @@ export default function NewsFeedScreen({ navigation }: any) {
 
                   {/* Read now arrow */}
                   <View style={feedStyles.heroArrow}>
-                    <Text style={[feedStyles.heroArrowText, { color: colors.primary }]}>Read Now</Text>
+                    <Text style={[feedStyles.heroArrowText, { color: colors.primary }]}>{t('news.readNow')}</Text>
                     <Ionicons name="arrow-forward" size={14} color={colors.primary} />
                   </View>
                 </LinearGradient>

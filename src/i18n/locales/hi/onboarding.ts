@@ -14,4 +14,11 @@ export default {
     orderPlaced: 'ऑर्डर दिया गया! {{count}} शेयर {{action}} ✓',
     bought: 'खरीदे गए',
     sold: 'बेचे गए',
+    portfolioAllocation: 'आपका पोर्टफोलियो आवंटन',
+    sell: 'बेचें',
+    total: 'कुल',
+    tapToConnectBroker: 'अपना ब्रोकर कनेक्ट करने के लिए टैप करें',
+    connected: 'कनेक्टेड',
+    sync: 'सिंक',
+    tapBadgesToUnlock: 'अनलॉक करने के लिए बैज पर टैप करें',
 };

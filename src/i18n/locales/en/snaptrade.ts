@@ -23,4 +23,13 @@ export default {
     failedDisconnect: 'Failed to disconnect.',
     connecting: 'Connecting...',
     completeLoginBrowser: 'Complete login on your browser',
+    usPortfolio: 'US Portfolio',
+    noBrokerConnected: 'No Broker Connected',
+    connectBroker: 'Connect Broker',
+    totalPortfolioValue: 'Total Portfolio Value',
+    holdings: 'Holdings',
+    accounts: 'Accounts',
+    buyingPower: 'Buying Power',
+    noHoldingsYet: 'No Holdings Yet',
+    startTrading: 'Start Trading',
 };

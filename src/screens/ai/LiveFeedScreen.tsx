@@ -77,6 +77,7 @@ const NUM_BUCKETS = 10;
 
 function SentimentFrequencyChart({ events }: { events: LiveFeedEvent[] }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [timeframe, setTimeframe] = useState<Timeframe>('all');
 
   const width = SCREEN_WIDTH - SPACING.xl * 2;
@@ -161,7 +162,7 @@ function SentimentFrequencyChart({ events }: { events: LiveFeedEvent[] }) {
       <View style={chartStyles.headerRow}>
         <View style={chartStyles.headerLeft}>
           <Ionicons name="pulse" size={14} color={colors.textMuted} />
-          <Text style={[chartStyles.title, { color: colors.textSecondary }]}>Frequency</Text>
+          <Text style={[chartStyles.title, { color: colors.textSecondary }]}>{t('ai.frequency')}</Text>
         </View>
         <View style={[chartStyles.peakBadge, { backgroundColor: '#8B5CF615' }]}>
           <Text style={[chartStyles.peakText, { color: '#8B5CF6' }]}>Peak {maxCount}/bucket</Text>
@@ -623,7 +624,7 @@ export default function LiveFeedScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Live Sentiment Feed</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('ai.liveFeed')}</Text>
             <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
               {totalCount} events · {improvingCount} ↑ {deterioratingCount} ↓
             </Text>
@@ -727,7 +728,7 @@ export default function LiveFeedScreen({ navigation }: any) {
         {filteredEvents.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="pulse-outline" size={48} color={colors.textMuted} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Events</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('ai.noEvents')}</Text>
             <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
               {searchQuery ? 'Try a different search term' : 'No events match the selected filters'}
             </Text>

@@ -7,4 +7,6 @@ export default {
     uptime: '{{uptime}}% अपटाइम',
     conversion: '{{rate}}% रूपांतरण',
     churn: 'चर्न',
+    title: 'एडमिन डैशबोर्ड',
+    overview: 'अवलोकन',
 };

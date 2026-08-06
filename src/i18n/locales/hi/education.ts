@@ -209,4 +209,5 @@ export default {
     generateSharePdf: 'PDF जनरेट और साझा करें',
     openPdf: 'PDF खोलें',
     pdfOpenError: 'PDF फ़ाइल नहीं खोली जा सकी।',
+    level: 'स्तर',
 };

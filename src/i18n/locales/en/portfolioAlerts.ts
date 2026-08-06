@@ -24,4 +24,13 @@ export default {
     holding: 'holding',
     watched: 'watched',
     searchPlaceholder: 'Search by symbol or name…',
+    threshold: 'Threshold',
+    quietHours: 'Quiet Hours',
+    quickAddDefaults: 'Quick-Add Defaults (long-press)',
+    dayGainThreshold: 'Day Gain Threshold',
+    dayGainThresholdDesc: 'Default % for long-press day gain alert',
+    pnlThreshold: 'P&L Threshold',
+    pnlThresholdDesc: 'Default % for long-press P&L alert',
+    selectHoldings: 'Select Holdings',
+    none: 'None',
 };

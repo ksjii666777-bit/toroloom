@@ -393,7 +393,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
               )}
 
               <View style={styles.thresholdRow}>
-                <Text style={styles.thresholdLabel}>Threshold</Text>
+                <Text style={styles.thresholdLabel}>{t('portfolioAlerts.threshold')}</Text>
                 <View style={styles.thresholdControls}>
                 <Pressable onPress={() => handleAdjustThreshold(rule.id, -config.step, rule.kind)}>
                   <Ionicons name="remove" size={18} color={colors.primary} />
@@ -586,7 +586,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
 
         {/* ── Quiet Hours ──────────────────────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quiet Hours</Text>
+          <Text style={styles.sectionTitle}>{t('portfolioAlerts.quietHours')}</Text>
           <Pressable style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>
             <View style={[styles.quietHoursIcon, {
               backgroundColor: isInQuietHours(preferences)
@@ -617,12 +617,12 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
 
         {/* ── Quick-Add Defaults ──────────────────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick-Add Defaults (long-press)</Text>
+          <Text style={styles.sectionTitle}>{t('portfolioAlerts.quickAddDefaults')}</Text>
           <View style={styles.quickAddCard}>
             <View style={styles.quickAddRow}>
               <View style={styles.quickAddInfo}>
-                <Text style={styles.quickAddLabel}>Day Gain Threshold</Text>
-                <Text style={styles.quickAddDesc}>Default % for long-press day gain alert</Text>
+                <Text style={styles.quickAddLabel}>{t('portfolioAlerts.dayGainThreshold')}</Text>
+                <Text style={styles.quickAddDesc}>{t('portfolioAlerts.dayGainThresholdDesc')}</Text>
               </View>
               <View style={styles.quickAddControls}>
                 <Pressable onPress={() => { const next = Math.max(2, quickAddDayGainThreshold - 1); setQuickAddThreshold('day_gain', next); }}>
@@ -639,8 +639,8 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
             <View style={styles.quickAddDivider} />
             <View style={styles.quickAddRow}>
               <View style={styles.quickAddInfo}>
-                <Text style={styles.quickAddLabel}>P&L Threshold</Text>
-                <Text style={styles.quickAddDesc}>Default % for long-press P&L alert</Text>
+                <Text style={styles.quickAddLabel}>{t('portfolioAlerts.pnlThreshold')}</Text>
+                <Text style={styles.quickAddDesc}>{t('portfolioAlerts.pnlThresholdDesc')}</Text>
               </View>
               <View style={styles.quickAddControls}>
                 <Pressable onPress={() => { const next = Math.max(5, quickAddPnLThreshold - 5); setQuickAddThreshold('pnl', next); }}>
@@ -671,7 +671,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
           <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
             <View style={styles.modalHeader}>
               <View>
-                <Text style={styles.modalTitle}>Select Holdings</Text>
+                <Text style={styles.modalTitle}>{t('portfolioAlerts.selectHoldings')}</Text>
                 <Text style={styles.modalSubtitle}>
                   {selectedStockIds.length} of {holdings.length} selected
                 </Text>
@@ -702,7 +702,7 @@ export default function PortfolioAlertsScreen({ navigation }: any) {
                 </Pressable>
                 <Pressable onPress={() => setSelectedStockIds([])}>
                   <Ionicons name="remove-circle-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.modalActionText, { color: colors.textMuted }]}>None</Text>
+                  <Text style={[styles.modalActionText, { color: colors.textMuted }]}>{t('portfolioAlerts.none')}</Text>
                 </Pressable>
                 <Pressable onPress={() => setStockPickerVisible(false)}>
                   <Ionicons name="close" size={24} color={colors.text} />

@@ -324,4 +324,8 @@ export default {
     zeroPlaceholder: '0.00',
     tradeLogCount: 'ट्रेड लॉग ({{count}} ट्रेड)',
     backtestSummary: '{{count}} ट्रेड · 1 साल का मॉक डेटा · {{symbol}}',
+    cryptoTitle: 'क्रिप्टो ट्रेडिंग',
+    marketCap: 'मार्केट कैप',
+    noCoinsFound: 'कोई कॉइन नहीं मिला',
+    cryptoHoldings: 'क्रिप्टो होल्डिंग्स',
 };

@@ -40,4 +40,7 @@ export default {
     regionAsiaPacific: 'Asia-Pacific Stock',
     avgVolumeAcross: 'with an average daily volume of {{volume}} shares across the {{exchange}} order book.',
     avgVolumePlain: 'with an average daily volume of {{volume}} shares.',
+    advanced: 'Advanced',
+    companyFundamentals: 'Company Fundamentals',
+    aboutCompany: 'About Company',
 };

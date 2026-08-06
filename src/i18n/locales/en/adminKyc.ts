@@ -7,4 +7,5 @@ export default {
     rejectMsg: 'Reject {{name}} KYC verification?',
     reject: 'Reject',
     searchUsers: 'Search by name or email...',
+    queueTitle: 'KYC Queue',
 };

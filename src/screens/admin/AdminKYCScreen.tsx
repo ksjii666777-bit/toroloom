@@ -167,7 +167,7 @@ export default function AdminKYCScreen({ navigation }: any) {
           </View>
         </AnimatedPressable>
         <View style={{ flex: 1, marginLeft: SPACING.md }}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>KYC Queue</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('adminKyc.queueTitle')}</Text>
           <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
             {pendingUsers.length} pending verification{pendingUsers.length !== 1 ? 's' : ''}
           </Text>

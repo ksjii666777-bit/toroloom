@@ -242,7 +242,7 @@ export default function CommunityScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Community</Text>
+          <Text style={styles.title}>{t('community.title')}</Text>
           <Pressable
             style={styles.newPostBtn}
             onPress={() => {
@@ -290,13 +290,13 @@ export default function CommunityScreen({ navigation }: any) {
               </View>
               <View style={styles.createPostBtns}>
                 <Button
-                  title="Cancel"
+                  title={t('app.cancel')}
                   variant="ghost"
                   size="small"
                   onPress={() => { setShowPostInput(false); setPostContent(''); }}
                 />
                 <Button
-                  title="Post"
+                  title={t('community.post')}
                   size="small"
                   onPress={handlePost}
                   disabled={!postContent.trim()}
@@ -333,7 +333,7 @@ export default function CommunityScreen({ navigation }: any) {
         <View style={styles.trendingSection}>
           <View style={styles.trendingHeader}>
             <Ionicons name="flame" size={18} color={colors.warning} />
-            <Text style={styles.trendingTitle}>Trending Topics</Text>
+            <Text style={styles.trendingTitle}>{t('community.trendingTopics')}</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {trendingTags.map(tag => (

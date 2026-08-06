@@ -130,4 +130,7 @@ export default {
     ipoNotFound: 'IPO not found',
     goBack: 'Go back',
     lotShares: 'Lot: {{count}} shares',
+    registrar: 'Registrar',
+    rating: 'Rating',
+    closed: 'Closed',
 };

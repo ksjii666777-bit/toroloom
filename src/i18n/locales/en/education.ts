@@ -209,4 +209,5 @@ export default {
     generateSharePdf: 'Generate & Share PDF',
     openPdf: 'Open PDF',
     pdfOpenError: 'Could not open PDF file.',
+    level: 'Level',
 };

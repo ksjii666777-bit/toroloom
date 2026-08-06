@@ -324,4 +324,8 @@ export default {
     zeroPlaceholder: '0.00',
     tradeLogCount: 'Trade Log ({{count}} trades)',
     backtestSummary: '{{count}} trades · 1 year mock data · {{symbol}}',
+    cryptoTitle: 'Crypto Trading',
+    marketCap: 'Market Cap',
+    noCoinsFound: 'No coins found',
+    cryptoHoldings: 'Crypto Holdings',
 };
