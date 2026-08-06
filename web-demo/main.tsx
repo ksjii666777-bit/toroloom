@@ -30,6 +30,7 @@ import SIPCalculator from '../src/screens/calculators/SIPCalculator';
 import EMICalculator from '../src/screens/calculators/EMICalculator';
 import LumpsumCalculator from '../src/screens/calculators/LumpsumCalculator';
 import TaxCalculator from '../src/screens/calculators/TaxCalculator';
+import StepUpSipScreen from '../src/screens/calculators/StepUpSipScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { configureApi } from '../src/services/api/client';
 import { useThemeStore } from '../src/store/themeStore';
@@ -367,7 +368,7 @@ function DemoApp() {
       </section>
 
       <section>
-        <h2>More interactive calculators (EMI, Lumpsum, Tax)</h2>
+        <h2>More interactive calculators (EMI, Lumpsum, Tax, Step-Up SIP)</h2>
         <div className="calc-grid">
           <div className="card calc-card">
             <EMICalculator />
@@ -378,6 +379,9 @@ function DemoApp() {
         </div>
         <div className="card calc-card" style={{ marginTop: 12 }}>
           <TaxCalculator />
+        </div>
+        <div className="card calc-card" style={{ marginTop: 12 }}>
+          <StepUpSipScreen />
         </div>
       </section>
 

@@ -52,13 +52,19 @@ can be verified live — without booting the full native app.
    STCG/LTCG toggle with dynamic rate labels, LTCG ₹1L exemption, surcharge
    + cess breakdown. Interactive (LTCG ₹35,000 profit → ₹0 tax; switching to
    STCG → ₹7,280, verified in Chrome).
-14. **Real theme toggle** — the outlined button calls the app's real
+14. **StepUpSipScreen** — real mutual-fund SIP step-up screen driven by the
+   real `useMutualFundStore` (seeded with the app's `mockSIPs`: Parag Parikh
+   ₹5K + SBI Bluechip ₹3K). Bottom-sheet config modal with percent presets,
+   frequency toggle and live projection (`Now ₹5,000 → After 10 yrs
+   ₹12,969` for 10% yearly — verified in Chrome). Enabling flips the card
+   to `Step-Up Active` with summary + mini chart via the real store action.
+15. **Real theme toggle** — the outlined button calls the app's real
     `useTheme().toggleTheme()` (zustand store + persistence), flipping
     components between dark (`COLORS`) and light (`LIGHT_COLORS`).
     Badges use the real `darkMode.*` namespace keys.
-15. **Strings across 16 namespaces** — live `t()` output with the English
+16. **Strings across 16 namespaces** — live `t()` output with the English
     original shown below each key.
-16. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
+17. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
     `components.stockAnalysis.shares` with `{{count}}`.
 
 ### Scripted verification (no clicks needed)
