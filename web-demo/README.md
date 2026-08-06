@@ -58,13 +58,22 @@ can be verified live — without booting the full native app.
    frequency toggle and live projection (`Now ₹5,000 → After 10 yrs
    ₹12,969` for 10% yearly — verified in Chrome). Enabling flips the card
    to `Step-Up Active` with summary + mini chart via the real store action.
-15. **Real theme toggle** — the outlined button calls the app's real
+15. **CurrencyConverterScreen** — real screen wired to the app's live-forex
+   pipeline (`useLiveConversion` → `useForexRates` → Frankfurter API +
+   WebSocket feed). With the demo's dead endpoint it degrades gracefully to
+   static rates + `Mock` badge (`1 USD = 83.45 INR`); currency chips, swap,
+   save-to-recent and favourite-pair quick reference all interactive.
+   Bonus: surfaced & fixed a real app bug — `RealWebSocketService` reconnect
+   fired a fire-and-forget `connect()` whose rejection produced an unhandled
+   `Uncaught (in promise)`; now `.catch`-guarded (verified: 12s of reconnect
+   cycles, zero unhandled rejections).
+16. **Real theme toggle** — the outlined button calls the app's real
     `useTheme().toggleTheme()` (zustand store + persistence), flipping
     components between dark (`COLORS`) and light (`LIGHT_COLORS`).
     Badges use the real `darkMode.*` namespace keys.
-16. **Strings across 16 namespaces** — live `t()` output with the English
+17. **Strings across 16 namespaces** — live `t()` output with the English
     original shown below each key.
-17. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
+18. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
     `components.stockAnalysis.shares` with `{{count}}`.
 
 ### Scripted verification (no clicks needed)
@@ -107,6 +116,7 @@ render correctly.
 | `expo-modules-core` | `web-demo/stubs/expo-modules-core.ts` (no-op module surface) |
 | `react-native-razorpay` | `web-demo/stubs/razorpay.ts` (no-op checkout) |
 | `@react-navigation/native` | `web-demo/stubs/react-navigation.ts` (no-op `useNavigation`) |
+| `react-dom/client` types | `web-demo/react-dom-client.d.ts` (createRoot shim — `@types/react-dom` not installed) |
 
 `resolve.extensions` lists `.web.*` variants FIRST so platform implementations
 are picked (e.g. `expo-linear-gradient` renders its real CSS-gradient web

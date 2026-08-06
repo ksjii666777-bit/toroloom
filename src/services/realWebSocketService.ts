@@ -125,7 +125,12 @@ export class RealWebSocketService implements WebSocketService {
         this.onConnectionChange?.(false);
 
         if (this.shouldReconnect) {
-          this.reconnectTimer = setTimeout(() => this.connect(), 3000);
+          this.reconnectTimer = setTimeout(() => {
+            // Fire-and-forget reconnect — swallow the rejection so a failed
+            // retry (e.g. backend offline) doesn't surface as an unhandled
+            // promise rejection in the console.
+            this.connect().catch(() => {});
+          }, 3000);
         }
       };
 

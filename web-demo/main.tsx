@@ -31,11 +31,13 @@ import EMICalculator from '../src/screens/calculators/EMICalculator';
 import LumpsumCalculator from '../src/screens/calculators/LumpsumCalculator';
 import TaxCalculator from '../src/screens/calculators/TaxCalculator';
 import StepUpSipScreen from '../src/screens/calculators/StepUpSipScreen';
+import CurrencyConverterScreen from '../src/screens/calculators/CurrencyConverterScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { configureApi } from '../src/services/api/client';
 import { useThemeStore } from '../src/store/themeStore';
 import { useT } from '../src/hooks/useT';
-import type { Holding, SectorMetrics, Stock } from '../src/types';
+import type { Holding, Stock } from '../src/types';
+import type { SectorMetrics } from '../src/utils/analytics/periodAnalytics';
 import type { DetectedPattern } from '../src/components/chart/patternDetection';
 
 // Point the API client at a dead endpoint so the real connectivity health-check
@@ -368,7 +370,7 @@ function DemoApp() {
       </section>
 
       <section>
-        <h2>More interactive calculators (EMI, Lumpsum, Tax, Step-Up SIP)</h2>
+        <h2>More interactive calculators (EMI, Lumpsum, Tax, Step-Up SIP, Currency)</h2>
         <div className="calc-grid">
           <div className="card calc-card">
             <EMICalculator />
@@ -382,6 +384,9 @@ function DemoApp() {
         </div>
         <div className="card calc-card" style={{ marginTop: 12 }}>
           <StepUpSipScreen />
+        </div>
+        <div className="card calc-card" style={{ marginTop: 12 }}>
+          <CurrencyConverterScreen />
         </div>
       </section>
 
