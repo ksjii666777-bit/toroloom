@@ -97,7 +97,7 @@ export default function PortfolioScreen({ navigation }: any) {
             <PortfolioSkeleton />
             <SkeletonBlock width="100%" height={40} borderRadius={8} />
             <View style={{ height: SPACING.lg }} />
-            {[1, 2, 3].map(i => <SkeletonCard key={i} hasAvatar hasAction={false} />)}
+            {[1, 2, 3].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction={false} />)}
           </View>
         </ScrollView>
       </View>

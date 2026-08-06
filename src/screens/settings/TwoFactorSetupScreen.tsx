@@ -236,8 +236,8 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
             t('twoFactor.benefit1'),
             t('twoFactor.benefit2'),
             t('twoFactor.benefit3'),
-          ].map((benefit, i) => (
-            <View key={i} style={styles.benefitRow}>
+          ].map((benefit) => (
+            <View key={benefit} style={styles.benefitRow}>
               <Ionicons name="checkmark-circle" size={16} color={colors.success} />
               <Text style={styles.benefitText}>{benefit}</Text>
             </View>
@@ -386,8 +386,8 @@ export default function TwoFactorSetupScreen({ navigation }: any) {
         </View>
 
         <View style={[styles.codesGrid, { backgroundColor: colors.bgInput }]}>
-          {setupData?.backupCodes.map((code, i) => (
-            <View key={i} style={styles.codeRow}>
+          {setupData?.backupCodes.map((code) => (
+            <View key={code} style={styles.codeRow}>
               <Ionicons name="key-outline" size={14} color={colors.textMuted} />
               <Text style={styles.codeText}>{code}</Text>
             </View>

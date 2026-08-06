@@ -611,7 +611,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: any) {
               {t('reports.perFileBreakdown')}
             </Text>
             {batchResult.files.map((file, i) => (
-              <View key={i} style={[styles.glassCard, { marginBottom: SPACING.sm }]}>
+              <View key={file.filename} style={[styles.glassCard, { marginBottom: SPACING.sm }]}>
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => setExpandedFileIndex(expandedFileIndex === i ? null : i)}

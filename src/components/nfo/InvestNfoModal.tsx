@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import type { NFOItem } from '../../types';
 import { useNFOStore } from '../../store/nfoStore';
@@ -44,6 +45,7 @@ export default function InvestNfoModal({
   nfo, visible, onClose, onSuccess,
 }: InvestNfoModalProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const applyForNFO = useNFOStore((s) => s.applyForNFO);
 
@@ -62,9 +64,9 @@ export default function InvestNfoModal({
   const handleSubmit = () => {
     if (!isValid) {
       if (investAmount < nfo.minInvestment) {
-        Alert.alert('Minimum Investment', `Minimum investment is ${formatCompact(nfo.minInvestment)}`);
+        Alert.alert(t('nfo.minInvestAlert'), t('nfo.minInvestAlertMsg', { amount: formatCompact(nfo.minInvestment) }));
       } else if (nfo.maxInvestment > 0 && investAmount > nfo.maxInvestment) {
-        Alert.alert('Maximum Investment', `Maximum investment is ${formatCompact(nfo.maxInvestment)}`);
+        Alert.alert(t('nfo.maxInvestAlert'), t('nfo.maxInvestAlertMsg', { amount: formatCompact(nfo.maxInvestment) }));
       }
       return;
     }
@@ -74,8 +76,12 @@ export default function InvestNfoModal({
       setSubmitting(false);
       applyForNFO(nfo, investAmount);
       Alert.alert(
-        'Application Submitted ✅',
-        `${nfo.schemeName}\nInvestment: ${formatCompact(investAmount)}\nAMC: ${nfo.amcName}`,
+        t('nfo.submittedTitle'),
+        t('nfo.submittedMsg', {
+          scheme: nfo.schemeName,
+          amount: formatCompact(investAmount),
+          amc: nfo.amcName,
+        }),
       );
       onSuccess?.();
       onClose();
@@ -99,7 +105,7 @@ export default function InvestNfoModal({
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
-            <Text style={[styles.title, { color: colors.text }]}>Invest in NFO</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('nfo.investTitle')}</Text>
             <View style={{ width: 24 }} />
           </View>
 
@@ -112,13 +118,13 @@ export default function InvestNfoModal({
               <View style={{ flex: 1 }}>
                 <Text style={[styles.schemeName, { color: colors.text }]}>{nfo.schemeName}</Text>
                 <Text style={[styles.schemeMeta, { color: colors.textMuted }]}>
-                  {nfo.amcName} · Min: {formatCompact(nfo.minInvestment)}
+                  {nfo.amcName} · {t('nfo.minPrefix', { amount: formatCompact(nfo.minInvestment) })}
                 </Text>
               </View>
             </View>
 
             {/* Quick Amount Buttons */}
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Quick Select</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>{t('nfo.quickSelect')}</Text>
             <View style={styles.quickRow}>
               {quickAmounts.map((amt, i) => (
                 <TouchableOpacity
@@ -140,7 +146,7 @@ export default function InvestNfoModal({
             </View>
 
             {/* Custom Amount */}
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Custom Amount</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>{t('nfo.customAmount')}</Text>
             <View style={[styles.amountRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <Text style={[styles.currencyPrefix, { color: colors.textMuted }]}>₹</Text>
               <TextInput
@@ -157,12 +163,14 @@ export default function InvestNfoModal({
             <View style={[styles.rangeHint, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
               <Ionicons name="information-circle" size={12} color={colors.primary} />
               <Text style={[styles.rangeText, { color: colors.textMuted }]}>
-                Min: {formatCompact(nfo.minInvestment)}{nfo.maxInvestment > 0 ? ` · Max: ${formatCompact(nfo.maxInvestment)}` : ''}
+                {nfo.maxInvestment > 0
+                  ? t('nfo.rangeTextMax', { min: formatCompact(nfo.minInvestment), max: formatCompact(nfo.maxInvestment) })
+                  : t('nfo.rangeText', { min: formatCompact(nfo.minInvestment) })}
               </Text>
             </View>
 
             {/* Allocation Preview */}
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Asset Allocation</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>{t('nfo.assetAllocation')}</Text>
             <View style={styles.allocationList}>
               {nfo.assetAllocation.map((item, i) => (
                 <View key={i} style={styles.allocationItem}>
@@ -177,7 +185,7 @@ export default function InvestNfoModal({
             <View style={[styles.fmBox, { backgroundColor: '#3B82F610', borderColor: '#3B82F630' }]}>
               <Ionicons name="person-circle" size={16} color={colors.primary} />
               <Text style={[styles.fmText, { color: colors.textMuted }]}>
-                Fund Manager: {nfo.fundManagers.join(', ')}
+                {t('nfo.fundManager', { names: nfo.fundManagers.join(', ') })}
               </Text>
             </View>
 
@@ -196,10 +204,10 @@ export default function InvestNfoModal({
                 <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
                 <Text style={styles.submitText}>
                   {submitting
-                    ? 'Processing...'
+                    ? t('nfo.processing')
                     : isValid
-                      ? `Invest ${formatCompact(investAmount)}`
-                      : `Min: ${formatCompact(nfo.minInvestment)}`}
+                      ? t('nfo.investAmount', { amount: formatCompact(investAmount) })
+                      : t('nfo.minSubmit', { amount: formatCompact(nfo.minInvestment) })}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -208,7 +216,7 @@ export default function InvestNfoModal({
             <View style={[styles.infoBox, { backgroundColor: '#3B82F610', borderColor: '#3B82F630' }]}>
               <Ionicons name="information-circle" size={14} color={colors.primary} />
               <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                Your investment will be allocated at the NFO price of ₹10/unit. Actual NAV will be declared after the NFO closes.
+                {t('nfo.infoText')}
               </Text>
             </View>
 

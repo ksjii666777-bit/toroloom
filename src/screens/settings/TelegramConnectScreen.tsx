@@ -297,8 +297,8 @@ export default function TelegramConnectScreen({ navigation }: any) {
             { icon: 'checkmark-circle', label: 'Trade Confirms', color: '#3B82F6' },
             { icon: 'pie-chart', label: 'Portfolio Updates', color: '#8B5CF6' },
             { icon: 'newspaper', label: 'Market News', color: '#FFC107' },
-          ].map((feat, i) => (
-            <View key={i} style={styles.featureItem}>
+          ].map((feat) => (
+            <View key={feat.label} style={styles.featureItem}>
               <View style={[styles.featureIcon, { backgroundColor: feat.color + '20' }]}>
                 <Ionicons name={feat.icon as any} size={20} color={feat.color} />
               </View>

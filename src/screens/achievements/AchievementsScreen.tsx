@@ -150,8 +150,8 @@ export default function AchievementsScreen({ navigation }: any) {
         {/* Next Rewards Preview */}
         <Text style={styles.sectionTitle}>Upcoming Challenges</Text>
         <View style={styles.rewardsRow}>
-          {nextRewards.map((reward, i) => (
-            <View key={i} style={styles.rewardCard}>
+          {nextRewards.map((reward) => (
+            <View key={reward.label} style={styles.rewardCard}>
               <Text style={styles.rewardIcon}>{reward.icon}</Text>
               <Text style={styles.rewardLabel}>{reward.label}</Text>
               <Text style={styles.rewardXp}>+{reward.xp} XP</Text>

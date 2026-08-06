@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { timeAgo } from '../../utils/formatters';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
@@ -25,32 +26,32 @@ type DashboardTab = 'active' | 'myapps';
 
 type NFOFilter = 'all' | 'open' | 'upcoming' | 'closed';
 
-const FILTERS: { key: NFOFilter; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: 'apps' },
-  { key: 'open', label: 'Open', icon: 'pricetag' },
-  { key: 'upcoming', label: 'Upcoming', icon: 'calendar' },
-  { key: 'closed', label: 'Closed', icon: 'lock-closed' },
+const FILTERS: { key: NFOFilter; labelKey: string; icon: string }[] = [
+  { key: 'all', labelKey: 'nfo.filterAll', icon: 'apps' },
+  { key: 'open', labelKey: 'nfo.filterOpen', icon: 'pricetag' },
+  { key: 'upcoming', labelKey: 'nfo.filterUpcoming', icon: 'calendar' },
+  { key: 'closed', labelKey: 'nfo.filterClosed', icon: 'lock-closed' },
 ];
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  open: { label: 'Open Now', color: '#00E676', bgColor: '#00E67620' },
-  upcoming: { label: 'Upcoming', color: '#3B82F6', bgColor: '#3B82F620' },
-  closed: { label: 'Closed', color: '#FFAB40', bgColor: '#FFAB4020' },
-  matured: { label: 'Matured', color: '#64748B', bgColor: '#64748B20' },
+const STATUS_CONFIG: Record<string, { labelKey: string; color: string; bgColor: string }> = {
+  open: { labelKey: 'nfo.statusOpen', color: '#00E676', bgColor: '#00E67620' },
+  upcoming: { labelKey: 'nfo.statusUpcoming', color: '#3B82F6', bgColor: '#3B82F620' },
+  closed: { labelKey: 'nfo.statusClosed', color: '#FFAB40', bgColor: '#FFAB4020' },
+  matured: { labelKey: 'nfo.statusMatured', color: '#64748B', bgColor: '#64748B20' },
 };
 
-const RISK_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: 'Low Risk', color: '#00E676' },
-  moderate: { label: 'Moderate', color: '#3B82F6' },
-  moderately_high: { label: 'Mod. High', color: '#FF9800' },
-  high: { label: 'High Risk', color: '#FF5252' },
+const RISK_CONFIG: Record<string, { labelKey: string; color: string }> = {
+  low: { labelKey: 'nfo.riskLow', color: '#00E676' },
+  moderate: { labelKey: 'nfo.riskModerate', color: '#3B82F6' },
+  moderately_high: { labelKey: 'nfo.riskModHigh', color: '#FF9800' },
+  high: { labelKey: 'nfo.riskHigh', color: '#FF5252' },
 };
 
-const APP_STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; icon: string }> = {
-  submitted: { label: 'Submitted', color: '#3B82F6', bgColor: '#3B82F620', icon: 'send-outline' },
-  allotted: { label: 'Allotted ✅', color: '#00E676', bgColor: '#00E67620', icon: 'checkmark-circle' },
-  in_progress: { label: 'In Progress', color: '#FFAB40', bgColor: '#FFAB4020', icon: 'hourglass-outline' },
-  matured: { label: 'Matured', color: '#64748B', bgColor: '#64748B20', icon: 'flag-outline' },
+const APP_STATUS_CONFIG: Record<string, { labelKey: string; color: string; bgColor: string; icon: string }> = {
+  submitted: { labelKey: 'nfo.appSubmitted', color: '#3B82F6', bgColor: '#3B82F620', icon: 'send-outline' },
+  allotted: { labelKey: 'nfo.appAllotted', color: '#00E676', bgColor: '#00E67620', icon: 'checkmark-circle' },
+  in_progress: { labelKey: 'nfo.appInProgress', color: '#FFAB40', bgColor: '#FFAB4020', icon: 'hourglass-outline' },
+  matured: { labelKey: 'nfo.appMatured', color: '#64748B', bgColor: '#64748B20', icon: 'flag-outline' },
 };
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
@@ -75,11 +76,12 @@ function formatCr(num: number): string {
 // ──── Status Badge ─────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useT();
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.upcoming;
   return (
     <View style={[badgeStyles.badge, { backgroundColor: config.bgColor }]}>
       <View style={[badgeStyles.dot, { backgroundColor: config.color }]} />
-      <Text style={[badgeStyles.label, { color: config.color }]}>{config.label}</Text>
+      <Text style={[badgeStyles.label, { color: config.color }]}>{t(config.labelKey)}</Text>
     </View>
   );
 }
@@ -93,11 +95,12 @@ const badgeStyles = StyleSheet.create({
 // ──── Risk Badge ───────────────────────────────────────────────────────────
 
 function RiskBadge({ level }: { level: string }) {
+  const { t } = useT();
   const config = RISK_CONFIG[level] || RISK_CONFIG.moderate;
   return (
     <View style={[riskStyles.badge, { backgroundColor: config.color + '20', borderColor: config.color + '40' }]}>
       <View style={[riskStyles.dot, { backgroundColor: config.color }]} />
-      <Text style={[riskStyles.label, { color: config.color }]}>{config.label}</Text>
+      <Text style={[riskStyles.label, { color: config.color }]}>{t(config.labelKey)}</Text>
     </View>
   );
 }
@@ -111,11 +114,12 @@ const riskStyles = StyleSheet.create({
 // ──── App Status Badge ─────────────────────────────────────────────────────
 
 function AppStatusBadge({ status }: { status: string }) {
+  const { t } = useT();
   const config = APP_STATUS_CONFIG[status] || APP_STATUS_CONFIG.submitted;
   return (
     <View style={[appBadgeStyles.badge, { backgroundColor: config.bgColor, borderColor: config.color + '30' }]}>
       <Ionicons name={config.icon as any} size={12} color={config.color} />
-      <Text style={[appBadgeStyles.label, { color: config.color }]}>{config.label}</Text>
+      <Text style={[appBadgeStyles.label, { color: config.color }]}>{t(config.labelKey)}</Text>
     </View>
   );
 }
@@ -149,6 +153,7 @@ function NFOCard({
 }: {
   nfo: NFOItem; onPress: () => void; onInvest?: () => void; colors: any;
 }) {
+  const { t } = useT();
   const canInvest = nfo.subscriptionStatus === 'open';
   const collectedPercent = Math.min((nfo.collectedAmount / nfo.targetSize) * 100, 100);
 
@@ -183,24 +188,24 @@ function NFOCard({
         <View style={cardStyles.managerRow}>
           <Ionicons name="person-outline" size={12} color={colors.textMuted} />
           <Text style={[cardStyles.managerText, { color: colors.textMuted }]}>
-            Fund Manager: {nfo.fundManagers.join(', ')}
+            {t('nfo.fundManager', { names: nfo.fundManagers.join(', ') })}
           </Text>
         </View>
 
         {/* Investment Grid */}
         <View style={[cardStyles.gridRow, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
           <View style={cardStyles.gridItem}>
-            <Text style={[cardStyles.gridLabel, { color: colors.textMuted }]}>Min Invest</Text>
+            <Text style={[cardStyles.gridLabel, { color: colors.textMuted }]}>{t('nfo.minInvest')}</Text>
             <Text style={[cardStyles.gridValue, { color: colors.text }]}>{formatCompact(nfo.minInvestment)}</Text>
           </View>
           <View style={[cardStyles.gridDivider, { backgroundColor: colors.divider }]} />
           <View style={cardStyles.gridItem}>
-            <Text style={[cardStyles.gridLabel, { color: colors.textMuted }]}>Expense</Text>
+            <Text style={[cardStyles.gridLabel, { color: colors.textMuted }]}>{t('nfo.expense')}</Text>
             <Text style={[cardStyles.gridValue, { color: colors.text }]}>{nfo.expenseRatio}%</Text>
           </View>
           <View style={[cardStyles.gridDivider, { backgroundColor: colors.divider }]} />
           <View style={cardStyles.gridItem}>
-            <Text style={[cardStyles.gridLabel, { color: colors.textMuted }]}>Target</Text>
+            <Text style={[cardStyles.gridLabel, { color: colors.textMuted }]}>{t('nfo.target')}</Text>
             <Text style={[cardStyles.gridValue, { color: colors.text }]}>{formatCr(nfo.targetSize)}</Text>
           </View>
         </View>
@@ -211,7 +216,11 @@ function NFOCard({
           <View style={{ flex: 1 }}>
             <View style={cardStyles.colLabelRow}>
               <Text style={[cardStyles.colLabel, { color: colors.textMuted }]}>
-                Collected: {formatCr(nfo.collectedAmount)} of {formatCr(nfo.targetSize)} ({collectedPercent.toFixed(0)}%)
+                {t('nfo.collectedOf', {
+                  collected: formatCr(nfo.collectedAmount),
+                  target: formatCr(nfo.targetSize),
+                  percent: collectedPercent.toFixed(0),
+                })}
               </Text>
             </View>
             <View style={[cardStyles.colBar, { backgroundColor: colors.bgInput }]}>
@@ -223,7 +232,7 @@ function NFOCard({
             </View>
           </View>
           <Text style={[cardStyles.investorCount, { color: colors.textMuted }]}>
-            {(nfo.totalInvestors / 1000).toFixed(1)}K investors
+            {t('nfo.investors', { count: (nfo.totalInvestors / 1000).toFixed(1) })}
           </Text>
         </View>
 
@@ -233,13 +242,13 @@ function NFOCard({
             <View style={cardStyles.dateItem}>
               <Ionicons name="calendar-outline" size={10} color={colors.textMuted} />
               <Text style={[cardStyles.dateText, { color: colors.textMuted }]}>
-                Open: {formatDate(nfo.openDate)}
+                {t('nfo.openDate', { date: formatDate(nfo.openDate) })}
               </Text>
             </View>
             <View style={cardStyles.dateItem}>
               <Ionicons name="flag-outline" size={10} color={colors.textMuted} />
               <Text style={[cardStyles.dateText, { color: colors.textMuted }]}>
-                Close: {formatDate(nfo.closeDate)}
+                {t('nfo.closeDate', { date: formatDate(nfo.closeDate) })}
               </Text>
             </View>
           </View>
@@ -255,7 +264,7 @@ function NFOCard({
                 style={cardStyles.investGradient}
               >
                 <Ionicons name="wallet-outline" size={14} color="#FFFFFF" />
-                <Text style={cardStyles.investText}>Invest Now</Text>
+                <Text style={cardStyles.investText}>{t('nfo.investNow')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           )}
@@ -302,6 +311,7 @@ const cardStyles = StyleSheet.create({
 // ──── Application Card ─────────────────────────────────────────────────────
 
 function ApplicationCard({ app, colors }: { app: NFOApplication; colors: any }) {
+  const { t } = useT();
   const _config = APP_STATUS_CONFIG[app.status] || APP_STATUS_CONFIG.submitted;
   const isPositive = app.returnPercent ? app.returnPercent >= 0 : false;
 
@@ -322,17 +332,17 @@ function ApplicationCard({ app, colors }: { app: NFOApplication; colors: any }) 
       {/* Details */}
       <View style={[appCardStyles.details, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
         <View style={appCardStyles.detailItem}>
-          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>Invested</Text>
+          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>{t('nfo.invested')}</Text>
           <Text style={[appCardStyles.detailValue, { color: colors.text }]}>{formatCompact(app.amount)}</Text>
         </View>
         <View style={[appCardStyles.detailDivider, { backgroundColor: colors.divider }]} />
         <View style={appCardStyles.detailItem}>
-          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>NAV</Text>
+          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>{t('nfo.nav')}</Text>
           <Text style={[appCardStyles.detailValue, { color: colors.text }]}>₹{app.currentNav.toFixed(2)}</Text>
         </View>
         <View style={[appCardStyles.detailDivider, { backgroundColor: colors.divider }]} />
         <View style={appCardStyles.detailItem}>
-          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>Current</Text>
+          <Text style={[appCardStyles.detailLabel, { color: colors.textMuted }]}>{t('nfo.current')}</Text>
           <Text style={[appCardStyles.detailValue, { color: colors.text }]}>{formatCompact(app.currentValue)}</Text>
         </View>
       </View>
@@ -345,7 +355,7 @@ function ApplicationCard({ app, colors }: { app: NFOApplication; colors: any }) 
         }]}>
           <Ionicons name={isPositive ? 'trending-up' : 'trending-down'} size={14} color={isPositive ? colors.marketUp : colors.marketDown} />
           <Text style={[appCardStyles.returnValue, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
-            {isPositive ? '+' : ''}{app.returnPercent.toFixed(1)}% · {formatCompact(app.currentValue - app.amount)} return
+            {t('nfo.returnLabel', { value: `${isPositive ? '+' : ''}${app.returnPercent.toFixed(1)}% · ${formatCompact(app.currentValue - app.amount)}` })}
           </Text>
         </View>
       )}
@@ -353,11 +363,11 @@ function ApplicationCard({ app, colors }: { app: NFOApplication; colors: any }) 
       {/* Applied date */}
       <View style={appCardStyles.footer}>
         <Text style={[appCardStyles.footerText, { color: colors.textMuted }]}>
-          Applied: {formatDate(app.appliedAt)}
+          {t('nfo.applied', { date: formatDate(app.appliedAt) })}
         </Text>
         {app.allotmentDate && (
           <Text style={[appCardStyles.footerText, { color: colors.textMuted }]}>
-            Allotted: {formatDate(app.allotmentDate)}
+            {t('nfo.allotted', { date: formatDate(app.allotmentDate) })}
           </Text>
         )}
       </View>
@@ -388,6 +398,7 @@ const appCardStyles = StyleSheet.create({
 
 export default function NFODashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const [activeTab, setActiveTab] = useState<DashboardTab>('active');
@@ -453,16 +464,16 @@ export default function NFODashboardScreen({ navigation }: any) {
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={[styles.title, { color: colors.text }]}>NFO Dashboard</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('nfo.dashboardTitle')}</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
               {counts.open > 0
-                ? `${counts.open} open · ${counts.upcoming} upcoming · ${counts.closed} closed`
-                : `${appStats.total} investments tracked`}
+                ? t('nfo.subtitleOpen', { open: counts.open, upcoming: counts.upcoming, closed: counts.closed })
+                : t('nfo.subtitleInvestments', { count: appStats.total })}
             </Text>
             <View style={styles.refreshRow}>
               <Ionicons name="refresh" size={10} color={colors.textMuted} />
               <Text style={[styles.refreshText, { color: colors.textMuted }]}>
-                Updated {timeAgo(lastRefreshedAt)}
+                {t('nfo.updated', { time: timeAgo(lastRefreshedAt) })}
               </Text>
             </View>
           </View>
@@ -482,7 +493,7 @@ export default function NFODashboardScreen({ navigation }: any) {
           >
             <Ionicons name="leaf" size={14} color={activeTab === 'active' ? '#FFFFFF' : colors.textMuted} />
             <Text style={[styles.tabText, { color: activeTab === 'active' ? '#FFFFFF' : colors.textMuted }]}>
-              Active NFOs
+              {t('nfo.tabActiveNfos')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -491,7 +502,7 @@ export default function NFODashboardScreen({ navigation }: any) {
           >
             <Ionicons name="wallet" size={14} color={activeTab === 'myapps' ? '#FFFFFF' : colors.textMuted} />
             <Text style={[styles.tabText, { color: activeTab === 'myapps' ? '#FFFFFF' : colors.textMuted }]}>
-              My Investments ({appStats.total})
+              {t('nfo.tabMyInvestments', { count: appStats.total })}
             </Text>
           </TouchableOpacity>
         </View>
@@ -502,7 +513,7 @@ export default function NFODashboardScreen({ navigation }: any) {
         <View style={[styles.successBanner, { backgroundColor: '#00E67615', borderColor: '#00E67630' }]}>
           <Ionicons name="checkmark-circle" size={16} color="#00E676" />
           <Text style={styles.successText}>
-            Invested in {lastInvestedNFO} ✅
+            {t('nfo.investedIn', { name: lastInvestedNFO })}
           </Text>
         </View>
       )}
@@ -526,7 +537,7 @@ export default function NFODashboardScreen({ navigation }: any) {
               >
                 <Ionicons name={f.icon as any} size={13} color={activeFilter === f.key ? '#FFFFFF' : colors.textSecondary} />
                 <Text style={[styles.filterText, { color: activeFilter === f.key ? '#FFFFFF' : colors.textSecondary }]}>
-                  {f.label}
+                  {t(f.labelKey)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -536,9 +547,9 @@ export default function NFODashboardScreen({ navigation }: any) {
           {filteredNFOs.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="leaf-outline" size={48} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No NFOs found</Text>
+              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('nfo.noNfos')}</Text>
               <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                Check back later for new fund offers
+                {t('nfo.noNfosSubtitle')}
               </Text>
             </View>
           ) : (
@@ -556,7 +567,7 @@ export default function NFODashboardScreen({ navigation }: any) {
               }
             >
               <Text style={[styles.countText, { color: colors.textMuted }]}>
-                Showing {filteredNFOs.length} NFO{filteredNFOs.length !== 1 ? 's' : ''}
+                {t('nfo.showingNfos', { count: filteredNFOs.length })}
               </Text>
               {filteredNFOs.map((nfo) => (
                 <NFOCard
@@ -579,26 +590,26 @@ export default function NFODashboardScreen({ navigation }: any) {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: SPACING.sm }}>
                 <View style={[styles.statChip, { backgroundColor: '#3B82F620', borderColor: '#3B82F640' }]}>
                   <Text style={[styles.statChipValue, { color: '#3B82F6' }]}>{appStats.total}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Total</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('nfo.statTotal')}</Text>
                 </View>
                 <View style={[styles.statChip, { backgroundColor: '#3B82F620', borderColor: '#3B82F640' }]}>
                   <Text style={[styles.statChipValue, { color: '#3B82F6' }]}>{appStats.submitted}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Active</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('nfo.statActive')}</Text>
                 </View>
                 <View style={[styles.statChip, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
                   <Text style={[styles.statChipValue, { color: '#00E676' }]}>{appStats.allotted}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Allotted</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('nfo.statAllotted')}</Text>
                 </View>
                 <View style={[styles.statChip, { backgroundColor: '#FFAB4020', borderColor: '#FFAB4040' }]}>
                   <Text style={[styles.statChipValue, { color: '#FFAB40' }]}>{formatCompact(appStats.totalInvestment)}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Invested</Text>
+                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('nfo.statInvested')}</Text>
                 </View>
                 {appStats.totalReturn > 0 && (
                   <View style={[styles.statChip, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
                     <Text style={[styles.statChipValue, { color: '#00E676' }]}>
                       +{formatCompact(appStats.totalReturn)}
                     </Text>
-                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>Returns</Text>
+                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('nfo.statReturns')}</Text>
                   </View>
                 )}
               </ScrollView>
@@ -618,7 +629,7 @@ export default function NFODashboardScreen({ navigation }: any) {
                   onPress={() => setAppFilter(f)}
                 >
                   <Text style={[styles.appFilterText, { color: appFilter === f ? '#FFFFFF' : colors.textMuted }]}>
-                    {f === 'all' ? 'All' : f === 'submitted' ? 'Active' : f === 'allotted' ? '✅' : '📈'}
+                    {f === 'all' ? t('nfo.filterAll') : f === 'submitted' ? t('nfo.statActive') : f === 'allotted' ? '✅' : '📈'}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -629,9 +640,9 @@ export default function NFODashboardScreen({ navigation }: any) {
           {filteredApps.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="wallet-outline" size={48} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>No Investments</Text>
+              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('nfo.noInvestments')}</Text>
               <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                Invest in an open NFO to see it here
+                {t('nfo.noInvestmentsSubtitle')}
               </Text>
             </View>
           ) : (
@@ -649,7 +660,7 @@ export default function NFODashboardScreen({ navigation }: any) {
               }
             >
               <Text style={[styles.countText, { color: colors.textMuted }]}>
-                {filteredApps.length} investment{filteredApps.length !== 1 ? 's' : ''}
+                {t('nfo.investmentsCount', { count: filteredApps.length })}
               </Text>
               {filteredApps.map((app) => (
                 <ApplicationCard key={app.id} app={app} colors={colors} />

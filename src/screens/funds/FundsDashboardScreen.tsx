@@ -104,9 +104,9 @@ export default function FundsDashboardScreen({ navigation }: any) {
 
         {/* Quick Actions */}
         <View style={styles.quickActionsRow}>
-          {quickActions.map((action, i) => (
+          {quickActions.map((action) => (
             <TouchableOpacity
-              key={i}
+              key={action.screen}
               style={styles.quickAction}
               onPress={() => handleQuickAction(action.screen)}
             >

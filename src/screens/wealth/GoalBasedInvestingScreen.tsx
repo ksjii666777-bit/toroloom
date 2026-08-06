@@ -33,21 +33,21 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
 interface CategoryInfo {
   key: GoalCategory;
-  label: string;
+  labelKey: string;
   icon: string;
   color: string;
   suggestions: { label: string; amount: number }[];
 }
 
 const CATEGORIES: CategoryInfo[] = [
-  { key: 'emergency', label: 'Emergency Fund', icon: '🛡️', color: '#00C853', suggestions: [{ label: '3 Months', amount: 150000 }, { label: '6 Months', amount: 300000 }, { label: '12 Months', amount: 600000 }] },
-  { key: 'retirement', label: 'Retirement', icon: '🏖️', color: '#6C63FF', suggestions: [{ label: '₹1 Cr', amount: 10000000 }, { label: '₹3 Cr', amount: 30000000 }, { label: '₹5 Cr', amount: 50000000 }] },
-  { key: 'education', label: 'Education', icon: '🎓', color: '#3B82F6', suggestions: [{ label: '₹10L', amount: 1000000 }, { label: '₹25L', amount: 2500000 }, { label: '₹50L', amount: 5000000 }] },
-  { key: 'house', label: 'Buy a House', icon: '🏠', color: '#F59E0B', suggestions: [{ label: '₹20L Down', amount: 2000000 }, { label: '₹50L Down', amount: 5000000 }, { label: '₹1Cr Down', amount: 10000000 }] },
-  { key: 'travel', label: 'Travel/Vacation', icon: '✈️', color: '#06B6D4', suggestions: [{ label: '₹2L Trip', amount: 200000 }, { label: '₹5L Trip', amount: 500000 }, { label: '₹10L Trip', amount: 1000000 }] },
-  { key: 'wedding', label: 'Wedding', icon: '💒', color: '#EC4899', suggestions: [{ label: '₹10L', amount: 1000000 }, { label: '₹25L', amount: 2500000 }, { label: '₹50L', amount: 5000000 }] },
-  { key: 'vehicle', label: 'Vehicle', icon: '🚗', color: '#FF6B00', suggestions: [{ label: '₹5L Car', amount: 500000 }, { label: '₹10L Car', amount: 1000000 }, { label: '₹20L Car', amount: 2000000 }] },
-  { key: 'custom', label: 'Custom Goal', icon: '🎯', color: '#8B5CF6', suggestions: [{ label: '₹1L', amount: 100000 }, { label: '₹5L', amount: 500000 }, { label: '₹10L', amount: 1000000 }] },
+  { key: 'emergency', labelKey: 'wealth.catEmergency', icon: '🛡️', color: '#00C853', suggestions: [{ label: '3 Months', amount: 150000 }, { label: '6 Months', amount: 300000 }, { label: '12 Months', amount: 600000 }] },
+  { key: 'retirement', labelKey: 'wealth.catRetirement', icon: '🏖️', color: '#6C63FF', suggestions: [{ label: '₹1 Cr', amount: 10000000 }, { label: '₹3 Cr', amount: 30000000 }, { label: '₹5 Cr', amount: 50000000 }] },
+  { key: 'education', labelKey: 'wealth.catEducation', icon: '🎓', color: '#3B82F6', suggestions: [{ label: '₹10L', amount: 1000000 }, { label: '₹25L', amount: 2500000 }, { label: '₹50L', amount: 5000000 }] },
+  { key: 'house', labelKey: 'wealth.catHouse', icon: '🏠', color: '#F59E0B', suggestions: [{ label: '₹20L Down', amount: 2000000 }, { label: '₹50L Down', amount: 5000000 }, { label: '₹1Cr Down', amount: 10000000 }] },
+  { key: 'travel', labelKey: 'wealth.catTravel', icon: '✈️', color: '#06B6D4', suggestions: [{ label: '₹2L Trip', amount: 200000 }, { label: '₹5L Trip', amount: 500000 }, { label: '₹10L Trip', amount: 1000000 }] },
+  { key: 'wedding', labelKey: 'wealth.catWedding', icon: '💒', color: '#EC4899', suggestions: [{ label: '₹10L', amount: 1000000 }, { label: '₹25L', amount: 2500000 }, { label: '₹50L', amount: 5000000 }] },
+  { key: 'vehicle', labelKey: 'wealth.catVehicle', icon: '🚗', color: '#FF6B00', suggestions: [{ label: '₹5L Car', amount: 500000 }, { label: '₹10L Car', amount: 1000000 }, { label: '₹20L Car', amount: 2000000 }] },
+  { key: 'custom', labelKey: 'wealth.catCustom', icon: '🎯', color: '#8B5CF6', suggestions: [{ label: '₹1L', amount: 100000 }, { label: '₹5L', amount: 500000 }, { label: '₹10L', amount: 1000000 }] },
 ];
 
 const formatINR = (n: number) =>
@@ -97,15 +97,15 @@ export function GoalCreateScreen({ navigation }: any) {
 
   const handleCreate = useCallback(() => {
     if (!name.trim()) {
-      Alert.alert('Goal Name Required', 'Please enter a name for your goal.');
+      Alert.alert(t('wealth.goalNameRequired'), t('wealth.goalNameRequiredMsg'));
       return;
     }
     if (targetAmt <= 0) {
-      Alert.alert('Invalid Amount', 'Please enter a valid target amount.');
+      Alert.alert(t('wealth.invalidAmount'), t('wealth.invalidAmountMsg'));
       return;
     }
     if (years <= 0) {
-      Alert.alert('Invalid Timeframe', 'Please enter a valid number of years.');
+      Alert.alert(t('wealth.invalidTimeframe'), t('wealth.invalidTimeframeMsg'));
       return;
     }
 
@@ -126,10 +126,10 @@ export function GoalCreateScreen({ navigation }: any) {
       notes,
     });
 
-    Alert.alert('🎯 Goal Created!', `Your "${name}" goal has been created.`, [
-      { text: 'OK', onPress: () => navigation.goBack() },
+    Alert.alert(t('wealth.goalCreated'), t('wealth.goalCreatedMsg', { name }), [
+      { text: t('app.ok'), onPress: () => navigation.goBack() },
     ]);
-  }, [name, category, targetAmt, monthly, years, ret, priority, notes, catInfo, addGoal, navigation]);
+  }, [name, category, targetAmt, monthly, years, ret, priority, notes, catInfo, addGoal, navigation, t]);
 
   const inputStyle = (val: string) => ({
     backgroundColor: colors.bgInput,
@@ -144,23 +144,23 @@ export function GoalCreateScreen({ navigation }: any) {
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="close" size={24} color={colors.text} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Create Goal</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('wealth.createGoal')}</Text>
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Goal Name */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Goal Name</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('wealth.goalName')}</Text>
         <TextInput
           style={[styles.input, inputStyle(name)]}
           value={name}
           onChangeText={setName}
-          placeholder="e.g. Dream Home Down Payment"
+          placeholder={t('wealth.goalNamePlaceholder')}
           placeholderTextColor={colors.textMuted}
         />
 
         {/* Category */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>Category</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.category')}</Text>
         <View style={styles.categoryGrid}>
           {CATEGORIES.map(cat => {
             const isActive = category === cat.key;
@@ -174,14 +174,14 @@ export function GoalCreateScreen({ navigation }: any) {
                 }]}
               >
                 <Text style={{ fontSize: 20 }}>{cat.icon}</Text>
-                <Text style={[styles.categoryLabel, { color: isActive ? cat.color : colors.textMuted }]}>{cat.label}</Text>
+                <Text style={[styles.categoryLabel, { color: isActive ? cat.color : colors.textMuted }]}>{t(cat.labelKey)}</Text>
               </Pressable>
             );
           })}
         </View>
 
         {/* Target Amount */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>Target Amount</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.targetAmount')}</Text>
         <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: targetAmount ? colors.primary : colors.border }]}>
           <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
           <TextInput
@@ -209,7 +209,7 @@ export function GoalCreateScreen({ navigation }: any) {
         </View>
 
         {/* Timeframe */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>Target Timeframe (years)</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.targetTimeframe')}</Text>
         <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: targetYears ? colors.primary : colors.border, width: 120 }]}>
           <TextInput
             style={[styles.inputFlex, { color: colors.text }]}
@@ -217,7 +217,7 @@ export function GoalCreateScreen({ navigation }: any) {
             onChangeText={setTargetYears}
             keyboardType="numeric"
           />
-          <Text style={[styles.inputSuffix, { color: colors.textMuted }]}>yrs</Text>
+          <Text style={[styles.inputSuffix, { color: colors.textMuted }]}>{t('wealth.yrsSuffix')}</Text>
         </View>
         <View style={styles.suggestionRow}>
           {[1, 3, 5, 10, 15, 20].map(y => (
@@ -232,7 +232,7 @@ export function GoalCreateScreen({ navigation }: any) {
         </View>
 
         {/* Expected Return */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>Expected Return (% p.a.)</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.expectedReturn')}</Text>
         <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: expectedReturn ? colors.primary : colors.border, width: 100 }]}>
           <TextInput
             style={[styles.inputFlex, { color: colors.text }]}
@@ -255,7 +255,7 @@ export function GoalCreateScreen({ navigation }: any) {
         </View>
 
         {/* Priority */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>Priority</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.priority')}</Text>
         <View style={styles.priorityRow}>
           {(['low', 'medium', 'high'] as const).map(p => (
             <Pressable
@@ -267,7 +267,7 @@ export function GoalCreateScreen({ navigation }: any) {
               }]}
             >
               <Text style={[styles.priorityText, { color: priority === p ? (p === 'high' ? '#FF5252' : p === 'medium' ? '#FFC107' : '#00C853') : colors.textMuted }]}>
-                {p.charAt(0).toUpperCase() + p.slice(1)}
+                {p === 'low' ? t('wealth.priorityLow') : p === 'medium' ? t('wealth.priorityMedium') : t('wealth.priorityHigh')}
               </Text>
             </Pressable>
           ))}
@@ -276,18 +276,23 @@ export function GoalCreateScreen({ navigation }: any) {
         {/* SIP Estimate Card */}
         {targetAmt > 0 && years > 0 && ret > 0 && (
           <Animated.View entering={FadeInUp.duration(400)} style={[styles.sipEstimateCard, { backgroundColor: colors.bgCard, borderColor: colors.primary + '30' }]}>
-            <Text style={[styles.sipEstimateTitle, { color: colors.text }]}>📊 Monthly SIP Needed</Text>
+            <Text style={[styles.sipEstimateTitle, { color: colors.text }]}>{t('wealth.monthlySipNeeded')}</Text>
             <Text style={[styles.sipEstimateAmount, { color: colors.primary }]}>
               {formatCompactINR(estimatedSIP)}
             </Text>
             <Text style={[styles.sipEstimateNote, { color: colors.textMuted }]}>
-              Invest {formatCompactINR(estimatedSIP)}/month at {ret}% for {years} years to reach {formatCompactINR(targetAmt)}
+              {t('wealth.sipEstimateNote', {
+                amount: formatCompactINR(estimatedSIP),
+                return: ret,
+                years,
+                target: formatCompactINR(targetAmt),
+              })}
             </Text>
           </Animated.View>
         )}
 
         {/* Notes */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>Notes (optional)</Text>
+        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.notesOptional')}</Text>
         <TextInput
           style={[styles.textArea, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
           value={notes}
@@ -302,7 +307,7 @@ export function GoalCreateScreen({ navigation }: any) {
         <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.97} style={{ marginTop: SPACING.xl }}>
           <View style={[styles.createBtn, { backgroundColor: colors.primary }]}>
             <Ionicons name="flag" size={20} color="#fff" />
-            <Text style={styles.createBtnText}>Create Goal</Text>
+            <Text style={styles.createBtnText}>{t('wealth.createGoal')}</Text>
           </View>
         </AnimatedPressable>
 
@@ -318,6 +323,7 @@ export function GoalCreateScreen({ navigation }: any) {
 
 export function GoalDetailScreen({ route, navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { goalId } = route.params || {};
   const { goals, deleteGoal, contributeToGoal, getGoalProgress } = useWealthStore();
@@ -329,7 +335,7 @@ export function GoalDetailScreen({ route, navigation }: any) {
     return (
       <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
         <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>Goal not found</Text>
+        <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>{t('wealth.goalNotFound')}</Text>
       </View>
     );
   }
@@ -350,12 +356,12 @@ export function GoalDetailScreen({ route, navigation }: any) {
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Goal Details</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('wealth.goalDetails')}</Text>
           <Pressable
             onPress={() => {
-              Alert.alert('Delete Goal', `Are you sure you want to delete "${goal.name}"?`, [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: () => { deleteGoal(goal.id); navigation.goBack(); } },
+              Alert.alert(t('wealth.deleteGoal'), t('wealth.deleteGoalMsg', { name: goal.name }), [
+                { text: t('app.cancel'), style: 'cancel' },
+                { text: t('app.delete'), style: 'destructive', onPress: () => { deleteGoal(goal.id); navigation.goBack(); } },
               ]);
             }}
           >
@@ -370,11 +376,11 @@ export function GoalDetailScreen({ route, navigation }: any) {
           <Text style={{ fontSize: 48 }}>{goal.icon}</Text>
           <Text style={[styles.heroTitle, { color: colors.text }]}>{goal.name}</Text>
           <Text style={[styles.heroCategory, { color: goal.color }]}>
-            {CATEGORIES.find(c => c.key === goal.category)?.label || goal.category}
+            {t(CATEGORIES.find(c => c.key === goal.category)?.labelKey || 'wealth.catCustom')}
           </Text>
 
           <View style={styles.heroProgressContainer}>
-            <Text style={[styles.heroProgressText, { color: colors.text }]}>{progress.toFixed(1)}% complete</Text>
+            <Text style={[styles.heroProgressText, { color: colors.text }]}>{t('wealth.percentComplete', { progress: progress.toFixed(1) })}</Text>
             <View style={[styles.progressBarBg, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
               <View style={[styles.progressBarFill, { width: `${Math.min(100, progress)}%`, backgroundColor: goal.color }]} />
             </View>
@@ -385,17 +391,17 @@ export function GoalDetailScreen({ route, navigation }: any) {
         <View style={[styles.amountsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <View style={styles.amountsRow}>
             <View style={styles.amountsItem}>
-              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>Target</Text>
+              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.targetLabel')}</Text>
               <Text style={[styles.amountsValue, { color: colors.text }]}>{formatCompactINR(goal.targetAmount)}</Text>
             </View>
             <View style={[styles.amountsDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.amountsItem}>
-              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>Saved</Text>
+              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.saved')}</Text>
               <Text style={[styles.amountsValue, { color: goal.color }]}>{formatCompactINR(goal.currentAmount)}</Text>
             </View>
             <View style={[styles.amountsDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.amountsItem}>
-              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>Remaining</Text>
+              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.remaining')}</Text>
               <Text style={[styles.amountsValue, { color: '#FFC107' }]}>{formatCompactINR(remaining)}</Text>
             </View>
           </View>
@@ -406,27 +412,27 @@ export function GoalDetailScreen({ route, navigation }: any) {
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Ionicons name="calendar" size={16} color={colors.textMuted} />
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Target Date</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.targetDate')}</Text>
               <Text style={[styles.statValue, { color: colors.text }]}>
                 {targetDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
               </Text>
             </View>
             <View style={styles.statItem}>
               <Ionicons name="time" size={16} color={colors.textMuted} />
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Time Left</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>{monthsLeft} months</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.timeLeft')}</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>{t('wealth.monthsLeft', { count: monthsLeft })}</Text>
             </View>
           </View>
           <View style={[styles.statsDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Ionicons name="trending-up" size={16} color={colors.textMuted} />
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Monthly SIP</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.monthlySip')}</Text>
               <Text style={[styles.statValue, { color: colors.text }]}>{formatCompactINR(goal.monthlyContribution)}</Text>
             </View>
             <View style={styles.statItem}>
               <Ionicons name="pulse" size={16} color={colors.textMuted} />
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Required SIP</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.requiredSip')}</Text>
               <Text style={[styles.statValue, { color: '#FFC107' }]}>{formatCompactINR(sipRequired)}</Text>
             </View>
           </View>
@@ -434,7 +440,7 @@ export function GoalDetailScreen({ route, navigation }: any) {
 
         {/* Quick Contribute */}
         <View style={[styles.contributeCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.contributeTitle, { color: colors.text }]}>💰 Quick Contribute</Text>
+          <Text style={[styles.contributeTitle, { color: colors.text }]}>{t('wealth.quickContribute')}</Text>
           <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
             <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
             <TextInput
@@ -442,18 +448,18 @@ export function GoalDetailScreen({ route, navigation }: any) {
               value={addAmount}
               onChangeText={setAddAmount}
               keyboardType="numeric"
-              placeholder="Enter amount"
+              placeholder={t('wealth.enterAmount')}
               placeholderTextColor={colors.textMuted}
             />
             <Pressable
               onPress={() => {
                 const amt = parseFloat(addAmount);
-                if (amt > 0) { contributeToGoal(goal.id, amt); setAddAmount(''); Alert.alert('✅ Added!', `₹${amt.toLocaleString('en-IN')} added to "${goal.name}"`); }
-                else Alert.alert('Invalid Amount', 'Please enter a valid amount.');
+                if (amt > 0) { contributeToGoal(goal.id, amt); setAddAmount(''); Alert.alert(t('wealth.addedTitle'), t('wealth.addedMsg', { amount: amt.toLocaleString('en-IN'), name: goal.name })); }
+                else Alert.alert(t('wealth.invalidAmount'), t('wealth.invalidAmountMsg2'));
               }}
               style={[styles.contributeBtn, { backgroundColor: colors.primary }]}
             >
-              <Text style={styles.contributeBtnText}>Add</Text>
+              <Text style={styles.contributeBtnText}>{t('wealth.add')}</Text>
             </Pressable>
           </View>
           <View style={styles.quickAmtRow}>
@@ -472,20 +478,22 @@ export function GoalDetailScreen({ route, navigation }: any) {
         {/* Notes */}
         {goal.notes ? (
           <View style={[styles.notesCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.notesLabel, { color: colors.textMuted }]}>Notes</Text>
+            <Text style={[styles.notesLabel, { color: colors.textMuted }]}>{t('wealth.notes')}</Text>
             <Text style={[styles.notesText, { color: colors.text }]}>{goal.notes}</Text>
           </View>
         ) : null}
 
         {/* Priority Badge */}
         <View style={[styles.priorityCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.priorityCardLabel, { color: colors.textMuted }]}>Priority</Text>
+          <Text style={[styles.priorityCardLabel, { color: colors.textMuted }]}>{t('wealth.priorityLabel')}</Text>
           <View style={[styles.priorityBadge, {
             backgroundColor: goal.priority === 'high' ? '#FF525220' : goal.priority === 'medium' ? '#FFC10720' : '#00C85320',
           }]}>
             <Text style={[styles.priorityBadgeText, {
               color: goal.priority === 'high' ? '#FF5252' : goal.priority === 'medium' ? '#FFC107' : '#00C853',
-            }]}>{goal.priority.toUpperCase()}</Text>
+            }]}>
+              {goal.priority === 'low' ? t('wealth.priorityLow') : goal.priority === 'medium' ? t('wealth.priorityMedium') : t('wealth.priorityHigh')}
+            </Text>
           </View>
         </View>
 

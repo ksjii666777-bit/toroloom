@@ -108,7 +108,7 @@ function CommentSkeleton() {
     <>
       {[1, 2, 3].map((_, i) => (
         <View
-          key={i}
+          key={`skeleton-${i}`}
           style={{
             flexDirection: 'row', gap: 12, padding: 16, marginBottom: 8,
             borderRadius: 12, backgroundColor: '#9CA3AF10',

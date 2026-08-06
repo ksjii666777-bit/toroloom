@@ -127,7 +127,7 @@ export default function MarketsScreen({ navigation }: any) {
             <View style={{ height: SPACING.lg }} />
             <SkeletonBlock width="100%" height={100} borderRadius={12} />
             <View style={{ height: SPACING.lg }} />
-            {[1, 2, 3, 4].map(i => <SkeletonCard key={i} hasAvatar hasAction />)}
+            {[1, 2, 3, 4].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction />)}
           </View>
         </ScrollView>
       </View>

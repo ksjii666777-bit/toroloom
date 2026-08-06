@@ -47,6 +47,7 @@ import market from './market';
 import monteCarlo from './monteCarlo';
 import mutualFunds from './mutualFunds';
 import news from './news';
+import nfo from './nfo';
 import notificationPrefs from './notificationPrefs';
 import notifications from './notifications';
 import onboarding from './onboarding';
@@ -136,6 +137,7 @@ const hi = {
   monteCarlo,
   mutualFunds,
   news,
+  nfo,
   notificationPrefs,
   notifications,
   onboarding,

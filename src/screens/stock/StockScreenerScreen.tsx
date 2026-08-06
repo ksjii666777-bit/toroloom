@@ -844,7 +844,7 @@ export default function StockScreenerScreen({ navigation }: any) {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginTop: SPACING.sm }}>
               {PRESET_PRICES.map((preset, i) => (
                 <PresetChip
-                  key={i}
+                  key={preset.label}
                   label={preset.label}
                   isActive={activePricePreset === i}
                   onPress={() => handlePricePreset(i, preset)}
@@ -866,7 +866,7 @@ export default function StockScreenerScreen({ navigation }: any) {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginTop: SPACING.sm }}>
               {PRESET_PE.map((preset, i) => (
                 <PresetChip
-                  key={i}
+                  key={preset.label}
                   label={preset.label}
                   isActive={activePePreset === i}
                   onPress={() => handlePePreset(i, preset)}
@@ -886,9 +886,9 @@ export default function StockScreenerScreen({ navigation }: any) {
               placeholder="-100"
             />
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginTop: SPACING.sm }}>
-              {PRESET_CHANGE.map((preset, i) => (
+              {PRESET_CHANGE.map((preset) => (
                 <PresetChip
-                  key={i}
+                  key={`${preset.label}-${preset.min}-${preset.max}`}
                   label={preset.label}
                   isActive={dayChangeMinStr === String(preset.min) && dayChangeMaxStr === String(preset.max)}
                   onPress={() => {

@@ -137,8 +137,8 @@ export default function DigiLockerScreen({ navigation }: any) {
         </View>
 
         <View style={styles.docTypesGrid}>
-          {DOCUMENT_TYPES.map((doc, i) => (
-            <View key={i} style={styles.docTypeItem}>
+          {DOCUMENT_TYPES.map((doc) => (
+            <View key={doc.key} style={styles.docTypeItem}>
               <Ionicons name={doc.icon as keyof typeof Ionicons.glyphMap} size={16} color={colors.primary} />
               <Text style={styles.docTypeLabel}>{doc.label}</Text>
             </View>
@@ -152,8 +152,8 @@ export default function DigiLockerScreen({ navigation }: any) {
             t('kyc.digiBenefitNoUpload'),
             t('kyc.digiBenefitGovt'),
             t('kyc.digiBenefitConsent'),
-          ].map((benefit, i) => (
-            <View key={i} style={styles.benefitRow}>
+          ].map((benefit) => (
+            <View key={benefit} style={styles.benefitRow}>
               <Ionicons name="checkmark-circle" size={16} color={colors.success} />
               <Text style={styles.benefitText}>{benefit}</Text>
             </View>

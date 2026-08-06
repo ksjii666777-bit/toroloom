@@ -226,8 +226,8 @@ export default function GlossaryScreen({ navigation }: any) {
               <View style={styles.detailSection}>
                 <Text style={styles.detailSectionTitle}>{t('education.tags')}</Text>
                 <View style={styles.tagsRow}>
-                  {selectedTerm.tags.map((tag, i) => (
-                    <View key={i} style={[styles.tag, { backgroundColor: colors.textMuted + '15' }]}>
+                  {selectedTerm.tags.map((tag) => (
+                    <View key={tag} style={[styles.tag, { backgroundColor: colors.textMuted + '15' }]}>
                       <Text style={[styles.tagText, { color: colors.textMuted }]}>{tag}</Text>
                     </View>
                   ))}

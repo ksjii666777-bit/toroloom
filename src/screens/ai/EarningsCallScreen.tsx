@@ -461,7 +461,7 @@ export default function EarningsCallScreen({ navigation }: any) {
           {expandedSections.takeaways && (
             <View style={styles.sectionBody}>
               {selectedEarnings.keyTakeaways.map((takeaway, i) => (
-                <View key={i} style={[styles.takeawayRow, { borderBottomColor: colors.divider }]}>
+                <View key={`${takeaway}-${i}`} style={[styles.takeawayRow, { borderBottomColor: colors.divider }]}>
                   <View style={[styles.takeawayDot, { backgroundColor: sc.color }]} />
                   <Text style={styles.takeawayText}>{takeaway}</Text>
                 </View>
@@ -491,7 +491,7 @@ export default function EarningsCallScreen({ navigation }: any) {
           {expandedSections.highlights && (
             <View style={styles.sectionBody}>
               {selectedEarnings.managementHighlights.map((h, i) => (
-                <View key={i} style={[styles.highlightRow, { borderBottomColor: colors.divider }]}>
+                <View key={`${h}-${i}`} style={[styles.highlightRow, { borderBottomColor: colors.divider }]}>
                   <View style={[styles.highlightBadge, { backgroundColor: '#8B5CF615' }]}>
                     <Text style={[styles.highlightIndex, { color: '#8B5CF6' }]}>{i + 1}</Text>
                   </View>
@@ -543,7 +543,7 @@ export default function EarningsCallScreen({ navigation }: any) {
           {expandedSections.drivers && (
             <View style={styles.sectionBody}>
               {selectedEarnings.growthDrivers.map((d, i) => (
-                <View key={i} style={[styles.bulletRow, { borderBottomColor: colors.divider }]}>
+                <View key={`${d}-${i}`} style={[styles.bulletRow, { borderBottomColor: colors.divider }]}>
                   <Text style={[styles.bulletIcon, { color: colors.marketUp }]}>✓</Text>
                   <Text style={styles.bulletText}>{d}</Text>
                 </View>
@@ -573,7 +573,7 @@ export default function EarningsCallScreen({ navigation }: any) {
           {expandedSections.risks && (
             <View style={styles.sectionBody}>
               {selectedEarnings.riskFactors.map((r, i) => (
-                <View key={i} style={[styles.bulletRow, { borderBottomColor: colors.divider }]}>
+                <View key={`${r}-${i}`} style={[styles.bulletRow, { borderBottomColor: colors.divider }]}>
                   <Text style={[styles.bulletIcon, { color: colors.marketDown }]}>⚠</Text>
                   <Text style={styles.bulletText}>{r}</Text>
                 </View>

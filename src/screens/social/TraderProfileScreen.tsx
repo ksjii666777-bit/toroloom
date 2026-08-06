@@ -142,8 +142,8 @@ function PerformanceAnalyticsCard({ trader }: { trader: TraderProfile }) {
         <Text style={[analyticsStyles.title, { color: colors.text }]}>{t('traderProfile.performanceAnalytics')}</Text>
       </View>
       <View style={analyticsStyles.grid}>
-        {metrics.map((m, i) => (
-          <View key={i} style={[analyticsStyles.metricBox, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+        {metrics.map((m) => (
+          <View key={m.label} style={[analyticsStyles.metricBox, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
             <View style={analyticsStyles.metricTop}>
               <Ionicons name={m.icon} size={14} color={m.color} />
               <Text style={[analyticsStyles.metricValue, { color: m.color }]}>{m.value}</Text>
@@ -434,8 +434,8 @@ export default function TraderProfileScreen({ navigation, route }: any) {
             { label: t('traderProfile.maxDd'), value: `${trader.maxDrawdown.toFixed(1)}%`, color: colors.danger },
             { label: t('traderProfile.avgHold'), value: `${trader.avgHoldingDays.toFixed(1)}d`, color: colors.text },
             { label: t('traderProfile.copyTraders'), value: trader.copyTraders >= 1000 ? `${(trader.copyTraders / 1000).toFixed(1)}K` : `${trader.copyTraders}`, color: colors.primary },
-          ].map((stat, i) => (
-            <View key={i} style={[styles.statBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+          ].map((stat) => (
+            <View key={stat.label} style={[styles.statBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>{stat.label}</Text>
             </View>

@@ -47,6 +47,7 @@ function IndicatorCard({
   onDelete: () => void;
   colors: any;
 }) {
+  const { t } = useT();
   return (
     <View style={[cardStyles.card, {
       backgroundColor: colors.bgCard,
@@ -74,7 +75,7 @@ function IndicatorCard({
           <Text style={[cardStyles.badgeText, {
             color: indicator.panel === 'overlay' ? colors.primary : '#4ECDC4',
           }]}>
-            {indicator.panel === 'overlay' ? 'Overlay' : 'Separate'}
+            {indicator.panel === 'overlay' ? t('customIndicator.overlay') : t('customIndicator.separate')}
           </Text>
         </View>
 
@@ -91,14 +92,14 @@ function IndicatorCard({
       <View style={cardStyles.actions}>
         <Pressable style={[cardStyles.actionBtn, { borderColor: colors.border }]} onPress={onEdit}>
           <Ionicons name="pencil-outline" size={14} color={colors.primary} />
-          <Text style={[cardStyles.actionText, { color: colors.primary }]}>Edit</Text>
+          <Text style={[cardStyles.actionText, { color: colors.primary }]}>{t('app.edit')}</Text>
         </Pressable>
         <Pressable
           style={[cardStyles.actionBtn, { borderColor: '#FF6B6B' + '40' }]}
           onPress={onDelete}
         >
           <Ionicons name="trash-outline" size={14} color="#FF6B6B" />
-          <Text style={[cardStyles.actionText, { color: '#FF6B6B' }]}>Delete</Text>
+          <Text style={[cardStyles.actionText, { color: '#FF6B6B' }]}>{t('customIndicator.delete')}</Text>
         </Pressable>
       </View>
     </View>
@@ -177,6 +178,7 @@ const cardStyles = StyleSheet.create({
 // ============================================================================
 
 function PresetQuickAdd({ colors }: { colors: any }) {
+  const { t } = useT();
   const navigation = useNavigation<any>();
   const importPreset = useCustomIndicatorStore((s) => s.importPreset);
 
@@ -204,7 +206,7 @@ function PresetQuickAdd({ colors }: { colors: any }) {
 
   return (
     <View style={presetSectionStyles.container}>
-      <Text style={[presetSectionStyles.title, { color: colors.text }]}>Quick-Add Presets</Text>
+      <Text style={[presetSectionStyles.title, { color: colors.text }]}>{t('customIndicator.quickAddPresets')}</Text>
       <View style={presetSectionStyles.grid}>
         {PRESET_INDICATORS.slice(0, 8).map((preset) => (
           <Pressable
@@ -263,7 +265,7 @@ const presetSectionStyles = StyleSheet.create({
 
 export default function CustomIndicatorManagerScreen() {
   const { colors } = useTheme();
-  const _t = useT();
+  const { t } = useT();
   const navigation = useNavigation<any>();
   const indicators = useCustomIndicatorStore((s) => s.indicators);
   const toggleActive = useCustomIndicatorStore((s) => s.toggleActive);
@@ -280,16 +282,20 @@ export default function CustomIndicatorManagerScreen() {
 
   const handleDelete = useCallback(
     (indicator: CustomIndicator) => {
-      Alert.alert('Delete', `Delete "${indicator.label}"?`, [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteIndicator(indicator.id),
-        },
-      ]);
+      Alert.alert(
+        t('customIndicator.deleteTitle'),
+        t('customIndicator.deleteMsg', { label: indicator.label }),
+        [
+          { text: t('app.cancel'), style: 'cancel' },
+          {
+            text: t('customIndicator.delete'),
+            style: 'destructive',
+            onPress: () => deleteIndicator(indicator.id),
+          },
+        ],
+      );
     },
-    [deleteIndicator],
+    [deleteIndicator, t],
   );
 
   const handleNew = useCallback(() => {
@@ -305,10 +311,10 @@ export default function CustomIndicatorManagerScreen() {
         </Pressable>
         <View style={containerStyles.headerInfo}>
           <Text style={[containerStyles.headerTitle, { color: colors.text }]}>
-            Custom Indicators
+            {t('customIndicator.customIndicatorsTitle')}
           </Text>
           <Text style={[containerStyles.headerSubtitle, { color: colors.textMuted }]}>
-            {indicators.length} total &middot; {activeCount} active
+            {t('customIndicator.totalActive', { total: indicators.length, active: activeCount })}
           </Text>
         </View>
         <Pressable style={[containerStyles.newBtn, { backgroundColor: colors.primary }]} onPress={handleNew}>
@@ -328,18 +334,17 @@ export default function CustomIndicatorManagerScreen() {
           <View style={[containerStyles.empty, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Ionicons name="code-slash-outline" size={48} color={colors.textMuted} />
             <Text style={[containerStyles.emptyTitle, { color: colors.text }]}>
-              No Custom Indicators Yet
+              {t('customIndicator.noCustomIndicators')}
             </Text>
             <Text style={[containerStyles.emptyDesc, { color: colors.textMuted }]}>
-              Create your own technical indicators using formulas like{'\n'}
-              SMA(close, 14), RSI(close, 14), or MACD(close)
+              {t('customIndicator.noCustomIndicatorsDesc')}
             </Text>
             <Pressable
               style={[containerStyles.emptyBtn, { backgroundColor: colors.primary }]}
               onPress={handleNew}
             >
               <Ionicons name="add-circle-outline" size={18} color="#fff" />
-              <Text style={containerStyles.emptyBtnText}>Create Indicator</Text>
+              <Text style={containerStyles.emptyBtnText}>{t('customIndicator.createIndicator')}</Text>
             </Pressable>
           </View>
         ) : (
@@ -348,7 +353,7 @@ export default function CustomIndicatorManagerScreen() {
             {indicators.filter((i) => i.panel === 'overlay').length > 0 && (
               <View style={containerStyles.section}>
                 <Text style={[containerStyles.sectionTitle, { color: colors.textSecondary }]}>
-                  On Chart Overlay
+                  {t('customIndicator.onChartOverlay')}
                 </Text>
                 {indicators
                   .filter((i) => i.panel === 'overlay')
@@ -369,7 +374,7 @@ export default function CustomIndicatorManagerScreen() {
             {indicators.filter((i) => i.panel === 'separate').length > 0 && (
               <View style={containerStyles.section}>
                 <Text style={[containerStyles.sectionTitle, { color: colors.textSecondary }]}>
-                  Separate Panel
+                  {t('customIndicator.separatePanel')}
                 </Text>
                 {indicators
                   .filter((i) => i.panel === 'separate')

@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { timeAgo } from '../../utils/formatters';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
@@ -39,38 +40,40 @@ function formatCr(num: number): string {
 
 // ──── Status & Risk Config ─────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  open: { label: 'Open Now', color: '#00E676', bgColor: '#00E67620' },
-  upcoming: { label: 'Upcoming', color: '#3B82F6', bgColor: '#3B82F620' },
-  closed: { label: 'Closed', color: '#FFAB40', bgColor: '#FFAB4020' },
-  matured: { label: 'Matured', color: '#64748B', bgColor: '#64748B20' },
+const STATUS_CONFIG: Record<string, { labelKey: string; color: string; bgColor: string }> = {
+  open: { labelKey: 'nfo.statusOpen', color: '#00E676', bgColor: '#00E67620' },
+  upcoming: { labelKey: 'nfo.statusUpcoming', color: '#3B82F6', bgColor: '#3B82F620' },
+  closed: { labelKey: 'nfo.statusClosed', color: '#FFAB40', bgColor: '#FFAB4020' },
+  matured: { labelKey: 'nfo.statusMatured', color: '#64748B', bgColor: '#64748B20' },
 };
 
-const RISK_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: 'Low Risk', color: '#00E676' },
-  moderate: { label: 'Moderate', color: '#3B82F6' },
-  moderately_high: { label: 'Mod. High', color: '#FF9800' },
-  high: { label: 'High Risk', color: '#FF5252' },
+const RISK_CONFIG: Record<string, { labelKey: string; color: string }> = {
+  low: { labelKey: 'nfo.riskLow', color: '#00E676' },
+  moderate: { labelKey: 'nfo.riskModerate', color: '#3B82F6' },
+  moderately_high: { labelKey: 'nfo.riskModHigh', color: '#FF9800' },
+  high: { labelKey: 'nfo.riskHigh', color: '#FF5252' },
 };
 
 // ──── Sub-Components ───────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useT();
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.upcoming;
   return (
     <View style={[styles.statusBadge, { backgroundColor: config.bgColor, borderColor: config.color + '40' }]}>
       <View style={[styles.statusDot, { backgroundColor: config.color }]} />
-      <Text style={[styles.statusLabel, { color: config.color }]}>{config.label}</Text>
+      <Text style={[styles.statusLabel, { color: config.color }]}>{t(config.labelKey)}</Text>
     </View>
   );
 }
 
 function RiskBadge({ level }: { level: string }) {
+  const { t } = useT();
   const config = RISK_CONFIG[level] || RISK_CONFIG.moderate;
   return (
     <View style={[styles.riskBadge, { backgroundColor: config.color + '20', borderColor: config.color + '40' }]}>
       <View style={[styles.riskDot, { backgroundColor: config.color }]} />
-      <Text style={[styles.riskLabel, { color: config.color }]}>{config.label}</Text>
+      <Text style={[styles.riskLabel, { color: config.color }]}>{t(config.labelKey)}</Text>
     </View>
   );
 }
@@ -173,13 +176,14 @@ function SectorChip({ label, color }: { label: string; color: string }) {
 
 function PerformanceProjection(_props: { nfo: NFOItem }) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   const projections = useMemo(() => {
     // Base projections: conservative (8%), moderate (12%), aggressive (16%)
     return [
-      { label: 'Conservative', return: 8, color: '#3B82F6', finalValue: Math.round(100000 * Math.pow(1.08, 3) / 1000) * 1000 },
-      { label: 'Moderate', return: 12, color: '#00E676', finalValue: Math.round(100000 * Math.pow(1.12, 3) / 1000) * 1000 },
-      { label: 'Aggressive', return: 16, color: '#8B5CF6', finalValue: Math.round(100000 * Math.pow(1.16, 3) / 1000) * 1000 },
+      { labelKey: 'nfo.projectionConservative', return: 8, color: '#3B82F6', finalValue: Math.round(100000 * Math.pow(1.08, 3) / 1000) * 1000 },
+      { labelKey: 'nfo.projectionModerate', return: 12, color: '#00E676', finalValue: Math.round(100000 * Math.pow(1.12, 3) / 1000) * 1000 },
+      { labelKey: 'nfo.projectionAggressive', return: 16, color: '#8B5CF6', finalValue: Math.round(100000 * Math.pow(1.16, 3) / 1000) * 1000 },
     ];
   }, []);
 
@@ -187,12 +191,12 @@ function PerformanceProjection(_props: { nfo: NFOItem }) {
 
   return (
     <View style={[styles.projectionCard, { backgroundColor: colors.bgCard }]}>
-      <Text style={[styles.projectionTitle, { color: colors.textMuted }]}>Projected Value of ₹1L after 3 Years</Text>
+      <Text style={[styles.projectionTitle, { color: colors.textMuted }]}>{t('nfo.projectedTitle')}</Text>
       {projections.map((p, i) => (
         <View key={i} style={styles.projectionRow}>
           <View style={[styles.projectionLabelRow]}>
-            <Text style={[styles.projectionLabel, { color: p.color }]}>{p.label}</Text>
-            <Text style={[styles.projectionReturn, { color: p.color }]}>{p.return}% p.a.</Text>
+            <Text style={[styles.projectionLabel, { color: p.color }]}>{t(p.labelKey)}</Text>
+            <Text style={[styles.projectionReturn, { color: p.color }]}>{t('nfo.percentPa', { value: p.return })}</Text>
           </View>
           <View style={styles.projectionBarRow}>
             <View style={[styles.projectionBar, { backgroundColor: colors.bgInput }]}>
@@ -210,7 +214,7 @@ function PerformanceProjection(_props: { nfo: NFOItem }) {
       <View style={[styles.projectionNote, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
         <Ionicons name="information-circle" size={12} color={colors.primary} />
         <Text style={[styles.projectionNoteText, { color: colors.textMuted }]}>
-          Past performance and projections are not indicative of future returns. Actual returns may vary.
+          {t('nfo.projectionNote')}
         </Text>
       </View>
     </View>
@@ -221,6 +225,7 @@ function PerformanceProjection(_props: { nfo: NFOItem }) {
 
 export default function NFODetailScreen({ route, navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const { nfoId } = route.params || {};
   const [showInvest, setShowInvest] = useState(false);
@@ -241,9 +246,9 @@ export default function NFODetailScreen({ route, navigation }: any) {
     return (
       <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
         <Ionicons name="alert-circle" size={48} color={colors.textMuted} />
-        <Text style={[styles.notFoundText, { color: colors.textMuted }]}>NFO not found</Text>
+        <Text style={[styles.notFoundText, { color: colors.textMuted }]}>{t('nfo.notFound')}</Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.notFoundLink, { color: colors.primary }]}>Go back</Text>
+          <Text style={[styles.notFoundLink, { color: colors.primary }]}>{t('nfo.goBack')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -292,61 +297,61 @@ export default function NFODetailScreen({ route, navigation }: any) {
 
         {/* ── Stats Row ── */}
         <View style={styles.statsRow}>
-          <StatCard label="Min Invest" value={formatCompact(nfo.minInvestment)} icon="wallet" />
-          <StatCard label="Expense" value={`${nfo.expenseRatio}%`} icon="pricetag" />
-          <StatCard label="Target" value={formatCr(nfo.targetSize)} icon="flag" />
+          <StatCard label={t('nfo.minInvest')} value={formatCompact(nfo.minInvestment)} icon="wallet" />
+          <StatCard label={t('nfo.expense')} value={`${nfo.expenseRatio}%`} icon="pricetag" />
+          <StatCard label={t('nfo.target')} value={formatCr(nfo.targetSize)} icon="flag" />
         </View>
 
         {/* ── Investment Objective ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Investment Objective" icon="bulb" color="#FFC107" />
+          <SectionHeader title={t('nfo.objective')} icon="bulb" color="#FFC107" />
           <Text style={[styles.objectiveText, { color: colors.textSecondary }]}>{nfo.objective}</Text>
         </View>
 
         {/* ── Investment Strategy ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Investment Strategy" icon="git-branch" color="#8B5CF6" />
+          <SectionHeader title={t('nfo.strategy')} icon="git-branch" color="#8B5CF6" />
           <Text style={[styles.strategyText, { color: colors.textSecondary }]}>{nfo.strategy}</Text>
         </View>
 
         {/* ── Asset Allocation ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Asset Allocation" icon="pie-chart" />
+          <SectionHeader title={t('nfo.assetAllocation')} icon="pie-chart" />
           <AllocationSegment allocation={nfo.assetAllocation} />
         </View>
 
         {/* ── Performance Projections ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Performance Projections" icon="trending-up" color="#00E676" />
+          <SectionHeader title={t('nfo.projections')} icon="trending-up" color="#00E676" />
           <PerformanceProjection nfo={nfo} />
         </View>
 
         {/* ── Key Details ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Key Details" icon="information-circle" />
+          <SectionHeader title={t('nfo.keyDetails')} icon="information-circle" />
           <View style={styles.detailGrid}>
             <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Fund Manager</Text>
+              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.fundManagerLabel')}</Text>
               <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.fundManagers.join(', ')}</Text>
             </View>
             <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Benchmark</Text>
+              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.benchmark')}</Text>
               <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.benchmark}</Text>
             </View>
             <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Entry Load</Text>
+              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.entryLoad')}</Text>
               <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.entryLoad}%</Text>
             </View>
             <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Exit Load</Text>
+              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.exitLoad')}</Text>
               <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.exitLoad}</Text>
             </View>
             <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
             <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Min Investment</Text>
+              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.minInvestment')}</Text>
               <Text style={[styles.detailValue, { color: colors.text }]}>{formatCompact(nfo.minInvestment)}</Text>
             </View>
           </View>
@@ -354,10 +359,10 @@ export default function NFODetailScreen({ route, navigation }: any) {
 
         {/* ── AMC Info ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="AMC Details" icon="business" />
+          <SectionHeader title={t('nfo.amcDetails')} icon="business" />
           <View style={styles.amcGrid}>
             <View style={styles.amcItem}>
-              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>Rating</Text>
+              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.rating')}</Text>
               <View style={styles.stars}>
                 {[1, 2, 3, 4, 5].map(s => (
                   <Ionicons key={s} name={s <= nfo.amcRating ? 'star' : 'star-outline'} size={14} color={s <= nfo.amcRating ? '#FFC107' : colors.textMuted} />
@@ -365,12 +370,12 @@ export default function NFODetailScreen({ route, navigation }: any) {
               </View>
             </View>
             <View style={styles.amcItem}>
-              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>AUM</Text>
+              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.aum')}</Text>
               <Text style={[styles.amcValue, { color: colors.text }]}>{nfo.amcAum}</Text>
             </View>
             <View style={styles.amcItem}>
-              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>Funds</Text>
-              <Text style={[styles.amcValue, { color: colors.text }]}>{nfo.amcFundsCount} schemes</Text>
+              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.funds')}</Text>
+              <Text style={[styles.amcValue, { color: colors.text }]}>{t('nfo.schemes', { count: nfo.amcFundsCount })}</Text>
             </View>
           </View>
         </View>
@@ -378,11 +383,11 @@ export default function NFODetailScreen({ route, navigation }: any) {
         {/* ── Collection Progress ── */}
         {nfo.collectedAmount > 0 && (
           <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <SectionHeader title="Collection Progress" icon="pulse" color="#00E676" />
+            <SectionHeader title={t('nfo.collectionProgress')} icon="pulse" color="#00E676" />
             <View style={styles.collectionHeader}>
               <Text style={[styles.collectionAmount, { color: '#00E676' }]}>{formatCr(nfo.collectedAmount)}</Text>
               <Text style={[styles.collectionTarget, { color: colors.textMuted }]}>
-                of {formatCr(nfo.targetSize)} ({collectedPercent.toFixed(0)}%)
+                {t('nfo.ofTarget', { target: formatCr(nfo.targetSize), percent: collectedPercent.toFixed(0) })}
               </Text>
             </View>
             <View style={[styles.collectionBar, { backgroundColor: colors.bgInput }]}>
@@ -394,12 +399,15 @@ export default function NFODetailScreen({ route, navigation }: any) {
             </View>
             <View style={styles.collectionMeta}>
               <Text style={[styles.collectionMetaText, { color: colors.textMuted }]}>
-                {(nfo.totalInvestors / 1000).toFixed(1)}K investors · {nfo.applications.toLocaleString('en-IN')} applications
+                {t('nfo.collectionMeta', {
+                  investors: (nfo.totalInvestors / 1000).toFixed(1),
+                  applications: nfo.applications.toLocaleString('en-IN'),
+                })}
               </Text>
               <View style={styles.collectionUpdatedRow}>
                 <Ionicons name="refresh" size={10} color={colors.textMuted} />
                 <Text style={[styles.collectionUpdated, { color: colors.textMuted }]}>
-                  Updated {timeAgo(screenLoadedAt)}
+                  {t('nfo.updated', { time: timeAgo(screenLoadedAt) })}
                 </Text>
               </View>
             </View>
@@ -408,28 +416,28 @@ export default function NFODetailScreen({ route, navigation }: any) {
 
         {/* ── Key Dates Timeline ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Key Dates" icon="calendar" />
+          <SectionHeader title={t('nfo.keyDates')} icon="calendar" />
           <View style={styles.timeline}>
             <TimelineItem
-              label="Open Date"
+              label={t('nfo.openDateLabel')}
               date={nfo.openDate}
               isActive={nfo.subscriptionStatus === 'open' || nfo.subscriptionStatus === 'closed'}
               color="#3B82F6"
             />
             <TimelineItem
-              label="Close Date"
+              label={t('nfo.closeDateLabel')}
               date={nfo.closeDate}
               isActive={nfo.subscriptionStatus === 'closed' || nfo.subscriptionStatus === 'matured'}
               color="#00E676"
             />
             <TimelineItem
-              label="Allotment"
+              label={t('nfo.allotment')}
               date={nfo.maturityDate}
               isActive={nfo.subscriptionStatus === 'matured'}
               color="#8B5CF6"
             />
             <TimelineItem
-              label="Maturity / Listing"
+              label={t('nfo.maturityListing')}
               date={nfo.maturityDate}
               isActive={nfo.subscriptionStatus === 'matured'}
               isLast
@@ -440,7 +448,7 @@ export default function NFODetailScreen({ route, navigation }: any) {
 
         {/* ── Top Sectors ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Top Sectors" icon="layers" color="#8B5CF6" />
+          <SectionHeader title={t('nfo.topSectors')} icon="layers" color="#8B5CF6" />
           <View style={styles.sectorRow}>
             {nfo.topSectors.map((s, i) => (
               <SectorChip key={i} label={s} color={[colors.primary, '#00E676', '#8B5CF6', '#FF9800', '#FF5252'][i % 5]} />
@@ -450,19 +458,19 @@ export default function NFODetailScreen({ route, navigation }: any) {
 
         {/* ── About ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="About the Scheme" icon="information-circle" />
+          <SectionHeader title={t('nfo.aboutScheme')} icon="information-circle" />
           <Text style={[styles.aboutText, { color: colors.textSecondary }]}>{nfo.about}</Text>
         </View>
 
         {/* ── Strengths ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Strengths" icon="shield-checkmark" color="#00E676" />
+          <SectionHeader title={t('nfo.strengths')} icon="shield-checkmark" color="#00E676" />
           <BulletList items={nfo.strengths} color="#00E676" />
         </View>
 
         {/* ── Risks ── */}
         <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title="Risks" icon="warning" color="#FF5252" />
+          <SectionHeader title={t('nfo.risks')} icon="warning" color="#FF5252" />
           <BulletList items={nfo.risks} color="#FF5252" />
         </View>
 
@@ -471,10 +479,10 @@ export default function NFODetailScreen({ route, navigation }: any) {
       {/* ── Bottom Action Bar ── */}
       <View style={[styles.bottomBar, { backgroundColor: colors.bgSecondary, borderTopColor: colors.border }]}>
         <View style={styles.bottomLeft}>
-          <Text style={[styles.bottomTarget, { color: colors.textMuted }]}>Target: {formatCr(nfo.targetSize)}</Text>
+          <Text style={[styles.bottomTarget, { color: colors.textMuted }]}>{t('nfo.bottomTarget', { target: formatCr(nfo.targetSize) })}</Text>
           {nfo.collectedAmount > 0 && (
             <Text style={[styles.bottomCollected, { color: '#00E676' }]}>
-              Collected: {collectedPercent.toFixed(0)}%
+              {t('nfo.bottomCollected', { percent: collectedPercent.toFixed(0) })}
             </Text>
           )}
         </View>
@@ -491,18 +499,18 @@ export default function NFODetailScreen({ route, navigation }: any) {
               style={styles.bottomInvestGradient}
             >
               <Ionicons name="wallet-outline" size={16} color="#FFFFFF" />
-              <Text style={styles.bottomInvestText}>Invest Now</Text>
+              <Text style={styles.bottomInvestText}>{t('nfo.investNow')}</Text>
             </LinearGradient>
           </TouchableOpacity>
         ) : nfo.subscriptionStatus === 'upcoming' ? (
           <View style={[styles.bottomStatus, { backgroundColor: '#3B82F620' }]}>
             <Ionicons name="time-outline" size={16} color="#3B82F6" />
-            <Text style={[styles.bottomStatusText, { color: '#3B82F6' }]}>Upcoming</Text>
+            <Text style={[styles.bottomStatusText, { color: '#3B82F6' }]}>{t('nfo.statusUpcoming')}</Text>
           </View>
         ) : (
           <View style={[styles.bottomStatus, { backgroundColor: '#64748B20' }]}>
             <Ionicons name="lock-closed" size={16} color="#64748B" />
-            <Text style={[styles.bottomStatusText, { color: '#64748B' }]}>Closed</Text>
+            <Text style={[styles.bottomStatusText, { color: '#64748B' }]}>{t('nfo.statusClosed')}</Text>
           </View>
         )}
       </View>

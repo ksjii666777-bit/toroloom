@@ -134,6 +134,7 @@ function MiniPreview({
   color: string;
   height?: number;
 }) {
+  const { t } = useT();
   const valid = values.filter((v): v is number => v !== null);
   if (valid.length < 2) {
     return (
@@ -165,7 +166,7 @@ function MiniPreview({
   if (!path) {
     return (
       <View style={previewStyles.empty}>
-        <Text style={previewStyles.emptyText}>Not enough data</Text>
+        <Text style={previewStyles.emptyText}>{t('customIndicator.notEnoughData')}</Text>
       </View>
     );
   }
@@ -327,9 +328,9 @@ export default function CustomIndicatorEditorScreen() {
 
   // Validation
   const validation = useMemo(() => {
-    if (!formula.trim()) return { valid: false, error: 'Enter a formula' };
+    if (!formula.trim()) return { valid: false, error: t('customIndicator.enterFormula') };
     return validateFormula(formula.trim());
-  }, [formula]);
+  }, [formula, t]);
 
   // Preview evaluation
   const previewValues = useMemo(() => {
@@ -349,11 +350,11 @@ export default function CustomIndicatorEditorScreen() {
   // Save
   const handleSave = useCallback(() => {
     if (!validation.valid) {
-      Alert.alert('Invalid Formula', validation.error || 'Please fix the formula syntax.');
+      Alert.alert(t('customIndicator.invalidFormula'), validation.error || t('customIndicator.invalidFormulaMsg'));
       return;
     }
     if (!label.trim()) {
-      Alert.alert('Missing Label', 'Please enter a name for this indicator.');
+      Alert.alert(t('customIndicator.missingLabel'), t('customIndicator.missingLabelMsg'));
       return;
     }
 
@@ -370,21 +371,21 @@ export default function CustomIndicatorEditorScreen() {
       if (id) {
         navigation.goBack();
       } else {
-        Alert.alert('Error', 'Failed to save indicator. Check the formula syntax.');
+        Alert.alert(t('app.errorTitle'), t('customIndicator.saveError'));
       }
     }
-  }, [validation, label, formula, color, panel, editMode, existingIndicator, addIndicator, updateIndicator, navigation]);
+  }, [validation, label, formula, color, panel, editMode, existingIndicator, addIndicator, updateIndicator, navigation, t]);
 
   // Delete
   const handleDelete = useCallback(() => {
     if (!existingIndicator) return;
     Alert.alert(
-      'Delete Indicator',
-      `Delete "${existingIndicator.label}"?`,
+      t('customIndicator.deleteTitle'),
+      t('customIndicator.deleteMsg', { label: existingIndicator.label }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('app.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('customIndicator.delete'),
           style: 'destructive',
           onPress: () => {
             deleteIndicator(existingIndicator.id);
@@ -393,7 +394,7 @@ export default function CustomIndicatorEditorScreen() {
         },
       ],
     );
-  }, [existingIndicator, deleteIndicator, navigation]);
+  }, [existingIndicator, deleteIndicator, navigation, t]);
 
   // Import preset
   const handleImportPreset = useCallback((preset: typeof PRESET_INDICATORS[0]) => {
@@ -413,7 +414,7 @@ export default function CustomIndicatorEditorScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
         <Text style={[screenStyles.headerTitle, { color: colors.text }]}>
-          {editMode ? 'Edit Indicator' : 'Custom Indicator'}
+          {editMode ? t('customIndicator.editTitle') : t('customIndicator.createTitle')}
         </Text>
         <Pressable onPress={() => setShowPresets(!showPresets)} style={screenStyles.presetsBtn}>
           <Ionicons name="bookmark-outline" size={22} color={colors.primary} />
@@ -428,9 +429,9 @@ export default function CustomIndicatorEditorScreen() {
         {/* Presets panel */}
         {showPresets && (
           <View style={[screenStyles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>Preset Formulas</Text>
+            <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>{t('customIndicator.presetsTitle')}</Text>
             <Text style={[screenStyles.sectionDesc, { color: colors.textMuted }]}>
-              Choose a built-in formula to get started
+              {t('customIndicator.presetsDesc')}
             </Text>
             <View style={presetStyles.grid}>
               {PRESET_INDICATORS.map((preset) => (
@@ -452,9 +453,9 @@ export default function CustomIndicatorEditorScreen() {
 
         {/* Formula input */}
         <View style={[screenStyles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>Formula</Text>
+          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>{t('customIndicator.formulaTitle')}</Text>
           <Text style={[screenStyles.sectionDesc, { color: colors.textMuted }]}>
-            Write your indicator formula using close, open, high, low, volume and built-in functions
+            {t('customIndicator.formulaDesc')}
           </Text>
 
           {/* Formula builder quick-insert chips */}
@@ -492,11 +493,11 @@ export default function CustomIndicatorEditorScreen() {
           <Text style={[editorStyles.validationText, {
             color: validation.valid ? '#4ECDC4' : '#FF6B6B',
           }]}>
-            {validation.valid ? '✓ Valid syntax' : `✗ ${validation.error}`}
+            {validation.valid ? t('customIndicator.validSyntax') : t('customIndicator.invalidSyntax', { error: validation.error })}
           </Text>
 
           {/* Label */}
-          <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary }]}>Indicator Name</Text>
+          <Text style={[screenStyles.fieldLabel, { color: colors.textSecondary }]}>{t('customIndicator.indicatorName')}</Text>
           <TextInput
             style={[editorStyles.labelInput, {
               backgroundColor: colors.bgInput,
@@ -512,7 +513,7 @@ export default function CustomIndicatorEditorScreen() {
 
         {/* Panel type */}
         <View style={[screenStyles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>Display</Text>
+          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>{t('customIndicator.displayTitle')}</Text>
           <View style={panelStyles.row}>
             <Pressable
               style={[panelStyles.option, {
@@ -525,9 +526,9 @@ export default function CustomIndicatorEditorScreen() {
                 color={panel === 'overlay' ? colors.primary : colors.textMuted} />
               <Text style={[panelStyles.optionText, {
                 color: panel === 'overlay' ? colors.primary : colors.textMuted,
-              }]}>Overlay</Text>
+              }]}>{t('customIndicator.overlay')}</Text>
               <Text style={[panelStyles.optionDesc, { color: colors.textSecondary }]}>
-                On main chart
+                {t('customIndicator.onMainChart')}
               </Text>
             </Pressable>
             <Pressable
@@ -541,9 +542,9 @@ export default function CustomIndicatorEditorScreen() {
                 color={panel === 'separate' ? colors.primary : colors.textMuted} />
               <Text style={[panelStyles.optionText, {
                 color: panel === 'separate' ? colors.primary : colors.textMuted,
-              }]}>Separate</Text>
+              }]}>{t('customIndicator.separate')}</Text>
               <Text style={[panelStyles.optionDesc, { color: colors.textSecondary }]}>
-                Below chart
+                {t('customIndicator.belowChart')}
               </Text>
             </Pressable>
           </View>
@@ -551,14 +552,14 @@ export default function CustomIndicatorEditorScreen() {
 
         {/* Color picker */}
         <View style={[screenStyles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>Line Color</Text>
+          <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>{t('customIndicator.lineColor')}</Text>
           <ColorPicker selected={color} onSelect={setColor} />
         </View>
 
         {/* Preview */}
         {validation.valid && previewValues.length > 0 && (
           <View style={[screenStyles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>Preview</Text>
+            <Text style={[screenStyles.sectionTitle, { color: colors.text }]}>{t('customIndicator.previewTitle')}</Text>
             <MiniPreview values={previewValues} color={color} />
             {/* Last few values */}
             <View style={valueRowStyles.row}>
@@ -584,7 +585,7 @@ export default function CustomIndicatorEditorScreen() {
           >
             <Ionicons name="checkmark-circle" size={20} color="#fff" />
             <Text style={screenStyles.saveBtnText}>
-              {editMode ? 'Update Indicator' : 'Save Indicator'}
+              {editMode ? t('customIndicator.updateIndicator') : t('customIndicator.saveIndicator')}
             </Text>
           </Pressable>
 
@@ -595,7 +596,7 @@ export default function CustomIndicatorEditorScreen() {
               onPress={handleDelete}
             >
               <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
-              <Text style={[screenStyles.deleteBtnText, { color: '#FF6B6B' }]}>Delete</Text>
+              <Text style={[screenStyles.deleteBtnText, { color: '#FF6B6B' }]}>{t('customIndicator.delete')}</Text>
             </Pressable>
           )}
         </View>

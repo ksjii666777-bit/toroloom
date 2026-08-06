@@ -480,7 +480,7 @@ export default function WatchlistScreen({ navigation }: any) {
             <SkeletonBlock width="100%" height={36} borderRadius={18} />
             <View style={{ height: SPACING.lg }} />
             <PortfolioSkeleton />
-            {[1, 2, 3].map(i => <SkeletonCard key={i} hasAvatar hasAction />)}
+            {[1, 2, 3].map(i => <SkeletonCard key={`skel-${i}`} hasAvatar hasAction />)}
           </View>
         </ScrollView>
       </View>

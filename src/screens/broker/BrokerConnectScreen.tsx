@@ -508,7 +508,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                       {/* Features */}
                       <View style={styles.featureList}>
                         {broker.features.map((feature, i) => (
-                          <View key={i} style={styles.featureItem}>
+                          <View key={`${feature}-${i}`} style={styles.featureItem}>
                             <Text style={styles.featureDot}>•</Text>
                             <Text style={styles.featureText} numberOfLines={1}>{feature}</Text>
                           </View>

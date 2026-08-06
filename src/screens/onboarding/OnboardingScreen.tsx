@@ -211,7 +211,7 @@ function MiniCandlestickChart({
 
             return (
               <Pressable
-                key={i}
+                key={candle.date}
                 
                 onPress={() => {
                   onInteract();
@@ -259,8 +259,8 @@ function MiniCandlestickChart({
 
         {/* Day labels */}
         <View style={demoStyles.dayLabels}>
-          {MOCK_CANDLE_DATA.map((candle, i) => (
-            <Text key={i} style={[demoStyles.dayLabel, { width: candleWidth + 4 }]}>
+          {MOCK_CANDLE_DATA.map((candle) => (
+            <Text key={candle.date} style={[demoStyles.dayLabel, { width: candleWidth + 4 }]}>
               {candle.date.substring(0, 3)}
             </Text>
           ))}
@@ -1003,7 +1003,7 @@ export default function OnboardingScreen({ _navigation }: any) {
             const _isWelcome = stepId === 'welcome';
             return (
               <Pressable
-                key={i}
+                key={stepId}
                 onPress={() => scrollToStep(i)}
                 
               >

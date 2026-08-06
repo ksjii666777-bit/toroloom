@@ -439,7 +439,7 @@ export default function ReportsScreen({ navigation }: any) {
             {analytics.monthlyReturns.length > 0 && (
               <Card title={t('reports.monthlyReturns')}>
                 {analytics.monthlyReturns.slice(-6).map((mr, i) => (
-                  <View key={i}>
+                  <View key={mr.month}>
                     <View style={styles.monthlyRow}>
                       <Text style={styles.monthlyLabel}>
                         {new Date(mr.month + '-01').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
@@ -481,8 +481,8 @@ export default function ReportsScreen({ navigation }: any) {
                 { icon: 'trending-down', label: t('reports.maxDrawdown'), value: formatPercent(m.maxDrawdownPercent), color: colors.danger },
                 { icon: 'flag', label: t('reports.profitFactor'), value: m.profitFactor.toFixed(2), color: m.profitFactor >= 2 ? colors.marketUp : m.profitFactor >= 1 ? colors.warning : colors.marketDown },
                 { icon: 'calendar', label: t('reports.avgHolding'), value: `${m.avgHoldingDays}d`, color: colors.text },
-              ].map((item, i) => (
-                <View key={i}
+              ].map((item) => (
+                <View key={item.label}
                   style={styles.perfCard}>
                   <View style={styles.perfCardIcon}>
                     <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />

@@ -144,8 +144,8 @@ export default function HelpScreen({ navigation }: any) {
         {/* Quick Topics */}
         <Text style={styles.sectionTitle}>Quick Help</Text>
         <View style={styles.topicsGrid}>
-          {quickTopics.map((topic, i) => (
-            <Pressable key={i} style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
+          {quickTopics.map((topic) => (
+            <Pressable key={topic.label} style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
               <View style={[styles.topicIcon, { backgroundColor: topic.color + '20' }]}>
                 <Ionicons name={topic.icon as keyof typeof Ionicons.glyphMap} size={22} color={topic.color} />
               </View>
@@ -157,8 +157,8 @@ export default function HelpScreen({ navigation }: any) {
         {/* Contact Options */}
         <Text style={styles.sectionTitle}>Contact Us</Text>
         <View style={styles.contactRow}>
-          {contactOptions.map((option, i) => (
-            <Pressable key={i}
+          {contactOptions.map((option) => (
+            <Pressable key={option.label}
             >
               <LinearGradient colors={option.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
                 <Ionicons name={option.icon as keyof typeof Ionicons.glyphMap} size={22} color={COLORS.white} />
