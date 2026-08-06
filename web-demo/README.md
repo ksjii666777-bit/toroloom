@@ -42,13 +42,23 @@ can be verified live — without booting the full native app.
    `stockScreener.*` keys (`Results (6)` → `परिणाम (6)`, sort chips
    `Symbol/Price/Change%/P/E/Dividend/Mkt Cap` → `प्रतीक/मूल्य/बदलाव%/…`)
    over real `StockItem` rows for 6 stocks.
-11. **Real theme toggle** — the outlined button calls the app's real
+11. **EMICalculator** — real loan screen: EMI formula, principal/interest
+   breakdown bars, yearly amortization schedule, loan presets. Interactive
+   (`₹10L` preset → EMI ₹20,758.36, verified in Chrome).
+12. **LumpsumCalculator** — real one-time investment screen: compound
+   growth chart, wealth-growth factor, investment presets (default ₹5L @
+   12% 5Y → ₹8,81,170.84, verified).
+13. **TaxCalculator** — real Indian equity tax screen (FY 2025-26):
+   STCG/LTCG toggle with dynamic rate labels, LTCG ₹1L exemption, surcharge
+   + cess breakdown. Interactive (LTCG ₹35,000 profit → ₹0 tax; switching to
+   STCG → ₹7,280, verified in Chrome).
+14. **Real theme toggle** — the outlined button calls the app's real
     `useTheme().toggleTheme()` (zustand store + persistence), flipping
     components between dark (`COLORS`) and light (`LIGHT_COLORS`).
     Badges use the real `darkMode.*` namespace keys.
-12. **Strings across 16 namespaces** — live `t()` output with the English
+15. **Strings across 16 namespaces** — live `t()` output with the English
     original shown below each key.
-13. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
+16. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
     `components.stockAnalysis.shares` with `{{count}}`.
 
 ### Scripted verification (no clicks needed)

@@ -27,6 +27,9 @@ import SectorMetricsCard from '../src/components/SectorMetricsCard';
 import StockItem from '../src/components/StockItem';
 import TaxSummaryCard, { type TaxSummaryData } from '../src/components/TaxSummaryCard';
 import SIPCalculator from '../src/screens/calculators/SIPCalculator';
+import EMICalculator from '../src/screens/calculators/EMICalculator';
+import LumpsumCalculator from '../src/screens/calculators/LumpsumCalculator';
+import TaxCalculator from '../src/screens/calculators/TaxCalculator';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { configureApi } from '../src/services/api/client';
 import { useThemeStore } from '../src/store/themeStore';
@@ -360,6 +363,21 @@ function DemoApp() {
           {demoStocks.map((s) => (
             <StockItem key={s.id} stock={s} onPress={() => {}} />
           ))}
+        </div>
+      </section>
+
+      <section>
+        <h2>More interactive calculators (EMI, Lumpsum, Tax)</h2>
+        <div className="calc-grid">
+          <div className="card calc-card">
+            <EMICalculator />
+          </div>
+          <div className="card calc-card">
+            <LumpsumCalculator />
+          </div>
+        </div>
+        <div className="card calc-card" style={{ marginTop: 12 }}>
+          <TaxCalculator />
         </div>
       </section>
 

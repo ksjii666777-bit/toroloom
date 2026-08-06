@@ -171,6 +171,20 @@
         color: var(--text-muted);
         background: var(--cell-bg);
       }
+      /* Interactive calculator cards (full real screens) */
+      .calc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 720px) {
+        .calc-grid { grid-template-columns: 1fr; }
+      }
+      .calc-card {
+        padding: 0;
+        overflow: hidden;
+        height: 780px;
+      }
     </style>
   </head>
   <body>
