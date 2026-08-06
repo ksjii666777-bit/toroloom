@@ -25,9 +25,9 @@ import { resolve } from 'path';
 export default defineConfig({
   root: resolve(__dirname),
   resolve: {
-    // Pick platform-specific .web.* variants (expo-linear-gradient ships a real
-    // CSS-gradient implementation under NativeLinearGradient.web.js).
-    extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.web.js', '.web.ts', '.web.tsx'],
+    // Pick platform-specific .web.* variants FIRST (expo-linear-gradient ships a
+    // real CSS-gradient implementation under NativeLinearGradient.web.js).
+    extensions: ['.mjs', '.web.js', '.web.ts', '.web.tsx', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
     alias: {
       // React Native components → react-native-web (installed dependency)
       'react-native': 'react-native-web',
@@ -43,6 +43,8 @@ export default defineConfig({
       // Pulled transitively; its TS source needs react-native internals RNW lacks
       'expo-modules-core': resolve(__dirname, 'stubs/expo-modules-core.ts'),
       'react-native-razorpay': resolve(__dirname, 'stubs/razorpay.ts'),
+      // Real screens call useNavigation() with no NavigationContainer present
+      '@react-navigation/native': resolve(__dirname, 'stubs/react-navigation.ts'),
     },
   },
   build: {

@@ -25,9 +25,11 @@ import { PortfolioSkeleton, SkeletonList } from '../src/components/ui/SkeletonLo
 import ReportHeader from '../src/components/ReportHeader';
 import SectorMetricsCard from '../src/components/SectorMetricsCard';
 import StockItem from '../src/components/StockItem';
+import TaxSummaryCard, { type TaxSummaryData } from '../src/components/TaxSummaryCard';
+import SIPCalculator from '../src/screens/calculators/SIPCalculator';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useConnectivityStore } from '../src/store/connectivityStore';
 import { configureApi } from '../src/services/api/client';
+import { useThemeStore } from '../src/store/themeStore';
 import { useT } from '../src/hooks/useT';
 import type { Holding, SectorMetrics, Stock } from '../src/types';
 import type { DetectedPattern } from '../src/components/chart/patternDetection';
@@ -114,7 +116,7 @@ const demoPatterns: DetectedPattern[] = [
   },
 ];
 
-/** Demo watchlist rows for StockItem (one up, one down, one up). */
+/** Demo watchlist/screener rows for StockItem. */
 const demoStocks: Stock[] = [
   {
     id: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries Ltd.',
@@ -134,7 +136,32 @@ const demoStocks: Stock[] = [
     isPositive: true, marketCap: '₹12.8L Cr', volume: '3.4M',
     high52: 1790, low52: 1360, pe: 19.6, pb: 2.8, dividend: 0.6,
   },
+  {
+    id: 'INFY', symbol: 'INFY', name: 'Infosys Ltd.',
+    sector: 'IT', price: 1520.4, change: 11.8, changePercent: 0.78,
+    isPositive: true, marketCap: '₹6.3L Cr', volume: '4.8M',
+    high52: 1750, low52: 1210, pe: 24.1, pb: 6.4, dividend: 2.1,
+  },
+  {
+    id: 'ITC', symbol: 'ITC', name: 'ITC Ltd.',
+    sector: 'FMCG', price: 442.6, change: -2.3, changePercent: -0.52,
+    isPositive: false, marketCap: '₹5.5L Cr', volume: '6.2M',
+    high52: 499, low52: 399, pe: 25.7, pb: 7.2, dividend: 3.8,
+  },
+  {
+    id: 'SBIN', symbol: 'SBIN', name: 'State Bank of India',
+    sector: 'Banking', price: 812.4, change: 9.6, changePercent: 1.19,
+    isPositive: true, marketCap: '₹7.2L Cr', volume: '9.1M',
+    high52: 920, low52: 540, pe: 10.2, pb: 1.6, dividend: 2.4,
+  },
 ];
+
+/** Demo tax breakdown for TaxSummaryCard (STCG + LTCG). */
+const demoTaxData: TaxSummaryData = {
+  shortTerm: { gains: 82500, estimatedTax: 12375 },
+  longTerm: { gains: 145000, estimatedTax: 4500 },
+  totalEstimatedTax: 16875,
+};
 
 /** Demo period-report sector metrics (IT profitable, Energy losing). */
 const demoSectorMetrics: SectorMetrics[] = [
@@ -188,6 +215,20 @@ function DemoApp() {
   const { t } = useT();
   // REAL theme from the app's ThemeContext — toggleTheme() drives the zustand store.
   const { isDark, toggleTheme } = useTheme();
+  const storeSetTheme = useThemeStore((s) => s.setTheme);
+
+  // Optional URL overrides for scripted verification (avoids relying on clicks):
+  //   ?lang=hi|en   pre-selects the language on load
+  //   ?theme=dark|light  pre-selects the theme on load
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const lang = params.get('lang');
+    const theme = params.get('theme');
+    if (lang === 'hi' && (i18n.language || 'en') !== 'hi') void i18n.changeLanguage('hi');
+    if (lang === 'en' && (i18n.language || 'en') !== 'en') void i18n.changeLanguage('en');
+    if (theme === 'light' || theme === 'dark') storeSetTheme(theme);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Flip the page shell CSS variables to match the app theme.
   useEffect(() => {
@@ -284,6 +325,38 @@ function DemoApp() {
           <SectorMetricsCard sectorMetrics={demoSectorMetrics} holdingsBuyPriceMap={buyPrices} />
         </div>
         <div className="card">
+          {demoStocks.map((s) => (
+            <StockItem key={s.id} stock={s} onPress={() => {}} />
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2>Data-heavy components (SIPCalculator, TaxSummaryCard, StockScreener results)</h2>
+
+        {/* Real SIP calculator screen — full interactivity (inputs, presets, chart). */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden', height: 760 }}>
+          <SIPCalculator />
+        </div>
+
+        <div className="card" style={{ marginBottom: 12 }}>
+          <TaxSummaryCard cg={demoTaxData} />
+        </div>
+
+        {/* Stock screener results: real stockScreener.* keys + real StockItem rows. */}
+        <div className="card">
+          <div className="screener-head">
+            <strong data-testid="screener-results">
+              {t('stockScreener.results', { count: demoStocks.length })}
+            </strong>
+          </div>
+          <div className="screener-cols">
+            {['sortSymbol', 'sortPrice', 'sortChange', 'sortPE', 'sortDividend', 'sortMktCap'].map((k) => (
+              <span key={k} className="screener-chip">
+                {t(`stockScreener.${k}`)}
+              </span>
+            ))}
+          </div>
           {demoStocks.map((s) => (
             <StockItem key={s.id} stock={s} onPress={() => {}} />
           ))}

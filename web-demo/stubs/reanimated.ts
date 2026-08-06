@@ -81,6 +81,31 @@ export const Easing = {
   steps: () => id,
 };
 
+/**
+ * Chainable no-op entry/exit animation descriptors. Components render these via
+ * the `entering`/`exiting` props, but the stub Animated.View is a plain View so
+ * the descriptors are never evaluated — they just need to exist and chain.
+ */
+const entry: Record<string, unknown> = {
+  duration: () => entry,
+  delay: () => entry,
+  springify: () => entry,
+  damping: () => entry,
+  stiffness: () => entry,
+  mass: () => entry,
+  easing: () => entry,
+  withInitialValues: () => entry,
+  build: () => undefined,
+};
+
+const layout: Record<string, unknown> = {
+  duration: () => layout,
+  delay: () => layout,
+  springify: () => layout,
+  easing: () => layout,
+  build: () => undefined,
+};
+
 const Animated = {
   View,
   Text,
@@ -90,5 +115,30 @@ const Animated = {
   ActivityIndicator,
   createAnimatedComponent: (Component: unknown) => Component,
 };
+
+export const FadeIn = entry;
+export const FadeInUp = entry;
+export const FadeInDown = entry;
+export const FadeInLeft = entry;
+export const FadeInRight = entry;
+export const FadeOut = entry;
+export const FadeOutUp = entry;
+export const FadeOutDown = entry;
+export const SlideInUp = entry;
+export const SlideInDown = entry;
+export const SlideInLeft = entry;
+export const SlideInRight = entry;
+export const ZoomIn = entry;
+export const ZoomOut = entry;
+export const BounceIn = entry;
+export const BounceOut = entry;
+export const LightSpeedIn = entry;
+export const LightSpeedOut = entry;
+export const Layout = layout;
+export const LinearTransition = layout;
+export const FadingTransition = layout;
+export const JumpingTransition = layout;
+export const CurvedTransition = layout;
+export const SequencedTransition = layout;
 
 export default Animated;

@@ -31,14 +31,34 @@ can be verified live — without booting the full native app.
    via `sectorWins`/`sectorLosses` first-char extraction, `ज`/`ह` in Hindi).
 7. **WatchlistItem rows** — `StockItem` (the real component used for watchlist
    rows) for RELIANCE/TCS/HDFCBANK with sector badges and up/down styling.
-8. **Real theme toggle** — the outlined button calls the app's real
-   `useTheme().toggleTheme()` (zustand store + persistence), flipping
-   components between dark (`COLORS`) and light (`LIGHT_COLORS`).
-   Badges use the real `darkMode.*` namespace keys.
-9. **Strings across 16 namespaces** — live `t()` output with the English
-   original shown below each key.
-10. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
-   `components.stockAnalysis.shares` with `{{count}}`.
+8. **SIPCalculator** — the real full calculator screen (not a copy): maturity
+   value computed live from the SIP formula, yearly-growth bar chart, preset
+   chips, quick summary and info note. Fully interactive (`₹25K` preset →
+   maturity ₹58,08,476.91, verified in Chrome). `@react-navigation/native` is
+   stubbed so `useNavigation()` works without a container.
+9. **TaxSummaryCard** — real STCG/LTCG breakdown (`Tax Summary` →
+   `कर सारांश`, `STCG (15%)` → `अल्पकालिक (15%)`) with estimated-tax tip.
+10. **StockScreener results** — the real screener result block: real
+   `stockScreener.*` keys (`Results (6)` → `परिणाम (6)`, sort chips
+   `Symbol/Price/Change%/P/E/Dividend/Mkt Cap` → `प्रतीक/मूल्य/बदलाव%/…`)
+   over real `StockItem` rows for 6 stocks.
+11. **Real theme toggle** — the outlined button calls the app's real
+    `useTheme().toggleTheme()` (zustand store + persistence), flipping
+    components between dark (`COLORS`) and light (`LIGHT_COLORS`).
+    Badges use the real `darkMode.*` namespace keys.
+12. **Strings across 16 namespaces** — live `t()` output with the English
+    original shown below each key.
+13. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
+    `components.stockAnalysis.shares` with `{{count}}`.
+
+### Scripted verification (no clicks needed)
+
+Append query params to pre-select state on load — handy for URL-driven checks:
+
+- `?lang=hi|en` — pre-select language
+- `?theme=dark|light` — pre-select theme
+
+Example: `http://localhost:4175/?lang=hi&theme=light`
 
 ## Run
 
@@ -70,8 +90,9 @@ render correctly.
 | `@react-native-firebase/*` | `web-demo/stubs/firebase.ts` (no-op analytics) |
 | `expo-modules-core` | `web-demo/stubs/expo-modules-core.ts` (no-op module surface) |
 | `react-native-razorpay` | `web-demo/stubs/razorpay.ts` (no-op checkout) |
+| `@react-navigation/native` | `web-demo/stubs/react-navigation.ts` (no-op `useNavigation`) |
 
-`resolve.extensions` also includes `.web.js`/`.web.tsx` so platform variants
+`resolve.extensions` lists `.web.*` variants FIRST so platform implementations
 are picked (e.g. `expo-linear-gradient` renders its real CSS-gradient web
 implementation instead of the console-warning shim).
 
