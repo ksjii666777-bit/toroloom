@@ -19,8 +19,19 @@ import { createRoot } from 'react-dom/client';
 import i18n, { toggleLanguage } from '../src/i18n';
 import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 import PortfolioHolding from '../src/components/PortfolioHolding';
+import OfflineBanner from '../src/components/ui/OfflineBanner';
+import PatternSummary from '../src/components/stock/PatternSummary';
+import { PortfolioSkeleton, SkeletonList } from '../src/components/ui/SkeletonLoader';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useConnectivityStore } from '../src/store/connectivityStore';
+import { configureApi } from '../src/services/api/client';
 import { useT } from '../src/hooks/useT';
 import type { Holding } from '../src/types';
+import type { DetectedPattern } from '../src/components/chart/patternDetection';
+
+// Point the API client at a dead endpoint so the real connectivity health-check
+// fails → `combinedOffline` becomes true → OfflineBanner actually renders.
+configureApi({ baseUrl: 'http://127.0.0.1:59999/api' });
 
 const positiveHolding: Holding = {
   id: 'h1',
@@ -77,6 +88,27 @@ const SAMPLES: string[] = [
 const INTERPOLATED: Array<[string, Record<string, number>]> = [
   ['time.daysLeft', { count: 3 }],
   ['components.stockAnalysis.shares', { count: 50 }],
+];
+
+const demoPatterns: DetectedPattern[] = [
+  {
+    type: 'head_and_shoulders',
+    label: 'Head & Shoulders',
+    startIndex: 0,
+    endIndex: 20,
+    confidence: 82,
+    direction: 'bearish',
+    levels: [{ x: 0, price: 100 }],
+  },
+  {
+    type: 'double_bottom',
+    label: 'Double Bottom',
+    startIndex: 25,
+    endIndex: 45,
+    confidence: 74,
+    direction: 'bullish',
+    levels: [{ x: 25, price: 110 }],
+  },
 ];
 
 const isDevanagari = (s: string): boolean => /[\u0900-\u097F]/.test(s);
@@ -166,6 +198,18 @@ function DemoApp() {
       </section>
 
       <section>
+        <h2>More real components (OfflineBanner, PatternSummary, SkeletonLoader)</h2>
+        <div className="card" style={{ position: 'relative', minHeight: 84, marginBottom: 12 }}>
+          <OfflineBanner />
+        </div>
+        <div className="card">
+          <PatternSummary patterns={demoPatterns} />
+          <PortfolioSkeleton />
+          <SkeletonList count={2} />
+        </div>
+      </section>
+
+      <section>
         <h2>Strings across 16 namespaces — live</h2>
         <div className="grid">
           {SAMPLES.map((key) => {
@@ -212,7 +256,9 @@ function DemoApp() {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <ThemeProvider>
-    <DemoApp />
-  </ThemeProvider>
+  <SafeAreaProvider>
+    <ThemeProvider>
+      <DemoApp />
+    </ThemeProvider>
+  </SafeAreaProvider>
 );

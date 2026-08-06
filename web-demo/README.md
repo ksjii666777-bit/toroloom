@@ -15,13 +15,21 @@ can be verified live — without booting the full native app.
 
 1. **Real component render** — two `PortfolioHolding` cards (labels like
    `Avg Cost` → `औसत लागत` flip on toggle).
-2. **Real theme toggle** — the outlined button calls the app's real
+2. **OfflineBanner** — rendered live by pointing the API client at a dead
+   endpoint (`configureApi({ baseUrl: 'http://127.0.0.1:59999/api' })`) so the
+   real connectivity health-check fails and `combinedOffline` is true.
+   `You're offline` → `आप ऑफ़लाइन हैं`, `Data Freshness` → `डेटा ताज़गी`.
+3. **PatternSummary** — real `getPatternDescription` + `detectedPatterns` key
+   (`Detected Patterns` → `पहचाने गए पैटर्न`).
+4. **SkeletonLoader** — `PortfolioSkeleton` + `SkeletonList` shimmer blocks
+   (no text — pure theme/visual check).
+5. **Real theme toggle** — the outlined button calls the app's real
    `useTheme().toggleTheme()` (zustand store + persistence), flipping
-   `PortfolioHolding` between dark (`COLORS`) and light (`LIGHT_COLORS`).
+   components between dark (`COLORS`) and light (`LIGHT_COLORS`).
    Badges use the real `darkMode.*` namespace keys.
-3. **Strings across 16 namespaces** — live `t()` output with the English
+6. **Strings across 16 namespaces** — live `t()` output with the English
    original shown below each key.
-4. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
+7. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
    `components.stockAnalysis.shares` with `{{count}}`.
 
 ## Run
@@ -36,6 +44,10 @@ Click **हिन्दी में देखें** to switch to Hindi, **�
 switch the theme. All four combinations (en/hi × dark/light) are verified to
 render correctly.
 
+> The `net::ERR_CONNECTION_REFUSED` message in the console is intentional — it
+> is the real connectivity health-check hitting the deliberately-dead API URL
+> that makes OfflineBanner display.
+
 ## How it works
 
 `vite.config.ts` aliases:
@@ -46,6 +58,10 @@ render correctly.
 | `react-native-reanimated` | `web-demo/stubs/reanimated.ts` (static style stubs) |
 | `expo-haptics` | `web-demo/stubs/expo-haptics.ts` (no-op) |
 | `@expo/vector-icons` | `web-demo/stubs/vector-icons.tsx` (icon name as text) |
+| `react-native-safe-area-context` | `web-demo/stubs/safe-area-context.ts` (zero insets) |
+| `@react-native-firebase/*` | `web-demo/stubs/firebase.ts` (no-op analytics) |
+| `expo-modules-core` | `web-demo/stubs/expo-modules-core.ts` (no-op module surface) |
+| `react-native-razorpay` | `web-demo/stubs/razorpay.ts` (no-op checkout) |
 
 Everything else — i18next, react-i18next, zustand, date-fns, the 109 locale
 namespaces — runs unmodified.
