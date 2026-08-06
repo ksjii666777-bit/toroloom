@@ -25,6 +25,9 @@ import { resolve } from 'path';
 export default defineConfig({
   root: resolve(__dirname),
   resolve: {
+    // Pick platform-specific .web.* variants (expo-linear-gradient ships a real
+    // CSS-gradient implementation under NativeLinearGradient.web.js).
+    extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.web.js', '.web.ts', '.web.tsx'],
     alias: {
       // React Native components → react-native-web (installed dependency)
       'react-native': 'react-native-web',

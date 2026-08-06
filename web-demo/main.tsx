@@ -22,11 +22,14 @@ import PortfolioHolding from '../src/components/PortfolioHolding';
 import OfflineBanner from '../src/components/ui/OfflineBanner';
 import PatternSummary from '../src/components/stock/PatternSummary';
 import { PortfolioSkeleton, SkeletonList } from '../src/components/ui/SkeletonLoader';
+import ReportHeader from '../src/components/ReportHeader';
+import SectorMetricsCard from '../src/components/SectorMetricsCard';
+import StockItem from '../src/components/StockItem';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useConnectivityStore } from '../src/store/connectivityStore';
 import { configureApi } from '../src/services/api/client';
 import { useT } from '../src/hooks/useT';
-import type { Holding } from '../src/types';
+import type { Holding, SectorMetrics, Stock } from '../src/types';
 import type { DetectedPattern } from '../src/components/chart/patternDetection';
 
 // Point the API client at a dead endpoint so the real connectivity health-check
@@ -110,6 +113,64 @@ const demoPatterns: DetectedPattern[] = [
     levels: [{ x: 25, price: 110 }],
   },
 ];
+
+/** Demo watchlist rows for StockItem (one up, one down, one up). */
+const demoStocks: Stock[] = [
+  {
+    id: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries Ltd.',
+    sector: 'Energy', price: 2890.5, change: 45.2, changePercent: 1.59,
+    isPositive: true, marketCap: '₹19.6L Cr', volume: '2.1M',
+    high52: 3200, low52: 2200, pe: 28.4, pb: 3.1, dividend: 0.35,
+  },
+  {
+    id: 'TCS', symbol: 'TCS', name: 'Tata Consultancy Services',
+    sector: 'IT', price: 3650, change: -15.1, changePercent: -0.41,
+    isPositive: false, marketCap: '₹13.2L Cr', volume: '1.2M',
+    high52: 4200, low52: 3000, pe: 31.2, pb: 15.8, dividend: 1.4,
+  },
+  {
+    id: 'HDFCBANK', symbol: 'HDFCBANK', name: 'HDFC Bank Ltd.',
+    sector: 'Banking', price: 1680.2, change: 22.4, changePercent: 1.35,
+    isPositive: true, marketCap: '₹12.8L Cr', volume: '3.4M',
+    high52: 1790, low52: 1360, pe: 19.6, pb: 2.8, dividend: 0.6,
+  },
+];
+
+/** Demo period-report sector metrics (IT profitable, Energy losing). */
+const demoSectorMetrics: SectorMetrics[] = [
+  {
+    sector: 'IT',
+    totalTrades: 5,
+    totalWins: 4,
+    totalLosses: 1,
+    avgWin: 12500,
+    avgLoss: -3200,
+    profitFactor: 3.1,
+    trades: [
+      { id: 't1', stockId: 'TCS', symbol: 'TCS', name: 'Tata Consultancy Services', type: 'buy', quantity: 20, price: 3800, total: 12500, timestamp: '2026-07-18T09:45:00.000Z' },
+      { id: 't2', stockId: 'INFY', symbol: 'INFY', name: 'Infosys Ltd.', type: 'sell', quantity: 10, price: 1850, total: 8400, timestamp: '2026-07-21T10:10:00.000Z' },
+    ],
+  },
+  {
+    sector: 'Energy',
+    totalTrades: 3,
+    totalWins: 1,
+    totalLosses: 2,
+    avgWin: 4800,
+    avgLoss: -6100,
+    profitFactor: 0.7,
+    trades: [
+      { id: 't3', stockId: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries Ltd.', type: 'sell', quantity: 10, price: 2820, total: -5100, timestamp: '2026-07-22T14:05:00.000Z' },
+      { id: 't4', stockId: 'ONGC', symbol: 'ONGC', name: 'Oil & Natural Gas Corp', type: 'sell', quantity: 15, price: 285, total: 3450, timestamp: '2026-07-24T11:30:00.000Z' },
+    ],
+  },
+];
+
+/** Buy prices for the B-vs-S comparison inside expanded sector rows. */
+const buyPrices = new Map<string, number>([
+  ['TCS', 3800],
+  ['RELIANCE', 2650],
+]);
 
 const isDevanagari = (s: string): boolean => /[\u0900-\u097F]/.test(s);
 
@@ -206,6 +267,26 @@ function DemoApp() {
           <PatternSummary patterns={demoPatterns} />
           <PortfolioSkeleton />
           <SkeletonList count={2} />
+        </div>
+      </section>
+
+      <section>
+        <h2>More real components (ReportHeader, SectorMetricsCard, WatchlistItem rows)</h2>
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <ReportHeader
+            navigation={{ goBack: () => {} }}
+            hasAnalytics
+            isExporting={false}
+            onExport={() => {}}
+          />
+        </div>
+        <div className="card" style={{ marginBottom: 12 }}>
+          <SectorMetricsCard sectorMetrics={demoSectorMetrics} holdingsBuyPriceMap={buyPrices} />
+        </div>
+        <div className="card">
+          {demoStocks.map((s) => (
+            <StockItem key={s.id} stock={s} onPress={() => {}} />
+          ))}
         </div>
       </section>
 

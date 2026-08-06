@@ -23,13 +23,21 @@ can be verified live — without booting the full native app.
    (`Detected Patterns` → `पहचाने गए पैटर्न`).
 4. **SkeletonLoader** — `PortfolioSkeleton` + `SkeletonList` shimmer blocks
    (no text — pure theme/visual check).
-5. **Real theme toggle** — the outlined button calls the app's real
+5. **ReportHeader** — real gradient period-report header with `periodReport.*`
+   keys (`Period Report` → `अवधि रिपोर्ट`), LIVE badge and export button.
+   Renders the real `expo-linear-gradient` web implementation (CSS gradient).
+6. **SectorMetricsCard** — real sector win/loss card with expandable trade
+   details (`Sector-wise Metrics` → `सेक्टर-वार मेट्रिक्स`; W/L badges flip
+   via `sectorWins`/`sectorLosses` first-char extraction, `ज`/`ह` in Hindi).
+7. **WatchlistItem rows** — `StockItem` (the real component used for watchlist
+   rows) for RELIANCE/TCS/HDFCBANK with sector badges and up/down styling.
+8. **Real theme toggle** — the outlined button calls the app's real
    `useTheme().toggleTheme()` (zustand store + persistence), flipping
    components between dark (`COLORS`) and light (`LIGHT_COLORS`).
    Badges use the real `darkMode.*` namespace keys.
-6. **Strings across 16 namespaces** — live `t()` output with the English
+9. **Strings across 16 namespaces** — live `t()` output with the English
    original shown below each key.
-7. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
+10. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
    `components.stockAnalysis.shares` with `{{count}}`.
 
 ## Run
@@ -62,6 +70,10 @@ render correctly.
 | `@react-native-firebase/*` | `web-demo/stubs/firebase.ts` (no-op analytics) |
 | `expo-modules-core` | `web-demo/stubs/expo-modules-core.ts` (no-op module surface) |
 | `react-native-razorpay` | `web-demo/stubs/razorpay.ts` (no-op checkout) |
+
+`resolve.extensions` also includes `.web.js`/`.web.tsx` so platform variants
+are picked (e.g. `expo-linear-gradient` renders its real CSS-gradient web
+implementation instead of the console-warning shim).
 
 Everything else — i18next, react-i18next, zustand, date-fns, the 109 locale
 namespaces — runs unmodified.
