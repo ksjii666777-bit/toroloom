@@ -2,6 +2,7 @@ import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, Pressable, PanResponder } from 'react-native';
 import Svg, { Path, Line, Rect, G, Text as SvgText, Circle, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
+import { useT } from '../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { formatCurrency, formatCompactNumber } from '../utils/formatters';
 import { useChartCrosshair } from './ChartCrosshairContext';
@@ -153,6 +154,7 @@ export default function CandlestickChart({
   renderer = 'svg',
 }: CandlestickChartProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { focusedIndex, setFocusedIndex } = useChartCrosshair();
 
@@ -478,7 +480,7 @@ export default function CandlestickChart({
     return (
       <View style={[styles.container, { height }]}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading chart data...</Text>
+          <Text style={styles.loadingText}>{t('charts.loadingChart')}</Text>
         </View>
       </View>
     );
@@ -488,7 +490,7 @@ export default function CandlestickChart({
     return (
       <View style={[styles.container, { height }]}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>No chart data available</Text>
+          <Text style={styles.loadingText}>{t('charts.noChartData')}</Text>
         </View>
       </View>
     );
@@ -608,7 +610,7 @@ export default function CandlestickChart({
             </Pressable>
             {zoomLevel > 0 && (
               <Pressable style={({pressed}) => [styles.zoomResetBtn, {opacity: pressed ? 0.6 : 1}]} onPress={resetZoom}>
-                <Text style={styles.zoomResetText}>Reset</Text>
+                <Text style={styles.zoomResetText}>{t('charts.reset')}</Text>
               </Pressable>
             )}
           </View>

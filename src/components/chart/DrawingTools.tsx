@@ -8,6 +8,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { View, Text, StyleSheet, Pressable, PanResponder, ScrollView, TextInput } from 'react-native';
 import Svg, { Line, Rect, G, Text as SvgText, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import { priceToY, findDrawingAtPoint } from './drawingHitDetection';
@@ -121,6 +122,7 @@ function DrawingToolbar({
     { type: 'annotation', icon: 'Aa', label: 'Text' },
   ];
 
+  const { t } = useT();
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   return (
@@ -178,7 +180,7 @@ function DrawingToolbar({
             onPress={onClearAll}
           >
             <Text style={[isFullscreen ? drawingStyles.clearTextFS : drawingStyles.clearText, { color: colors.marketDown }]}>
-              Clear ({drawingCount})
+              {t('charts.clear', { count: drawingCount })}
             </Text>
           </Pressable>
         )}
@@ -745,6 +747,7 @@ export default function DrawingTools({
   nextDrawingColor,
 }: DrawingToolsProps) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   // ── Internal drawing state (for in-progress drawings) ──
   const [pendingPoint, setPendingPoint] = useState<DrawingPoint | null>(null);
@@ -1093,7 +1096,7 @@ export default function DrawingTools({
             disabled={!canUndo}
           >
             <Text style={[undoStyles.btnText, { color: colors.text }]}>
-              ↩ Undo
+              ↩ {t('charts.undo')}
             </Text>
           </Pressable>
           <View style={[undoStyles.divider, { backgroundColor: colors.border }]} />
@@ -1103,7 +1106,7 @@ export default function DrawingTools({
             disabled={!canRedo}
           >
             <Text style={[undoStyles.btnText, { color: colors.text }]}>
-              Redo ↪
+              {t('charts.redo')} ↪
             </Text>
           </Pressable>
         </View>
@@ -1117,7 +1120,7 @@ export default function DrawingTools({
             onPress={deleteSelectedDrawing}
           >
             <Text style={selectStyles.deleteIcon}>🗑</Text>
-            <Text style={selectStyles.deleteText}>Delete</Text>
+            <Text style={selectStyles.deleteText}>{t('app.delete')}</Text>
           </Pressable>
           <Pressable
             style={({pressed}) => [[selectStyles.cancelBtn, { backgroundColor: colors.bgCardLight, borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
@@ -1136,14 +1139,14 @@ export default function DrawingTools({
             { backgroundColor: colors.bgCard, borderColor: colors.border },
           ]}>
             <Text style={[isFullscreen ? annotationStyles.inputTitleFS : annotationStyles.inputTitle, { color: colors.text }]}>
-              Add Label
+              {t('charts.addLabel')}
             </Text>
             <View style={[annotationStyles.input, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
               <TextInput
                 style={[isFullscreen ? annotationStyles.inputFieldFS : annotationStyles.inputField, { color: colors.text }]}
                 value={annotationText}
                 onChangeText={setAnnotationText}
-                placeholder="Type your annotation..."
+                placeholder={t('charts.annotationPlaceholder')}
                 placeholderTextColor={colors.textMuted}
                 autoFocus
                 maxLength={100}
@@ -1156,13 +1159,13 @@ export default function DrawingTools({
                 style={[annotationStyles.inputBtn, { backgroundColor: colors.bgCardLight }]}
                 onPress={() => { setShowAnnotationInput(false); setPendingPoint(null); }}
               >
-                <Text style={[annotationStyles.inputBtnText, { color: colors.textSecondary }]}>Cancel</Text>
+                <Text style={[annotationStyles.inputBtnText, { color: colors.textSecondary }]}>{t('app.cancel')}</Text>
               </Pressable>
               <Pressable
                 style={[annotationStyles.inputBtn, { backgroundColor: colors.primary }]}
                 onPress={() => confirmAnnotation(annotationText)}
               >
-                <Text style={[annotationStyles.inputBtnText, { color: '#fff' }]}>Done</Text>
+                <Text style={[annotationStyles.inputBtnText, { color: '#fff' }]}>{t('app.done')}</Text>
               </Pressable>
             </View>
           </View>

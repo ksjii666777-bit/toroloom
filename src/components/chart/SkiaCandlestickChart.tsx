@@ -27,6 +27,7 @@ import {
   Group,
 } from '@shopify/react-native-skia';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { FONTS, BORDER_RADIUS, SPACING } from '../../constants/theme';
 import { formatCurrency, formatCompactNumber } from '../../utils/formatters';
 import { useChartCrosshair } from '../ChartCrosshairContext';
@@ -113,6 +114,7 @@ export default function SkiaCandlestickChart({
   chartHeight: externalChartHeight,
 }: SkiaCandlestickChartProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const { focusedIndex } = useChartCrosshair();
 
   // ── Apply Heikin-Ashi if selected ──
@@ -387,7 +389,7 @@ export default function SkiaCandlestickChart({
   if (!data || data.length === 0) {
     return (
       <View style={[fallbackStyles.container, { height, width, backgroundColor: colors.bgCard }]}>
-        <Text style={[fallbackStyles.text, { color: colors.textMuted }]}>No chart data available</Text>
+        <Text style={[fallbackStyles.text, { color: colors.textMuted }]}>{t('charts.noChartData')}</Text>
       </View>
     );
   }

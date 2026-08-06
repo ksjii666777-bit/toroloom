@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path, Line, Rect, Text as SvgText, Defs as SvgDefs, LinearGradient as SvgLinearGradient, Stop as SvgStop } from 'react-native-svg';
 import { useTheme } from '../context/ThemeContext';
+import { useT } from '../hooks/useT';
 import { FONTS} from '../constants/theme';
 import { formatCurrency } from '../utils/formatters';
 
@@ -30,13 +31,14 @@ export default function StockChart({
   showAxis = false,
 }: StockChartProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; price: number; date: string } | null>(null);
 
   if (!data || data.length === 0) {
     return (
       <View style={[styles.container, { height }]}>
-        <Text style={styles.noData}>No chart data available</Text>
+        <Text style={styles.noData}>{t('charts.noChartData')}</Text>
       </View>
     );
   }

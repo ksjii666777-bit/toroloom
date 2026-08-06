@@ -8,6 +8,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -47,6 +48,7 @@ export default function TickModeIndicator({
 }: TickModeProps) {
   const startTimeRef = useRef(Date.now());
   const { colors } = useTheme();
+  const { t } = useT();
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const tickSpeedAnim = useRef(new Animated.Value(0)).current;
   const prevPriceRef = useRef(lastPrice);
@@ -103,7 +105,7 @@ export default function TickModeIndicator({
               { backgroundColor: colors.marketUp, opacity: pulseAnim },
             ]}
           />
-          <Text style={[styles.liveLabel, { color: colors.marketUp }]}>TICK</Text>
+          <Text style={[styles.liveLabel, { color: colors.marketUp }]}>{t('charts.tick')}</Text>
         </View>
 
         <Animated.Text

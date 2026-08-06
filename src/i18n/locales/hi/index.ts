@@ -18,6 +18,7 @@ import bondDashboard from './bondDashboard';
 import brokerConnect from './brokerConnect';
 import calculators from './calculators';
 import capitalGains from './capitalGains';
+import charts from './charts';
 import cdnOptimization from './cdnOptimization';
 import commodityMarkets from './commodityMarkets';
 import components from './components';
@@ -126,6 +127,7 @@ const hi = {
   brokerConnect,
   calculators,
   capitalGains,
+  charts,
   cdnOptimization,
   commodityMarkets,
   components,
