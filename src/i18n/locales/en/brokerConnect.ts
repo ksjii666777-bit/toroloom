@@ -67,4 +67,18 @@ export default {
     limitedConnectionTitle: 'Limited Connection',
     limitedConnectionMsg: 'Connected but token exchange failed: {{error}}. Some features may be unavailable until you reconnect.',
     disconnectBrokerMsg: 'Are you sure you want to disconnect from {{label}}?',
+    // BrokerConnectScreen (grid)
+    headerSubtitle: '1-tap OAuth — no API keys needed',
+    connectedTo: 'Connected to {{broker}}',
+    oauthSessionActive: 'OAuth session active',
+    selectBrokerToConnect: 'Select a broker to connect',
+    oauthSecure: 'OAuth Secure',
+    snapTradeInfo: 'SnapTrade provides secure 1-tap OAuth. Your credentials are never shared with us.',
+    loadingLogin: 'Loading {{broker}} login...',
+    connecting: 'Connecting...',
+    completeLoginBrowser: 'Complete login in your browser',
+    connectedExclam: 'Connected!',
+    accountLinked: 'Your {{broker}} account is now linked.',
+    failedOAuthConnect: 'Failed to connect via OAuth.',
+    yourBroker: 'your broker',
 };

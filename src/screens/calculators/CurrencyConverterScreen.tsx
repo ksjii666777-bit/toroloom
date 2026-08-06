@@ -29,10 +29,11 @@ import {
   type RecentConversion,
 } from '../../utils/currencyConverter';
 import { useLiveConversion } from '../../hooks/useLiveConversion';
-
+import { useT } from '../../hooks/useT';
 
 export default function CurrencyConverterScreen() {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
@@ -94,7 +95,7 @@ export default function CurrencyConverterScreen() {
           </Pressable>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={[styles.headerTitle, { color: colors.text }]}>Currency Converter</Text>
+              <Text style={[styles.headerTitle, { color: colors.text }]}>{t('currencyConverter.title')}</Text>
               {/* Live / Mock badge */}
               <View style={[styles.liveBadge, {
                 backgroundColor: isLive ? '#00E67620' : '#FF525220',
@@ -106,14 +107,20 @@ export default function CurrencyConverterScreen() {
                 <Text style={[styles.liveBadgeText, {
                   color: isLive ? '#00E676' : '#FF5252',
                 }]}>
-                  {ratesLoading ? 'Loading…' : isLive ? 'Live' : 'Mock'}
+                  {ratesLoading
+                    ? t('currencyConverter.loading')
+                    : isLive
+                      ? t('currencyConverter.live')
+                      : t('currencyConverter.mock')}
                 </Text>
               </View>
             </View>
-            <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>Real-time cross rates</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>{t('currencyConverter.subtitle')}</Text>
             {lastUpdated && (
               <Text style={[styles.updatedText, { color: colors.textMuted }]}>
-                Updated {new Intl.DateTimeFormat('en-IN', { hour: '2-digit', minute: '2-digit' }).format(lastUpdated)}
+                {t('currencyConverter.updatedAt', {
+                  time: new Intl.DateTimeFormat('en-IN', { hour: '2-digit', minute: '2-digit' }).format(lastUpdated),
+                })}
               </Text>
             )}
           </View>
@@ -144,7 +151,7 @@ export default function CurrencyConverterScreen() {
         </View>
 
         {/* From Currency Picker */}
-        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>From</Text>
+        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyConverter.from')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
           {CURRENCIES.map(cur => {
             const selected = fromCode === cur.code;
@@ -178,7 +185,7 @@ export default function CurrencyConverterScreen() {
         {/* Swap + Rate Display */}
         <View style={styles.convRateRow}>
           <View style={[styles.convRateBox, { backgroundColor: colors.bgInput }]}>
-            <Text style={[styles.convRateLabel, { color: colors.textMuted }]}>1 {fromCode} =</Text>
+            <Text style={[styles.convRateLabel, { color: colors.textMuted }]}>{t('currencyConverter.rateEquals', { from: fromCode })}</Text>
             <Text style={[styles.convRateValue, { color: colors.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
               {rate.toFixed(6)} {toCode}
             </Text>
@@ -189,7 +196,7 @@ export default function CurrencyConverterScreen() {
         </View>
 
         {/* To Currency Picker */}
-        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>To</Text>
+        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyConverter.to')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
           {selectableCurrencies.map(cur => {
             const selected = toCode === cur.code;
@@ -225,7 +232,7 @@ export default function CurrencyConverterScreen() {
           <View style={styles.convResultHeader}>
             <Text style={{ fontSize: 28 }}>{toCurrency.icon}</Text>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.convResultLabel, { color: colors.textMuted }]}>Converted Amount</Text>
+              <Text style={[styles.convResultLabel, { color: colors.textMuted }]}>{t('currencyConverter.convertedAmount')}</Text>
               <Text style={[styles.convResultValue, { color: toCurrency.color }]}>
                 {toCurrency.symbol}{result.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
               </Text>
@@ -235,10 +242,10 @@ export default function CurrencyConverterScreen() {
           <View style={[styles.convResultDivider, { backgroundColor: toCurrency.color + '20' }]} />
           <View style={styles.convResultFooter}>
             <Text style={[styles.convResultMeta, { color: colors.textMuted }]}>
-              1 {toCode} = {inverseRate.toFixed(6)} {fromCode}
+              {t('currencyConverter.inverseRate', { to: toCode, rate: inverseRate.toFixed(6), from: fromCode })}
             </Text>
             <Text style={[styles.convResultMeta, { color: colors.textMuted }]}>
-              Via {getCurrency('INR').symbol}1 = {fromCurrency.symbol}{convertWithLive(1, 'INR', fromCode).toFixed(4)}
+              {t('currencyConverter.via', { symbol: fromCurrency.symbol, rate: convertWithLive(1, 'INR', fromCode).toFixed(4) })}
             </Text>
           </View>
         </View>
@@ -250,13 +257,13 @@ export default function CurrencyConverterScreen() {
           style={[styles.convConvertBtn, { backgroundColor: amount <= 0 ? colors.textMuted + '60' : colors.primary, opacity: amount <= 0 ? 0.5 : 1 }]}
         >
           <Ionicons name="bookmark" size={16} color="#fff" />
-          <Text style={styles.convConvertText}>Save Conversion</Text>
+          <Text style={styles.convConvertText}>{t('currencyConverter.saveConversion')}</Text>
         </Pressable>
 
         {/* Recent Conversions */}
         {recentConversions.length > 0 && (
           <View style={styles.convRecentSection}>
-            <Text style={[styles.convRecentTitle, { color: colors.text }]}>Recent</Text>
+            <Text style={[styles.convRecentTitle, { color: colors.text }]}>{t('currencyConverter.recent')}</Text>
             {recentConversions.map((conv, _i) => {
               const fC = getCurrency(conv.from);
               const tC = getCurrency(conv.to);
@@ -295,9 +302,15 @@ export default function CurrencyConverterScreen() {
           <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Ionicons name="information-circle" size={18} color={colors.primary} />
             <View style={{ flex: 1 }}>
-              <Text style={[styles.infoTitle, { color: colors.text }]}>Quick Reference</Text>
+              <Text style={[styles.infoTitle, { color: colors.text }]}>{t('currencyConverter.quickReference')}</Text>
               <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                Major INR rates: USD₹{getLiveCurrencyRate('USD').toFixed(2)} · EUR₹{getLiveCurrencyRate('EUR').toFixed(2)} · GBP₹{getLiveCurrencyRate('GBP').toFixed(2)} · JPY₹{getLiveCurrencyRate('JPY').toFixed(4)} · SGD₹{getLiveCurrencyRate('SGD').toFixed(2)}
+                {t('currencyConverter.majorInrRates', {
+                  usd: getLiveCurrencyRate('USD').toFixed(2),
+                  eur: getLiveCurrencyRate('EUR').toFixed(2),
+                  gbp: getLiveCurrencyRate('GBP').toFixed(2),
+                  jpy: getLiveCurrencyRate('JPY').toFixed(4),
+                  sgd: getLiveCurrencyRate('SGD').toFixed(2),
+                })}
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
                 {[

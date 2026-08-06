@@ -27,6 +27,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import _Button from '../../components/ui/Button';
+import { useT } from '../../hooks/useT';
 
 const { width } = Dimensions.get('window');
 
@@ -44,6 +45,7 @@ const SUPPORTED_BROKERS = [
 
 export default function SnapTradeConnectScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   const [status, setStatus] = useState<ConnectionStatus>('checking');
@@ -98,15 +100,15 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
             navigation.navigate('SnapTradePortfolio');
           }, 3000);
         } else {
-          setConnectError('Unable to open browser. Please try again.');
+          setConnectError(t('snaptrade.unableOpenBrowser'));
           setIsConnecting(false);
         }
       }
     } catch (err: any) {
-      setConnectError(err?.message || 'Failed to connect. Please try again.');
+      setConnectError(err?.message || t('snaptrade.failedConnect'));
       setIsConnecting(false);
     }
-  }, [loadStatus, navigation]);
+  }, [loadStatus, navigation, t]);
 
   // ── Disconnect ─────────────────────────────────────────────
   const disconnect = useCallback(async () => {
@@ -117,9 +119,9 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
       setBrokerSlug(null);
       setConnectedAt(null);
     } catch (err: any) {
-      setConnectError(err?.message || 'Failed to disconnect.');
+      setConnectError(err?.message || t('snaptrade.failedDisconnect'));
     }
-  }, []);
+  }, [t]);
 
   // ── Format connection date ─────────────────────────────────
   const formattedDate = connectedAt
@@ -135,7 +137,7 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
       <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={[styles.statusText, { color: colors.textMuted, marginTop: SPACING.md }]}>
-          Checking connection...
+          {t('snaptrade.checkingConnection')}
         </Text>
       </View>
     );
@@ -149,9 +151,9 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </AnimatedPressable>
         <View style={{ marginLeft: SPACING.md }}>
-          <Text style={[styles.title, { color: colors.text }]}>SnapTrade</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('snaptrade.title')}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            {status === 'connected' ? 'Connected to US Broker' : 'Connect US Brokerage'}
+            {status === 'connected' ? t('snaptrade.subtitleConnected') : t('snaptrade.subtitleDisconnected')}
           </Text>
         </View>
       </View>
@@ -174,10 +176,10 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
                   <Ionicons name="checkmark" size={28} color="#fff" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.connectedTitle}>Connected</Text>
-                  <Text style={styles.connectedBroker}>{brokerName || 'Broker'}</Text>
+                  <Text style={styles.connectedTitle}>{t('snaptrade.connected')}</Text>
+                  <Text style={styles.connectedBroker}>{brokerName || t('snaptrade.broker')}</Text>
                   {formattedDate && (
-                    <Text style={styles.connectedDate}>Connected: {formattedDate}</Text>
+                    <Text style={styles.connectedDate}>{t('snaptrade.connectedOn', { date: formattedDate })}</Text>
                   )}
                 </View>
               </View>
@@ -194,9 +196,9 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
                 <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
                   <Ionicons name="briefcase" size={24} color={colors.primary} />
                 </View>
-                <Text style={[styles.actionTitle, { color: colors.text }]}>Portfolio</Text>
+                <Text style={[styles.actionTitle, { color: colors.text }]}>{t('snaptrade.portfolio')}</Text>
                 <Text style={[styles.actionDesc, { color: colors.textMuted }]}>
-                  View holdings & positions
+                  {t('snaptrade.portfolioDesc')}
                 </Text>
               </AnimatedPressable>
 
@@ -209,9 +211,9 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
                 <View style={[styles.actionIcon, { backgroundColor: '#00E67620' }]}>
                   <Ionicons name="swap-horizontal" size={24} color="#00E676" />
                 </View>
-                <Text style={[styles.actionTitle, { color: colors.text }]}>Trade</Text>
+                <Text style={[styles.actionTitle, { color: colors.text }]}>{t('snaptrade.trade')}</Text>
                 <Text style={[styles.actionDesc, { color: colors.textMuted }]}>
-                  Place US stock orders
+                  {t('snaptrade.tradeDesc')}
                 </Text>
               </AnimatedPressable>
             </View>
@@ -224,7 +226,7 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
               style={[styles.disconnectBtn, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}
             >
               <Ionicons name="link-outline" size={18} color={colors.danger} />
-              <Text style={[styles.disconnectText, { color: colors.danger }]}>Disconnect Broker</Text>
+              <Text style={[styles.disconnectText, { color: colors.danger }]}>{t('snaptrade.disconnectBroker')}</Text>
             </AnimatedPressable>
           </Animated.View>
         )}
@@ -237,17 +239,15 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
               <View style={[styles.infoIconCircle, { backgroundColor: colors.primary + '15' }]}>
                 <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
               </View>
-              <Text style={[styles.infoTitle, { color: colors.text }]}>SnapTrade OAuth Gateway</Text>
+              <Text style={[styles.infoTitle, { color: colors.text }]}>{t('snaptrade.oauthGateway')}</Text>
               <Text style={[styles.infoDesc, { color: colors.textMuted }]}>
-                Connect your US brokerage account securely via SnapTrade. 
-                One-tap OAuth — no API keys needed. Supports 20+ US brokerages 
-                including Alpaca, TD Ameritrade, E*TRADE, Interactive Brokers, and more.
+                {t('snaptrade.oauthDesc')}
               </Text>
               <View style={styles.featureRow}>
                 {[
-                  { icon: 'lock-closed', text: 'End-to-end encrypted' },
-                  { icon: 'flash', text: 'Instant connection' },
-                  { icon: 'globe', text: '20+ US brokers' },
+                  { icon: 'lock-closed', text: t('snaptrade.featureEncrypted') },
+                  { icon: 'flash', text: t('snaptrade.featureInstant') },
+                  { icon: 'globe', text: t('snaptrade.featureBrokers') },
                 ].map((f, i) => (
                   <View key={i} style={styles.featureChip}>
                     <Ionicons name={f.icon as any} size={12} color={colors.primary} />
@@ -258,7 +258,7 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
             </View>
 
             {/* Broker Grid */}
-            <Text style={[styles.sectionLabel, { color: colors.text }]}>Select your broker</Text>
+            <Text style={[styles.sectionLabel, { color: colors.text }]}>{t('snaptrade.selectBroker')}</Text>
             <View style={styles.brokerGrid}>
               {SUPPORTED_BROKERS.map((broker, i) => (
                 <Animated.View
@@ -287,7 +287,7 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
                       {broker.desc}
                     </Text>
                     <View style={[styles.connectChip, { backgroundColor: broker.color + '20' }]}>
-                      <Text style={[styles.connectChipText, { color: broker.color }]}>Connect</Text>
+                      <Text style={[styles.connectChipText, { color: broker.color }]}>{t('snaptrade.connect')}</Text>
                     </View>
                   </AnimatedPressable>
                 </Animated.View>
@@ -315,9 +315,9 @@ export default function SnapTradeConnectScreen({ navigation }: any) {
             style={StyleSheet.absoluteFill}
           />
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.connectingTitle, { color: colors.text }]}>Connecting...</Text>
+          <Text style={[styles.connectingTitle, { color: colors.text }]}>{t('snaptrade.connecting')}</Text>
           <Text style={[styles.connectingSub, { color: colors.textMuted }]}>
-            Complete login on your browser
+            {t('snaptrade.completeLoginBrowser')}
           </Text>
           <Text style={[styles.connectingBroker, { color: colors.primary }]}>
             {selectedBroker ? SUPPORTED_BROKERS.find(b => b.id === selectedBroker)?.name : ''}

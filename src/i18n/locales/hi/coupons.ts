@@ -29,4 +29,14 @@ export default {
     used: 'उपयोग किया',
     active: 'सक्रिय',
     expiredStatus: 'समाप्त',
+    // Coupon history screen
+    myCoupons: 'मेरे कूपन',
+    loadingHistory: 'कूपन इतिहास लोड हो रहा है...',
+    noCouponsUsed: 'अभी कोई कूपन उपयोग नहीं हुआ',
+    emptySubtitle: 'आपके लागू किए गए कूपन यहाँ दिखाई देंगे।\nछूट पाने के लिए प्रीमियम पर जाएँ!',
+    viewPremiumPlans: 'प्रीमियम प्लान देखें',
+    totalSaved: 'कुल बचत',
+    couponsUsed: 'कूपन उपयोग किए गए',
+    usageHistory: 'उपयोग इतिहास',
+    appliedTo: 'लागू: {{plan}}',
 };

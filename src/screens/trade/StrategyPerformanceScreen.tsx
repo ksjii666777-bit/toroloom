@@ -5,22 +5,24 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS } from '../../constants/theme';
 
 export default function StrategyPerformanceScreen({ _navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <Text style={[styles.title, { color: colors.text }]}>Strategy Performance</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('strategyPerformance.title')}</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.emptyState}>
           <Ionicons name="analytics-outline" size={64} color={colors.textMuted} />
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>No Data Yet</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('strategyPerformance.noData')}</Text>
           <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
-            Strategy performance metrics will appear here after backtesting
+            {t('strategyPerformance.noDataDesc')}
           </Text>
         </View>
       </ScrollView>

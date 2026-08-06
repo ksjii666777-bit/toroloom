@@ -1,0 +1,18 @@
+export default {
+    title: 'मुद्रा परिवर्तक',
+    subtitle: 'रीयल-टाइम क्रॉस रेट',
+    updatedAt: 'अपडेटेड {{time}}',
+    loading: 'लोड हो रहा है…',
+    live: 'लाइव',
+    mock: 'मॉक',
+    from: 'से',
+    to: 'तक',
+    rateEquals: '1 {{from}} =',
+    convertedAmount: 'परिवर्तित राशि',
+    inverseRate: '1 {{to}} = {{rate}} {{from}}',
+    via: 'via ₹1 = {{symbol}}{{rate}}',
+    saveConversion: 'रूपांतरण सेव करें',
+    recent: 'हालिया',
+    quickReference: 'त्वरित संदर्भ',
+    majorInrRates: 'प्रमुख INR दरें: USD₹{{usd}} · EUR₹{{eur}} · GBP₹{{gbp}} · JPY₹{{jpy}} · SGD₹{{sgd}}',
+};

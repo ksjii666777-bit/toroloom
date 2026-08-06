@@ -34,6 +34,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { api, snapTradeApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import { useT } from '../../hooks/useT';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - 48) / 2; // 2 columns with 16px padding each side
@@ -128,6 +129,7 @@ interface ConnectionState {
 
 export default function BrokerConnectScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -280,9 +282,9 @@ export default function BrokerConnectScreen({ navigation }: any) {
       }
     } catch (err: any) {
       setIsConnectingSnapTrade(false);
-      Alert.alert('Connection Failed', err.message || 'Failed to connect via SnapTrade.');
+      Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedSnapTrade'));
     }
-  }, [showConnectedSuccess]);
+  }, [showConnectedSuccess, t]);
 
   // ── Open OAuth WebView (Zerodha — legacy fallback) ────────
   const _openOAuthWebView = useCallback(async (broker: BrokerMeta) => {
@@ -311,27 +313,27 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
       if (!res.hasAccessToken && res.exchangeError) {
         Alert.alert(
-          'Limited Connection',
-          `Connected but token exchange failed: ${res.exchangeError}. Some features may be unavailable until you reconnect.`,
+          t('brokerConnect.limitedConnectionTitle'),
+          t('brokerConnect.limitedConnectionMsg', { error: res.exchangeError }),
         );
       }
 
       showConnectedSuccess();
     } catch (err: any) {
       setShowWebView(false);
-      Alert.alert('Connection Failed', err.message || 'Failed to connect via OAuth.');
+      Alert.alert(t('brokerConnect.connectionFailed'), err.message || t('brokerConnect.failedOAuthConnect'));
     }
-  }, [showConnectedSuccess]);
+  }, [showConnectedSuccess, t]);
 
   // ── Disconnect broker ──────────────────────────────────────
   const handleDisconnect = useCallback(async () => {
     Alert.alert(
-      'Disconnect Broker',
-      `Are you sure you want to disconnect from ${connectionState.label || 'your broker'}?`,
+      t('brokerConnect.disconnectTitle'),
+      t('brokerConnect.disconnectBrokerMsg', { label: connectionState.label || t('brokerConnect.yourBroker') }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('brokerConnect.cancel'), style: 'cancel' },
         {
-          text: 'Disconnect',
+          text: t('brokerConnect.disconnect'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -341,13 +343,13 @@ export default function BrokerConnectScreen({ navigation }: any) {
                 connected: false, brokerType: null, label: null, connectedAt: null, isLoading: false,
               });
             } catch (err: any) {
-              Alert.alert('Error', err.message || 'Failed to disconnect');
+              Alert.alert(t('brokerConnect.errorTitle'), err.message || t('brokerConnect.failedDisconnect'));
             }
           },
         },
       ],
     );
-  }, [connectionState]);
+  }, [connectionState, t]);
 
   // ── WebView navigation handler (extract request_token) ─────
   const handleWebViewNav = useCallback((navState: any) => {
@@ -374,15 +376,15 @@ export default function BrokerConnectScreen({ navigation }: any) {
   // ── WebView error handler ──────────────────────────────────
   const handleWebViewError = useCallback(() => {
     setShowWebView(false);
-    Alert.alert('Connection Error', 'Failed to load broker login page. Please try again.');
-  }, []);
+    Alert.alert(t('brokerConnect.connectionErrorTitle'), t('brokerConnect.failedLoadLogin'));
+  }, [t]);
 
   // ── Page loading indicator ─────────────────────────────────
   if (connectionState.isLoading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textMuted }]}>Checking connection status...</Text>
+        <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('brokerConnect.checkingStatus')}</Text>
       </View>
     );
   }
@@ -395,8 +397,8 @@ export default function BrokerConnectScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </AnimatedPressable>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Connect Broker</Text>
-          <Text style={styles.headerSubtitle}>1-tap OAuth — no API keys needed</Text>
+          <Text style={styles.headerTitle}>{t('brokerConnect.title')}</Text>
+          <Text style={styles.headerSubtitle}>{t('brokerConnect.headerSubtitle')}</Text>
         </View>
       </View>
 
@@ -416,14 +418,14 @@ export default function BrokerConnectScreen({ navigation }: any) {
               <Ionicons name="checkmark-circle" size={24} color="#fff" />
               <View style={styles.connectedInfo}>
                 <Text style={styles.connectedTitle}>
-                  Connected to {connectionState.label}
+                  {t('brokerConnect.connectedTo', { broker: connectionState.label })}
                 </Text>
                 <Text style={styles.connectedDate}>
-                  OAuth session active
+                  {t('brokerConnect.oauthSessionActive')}
                 </Text>
               </View>
               <TouchableOpacity onPress={handleDisconnect} style={styles.disconnectBtn}>
-                <Text style={styles.disconnectText}>Disconnect</Text>
+                <Text style={styles.disconnectText}>{t('brokerConnect.disconnect')}</Text>
               </TouchableOpacity>
             </LinearGradient>
           </Animated.View>
@@ -431,10 +433,10 @@ export default function BrokerConnectScreen({ navigation }: any) {
 
         {/* ── Section Title ────────────────────────────────── */}
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          <Text style={styles.sectionTitle}>Choose Your Broker</Text>            <Text style={styles.sectionSubtitle}>
+          <Text style={styles.sectionTitle}>{t('brokerConnect.chooseBroker')}</Text>            <Text style={styles.sectionSubtitle}>
             {connectionState.connected
-              ? 'Switch to a different broker below'
-              : 'Select a broker to connect'}
+              ? t('brokerConnect.switchBroker')
+              : t('brokerConnect.selectBrokerToConnect')}
           </Text>
         </Animated.View>
 
@@ -524,7 +526,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                           styles.connectBadgeText,
                           isConnected && styles.connectBadgeTextConnected,
                         ]}>
-                          {isConnected ? 'Connected' : 'OAuth Connect'}
+                          {isConnected ? t('brokerConnect.connected') : t('brokerConnect.oauthConnect')}
                         </Text>
                       </View>
 
@@ -532,7 +534,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
                       {!isConnected && (
                         <View style={styles.oauthIndicator}>
                           <Ionicons name="shield-checkmark" size={10} color="rgba(255,255,255,0.6)" />
-                          <Text style={styles.oauthText}>OAuth Secure</Text>
+                          <Text style={styles.oauthText}>{t('brokerConnect.oauthSecure')}</Text>
                         </View>
                       )}
                     </LinearGradient>
@@ -547,7 +549,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
         <Animated.View style={[styles.infoBox, { opacity: fadeAnim }]}>
           <Ionicons name="information-circle" size={18} color={colors.primary} />
           <Text style={styles.infoText}>
-            SnapTrade provides secure 1-tap OAuth. Your credentials are never shared with us.
+            {t('brokerConnect.snapTradeInfo')}
           </Text>
         </Animated.View>
 
@@ -566,7 +568,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.webViewTitle}>
-              Connect {selectedBroker?.label}
+              {t('brokerConnect.connectBroker', { name: selectedBroker?.label })}
             </Text>
             <View style={{ width: 24 }} />
           </View>
@@ -582,7 +584,7 @@ export default function BrokerConnectScreen({ navigation }: any) {
               <View style={styles.webViewLoading}>
                 <ActivityIndicator size="large" color={colors.primary} />
                 <Text style={[styles.webViewLoadingText, { color: colors.textMuted }]}>
-                  Loading {selectedBroker?.label} login...
+                  {t('brokerConnect.loadingLogin', { broker: selectedBroker?.label })}
                 </Text>
               </View>
             )}
@@ -595,9 +597,9 @@ export default function BrokerConnectScreen({ navigation }: any) {
         <View style={styles.successOverlay}>
           <Animated.View style={styles.successContent}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={styles.successTitle}>Connecting...</Text>
+            <Text style={styles.successTitle}>{t('brokerConnect.connecting')}</Text>
             <Text style={styles.successSubtitle}>
-              Complete login in your browser
+              {t('brokerConnect.completeLoginBrowser')}
             </Text>
           </Animated.View>
         </View>
@@ -615,9 +617,9 @@ export default function BrokerConnectScreen({ navigation }: any) {
             >
               <Ionicons name="checkmark" size={40} color="#fff" />
             </LinearGradient>
-            <Text style={styles.successTitle}>Connected!</Text>
+            <Text style={styles.successTitle}>{t('brokerConnect.connectedExclam')}</Text>
             <Text style={styles.successSubtitle}>
-              Your {selectedBroker?.label} account is now linked.
+              {t('brokerConnect.accountLinked', { broker: selectedBroker?.label })}
             </Text>
           </Animated.View>
         </View>

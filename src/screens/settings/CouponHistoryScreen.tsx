@@ -14,6 +14,7 @@ import { couponApi, CouponUsageDisplay } from '../../services/api/coupons';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import * as Haptics from 'expo-haptics';
+import { useT } from '../../hooks/useT';
 
 // ─── Type Color Helpers ──────────────────────────────────────
 
@@ -40,6 +41,7 @@ function formatDate(dateStr: string): string {
 
 function UsageCard({ usage, index }: { usage: CouponUsageDisplay; index: number }) {
   const { colors } = useTheme();
+  const { t } = useT();
   const color = getDiscountColor(usage.code);
 
   return (
@@ -72,7 +74,7 @@ function UsageCard({ usage, index }: { usage: CouponUsageDisplay; index: number 
           </View>
           {usage.planId && (
             <Text style={[s.usagePlan, { color: colors.textMuted }]}>
-              Applied to: {usage.planId.replace('plan_', '').toUpperCase()}
+              {t('coupons.appliedTo', { plan: usage.planId.replace('plan_', '').toUpperCase() })}
             </Text>
           )}
         </View>
@@ -85,6 +87,7 @@ function UsageCard({ usage, index }: { usage: CouponUsageDisplay; index: number 
 
 export default function CouponHistoryScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [usages, setUsages] = useState<CouponUsageDisplay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,7 +124,7 @@ export default function CouponHistoryScreen({ navigation }: any) {
             <Ionicons name="chevron-back" size={24} color={colors.text} />
           </View>
         </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>My Coupons</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('coupons.myCoupons')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -139,16 +142,16 @@ export default function CouponHistoryScreen({ navigation }: any) {
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.textMuted }]}>Loading coupon history...</Text>
+            <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('coupons.loadingHistory')}</Text>
           </View>
         ) : usages.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={[styles.emptyIconWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="receipt-outline" size={40} color={colors.textMuted} />
             </View>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No Coupons Used Yet</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('coupons.noCouponsUsed')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              Your applied coupons will appear here.{'\n'}Go to Premium to find available discounts!
+              {t('coupons.emptySubtitle')}
             </Text>
             <AnimatedPressable
               onPress={() => {
@@ -160,7 +163,7 @@ export default function CouponHistoryScreen({ navigation }: any) {
             >
               <View style={[styles.emptyCta, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
                 <Ionicons name="flash" size={16} color={colors.primary} />
-                <Text style={[styles.emptyCtaText, { color: colors.primary }]}>View Premium Plans</Text>
+                <Text style={[styles.emptyCtaText, { color: colors.primary }]}>{t('coupons.viewPremiumPlans')}</Text>
               </View>
             </AnimatedPressable>
           </View>
@@ -172,14 +175,14 @@ export default function CouponHistoryScreen({ navigation }: any) {
                 <Ionicons name="wallet-outline" size={24} color={colors.marketUp} />
               </View>
               <View style={styles.summaryInfo}>
-                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Total Saved</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('coupons.totalSaved')}</Text>
                 <Text style={[styles.summaryAmount, { color: colors.marketUp }]}>
                   {formatCurrency(totalSaved)}
                 </Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryInfo}>
-                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Coupons Used</Text>
+                <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('coupons.couponsUsed')}</Text>
                 <Text style={[styles.summaryCount, { color: colors.text }]}>{usages.length}</Text>
               </View>
             </View>
@@ -187,7 +190,7 @@ export default function CouponHistoryScreen({ navigation }: any) {
             {/* Usage List */}
             <View style={styles.sectionHeader}>
               <Ionicons name="time-outline" size={18} color={colors.primary} />
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Usage History</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('coupons.usageHistory')}</Text>
             </View>
             {usages.map((usage, i) => (
               <UsageCard key={usage.id} usage={usage} index={i} />

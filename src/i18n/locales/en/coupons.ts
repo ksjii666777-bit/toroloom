@@ -29,4 +29,14 @@ export default {
     used: 'Used',
     active: 'Active',
     expiredStatus: 'Expired',
+    // Coupon history screen
+    myCoupons: 'My Coupons',
+    loadingHistory: 'Loading coupon history...',
+    noCouponsUsed: 'No Coupons Used Yet',
+    emptySubtitle: 'Your applied coupons will appear here.\nGo to Premium to find available discounts!',
+    viewPremiumPlans: 'View Premium Plans',
+    totalSaved: 'Total Saved',
+    couponsUsed: 'Coupons Used',
+    usageHistory: 'Usage History',
+    appliedTo: 'Applied to: {{plan}}',
 };

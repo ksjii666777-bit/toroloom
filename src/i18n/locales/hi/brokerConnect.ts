@@ -67,4 +67,18 @@ export default {
     limitedConnectionTitle: 'सीमित कनेक्शन',
     limitedConnectionMsg: 'कनेक्ट हुआ लेकिन टोकन एक्सचेंज विफल: {{error}}। दोबारा कनेक्ट करने तक कुछ सुविधाएँ उपलब्ध नहीं हो सकती हैं।',
     disconnectBrokerMsg: 'क्या आप वाकई {{label}} से डिस्कनेक्ट करना चाहते हैं?',
+    // BrokerConnectScreen (grid)
+    headerSubtitle: '1-टैप OAuth — कोई API कुंजी आवश्यक नहीं',
+    connectedTo: '{{broker}} से कनेक्टेड',
+    oauthSessionActive: 'OAuth सत्र सक्रिय',
+    selectBrokerToConnect: 'कनेक्ट करने के लिए ब्रोकर चुनें',
+    oauthSecure: 'OAuth सुरक्षित',
+    snapTradeInfo: 'SnapTrade सुरक्षित 1-टैप OAuth प्रदान करता है। आपके क्रेडेंशियल हमारे साथ कभी साझा नहीं होते।',
+    loadingLogin: '{{broker}} लॉगिन लोड हो रहा है...',
+    connecting: 'कनेक्ट हो रहा है...',
+    completeLoginBrowser: 'अपने ब्राउज़र में लॉगिन पूरा करें',
+    connectedExclam: 'कनेक्टेड!',
+    accountLinked: 'आपका {{broker}} खाता अब लिंक हो गया है।',
+    failedOAuthConnect: 'OAuth के माध्यम से कनेक्ट करने में विफल।',
+    yourBroker: 'आपका ब्रोकर',
 };

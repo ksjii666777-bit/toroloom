@@ -1,0 +1,18 @@
+export default {
+    title: 'Currency Converter',
+    subtitle: 'Real-time cross rates',
+    updatedAt: 'Updated {{time}}',
+    loading: 'Loading…',
+    live: 'Live',
+    mock: 'Mock',
+    from: 'From',
+    to: 'To',
+    rateEquals: '1 {{from}} =',
+    convertedAmount: 'Converted Amount',
+    inverseRate: '1 {{to}} = {{rate}} {{from}}',
+    via: 'Via ₹1 = {{symbol}}{{rate}}',
+    saveConversion: 'Save Conversion',
+    recent: 'Recent',
+    quickReference: 'Quick Reference',
+    majorInrRates: 'Major INR rates: USD₹{{usd}} · EUR₹{{eur}} · GBP₹{{gbp}} · JPY₹{{jpy}} · SGD₹{{sgd}}',
+};

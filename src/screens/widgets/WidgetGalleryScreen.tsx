@@ -23,6 +23,7 @@ import { useWidgetStore } from '../../store/widgetStore';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { getWidgetsByCategory } from '../../components/widgets/WidgetRegistry';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
+import { useT } from '../../hooks/useT';
 import type { WidgetType, WidgetMeta, WidgetSize } from '../../types/widgets';
 import type { SubscriptionTier } from '../../types';
 
@@ -37,15 +38,16 @@ function getUpgradeLabel(minTier: SubscriptionTier): string {
   return minTier === 'elite' ? 'Elite' : 'Pro';
 }
 
-const CATEGORY_META: Record<string, { label: string; icon: string }> = {
-  performance: { label: 'Performance', icon: 'trending-up' },
-  holdings:    { label: 'Holdings',    icon: 'pie-chart' },
-  risk:        { label: 'Risk',        icon: 'shield' },
-  market:      { label: 'Market',      icon: 'stats-chart' },
+const CATEGORY_ICONS: Record<string, string> = {
+  performance: 'trending-up',
+  holdings:    'pie-chart',
+  risk:        'shield',
+  market:      'stats-chart',
 };
 
 export default function WidgetGalleryScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { addWidget, layout } = useWidgetStore();
@@ -59,8 +61,8 @@ export default function WidgetGalleryScreen({ navigation }: any) {
     const size = selectedSizes[type] || meta.defaultSize;
     addWidget(type, meta.name, size);
     Alert.alert(
-      '✅ Widget Added',
-      `"${meta.name}" has been added to your dashboard.`,
+      t('widgetGallery.widgetAdded'),
+      t('widgetGallery.widgetAddedMsg', { name: meta.name }),
     );
   };
 
@@ -79,9 +81,9 @@ export default function WidgetGalleryScreen({ navigation }: any) {
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: SPACING.md }}>
-          <Text style={[styles.title, { color: colors.text }]}>Widget Gallery</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('widgetGallery.title')}</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Add widgets to customize your dashboard
+            {t('widgetGallery.subtitle')}
           </Text>
         </View>
       </View>
@@ -92,7 +94,8 @@ export default function WidgetGalleryScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
         renderItem={({ item: [category, metas] }) => {
-          const catMeta = CATEGORY_META[category] || { label: category, icon: 'grid' };
+          const catLabel = t(`widgetGallery.category${category.charAt(0).toUpperCase() + category.slice(1)}`);
+          const catIcon = CATEGORY_ICONS[category] || 'grid';
           const addedCount = metas.filter(m => existingTypes.has(m.type)).length;
 
           return (
@@ -104,11 +107,11 @@ export default function WidgetGalleryScreen({ navigation }: any) {
               {/* Category Header */}
               <View style={styles.categoryHeader}>
                 <View style={styles.categoryLeft}>
-                  <Ionicons name={catMeta.icon as any} size={16} color={colors.primary} />
-                  <Text style={[styles.categoryTitle, { color: colors.text }]}>{catMeta.label}</Text>
+                  <Ionicons name={catIcon as any} size={16} color={colors.primary} />
+                  <Text style={[styles.categoryTitle, { color: colors.text }]}>{catLabel}</Text>
                 </View>
                 <Text style={[styles.categoryCount, { color: colors.textMuted }]}>
-                  {addedCount}/{metas.length} added
+                  {t('widgetGallery.addedCount', { added: addedCount, total: metas.length })}
                 </Text>
               </View>
 
@@ -168,7 +171,7 @@ export default function WidgetGalleryScreen({ navigation }: any) {
                                 styles.sizeChipText,
                                 { color: selectedSize === s ? meta.color : colors.textMuted },
                               ]}>
-                                {s.charAt(0).toUpperCase() + s.slice(1)}
+                                {t(`widgetGallery.size${s.charAt(0).toUpperCase() + s.slice(1)}`)}
                               </Text>
                             </Pressable>
                           ))}
@@ -180,7 +183,7 @@ export default function WidgetGalleryScreen({ navigation }: any) {
                         <View style={styles.gatedOverlay}>
                           <Ionicons name="lock-closed" size={14} color={colors.textMuted} />
                           <Text style={[styles.gatedText, { color: colors.textMuted }]}>
-                            {upgradeTo === 'Elite' ? 'Elite plan' : 'Pro plan'} required
+                            {upgradeTo === 'Elite' ? t('widgetGallery.eliteRequired') : t('widgetGallery.proRequired')}
                           </Text>
                         </View>
                       ) : (
@@ -204,7 +207,7 @@ export default function WidgetGalleryScreen({ navigation }: any) {
                             styles.addBtnText,
                             { color: isAdded ? colors.textMuted : '#FFF' },
                           ]}>
-                            {isAdded ? 'Added' : 'Add to Dashboard'}
+                            {isAdded ? t('widgetGallery.added') : t('widgetGallery.addToDashboard')}
                           </Text>
                         </TouchableOpacity>
                       )}
@@ -226,7 +229,7 @@ export default function WidgetGalleryScreen({ navigation }: any) {
                             styles.proBadgeText,
                             { color: isGated ? colors.textMuted : '#FFC107' },
                           ]}>
-                            {upgradeTo}
+                            {upgradeTo === 'Elite' ? t('widgetGallery.elite') : t('widgetGallery.pro')}
                           </Text>
                         </View>
                       )}
@@ -241,7 +244,7 @@ export default function WidgetGalleryScreen({ navigation }: any) {
           <View style={[styles.tipCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Ionicons name="information-circle" size={18} color={colors.primary} />
             <Text style={[styles.tipText, { color: colors.textSecondary }]}>
-              Long-press any widget on the dashboard to reorder. Tap the ⋮ menu to resize or remove widgets.
+              {t('widgetGallery.tip')}
             </Text>
           </View>
         }

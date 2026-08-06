@@ -27,12 +27,14 @@ import contractNoteUpload from './contractNoteUpload';
 import correlationMatrix from './correlationMatrix';
 import cryptoDetail from './cryptoDetail';
 import currencyMarkets from './currencyMarkets';
+import currencyConverter from './currencyConverter';
 import customIndicator from './customIndicator';
 import dividendTracker from './dividendTracker';
 import darkMode from './darkMode';
 import sectorDetail from './sectorDetail';
 import education from './education';
 import earningsCall from './earningsCall';
+import economicCalendar from './economicCalendar';
 import errors from './errors';
 import factorAnalysis from './factorAnalysis';
 import featureFlags from './featureFlags';
@@ -76,10 +78,12 @@ import riskSettings from './riskSettings';
 import securityAudit from './securityAudit';
 import stockDetail from './stockDetail';
 import stockScreener from './stockScreener';
+import strategyPerformance from './strategyPerformance';
 import syncSettings from './syncSettings';
 import security from './security';
 import social from './social';
 import smartAlerts from './smartAlerts';
+import snaptrade from './snaptrade';
 import status from './status';
 import telegramConnect from './telegramConnect';
 import subscription from './subscription';
@@ -96,6 +100,7 @@ import wealth from './wealth';
 import webhookHealth from './webhookHealth';
 import webhookManagement from './webhookManagement';
 import widgetSettings from './widgetSettings';
+import widgetGallery from './widgetGallery';
 
 const en = {
   abTestRunner,
@@ -126,12 +131,14 @@ const en = {
   correlationMatrix,
   cryptoDetail,
   currencyMarkets,
+  currencyConverter,
   customIndicator,
   dividendTracker,
   darkMode,
   sectorDetail,
   education,
   earningsCall,
+  economicCalendar,
   errors,
   factorAnalysis,
   featureFlags,
@@ -175,10 +182,12 @@ const en = {
   securityAudit,
   stockDetail,
   stockScreener,
+  strategyPerformance,
   syncSettings,
   security,
   social,
   smartAlerts,
+  snaptrade,
   status,
   telegramConnect,
   subscription,
@@ -195,6 +204,7 @@ const en = {
   webhookHealth,
   webhookManagement,
   widgetSettings,
+  widgetGallery,
 };
 
 export default en;

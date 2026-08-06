@@ -41,19 +41,20 @@ import {
   SYNC_INTERVAL_OPTIONS,
 } from '../../services/backgroundSyncService';
 import { useTheme } from '../../context/ThemeContext';
+import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
 
-function formatSyncTime(iso: string | null): string {
-  if (!iso) return 'Never';
+function formatSyncTime(iso: string | null, t: (k: string, p?: Record<string, any>) => string): string {
+  if (!iso) return t('syncSettings.never');
   try {
     const d = new Date(iso);
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
-    if (diffMs < 60_000) return 'Just now';
-    if (diffMs < 3_600_000) return `${Math.round(diffMs / 60_000)}m ago`;
-    if (diffMs < 86_400_000) return `${Math.round(diffMs / 3_600_000)}h ago`;
+    if (diffMs < 60_000) return t('syncSettings.justNow');
+    if (diffMs < 3_600_000) return t('syncSettings.minutesAgo', { count: Math.round(diffMs / 60_000) });
+    if (diffMs < 86_400_000) return t('syncSettings.hoursAgo', { count: Math.round(diffMs / 3_600_000) });
     return d.toLocaleDateString('en-IN', {
       day: 'numeric',
       month: 'short',
@@ -61,13 +62,19 @@ function formatSyncTime(iso: string | null): string {
       minute: '2-digit',
     });
   } catch {
-    return 'Unknown';
+    return t('syncSettings.unknown');
   }
 }
 
-function getIntervalLabel(minutes: number): string {
-  const opt = SYNC_INTERVAL_OPTIONS.find((o) => o.value === minutes);
-  return opt?.label ?? `${minutes} minutes`;
+function getIntervalLabel(minutes: number, t: (k: string, p?: Record<string, any>) => string): string {
+  const map: Record<number, string> = {
+    15: t('syncSettings.interval15min'),
+    30: t('syncSettings.interval30min'),
+    60: t('syncSettings.interval1hr'),
+    120: t('syncSettings.interval2hr'),
+    240: t('syncSettings.interval4hr'),
+  };
+  return map[minutes] ?? `${minutes} minutes`;
 }
 
 // ──── Component ────────────────────────────────────────────────────────────
@@ -75,6 +82,7 @@ function getIntervalLabel(minutes: number): string {
 export default function BackgroundSyncSettingsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useT();
   const styles = createStyles(colors);
 
   const [enabled, setEnabledState] = useState<boolean>(true);
@@ -182,7 +190,7 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
         <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Background Sync</Text>
+        <Text style={styles.headerTitle}>{t('syncSettings.title')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -216,14 +224,14 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
           <Text style={styles.heroTitle}>
             {enabled
               ? isSyncingNow
-                ? 'Syncing...'
-                : 'Background Sync Active'
-              : 'Background Sync Disabled'}
+                ? t('syncSettings.syncing')
+                : t('syncSettings.syncActive')
+              : t('syncSettings.syncDisabled')}
           </Text>
           <Text style={styles.heroSubtitle}>
             {enabled
-              ? `Refreshes every ${getIntervalLabel(intervalMinutes).toLowerCase()}`
-              : 'Enable to keep portfolio & watchlist up to date'}
+              ? t('syncSettings.refreshesEvery', { interval: getIntervalLabel(intervalMinutes, t).toLowerCase() })
+              : t('syncSettings.enableToSync')}
           </Text>
           <View style={styles.lastSyncRow}>
             <Ionicons
@@ -232,7 +240,7 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
               color={lastSync ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)'}
             />
             <Text style={styles.lastSyncText}>
-              Last sync: {formatSyncTime(lastSync)}
+              {t('syncSettings.lastSyncAt', { time: formatSyncTime(lastSync, t) })}
             </Text>
           </View>
         </View>
@@ -245,9 +253,9 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
                 <Ionicons name="sync" size={18} color="#22C55E" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.settingLabel}>Enable Background Sync</Text>
+                <Text style={styles.settingLabel}>{t('syncSettings.enableSync')}</Text>
                 <Text style={styles.settingDesc}>
-                  Periodically refresh portfolio, watchlist & orders
+                  {t('syncSettings.enableSyncDesc')}
                 </Text>
               </View>
             </View>
@@ -275,9 +283,9 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
                 <Ionicons name="timer-outline" size={18} color="#3B82F6" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.settingLabel}>Sync Interval</Text>
+                <Text style={styles.settingLabel}>{t('syncSettings.syncInterval')}</Text>
                 <Text style={styles.settingDesc}>
-                  {getIntervalLabel(intervalMinutes)}
+                  {getIntervalLabel(intervalMinutes, t)}
                 </Text>
               </View>
             </View>
@@ -357,12 +365,12 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
             </RNAnimated.View>
             <View style={{ flex: 1 }}>
               <Text style={styles.syncNowLabel}>
-                {isSyncingNow ? 'Syncing...' : 'Sync Now'}
+                {isSyncingNow ? t('syncSettings.syncing') : t('syncSettings.syncNow')}
               </Text>
               <Text style={styles.syncNowDesc}>
                 {isSyncingNow
-                  ? 'Refreshing portfolio, watchlist & orders'
-                  : 'Manually trigger a full data refresh'}
+                  ? t('syncSettings.refreshingData')
+                  : t('syncSettings.syncNowDesc')}
               </Text>
             </View>
             {isSyncingNow && (
@@ -373,18 +381,18 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
 
         {/* ── What Gets Synced ── */}
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>📦 What Gets Synced</Text>
+          <Text style={styles.infoTitle}>{t('syncSettings.whatGetsSynced')}</Text>
           <View style={styles.infoItem}>
             <Ionicons name="pie-chart" size={14} color="#22C55E" />
-            <Text style={styles.infoText}>Portfolio holdings & trades</Text>
+            <Text style={styles.infoText}>{t('syncSettings.syncHoldings')}</Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="heart" size={14} color="#FF6B6B" />
-            <Text style={styles.infoText}>Watchlist stocks</Text>
+            <Text style={styles.infoText}>{t('syncSettings.syncWatchlist')}</Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="document-text" size={14} color="#FFC107" />
-            <Text style={styles.infoText}>Open orders status</Text>
+            <Text style={styles.infoText}>{t('syncSettings.syncOrders')}</Text>
           </View>
         </View>
 
@@ -392,9 +400,7 @@ export default function BackgroundSyncSettingsScreen({ navigation }: any) {
         <View style={styles.noteCard}>
           <Ionicons name="battery-charging" size={16} color="#FFAB40" />
           <Text style={styles.noteText}>
-            Background sync uses minimal battery. iOS may delay background tasks
-            based on usage patterns. Shorter intervals increase data freshness
-            with negligible battery impact.
+            {t('syncSettings.batteryNoteDesc')}
           </Text>
         </View>
 

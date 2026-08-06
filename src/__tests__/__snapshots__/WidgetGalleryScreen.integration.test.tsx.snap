@@ -204,10 +204,7 @@ exports[`WidgetGalleryScreen — Integration > matches snapshot with added widge
                     ]
                   },
                   "children": [
-                    "1",
-                    "/",
-                    "3",
-                    " added"
+                    "1/3 added"
                   ]
                 }
               ]
@@ -1048,10 +1045,7 @@ exports[`WidgetGalleryScreen — Integration > matches snapshot with added widge
                     ]
                   },
                   "children": [
-                    "1",
-                    "/",
-                    "2",
-                    " added"
+                    "1/2 added"
                   ]
                 }
               ]
@@ -1335,8 +1329,7 @@ exports[`WidgetGalleryScreen — Integration > matches snapshot with added widge
                             ]
                           },
                           "children": [
-                            "Pro plan",
-                            " required"
+                            "Pro plan required"
                           ]
                         }
                       ]
@@ -1476,10 +1469,7 @@ exports[`WidgetGalleryScreen — Integration > matches snapshot with added widge
                     ]
                   },
                   "children": [
-                    "0",
-                    "/",
-                    "1",
-                    " added"
+                    "0/1 added"
                   ]
                 }
               ]
@@ -1622,8 +1612,7 @@ exports[`WidgetGalleryScreen — Integration > matches snapshot with added widge
                             ]
                           },
                           "children": [
-                            "Pro plan",
-                            " required"
+                            "Pro plan required"
                           ]
                         }
                       ]
@@ -1763,10 +1752,7 @@ exports[`WidgetGalleryScreen — Integration > matches snapshot with added widge
                     ]
                   },
                   "children": [
-                    "0",
-                    "/",
-                    "1",
-                    " added"
+                    "0/1 added"
                   ]
                 }
               ]
@@ -1909,8 +1895,7 @@ exports[`WidgetGalleryScreen — Integration > matches snapshot with added widge
                             ]
                           },
                           "children": [
-                            "Elite plan",
-                            " required"
+                            "Elite plan required"
                           ]
                         }
                       ]

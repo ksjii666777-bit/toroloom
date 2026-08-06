@@ -28,6 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import { useT } from '../../hooks/useT';
 import type { LoginEvent, ActiveSession } from '../../types';
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
@@ -218,32 +219,33 @@ const MOCK_ACTIVE_SESSIONS: ActiveSession[] = [
 // HELPERS
 // ═════════════════════════════════════════════════════════════════════════
 
-function formatRelativeTime(iso: string): string {
+function formatRelativeTime(iso: string, t: (k: string, p?: Record<string, any>) => string): string {
   const now = Date.now();
   const diff = now - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
   const hrs = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  if (hrs < 24) return `${hrs}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return `${Math.floor(days / 7)}w ago`;
+  if (mins < 1) return t('securityAudit.justNow');
+  if (mins < 60) return t('securityAudit.minutesAgo', { count: mins });
+  if (hrs < 24) return t('securityAudit.hoursAgo', { count: hrs });
+  if (days < 7) return t('securityAudit.daysAgo', { count: days });
+  return t('securityAudit.weeksAgo', { count: Math.floor(days / 7) });
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, t: (k: string, p?: Record<string, any>) => string): string {
   const d = new Date(iso);
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
   const isYesterday = d.toDateString() === yesterday.toDateString();
+  const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
-  if (isToday) return `Today at ${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`;
-  if (isYesterday) return `Yesterday at ${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`;
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) +
-    ` at ${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`;
+  if (isToday) return t('securityAudit.todayAt', { time });
+  if (isYesterday) return t('securityAudit.yesterdayAt', { time });
+  const date = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  return t('securityAudit.dateAt', { date, time });
 }
 
 function getAuthMethodIcon(method: LoginEvent['authMethod']): string {
@@ -309,6 +311,7 @@ const statCardStyles = StyleSheet.create({
 // ═════════════════════════════════════════════════════════════════════════
 
 function LoginEventRow({ event, colors }: { event: LoginEvent; colors: any }) {
+  const { t } = useT();
   const isSuccess = event.success;
   const iconName = getAuthMethodIcon(event.authMethod);
 
@@ -330,14 +333,14 @@ function LoginEventRow({ event, colors }: { event: LoginEvent; colors: any }) {
         <View style={loginStyles.topRow}>
           <Ionicons name={iconName as any} size={13} color={isSuccess ? colors.primary : colors.danger} />
           <Text style={[loginStyles.authMethod, { color: colors.text }]}>
-            {event.authMethod === '2fa' ? '2FA' : event.authMethod.charAt(0).toUpperCase() + event.authMethod.slice(1)}
+            {t(`securityAudit.auth${event.authMethod === '2fa' ? '2fa' : event.authMethod.charAt(0).toUpperCase() + event.authMethod.slice(1)}`)}
           </Text>
           <Text style={[loginStyles.time, { color: colors.textMuted }]}>
-            {formatRelativeTime(event.timestamp)}
+            {formatRelativeTime(event.timestamp, t)}
           </Text>
           {!isSuccess && (
             <View style={[loginStyles.failBadge, { backgroundColor: '#FF525220' }]}>
-              <Text style={loginStyles.failBadgeText}>Failed</Text>
+              <Text style={loginStyles.failBadgeText}>{t('securityAudit.failedBadge')}</Text>
             </View>
           )}
         </View>
@@ -365,7 +368,7 @@ function LoginEventRow({ event, colors }: { event: LoginEvent; colors: any }) {
 
       {/* Timestamp full */}
       <Text style={[loginStyles.fullDate, { color: colors.textMuted }]}>
-        {formatDate(event.timestamp)}
+        {formatDate(event.timestamp, t)}
       </Text>
     </View>
   );
@@ -420,6 +423,7 @@ function SessionCard({
   onLogout: (session: ActiveSession) => void;
   colors: any;
 }) {
+  const { t } = useT();
   const isCurrent = session.isCurrentDevice;
   const iconName = getDeviceIcon(session.deviceName);
 
@@ -442,7 +446,7 @@ function SessionCard({
             <Text style={[sessionStyles.deviceName, { color: colors.text }]}>{session.deviceName}</Text>
             {isCurrent && (
               <View style={[sessionStyles.currentBadge, { backgroundColor: colors.primary + '20' }]}>
-                <Text style={[sessionStyles.currentBadgeText, { color: colors.primary }]}>Current</Text>
+                <Text style={[sessionStyles.currentBadgeText, { color: colors.primary }]}>{t('securityAudit.current')}</Text>
               </View>
             )}
           </View>
@@ -467,13 +471,13 @@ function SessionCard({
         <View style={sessionStyles.detailItem}>
           <Ionicons name="time" size={11} color={colors.textMuted} />
           <Text style={[sessionStyles.detailText, { color: colors.textMuted }]}>
-            Created {formatRelativeTime(session.createdAt)} ago
+            {t('securityAudit.createdAgo', { time: formatRelativeTime(session.createdAt, t) })}
           </Text>
         </View>
         <View style={sessionStyles.detailItem}>
           <Ionicons name="flash" size={11} color={colors.textMuted} />
           <Text style={[sessionStyles.detailText, { color: colors.textMuted }]}>
-            Active {formatRelativeTime(session.lastActiveAt)} ago
+            {t('securityAudit.activeAgo', { time: formatRelativeTime(session.lastActiveAt, t) })}
           </Text>
         </View>
       </View>
@@ -487,7 +491,7 @@ function SessionCard({
           ]}
         >
           <Ionicons name="log-out-outline" size={14} color="#FF5252" />
-          <Text style={sessionStyles.logoutBtnText}>Log Out This Device</Text>
+          <Text style={sessionStyles.logoutBtnText}>{t('securityAudit.logOutThisDevice')}</Text>
         </Pressable>
       )}
     </View>
@@ -571,6 +575,7 @@ const chipStyles = StyleSheet.create({
 
 export default function SecurityAuditLogScreen({ navigation }: any) {
   const { colors } = useTheme();
+  const { t } = useT();
   const [activeFilter, setActiveFilter] = useState<'all' | 'success' | 'failed'>('all');
   const [showAllHistory, setShowAllHistory] = useState(false);
 
@@ -592,38 +597,44 @@ export default function SecurityAuditLogScreen({ navigation }: any) {
   // ── Handlers ──
   const handleRemoteLogout = useCallback((session: ActiveSession) => {
     Alert.alert(
-      'Log Out Device',
-      `This will log out "${session.deviceName}" (${session.location}).\n\nThey will need to sign in again to access your account.`,
+      t('securityAudit.logOutDeviceTitle'),
+      t('securityAudit.logOutDeviceMsg', {
+        device: session.deviceName,
+        location: session.location,
+      }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('securityAudit.cancel'), style: 'cancel' },
         {
-          text: 'Log Out',
+          text: t('securityAudit.logOut'),
           style: 'destructive',
           onPress: () => {
-            Alert.alert('✅ Done', `"${session.deviceName}" has been logged out successfully.`);
+            Alert.alert(t('securityAudit.doneTitle'), t('securityAudit.loggedOutMsg', { device: session.deviceName }));
           },
         },
       ],
     );
-  }, []);
+  }, [t]);
 
   const handleLogoutAll = useCallback(() => {
     const otherSessions = MOCK_ACTIVE_SESSIONS.filter(s => !s.isCurrentDevice);
     Alert.alert(
-      'Log Out All Other Devices',
-      `This will log out ${otherSessions.length} other device${otherSessions.length !== 1 ? 's' : ''}.\n\nYou will only remain signed in on this device.`,
+      t('securityAudit.logOutAllTitle'),
+      t('securityAudit.logOutAllMsg', {
+        count: otherSessions.length,
+        s: otherSessions.length !== 1 ? 's' : '',
+      }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('securityAudit.cancel'), style: 'cancel' },
         {
-          text: 'Log Out All',
+          text: t('securityAudit.logOutAllConfirm'),
           style: 'destructive',
           onPress: () => {
-            Alert.alert('✅ Done', 'All other devices have been logged out successfully.');
+            Alert.alert(t('securityAudit.doneTitle'), t('securityAudit.allLoggedOutMsg'));
           },
         },
       ],
     );
-  }, []);
+  }, [t]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -634,9 +645,9 @@ export default function SecurityAuditLogScreen({ navigation }: any) {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>Audit Log</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('securityAudit.screenTitle')}</Text>
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              Login history & active sessions
+              {t('securityAudit.screenSubtitle')}
             </Text>
           </View>
         </View>
@@ -645,27 +656,27 @@ export default function SecurityAuditLogScreen({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* ── Summary Stats ── */}
         <View style={styles.statsRow}>
-          <StatCard icon="log-in" label="Total Logins" value={stats.total.toString()} color="#3B82F6" />
-          <StatCard icon="checkmark-circle" label="Successful" value={stats.successful.toString()} color="#00C853" />
-          <StatCard icon="alert-circle" label="Failed" value={stats.failed.toString()} color="#FF5252" />
+          <StatCard icon="log-in" label={t('securityAudit.totalLogins')} value={stats.total.toString()} color="#3B82F6" />
+          <StatCard icon="checkmark-circle" label={t('securityAudit.successful')} value={stats.successful.toString()} color="#00C853" />
+          <StatCard icon="alert-circle" label={t('securityAudit.failed')} value={stats.failed.toString()} color="#FF5252" />
         </View>
         <View style={styles.statsRow}>
-          <StatCard icon="phone-portrait" label="Active Devices" value={stats.activeSessions.toString()} color="#8B5CF6" isLast />
+          <StatCard icon="phone-portrait" label={t('securityAudit.activeDevices')} value={stats.activeSessions.toString()} color="#8B5CF6" isLast />
           <View style={[statCardStyles.card, { borderColor: '#FFC10730', marginLeft: SPACING.sm, flex: 1 }]}>
             <Ionicons name="time" size={20} color="#FFC107" />
             <Text style={[statCardStyles.value, { color: '#FFC107', fontSize: FONTS.size.sm }]}>
-              {formatRelativeTime(stats.lastLogin)}
+              {formatRelativeTime(stats.lastLogin, t)}
             </Text>
-            <Text style={statCardStyles.label}>Last Login</Text>
+            <Text style={statCardStyles.label}>{t('securityAudit.lastLogin')}</Text>
           </View>
         </View>
 
         {/* ── Active Sessions ── */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Active Sessions
+          {t('securityAudit.activeSessions')}
         </Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          Devices currently signed in to your account
+          {t('securityAudit.sessionsSubtitle')}
         </Text>
 
         {MOCK_ACTIVE_SESSIONS.map((session) => (
@@ -687,7 +698,7 @@ export default function SecurityAuditLogScreen({ navigation }: any) {
             <View style={[styles.logoutAllBtn, { borderColor: '#FF525240' }]}>
               <Ionicons name="log-out-outline" size={18} color="#FF5252" />
               <Text style={styles.logoutAllBtnText}>
-                Log Out {MOCK_ACTIVE_SESSIONS.filter(s => !s.isCurrentDevice).length} Other Device{MOCK_ACTIVE_SESSIONS.filter(s => !s.isCurrentDevice).length !== 1 ? 's' : ''}
+                {t('securityAudit.logOutOther', { count: MOCK_ACTIVE_SESSIONS.filter(s => !s.isCurrentDevice).length })}
               </Text>
             </View>
           </AnimatedPressable>
@@ -697,19 +708,19 @@ export default function SecurityAuditLogScreen({ navigation }: any) {
         <View style={styles.sectionRow}>
           <View>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Login History
+              {t('securityAudit.loginHistory')}
             </Text>
             <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-              Recent login attempts on your account
+              {t('securityAudit.loginHistorySub')}
             </Text>
           </View>
         </View>
 
         {/* Filter chips */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-          <FilterChip label="All" active={activeFilter === 'all'} onPress={() => setActiveFilter('all')} color={colors.primary} />
-          <FilterChip label="Successful" active={activeFilter === 'success'} onPress={() => setActiveFilter('success')} color="#00C853" />
-          <FilterChip label="Failed" active={activeFilter === 'failed'} onPress={() => setActiveFilter('failed')} color="#FF5252" />
+          <FilterChip label={t('securityAudit.all')} active={activeFilter === 'all'} onPress={() => setActiveFilter('all')} color={colors.primary} />
+          <FilterChip label={t('securityAudit.filterSuccessful')} active={activeFilter === 'success'} onPress={() => setActiveFilter('success')} color="#00C853" />
+          <FilterChip label={t('securityAudit.filterFailed')} active={activeFilter === 'failed'} onPress={() => setActiveFilter('failed')} color="#FF5252" />
         </ScrollView>
 
         {/* Login event list */}
@@ -724,7 +735,9 @@ export default function SecurityAuditLogScreen({ navigation }: any) {
             <View style={styles.emptyState}>
               <Ionicons name="search-outline" size={36} color={colors.textMuted} />
               <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                No {activeFilter === 'success' ? 'failed' : 'successful'} logins found
+                {t('securityAudit.noLoginsFound', {
+                  type: activeFilter === 'success' ? t('securityAudit.noLoginsTypeFailed') : t('securityAudit.noLoginsTypeSuccess'),
+                })}
               </Text>
             </View>
           )}
@@ -736,7 +749,7 @@ export default function SecurityAuditLogScreen({ navigation }: any) {
               style={[styles.showMoreBtn, { borderTopColor: colors.divider }]}
             >
               <Text style={[styles.showMoreText, { color: colors.primary }]}>
-                {showAllHistory ? 'Show Less' : `Show All (${filteredHistory.length})`}
+                {showAllHistory ? t('securityAudit.showLess') : t('securityAudit.showAll', { count: filteredHistory.length })}
               </Text>
               <Ionicons
                 name={showAllHistory ? 'chevron-up' : 'chevron-down'}
@@ -751,10 +764,9 @@ export default function SecurityAuditLogScreen({ navigation }: any) {
         <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           <Ionicons name="shield-checkmark" size={18} color={colors.primary} />
           <View style={{ flex: 1 }}>
-            <Text style={[styles.infoTitle, { color: colors.text }]}>Stay Secure</Text>
+            <Text style={[styles.infoTitle, { color: colors.text }]}>{t('securityAudit.staySecure')}</Text>
             <Text style={[styles.infoText, { color: colors.textMuted }]}>
-              Regularly review your active sessions and log out devices you don't recognize.
-              If you see suspicious activity, change your password immediately and enable 2FA.
+              {t('securityAudit.staySecureDesc')}
             </Text>
           </View>
         </View>
