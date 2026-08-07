@@ -425,6 +425,63 @@ export class MockBroker implements IBroker {
     await this.delay(800);
 
     const stock = mockStocks.find(s => s.symbol === order.symbol);
+
+    // F&O instruments (NFO exchange): simulate a fill even though the
+    // instrument symbol isn't a known equity. Full exposure still passes
+    // through the risk engine via the OrderExecutionPipeline.
+    if (order.exchange === 'NFO') {
+      const nfoResult: OrderResult = {
+        id: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        status: 'confirmed',
+        message: `F&O order filled: ${order.symbol} ${order.transactionType} ${order.quantity} @ ${order.price}`,
+        timestamp: new Date().toISOString(),
+      };
+      mockOrders.push(nfoResult);
+      mockTradeHistory.unshift({
+        id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        symbol: order.symbol,
+        type: order.transactionType === 'BUY' ? 'buy' : 'sell',
+        quantity: order.quantity,
+        price: order.price,
+        total: order.price * order.quantity,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Track the position like the equity path (buy upserts, sell reduces)
+      const existingNfoPos = mockPositions.find(p => p.symbol === order.symbol);
+      if (order.transactionType === 'BUY') {
+        if (existingNfoPos) {
+          const prevQty = existingNfoPos.quantity;
+          existingNfoPos.quantity += order.quantity;
+          existingNfoPos.buyPrice =
+            ((existingNfoPos.buyPrice * prevQty) + (order.price * order.quantity)) /
+            existingNfoPos.quantity;
+          existingNfoPos.currentPrice = order.price;
+          existingNfoPos.pnl = (existingNfoPos.quantity * order.price) -
+            (existingNfoPos.buyPrice * existingNfoPos.quantity);
+          existingNfoPos.pnlPercent = existingNfoPos.buyPrice > 0
+            ? (existingNfoPos.pnl / (existingNfoPos.buyPrice * existingNfoPos.quantity)) * 100
+            : 0;
+        } else {
+          mockPositions.push({
+            symbol: order.symbol,
+            quantity: order.quantity,
+            buyPrice: order.price,
+            currentPrice: order.price,
+            pnl: 0,
+            pnlPercent: 0,
+          });
+        }
+      } else if (existingNfoPos) {
+        existingNfoPos.quantity -= order.quantity;
+        if (existingNfoPos.quantity <= 0) {
+          mockPositions = mockPositions.filter(p => p.symbol !== order.symbol);
+        }
+      }
+
+      return nfoResult;
+    }
+
     if (!stock) {
       const result: OrderResult = {
         id: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,

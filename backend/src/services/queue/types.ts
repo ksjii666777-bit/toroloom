@@ -18,7 +18,7 @@ export interface OrderJobData {
   /** Unique job correlation ID for dedup and tracing */
   correlationId: string;
 
-  /** The full order parameters to execute */
+  /** The full order parameters to execute (idempotency key rides in params) */
   params: ExecuteOrderParams;
 
   /** When the job was enqueued (ISO timestamp) */

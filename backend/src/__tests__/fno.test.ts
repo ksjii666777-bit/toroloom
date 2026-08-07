@@ -37,6 +37,8 @@ vi.mock('../middleware/auth', () => ({
 // ──── Import route AFTER mocks ─────────────────────────────────────────────
 
 import fnoRoutes from '../routes/fno';
+import { riskEngine } from '../services/riskEngine/RiskEngine';
+import { clearIdempotencyForTest } from '../services/idempotency';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
 
@@ -420,6 +422,15 @@ describe('F&O Routes', () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   describe('POST /api/fno/place-order', () => {
+    // F&O orders now flow through the Risk-Guarded pipeline: enable F&O and
+    // set a portfolio so the engine's position-size check passes.
+    beforeEach(() => {
+      clearIdempotencyForTest();
+      riskEngine.resetDaily('test_user');
+      riskEngine.setPortfolioValue('test_user', 1000000);
+      riskEngine.updateLimits('test_user', { allowFNO: true, maxPositionSizePercent: 100 });
+    });
+
     it('should place a CE option order successfully', async () => {
       const { status, body } = await request(server, baseUrl, {
         method: 'POST', path: '/api/fno/place-order',
@@ -437,7 +448,6 @@ describe('F&O Routes', () => {
       expect(status).toBe(200);
       expect(body.success).toBe(true);
       expect(body.orderId).toBeDefined();
-      expect(body.orderId).toContain('FNO_');
       expect(body.message).toContain('BUY CE');
       expect(body.type).toBe('CE');
       expect(body.symbol).toBe('NIFTY');
@@ -574,10 +584,11 @@ describe('F&O Routes', () => {
           action: 'buy',
           expiry: new Date().toISOString(),
           quantity: 1,
-          price: 23500,
+          price: 100, // keep order value under the position-size cap
         },
       });
       expect(status).toBe(200);
+      expect(body.success).toBe(true);
       expect(body.strike).toBeNull();
     });
 
@@ -600,7 +611,7 @@ describe('F&O Routes', () => {
       expect(body.lotSize).toBe(25); // BANKNIFTY lot size
     });
 
-    it('should handle very large quantity without crashing', async () => {
+    it('should block a very large quantity via the risk engine (no crash)', async () => {
       const { status, body } = await request(server, baseUrl, {
         method: 'POST', path: '/api/fno/place-order',
         body: {
@@ -613,10 +624,12 @@ describe('F&O Routes', () => {
         },
       });
       expect(status).toBe(200);
-      expect(body.totalQuantity).toBe(99999999 * 50);
+      expect(body.success).toBe(false);
+      expect(body.status).toBe('rejected');
+      expect(body.message).toContain('max position size');
     });
 
-    it('should handle very large price without crashing', async () => {
+    it('should block a very large price via the risk engine (no crash)', async () => {
       const { status, body } = await request(server, baseUrl, {
         method: 'POST', path: '/api/fno/place-order',
         body: {
@@ -629,7 +642,9 @@ describe('F&O Routes', () => {
         },
       });
       expect(status).toBe(200);
-      expect(body.totalValue).toBe(50 * 999999.99);
+      expect(body.success).toBe(false);
+      expect(body.status).toBe('rejected');
+      expect(body.message).toContain('max position size');
     });
 
     it('should accept custom productType', async () => {
@@ -647,6 +662,52 @@ describe('F&O Routes', () => {
       });
       expect(status).toBe(200);
       expect(body.productType).toBe('MIS');
+    });
+
+    it('should block F&O orders when allowFNO is disabled (default)', async () => {
+      riskEngine.updateLimits('test_user', { allowFNO: false });
+      const { status, body } = await request(server, baseUrl, {
+        method: 'POST', path: '/api/fno/place-order',
+        body: {
+          symbol: 'NIFTY',
+          type: 'CE',
+          action: 'buy',
+          strike: 23500,
+          expiry: new Date(Date.now() + 7 * 86400000).toISOString(),
+          quantity: 1,
+          price: 185.5,
+        },
+      });
+      expect(status).toBe(200);
+      expect(body.success).toBe(false);
+      expect(body.status).toBe('rejected');
+      expect(body.message).toContain('F&O');
+    });
+
+    it('should dedupe repeated identical orders via idempotencyKey', async () => {
+      const orderBody = {
+        symbol: 'NIFTY',
+        type: 'CE',
+        action: 'buy',
+        strike: 23500,
+        expiry: new Date(Date.now() + 7 * 86400000).toISOString(),
+        quantity: 1,
+        price: 185.5,
+        idempotencyKey: 'test-idem-key-00001',
+      };
+      const first = await request(server, baseUrl, {
+        method: 'POST', path: '/api/fno/place-order',
+        body: orderBody,
+      });
+      const second = await request(server, baseUrl, {
+        method: 'POST', path: '/api/fno/place-order',
+        body: orderBody,
+      });
+
+      expect(first.body.success).toBe(true);
+      expect(first.body.orderId).toBeDefined();
+      expect(second.body.orderId).toBe(first.body.orderId);
+      expect(second.body.idempotentReplay).toBe(true);
     });
 
     // ── Input Validation Error Paths ────────────────────────────────────

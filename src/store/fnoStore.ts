@@ -7,8 +7,9 @@ import type {
   FnOPosition,
   StrategyLeg,
 } from '../types';
-import { fnoApi, StrategyAnalyzeResult, PrebuiltStrategy, SavedStrategy } from '../services/api/fno';
+import { fnoApi, StrategyAnalyzeResult, PrebuiltStrategy, SavedStrategy, FnOOrderResult } from '../services/api/fno';
 import { offlineCache } from '../services/offlineCache';
+import { newIdempotencyKey } from '../utils/idempotency';
 
 import { log } from '../utils/logger';
 import type { BacktestResult } from '../services/backtestEngine';
@@ -200,7 +201,8 @@ interface FnoState {
   openOrderModal: (contract: OptionContract, type: 'buy' | 'sell') => void;
   closeOrderModal: () => void;
   setOrderQuantity: (qty: number) => void;
-  placeOrder: () => Promise<void>;
+  /** Returns the server result (success:false when risk-engine blocked) */
+  placeOrder: () => Promise<FnOOrderResult | null>;
 }
 
 export const useFnoStore = create<FnoState>((set, get) => ({
@@ -872,10 +874,10 @@ export const useFnoStore = create<FnoState>((set, get) => ({
 
   placeOrder: async () => {
     const { selectedContract, orderType, selectedSymbol, selectedExpiry, orderQuantity } = get();
-    if (!selectedContract || !selectedExpiry) return;
+    if (!selectedContract || !selectedExpiry) return null;
 
     try {
-      await fnoApi.placeOrder({
+      const result = await fnoApi.placeOrder({
         symbol: selectedSymbol,
         type: selectedContract.type,
         action: orderType,
@@ -883,10 +885,18 @@ export const useFnoStore = create<FnoState>((set, get) => ({
         expiry: selectedExpiry.date,
         quantity: orderQuantity,
         price: selectedContract.ltp,
+        idempotencyKey: newIdempotencyKey(),
       });
-      set({ showOrderModal: false, selectedContract: null, orderQuantity: 1 });
+
+      // Only close the modal on success — a risk-engine block must surface
+      // the reason to the user instead of silently closing.
+      if (result?.success) {
+        set({ showOrderModal: false, selectedContract: null, orderQuantity: 1 });
+      }
+      return result ?? null;
     } catch {
-      // Handle error
+      // Keep the modal open; the screen surfaces the failure
+      return null;
     }
   },
 }));

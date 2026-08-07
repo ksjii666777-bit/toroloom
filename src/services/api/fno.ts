@@ -52,11 +52,13 @@ export interface FnOPlaceOrderRequest {
   quantity: number;
   price: number;
   productType?: string;
+  /** Client-generated key — dedupes retries after a lost response */
+  idempotencyKey?: string;
 }
 
 export interface FnOOrderResult {
   success: boolean;
-  orderId: string;
+  orderId: string | null;
   message: string;
   type: string;
   action: string;
@@ -67,6 +69,13 @@ export interface FnOOrderResult {
   price: number;
   timestamp: string;
   status: string;
+  riskEvaluation?: {
+    allowed: boolean;
+    decision?: string;
+    message?: string;
+  };
+  /** True when this response is a replay of an identical earlier order */
+  idempotentReplay?: boolean;
 }
 
 // ──── Strategy Persistence Types ─────────────────────────────────────────
@@ -195,6 +204,8 @@ export const fnoApi = {
     name?: string;
     productType?: string;
     orderType?: string;
+    /** Client-generated key — dedupes whole-strategy retries */
+    idempotencyKey?: string;
   }) =>
     api.post<{
       strategyName: string;
@@ -202,6 +213,8 @@ export const fnoApi = {
       successful: number;
       failed: number;
       totalValue: number;
+      blocked?: boolean;
+      blockedReasons?: string[];
       legs: {
         legIndex: number;
         legLabel: string;

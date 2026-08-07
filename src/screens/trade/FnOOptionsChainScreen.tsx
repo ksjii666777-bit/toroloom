@@ -577,13 +577,19 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               style={[styles.modalActionBtn, {
                 backgroundColor: orderType === 'buy' ? colors.marketUp : colors.marketDown,
               }]}
-              onPress={() => {
-                placeOrder();
-                Alert.alert(
-                  'Order Placed ✅',
-                  `${orderType === 'buy' ? t('trading.bought') : t('trading.sold')} ${orderQuantity} ${t('trading.lots').toLowerCase()} ${selectedSymbol} ${selectedContract.strike} ${selectedContract.type} @ ${formatCurrency(selectedContract.ltp, true)}`,
-                );
-                closeOrderModal();
+              onPress={async () => {
+                const result = await placeOrder();
+                if (result?.success) {
+                  Alert.alert(
+                    'Order Placed ✅',
+                    `${orderType === 'buy' ? t('trading.bought') : t('trading.sold')} ${orderQuantity} ${t('trading.lots').toLowerCase()} ${selectedSymbol} ${selectedContract.strike} ${selectedContract.type} @ ${formatCurrency(selectedContract.ltp, true)}`,
+                  );
+                  closeOrderModal();
+                } else {
+                  // Risk engine blocked the order (e.g. F&O disabled, daily
+                  // loss limit, lockdown) — show the reason, keep modal open.
+                  Alert.alert('Order Rejected', result?.message || 'Order could not be placed. Please check your risk settings.');
+                }
               }}
             >
               <Ionicons

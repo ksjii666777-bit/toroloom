@@ -41,6 +41,14 @@ import {
   deleteConnection,
 } from '../services/snapTradePersistence';
 import { encrypt, decrypt } from '../lib/crypto';
+import { riskEngine } from '../services/riskEngine/RiskEngine';
+import { OrderActionType } from '../services/riskEngine/types';
+import { auditTrail } from '../services/auditTrail';
+import {
+  claimOrderExecution,
+  completeOrderExecution,
+  releaseOrderExecution,
+} from '../services/idempotency';
 
 const router = Router();
 router.use(authMiddleware);
@@ -578,6 +586,10 @@ router.post('/place-order', async (req: Request, res: Response) => {
   }
 
   const { symbol, action, orderType, quantity, price, stopPrice, timeInForce } = req.body;
+  const idempotencyKey = req.body.idempotencyKey as string | undefined;
+  // Market orders may not carry a price — the client sends an estimate so the
+  // risk engine's position-size gate still fires (the biggest live-money check).
+  const estimatedPrice = req.body.estimatedPrice as number | undefined;
 
   if (!symbol || !action || !orderType || !quantity) {
     res.status(400).json({
@@ -587,7 +599,88 @@ router.post('/place-order', async (req: Request, res: Response) => {
     return;
   }
 
+  if (idempotencyKey !== undefined && (idempotencyKey.length < 8 || idempotencyKey.length > 128)) {
+    res.status(400).json({ error: 'idempotencyKey must be a string between 8 and 128 characters' });
+    return;
+  }
+
   try {
+    // ── Idempotency guard: a replayed key returns the ORIGINAL outcome ──────
+    if (idempotencyKey) {
+      const claim = await claimOrderExecution(userId, idempotencyKey);
+      if (claim.state === 'completed' && claim.result) {
+        res.json({ ...(claim.result as Record<string, unknown>), idempotentReplay: true });
+        return;
+      }
+      if (claim.state === 'in_progress') {
+        res.status(429).json({ error: 'Duplicate order request in progress — please wait.' });
+        return;
+      }
+    }
+
+    // ── Fetch current positions so SELL exits are recognized (lockdown-safe) ──
+    let currentPosition: { quantity: number; avgPrice: number } | undefined;
+    try {
+      const positions = await snapTradeService.getPositions(
+        snapTradeUserId,
+        userSecret,
+        connection.accountId,
+      );
+      const sym = String(symbol).toUpperCase().trim();
+      const pos = (positions as any[]).find(
+        (p: any) =>
+          p.symbol?.symbol && String(p.symbol.symbol).toUpperCase().trim() === sym,
+      );
+      if (pos && Number(pos.units) > 0) {
+        currentPosition = { quantity: Number(pos.units), avgPrice: Number(pos.avgCost) || 0 };
+      }
+    } catch {
+      // Best-effort — position lookup failure must NOT block ordering
+    }
+
+    // ── Financial Bodyguard: risk check BEFORE any live-money order ─────────
+    const portfolioValue = riskEngine.getState(userId).portfolioValueAtOpen || 1000000;
+    const evaluation = riskEngine.evaluate(userId, {
+      actionType: action.toUpperCase() === 'BUY' ? OrderActionType.BUY : OrderActionType.SELL,
+      symbol,
+      quantity,
+      price: price ?? estimatedPrice,
+      productType: 'CNC',
+      isFNO: false,
+      portfolioValue,
+      currentPosition,
+    });
+
+    if (!evaluation.allowed) {
+      await auditTrail.append({
+        userId,
+        eventType: 'ORDER_REJECTED',
+        data: {
+          source: 'snaptrade',
+          symbol,
+          action: action.toUpperCase(),
+          quantity,
+          price: price ?? estimatedPrice,
+          reason: evaluation.message,
+          decision: evaluation.decision,
+        },
+      });
+      const blockedResponse = {
+        success: false,
+        status: 'rejected',
+        orderId: null,
+        message: evaluation.message,
+        riskEvaluation: evaluation,
+      };
+      // Store the blocked outcome so a retry of the same key returns the block
+      // message (not a confusing 429 from the pending claim).
+      if (idempotencyKey) {
+        await completeOrderExecution(userId, idempotencyKey, blockedResponse);
+      }
+      res.json(blockedResponse);
+      return;
+    }
+
     const result = await snapTradeService.placeOrder(
       snapTradeUserId,
       userSecret,
@@ -603,13 +696,42 @@ router.post('/place-order', async (req: Request, res: Response) => {
       },
     );
 
-    res.json({
-      success: true,
-      orderId: result.id || result.brokerageOrderId,
-      status: result.status || result.orderStatus,
-      message: `Order placed successfully. Status: ${result.status || result.orderStatus || 'unknown'}`,
+    const orderId = result.id || result.brokerageOrderId;
+    const orderStatus = result.status || result.orderStatus;
+
+    const auditEvent = await auditTrail.append({
+      userId,
+      eventType: 'ORDER_EXECUTION',
+      data: {
+        source: 'snaptrade',
+        symbol,
+        action: action.toUpperCase(),
+        orderType,
+        quantity,
+        price,
+        orderId,
+        status: orderStatus,
+      },
     });
+
+    const responseBody = {
+      success: true,
+      orderId,
+      status: orderStatus,
+      message: `Order placed successfully. Status: ${orderStatus || 'unknown'}`,
+      riskEvaluation: evaluation,
+      auditEventId: auditEvent.id,
+    };
+
+    if (idempotencyKey) {
+      await completeOrderExecution(userId, idempotencyKey, responseBody);
+    }
+
+    res.json(responseBody);
   } catch (err: any) {
+    if (idempotencyKey) {
+      await releaseOrderExecution(userId, idempotencyKey);
+    }
     console.error('[SnapTrade] Place-order error:', err.message);
     res.status(500).json({ error: `Failed to place order: ${err.message}` });
   }

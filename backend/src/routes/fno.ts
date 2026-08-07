@@ -15,6 +15,9 @@ import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { env } from '../config/env';
 import { getBroker } from '../services/broker';
+import { orderPipeline, ExecuteOrderParams } from '../services/orderExecution';
+import { OrderActionType } from '../services/riskEngine/types';
+import { riskEngine } from '../services/riskEngine/RiskEngine';
 
 const router = Router();
 router.use(authMiddleware);
@@ -783,8 +786,30 @@ router.get('/historical-data', async (req: Request, res: Response) => {
   }
 });
 
+// ──── F&O symbol construction ────────────────────────────────────────────
+// Kite-format instrument name, e.g. NIFTY24OCT23800CE / NIFTY24OCTFUT.
+// Used for the broker call; the raw components are also carried in
+// metadata.fno so the broker layer can re-resolve the exact instrument.
+function buildFnoSymbol(
+  symbol: string,
+  type: string,
+  strike: number | undefined,
+  expiry: string,
+): string {
+  const d = new Date(expiry);
+  const yy = Number.isNaN(d.getTime()) ? '' : String(d.getUTCFullYear()).slice(-2);
+  const mon =
+    Number.isNaN(d.getTime())
+      ? ''
+      : (['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][d.getUTCMonth()] || '');
+  if (type === 'FUTURE') {
+    return `${symbol}${yy}${mon}FUT`;
+  }
+  return `${symbol}${yy}${mon}${strike ?? ''}${type}`;
+}
+
 // POST /api/fno/place-order — Place F&O order
-router.post('/place-order', (req: Request, res: Response) => {
+router.post('/place-order', async (req: Request, res: Response) => {
   try {
     const {
       symbol,
@@ -841,10 +866,9 @@ router.post('/place-order', (req: Request, res: Response) => {
       return;
     }
 
-    const orderId = `FNO_${Date.now()}_${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     const timestamp = new Date().toISOString();
 
-    // Simulate order processing
+    // F&O instruments trade in lots — used for display and value math
     const lotSizes: Record<string, number> = {
       NIFTY: 50, BANKNIFTY: 25, RELIANCE: 1000, HDFCBANK: 1000,
       INFY: 1000, TCS: 500, SBIN: 1000, TATAMOTORS: 1000,
@@ -854,10 +878,35 @@ router.post('/place-order', (req: Request, res: Response) => {
     const totalQuantity = quantity * lotSize;
     const totalValue = totalQuantity * price;
 
+    // Route through the Risk-Guarded OrderExecutionPipeline (audit → risk →
+    // hooks → broker → MTM). No F&O order can bypass the Financial Bodyguard.
+    const idempotencyKey = req.body.idempotencyKey as string | undefined;
+    if (idempotencyKey !== undefined && (idempotencyKey.length < 8 || idempotencyKey.length > 128)) {
+      res.status(400).json({ error: 'idempotencyKey must be a string between 8 and 128 characters' });
+      return;
+    }
+
+    const params: ExecuteOrderParams = {
+      userId: req.user!.userId,
+      actionType: action === 'buy' ? OrderActionType.BUY : OrderActionType.SELL,
+      symbol: buildFnoSymbol(symbol, type, strike, expiry),
+      exchange: 'NFO',
+      quantity: totalQuantity,
+      price,
+      productType: (productType || 'NRML') as 'CNC' | 'MIS' | 'NRML',
+      orderType: 'LIMIT',
+      metadata: { fno: { type, strike: strike ?? null, expiry } },
+      idempotencyKey,
+    };
+
+    const result = await orderPipeline.execute(params);
+
     res.status(200).json({
-      success: true,
-      orderId,
-      message: `${action.toUpperCase()} ${type} order placed: ${quantity} lot(s) of ${symbol}${strike ? ` ${strike}` : ''} @ ₹${price}`,
+      success: result.success,
+      orderId: result.orderId || null,
+      message: result.success
+        ? `${action.toUpperCase()} ${type} order placed: ${quantity} lot(s) of ${symbol}${strike ? ` ${strike}` : ''} @ ₹${price}`
+        : result.message,
       type,
       action,
       symbol,
@@ -870,7 +919,9 @@ router.post('/place-order', (req: Request, res: Response) => {
       totalValue,
       productType,
       timestamp,
-      status: 'confirmed',
+      status: result.success ? 'confirmed' : 'rejected',
+      riskEvaluation: result.riskEvaluation,
+      idempotentReplay: result.idempotentReplay || undefined,
     });
   } catch (error: unknown) {
     res.status(500).json({ error: (error as Error).message || 'Failed to place F&O order' });
@@ -880,7 +931,7 @@ router.post('/place-order', (req: Request, res: Response) => {
 // POST /api/fno/strategy/execute — Execute a multi-leg strategy (all legs to broker)
 router.post('/strategy/execute', async (req: Request, res: Response) => {
   try {
-    const _userId = (req as any).userId || 'default_user';
+    const userId = req.user!.userId;
     const { legs, _spotPrice, symbol: strategySymbol, productType = 'NRML', orderType = 'MARKET' } = req.body;
 
     if (!legs || !Array.isArray(legs) || legs.length < 1) {
@@ -920,7 +971,49 @@ router.post('/strategy/execute', async (req: Request, res: Response) => {
 
     const symbol = strategySymbol || 'NIFTY';
 
-    // ── Execute each leg via broker ───────────────────────────────────
+    // ── All-or-nothing pre-validation: every leg must pass risk checks ──
+    const portfolioValue = riskEngine.getState(userId).portfolioValueAtOpen || 1000000;
+    const blockedReasons: string[] = [];
+
+    for (let i = 0; i < legs.length; i++) {
+      const leg = legs[i];
+      const { type, action, strike, premium, quantity } = leg;
+      const evaluation = riskEngine.evaluate(userId, {
+        actionType: action === 'buy' ? OrderActionType.BUY : OrderActionType.SELL,
+        symbol,
+        quantity: quantity * (leg.lotSize || 50),
+        price: premium,
+        productType: (productType || 'NRML') as 'CNC' | 'MIS' | 'NRML',
+        portfolioValue,
+        isFNO: true,
+      });
+      if (!evaluation.allowed) {
+        blockedReasons.push(`Leg ${i} (${type} ${strike}): ${evaluation.message}`);
+      }
+    }
+
+    if (blockedReasons.length > 0) {
+      res.json({
+        strategyName: req.body.name || 'Custom Strategy',
+        totalLegs: legs.length,
+        successful: 0,
+        failed: legs.length,
+        totalValue: 0,
+        blocked: true,
+        blockedReasons,
+        legs: legs.map((leg: any, i: number) => ({
+          legIndex: i,
+          legLabel: `${leg.action === 'buy' ? '▲' : '▼'}${leg.type} ${leg.strike}`,
+          success: false,
+          message: blockedReasons[i],
+          status: 'rejected',
+        })),
+        executedAt: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // ── Execute each leg through the Risk-Guarded pipeline ────────────
     const executionResults: {
       legIndex: number;
       legLabel: string;
@@ -932,54 +1025,37 @@ router.post('/strategy/execute', async (req: Request, res: Response) => {
       totalValue?: number;
     }[] = [];
 
+    const strategyIdempotencyKey = req.body.idempotencyKey as string | undefined;
+
     for (let i = 0; i < legs.length; i++) {
       const leg = legs[i];
       const { type, action, strike, premium, quantity } = leg;
-
-      const transactionType = action === 'buy' ? 'BUY' : 'SELL';
       const legLabel = `${action === 'buy' ? '▲' : '▼'}${type} ${strike}`;
+      const legExpiry = leg.expiry || new Date().toISOString();
 
       try {
-        if (!env.isMock) {
-          // Try real broker
-          const broker = await getBroker();
-          const orderPayload = {
-            symbol: type === 'FUTURE' ? symbol : `${symbol}${new Date().getTime()}`,
-            exchange: 'NFO' as const,
-            transactionType: transactionType as 'BUY' | 'SELL',
-            quantity: quantity * (leg.lotSize || 50),
-            price: premium,
-            productType: (productType || 'NRML') as 'CNC' | 'MIS' | 'NRML',
-            orderType: (orderType || 'MARKET') as 'LIMIT' | 'MARKET' | 'SL' | 'SLM',
-          };
-          const brokerResult = await broker.placeOrder(orderPayload);
-          executionResults.push({
-            legIndex: i,
-            legLabel,
-            success: brokerResult.status !== 'rejected',
-            orderId: brokerResult.id,
-            message: brokerResult.message,
-            status: brokerResult.status,
-            totalQuantity: quantity * (leg.lotSize || 50),
-            totalValue: premium * quantity * (leg.lotSize || 50),
-          });
-        } else {
-          // Mock execution
-          const lotSize = leg.lotSize || 50;
-          const totalQuantity = quantity * lotSize;
-          const totalValue = premium * totalQuantity;
-          const orderId = `FNO_${Date.now()}_${Math.random().toString(36).slice(2, 8).toUpperCase()}_L${i}`;
-          executionResults.push({
-            legIndex: i,
-            legLabel,
-            success: true,
-            orderId,
-            message: `${action.toUpperCase()} ${type} ${strike}: ${quantity} lot(s) @ ₹${premium}`,
-            status: 'confirmed',
-            totalQuantity,
-            totalValue,
-          });
-        }
+        const result = await orderPipeline.execute({
+          userId,
+          actionType: action === 'buy' ? OrderActionType.BUY : OrderActionType.SELL,
+          symbol: buildFnoSymbol(symbol, type, strike, legExpiry),
+          exchange: 'NFO',
+          quantity: quantity * (leg.lotSize || 50),
+          price: premium,
+          productType: (productType || 'NRML') as 'CNC' | 'MIS' | 'NRML',
+          orderType: (orderType || 'MARKET') as 'LIMIT' | 'MARKET' | 'SL' | 'SLM',
+          metadata: { fno: { type, strike: strike ?? null, expiry: legExpiry } },
+          idempotencyKey: strategyIdempotencyKey ? `${strategyIdempotencyKey}:L${i}` : undefined,
+        });
+        executionResults.push({
+          legIndex: i,
+          legLabel,
+          success: result.success,
+          orderId: result.orderId,
+          message: result.message,
+          status: result.success ? 'confirmed' : 'rejected',
+          totalQuantity: quantity * (leg.lotSize || 50),
+          totalValue: premium * quantity * (leg.lotSize || 50),
+        });
       } catch (error: any) {
         executionResults.push({
           legIndex: i,

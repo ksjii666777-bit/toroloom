@@ -29,6 +29,7 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { snapTradeApi, api } from '../../services/api';
+import { newIdempotencyKey } from '../../utils/idempotency';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
 // ─── Types ─────────────────────────────────────────────────────────────
@@ -313,11 +314,19 @@ function TradeModal({
         orderType,
         quantity: qty,
         ...(limitPrice > 0 && orderType !== 'Market' && { price: limitPrice }),
+        ...(orderType === 'Market' && displayPrice > 0 && { estimatedPrice: displayPrice }),
         timeInForce: 'Day',
+        idempotencyKey: newIdempotencyKey(),
       });
+      if (!result.success) {
+        Alert.alert(t('trading.orderBlocked'), result.message || t('trading.usOrderFailedMsg'), [
+          { text: t('app.ok'), onPress: onClose },
+        ]);
+        return;
+      }
       Alert.alert(
         t('trading.usOrderPlaced', { action: action === 'BUY' ? t('trading.buy') : t('trading.sell') }),
-        `${t('trading.orderIdPrefix')}${result.orderId.substring(0, 12)}...\n${t('trading.statusPrefix')}${result.status}`,
+        `${t('trading.orderIdPrefix')}${result.orderId ? result.orderId.substring(0, 12) : '—'}...\n${t('trading.statusPrefix')}${result.status}`,
         [{ text: t('app.ok'), onPress: onClose }],
       );
     } catch (err: any) {
@@ -325,7 +334,7 @@ function TradeModal({
     } finally {
       setIsPlacing(false);
     }
-  }, [stock, action, orderType, qty, limitPrice, canPlace, onClose, t]);
+  }, [stock, action, orderType, qty, limitPrice, displayPrice, canPlace, onClose, t]);
 
   const overlayOpacity = slideAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.5] });
   const translateY = slideAnim.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });

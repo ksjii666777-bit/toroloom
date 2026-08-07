@@ -202,6 +202,9 @@ export interface OrderRiskContext {
   /** Product type */
   productType?: 'CNC' | 'MIS' | 'NRML';
 
+  /** True when the order targets an F&O (NFO) instrument */
+  isFNO?: boolean;
+
   /** Current portfolio value (for percent calculations) */
   portfolioValue: number;
 

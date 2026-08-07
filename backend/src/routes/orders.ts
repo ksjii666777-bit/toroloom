@@ -79,6 +79,7 @@ router.post('/execute', async (req: Request, res: Response) => {
       productType,
       orderType,
       metadata,
+      idempotencyKey,
     } = req.body;
 
     // ──────────────────────────────────────────────────────────────
@@ -114,6 +115,22 @@ router.post('/execute', async (req: Request, res: Response) => {
     if (price === undefined || typeof price !== 'number' || price <= 0) {
       res.status(400).json({ error: 'price is required and must be a positive number' });
       return;
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // IDEMPOTENCY KEY (optional for backward compatibility)
+    // ──────────────────────────────────────────────────────────────
+    // Client retries after a lost response reuse the same key; the server
+    // returns the ORIGINAL result instead of executing a duplicate order.
+    let normalizedIdempotencyKey: string | undefined;
+    if (idempotencyKey !== undefined && idempotencyKey !== null) {
+      normalizedIdempotencyKey = String(idempotencyKey);
+      if (normalizedIdempotencyKey.length < 8 || normalizedIdempotencyKey.length > 128) {
+        res.status(400).json({
+          error: 'idempotencyKey must be a string between 8 and 128 characters',
+        });
+        return;
+      }
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -195,6 +212,7 @@ router.post('/execute', async (req: Request, res: Response) => {
       orderType: normalizedOrderType as 'LIMIT' | 'MARKET' | 'SL' | 'SLM',
       currentPosition, // Server-resolved, never from client
       metadata: metadata || {},
+      idempotencyKey: normalizedIdempotencyKey,
     };
 
     const result = await orderPipeline.execute(params);
@@ -220,7 +238,7 @@ router.post('/execute', async (req: Request, res: Response) => {
 router.post('/validate', async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const { actionType, symbol, quantity, price } = req.body;
+    const { actionType, symbol, quantity, price, exchange } = req.body;
 
     if (!actionType) {
       res.status(400).json({ error: 'actionType is required' });
@@ -264,6 +282,8 @@ router.post('/validate', async (req: Request, res: Response) => {
       price: price ? parseFloat(price as string) : undefined,
       portfolioValue,
       currentPosition,
+      // Mirror /execute: F&O orders get the allowFNO gate in pre-checks too
+      isFNO: ((exchange as string) || '').toUpperCase() === 'NFO',
     });
 
     res.status(200).json(evaluation);

@@ -259,7 +259,7 @@ app.use('/api/broker', writeLimiter, brokerRoutes);
 app.use('/api/broker-link', writeLimiter, authMiddleware, requireSubscription('pro'), brokerLinkRoutes);
 
 // ── SnapTrade Broker OAuth — 50 req / min ──────────────────────────────
-app.use('/api/snaptrade', writeLimiter, authMiddleware, snapTradeRoutes);
+app.use('/api/snaptrade', writeLimiter, replayProtection, authMiddleware, snapTradeRoutes);
 app.use('/api/iron-lock', writeLimiter, authMiddleware, requireSubscription('elite'), ironLockRoutes);
 app.use('/api/payments', writeLimiter, paymentsRoutes);
 // Protected subscription routes (authMiddleware applied inside router)
@@ -273,7 +273,7 @@ app.use('/api/webhooks', readLimiter, webhookHealthRoutes);
 app.use('/api/contract-note', writeLimiter, authMiddleware, requireSubscription('pro'), contractNoteRoutes);
 
 // ── F&O — 100 req / min (data reads), 50 req / min (writes) ────────────
-app.use('/api/fno', readLimiter, fnoRoutes);
+app.use('/api/fno', readLimiter, writeLimiter, replayProtection, fnoRoutes);
 
 // ── Social — 200 req / min (rates apply in production) ────────────────────
 app.use('/api/social', readLimiter, authMiddleware, requireSubscription('elite'), socialRoutes);

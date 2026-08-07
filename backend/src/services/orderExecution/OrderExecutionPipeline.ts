@@ -33,12 +33,13 @@
  */
 
 import { riskEngine } from '../riskEngine/RiskEngine';
-import { RiskEvaluation, RiskDecision, OrderActionType, OrderRiskContext } from '../riskEngine/types';
+import { RiskEvaluation, RiskDecision, OrderActionType, OrderRiskContext, LockdownStatus } from '../riskEngine/types';
 import { hookRegistry, PreOrderContext, PostOrderContext, OrderErrorContext } from '../../middleware/customHooks/OrderHookTypes';
 import { getBroker } from '../broker';
 import { getCircuitBreaker } from '../circuitBreaker';
 import { auditTrail } from '../auditTrail';
 import { OrderPayload } from '../broker/interface';
+import { claimOrderExecution, completeOrderExecution, releaseOrderExecution } from '../idempotency';
 
 export interface ExecuteOrderParams {
   userId: string;
@@ -53,6 +54,8 @@ export interface ExecuteOrderParams {
   currentPosition?: { quantity: number; avgPrice: number };
   /** Arbitrary metadata for custom hooks */
   metadata?: Record<string, unknown>;
+  /** Client-generated key to dedupe retries (prevents double execution) */
+  idempotencyKey?: string;
 }
 
 export interface ExecuteOrderResult {
@@ -65,6 +68,8 @@ export interface ExecuteOrderResult {
     reason: string;
   };
   auditEventId?: string;
+  /** True when served from a previously executed identical request */
+  idempotentReplay?: boolean;
 }
 
 export class OrderExecutionPipeline {
@@ -73,6 +78,82 @@ export class OrderExecutionPipeline {
    * This is the ONLY path to the broker — no bypass allowed.
    */
   async execute(params: ExecuteOrderParams): Promise<ExecuteOrderResult> {
+    const { idempotencyKey } = params;
+
+    // ── Claim-based idempotency guard ─────────────────────────────────
+    // A replayed key returns the ORIGINAL result; a concurrent duplicate is
+    // rejected while the first request is still executing.
+    if (idempotencyKey) {
+      const claim = await claimOrderExecution(params.userId, idempotencyKey);
+
+      if (claim.state === 'completed' && claim.result) {
+        return { ...(claim.result as ExecuteOrderResult), idempotentReplay: true };
+      }
+
+      if (claim.state === 'in_progress') {
+        return this.duplicateRequestResponse(params);
+      }
+    }
+
+    try {
+      const result = await this.executeInner(params);
+
+      // Persist the outcome so retries (network loss, offline replay, BullMQ
+      // worker retries) return the same result instead of double-executing.
+      if (idempotencyKey) {
+        await completeOrderExecution(params.userId, idempotencyKey, result);
+      }
+      return result;
+    } catch (error) {
+      // Execution threw (e.g. broker error) — release the claim so a genuine
+      // retry can proceed.
+      if (idempotencyKey) {
+        await releaseOrderExecution(params.userId, idempotencyKey);
+      }
+      throw error;
+    }
+  }
+
+  /** Response when an identical order is already executing. */
+  private duplicateRequestResponse(params: ExecuteOrderParams): ExecuteOrderResult {
+    return {
+      success: false,
+      riskEvaluation: {
+        allowed: false,
+        decision: RiskDecision.BLOCKED_GENERAL,
+        message: 'This order is already being processed. Please wait a moment and check your open orders.',
+        currentState: this.snapshotRiskState(params.userId),
+      },
+      message: 'Duplicate request — this order is already being processed.',
+    };
+  }
+
+  /** Mirror of the risk engine's snapshotState for error responses. */
+  private snapshotRiskState(userId: string): {
+    lockdown: LockdownStatus;
+    dailyLoss: number;
+    dailyLossPercent: number;
+    settingsFrozen: boolean;
+  } {
+    try {
+      const st = riskEngine.getState(userId);
+      const currentLoss = st.today.realizedPnL + st.today.unrealizedPnL;
+      return {
+        lockdown: st.lockdown.status,
+        dailyLoss: currentLoss,
+        dailyLossPercent:
+          st.portfolioValueAtOpen > 0 ? Math.abs((currentLoss / st.portfolioValueAtOpen) * 100) : 0,
+        settingsFrozen: st.settingsFrozen,
+      };
+    } catch {
+      return { lockdown: LockdownStatus.NONE, dailyLoss: 0, dailyLossPercent: 0, settingsFrozen: false };
+    }
+  }
+
+  /**
+   * Internal 5-stage execution pipeline (audit → risk → hooks → broker → MTM).
+   */
+  private async executeInner(params: ExecuteOrderParams): Promise<ExecuteOrderResult> {
     const {
       userId,
       actionType,
@@ -91,6 +172,7 @@ export class OrderExecutionPipeline {
       quantity,
       price,
       productType,
+      isFNO: exchange === 'NFO' || Boolean(metadata?.fno),
       currentPosition: params.currentPosition,
       portfolioValue: 0, // Will be fetched from profile
     };

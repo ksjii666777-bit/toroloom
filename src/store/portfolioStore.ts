@@ -4,6 +4,7 @@ import { mockHoldings, mockTrades, mockOpenOrders } from '../constants/mockData'
 import { api } from '../services/api/client';
 import { portfolioApi } from '../services/api/portfolio';
 import { offlineCache } from '../services/offlineCache';
+import { newIdempotencyKey } from '../utils/idempotency';
 
 import { useAuthStore } from './authStore';
 import { sendTradeConfirmation } from '../services/notificationService';
@@ -175,9 +176,11 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     const totalCost = quantity * price;
 
     // Execute through Risk-Guarded Pipeline (POST /api/orders/execute)
+    const idempotencyKey = newIdempotencyKey();
     try {
       const user = useAuthStore.getState().user;
       const payload: Record<string, any> = {
+        idempotencyKey,
         userId: user?.id || 'user_1',
         actionType: 'BUY',
         symbol: stock.symbol,
@@ -205,6 +208,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
           quantity,
           price,
           productType: 'CNC',
+          idempotencyKey,
         }).catch(() => {});
       } else {
         // Server responded but error occurred — still proceed locally for demo
@@ -299,9 +303,11 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     const totalReceived = quantity * price;
 
     // Execute through Risk-Guarded Pipeline (POST /api/orders/execute)
+    const idempotencyKey = newIdempotencyKey();
     try {
       const user = useAuthStore.getState().user;
       const payload: Record<string, any> = {
+        idempotencyKey,
         userId: user?.id || 'user_1',
         actionType: 'SELL',
         symbol: holding.symbol,
@@ -333,6 +339,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
           price,
           avgBuyPrice: holding.buyPrice,
           productType: 'CNC',
+          idempotencyKey,
         }).catch(() => {});
       } else {
         log.warn('[Portfolio] Order execution API error:', err);

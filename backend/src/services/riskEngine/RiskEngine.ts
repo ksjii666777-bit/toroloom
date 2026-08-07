@@ -309,6 +309,17 @@ export class RiskEngine {
       };
     }
 
+    // ── F&O gate: block futures/options orders when "Allow F&O" is disabled ──
+    if (context.isFNO && !profile.limits.allowFNO) {
+      return {
+        allowed: false,
+        decision: RiskDecision.BLOCKED_GENERAL,
+        message:
+          '🔒 F&O trading is disabled in your risk settings. Enable "Allow F&O" to place futures/options orders.',
+        currentState: this.snapshotState(profile),
+      };
+    }
+
     if (
       profile.lockdown.status === LockdownStatus.ACTIVE ||
       profile.lockdown.status === LockdownStatus.COOLDOWN

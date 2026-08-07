@@ -175,10 +175,30 @@ export const snapTradeApi = {
     price?: number;
     stopPrice?: number;
     timeInForce?: 'Day' | 'Gtc';
-  }): Promise<{ success: boolean; orderId: string; status: string }> => {
-    return api.post<{ success: boolean; orderId: string; status: string }>(
-      '/snaptrade/place-order',
-      order,
-    );
+    /** Client-generated dedup key — prevents double-execution on retries */
+    idempotencyKey?: string;
+    /** Estimate of the execution price (Market orders) so the server-side
+     *  position-size gate still fires without a limit price. */
+    estimatedPrice?: number;
+  }): Promise<{
+    success: boolean;
+    orderId: string | null;
+    status: string;
+    message?: string;
+    riskEvaluation?: {
+      allowed: boolean;
+      message: string;
+      decision?: string;
+    };
+    idempotentReplay?: boolean;
+  }> => {
+    return api.post<{
+      success: boolean;
+      orderId: string | null;
+      status: string;
+      message?: string;
+      riskEvaluation?: { allowed: boolean; message: string; decision?: string };
+      idempotentReplay?: boolean;
+    }>('/snaptrade/place-order', order);
   },
 };

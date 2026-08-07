@@ -458,15 +458,17 @@ describe('F&O Store — Order Modal', () => {
 
     await useFnoStore.getState().placeOrder();
 
-    expect(mockFnoApi.placeOrder).toHaveBeenCalledWith({
-      symbol: 'NIFTY',
-      type: 'CE',
-      action: 'buy',
-      strike: 23500,
-      expiry: '2026-07-02T00:00:00.000Z',
-      quantity: 1,
-      price: 185.50,
-    });
+    expect(mockFnoApi.placeOrder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        symbol: 'NIFTY',
+        type: 'CE',
+        action: 'buy',
+        strike: 23500,
+        expiry: '2026-07-02T00:00:00.000Z',
+        quantity: 1,
+        price: 185.50,
+      }),
+    );
     const state = useFnoStore.getState();
     expect(state.showOrderModal).toBe(false);
     expect(state.selectedContract).toBeNull();

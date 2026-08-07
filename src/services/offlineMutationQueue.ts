@@ -135,6 +135,9 @@ async function replayMutation(mutation: QueuedMutation): Promise<boolean> {
           price,
           productType: productType || 'CNC',
           orderType: 'MARKET',
+          // Same key generated at enqueue time — a replay can never
+          // double-execute an order that actually went through.
+          idempotencyKey: (mutation.payload.idempotencyKey as string) || mutation.id,
         });
         return true;
       }
@@ -150,6 +153,9 @@ async function replayMutation(mutation: QueuedMutation): Promise<boolean> {
           productType: productType || 'CNC',
           orderType: 'MARKET',
           currentPosition: { quantity, avgPrice: avgBuyPrice },
+          // Same key generated at enqueue time — a replay can never
+          // double-execute an order that actually went through.
+          idempotencyKey: (mutation.payload.idempotencyKey as string) || mutation.id,
         });
         return true;
       }

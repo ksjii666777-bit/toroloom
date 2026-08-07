@@ -32,6 +32,7 @@ import { useT } from '../../hooks/useT';
 import { useBiometricStore } from '../../store/biometricStore';
 import { biometricAuth } from '../../services/biometricService';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import { newIdempotencyKey } from '../../utils/idempotency';
 
 
 type TradeAction = 'BUY' | 'SELL';
@@ -61,7 +62,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
   const [stopPriceStr, setStopPriceStr] = useState('');
   const [isPlacing, setIsPlacing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [orderResult, setOrderResult] = useState<{ orderId: string; status: string } | null>(null);
+  const [orderResult, setOrderResult] = useState<{ orderId: string | null; status: string } | null>(null);
 
   const qty = parseInt(quantityStr) || 0;
   const limitPrice = parseFloat(limitPriceStr) || 0;
@@ -129,16 +130,24 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
         return;
       }
 
-      // 3. Place the order via SnapTrade
+      // 3. Place the order via SnapTrade (idempotency key dedupes retries)
       const orderResult = await snapTradeApi.placeOrder({
         symbol: symbol.toUpperCase().trim(),
         action,
         orderType,
         quantity: qty,
         ...(limitPrice > 0 && orderType !== 'Market' && { price: limitPrice }),
+        ...(orderType === 'Market' && displayPrice > 0 && { estimatedPrice: displayPrice }),
         ...(stopPrice > 0 && { stopPrice }),
         timeInForce,
+        idempotencyKey: newIdempotencyKey(),
       });
+
+      if (!orderResult.success) {
+        setIsPlacing(false);
+        Alert.alert(t('trading.orderBlocked'), orderResult.message || t('trading.orderFailedMsg'));
+        return;
+      }
 
       setOrderResult({ orderId: orderResult.orderId, status: orderResult.status });
       setShowConfirmation(true);
@@ -150,7 +159,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
     } finally {
       setIsPlacing(false);
     }
-  }, [canPlaceOrder, symbol, action, orderType, qty, limitPrice, stopPrice, timeInForce, preValidateOrder, t, setIsPlacing]);
+  }, [canPlaceOrder, symbol, action, orderType, qty, limitPrice, stopPrice, timeInForce, displayPrice, preValidateOrder, t, setIsPlacing]);
 
   // ── Reset ──────────────────────────────────────────────────
   const resetForm = useCallback(() => {
@@ -181,7 +190,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
             </LinearGradient>
             <Text style={[styles.confirmTitle, { color: colors.text }]}>{t('trading.orderPlacedTitle')}</Text>
             <Text style={[styles.confirmOrderId, { color: colors.textMuted }]}>
-              {t('trading.orderIdPrefix')}{orderResult.orderId.substring(0, 12)}...
+              {t('trading.orderIdPrefix')}{orderResult.orderId ? orderResult.orderId.substring(0, 12) : '—'}...
             </Text>
             <Text style={[styles.confirmStatus, { color: '#00E676' }]}>
               {t('trading.statusPrefix')}{orderResult.status}

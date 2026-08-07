@@ -30,6 +30,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 const BORDER_RADIUS_SM = 4;
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { snapTradeApi, api } from '../../services/api';
+import { newIdempotencyKey } from '../../utils/idempotency';
 
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { CryptoAssetData } from '../../services/api/globalMarkets';
@@ -304,11 +305,19 @@ function TradeModal({
         orderType,
         quantity: qty,
         ...(limitPrice > 0 && orderType !== 'Market' && { price: limitPrice }),
+        ...(orderType === 'Market' && displayPrice > 0 && { estimatedPrice: displayPrice }),
         timeInForce: 'Day',
+        idempotencyKey: newIdempotencyKey(),
       });
+      if (!result.success) {
+        Alert.alert('Order Blocked', result.message || 'Order was blocked by the risk engine.', [
+          { text: 'OK', onPress: onClose },
+        ]);
+        return;
+      }
       Alert.alert(
         action === 'BUY' ? 'Buy Order Placed' : 'Sell Order Placed',
-        `Order ID: ${result.orderId.substring(0, 12)}...\nStatus: ${result.status}`,
+        `Order ID: ${result.orderId ? result.orderId.substring(0, 12) : '—'}...\nStatus: ${result.status}`,
         [{ text: 'OK', onPress: onClose }],
       );
     } catch (err: any) {
@@ -316,7 +325,7 @@ function TradeModal({
     } finally {
       setIsPlacing(false);
     }
-  }, [coin, action, orderType, qty, limitPrice, canPlace, onClose]);
+  }, [coin, action, orderType, qty, limitPrice, displayPrice, canPlace, onClose]);
 
   const overlayOpacity = slideAnim.interpolate({
     inputRange: [0, 1],
