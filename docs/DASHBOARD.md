@@ -17,10 +17,10 @@
 | **Zustand Stores** | 26 |
 | **API Routes** | 28 |
 | **Backend Services** | 16 modules |
-| **Frontend Tests** | 147 files |
-| **Backend Tests** | 77 files |
+| **Frontend Tests** | 215 files |
+| **Backend Tests** | 103 files (71 unit + 32 integration) |
 | **E2E Flows** | 32 files |
-| **Total Test Files** | **236** |
+| **Total Test Files** | **350** |
 | **Code Coverage** | Frontend ≥73% · Backend ≥75% |
 
 ---
@@ -87,9 +87,10 @@
 ██████████████████████████████████████████████████  100%  Order Placement (7/7)
 ██████████████████████████████████████████████████  100%  Order Management (4/4)
 ██████████████████████████████████████████████████  100%  Order Execution Pipeline (4/4)
+██████████████████████████████████████████████████  100%  Idempotency & Order Safety (5/5)
 ```
 
-**Total: 16/16 ✅** — Buy/Sell, MARKET/LIMIT/SL, CNC/MIS, Order Book, Trade History, 5-Stage Pipeline
+**Total: 21/21 ✅** — Buy/Sell, MARKET/LIMIT/SL, CNC/MIS, Order Book, Trade History, 5-Stage Pipeline, Idempotency Keys, Claim-Based Dedup, Order Safety
 
 ---
 
@@ -236,7 +237,7 @@
 ██████████████████████████████████████████████████  100%  Cluster Mode (3/3)
 ```
 
-**Total: 24/24 ✅** — In-Memory/PostgreSQL/MongoDB Storage, JWT Auth, Rate Limiting, Redis Cache, Prometheus, Sentry, Circuit Breaker, Graceful Shutdown
+**Total: 25/25 ✅** — In-Memory/PostgreSQL/MongoDB Storage, JWT Auth, Rate Limiting, Redis Cache, Order Idempotency, Prometheus, Sentry, Circuit Breaker, Graceful Shutdown
 
 ---
 
@@ -318,14 +319,14 @@
 ## 🧪 Test Coverage Summary
 
 ```
-██████████████████████████████████████████████████  147  Frontend Unit Tests
-██████████████████████████████████████████████████   77  Backend Unit Tests
-██████████████████████████████████████████████████   25  Backend Integration Tests
+██████████████████████████████████████████████████  215  Frontend Unit Tests
+██████████████████████████████████████████████████   61  Backend Unit Tests
+██████████████████████████████████████████████████   32  Backend Integration Tests
 ██████████████████████████████████████████████████   10  Cross-File Isolation Tests
 ██████████████████████████████████████████████████   32  Maestro E2E Flows
 ```
 
-**Total: 236 Test Files — All Passing ✅**
+**Total: 350 Test Files — All Passing ✅**
 
 | Coverage Target | Threshold | Status |
 |----------------|-----------|--------|
@@ -355,7 +356,7 @@ Stores        ██████████████████████
 API Routes    ████████████████████████████████████████████████  28
 Services      ████████████████████████████████████████████████  23 Frontend
               ████████████████████████████████████████████████  16 Backend
-Tests         ████████████████████████████████████████████████  236 Total
+Tests         ████████████████████████████████████████████████  350 Total
 E2E Flows     ████████████████████████████████████████████████  32
 Components    ████████████████████████████████████████████████  24+
 Checklist     ████████████████████████████████████████████████  400+ Features

@@ -2,12 +2,12 @@
 
 > **Buyer ke liye:** Yeh document Toroloom app ke sabhi features ka high-level overview hai. Har feature implement ho chuka hai aur tests cover karte hain.
 
-**Stats (as of July 2026):**
+**Stats (as of August 2026):**
 - **Frontend Screens:** 58 | **Stores:** 26 | **Services:** 23
 - **Backend Routes:** 28 | **Backend Modules:** 16
-- **Frontend Tests:** 147 files | **Backend Tests:** 77 files
+- **Frontend Tests:** 215 files | **Backend Tests:** 103 files (71 unit + 32 integration)
 - **E2E Flows (Maestro):** 32 files
-- **Total Tests:** 3,232 passing (146 test files)
+- **Total Tests:** 7,965 passing (318 test files + 32 E2E flows)
 
 ---
 
@@ -54,6 +54,7 @@
 | **Order Placement** | Buy/Sell toggle, MARKET/LIMIT/SL/SL-M, CNC/MIS, Quantity presets, Cost summary, Confirmation | ✅ |
 | **Order Management** | Open orders, Modify/Cancel, Trade history | ✅ |
 | **Pipeline** | 5-stage execution, Validation, Risk check, Pre-order hooks | ✅ |
+| **Idempotency & Order Safety** | Idempotency keys on equity/FnO/SnapTrade orders, claim-based dedup (PENDING→COMPLETED, 24h TTL, stale auto-release), risk-rejected → BLOCKED result (no 429/500), offline replay safety | ✅ |
 
 ## 7. 📈 F&O (Futures & Options)
 | Area | Features | Status |
@@ -137,7 +138,7 @@
 | Area | Features | Status |
 |------|----------|--------|
 | **Storage** | In-memory, PostgreSQL, MongoDB — swappable via `STORAGE_BACKEND` env var | ✅ |
-| **Middleware** | JWT auth, Rate limiting (4 tiers), Subscription gating, Error handler, Redis cache | ✅ |
+| **Middleware** | JWT auth, Rate limiting (4 tiers), Subscription gating, Error handler, Redis cache, Order idempotency (in-memory + Redis) | ✅ |
 | **WebSocket** | Auth, Subscribe/ticks, Ping/pong, P&L bridge, Cluster IPC, Redis Pub/Sub | ✅ |
 | **Monitoring** | Prometheus metrics, Health endpoint, Sentry, Circuit breaker, DB provider | ✅ |
 | **Cluster** | Multi-worker, Graceful shutdown, Auto-restart | ✅ |
@@ -193,10 +194,11 @@
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Frontend unit tests | 147 files | ✅ |
-| Backend unit + int + cross-file + stress | 113 files | ✅ |
+| Frontend unit tests | 215 files (5,388 tests) | ✅ |
+| Backend unit + cross-file + stress | 71 files (1,822 tests) | ✅ |
+| Backend integration (PG + Mongo) | 32 files (755 tests) | ✅ |
 | E2E (Maestro) | 32 flows | ✅ |
-| **Total** | **3,232 tests passing** | ✅ |
+| **Total** | **7,965 tests passing** | ✅ |
 
 ---
 
@@ -205,7 +207,7 @@
 ```
 Frontend Screens:     58 ✅     Backend Routes:     28 ✅
 Zustand Stores:       26 ✅     Backend Modules:    16 ✅
-UI Components:        24 ✅     Tests:          3,232 ✅
+UI Components:        24 ✅     Tests:          7,965 ✅
 Services:             23 ✅     E2E Flows:         32 ✅
 ```
 
