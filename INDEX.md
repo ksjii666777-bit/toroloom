@@ -35,6 +35,7 @@
 | 4 | [`docs/STORE_SUBMISSION.md`](./docs/STORE_SUBMISSION.md) | App Store + Play Store submit kaise karein. EAS build, screenshots, metadata | ~40 |
 | 5 | [`docs/APPLE_CONFIG.md`](./docs/APPLE_CONFIG.md) | Apple Developer config — Team ID, ascAppId, Firebase iOS setup, EAS credentials | ~30 |
 | 5a | [`docs/EAS_SETUP_GUIDE.md`](./docs/EAS_SETUP_GUIDE.md) | eas.json Apple values bharna — appleId, ascAppId, appleTeamId + build/submit commands | ~15 |
+| 5b | [`docs/PRODUCTION_READINESS.md`](./docs/PRODUCTION_READINESS.md) | Production checklist — saare env vars, placeholders, Razorpay keys, deploy smoke test | ~20 |
 | 6 | [`terraform/README.md`](./terraform/README.md) | Terraform deep-dive — RDS vars, outputs, CloudWatch alarms, cleanup | ~40 |
 | 7 | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Dev setup, tests kaise chalayein (unit + integration + E2E), code style | ~50 |
 
