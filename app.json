@@ -75,7 +75,13 @@
       "@react-native-firebase/app",
       "@react-native-firebase/analytics",
       "expo-font",
-      "@sentry/react-native",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "karan-cd",
+          "project": "react-native"
+        }
+      ],
       "expo-local-authentication",
       [
         "expo-notifications",
