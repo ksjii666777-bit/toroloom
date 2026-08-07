@@ -22,7 +22,7 @@
     "test:int:down": "bash ../scripts/run-integration-tests.sh --down"
   },
   "dependencies": {
-    "@sentry/node": "^10.56.0",
+    "@sentry/node": "^10.69.0",
     "bullmq": "^5.81.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

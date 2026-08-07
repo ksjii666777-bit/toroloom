@@ -1,3 +1,6 @@
+// ⚠️ Must be the FIRST import — runs Sentry.init() before express loads,
+// otherwise @sentry/node cannot instrument express request handlers.
+import './sentry';
 import * as Sentry from '@sentry/node';
 import path from 'path';
 import express from 'express';
@@ -80,17 +83,6 @@ import apiDocsRoutes from './routes/apiDocs';
 import apiKeyRoutes from './routes/apiKeys';
 import publicApiRoutes from './routes/publicApi';
 import { setWSS, getFailureCount, SEND_FAILURE_THRESHOLD } from './services/syncInvalidationBridge';
-
-// ============ Sentry Initialization ============
-
-if (env.sentryDsn) {
-  Sentry.init({
-    dsn: env.sentryDsn,
-    environment: env.nodeEnv,
-    tracesSampleRate: env.isDev ? 0.1 : 0.5,
-    integrations: [Sentry.expressIntegration()],
-  });
-}
 
 const app = express();
 const server = http.createServer(app);
