@@ -55,7 +55,9 @@ services:
       # ── Core ─────────────────────────────────────────────────────
       NODE_ENV: production
       PORT: '3000'
-      JWT_SECRET: '${JWT_SECRET:-change-me-in-production}'
+      # Fail-fast: koi weak default nahi — agar JWT_SECRET set nahi hai to
+      # `docker compose up` error dekar ruk jaata hai (openssl rand -hex 32).
+      JWT_SECRET: '${JWT_SECRET:?JWT_SECRET is required. Generate with: openssl rand -hex 32 and set it in .env}'
       JWT_EXPIRES_IN: '${JWT_EXPIRES_IN:-7d}'
 
       # ── Cluster mode (multi-core) ───────────────────────────────
@@ -398,7 +400,8 @@ services:
       - grafanadata:/var/lib/grafana
     environment:
       GF_SECURITY_ADMIN_USER: '${GRAFANA_ADMIN_USER:-admin}'
-      GF_SECURITY_ADMIN_PASSWORD: '${GRAFANA_ADMIN_PASSWORD:-admin}'
+      # Fail-fast: admin/admin default nahi — .env mein GRAFANA_ADMIN_PASSWORD set karo
+      GF_SECURITY_ADMIN_PASSWORD: '${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required. Generate with: openssl rand -hex 24 and set it in .env}'
       GF_INSTALL_PLUGINS: ''
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/toroloom-ws.json
       # ── Protocol ──────────────────────────────────────────────────
@@ -421,9 +424,11 @@ services:
       GF_SERVER_SERVE_FROM_SUB_PATH: '${GF_SERVER_SERVE_FROM_SUB_PATH:-true}'
 
       # Provisioning: auto-load dashboards from the JSON file
-      # Slack & PagerDuty (set these in .env for alert notifications)
-      SLACK_WEBHOOK_URL: '${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/placeholder}'
-      PAGERDUTY_INTEGRATION_KEY: '${PAGERDUTY_INTEGRATION_KEY:-placeholder}'
+      # Slack & PagerDuty (optional — real values .env mein set karo to enable
+      # alerts; empty = alerts disabled. NOTE: jab tak real values nahi hain,
+      # Grafana provisioning contact points ke liye errors log karega — harmless).
+      SLACK_WEBHOOK_URL: '${SLACK_WEBHOOK_URL:-}'
+      PAGERDUTY_INTEGRATION_KEY: '${PAGERDUTY_INTEGRATION_KEY:-}'
     depends_on:
       prometheus:
         condition: service_started

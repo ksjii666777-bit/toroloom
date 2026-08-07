@@ -8,6 +8,8 @@ node_modules/
 backend/.env
 backend/.env.local
 backend/.env.*.local
+# k8s secrets input (kustomize secretGenerator)
+k8s/.env.secret
 
 # ===================== Firebase =====================
 google-services.json

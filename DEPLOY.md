@@ -128,7 +128,8 @@ cd toroloom
 ```bash
 # .env file banao
 cp .env.example .env
-# Edit karo — minimum JWT_SECRET set karo
+# Edit karo — minimum JWT_SECRET + GRAFANA_ADMIN_PASSWORD set karo
+# (dono required hain; generate: openssl rand -hex 32 / -hex 24)
 nano .env
 
 # Production stack start karo

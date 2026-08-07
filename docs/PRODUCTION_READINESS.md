@@ -14,8 +14,8 @@
 
 | Severity | Count | Status |
 |----------|:-----:|--------|
-| 🔴 Critical (deploy se pehle mandatory) | 3 areas | ⬜ Baki |
-| 🟡 Medium (deploy config defaults) | 5 items | ⬜ Baki |
+| 🔴 Critical (deploy se pehle mandatory) | 3 areas | ⬜ Baki (user API keys) |
+| 🟡 Medium (deploy config defaults) | 5 items | 5 ✅ / 0 ⬜ |
 | 🟢 Low (intentional / no action) | 6 categories | ✅ No action |
 
 ---
@@ -40,27 +40,28 @@
 
 > 📖 Step-by-step: [`EAS_SETUP_GUIDE.md`](./EAS_SETUP_GUIDE.md)
 
-### 2. `backend/.env` — File exist nahi karta! ❌
+### 2. `backend/.env` — File ab EXIST karta hai ✅ (secure secrets generated)
 
-Sirf `.env.example` templates hain — **koi real `.env` nahi hai**. Deploy se pehle
-`cp backend/.env.example backend/.env` karke ye sab fill karo:
+`backend/.env` generate ho chuka hai — JWT_SECRET, SNAPTRADE_ENCRYPTION_KEY aur
+RAZORPAY_WEBHOOK_SECRET random hex values ke saath filled hain. Ab sirf ye
+**user-account keys** (jo sirf aapke dashboards se aati hain) bharni hain:
 
 | Variable | Status | Required for |
 |----------|--------|--------------|
-| `JWT_SECRET` | ❌ placeholder `change-this-to-...` | Auth — **must** (`openssl rand -hex 32`) |
-| `DATABASE_URL` | ❌ localhost dev URL | Postgres storage |
-| `MONGODB_URI` | ❌ localhost dev URL | Mongo storage |
+| `JWT_SECRET` | ✅ generated random hex | Auth — done |
+| `DATABASE_URL` | ✅ dev URL set (prod mein RDS URL daalo) | Postgres storage |
+| `MONGODB_URI` | ✅ dev URL set | Mongo storage |
 | `CORS_ORIGIN` | ❌ `*` (dangerous in prod) | App domain(s), comma-separated |
-| `SNAPTRADE_ENCRYPTION_KEY` | ❌ empty | Broker session security (`openssl rand -hex 32`) |
-| `SENTRY_DSN` | ❌ empty | Error tracking |
-| `REDIS_URL` | ❌ empty | Cache + cluster sync |
-| `RAZORPAY_KEY_ID` | ❌ empty | Payments |
-| `RAZORPAY_KEY_SECRET` | ❌ empty | Payments |
-| `RAZORPAY_WEBHOOK_SECRET` | ❌ empty | Payment webhook verification |
-| `OPENROUTER_API_KEY` | ❌ empty | AI analysis |
-| `GOOGLE_GEMINI_API_KEY` | ❌ empty | AI analysis (alt provider) |
-| `SNAPTRADE_CLIENT_ID` | ❌ empty | Broker OAuth connect |
-| `SNAPTRADE_CONSUMER_KEY` | ❌ empty | Broker OAuth connect |
+| `SNAPTRADE_ENCRYPTION_KEY` | ✅ generated random hex | Broker session security — done |
+| `SENTRY_DSN` | ❌ empty | Error tracking — apna DSN daalo |
+| `REDIS_URL` | ⬜ empty (optional locally) | Cache + cluster sync |
+| `RAZORPAY_KEY_ID` | ❌ empty | Payments — dashboard se daalo |
+| `RAZORPAY_KEY_SECRET` | ❌ empty | Payments — dashboard se daalo |
+| `RAZORPAY_WEBHOOK_SECRET` | ✅ generated random hex | Payment webhook — done |
+| `OPENROUTER_API_KEY` | ❌ empty | AI analysis — openrouter.ai se daalo |
+| `GOOGLE_GEMINI_API_KEY` | ❌ empty | AI analysis (alt provider) — daalo |
+| `SNAPTRADE_CLIENT_ID` | ❌ empty | Broker OAuth connect — SnapTrade se daalo |
+| `SNAPTRADE_CONSUMER_KEY` | ❌ empty | Broker OAuth connect — daalo |
 
 > Railway deploy par: **Variables tab** mein ye sab set karo (Railway `.env` file
 > read nahi karta — dashboard variables use karo).
@@ -78,13 +79,13 @@ keyId: keyId || 'rzp_test_placeholder',   // 5 jagah par fallback
 
 ## 🟡 MEDIUM — Deploy config defaults
 
-| # | File | Placeholder | Fix |
-|---|------|-------------|-----|
-| 1 | `docker-compose.prod.yml` | `JWT_SECRET: ${JWT_SECRET:-change-me-in-production}` | Real secret pass karo |
-| 2 | `docker-compose.prod.yml` | `SLACK_WEBHOOK_URL: ...placeholder` | Real Slack webhook URL |
-| 3 | `docker-compose.prod.yml` | `PAGERDUTY_INTEGRATION_KEY: placeholder` | Real PagerDuty key (ya remove) |
-| 4 | `k8s/secrets.yaml` | `JWT_SECRET: "change-me-to-a-random-hex-string"` | Real secret (K8s `kubectl create secret`) |
-| 5 | `eas.json` profiles | `EXPO_PUBLIC_SENTRY_DSN` value missing | Frontend Sentry DSN add karo |
+| # | File | Placeholder | Status |
+|---|------|-------------|--------|
+| 1 | `docker-compose.prod.yml` | `JWT_SECRET: ${JWT_SECRET:-change-me-in-production}` | ✅ Fixed — ab required (`${JWT_SECRET:?...}` fail-fast), root `.env` mein generated value |
+| 2 | `docker-compose.prod.yml` | `SLACK_WEBHOOK_URL: ...placeholder` | ✅ Fixed — fake webhook URL removed, empty default (alerts off) |
+| 3 | `docker-compose.prod.yml` | `PAGERDUTY_INTEGRATION_KEY: placeholder` | ✅ Fixed — placeholder removed, empty default |
+| 4 | `k8s/secrets.yaml` | `JWT_SECRET: "change-me-to-a-random-hex-string"` | ✅ Fixed — safe template + git-ignored `k8s/.env.secret` (secretGenerator enabled) |
+| 5 | `eas.json` profiles | `EXPO_PUBLIC_SENTRY_DSN` value missing | ✅ Done — real DSN already present in all 4 profiles (dev/preview/prod) |
 
 > 💡 Grafana `YOUR_DOMAIN` comment docs-level reminder hai — actual code issue nahi.
 
@@ -117,11 +118,11 @@ keyId: keyId || 'rzp_test_placeholder',   // 5 jagah par fallback
 
 ## 🎯 Action Plan (priority order)
 
-1. **`backend/.env` / Railway variables** — `.env.example` se copy karke saare values fill karo (15 vars)
+1. ✅ **`backend/.env` + root `.env` + `k8s/.env.secret`** — generated (JWT, encryption, webhook secrets). Bas user-account keys bharni hain (Razorpay, OpenRouter, Gemini, Sentry, SnapTrade)
 2. **`eas.json` Apple values** — jab Apple Developer Program ready ho ($99/yr)
-3. **`docker-compose.prod.yml`** — real `JWT_SECRET` + alert URLs
+3. ✅ **`docker-compose.prod.yml`** — JWT_SECRET required + alert placeholders removed
 4. **`CORS_ORIGIN`** — apne app domain(s) set karo (abhi `*` hai)
-5. **`EXPO_PUBLIC_SENTRY_DSN`** — eas.json production profile mein add karo
+5. ✅ **`EXPO_PUBLIC_SENTRY_DSN`** — already set (verified in eas.json) — no action
 6. **Deploy** — Railway (5 min): [`DEPLOY.md`](../DEPLOY.md)
 7. **App Store submit** — build + submit: [`STORE_SUBMISSION.md`](./STORE_SUBMISSION.md)
 

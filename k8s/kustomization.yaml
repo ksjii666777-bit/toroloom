@@ -33,13 +33,12 @@ resources:
   - hpa.yaml
   - ingress.yaml
   # secrets.yaml intentionally NOT included in resources — it's a template.
-  # Create secrets manually before applying:
-  #   kubectl create secret generic toroloom-secrets \
-  #     --namespace toroloom \
-  #     --from-literal=JWT_SECRET='$(openssl rand -hex 32)' \
-  #     --from-literal=DATABASE_URL='postgresql://...' \
-  #     --from-literal=REDIS_URL='redis://...'
-  # Or uncomment the secretGenerator below to read from .env.secret.
+  # Create secrets manually before applying:#   kubectl create secret generic toroloom-secrets \
+#     --namespace toroloom \
+#     --from-literal=JWT_SECRET='$(openssl rand -hex 32)' \
+#     --from-literal=DATABASE_URL='postgresql://...' \
+#     --from-literal=REDIS_URL='redis://...'
+#   Or use the secretGenerator below (reads from .env.secret).
 
 # ── ConfigMap Generator ──────────────────────────────────────────────────────
 # Generates ConfigMaps from literal key-value pairs (or files).
@@ -64,24 +63,20 @@ configMapGenerator:
       labels:
         app.kubernetes.io/component: api
 
-# ── Secret Generator (optional) ──────────────────────────────────────────────
-# Secrets are generated from environment files (.env) or literal values.
-# DO NOT commit the actual .env.secret file — add it to .gitignore.
+# ── Secret Generator ────────────────────────────────────────────────────────
+# REQUIRED input: k8s/.env.secret (git-ignored). Fresh clone par:
+#   cp k8s/.env.secret.example k8s/.env.secret   # then fill real values
+# .env.secret missing ho to `kubectl apply -k k8s/` error dega — expected.
 #
-# Usage:
-#   1. Create k8s/.env.secret (gitignored)
-#   2. Uncomment the secretGenerator block below
-#   3. Run: kubectl apply -k k8s/
-#
-# For production, use External Secrets Operator instead:
+# For production at scale, use External Secrets Operator instead:
 #   https://external-secrets.io
 #
-# secretGenerator:
-#   - name: toroloom-secrets
-#     envs:
-#       - .env.secret
-#     options:
-#       disableNameSuffixHash: false
+secretGenerator:
+  - name: toroloom-secrets
+    envs:
+      - .env.secret
+    options:
+      disableNameSuffixHash: false
 
 # ── Namespace ────────────────────────────────────────────────────────────────
 # Set the default namespace for all resources
