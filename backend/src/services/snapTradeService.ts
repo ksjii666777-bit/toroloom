@@ -337,7 +337,11 @@ class SnapTradeService {
     const raw = response.data || [];
     return raw.map((o: any) => ({
       id: o.brokerage_order_id || o.id || '',
-      symbol: o.symbol || o.universal_symbol?.symbol || '',
+      symbol:
+        o.universal_symbol?.symbol ||
+        o.universal_symbol?.raw_symbol ||
+        (typeof o.symbol === 'string' && !o.universal_symbol ? o.symbol : '') ||
+        '',
       action: o.action || '',
       quantity: Number(o.total_quantity) || 0,
       price: Number(o.execution_price) || Number(o.limit_price) || 0,
