@@ -22,7 +22,7 @@
 //
 // ============================================================================
 
-const { withDangerousMod, withAndroidManifest, createRunOncePlugin } = require('expo/config-plugins');
+const { withDangerousMod, withAndroidManifest, withGradleProperties, createRunOncePlugin } = require('expo/config-plugins');
 const path = require('path');
 const fs = require('fs');
 // ──── Plugin Metadata ──────────────────────────────────────────────────────
@@ -1381,9 +1381,25 @@ public class WidgetTestReceiver extends BroadcastReceiver {
  * @param {import('expo/config-plugins').ExpoConfig} config - Expo config object
  * @returns {import('expo/config-plugins').ExpoConfig} Modified config
  */
+function withAndroidWidgetProperties(config) {
+  // AGP's incremental javac can miss newly generated .java files when the
+  // Gradle cache is restored (EAS prefix-match cache) -> "cannot find symbol"
+  // errors between sibling widget classes. Disable incremental Java
+  // compilation so all generated sources are compiled in a single round.
+  return withGradleProperties(config, (modConfig) => {
+    const entries = modConfig.modResults;
+    const key = 'android.incrementalJavaCompilation';
+    if (!entries.some((e) => e.key === key)) {
+      entries.push({ type: 'property', key, value: 'false' });
+    }
+    return modConfig;
+  });
+}
+
 function withToroloomWidgets(config) {
   config = withIosWidget(config);
   config = withAndroidWidget(config);
+  config = withAndroidWidgetProperties(config);
   return config;
 }
 
