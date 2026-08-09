@@ -112,7 +112,7 @@ describe('HomeScreen — Loading State', () => {
   });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -129,34 +129,34 @@ describe('HomeScreen — Loaded Content', () => {
   });
 
   it('renders the dynamic greeting message', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     // Greeting is time-based: Good Morning / Good Afternoon / Good Evening
     expect(getByText(/Good (Morning|Afternoon|Evening),/)).toBeDefined();
   });
 
   it('renders the user first name from authStore', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText(/Rahul/)).toBeDefined();
     expect(getByText(/👋/)).toBeDefined();
   });
 
   it('renders the notification badge with unread count', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     // mockNotifications has 2 unread items (n1, n2) — badge shows the count
     expect(getByText(/^2$/)).toBeDefined();
   });
 
   it('renders the portfolio card with value label', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText('Portfolio Value')).toBeDefined();
   });
 
   it('renders portfolio action buttons', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText('Add Funds')).toBeDefined();
     expect(getByText('Transfer')).toBeDefined();
@@ -164,7 +164,7 @@ describe('HomeScreen — Loaded Content', () => {
   });
 
   it('renders quick action buttons', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText('Buy')).toBeDefined();
     expect(getByText('Sell')).toBeDefined();
@@ -173,14 +173,14 @@ describe('HomeScreen — Loaded Content', () => {
   });
 
   it('renders the Market Indices section header', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText('Market Indices')).toBeDefined();
     expect(getByText('See All')).toBeDefined();
   });
 
   it('renders index cards (NIFTY, SENSEX, BANKNIFTY)', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText('NIFTY')).toBeDefined();
     expect(getByText('SENSEX')).toBeDefined();
@@ -188,39 +188,39 @@ describe('HomeScreen — Loaded Content', () => {
   });
 
   it('renders the level & XP section', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText(/Lvl 12/)).toBeDefined();
     expect(getByText('Trading Pro')).toBeDefined();
   });
 
   it('renders the XP bar text', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText('4500 / 5000 XP')).toBeDefined();
   });
 
   it('renders Top Gainers section', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText(/Top Gainers/)).toBeDefined();
     expect(getByText('View All')).toBeDefined();
   });
 
   it('renders Top Losers section', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText(/Top Losers/)).toBeDefined();
   });
 
   it('renders top gainer stocks', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText('BHARTIARTL')).toBeDefined();
   });
 
   it('renders Watchlist Preview section', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText(/My Watchlist/)).toBeDefined();
     expect(getByText('Manage')).toBeDefined();
@@ -238,7 +238,7 @@ describe('HomeScreen — Navigation Callbacks', () => {
   });
 
   it('navigates to Markets when See All is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => {
       fireEvent.press(getByText('See All'));
@@ -247,13 +247,13 @@ describe('HomeScreen — Navigation Callbacks', () => {
   });
 
   it('renders the Top Gainers View All button', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText('View All')).toBeDefined();
   });
 
   it('navigates to Watchlist when Manage is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => {
       fireEvent.press(getByText('Manage'));
@@ -262,7 +262,7 @@ describe('HomeScreen — Navigation Callbacks', () => {
   });
 
   it('does not navigate on initial render', () => {
-    const { toJSON } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(toJSON).not.toBeNull();
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -287,7 +287,7 @@ describe('HomeScreen — Negative P&L', () => {
   });
 
   it('renders negative change chip with down caret', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     expect(getByText(/Portfolio Value/)).toBeDefined();
     // The formatted P&L should contain a negative percent
@@ -306,63 +306,63 @@ describe('HomeScreen — Quick Action Navigation', () => {
   });
 
   it('navigates to Markets when Buy quick action is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('Buy')); });
     expect(mockNavigate).toHaveBeenCalledWith('Markets');
   });
 
   it('navigates to Portfolio when Sell quick action is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('Sell')); });
     expect(mockNavigate).toHaveBeenCalledWith('Portfolio');
   });
 
   it('navigates to MutualFunds when SIP quick action is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('SIP')); });
     expect(mockNavigate).toHaveBeenCalledWith('SIPCalculator');
   });
 
   it('navigates to Learn when Learn quick action is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('Learn')); });
     expect(mockNavigate).toHaveBeenCalledWith('Learn');
   });
 
   it('navigates to AddFunds when Add Funds button is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('Add Funds')); });
     expect(mockNavigate).toHaveBeenCalledWith('AddFunds');
   });
 
   it('navigates to Transfer when Transfer button is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('Transfer')); });
     expect(mockNavigate).toHaveBeenCalledWith('Transfer');
   });
 
   it('navigates to FundsDashboard when Balance button is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('Balance')); });
     expect(mockNavigate).toHaveBeenCalledWith('FundsDashboard');
   });
 
   it('navigates to Notifications when notification bell is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText(/^2$/)); });
     expect(mockNavigate).toHaveBeenCalledWith('Notifications');
   });
 
   it('navigates to Profile when avatar is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText(/^R$/)); });
     expect(mockNavigate).toHaveBeenCalledWith('Profile');
@@ -380,7 +380,7 @@ describe('HomeScreen — Stock Detail Navigation', () => {
   });
 
   it('navigates to StockDetail when a top gainer stock is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     act(() => { fireEvent.press(getByText('BHARTIARTL')); });
     expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
@@ -390,7 +390,7 @@ describe('HomeScreen — Stock Detail Navigation', () => {
   });
 
   it('navigates to StockDetail when a watchlist stock is pressed', () => {
-    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<HomeScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(700);
     // RELIANCE and HDFCBANK appear in top stocks, which are also in watchlist preview
     act(() => { fireEvent.press(getByText('RELIANCE')); });

@@ -140,7 +140,7 @@ describe('OnboardingScreen — Referral Variant Auto-Scroll', () => {
   });
 
   it('calls setCurrentStep(1) when onLayout fires with referralSource set', () => {
-    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     const scrollView = findScrollView(root);
@@ -158,7 +158,7 @@ describe('OnboardingScreen — Referral Variant Auto-Scroll', () => {
   });
 
   it('calls setCurrentStep(1) only once even if onLayout fires multiple times', () => {
-    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     const scrollView = findScrollView(root);
@@ -182,7 +182,7 @@ describe('OnboardingScreen — Referral Variant Auto-Scroll', () => {
   });
 
   it('renders 5 progress dots instead of 6 for referral variant', () => {
-    const { getAllByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { getAllByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     // "STEP 1 OF 5" confirms 5 steps are visible (welcome skipped)
@@ -190,7 +190,7 @@ describe('OnboardingScreen — Referral Variant Auto-Scroll', () => {
   });
 
   it('does not render the Welcome step for referral variant', () => {
-    const { queryByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { queryByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     // Welcome step should be hidden
@@ -198,7 +198,7 @@ describe('OnboardingScreen — Referral Variant Auto-Scroll', () => {
   });
 
   it('renders the Portfolio step as the first visible step for referral variant', () => {
-    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     // Portfolio should be the first step
@@ -221,7 +221,7 @@ describe('OnboardingScreen — Default Variant (No Referral)', () => {
   });
 
   it('does NOT call setCurrentStep when onLayout fires (no referral source)', () => {
-    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     const scrollView = findScrollView(root);
@@ -238,14 +238,14 @@ describe('OnboardingScreen — Default Variant (No Referral)', () => {
   });
 
   it('renders 6 progress dots for default variant', () => {
-    const { getAllByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { getAllByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     expect(getAllByText(/STEP \d OF 6/).length).toBeGreaterThan(0);
   });
 
   it('renders the Welcome step for default variant', () => {
-    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     expect(getByText('Welcome to Toroloom')).toBeDefined();
@@ -267,7 +267,7 @@ describe('OnboardingScreen — Skip Button', () => {
   });
 
   it('calls skipOnboarding when Skip button is pressed', () => {
-    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     act(() => {
@@ -297,7 +297,7 @@ describe('OnboardingScreen — Demo Completion Flow', () => {
   });
 
   it('renders progress dots without checkmarks when no steps completed', () => {
-    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     // All 6 dots render — no completed checkmarks in the DOM
@@ -311,7 +311,7 @@ describe('OnboardingScreen — Demo Completion Flow', () => {
     // Override currentStep to be the last step (index 5 for default variant)
     currentOverriddenStep = 5;
 
-    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(1500);
 
     // Should show "2/6 demos completed" somewhere
@@ -331,7 +331,7 @@ describe('OnboardingScreen — Demo Completion Flow', () => {
     // Override to last step (index 5)
     currentOverriddenStep = 5;
 
-    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(1500);
 
     // Last step should show the all-completed message
@@ -351,7 +351,7 @@ describe('OnboardingScreen — Demo Completion Flow', () => {
     // Referral variant has 5 visible steps, last is index 4
     currentOverriddenStep = 4;
 
-    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(1500);
 
     // Should show "5/5 demos completed" or "All 5 interactive demos completed"
@@ -364,7 +364,7 @@ describe('OnboardingScreen — Demo Completion Flow', () => {
     // Stay on step 0 (first step) — summary should NOT render
     currentOverriddenStep = 0;
 
-    const { queryByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { queryByText } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(1500);
 
     // No completion summary text should appear on step 0
@@ -377,7 +377,7 @@ describe('OnboardingScreen — Demo Completion Flow', () => {
     // Not on last step
     currentOverriddenStep = 0;
 
-    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate }} />);
+    const { root } = render(<OnboardingScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     // Just verify render is stable with partial completion

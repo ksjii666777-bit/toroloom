@@ -15,6 +15,9 @@ import { useT } from '../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../constants/theme';
 import { formatRelativeTime } from '../utils/formatters';
 import Card from '../components/ui/Card';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../types';
+
 
 const NOTIFICATION_ICONS: Record<string, { icon: string; color: string }> = {
   price_alert: { icon: 'trending-up', color: '#FFC107' },
@@ -26,7 +29,7 @@ const NOTIFICATION_ICONS: Record<string, { icon: string; color: string }> = {
   sentiment_alert: { icon: 'pulse', color: '#8B5CF6' },
 };
 
-export default function NotificationsScreen({ navigation }: any) {
+export default function NotificationsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Notifications'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const {
@@ -112,7 +115,7 @@ export default function NotificationsScreen({ navigation }: any) {
               : notification.type === 'educational'
               ? 'Learn'
               : 'Home';
-          navigation.navigate(screen, notification.data || {});
+          (navigation.navigate as (screenName: string, params?: unknown) => void)(screen, notification.data || {});
         }}
         onLongPress={() => {
           Alert.alert(t('notifications.removeTitle'), t('notifications.removeMsg'), [

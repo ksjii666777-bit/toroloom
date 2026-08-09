@@ -154,6 +154,8 @@ function renderScreen() {
   return render(
     <CommodityMarketsScreen
       navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+    route={{ params: {} } as any}
+
     />
   );
 }

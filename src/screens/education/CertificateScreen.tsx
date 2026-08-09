@@ -24,7 +24,8 @@ import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatDate } from '../../utils/formatters';
-import type { CourseCertificate } from '../../types';
+import type {CourseCertificate, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const gradeConfig: Record<CourseCertificate['grade'], { label: string; color: string; bg: string }> = {
   A: { label: 'Distinction', color: '#FFD700', bg: '#FFD70015' },
@@ -32,7 +33,7 @@ const gradeConfig: Record<CourseCertificate['grade'], { label: string; color: st
   C: { label: 'Completed', color: '#CD7F32', bg: '#CD7F3215' },
 };
 
-export default function CertificateScreen({ _navigation, route }: any) {
+export default function CertificateScreen({ navigation: _navigation, route  }: NativeStackScreenProps<RootStackParamList, 'Certificate'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

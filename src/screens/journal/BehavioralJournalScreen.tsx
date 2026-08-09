@@ -14,10 +14,13 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useBehaviorJournalStore, MISTAKE_LABELS } from '../../store/behavioralJournalStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 type TabKey = 'Dashboard' | 'Entries' | 'Reports';
 
-export default function BehavioralJournalScreen({ _navigation }: any) {
+export default function BehavioralJournalScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'BehavioralJournal'>) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useT();

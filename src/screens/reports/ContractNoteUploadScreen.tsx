@@ -48,6 +48,9 @@ import {
   exportBatchToCSV,
   exportSelectedToCSV,
 } from '../../services/gateway/pdfExtractor';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 import type {
   ContractNoteParseResult,
   BatchParseResult,
@@ -65,7 +68,7 @@ const GLASS_BORDER = 'rgba(255,255,255,0.08)';
 
 // ─── Component ─────────────────────────────────────────────────────────────
 
-export default function ContractNoteUploadScreen({ navigation, route }: any) {
+export default function ContractNoteUploadScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'ContractNoteParser'>) {
   const { t } = useT();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(), []);

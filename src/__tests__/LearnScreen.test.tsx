@@ -42,7 +42,7 @@ beforeEach(() => {
 describe('LearnScreen', () => {
   it('renders the screen title', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('Learning Hub')).toBeDefined();
     unmount();
@@ -51,7 +51,7 @@ describe('LearnScreen', () => {
 
   it('renders the subtitle', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('Master the markets, one lesson at a time')).toBeDefined();
     unmount();
@@ -60,7 +60,7 @@ describe('LearnScreen', () => {
 
   it('renders All Courses section', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('All Courses')).toBeDefined();
     unmount();
@@ -69,7 +69,7 @@ describe('LearnScreen', () => {
 
   it('renders course titles', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('Stock Market Basics')).toBeDefined();
     expect(getByText('Technical Analysis')).toBeDefined();
@@ -80,7 +80,7 @@ describe('LearnScreen', () => {
 
   it('renders course level badges', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('beginner')).toBeDefined();
     expect(getByText('intermediate')).toBeDefined();
@@ -91,7 +91,7 @@ describe('LearnScreen', () => {
 
   it('renders course durations', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('2 hours')).toBeDefined();
     expect(getByText('4 hours')).toBeDefined();
@@ -102,7 +102,7 @@ describe('LearnScreen', () => {
 
   it('renders course ratings', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('4.7')).toBeDefined();
     expect(getByText('4.5')).toBeDefined();
@@ -113,7 +113,7 @@ describe('LearnScreen', () => {
 
   it('renders enrolled counts', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('15,420')).toBeDefined();
     expect(getByText('8,900')).toBeDefined();
@@ -123,7 +123,7 @@ describe('LearnScreen', () => {
 
   it('renders Continue Learning section when courses have progress', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('Continue Learning')).toBeDefined();
     unmount();
@@ -132,7 +132,7 @@ describe('LearnScreen', () => {
 
   it('renders progress percentages', () => {
     vi.useFakeTimers();
-    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(getByText('30% complete')).toBeDefined();
     unmount();
@@ -141,7 +141,7 @@ describe('LearnScreen', () => {
 
   it('renders without crashing', () => {
     vi.useFakeTimers();
-    const { toJSON, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { toJSON, unmount } = render(<LearnScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     act(() => { vi.advanceTimersByTime(600); });
     expect(toJSON()).toBeTruthy();
     unmount();

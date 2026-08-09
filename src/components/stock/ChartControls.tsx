@@ -12,6 +12,9 @@ interface ChartControlsProps {
   showPatterns: boolean;
   chartType: ChartType;
   isFullscreen: boolean;
+  /** Live (TradingView) chart mode is active */
+  isLive: boolean;
+  onToggleLive: () => void;
   onToggleMA: () => void;
   onToggleIndicator: (type: IndicatorType) => void;
   onToggleDrawing: () => void;
@@ -34,6 +37,8 @@ export default function ChartControls({
   showPatterns,
   chartType,
   isFullscreen,
+  isLive,
+  onToggleLive,
   onToggleMA,
   onToggleIndicator,
   onToggleDrawing,
@@ -45,6 +50,7 @@ export default function ChartControls({
   const styles = createStyles(colors);
 
   const controls: { label: string; active: boolean; onPress: () => void }[] = [
+    { label: 'LIVE', active: isLive, onPress: onToggleLive },
     { label: 'MA', active: showMA, onPress: onToggleMA },
     { label: 'RSI', active: activeIndicators.includes('rsi'), onPress: () => onToggleIndicator('rsi') },
     { label: 'MACD', active: activeIndicators.includes('macd'), onPress: () => onToggleIndicator('macd') },

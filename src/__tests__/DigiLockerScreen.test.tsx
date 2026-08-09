@@ -86,25 +86,25 @@ describe('DigiLockerScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('renders the header with title', () => {
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     expect(getByText('DigiLocker')).toBeDefined();
   });
 
   it('shows hero section with title and description', () => {
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     expect(getByText('Verify via DigiLocker')).toBeDefined();
     expect(getByText(/Fetch your verified government/)).toBeDefined();
   });
 
   it('shows document type badges', () => {
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     expect(getByText('Aadhaar Card')).toBeDefined();
     expect(getByText('PAN Card')).toBeDefined();
     expect(getByText('Voter ID')).toBeDefined();
   });
 
   it('shows benefit list', () => {
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     expect(getByText('Benefits')).toBeDefined();
     expect(getByText('Instant document verification')).toBeDefined();
     expect(getByText('No manual upload required')).toBeDefined();
@@ -113,12 +113,12 @@ describe('DigiLockerScreen', () => {
   });
 
   it('shows Connect DigiLocker button', () => {
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     expect(getByText('Connect DigiLocker')).toBeDefined();
   });
 
   it('renders all 6 document type options', () => {
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     expect(getByText('Aadhaar Card')).toBeDefined();
     expect(getByText('PAN Card')).toBeDefined();
     expect(getByText('Voter ID')).toBeDefined();
@@ -132,21 +132,21 @@ describe('DigiLockerScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('calls getDigiLockerAuth when Connect is pressed', () => {
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     act(() => { fireEvent.press(getByText('Connect DigiLocker')); });
     expect(mockGetDigiLockerAuth).toHaveBeenCalled();
   });
 
   it('shows connecting state while connecting', () => {
     mockGetDigiLockerAuth.mockImplementationOnce(() => new Promise(() => {}));
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     act(() => { fireEvent.press(getByText('Connect DigiLocker')); });
     expect(getByText(/Connecting/)).toBeDefined();
   });
 
   it('shows error message on API failure', async () => {
     mockGetDigiLockerAuth.mockRejectedValueOnce({ body: { error: 'Failed to connect' } });
-    const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+    const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
     act(() => { fireEvent.press(getByText('Connect DigiLocker')); });
     await flushMicrotasks();
     expect(getByText(/Failed to connect/)).toBeDefined();
@@ -168,7 +168,7 @@ describe('DigiLockerScreen', () => {
 
   it('fetches and displays documents after OAuth authorize', async () => {
     await withAuthorizeAlert(async () => {
-      const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+      const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
       act(() => { fireEvent.press(getByText('Connect DigiLocker')); });
       await flushMicrotasks();
 
@@ -183,7 +183,7 @@ describe('DigiLockerScreen', () => {
 
   it('shows document issuer names after fetch', async () => {
     await withAuthorizeAlert(async () => {
-      const { getByText } = render(<DigiLockerScreen {...baseProps} />);
+      const { getByText } = render(<DigiLockerScreen {...baseProps as any} />);
       act(() => { fireEvent.press(getByText('Connect DigiLocker')); });
       await flushMicrotasks();
 
@@ -203,12 +203,12 @@ describe('DigiLockerScreen', () => {
       navigation: { goBack: mockGoBack, navigate: mockNavigate },
       route: { params: {} },
     };
-    const { getByText } = render(<DigiLockerScreen {...noCallbackProps} />);
+    const { getByText } = render(<DigiLockerScreen {...noCallbackProps as any} />);
     expect(getByText('DigiLocker')).toBeDefined();
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<DigiLockerScreen {...baseProps} />);
+    const { toJSON } = render(<DigiLockerScreen {...baseProps as any} />);
     expect(toJSON()).toBeTruthy();
   });
 });

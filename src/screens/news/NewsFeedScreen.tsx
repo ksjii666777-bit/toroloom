@@ -23,6 +23,9 @@ import { MarketNewsItem } from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { newsApi } from '../../services/api';
 import { mockNews } from '../../constants/mockData';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
@@ -506,7 +509,7 @@ const detailStyles = StyleSheet.create({
 });
 
 // ─── Main Screen ──────────────────────────────────────────
-export default function NewsFeedScreen({ navigation }: any) {
+export default function NewsFeedScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'NewsFeed'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

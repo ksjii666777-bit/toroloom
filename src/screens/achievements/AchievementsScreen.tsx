@@ -8,6 +8,9 @@ import { useGamificationStore } from '../../store/gamificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatDate } from '../../utils/formatters';
 import { Badge } from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
@@ -31,7 +34,7 @@ const nextRewards = [
   { icon: '⭐', key: 'reward4', xp: 250 },
 ];
 
-export default function AchievementsScreen({ navigation }: any) {
+export default function AchievementsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Achievements'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

@@ -1,109 +1,75 @@
-# Toroloom I18N Hindi Conversion — Remaining Screens Plan
+# Toroloom I18N Hindi Conversion — Remaining Screens Plan (ARCHIVED ✅)
 
-> Generated from auto-i18n-convert audit on {{date}}
-
----
-
-## ✅ Already Converted (22 screens)
-
-| Screen | Status |
-|--------|--------|
-| HomeScreen | ✅ Complete |
-| MarketsScreen | ✅ Complete |
-| PortfolioScreen | ✅ Complete |
-| TradingScreen (PlaceOrder) | ✅ Complete |
-| Settings/Profile screens | ✅ Complete (SecuritySettings, MoreScreen) |
-| NotificationsScreen | ✅ Complete |
-| Education screens (8 files) | ✅ Complete |
-| AI Screens (AIInsights + AITradeAssistant) | ✅ Complete |
-| Calculator screens (SIP, Lumpsum, EMI, Tax) | ✅ Complete |
-| FnO Options Chain + Strategy Builder | ✅ Complete |
-| ReportsScreen | ✅ Complete |
-| MoreScreen (50 menu items) | ✅ Complete |
+> **Status: COMPLETED** — this plan was fully executed. It is kept as a
+> historical record of what was planned vs. delivered.
+>
+> **Canonical status doc: [`I18N_STATUS.md`](./I18N_STATUS.md)** — read that
+> for the current, verified state of the i18n conversion.
+>
+> **Last verified:** August 2026 (fresh audit + parity run, see below)
 
 ---
 
-## 📋 Remaining: Priority-Wise Plan
+## ✅ Current State (verified August 2026)
 
-### TIER 1 — 🔴 High Priority (20+ strings, complex screens)
+| Metric | Value |
+|--------|-------|
+| Files scanned | 228 |
+| Files using `useT()` (converted) | **194** |
+| Files with no user-facing strings (never converted) | 34 |
+| Converted files with intentional hardcoded strings left | 22 |
+| Locale parity (`npm run check:i18n`) | ✅ 558 keys checked, **all in sync** (0 missing, 0 extra, 0 var mismatch) |
 
-These screens have the most hardcoded strings and would benefit most from conversion:
-
-| # | Screen | Strings | Est. Time |
-|---|--------|---------|-----------|
-| 1 | **SocialTradingScreen** | ~35 strings | 15 min |
-| 2 | **IPODashboardScreen** | ~31 + props | 12 min |
-| 3 | **ContractNoteUploadScreen** | ~29 + 14 Alerts | 15 min |
-| 4 | **BankLinkingScreen** | ~25 + 4 Alerts | 12 min |
-| 5 | **MutualFundsScreen** | ~23 + 5 Alerts | 12 min |
-| 6 | **CreateCourseScreen** | ~23 + 9 props | 15 min |
-| 7 | **SnapTradeOrderScreen** | ~24 strings | 10 min |
-| 8 | **FactorAnalysisScreen** | ~22 + 8 props | 12 min |
-| 9 | **TaxHarvestingCalendar** | ~22 strings | 10 min |
-| 10 | **IPOCalendarScreen** | ~20 strings | 10 min |
-| 11 | **ConnectBrokerView** | ~20 + 8 Alerts | 12 min |
-| **→ Tier 1 Total** | **11 screens** | **~280 strings** | **~2.5 hrs** |
-
-### TIER 2 — 🟡 Medium Priority (10-19 strings)
-
-| # | Screen | Strings | Est. Time |
-|---|--------|---------|-----------|
-| 12 | **EarningsCallScreen** | ~26 + 6 props | 12 min |
-| 13 | **MonteCarloSimulation** | ~16 + 7 props | 10 min |
-| 14 | **CapitalGainsScreen** | ~15 + 9 props | 10 min |
-| 15 | **AdminCouponManagement** | ~23 + 5 Alerts | 12 min |
-| 16 | **AdminCourseReview** | ~18 + 8 Alerts | 12 min |
-| 17 | **RiskSettingsScreen** | ~19 + 8 props | 10 min |
-| 18 | **SubscriptionScreen** | ~17 strings | 8 min |
-| 19 | **TenantConfigScreen** | ~16 + 11 props | 12 min |
-| 20 | **PaymentHistoryScreen** | ~17 + 2 Alerts | 8 min |
-| 21 | **PortfolioAlertsScreen** | ~19 + 5 Alerts | 10 min |
-| 22 | **RevenueDashboardScreen** | ~16 strings | 8 min |
-| 23 | **TwoFactorSetupScreen** | ~16 + 5 props | 10 min |
-| 24 | **IPODetailScreen** | ~15 + 23 props | 15 min |
-| 25 | **NFODetailScreen** | ~13 + 19 props | 12 min |
-| 26 | **BondDashboardScreen** | ~18 strings | 8 min |
-| 27 | **UPIScreen** | ~18 + 3 props + 9 Alerts | 12 min |
-| 28 | **FundsDashboardScreen** | ~17 strings | 8 min |
-| 29 | **CertificateScreen** | ~17 + 4 Alerts | 10 min |
-| 30 | **CopyAnalyticsScreen** | ~22 + 5 props | 12 min |
-| **→ Tier 2 Total** | **19 screens** | **~360 strings** | **~3 hrs** |
-
-### TIER 3 — 🟢 Low Priority (<10 strings or simple screens)
-
-| # | Screen | Strings | Est. Time |
-|---|--------|---------|-----------|
-| 31-50 | **Remaining screens** | ~5-15 each | ~4 hrs |
-| | *Components (widgets, fno, stock, ui)* | ~2-12 each | ~2 hrs |
-
-**→ Tier 3 Total** | **~35 screens** | **~350 strings** | **~6 hrs**
+**The conversion is done.** There is no remaining i18n work in the app.
 
 ---
 
-## 📊 Grand Total
+## 📜 What This Document Was
 
-| Tier | Screens | Total Strings | Est. Time |
-|------|---------|---------------|-----------|
-| 🔴 High Priority | 11 | ~280 | ~2.5 hrs |
-| 🟡 Medium Priority | 19 | ~360 | ~3 hrs |
-| 🟢 Low Priority | ~35 | ~350 | ~6 hrs |
-| **Total Remaining** | **~65** | **~990** | **~11.5 hrs** |
+This file originally contained the priority plan for converting the remaining
+hardcoded-string screens to `useT()` — an estimated **~65 screens / ~990
+strings / ~11.5 hrs** of work across three tiers.
+
+All of that work was subsequently **completed**:
+
+| Tier | Original Plan | Outcome |
+|------|---------------|---------|
+| 🔴 Tier 1 — High priority (11 screens, ~280 strings) | ✅ Done | All screens converted |
+| 🟡 Tier 2 — Medium priority (19 screens, ~360 strings) | ✅ Done | All screens converted |
+| 🟢 Tier 3 — Low priority (~35 screens/components, ~350 strings) | ✅ Done | All screens + components converted |
+
+The tier tables from the original plan are intentionally **not** reproduced
+here — every screen they listed now routes its user-facing strings through
+`useT()`.
+
+### Why a few files still show hardcoded strings
+
+The audit (`node scripts/audit-i18n.mjs`) still flags 22 converted files, but
+**every hit is an intentional as-is string**:
+
+- **Format examples / placeholders** — `ABCDE1234F` (PAN), `HDFC0001234`
+  (IFSC), `XXXX XXXX XXXX`, `e.g. 5000000` (calculators)
+- **Technical abbreviations** — RSI/MACD/Bollinger, P/E, M.Cap, Chg%, CE OI/PE
+  OI, `LIVE`, `TICK`
+- **Strategy/code syntax** — `CROSSOVER(SMA(close, 20), SMA(close, 50))`
+- **Mock data names** — `Arun Kumar`, `Neha Singh`, `Mr. Sharma`
+- **Brand name** — `Toroloom`
+- **Code false positives** — `losers`/`declining` variables, type
+  declarations, date comparisons
+
+> Convention: universal/technical terms stay in English (same as RSI/MACD),
+> and format examples are not translatable.
 
 ---
 
-## 🏁 Recommended Order
+## 🔍 How to Re-verify at Any Time
 
-1. **🔴 Tier 1 first** (biggest impact)
-   - Start with `SocialTradingScreen` (35 strings — biggest)
-   - Then `IPODashboardScreen` + `IPODetailScreen` (most user-facing)
-   - Then `ContractNoteUploadScreen` (complex but important)
-   - Then `BankLinkingScreen` + KYC screens
+| Command | Purpose |
+|---------|---------|
+| `npm run check:i18n` | Verify en/hi namespace parity + interpolation vars |
+| `node scripts/audit-i18n.mjs` | Find files still using hardcoded strings |
+| `node scripts/audit-lines.mjs <file…>` | Show exact flagged lines per file |
+| `npm run typecheck` / `npm test` | Full CI checks |
 
-2. **🟡 Tier 2 second** (medium complexity)
-   - Funds screens (AddFunds, Withdraw, Transfer, UPI)
-   - Settings screens (RiskSettings, Subscription, etc.)
-   - Analytics screens (MonteCarlo, FactorAnalysis, etc.)
-
-3. **🟢 Tier 3 last** (simplest screens)
-   - Small screens & components
-   - Storybook files (can skip)
+See [`I18N_STATUS.md`](./I18N_STATUS.md) for the full maintenance guide and
+the conversion batch history.

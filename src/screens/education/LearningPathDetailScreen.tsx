@@ -21,8 +21,11 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
 
-export default function LearningPathDetailScreen({ navigation, route }: any) {
+
+export default function LearningPathDetailScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'LearningPathDetail'>) {
   const { pathId } = route.params;
   const { colors } = useTheme();
   const { t } = useT();

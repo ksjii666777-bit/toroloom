@@ -252,12 +252,12 @@ import { useFnoStore } from '../store/fnoStore';
 // ==================== Helpers ====================
 
 function renderOptionsChain() {
-  return render(<FnOOptionsChainScreen navigation={navMock} />);
+  return render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
 }
 
 function renderStrategyBuilder() {
   return render(
-    <StrategyBuilderScreen navigation={navMock} route={{ params: {} }} />,
+    <StrategyBuilderScreen navigation={navMock as any} route={{ params: {} } as any} />,
   );
 }
 
@@ -362,7 +362,7 @@ describe('FnOOptionsChain — Side Filter', () => {
       ...fnoStoreOptionsMock(),
       chainSide: 'PE',
     }));
-    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock} />);
+    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
     act(() => { fireEvent.press(getByText('CE')); });
     expect(mockSetChainSide).toHaveBeenCalledWith('CE');
   });
@@ -373,7 +373,7 @@ describe('FnOOptionsChain — Side Filter', () => {
       ...fnoStoreOptionsMock(),
       chainSide: 'CE',
     }));
-    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock} />);
+    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
     act(() => { fireEvent.press(getByText('PE')); });
     expect(mockSetChainSide).toHaveBeenCalledWith('PE');
   });
@@ -1014,7 +1014,7 @@ describe('FnOOptionsChain — Futures Card Interaction', () => {
     }));
     // Alert.alert is mocked as a no-op in react-native.mock.ts
     // We just verify no crash occurs when pressing the futures card
-    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock} />);
+    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
     act(() => { fireEvent.press(getByText('NIFTY')); });
     // If no error thrown, the function was exercised successfully
     expect(mockSetView).not.toHaveBeenCalled(); // just a sanity check
@@ -1036,7 +1036,7 @@ describe('FnOOptionsChain — Order Modal Action Button', () => {
       orderType: 'buy',
       orderQuantity: 1,
     }));
-    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock} />);
+    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
     act(() => { fireEvent.press(getByText('Buy 1 Lot')); });
     expect(mockPlaceOrder).toHaveBeenCalledTimes(1);
   });
@@ -1049,7 +1049,7 @@ describe('FnOOptionsChain — Order Modal Action Button', () => {
       orderType: 'sell',
       orderQuantity: 2,
     }));
-    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock} />);
+    const { getByText } = render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
     act(() => { fireEvent.press(getByText('Sell 2 Lots')); });
     expect(mockPlaceOrder).toHaveBeenCalledTimes(1);
   });
@@ -1063,7 +1063,7 @@ describe('FnOOptionsChain — Pull-to-Refresh', () => {
   });
 
   it('calls fetchExpiries and fetchOptionChain and fetchFutures and fetchPositions on pull-to-refresh', () => {
-    const { root } = render(<FnOOptionsChainScreen navigation={navMock} />);
+    const { root } = render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
 
     // Find the RefreshControl element in the rendered tree
     const refreshControls = root.findAll(

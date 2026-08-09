@@ -29,6 +29,10 @@ import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { mockSentimentData } from '../../constants/mockData';
 
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
+
 import {
   generateSentimentOverview,
   computeSentimentStability,
@@ -409,7 +413,7 @@ const articleStyles = StyleSheet.create({
 
 // ─── Main Screen ────────────────────────────────────────────
 
-export default function SentimentAnalysisScreen({ navigation }: any) {
+export default function SentimentAnalysisScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SentimentAnalysis'>) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useT();

@@ -28,7 +28,12 @@ import { useNavigation as useNavigationHook } from '@react-navigation/native';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
+import TradingViewChart from '../../components/TradingViewChart';
+import { toTradingViewCryptoSymbol, toTradingViewInterval } from '../../utils/tradingView';
 import type { CryptoDetailData } from '../../services/api/globalMarkets';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - SPACING.xl * 2 - SPACING.lg * 2;
@@ -184,7 +189,7 @@ function formatSupply(num: number | null | undefined): string {
 
 // ─── Main Screen ────────────────────────────────────────────────────────
 
-export default function CryptoDetailScreen({ route, navigation }: any) {    const { coinId, coinSymbol } = route.params || {};
+export default function CryptoDetailScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'CryptoDetail'>) {    const { coinId, coinSymbol } = route.params || {};
   const { colors } = useTheme();
   const { t } = useT();
   // Call unconditionally (Rules of Hooks) — navigation prop is always available inside navigator
@@ -197,6 +202,7 @@ export default function CryptoDetailScreen({ route, navigation }: any) {    cons
   const [selectedTimeframe, setSelectedTimeframe] = useState<TimeFrame>('7d');
   const [chartHistory, setChartHistory] = useState<{ timestamp: number; price: number }[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [chartFailed, setChartFailed] = useState(false);
 
   const fetchData = useCallback(async (showLoader = true) => {
     if (showLoader) setIsLoading(true);
@@ -349,13 +355,22 @@ export default function CryptoDetailScreen({ route, navigation }: any) {    cons
           </Text>
         </Animated.View>
 
-        {/* Price Chart */}
+        {/* Price Chart — TradingView widget with real market data */}
         <Animated.View entering={FadeInUp.duration(500)} style={[styles.chartContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <CryptoPriceChart
-            history={chartHistory}
-            color={data.color}
-            isPositive={isPositive}
-          />
+          {chartFailed ? (
+            <CryptoPriceChart
+              history={chartHistory}
+              color={data.color}
+              isPositive={isPositive}
+            />
+          ) : (
+            <TradingViewChart
+              symbol={toTradingViewCryptoSymbol(coinSymbol || data.symbol)}
+              interval={toTradingViewInterval(selectedTimeframe)}
+              height={CHART_HEIGHT}
+              onError={() => setChartFailed(true)}
+            />
+          )}
           <View style={styles.chartTimeframes}>
             {TIMEFRAMES.map(tf => (
               <Pressable

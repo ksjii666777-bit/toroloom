@@ -15,10 +15,11 @@ import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { timeAgo } from '../../utils/formatters';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
-import type { NFOItem, NFOApplication } from '../../types';
+import type {NFOItem, NFOApplication, RootStackParamList} from '../../types';
 import { useNFOStore } from '../../store/nfoStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import InvestNfoModal from '../../components/nfo/InvestNfoModal';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ──── Constants ────────────────────────────────────────────────────────────
 
@@ -396,7 +397,7 @@ const appCardStyles = StyleSheet.create({
 
 // ──── Main Screen ──────────────────────────────────────────────────────────
 
-export default function NFODashboardScreen({ navigation }: any) {
+export default function NFODashboardScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'NFODashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

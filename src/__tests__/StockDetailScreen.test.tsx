@@ -35,7 +35,17 @@ const { resolveT } = vi.hoisted(() => {
     'stockAnalysis.sectorContext': 'Sector Context',
     'stockAnalysis.peerComparison': 'Peer Comparison',
   };
-  const translations: Record<string, any> = { app, status, components };
+  // Labels for the live-position overlay (PositionLevelsOverlay) — must match
+  // the en locale so the Indian PlaceOrder flow tests assert real UI text.
+  const trading: Record<string, string> = {
+    'positionLive': 'LIVE',
+    'positionAvgBuy': 'AVG BUY',
+    'positionStop': 'STOP',
+    'positionTarget': 'TARGET',
+    'positionNoPosition': 'No open position',
+    'positionViewOnly': 'View-only — connect a broker to trade',
+  };
+  const translations: Record<string, any> = { app, status, components, trading };
 
   function resolveT(key: string, params?: Record<string, any>): string {
     const parts = key.split('.');
@@ -115,7 +125,30 @@ vi.mock('../store/marketStore', () => ({
   useMarketStore: vi.fn(() => marketStoreState),
 }));
 
-const portfolioStoreState = { buyStock: mockBuyStock };
+// Ticker Provider — spy on selectSymbol (hybrid pre-select) and expose
+// useTicker/useExecutionPrice for the live-position overlay.
+const { mockSelectSymbol } = vi.hoisted(() => ({
+  mockSelectSymbol: vi.fn(),
+}));
+
+vi.mock('../services/tickerProvider', () => ({
+  tickerProvider: {
+    selectSymbol: (...args: unknown[]) => mockSelectSymbol(...args),
+  },
+  useTicker: () => null,
+  useExecutionPrice: () => null,
+}));
+
+// snapTradeApi is imported by PositionLevelsOverlay — stub it (direct-position
+// mode means getTickerLevels is never called for the Indian flow).
+vi.mock('../services/api', () => ({
+  snapTradeApi: {
+    getTickerLevels: vi.fn(),
+  },
+}));
+
+const mockHoldings: any[] = [];
+const portfolioStoreState = { buyStock: mockBuyStock, holdings: mockHoldings };
 vi.mock('../store/portfolioStore', () => ({
   usePortfolioStore: vi.fn(() => portfolioStoreState),
 }));
@@ -234,7 +267,7 @@ describe('StockDetailScreen — Loading State', () => {
   it('renders without crashing during loading', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { toJSON } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     expect(toJSON).not.toBeNull();
   });
@@ -258,7 +291,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the stock symbol from route params', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('RELIANCE')).toBeDefined();
@@ -267,7 +300,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the stock name', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Reliance Industries Ltd.')).toBeDefined();
@@ -276,7 +309,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the sector badge', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Energy')).toBeDefined();
@@ -285,7 +318,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the live price', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     // Price formatted as ₹2,890.50
@@ -295,7 +328,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the positive change badge with caret-up icon', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText(/\+?45\.20/)).toBeDefined();
@@ -305,7 +338,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('shows Live connection status badge', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Live')).toBeDefined();
@@ -314,7 +347,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the streaming live prices indicator text', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Streaming live prices')).toBeDefined();
@@ -323,7 +356,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders timeframe buttons (1D, 1W, 1M, 3M, 1Y, Max)', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('1D')).toBeDefined();
@@ -337,7 +370,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the MA toggle button', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('MA')).toBeDefined();
@@ -346,7 +379,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders key stats cards', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Open')).toBeDefined();
@@ -362,7 +395,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the About Company section', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('About Company')).toBeDefined();
@@ -371,7 +404,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the AI Analysis card with confidence', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('AI Analysis')).toBeDefined();
@@ -381,7 +414,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders AI analysis sentiment (Bullish)', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Bullish')).toBeDefined();
@@ -391,7 +424,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders AI analysis summary', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Strong breakout above resistance with high volume')).toBeDefined();
@@ -400,7 +433,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders AI target prices with probability bars', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('₹2,950.00')).toBeDefined();
@@ -412,7 +445,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders LTP in the bottom action bar', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('LTP')).toBeDefined();
@@ -422,7 +455,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders Buy and Sell buttons in the bottom bar', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Buy')).toBeDefined();
@@ -432,7 +465,7 @@ describe('StockDetailScreen — Loaded Content', () => {
   it('renders the heart (watchlist) toggle button', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { toJSON } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(toJSON).not.toBeNull();
@@ -457,7 +490,7 @@ describe('StockDetailScreen — Watchlist Toggle', () => {
     mockIsInWatchlist.mockReturnValue(false);
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     // Tap the watchlist button area — the watchlist toggle is a TouchableOpacity
@@ -483,7 +516,7 @@ describe('StockDetailScreen — Sell Action', () => {
   it('renders Sell button', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Sell')).toBeDefined();
@@ -504,7 +537,7 @@ describe('StockDetailScreen — Navigation', () => {
   it('navigates back when back button is pressed', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     // The Ionicons arrow-back icon renders as 'IonIonicons' in mock
@@ -532,7 +565,7 @@ describe('StockDetailScreen — Negative Price', () => {
     // For the TCS stock (bearish AI insight to test negative path)
     const route = { params: { stockId: 'TCS', symbol: 'TCS' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('TCS')).toBeDefined();
@@ -545,6 +578,7 @@ describe('StockDetailScreen — Navigate to PlaceOrder', () => {
     mockNavigate.mockClear();
     mockBuyStock.mockClear();
     mockLoadHistory.mockClear();
+    mockSelectSymbol.mockClear();
   });
 
   afterEach(() => {
@@ -554,7 +588,7 @@ describe('StockDetailScreen — Navigate to PlaceOrder', () => {
   it('navigates to PlaceOrder with buy when Buy button is pressed', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
 
@@ -574,7 +608,7 @@ describe('StockDetailScreen — Navigate to PlaceOrder', () => {
   it('navigates to PlaceOrder with sell when Sell button is pressed', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
 
@@ -591,10 +625,81 @@ describe('StockDetailScreen — Navigate to PlaceOrder', () => {
     });
   });
 
+  it('pre-selects the stock in the ticker provider when Buy is pressed', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    act(() => {
+      fireEvent.press(getByText('Buy'));
+    });
+    advanceAndRender(100);
+
+    expect(mockSelectSymbol).toHaveBeenCalledWith({
+      symbol: 'RELIANCE',
+      exchange: 'NSE',
+      name: 'Reliance Industries Ltd.',
+      price: 2890.50,
+    });
+  });
+
+  it('pre-selects the stock in the ticker provider when Buy is pressed', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    act(() => {
+      fireEvent.press(getByText('Buy'));
+    });
+    advanceAndRender(100);
+
+    // Hybrid wiring: symbol + NSE exchange + name + live execution price.
+    expect(mockSelectSymbol).toHaveBeenCalledWith({
+      symbol: 'RELIANCE',
+      exchange: 'NSE',
+      name: 'Reliance Industries Ltd.',
+      price: 2890.50,
+    });
+  });
+
+  it('pre-selects the stock in the ticker provider when Sell is pressed', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    act(() => {
+      fireEvent.press(getByText('Sell'));
+    });
+    advanceAndRender(100);
+
+    expect(mockSelectSymbol).toHaveBeenCalledWith({
+      symbol: 'RELIANCE',
+      exchange: 'NSE',
+      name: 'Reliance Industries Ltd.',
+      price: 2890.50,
+    });
+  });
+
+  it('does not touch the ticker provider before any trade action', () => {
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    expect(mockSelectSymbol).not.toHaveBeenCalled();
+  });
+
   it('does not show modal content on the StockDetail screen (now navigates instead)', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { queryByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
 
@@ -602,6 +707,177 @@ describe('StockDetailScreen — Navigate to PlaceOrder', () => {
     expect(queryByText('Buy RELIANCE')).toBeNull();
     expect(queryByText('Market Price')).toBeNull();
     expect(queryByText('Buy 0 Shares')).toBeNull();
+  });
+});
+
+describe('StockDetailScreen — Live Position Overlay (PlaceOrder flow)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockNavigate.mockClear();
+    mockSelectSymbol.mockClear();
+    mockLoadHistory.mockClear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('renders the LIVE tag + AVG BUY chip (INR) when the stock is held', () => {
+    // Give RELIANCE a local holding (stockId 'RELIANCE').
+    (portfolioStoreState as any).holdings = [{
+      id: 'h1',
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      name: 'Reliance Industries Ltd.',
+      quantity: 10,
+      buyPrice: 2500,
+      currentPrice: 2650,
+      totalInvested: 25000,
+      currentValue: 26500,
+      pnl: 1500,
+      pnlPercent: 6,
+      dayChange: 20,
+      dayChangePercent: 0.76,
+    }];
+
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    // Overlay is provider-driven with direct position → LIVE tag + AVG BUY in INR.
+    expect(getByText('LIVE')).toBeDefined();
+    expect(getByText('10')).toBeDefined();
+    expect(getByText('AVG BUY')).toBeDefined();
+    expect(getByText('₹2,500.00')).toBeDefined();
+  });
+
+  it('navigates to PlaceOrder with SL pre-fill when STOP is tapped', () => {
+    (portfolioStoreState as any).holdings = [{
+      id: 'h1',
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      name: 'Reliance Industries Ltd.',
+      quantity: 10,
+      buyPrice: 2500,
+      currentPrice: 2650,
+      totalInvested: 25000,
+      currentValue: 26500,
+      pnl: 1500,
+      pnlPercent: 6,
+      dayChange: 20,
+      dayChangePercent: 0.76,
+    }];
+
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    act(() => {
+      fireEvent.press(getByText('STOP'));
+    });
+
+    // buyPrice 2500 × (1 − 5%) = 2375 → PlaceOrder SL order with that trigger.
+    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      tradeType: 'sell',
+      prefillOrderType: 'SL',
+      prefillTrigger: '2375',
+    });
+  });
+
+  it('pre-selects the stock in the ticker provider when STOP is tapped', () => {
+    (portfolioStoreState as any).holdings = [{
+      id: 'h1',
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      name: 'Reliance Industries Ltd.',
+      quantity: 10,
+      buyPrice: 2500,
+      currentPrice: 2650,
+      totalInvested: 25000,
+      currentValue: 26500,
+      pnl: 1500,
+      pnlPercent: 6,
+      dayChange: 20,
+      dayChangePercent: 0.76,
+    }];
+
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    act(() => {
+      fireEvent.press(getByText('STOP'));
+    });
+
+    // Shared openExitOrder wiring: chip taps now pre-select the instrument
+    // (same as every other trade surface) before navigating.
+    expect(mockSelectSymbol).toHaveBeenCalledWith({
+      symbol: 'RELIANCE',
+      exchange: 'NSE',
+      name: 'Reliance Industries Ltd.',
+      price: 2890.50,
+    });
+  });
+
+  it('navigates to PlaceOrder with LIMIT pre-fill when TARGET is tapped', () => {
+    (portfolioStoreState as any).holdings = [{
+      id: 'h1',
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      name: 'Reliance Industries Ltd.',
+      quantity: 10,
+      buyPrice: 2500,
+      currentPrice: 2650,
+      totalInvested: 25000,
+      currentValue: 26500,
+      pnl: 1500,
+      pnlPercent: 6,
+      dayChange: 20,
+      dayChangePercent: 0.76,
+    }];
+
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { getByText } = render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    act(() => {
+      fireEvent.press(getByText('TARGET'));
+    });
+
+    // buyPrice 2500 × (1 + 10%) = 2750 → PlaceOrder LIMIT order with that price.
+    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
+      stockId: 'RELIANCE',
+      symbol: 'RELIANCE',
+      tradeType: 'sell',
+      prefillOrderType: 'LIMIT',
+      prefillLimit: '2750',
+    });
+  });
+
+  it('renders no LIVE tag when the stock is not held', () => {
+    (portfolioStoreState as any).holdings = [];
+
+    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
+    const { queryByText } = render(
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
+    );
+    advanceAndRender(500);
+
+    // position={null} → no-position strip, no LIVE position tag. (Note: the
+    // ChartControls toolbar has its own 'LIVE' button, so assert on the
+    // overlay-only AVG BUY chip + the no-position strip instead.)
+    expect(queryByText('AVG BUY')).toBeNull();
+    expect(queryByText('No open position')).toBeDefined();
   });
 });
 
@@ -619,7 +895,7 @@ describe('StockDetailScreen — No Matching Stock', () => {
   it('falls back to first stock when stockId does not match', () => {
     const route = { params: { stockId: 'NONEXISTENT', symbol: 'NONEXISTENT' } };
     render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     // Falls back to stocks[0] = RELIANCE
@@ -640,7 +916,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('renders all 6 timeframe buttons', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('1D')).toBeDefined();
@@ -654,7 +930,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('renders indicator toggle buttons (MA, RSI, MACD, BB)', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('MA')).toBeDefined();
@@ -666,7 +942,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('does not crash when timeframe is changed', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText, toJSON } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     // Tap 1W timeframe — should trigger loadHistory('1W')
@@ -678,7 +954,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('loadHistory is available (not undefined)', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     // loadHistory function is properly wired to the component via useRealtimePrice
@@ -688,7 +964,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('renders without crashing when MA toggle is active', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { toJSON } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(toJSON).not.toBeNull();
@@ -698,7 +974,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
     // HDFCBANK (Finance sector) has multiple peers: ICICIBANK, SBIN, BAJFINANCE
     const route = { params: { stockId: 'HDFCBANK', symbol: 'HDFCBANK' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Sector Context')).toBeDefined();
@@ -708,7 +984,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
     // HDFCBANK (Finance sector) has multiple peers
     const route = { params: { stockId: 'HDFCBANK', symbol: 'HDFCBANK' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Peer Comparison')).toBeDefined();
@@ -718,7 +994,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
     // HDFCBANK (Finance sector) has multiple peers
     const route = { params: { stockId: 'HDFCBANK', symbol: 'HDFCBANK' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('YOU')).toBeDefined();
@@ -727,7 +1003,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('renders P/E ratio in the stats grid', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('28.5')).toBeDefined();
@@ -736,7 +1012,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('renders Market Cap stat', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('₹19,56,000 Cr')).toBeDefined();
@@ -745,7 +1021,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('renders 52W High stat', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('₹3,020.00')).toBeDefined();
@@ -754,7 +1030,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('renders 52W Low stat', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('₹2,200.00')).toBeDefined();
@@ -763,7 +1039,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
   it('renders when stock has negative price change (bearish path)', () => {
     const route = { params: { stockId: 'TCS', symbol: 'TCS' } };
     const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('TCS')).toBeDefined();
@@ -791,7 +1067,7 @@ describe('StockDetailScreen — Timeframe & Indicators', () => {
 
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
     const { getByText, toJSON } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+      <StockDetailScreen route={route as any} navigation={{ navigate: mockNavigate  } as any} />
     );
     advanceAndRender(500);
     expect(getByText('Offline')).toBeDefined();

@@ -302,7 +302,7 @@ beforeEach(() => {
 describe('PeriodReportScreen — Header & Layout', () => {
   it('renders title and subtitle', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Period Report')).toBeDefined();
     expect(getByText('Weekly & monthly performance overview')).toBeDefined();
@@ -310,14 +310,14 @@ describe('PeriodReportScreen — Header & Layout', () => {
 
   it('renders without crashing', () => {
     const { toJSON } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(toJSON()).toBeTruthy();
   });
 
   it('calls getAnalytics on mount', () => {
     render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getAnalyticsSpy).toHaveBeenCalled();
   });
@@ -326,7 +326,7 @@ describe('PeriodReportScreen — Header & Layout', () => {
 describe('PeriodReportScreen — Period Tabs', () => {
   it('renders all three period tabs', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Weekly')).toBeDefined();
     expect(getByText('Monthly')).toBeDefined();
@@ -335,7 +335,7 @@ describe('PeriodReportScreen — Period Tabs', () => {
 
   it('shows Monthly tab as active by default', () => {
     const { getAllByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // Monthly tab text should appear, and content should be monthly by default
     expect(getAllByText('Monthly').length).toBeGreaterThanOrEqual(1);
@@ -343,7 +343,7 @@ describe('PeriodReportScreen — Period Tabs', () => {
 
   it('switches to Weekly tab on press', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Weekly'));
     // After switching, Weekly should be active — verify by checking it's still rendered
@@ -352,7 +352,7 @@ describe('PeriodReportScreen — Period Tabs', () => {
 
   it('switches to Yearly tab on press', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Yearly'));
     expect(getByText('Yearly')).toBeDefined();
@@ -362,28 +362,28 @@ describe('PeriodReportScreen — Period Tabs', () => {
 describe('PeriodReportScreen — Portfolio Snapshot', () => {
   it('shows P&L Summary label', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('P&L Summary')).toBeDefined();
   });
 
   it('shows total P&L value', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('₹5,410')).toBeDefined();
   });
 
   it('shows period return percentage', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('+7.07%')).toBeDefined();
   });
 
   it('shows snapshot metric labels', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Total Trades')).toBeDefined();
     expect(getByText('Win Rate')).toBeDefined();
@@ -393,7 +393,7 @@ describe('PeriodReportScreen — Portfolio Snapshot', () => {
 
   it('shows snapshot metric values', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('3')).toBeDefined();  // total trades
     expect(getByText('67%')).toBeDefined();  // win rate
@@ -404,14 +404,14 @@ describe('PeriodReportScreen — Portfolio Snapshot', () => {
 describe('PeriodReportScreen — P&L Breakdown', () => {
   it('shows realized P&L card', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Realized P&L')).toBeDefined();
   });
 
   it('shows unrealized P&L card', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Unrealized P&L')).toBeDefined();
   });
@@ -420,14 +420,14 @@ describe('PeriodReportScreen — P&L Breakdown', () => {
 describe('PeriodReportScreen — Period Breakdown', () => {
   it('shows period details section title', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Period Details')).toBeDefined();
   });
 
   it('shows monthly period labels', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // With trades in June and July, monthly view should show both
     expect(getByText('Jul 2026')).toBeDefined();
@@ -436,7 +436,7 @@ describe('PeriodReportScreen — Period Breakdown', () => {
 
   it('shows trade count in period rows', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // Jul 2026 has 1 trade (HDFCBANK), Jun 2026 has 2 trades (RELIANCE + TCS)
     expect(getByText('1 trades')).toBeDefined();
@@ -445,7 +445,7 @@ describe('PeriodReportScreen — Period Breakdown', () => {
 
   it('shows win/loss record when both winners and losers exist', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // Jun 2026: RELIANCE (win) + TCS (loss) → should show W/L
     expect(getByText('1W/1L')).toBeDefined();
@@ -455,14 +455,14 @@ describe('PeriodReportScreen — Period Breakdown', () => {
 describe('PeriodReportScreen — Best / Worst Trade', () => {
   it('shows best trade card', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Best Trade')).toBeDefined();
   });
 
   it('shows worst trade card', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Worst Trade')).toBeDefined();
   });
@@ -471,28 +471,28 @@ describe('PeriodReportScreen — Best / Worst Trade', () => {
 describe('PeriodReportScreen — Tax Summary', () => {
   it('shows tax summary section title', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Tax Summary')).toBeDefined();
   });
 
   it('shows STCG label', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('STCG (15%)')).toBeDefined();
   });
 
   it('shows LTCG label', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('LTCG (10%)')).toBeDefined();
   });
 
   it('shows estimated tax', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Estimated Tax')).toBeDefined();
   });
@@ -501,7 +501,7 @@ describe('PeriodReportScreen — Tax Summary', () => {
 describe('PeriodReportScreen — Behavioral Insights', () => {
   it('shows behavioral insights section title', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Behavioral Insights')).toBeDefined();
   });
@@ -522,7 +522,7 @@ describe('PeriodReportScreen — Behavioral Insights', () => {
     mockAnalytics = buildMockAnalytics();
 
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // With TITAN (Consumer ~33%), BHARTIARTL (Telecom ~33%), DRREDDY (Pharma ~33%) → all under 35%
     expect(getByText('No behavioral alerts — balanced trading')).toBeDefined();
@@ -532,35 +532,35 @@ describe('PeriodReportScreen — Behavioral Insights', () => {
 describe('PeriodReportScreen — Detailed Metrics', () => {
   it('shows avg win label', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Avg Win')).toBeDefined();
   });
 
   it('shows avg loss label', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Avg Loss')).toBeDefined();
   });
 
   it('shows profit factor label', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Profit Factor')).toBeDefined();
   });
 
   it('shows avg holding days label', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Avg Holding Days')).toBeDefined();
   });
 
   it('displays profit factor value', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('2.32')).toBeDefined();
   });
@@ -571,7 +571,7 @@ describe('PeriodReportScreen — Empty State', () => {
     mockPortfolioState.holdings = [];
     mockPortfolioState.trades = [];
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('No Data Yet')).toBeDefined();
     expect(getByText('Start trading to see your period report')).toBeDefined();
@@ -581,7 +581,7 @@ describe('PeriodReportScreen — Empty State', () => {
 describe('PeriodReportScreen — Live Badge', () => {
   it('shows LIVE badge when analytics is available', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // Analytics is non-null when trades/holdings exist → LIVE badge should appear
     expect(getByText('LIVE')).toBeDefined();
@@ -593,7 +593,7 @@ describe('PeriodReportScreen — Live Badge', () => {
     mockPortfolioState.holdings = [];
     mockPortfolioState.trades = [];
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // LIVE badge shows because analytics is always available
     expect(getByText('LIVE')).toBeDefined();
@@ -618,14 +618,14 @@ describe('PeriodReportScreen — Export PDF Button', () => {
 
   it('renders the export PDF button in the header', () => {
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByTestId('export-pdf-btn')).toBeDefined();
   });
 
   it('calls Print.printToFileAsync when pressed', async () => {
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByTestId('export-pdf-btn'));
 
@@ -643,7 +643,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
 
   it('calls Sharing.shareAsync after PDF is generated', async () => {
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByTestId('export-pdf-btn'));
 
@@ -666,7 +666,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
     }));
 
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByTestId('export-pdf-btn'));
@@ -685,7 +685,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
 
   it('hides ActivityIndicator and re-enables button after export completes', async () => {
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByTestId('export-pdf-btn'));
@@ -704,7 +704,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
     mockIsAvailableAsync.mockResolvedValue(false);
 
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByTestId('export-pdf-btn'));
@@ -728,7 +728,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
     mockPrintToFileAsync.mockRejectedValue(new Error('Print failed'));
 
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByTestId('export-pdf-btn'));
@@ -747,7 +747,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
     }));
 
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     // Press the button twice quickly
@@ -767,7 +767,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
 
   it('generates PDF with correct period label (Monthly default)', async () => {
     const { getByTestId } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByTestId('export-pdf-btn'));
@@ -788,7 +788,7 @@ describe('PeriodReportScreen — Export PDF Button', () => {
     mockShareAsync.mockResolvedValue(undefined);
 
     const { getByTestId, getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     // Switch to Weekly first
@@ -809,14 +809,14 @@ describe('PeriodReportScreen — Export PDF Button', () => {
 describe('PeriodReportScreen — Sector-wise Metrics', () => {
   it('shows the section title', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Sector-wise Metrics')).toBeDefined();
   });
 
   it('shows sector headers for each sector with trades', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // 3 sell trades → Energy (RELIANCE), Technology (TCS), Banking (HDFCBANK)
     expect(getByText('Energy')).toBeDefined();
@@ -826,7 +826,7 @@ describe('PeriodReportScreen — Sector-wise Metrics', () => {
 
   it('shows W/L badge with correct counts per sector', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // RELIANCE: profit (total=5000) → 1W/0L, TCS: loss (total=-250) → 0W/1L, HDFCBANK: profit (total=800) → 1W/0L
     expect(getByText('1W')).toBeDefined();
@@ -835,7 +835,7 @@ describe('PeriodReportScreen — Sector-wise Metrics', () => {
 
   it('shows profit factor for each sector', () => {
     const { getByText } = render(
-      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // Energy: 1 win, 0 losses → ∞ (displayed when profitFactor >= 99)
     // Technology: 0 wins, 1 loss → 0.0
@@ -846,7 +846,7 @@ describe('PeriodReportScreen — Sector-wise Metrics', () => {
   describe('expand / collapse behavior', () => {
     it('trade details are hidden by default (collapsed)', () => {
       const { queryByText } = render(
-        <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       // The quantity×price pattern should NOT be visible initially
       expect(queryByText('10 × ₹2950')).toBeNull();
@@ -855,7 +855,7 @@ describe('PeriodReportScreen — Sector-wise Metrics', () => {
 
     it('expands to show trade details including date and buy/sell when sector is tapped', () => {
       const { getByText } = render(
-        <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       // Tap on "Energy" sector header to expand
       fireEvent.press(getByText('Energy'));
@@ -873,7 +873,7 @@ describe('PeriodReportScreen — Sector-wise Metrics', () => {
 
     it('shows correct trade details with buy/sell for different sectors', () => {
       const { getByText, queryByText } = render(
-        <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       // Tap Banking sector → should show HDFCBANK trade
       fireEvent.press(getByText('Banking'));
@@ -892,7 +892,7 @@ describe('PeriodReportScreen — Sector-wise Metrics', () => {
 
     it('collapses trade details when tapped again (buy/sell also hidden)', () => {
       const { getByText, queryByText } = render(
-        <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <PeriodReportScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       // Tap to expand
       fireEvent.press(getByText('Energy'));

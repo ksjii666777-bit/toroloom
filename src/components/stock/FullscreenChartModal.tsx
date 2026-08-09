@@ -30,6 +30,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import CandlestickChart, { ChartType } from '../CandlestickChart';
+import TradingViewChart from '../TradingViewChart';
+import { toTradingViewInterval } from '../../utils/tradingView';
 import type { DrawingAnnotation, DrawingToolType } from '../chart/DrawingTools';
 import type { DetectedPattern } from '../chart/patternDetection';
 
@@ -73,6 +75,12 @@ interface FullscreenChartModalProps {
   onDrawToolChange: (tool: DrawingToolType) => void;
   showPatterns: boolean;
   patterns: DetectedPattern[];
+  /** Render the live TradingView chart instead of the custom candlestick chart */
+  useLiveChart?: boolean;
+  /** TradingView symbol (e.g. "NSE:RELIANCE") used in live mode */
+  tvSymbol?: string;
+  /** Called when the live widget fails to load */
+  onTvError?: () => void;
   // Stock info for header
   symbol: string;
   name: string;
@@ -110,6 +118,9 @@ export default function FullscreenChartModal({
   onDrawToolChange,
   showPatterns,
   patterns,
+  useLiveChart,
+  tvSymbol,
+  onTvError,
   symbol,
   name,
   currentPrice,
@@ -227,26 +238,34 @@ export default function FullscreenChartModal({
 
       {/* ── Full-width Chart ── */}
       <View style={[styles.chartContainer, { paddingHorizontal: chartHorizontalPadding }]}>
-        <CandlestickChart
-          data={candleHistory}
-          height={chartHeight}
-          width={chartWidth}
-          timeframes={['1m', '5m', '15m', '1D', '1W', '1M', '3M', '1Y', 'Max']}
-          activeTimeframe={activeTimeframe}
-          onTimeframeChange={onTimeframeChange}
-          showVolume={true}
-          showMA={showMA}
-          loading={candleHistory.length === 0}
-          chartType={chartType}
-          onChartTypeChange={onChartTypeChange}
-          enableDrawing={enableDrawing}
-          drawings={drawings}
-          onDrawingsChange={onDrawingsChange}
-          activeDrawTool={activeDrawTool}
-          onDrawToolChange={onDrawToolChange}
-          showPatterns={showPatterns}
-          patterns={patterns}
-        />
+        {useLiveChart && tvSymbol ? (
+          <TradingViewChart
+            symbol={tvSymbol}
+            interval={toTradingViewInterval(activeTimeframe)}
+            onError={onTvError}
+          />
+        ) : (
+          <CandlestickChart
+            data={candleHistory}
+            height={chartHeight}
+            width={chartWidth}
+            timeframes={['1m', '5m', '15m', '1D', '1W', '1M', '3M', '1Y', 'Max']}
+            activeTimeframe={activeTimeframe}
+            onTimeframeChange={onTimeframeChange}
+            showVolume={true}
+            showMA={showMA}
+            loading={candleHistory.length === 0}
+            chartType={chartType}
+            onChartTypeChange={onChartTypeChange}
+            enableDrawing={enableDrawing}
+            drawings={drawings}
+            onDrawingsChange={onDrawingsChange}
+            activeDrawTool={activeDrawTool}
+            onDrawToolChange={onDrawToolChange}
+            showPatterns={showPatterns}
+            patterns={patterns}
+          />
+        )}
       </View>
     </Animated.View>
   );

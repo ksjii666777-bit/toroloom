@@ -48,11 +48,14 @@ import { useT } from '../../hooks/useT';
 import { telegramApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 const BOT_USERNAME = 'ToroloomBot';
 
-export default function TelegramConnectScreen({ navigation }: any) {
+export default function TelegramConnectScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'TelegramConnect'>) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useT();

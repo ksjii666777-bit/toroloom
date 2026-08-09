@@ -114,7 +114,7 @@ afterEach(() => {
 // ── Helpers ──────────────────────────────────────────────────
 
 function renderWithdraw() {
-  return render(<WithdrawScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+  return render(<WithdrawScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 }
 
 function changeText(input: ReactTestInstance, text: string) {

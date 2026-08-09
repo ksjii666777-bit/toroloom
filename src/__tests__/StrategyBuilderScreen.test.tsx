@@ -146,7 +146,7 @@ import { useFnoStore } from '../store/fnoStore';
 // ==================== Helpers ====================
 
 function renderScreen() {
-  return render(<StrategyBuilderScreen navigation={navMock} route={routeWithParams} />);
+  return render(<StrategyBuilderScreen navigation={navMock as any} route={routeWithParams as any} />);
 }
 
 /** Flush microtasks so async useEffect callbacks have resolved. */

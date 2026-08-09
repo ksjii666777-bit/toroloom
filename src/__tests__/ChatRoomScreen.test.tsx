@@ -80,8 +80,8 @@ import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
 function renderChatRoom(roomId = 'room_1') {
   return render(
     <ChatRoomScreen
-      route={{ params: { roomId } }}
-      navigation={{ goBack: mockGoBack, navigate: mockNavigate }}
+      route={{ params: { roomId } } as any}
+      navigation={{ goBack: mockGoBack, navigate: mockNavigate } as any}
     />,
   );
 }
@@ -203,8 +203,8 @@ describe('ChatRoomScreen — Edge Cases', () => {
   it('renders without crashing with no route params', () => {
     const { toJSON } = render(
       <ChatRoomScreen
-        route={{ params: {} }}
-        navigation={{ goBack: mockGoBack, navigate: mockNavigate }}
+        route={{ params: {} } as any}
+        navigation={{ goBack: mockGoBack, navigate: mockNavigate } as any}
       />,
     );
     expect(toJSON()).toBeTruthy();

@@ -93,7 +93,7 @@ vi.mock('../context/ThemeContext', () => ({
 import ConnectBrokerView from '../screens/broker/ConnectBrokerView';
 
 function renderView() {
-  return render(<ConnectBrokerView navigation={{ goBack: mockGoBack }} />);
+  return render(<ConnectBrokerView navigation={{ goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 }
 
 /** Flush pending promises so async effects resolve */

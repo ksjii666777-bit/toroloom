@@ -202,13 +202,13 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
 
   describe('Step 1 — PAN Verification', () => {
     it('renders PAN verification screen with correct title', () => {
-      const { getByText } = render(<PanVerificationScreen {...panScreenProps} />);
+      const { getByText } = render(<PanVerificationScreen {...panScreenProps as any} />);
       expect(getByText('PAN Verification')).toBeDefined();
     });
 
     it('enters PAN, verifies, and calls onVerified callback via Continue', async () => {
       const { getByPlaceholderText, getAllByText, getByText } = render(
-        <PanVerificationScreen {...panScreenProps} />
+        <PanVerificationScreen {...panScreenProps as any} />
       );
 
       // Enter valid PAN
@@ -238,7 +238,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       mockVerifyPan.mockRejectedValueOnce({ body: { error: 'PAN service unavailable' } });
 
       const { getByPlaceholderText, getAllByText, getByText } = render(
-        <PanVerificationScreen {...panScreenProps} />
+        <PanVerificationScreen {...panScreenProps as any} />
       );
       const input = getByPlaceholderText('ABCDE1234F');
       act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });
@@ -261,7 +261,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       });
 
       const { getByPlaceholderText, getAllByText, getByText } = render(
-        <PanVerificationScreen {...panScreenProps} />
+        <PanVerificationScreen {...panScreenProps as any} />
       );
       const input = getByPlaceholderText('ABCDE1234F');
       act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });
@@ -287,13 +287,13 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
     });
 
     it('renders Aadhaar verification screen with correct title', () => {
-      const { getByText } = render(<AadhaarVerificationScreen {...aadhaarScreenProps} />);
+      const { getByText } = render(<AadhaarVerificationScreen {...aadhaarScreenProps as any} />);
       expect(getByText('Aadhaar eKYC')).toBeDefined();
     });
 
     it('enters Aadhaar, gives consent, sends OTP, and transitions to OTP step', async () => {
       const { getByPlaceholderText, getByText } = render(
-        <AadhaarVerificationScreen {...aadhaarScreenProps} />
+        <AadhaarVerificationScreen {...aadhaarScreenProps as any} />
       );
 
       // Enter valid Aadhaar
@@ -317,7 +317,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
 
     it('shows the demo hint with 123456 code after OTP sent', async () => {
       const { getByPlaceholderText, getByText } = render(
-        <AadhaarVerificationScreen {...aadhaarScreenProps} />
+        <AadhaarVerificationScreen {...aadhaarScreenProps as any} />
       );
 
       const input = getByPlaceholderText('XXXX XXXX XXXX');
@@ -331,7 +331,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
 
     it('calls onVerified and goBack after full OTP verify flow', async () => {
       const { getByPlaceholderText, getByText } = render(
-        <AadhaarVerificationScreen {...aadhaarScreenProps} />
+        <AadhaarVerificationScreen {...aadhaarScreenProps as any} />
       );
 
       // Enter Aadhaar + consent + send OTP
@@ -368,7 +368,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       mockSendAadhaarOtp.mockRejectedValueOnce({ body: { error: 'Failed to send OTP' } });
 
       const { getByPlaceholderText, getByText } = render(
-        <AadhaarVerificationScreen {...aadhaarScreenProps} />
+        <AadhaarVerificationScreen {...aadhaarScreenProps as any} />
       );
 
       const input = getByPlaceholderText('XXXX XXXX XXXX');
@@ -394,13 +394,13 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
     });
 
     it('renders DigiLocker screen with correct title', () => {
-      const { getByText } = render(<DigiLockerScreen {...digilockerScreenProps} />);
+      const { getByText } = render(<DigiLockerScreen {...digilockerScreenProps as any} />);
       expect(getByText('DigiLocker')).toBeDefined();
     });
 
     it('completes full DigiLocker flow: connect → authorize → fetch → complete', async () => {
       await withAuthorizeAlert(async () => {
-        const { getByText } = render(<DigiLockerScreen {...digilockerScreenProps} />);
+        const { getByText } = render(<DigiLockerScreen {...digilockerScreenProps as any} />);
 
         // Press Connect DigiLocker
         act(() => { fireEvent.press(getByText('Connect DigiLocker')); });
@@ -424,7 +424,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
     it('shows error when DigiLocker connect fails', async () => {
       mockGetDigiLockerAuth.mockRejectedValueOnce({ body: { error: 'DigiLocker service unavailable' } });
 
-      const { getByText } = render(<DigiLockerScreen {...digilockerScreenProps} />);
+      const { getByText } = render(<DigiLockerScreen {...digilockerScreenProps as any} />);
       act(() => { fireEvent.press(getByText('Connect DigiLocker')); });
       await act(async () => {});
 
@@ -436,7 +436,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       mockFetchDigiLockerDocuments.mockRejectedValueOnce({ body: { error: 'Failed to fetch documents' } });
 
       await withAuthorizeAlert(async () => {
-        const { getByText } = render(<DigiLockerScreen {...digilockerScreenProps} />);
+        const { getByText } = render(<DigiLockerScreen {...digilockerScreenProps as any} />);
         act(() => { fireEvent.press(getByText('Connect DigiLocker')); });
         await act(async () => {});
 
@@ -461,7 +461,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
     });
 
     it('renders bank linking screen with correct title', () => {
-      const { getByText } = render(<BankLinkingScreen {...bankScreenProps} />);
+      const { getByText } = render(<BankLinkingScreen {...bankScreenProps as any} />);
       expect(getByText('Link Bank Account')).toBeDefined();
     });
 
@@ -469,7 +469,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       vi.useFakeTimers();
 
       const { getByPlaceholderText, getAllByText, getByText } = render(
-        <BankLinkingScreen {...bankScreenProps} />
+        <BankLinkingScreen {...bankScreenProps as any} />
       );
 
       // ── IFSC Step ──────────────────────────────────────────
@@ -533,7 +533,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       vi.useFakeTimers();
 
       const { getByPlaceholderText, getByText } = render(
-        <BankLinkingScreen {...bankScreenProps} />
+        <BankLinkingScreen {...bankScreenProps as any} />
       );
 
       // ── IFSC Step ────────────────────────────────────────
@@ -563,7 +563,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       vi.useFakeTimers();
 
       const { getByPlaceholderText, getByText } = render(
-        <BankLinkingScreen {...bankScreenProps} />
+        <BankLinkingScreen {...bankScreenProps as any} />
       );
       const input = getByPlaceholderText('HDFC0001234');
       act(() => { fireEvent.changeText(input, 'ABCD0001234'); });
@@ -583,7 +583,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
         isPrimary: true, linkedAt: '2025-06-01', verified: true,
       });
 
-      const { getByTestId } = render(<BankLinkingScreen {...bankScreenProps} />);
+      const { getByTestId } = render(<BankLinkingScreen {...bankScreenProps as any} />);
       expect(getByTestId('manage-banks-btn')).toBeDefined();
     });
 
@@ -595,7 +595,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
         isPrimary: true, linkedAt: '2025-06-01', verified: true,
       });
 
-      const { getByTestId, getByText } = render(<BankLinkingScreen {...bankScreenProps} />);
+      const { getByTestId, getByText } = render(<BankLinkingScreen {...bankScreenProps as any} />);
       const manageBtn = getByTestId('manage-banks-btn');
       act(() => { fireEvent.press(manageBtn); });
 
@@ -610,7 +610,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
         navigation: { goBack: mockGoBack, navigate: mockNavigate },
         route: { params: {} },
       };
-      const { getByText } = render(<BankLinkingScreen {...noCallbackProps} />);
+      const { getByText } = render(<BankLinkingScreen {...noCallbackProps as any} />);
       expect(getByText('Link Bank Account')).toBeDefined();
     });
   });
@@ -630,7 +630,7 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       // onVerified() exactly once when the user completes the flow.
 
       // Step 1: PAN (uses the same mockOnVerified)
-      const panResult = render(<PanVerificationScreen {...panScreenProps} />);
+      const panResult = render(<PanVerificationScreen {...panScreenProps as any} />);
       act(() => { fireEvent.changeText(panResult.getByPlaceholderText('ABCDE1234F'), 'ABCDE1234F'); });
       act(() => { fireEvent.press(panResult.getAllByText('Verify PAN').slice(-1)[0]); });
       // We don't flush here — this test just verifies the mock chain is set up
@@ -641,19 +641,19 @@ describe('Full KYC Flow — PAN → Aadhaar → DigiLocker → Bank Linking', ()
       // Step 2: Aadhaar (same mockOnVerified, fresh instance)
       mockOnVerified.mockClear();
       mockGoBack.mockClear();
-      const aadhaarResult = render(<AadhaarVerificationScreen {...aadhaarScreenProps} />);
+      const aadhaarResult = render(<AadhaarVerificationScreen {...aadhaarScreenProps as any} />);
       expect(aadhaarResult.getByText('Aadhaar eKYC')).toBeDefined();
 
       // Step 3: DigiLocker (same mockOnVerified, fresh instance)
       mockOnVerified.mockClear();
       mockGoBack.mockClear();
-      const digilockerResult = render(<DigiLockerScreen {...digilockerScreenProps} />);
+      const digilockerResult = render(<DigiLockerScreen {...digilockerScreenProps as any} />);
       expect(digilockerResult.getByText('DigiLocker')).toBeDefined();
 
       // Step 4: Bank (same mockOnVerified, fresh instance)
       mockOnVerified.mockClear();
       mockGoBack.mockClear();
-      const bankResult = render(<BankLinkingScreen {...bankScreenProps} />);
+      const bankResult = render(<BankLinkingScreen {...bankScreenProps as any} />);
       expect(bankResult.getByText('Link Bank Account')).toBeDefined();
 
       // All screens share the same callback type signature: () => void

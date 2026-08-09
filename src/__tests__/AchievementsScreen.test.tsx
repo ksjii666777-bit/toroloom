@@ -49,68 +49,68 @@ describe('AchievementsScreen', () => {
 
   describe('Header', () => {
     it('renders the title', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Achievements')).toBeDefined();
     });
 
     it('shows badge count subtitle', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('2 of 4 badges unlocked')).toBeDefined();
     });
   });
 
   describe('Level Card', () => {
     it('shows current level number', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('3')).toBeDefined();
     });
 
     it('shows level title', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Smart Saver')).toBeDefined();
     });
 
     it('shows total XP', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('2,450 Total XP')).toBeDefined();
     });
 
     it('shows XP progress values', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('2,450 / 5,000 XP')).toBeDefined();
     });
 
     it('shows the level progression label', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Level 3 → 4')).toBeDefined();
     });
   });
 
   describe('Stats Grid', () => {
     it('shows Total Badges label', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Total Badges')).toBeDefined();
     });
 
     it('shows Unlocked label', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Unlocked')).toBeDefined();
     });
 
     it('shows Locked label', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Locked')).toBeDefined();
     });
 
     it('shows Completion label', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Completion')).toBeDefined();
     });
   });
 
   describe('Badges Grid', () => {
     it('shows all badge names', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('First Trade')).toBeDefined();
       expect(getByText('Quick Learner')).toBeDefined();
       expect(getByText('Risk Taker')).toBeDefined();
@@ -118,37 +118,37 @@ describe('AchievementsScreen', () => {
     });
 
     it('shows unlock date for unlocked badge', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('15 Jan')).toBeDefined();
     });
   });
 
   describe('Tab Toggle', () => {
     it('shows All Badges tab', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('All Badges')).toBeDefined();
     });
 
     it('shows Unlocked tab with count', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Unlocked (2)')).toBeDefined();
     });
   });
 
   describe('Upcoming Challenges', () => {
     it('shows section heading', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Upcoming Challenges')).toBeDefined();
     });
 
     it('shows challenge descriptions', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('Place 10 trades')).toBeDefined();
       expect(getByText('Complete 10 lessons')).toBeDefined();
     });
 
     it('shows XP rewards', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       expect(getByText('+200 XP')).toBeDefined();
       expect(getByText('+150 XP')).toBeDefined();
     });
@@ -156,7 +156,7 @@ describe('AchievementsScreen', () => {
 
   describe('Badge Detail Modal', () => {
     it('shows badge details when tapped', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       act(() => { fireEvent.press(getByText('First Trade')); });
       expect(getByText('Complete your first trade')).toBeDefined();
       expect(getByText('Place 1 trade')).toBeDefined();
@@ -164,13 +164,13 @@ describe('AchievementsScreen', () => {
     });
 
     it('shows Got it! button in modal', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       act(() => { fireEvent.press(getByText('First Trade')); });
       expect(getByText('Got it!')).toBeDefined();
     });
 
     it('shows locked requirement for locked badge', () => {
-      const { getByText } = render(<AchievementsScreen {...defaultProps} />);
+      const { getByText } = render(<AchievementsScreen {...defaultProps as any} />);
       act(() => { fireEvent.press(getByText('Risk Taker')); });
       expect(getByText('Take a high-risk trade')).toBeDefined();
       expect(getByText('Locked')).toBeDefined();

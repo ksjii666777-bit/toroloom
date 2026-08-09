@@ -32,8 +32,9 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import Svg, { Polyline } from 'react-native-svg';
-import type { CommodityAsset } from '../../types';
+import type {CommodityAsset, RootStackParamList} from '../../types';
 import { useCommodityPrices } from '../../hooks/useCommodityPrices';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
@@ -460,7 +461,7 @@ function CommodityPriceCalculatorModal({
 
 type TabKey = 'all' | 'metals' | 'energy' | 'agriculture' | 'summary';
 
-export default function CommodityMarketsScreen({ navigation }: any) {
+export default function CommodityMarketsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'CommodityMarkets'>) {
   const { colors } = useTheme();
   const { t } = useT();
   // ── Live prices handled by useCommodityPrices WebSocket hook below ──

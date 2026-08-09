@@ -32,6 +32,9 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { ApiKey, ApiKeyScope, ApiKeyScopeMeta } from '../../types';
 import { API_KEY_SCOPES } from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -339,7 +342,7 @@ const keyCardStyles = StyleSheet.create({
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
-export default function ApiKeyManagementScreen({ navigation }: any) {
+export default function ApiKeyManagementScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'ApiKeys'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [keys, setKeys] = useState<ApiKey[]>(MOCK_API_KEYS);

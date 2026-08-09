@@ -19,7 +19,8 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import { formatCurrency, formatTimeAgo } from '../../utils/formatters';
 import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { OpenOrder } from '../../types';
+import type {OpenOrder, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 Dimensions.get('window');
 
@@ -37,7 +38,7 @@ const STATUS_LABELS: Record<string, string> = {
   trigger_pending: 'Trigger Pending',
 };
 
-export default function OpenOrdersScreen({ navigation }: any) {
+export default function OpenOrdersScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'OpenOrders'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -128,7 +129,7 @@ export default function OpenOrdersScreen({ navigation }: any) {
   }, [selectedOrder, modifyPrice, modifyQty, modifyOrderType, modifyOrder]);
 
   const handleViewStock = useCallback((symbol: string) => {
-    navigation.navigate('StockDetail', { symbol });
+    navigation.navigate('StockDetail', { stockId: symbol, symbol });
   }, [navigation]);
 
   const totalBuyValue = openOrders

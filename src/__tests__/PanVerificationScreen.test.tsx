@@ -76,28 +76,28 @@ describe('PanVerificationScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('renders the header with title', () => {
-    const { getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     expect(getByText('PAN Verification')).toBeDefined();
   });
 
   it('shows info card with PAN format hint', () => {
-    const { getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     expect(getByText('Format:')).toBeDefined();
     expect(getByText('ABCDE1234F')).toBeDefined();
   });
 
   it('shows the input field with correct placeholder', () => {
-    const { getByPlaceholderText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText } = render(<PanVerificationScreen {...baseProps as any} />);
     expect(getByPlaceholderText('ABCDE1234F')).toBeDefined();
   });
 
   it('shows the Verify PAN button', () => {
-    const { getAllByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getAllByText } = render(<PanVerificationScreen {...baseProps as any} />);
     expect(getAllByText('Verify PAN').length).toBeGreaterThan(0);
   });
 
   it('shows info text about PAN from NSDL database', () => {
-    const { getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     expect(getByText(/Permanent Account Number/)).toBeDefined();
     expect(getByText(/NSDL database/)).toBeDefined();
   });
@@ -107,12 +107,12 @@ describe('PanVerificationScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<PanVerificationScreen {...baseProps} />);
+    const { toJSON } = render(<PanVerificationScreen {...baseProps as any} />);
     expect(toJSON()).toBeTruthy();
   });
 
   it('shows initial hint text', () => {
-    const { getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     expect(getByText(/Enter your 10-digit PAN/)).toBeDefined();
   });
 
@@ -121,7 +121,7 @@ describe('PanVerificationScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('calls kycApi.verifyPan with the PAN when Verify is pressed', () => {
-    const { getByPlaceholderText, getAllByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getAllByText } = render(<PanVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('ABCDE1234F');
     act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });
 
@@ -133,7 +133,7 @@ describe('PanVerificationScreen', () => {
 
   it('shows verifying state while API call is in progress', () => {
     mockVerifyPan.mockImplementationOnce(() => new Promise(() => {}));
-    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('ABCDE1234F');
     act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });
 
@@ -146,7 +146,7 @@ describe('PanVerificationScreen', () => {
 
   it('displays error message on API failure', async () => {
     mockVerifyPan.mockRejectedValueOnce({ body: { error: 'Network error occurred' } });
-    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('ABCDE1234F');
     act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });
 
@@ -164,7 +164,7 @@ describe('PanVerificationScreen', () => {
       isVerified: false,
       status: 'INVALID',
     });
-    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('ABCDE1234F');
     act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });
 
@@ -177,7 +177,7 @@ describe('PanVerificationScreen', () => {
   });
 
   it('shows success card with PAN details after successful verification', async () => {
-    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('ABCDE1234F');
     act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });
 
@@ -193,7 +193,7 @@ describe('PanVerificationScreen', () => {
   });
 
   it('invokes kycCallbackStore callback and navigates back when Continue is pressed after success', async () => {
-    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getAllByText, getByText } = render(<PanVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('ABCDE1234F');
     act(() => { fireEvent.changeText(input, 'ABCDE1234F'); });
 

@@ -163,7 +163,7 @@ afterEach(() => {
 // ── Helpers ──────────────────────────────────────────────────
 
 function renderTransfer() {
-  return render(<TransferScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+  return render(<TransferScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 }
 
 function changeText(input: ReactTestInstance, text: string) {

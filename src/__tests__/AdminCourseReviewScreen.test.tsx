@@ -217,28 +217,28 @@ describe('AdminCourseReviewScreen — Rendering', () => {
 
   it('renders the screen title', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(getByText('Course Reviews')).toBeDefined();
   });
 
   it('renders the subtitle', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(getByText('Review and manage user-submitted courses')).toBeDefined();
   });
 
   it('loads cached courses on focus', () => {
     render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(mockLoadFromCache).toHaveBeenCalled();
   });
 
   it('renders stats bar with correct counts', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Stats bar shows counts: Pending=1, Approved=2, Rejected=1, Total=4
     expect(getByText('1')).toBeDefined();
@@ -247,7 +247,7 @@ describe('AdminCourseReviewScreen — Rendering', () => {
 
   it('renders all 4 filter chips', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(getByText('Pending')).toBeDefined();
     expect(getByText('Approved')).toBeDefined();
@@ -257,21 +257,21 @@ describe('AdminCourseReviewScreen — Rendering', () => {
 
   it('renders pending course card by default', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(getByText('Pending Course')).toBeDefined();
   });
 
   it('renders without crashing', () => {
     const { toJSON } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(toJSON()).toBeTruthy();
   });
 
   it('renders creator name on course cards', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(getByText('by Test Creator')).toBeDefined();
   });
@@ -284,7 +284,7 @@ describe('AdminCourseReviewScreen — Filter Switching', () => {
 
   it('shows pending courses by default', () => {
     const { getByText, queryByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(getByText('Pending Course')).toBeDefined();
     expect(queryByText('Approved Course')).toBeNull();
@@ -292,7 +292,7 @@ describe('AdminCourseReviewScreen — Filter Switching', () => {
 
   it('shows approved courses when Approved filter is selected', () => {
     const { getByText, queryByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Approved'));
     expect(getByText('Approved Course')).toBeDefined();
@@ -302,7 +302,7 @@ describe('AdminCourseReviewScreen — Filter Switching', () => {
 
   it('shows rejected courses when Rejected filter is selected', () => {
     const { getByText, queryByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText(/^Rejected$/));
     expect(getByText('Rejected Course')).toBeDefined();
@@ -311,7 +311,7 @@ describe('AdminCourseReviewScreen — Filter Switching', () => {
 
   it('shows all reviewed courses when All filter is selected', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Total'));
     expect(getByText('Pending Course')).toBeDefined();
@@ -346,14 +346,14 @@ describe('AdminCourseReviewScreen — Empty States', () => {
 
   it('shows empty state when no courses exist', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(getByText('No pending reviews')).toBeDefined();
   });
 
   it('shows correct empty message for Approved filter', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Approved'));
     expect(getByText('No approved courses')).toBeDefined();
@@ -361,7 +361,7 @@ describe('AdminCourseReviewScreen — Empty States', () => {
 
   it('shows correct empty message for Rejected filter', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText(/^Rejected$/));
     expect(getByText('No rejected courses')).toBeDefined();
@@ -375,7 +375,7 @@ describe('AdminCourseReviewScreen — Expand/Collapse', () => {
 
   it('shows course details when a pending course card is pressed', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course'));
     expect(getByText('Description')).toBeDefined();
@@ -384,7 +384,7 @@ describe('AdminCourseReviewScreen — Expand/Collapse', () => {
 
   it('shows approve and reject buttons for expanded pending course', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course'));
     expect(getByText(/^Reject$/)).toBeDefined();
@@ -393,7 +393,7 @@ describe('AdminCourseReviewScreen — Expand/Collapse', () => {
 
   it('shows Feature button for expanded approved course', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Approved'));
     press(getByText('Approved Course'));
@@ -402,7 +402,7 @@ describe('AdminCourseReviewScreen — Expand/Collapse', () => {
 
   it('shows Unfeature button for expanded featured course', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Approved'));
     press(getByText('Featured Course'));
@@ -411,7 +411,7 @@ describe('AdminCourseReviewScreen — Expand/Collapse', () => {
 
   it('shows rejected info and review notes for expanded rejected course', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText(/^Rejected$/));
     press(getByText('Rejected Course'));
@@ -427,7 +427,7 @@ describe('AdminCourseReviewScreen — Approve Flow', () => {
 
   it('shows confirmation alert when Approve & Publish is pressed', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course')); // Expand
     press(getByText('Approve & Publish'));
@@ -441,7 +441,7 @@ describe('AdminCourseReviewScreen — Approve Flow', () => {
 
   it('calls approveCourse when confirmation is accepted', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course')); // Expand
     press(getByText('Approve & Publish'));
@@ -459,7 +459,7 @@ describe('AdminCourseReviewScreen — Approve Flow', () => {
 
   it('does not call approveCourse when cancel is pressed', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course')); // Expand
     press(getByText('Approve & Publish'));
@@ -471,7 +471,7 @@ describe('AdminCourseReviewScreen — Approve Flow', () => {
 
   it('shows published confirmation alert after approval', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course'));
     press(getByText('Approve & Publish'));
@@ -493,7 +493,7 @@ describe('AdminCourseReviewScreen — Reject Flow', () => {
 
   it('shows notes required alert when rejecting without notes', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course')); // Expand
     press(getByText(/^Reject$/)); // Press Reject action button (not "Rejected" filter)
@@ -506,7 +506,7 @@ describe('AdminCourseReviewScreen — Reject Flow', () => {
 
   it('calls rejectCourse with notes when rejection is confirmed', () => {
     const { getByText, getByPlaceholderText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course')); // Expand
 
@@ -525,7 +525,7 @@ describe('AdminCourseReviewScreen — Reject Flow', () => {
 
   it('does not call rejectCourse when cancel is pressed', () => {
     const { getByText, getByPlaceholderText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course')); // Expand
 
@@ -541,7 +541,7 @@ describe('AdminCourseReviewScreen — Reject Flow', () => {
 
   it('clears reject notes input after rejection is submitted', () => {
     const { getByText, getByPlaceholderText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Pending Course')); // Expand
 
@@ -567,7 +567,7 @@ describe('AdminCourseReviewScreen — Toggle Featured', () => {
 
   it('calls toggleFeatured for a non-featured approved course', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Approved')); // Switch to Approved filter
     press(getByText('Approved Course')); // Expand
@@ -583,7 +583,7 @@ describe('AdminCourseReviewScreen — Toggle Featured', () => {
 
   it('calls toggleFeatured and shows removed message for a featured course', () => {
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     press(getByText('Approved')); // Switch to Approved filter
     press(getByText('Featured Course')); // Expand
@@ -607,7 +607,7 @@ describe('AdminCourseReviewScreen — Non-Admin Redirect', () => {
 
   it('shows access denied alert when user is not admin', () => {
     render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(mockAlert).toHaveBeenCalledWith(
       'Access Denied',
@@ -617,7 +617,7 @@ describe('AdminCourseReviewScreen — Non-Admin Redirect', () => {
 
   it('navigates back when user is not admin', () => {
     render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(mockGoBack).toHaveBeenCalledWith();
   });
@@ -625,7 +625,7 @@ describe('AdminCourseReviewScreen — Non-Admin Redirect', () => {
   it('does not show access denied for admin user', () => {
     _mockIsAdmin = true;
     const { getByText } = render(
-      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
+      <AdminCourseReviewScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(getByText('Course Reviews')).toBeDefined();
     expect(mockGoBack).not.toHaveBeenCalled();

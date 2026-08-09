@@ -42,7 +42,7 @@ import {
 } from '../services/snapTradePersistence';
 import { encrypt, decrypt } from '../lib/crypto';
 import { riskEngine } from '../services/riskEngine/RiskEngine';
-import { OrderActionType } from '../services/riskEngine/types';
+import { OrderActionType, LockdownStatus } from '../services/riskEngine/types';
 import { auditTrail } from '../services/auditTrail';
 import {
   claimOrderExecution,
@@ -86,6 +86,12 @@ function ensureConfigured(res: Response): boolean {
 }
 
 async function getUserSecret(userId: string): Promise<string | null> {
+  // Personal API keys auto-provision their user — no userSecret exists, but
+  // the flow must pass the "registered" checks. Return a marker so routes
+  // proceed (the service omits userId/userSecret in personal mode anyway).
+  if (snapTradeService.isPersonalMode()) {
+    return 'personal-auto-provisioned';
+  }
   const connection = await loadConnection(userId);
   if (!connection || !connection.encryptedUserSecret) return null;
   try {
@@ -108,8 +114,12 @@ router.post('/register', async (req: Request, res: Response) => {
   const snapTradeUserId = getSnapTradeUserId(userId);
 
   try {
+    // Personal keys auto-provision the user at signup — registration is a
+    // no-op that just records the user as ready for the connect flow.
     const { userSecret } = await snapTradeService.registerUser(snapTradeUserId);
-    const encryptedSecret = encrypt(userSecret);
+    const encryptedSecret = snapTradeService.isPersonalMode()
+      ? ''
+      : encrypt(userSecret);
 
     // Load existing connection to preserve any previous broker link
     const existing = await loadConnection(userId);
@@ -130,7 +140,9 @@ router.post('/register', async (req: Request, res: Response) => {
     res.json({
       success: true,
       snapTradeUserId,
-      message: 'SnapTrade user registered successfully',
+      message: snapTradeService.isPersonalMode()
+        ? 'SnapTrade personal mode — user auto-provisioned'
+        : 'SnapTrade user registered successfully',
     });
   } catch (err: any) {
     console.error('[SnapTrade] Register error:', err.message);
@@ -562,6 +574,91 @@ router.get('/balances', async (req: Request, res: Response) => {
     console.error('[SnapTrade] Balances error:', err.message);
     res.status(500).json({ error: `Failed to fetch balances: ${err.message}` });
   }
+});
+
+/**
+ * GET /api/snaptrade/ticker/:symbol
+ *
+ * Hybrid ticker endpoint — feeds the TradingView + SnapTrade order panel.
+ * Returns, for ONE symbol:
+ *   - connected            — whether a broker is linked (read-only mode)
+ *   - position             — open position (qty, avg buy, P&L) or null
+ *   - levels               — Iron Lock / risk-engine limits (stop/target hints)
+ *   - ironLockActive       — lockdown state
+ *
+ * Security: the SnapTrade userSecret is decrypted server-side ONLY and is
+ * never included in the response. The TradingView widget never sees any
+ * broker credential.
+ */
+router.get('/ticker/:symbol', async (req: Request, res: Response) => {
+  const userId = req.user!.userId;
+  const symbol = String(req.params.symbol || '').toUpperCase().trim();
+
+  if (!symbol) {
+    res.status(400).json({ error: 'symbol is required' });
+    return;
+  }
+
+  const connection = await loadConnection(userId);
+  if (!connection || !connection.authorizationId) {
+    res.json({
+      success: true,
+      connected: false,
+      symbol,
+      position: null,
+      levels: null,
+      ironLockActive: false,
+      lockdownStatus: 'none',
+    });
+    return;
+  }
+
+  // Position lookup is best-effort — never blocks the response.
+  let position: Record<string, unknown> | null = null;
+  try {
+    const userSecret = await getUserSecret(userId);
+    if (userSecret) {
+      const positions = await snapTradeService.getPositions(
+        getSnapTradeUserId(userId),
+        userSecret,
+        connection.accountId,
+      );
+      const pos = (positions as any[]).find(
+        (p: any) =>
+          p.symbol?.symbol &&
+          String(p.symbol.symbol).toUpperCase().trim() === symbol,
+      );
+      if (pos && Number(pos.units) > 0) {
+        position = {
+          symbol,
+          quantity: Number(pos.units) || 0,
+          avgCost: Number(pos.avgCost) || 0,
+          price: Number(pos.price) || 0,
+          pnl: Number(pos.pnl) || 0,
+          pnlPercent: Number(pos.pnlPercent) || 0,
+        };
+      }
+    }
+  } catch {
+    // Position lookup failed — respond with levels only.
+  }
+
+  const profile = riskEngine.getState(userId);
+  const isLockdown = profile.lockdown.status !== LockdownStatus.NONE;
+
+  res.json({
+    success: true,
+    connected: true,
+    symbol,
+    position,
+    levels: {
+      dailyLossLimit: profile.limits.dailyLossLimit,
+      dailyLossPercentLimit: profile.limits.dailyLossPercentLimit,
+      maxPositionSizePercent: profile.limits.maxPositionSizePercent,
+    },
+    ironLockActive: isLockdown && profile.settingsFrozen,
+    lockdownStatus: profile.lockdown.status,
+  });
 });
 
 /**

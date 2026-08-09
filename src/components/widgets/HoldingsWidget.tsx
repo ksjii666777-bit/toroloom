@@ -5,10 +5,13 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
+import { openExitOrder } from '../../utils/orderExit';
+import PositionLevelsOverlay from '../PositionLevelsOverlay';
 
 import type { WidgetSize } from '../../types/widgets';
 
@@ -17,6 +20,7 @@ interface HoldingsWidgetProps {
 }
 
 export default function HoldingsWidget({ size }: HoldingsWidgetProps) {
+  const navigation = useNavigation<any>();
   const { colors } = useTheme();
   const { t } = useT();
   const { holdings } = usePortfolioStore();
@@ -77,21 +81,64 @@ export default function HoldingsWidget({ size }: HoldingsWidgetProps) {
           const weight = totalValue > 0 ? (h.currentValue / totalValue) * 100 : 0;
           return (
             <View key={h.id} style={[styles.holdingRow, { borderBottomColor: colors.divider }]}>
-              <View style={styles.holdingInfo}>
-                <View style={[styles.weightBar, { width: `${Math.min(weight, 100)}%`, backgroundColor: '#3B82F620' }]} />
-                <Text style={[styles.symbol, { color: colors.text }]}>{h.symbol}</Text>
-                <Text style={[styles.weightText, { color: colors.textMuted }]}>
-                  {weight.toFixed(1)}%
-                </Text>
+              <View style={styles.holdingRowMain}>
+                <View style={styles.holdingInfo}>
+                  <View style={[styles.weightBar, { width: `${Math.min(weight, 100)}%`, backgroundColor: '#3B82F620' }]} />
+                  <Text style={[styles.symbol, { color: colors.text }]}>{h.symbol}</Text>
+                  <Text style={[styles.weightText, { color: colors.textMuted }]}>
+                    {weight.toFixed(1)}%
+                  </Text>
+                </View>
+                <View style={styles.holdingValues}>
+                  <Text style={[styles.holdingValue, { color: colors.text }]}>
+                    {formatCurrency(h.currentValue, true)}
+                  </Text>
+                  <Text style={[styles.holdingPnl, { color: h.pnl >= 0 ? '#00E676' : '#FF5252' }]}>
+                    {formatPercent(h.pnlPercent)}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.holdingValues}>
-                <Text style={[styles.holdingValue, { color: colors.text }]}>
-                  {formatCurrency(h.currentValue, true)}
-                </Text>
-                <Text style={[styles.holdingPnl, { color: h.pnl >= 0 ? '#00E676' : '#FF5252' }]}>
-                  {formatPercent(h.pnlPercent)}
-                </Text>
-              </View>
+
+              {/* Live position tag — same inline overlay as the portfolio
+                  rows, driven by the local holding (no SnapTrade fetch) with
+                  INR prices. STOP / TARGET pre-fill the PlaceOrder exit. */}
+              <PositionLevelsOverlay
+                symbol={h.symbol}
+                position={{
+                  symbol: h.symbol,
+                  quantity: h.quantity,
+                  avgCost: h.buyPrice,
+                  price: h.currentPrice,
+                  pnl: h.pnl,
+                  pnlPercent: h.pnlPercent,
+                }}
+                currency="INR"
+                inline
+                onApplyStop={(p) => openExitOrder(
+                  navigation,
+                  {
+                    symbol: h.symbol,
+                    exchange: 'NSE',
+                    name: h.name,
+                    price: h.currentPrice,
+                    stockId: h.stockId,
+                  },
+                  'SL',
+                  p,
+                )}
+                onApplyTarget={(p) => openExitOrder(
+                  navigation,
+                  {
+                    symbol: h.symbol,
+                    exchange: 'NSE',
+                    name: h.name,
+                    price: h.currentPrice,
+                    stockId: h.stockId,
+                  },
+                  'LIMIT',
+                  p,
+                )}
+              />
             </View>
           );
         })}
@@ -115,12 +162,14 @@ const styles = StyleSheet.create({
   countLabel: { fontFamily: 'System', fontSize: 10, fontWeight: '500' },
   list: { flex: 1 },
   holdingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingVertical: 6,
     borderBottomWidth: 0.5,
     position: 'relative',
+  },
+  holdingRowMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   holdingInfo: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, position: 'relative' },
   weightBar: { position: 'absolute', left: 0, top: 0, bottom: 0, borderRadius: 2 },

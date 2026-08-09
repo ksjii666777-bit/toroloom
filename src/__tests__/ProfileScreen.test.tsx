@@ -203,7 +203,7 @@ describe('ProfileScreen — Loading State', () => {
   });
 
   it('renders without crashing during load', () => {
-    const { toJSON } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -220,51 +220,51 @@ describe('ProfileScreen — Profile Tab Content', () => {
   });
 
   it('renders the header title', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Profile & KYC')).toBeDefined();
   });
 
   it('renders the user name from authStore', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Rahul Sharma')).toBeDefined();
   });
 
   it('renders the user level and title', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/Level 12/)).toBeDefined();
     expect(getByText('Trading Pro')).toBeDefined();
   });
 
   it('renders PAN badge in profile banner', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/ABCDE1234F/)).toBeDefined();
   });
 
   it('renders KYC verified badge', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/KYC/)).toBeDefined();
   });
 
   it('renders available balance', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Available Balance')).toBeDefined();
   });
 
   it('renders lifetime XP', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Lifetime XP')).toBeDefined();
     expect(getByText('24,500 XP')).toBeDefined();
   });
 
   it('renders quick action buttons', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Add Funds')).toBeDefined();
     expect(getByText('Withdraw')).toBeDefined();
@@ -273,26 +273,26 @@ describe('ProfileScreen — Profile Tab Content', () => {
   });
 
   it('renders profile toggle tab as active by default', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Profile')).toBeDefined();
   });
 
   it('renders the KYC & Banks toggle tab', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('KYC & Banks')).toBeDefined();
   });
 
   it('renders account details section', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Account Details')).toBeDefined();
     expect(getByText('Your trading account information')).toBeDefined();
   });
 
   it('renders account detail fields', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Account Type')).toBeDefined();
     expect(getByText('Trading Account')).toBeDefined();
@@ -305,7 +305,7 @@ describe('ProfileScreen — Profile Tab Content', () => {
   });
 
   it('renders personal information card', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Personal Information')).toBeDefined();
     expect(getByText('Edit Profile')).toBeDefined();
@@ -314,13 +314,13 @@ describe('ProfileScreen — Profile Tab Content', () => {
   });
 
   it('renders logout button', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Log Out')).toBeDefined();
   });
 
   it('does not navigate on initial render', () => {
-    const { toJSON } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(toJSON).not.toBeNull();
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -339,7 +339,7 @@ describe('ProfileScreen — KYC Tab', () => {
   });
 
   it('switches to KYC tab and renders KYC status', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('KYC & Banks')); });
     expect(getByText('KYC Status')).toBeDefined();
@@ -347,7 +347,7 @@ describe('ProfileScreen — KYC Tab', () => {
   });
 
   it('renders KYC steps after switching to KYC tab', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('KYC & Banks')); });
     expect(getByText('PAN Verification')).toBeDefined();
@@ -358,14 +358,14 @@ describe('ProfileScreen — KYC Tab', () => {
   });
 
   it('renders linked bank accounts in KYC tab', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('KYC & Banks')); });
     expect(getByText('Linked Bank Accounts')).toBeDefined();
   });
 
   it('renders bank details with account numbers', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('KYC & Banks')); });
     expect(getByText('HDFC Bank')).toBeDefined();
@@ -374,7 +374,7 @@ describe('ProfileScreen — KYC Tab', () => {
   });
 
   it('renders add bank button', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('KYC & Banks')); });
     expect(getByText('Add Bank Account')).toBeDefined();
@@ -393,7 +393,7 @@ describe('ProfileScreen — Navigation', () => {
   });
 
   it('navigates to NotificationPreferences when pressed', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('Notification Preferences')); });
     expect(mockNavigate).toHaveBeenCalledWith('NotificationPreferences');
@@ -412,7 +412,7 @@ describe('ProfileScreen — Logout', () => {
   });
 
   it('calls logout when Log Out button is pressed', () => {
-    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('Log Out')); });
     expect(mockLogout).toHaveBeenCalled();
@@ -431,7 +431,7 @@ describe('ProfileScreen — Back Navigation', () => {
   });
 
   it('navigates back when back button is pressed', () => {
-    render(<ProfileScreen navigation={{ navigate: mockNavigate }} />);
+    render(<ProfileScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // The back button is represented by Ionicons arrow-back icon
     // It's wrapped in a TouchableOpacity with an onPress that calls navigation.goBack()

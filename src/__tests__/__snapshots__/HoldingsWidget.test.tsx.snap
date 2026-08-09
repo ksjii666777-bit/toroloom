@@ -1,0 +1,5161 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HoldingsWidget > matches snapshot with the real seed (large) > HoldingsWidget-real-seed-large 1`] = `
+"{
+  "type": "View",
+  "props": {
+    "style": {
+      "flex": 1
+    }
+  },
+  "children": [
+    {
+      "type": "View",
+      "props": {
+        "style": {
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "alignItems": "center",
+          "marginBottom": 8
+        }
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "style": [
+              {
+                "fontFamily": "System",
+                "fontSize": 16,
+                "fontWeight": "800"
+              },
+              {
+                "color": "#E0E6ED"
+              }
+            ]
+          },
+          "children": [
+            "₹6.74L"
+          ]
+        },
+        {
+          "type": "Text",
+          "props": {
+            "style": [
+              {
+                "fontFamily": "System",
+                "fontSize": 10,
+                "fontWeight": "500"
+              },
+              {
+                "color": "#475569"
+              }
+            ]
+          },
+          "children": [
+            "5 holdings"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ScrollView",
+      "props": {
+        "showsVerticalScrollIndicator": false,
+        "style": {
+          "flex": 1
+        },
+        "contentContainerStyle": {
+          "paddingBottom": 4
+        }
+      },
+      "children": [
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "24.926544713817613%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "HDFCBANK"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "24.9",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹1.68L"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+8.32%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "100"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,472.50"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,705.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,550.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "8.32",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹12,890.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "23.4433343874668%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "SBIN"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "23.4",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹1.58L"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+9.65%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "200"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹684.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹792.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹720.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "9.65",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹13,900.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "21.4575547963815%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "RELIANCE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "21.5",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹1.45L"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+9.08%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "50"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹2,517.50"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹2,915.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹2,650.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "9.08",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹12,025.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "18.62163883605849%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "INFY"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "18.6",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹1.25L"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+8.12%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "80"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,377.50"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,595.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,450.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "8.12",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹9,424.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "11.550927266275599%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "TCS"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "11.6",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹77.8K"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+2.37%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "20"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹3,610.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹4,180.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹3,800.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "2.37",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹1,800.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}"
+`;
+
+exports[`HoldingsWidget > matches snapshot with the real seed (medium) > HoldingsWidget-real-seed-medium 1`] = `
+"{
+  "type": "View",
+  "props": {
+    "style": {
+      "flex": 1
+    }
+  },
+  "children": [
+    {
+      "type": "View",
+      "props": {
+        "style": {
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "alignItems": "center",
+          "marginBottom": 8
+        }
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "style": [
+              {
+                "fontFamily": "System",
+                "fontSize": 16,
+                "fontWeight": "800"
+              },
+              {
+                "color": "#E0E6ED"
+              }
+            ]
+          },
+          "children": [
+            "₹6.74L"
+          ]
+        },
+        {
+          "type": "Text",
+          "props": {
+            "style": [
+              {
+                "fontFamily": "System",
+                "fontSize": 10,
+                "fontWeight": "500"
+              },
+              {
+                "color": "#475569"
+              }
+            ]
+          },
+          "children": [
+            "5 holdings"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ScrollView",
+      "props": {
+        "showsVerticalScrollIndicator": false,
+        "style": {
+          "flex": 1
+        },
+        "contentContainerStyle": {
+          "paddingBottom": 4
+        }
+      },
+      "children": [
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "24.926544713817613%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "HDFCBANK"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "24.9",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹1.68L"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+8.32%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "100"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,472.50"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,705.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,550.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "8.32",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹12,890.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "23.4433343874668%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "SBIN"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "23.4",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹1.58L"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+9.65%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "200"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹684.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹792.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹720.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "9.65",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹13,900.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "21.4575547963815%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "RELIANCE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "21.5",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹1.45L"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+9.08%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "50"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹2,517.50"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹2,915.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹2,650.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "9.08",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹12,025.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "18.62163883605849%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "INFY"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "18.6",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹1.25L"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+8.12%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "80"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,377.50"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,595.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹1,450.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "8.12",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹9,424.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "View",
+          "props": {
+            "style": [
+              {
+                "paddingVertical": 6,
+                "borderBottomWidth": 0.5,
+                "position": "relative"
+              },
+              {
+                "borderBottomColor": "rgba(255,255,255,0.04)"
+              }
+            ]
+          },
+          "children": [
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "row",
+                  "alignItems": "center",
+                  "justifyContent": "space-between"
+                }
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 6,
+                      "flex": 1,
+                      "position": "relative"
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "position": "absolute",
+                            "left": 0,
+                            "top": 0,
+                            "bottom": 0,
+                            "borderRadius": 2
+                          },
+                          {
+                            "width": "11.550927266275599%",
+                            "backgroundColor": "#3B82F620"
+                          }
+                        ]
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "700",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "TCS"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 9,
+                            "fontWeight": "500",
+                            "zIndex": 1
+                          },
+                          {
+                            "color": "#475569"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "11.6",
+                        "%"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "alignItems": "center",
+                      "gap": 8
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 11,
+                            "fontWeight": "600"
+                          },
+                          {
+                            "color": "#E0E6ED"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "₹77.8K"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": [
+                          {
+                            "fontFamily": "System",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                            "minWidth": 50,
+                            "textAlign": "right"
+                          },
+                          {
+                            "color": "#00E676"
+                          }
+                        ]
+                      },
+                      "children": [
+                        "+2.37%"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "View",
+              "props": {
+                "style": {
+                  "flexDirection": "column",
+                  "alignItems": "stretch",
+                  "gap": 4,
+                  "marginTop": 8,
+                  "paddingTop": 8,
+                  "borderTopWidth": 1,
+                  "borderTopColor": "rgba(255,255,255,0.06)"
+                },
+                "pointerEvents": "auto"
+              },
+              "children": [
+                {
+                  "type": "View",
+                  "props": {
+                    "style": [
+                      {
+                        "flexDirection": "row",
+                        "alignItems": "center",
+                        "alignSelf": "flex-start",
+                        "gap": 5,
+                        "paddingHorizontal": 8,
+                        "paddingVertical": 3,
+                        "borderRadius": 999
+                      },
+                      {
+                        "backgroundColor": "#00E676"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": {
+                          "width": 5,
+                          "height": 5,
+                          "borderRadius": 2.5,
+                          "backgroundColor": "#fff"
+                        }
+                      },
+                      "children": null
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-ExtraBold",
+                          "fontWeight": "800",
+                          "letterSpacing": 0.5,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "LIVE"
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                      "props": {
+                        "style": {
+                          "fontFamily": "Inter-Bold",
+                          "fontWeight": "700",
+                          "letterSpacing": 0.05,
+                          "fontSize": 9,
+                          "color": "#052e16"
+                        }
+                      },
+                      "children": [
+                        "20"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "View",
+                  "props": {
+                    "style": {
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                      "gap": 4
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#3B82F6"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#60A5FA"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "STOP"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹3,610.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Pressable",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "TARGET"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹4,180.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "rgba(255,255,255,0.04)"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#94A3B8"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "AVG BUY"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "₹3,800.00"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "View",
+                      "props": {
+                        "style": [
+                          {
+                            "flexDirection": "row",
+                            "alignItems": "center",
+                            "gap": 5,
+                            "paddingHorizontal": 8,
+                            "paddingVertical": 4,
+                            "borderRadius": 999,
+                            "borderWidth": 1,
+                            "backgroundColor": "rgba(10,14,22,0.78)"
+                          },
+                          {
+                            "borderColor": "#22C55E"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Inter-Bold",
+                                "fontWeight": "700",
+                                "letterSpacing": 0.4,
+                                "fontSize": 8
+                              },
+                              {
+                                "color": "#4ADE80"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "2.37",
+                            "%"
+                          ]
+                        },
+                        {
+                          "type": "Text",
+                          "props": {
+                            "style": [
+                              {
+                                "fontFamily": "Menlo",
+                                "fontWeight": "700",
+                                "letterSpacing": 0,
+                                "fontSize": 10
+                              },
+                              {
+                                "color": "#fff"
+                              }
+                            ]
+                          },
+                          "children": [
+                            "+",
+                            "₹1,800.00"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}"
+`;
+
+exports[`HoldingsWidget > matches snapshot with the real seed (small) > HoldingsWidget-real-seed-small 1`] = `
+"{
+  "type": "View",
+  "props": {
+    "style": {
+      "flex": 1
+    }
+  },
+  "children": [
+    {
+      "type": "Text",
+      "props": {
+        "style": [
+          {
+            "fontFamily": "System",
+            "fontSize": 16,
+            "fontWeight": "800"
+          },
+          {
+            "color": "#E0E6ED"
+          }
+        ]
+      },
+      "children": [
+        "₹6.74L"
+      ]
+    },
+    {
+      "type": "Text",
+      "props": {
+        "style": [
+          {
+            "fontFamily": "System",
+            "fontSize": 10,
+            "fontWeight": "500",
+            "marginTop": 2
+          },
+          {
+            "color": "#475569"
+          }
+        ]
+      },
+      "children": [
+        "5 holdings"
+      ]
+    },
+    {
+      "type": "View",
+      "props": {
+        "style": {
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "alignItems": "center",
+          "paddingVertical": 2
+        }
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "style": [
+              {
+                "fontFamily": "System",
+                "fontSize": 11,
+                "fontWeight": "600"
+              },
+              {
+                "color": "#E0E6ED"
+              }
+            ]
+          },
+          "children": [
+            "HDFCBANK"
+          ]
+        },
+        {
+          "type": "Text",
+          "props": {
+            "style": [
+              {
+                "fontFamily": "System",
+                "fontSize": 10,
+                "fontWeight": "600"
+              },
+              {
+                "color": "#00E676"
+              }
+            ]
+          },
+          "children": [
+            "+8.32%"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "View",
+      "props": {
+        "style": {
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "alignItems": "center",
+          "paddingVertical": 2
+        }
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "style": [
+              {
+                "fontFamily": "System",
+                "fontSize": 11,
+                "fontWeight": "600"
+              },
+              {
+                "color": "#E0E6ED"
+              }
+            ]
+          },
+          "children": [
+            "SBIN"
+          ]
+        },
+        {
+          "type": "Text",
+          "props": {
+            "style": [
+              {
+                "fontFamily": "System",
+                "fontSize": 10,
+                "fontWeight": "600"
+              },
+              {
+                "color": "#00E676"
+              }
+            ]
+          },
+          "children": [
+            "+9.65%"
+          ]
+        }
+      ]
+    }
+  ]
+}"
+`;

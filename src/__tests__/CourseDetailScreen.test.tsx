@@ -261,7 +261,7 @@ describe('CourseDetailScreen — Loading State', () => {
   it('renders without crashing during loading', async () => {
     const route = { params: { courseId: 'c1' } };
     const { toJSON, unmount } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(toJSON).not.toBeNull();
     // Let the getCourse → import → setCourseLessons chain settle and unmount so no
@@ -283,7 +283,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the course title from mock data', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('Stock Market Basics')).toBeDefined();
@@ -292,7 +292,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the course description in the hero', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText(/investing in the stock market/)).toBeDefined();
@@ -301,7 +301,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the level badge', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('beginner')).toBeDefined();
@@ -310,7 +310,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the category badge', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('Fundamentals')).toBeDefined();
@@ -319,7 +319,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders Course Progress section', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('Course Progress')).toBeDefined();
@@ -328,7 +328,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders progress stats (Completed, Remaining, Duration)', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('Completed')).toBeDefined();
@@ -339,7 +339,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders About this Course section', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('About this Course')).toBeDefined();
@@ -348,7 +348,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the enrolled count stat', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText(/enrolled/)).toBeDefined();
@@ -357,7 +357,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the rating stat', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText(/rating/)).toBeDefined();
@@ -366,7 +366,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the Lessons section title with count', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText(/Lessons/)).toBeDefined();
@@ -375,7 +375,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders individual lesson titles from mock data', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('What is the Stock Market?')).toBeDefined();
@@ -386,7 +386,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders lesson durations', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('20 min')).toBeDefined();
@@ -396,7 +396,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the Continue Learning button (5 of 8 lessons completed in real data)', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('Continue Learning')).toBeDefined();
@@ -405,7 +405,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('renders the Next Lesson badge on the next incomplete lesson', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('Next Lesson')).toBeDefined();
@@ -414,7 +414,7 @@ describe('CourseDetailScreen — Loaded Content', () => {
   it('does not navigate on initial render', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('Stock Market Basics')).toBeDefined();
@@ -433,7 +433,7 @@ describe('CourseDetailScreen — Missing Course', () => {
   it('renders course not found for invalid courseId', async () => {
     const route = { params: { courseId: 'nonexistent' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     expect(getByText('Course not found')).toBeDefined();
@@ -452,7 +452,7 @@ describe('CourseDetailScreen — Lesson Navigation', () => {
   it('navigates to LessonView when Continue Learning button is pressed', async () => {
     const route = { params: { courseId: 'c1' } };
     const { getByText } = render(
-      <CourseDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CourseDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     await flushMicrotasks();
     act(() => { fireEvent.press(getByText('Continue Learning')); });

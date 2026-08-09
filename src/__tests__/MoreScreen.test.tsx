@@ -55,25 +55,25 @@ function renderWithTimeTravel(jsx: React.ReactElement) {
 
 describe('MoreScreen', () => {
   it('renders the screen title', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('More')).toBeDefined();
     cleanup();
   });
 
   it('renders the user name', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('TraderJoe')).toBeDefined();
     cleanup();
   });
 
   it('renders the user email', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('trader@example.com')).toBeDefined();
     cleanup();
   });
 
   it('renders quick action buttons', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Add Funds')).toBeDefined();
     expect(getByText('Withdraw')).toBeDefined();
     expect(getByText('Transfer')).toBeDefined();
@@ -82,7 +82,7 @@ describe('MoreScreen', () => {
   });
 
   it('renders menu section titles', () => {
-    const { getByText, getAllByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, getAllByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Portfolio & Wealth')).toBeDefined();
     expect(getByText('Markets & News')).toBeDefined();
     expect(getByText('Learn & Grow')).toBeDefined();
@@ -93,7 +93,7 @@ describe('MoreScreen', () => {
   });
 
   it('renders menu items', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Fund Dashboard')).toBeDefined();
     expect(getByText('Mutual Funds')).toBeDefined();
     expect(getByText('Reports')).toBeDefined();
@@ -102,25 +102,25 @@ describe('MoreScreen', () => {
   });
 
   it('renders Log Out button', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Log Out')).toBeDefined();
     cleanup();
   });
 
   it('renders Achievements card', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Achievements')).toBeDefined();
     cleanup();
   });
 
   it('renders available balance', () => {
-    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText(/Available Balance/)).toBeDefined();
     cleanup();
   });
 
   it('renders without crashing', () => {
-    const { toJSON, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { toJSON, cleanup } = renderWithTimeTravel(<MoreScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
     cleanup();
   });

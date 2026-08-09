@@ -131,6 +131,18 @@ export default {
     usOrderFailed: 'ऑर्डर विफल',
     usOrderFailedMsg: 'ऑर्डर देने में विफल। कृपया पुनः प्रयास करें।',
     usOrderInfo: 'ऑर्डर आपके कनेक्टेड SnapTrade ब्रोकरेज के माध्यम से दिए जाते हैं। ऑर्डर स्थिति और पुष्टिकरण के लिए अपना ब्रोकरेज खाता जांचें।',
+    // ── Hybrid chart (TradingView ⇄ SnapTrade) ──────────────────────────
+    selectSymbolChart: 'लाइव चार्ट देखने के लिए सिंबल दर्ज करें',
+    chartReadOnly: 'केवल देखने का मार्केट व्यू — ट्रेड करने के लिए ब्रोकर कनेक्ट करें',
+    chartFallbackTitle: 'लाइव मूल्य',
+    chartFallbackHint: 'TradingView चार्ट अनुपलब्ध — लाइव प्राइस फीड का उपयोग हो रहा है',
+    positionLive: 'LIVE',
+    positionAvgBuy: 'औसत खरीद',
+    positionStop: 'स्टॉप',
+    positionTarget: 'टारगेट',
+    positionNoPosition: 'कोई खुली पोजीशन नहीं',
+    positionViewOnly: 'केवल देखें — ट्रेड करने के लिए ब्रोकर कनेक्ट करें',
+    positionIronLock: 'आयरन लॉक सक्रिय',
     // ── FnO Options Chain ──────────────────────────────────────────────────
     all: 'सभी',
     optionChain: 'ऑप्शन चेन',

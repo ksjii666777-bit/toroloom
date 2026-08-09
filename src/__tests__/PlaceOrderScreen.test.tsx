@@ -220,7 +220,7 @@ const defaultRoute = {
 };
 
 function renderScreen() {
-  return render(<PlaceOrderScreen route={defaultRoute} navigation={navMock} />);
+  return render(<PlaceOrderScreen route={defaultRoute as any} navigation={navMock as any} />);
 }
 
 /** Check if a rendered element's joined text children contain the given string. */
@@ -256,7 +256,7 @@ describe('PlaceOrderScreen — Header & Stock Info', () => {
   it('renders header title with Sell Securities when tradeType is sell', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE', tradeType: 'sell' } };
     const { getByTestId } = render(
-      <PlaceOrderScreen route={route} navigation={navMock} />
+      <PlaceOrderScreen route={route as any} navigation={navMock as any} />
     );
     const title = getByTestId('headerTitle');
     expect(hasText(title, 'Sell Securities')).toBe(true);
@@ -293,7 +293,7 @@ describe('PlaceOrderScreen — Header & Stock Info', () => {
   it('renders stock not found fallback — defaults to first stock', () => {
     const route = { params: { stockId: 'NONEXISTENT', symbol: 'NONEXISTENT', tradeType: 'buy' } };
     const { getByText } = render(
-      <PlaceOrderScreen route={route} navigation={navMock} />
+      <PlaceOrderScreen route={route as any} navigation={navMock as any} />
     );
     expect(getByText('RELIANCE')).toBeDefined();
   });
@@ -325,7 +325,7 @@ describe('PlaceOrderScreen — Buy/Sell Toggle', () => {
   it('toggles back to Buy when Buy button is pressed after Sell', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE', tradeType: 'sell' } };
     const { getByTestId } = render(
-      <PlaceOrderScreen route={route} navigation={navMock} />
+      <PlaceOrderScreen route={route as any} navigation={navMock as any} />
     );
     act(() => {
       fireEvent.press(getByTestId('buyToggle'));
@@ -492,7 +492,7 @@ describe('PlaceOrderScreen — Sell Mode', () => {
   it('shows owned quantity in sell mode', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE', tradeType: 'sell' } };
     const { getByText } = render(
-      <PlaceOrderScreen route={route} navigation={navMock} />
+      <PlaceOrderScreen route={route as any} navigation={navMock as any} />
     );
     expect(getByText(/Owned: 50/)).toBeDefined();
   });
@@ -500,7 +500,7 @@ describe('PlaceOrderScreen — Sell Mode', () => {
   it('renders Sell Securities header in sell mode', () => {
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE', tradeType: 'sell' } };
     const { getByTestId } = render(
-      <PlaceOrderScreen route={route} navigation={navMock} />
+      <PlaceOrderScreen route={route as any} navigation={navMock as any} />
     );
     const title = getByTestId('headerTitle');
     expect(hasText(title, 'Sell Securities')).toBe(true);
@@ -563,7 +563,7 @@ describe('PlaceOrderScreen — Order Placement Flow (async)', () => {
     mockSellStock.mockResolvedValue(undefined);
     const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE', tradeType: 'sell' } };
     const { getByTestId } = render(
-      <PlaceOrderScreen route={route} navigation={navMock} />
+      <PlaceOrderScreen route={route as any} navigation={navMock as any} />
     );
 
     act(() => {

@@ -35,6 +35,9 @@ import {
   analyzePortfolioImpact, RISK_PROFILES,
 } from '../../services/ai/tradeAssistant';
 import type { RiskTolerance, RiskLevel } from '../../services/ai/tradeAssistant';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
@@ -56,7 +59,7 @@ const RISK_BG: Record<RiskLevel, string> = {
 
 // ─── Main Screen ───────────────────────────────────────────────────────────
 
-export default function AITradeAssistantScreen({ navigation }: any) {
+export default function AITradeAssistantScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AITradeAssistant'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

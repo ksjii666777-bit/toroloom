@@ -126,12 +126,12 @@ describe('TwoFactorSetupScreen', () => {
 
   it('renders loading state on mount while status loads', () => {
     mockGet2FAStatus.mockImplementation(() => new Promise(() => {}));
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     expect(getByText(/Loading 2FA status/)).toBeDefined();
   });
 
   it('renders the header with title', () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     expect(getByText('Two-Factor Auth')).toBeDefined();
   });
 
@@ -140,13 +140,13 @@ describe('TwoFactorSetupScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('shows 2FA info card with hero section', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     expect(getByText('Two-Factor Authentication')).toBeDefined();
   });
 
   it('shows benefits list', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     expect(getByText(/Protects against unauthorized access/)).toBeDefined();
     expect(getByText(/Works with Google Authenticator/)).toBeDefined();
@@ -154,13 +154,13 @@ describe('TwoFactorSetupScreen', () => {
   });
 
   it('shows Set Up button when no setup started', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     expect(getByText('Set Up Two-Factor Auth')).toBeDefined();
   });
 
   it('calls generate2FASetup when Set Up button is pressed', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -170,7 +170,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('shows generating state while setup is in progress', async () => {
     mockGenerate2FASetup.mockImplementation(() => new Promise(() => {}));
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -183,7 +183,7 @@ describe('TwoFactorSetupScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('shows QR section after setup is generated', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -192,7 +192,7 @@ describe('TwoFactorSetupScreen', () => {
   });
 
   it('shows manual entry toggle after QR code', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -205,7 +205,7 @@ describe('TwoFactorSetupScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('shows TOTP code input prompt after QR', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -214,7 +214,7 @@ describe('TwoFactorSetupScreen', () => {
   });
 
   it('shows Verify & Enable button', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -223,7 +223,7 @@ describe('TwoFactorSetupScreen', () => {
   });
 
   it('renders QR step with Verify button disabled until 6 digits entered', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -235,7 +235,7 @@ describe('TwoFactorSetupScreen', () => {
   });
 
   it('shows initial TOTP hint text when no code entered', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -250,28 +250,28 @@ describe('TwoFactorSetupScreen', () => {
 
   it('shows manage step when 2FA is already enabled', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     expect(getByText('2FA is Active')).toBeDefined();
   });
 
   it('shows Enabled badge in manage step', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     expect(getByText('Enabled')).toBeDefined();
   });
 
   it('shows setup date in manage step', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     expect(getByText(/Jan/)).toBeDefined(); // "Since 15 Jan 2026"
   });
 
   it('shows Manage 2FA card with all three actions', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     expect(getByText('Manage 2FA')).toBeDefined();
     expect(getByText(/View Backup Codes/)).toBeDefined();
@@ -281,14 +281,14 @@ describe('TwoFactorSetupScreen', () => {
 
   it('shows How It Works card in manage step', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     expect(getByText('How It Works')).toBeDefined();
   });
 
   it('opens backup codes when View Backup Codes is pressed', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const viewBtn = getByText(/View Backup Codes/);
     act(() => { fireEvent.press(viewBtn); });
@@ -298,7 +298,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('calls regenerateBackupCodes when Regenerate Backup Codes is pressed', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const regenerateBtn = getByText(/Regenerate Backup Codes/);
     // Pressing this triggers Alert.alert which shows a native dialog
@@ -316,7 +316,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('shows disable modal when Disable 2FA is pressed', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const disableBtn = getByText(/Disable Two-Factor Auth/);
     act(() => { fireEvent.press(disableBtn); });
@@ -328,7 +328,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('shows Cancel and Disable 2FA buttons in modal', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const disableBtn = getByText(/Disable Two-Factor Auth/);
     act(() => { fireEvent.press(disableBtn); });
@@ -339,7 +339,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('closes modal when Cancel is pressed and resets error state', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     // Open modal
     const disableBtn = getByText(/Disable Two-Factor Auth/);
@@ -358,7 +358,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('renders disable modal with Disable 2FA button disabled until code entered', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const disableBtn = getByText(/Disable Two-Factor Auth/);
     act(() => { fireEvent.press(disableBtn); });
@@ -373,7 +373,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('handles API failure for get2FAStatus gracefully', async () => {
     mockGet2FAStatus.mockRejectedValue(new Error('Network error'));
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     // The catch in loadStatus falls through to default: setup step
     await flushMicrotasks();
     expect(getByText('Two-Factor Authentication')).toBeDefined();
@@ -381,7 +381,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('handles API failure for generate2FASetup gracefully', async () => {
     mockGenerate2FASetup.mockRejectedValue({ body: { error: 'Rate limited' } });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const setupBtn = getByText('Set Up Two-Factor Auth');
     act(() => { fireEvent.press(setupBtn); });
@@ -390,14 +390,14 @@ describe('TwoFactorSetupScreen', () => {
   });
 
   it('shows back button header', async () => {
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     expect(getByText('Two-Factor Auth')).toBeDefined();
   });
 
   it('handles API failure for getBackupCodes gracefully from manage step', async () => {
     mockGetBackupCodes.mockRejectedValue({ body: { error: 'Failed to fetch codes' } });
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const viewBtn = getByText(/View Backup Codes/);
     act(() => { fireEvent.press(viewBtn); });
@@ -408,7 +408,7 @@ describe('TwoFactorSetupScreen', () => {
 
   it('shows backup codes after View Backup Codes is pressed from manage step', async () => {
     mockGet2FAStatus.mockResolvedValue({ enabled: true, verified: true, setupAt: '2026-01-15T00:00:00.000Z' });
-    const { getByText } = render(<TwoFactorSetupScreen {...baseProps} />);
+    const { getByText } = render(<TwoFactorSetupScreen {...baseProps as any} />);
     await flushMicrotasks();
     const viewBtn = getByText(/View Backup Codes/);
     act(() => { fireEvent.press(viewBtn); });

@@ -169,7 +169,7 @@ function renderScreen(overrides?: Record<string, any>) {
   (usePortfolioStore as any).mockImplementation(() => mockStore);
 
   return render(
-    <OpenOrdersScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+    <OpenOrdersScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
   );
 }
 
@@ -589,7 +589,7 @@ describe('OpenOrdersScreen — Navigation', () => {
     act(() => { fireEvent.press(getByText('HDFCBANK')); });
     advanceAnimations();
 
-    expect(mockNavigate).toHaveBeenCalledWith('StockDetail', { symbol: 'HDFCBANK' });
+    expect(mockNavigate).toHaveBeenCalledWith('StockDetail', { stockId: 'HDFCBANK', symbol: 'HDFCBANK' });
   });
 
   it('does not navigate on initial render', () => {

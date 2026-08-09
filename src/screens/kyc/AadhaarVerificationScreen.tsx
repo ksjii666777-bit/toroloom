@@ -27,11 +27,12 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import { kycCallbackStore } from '../../store/kycCallbackStore';
-import type { AadhaarOtpResponse, AadhaarVerifyResponse } from '../../types';
+import type {AadhaarOtpResponse, AadhaarVerifyResponse, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type FlowStep = 'aadhaar_input' | 'otp_input' | 'verified';
 
-export default function AadhaarVerificationScreen({ navigation }: any) {
+export default function AadhaarVerificationScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AadhaarVerification'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

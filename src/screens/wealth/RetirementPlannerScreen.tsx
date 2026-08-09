@@ -30,6 +30,9 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { useWealthStore } from '../../store/wealthStore';
 import _AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 
 const _formatINR = (n: number) =>
@@ -45,7 +48,7 @@ const formatCompactINR = (n: number): string => {
 
 const CHART_HEIGHT = 160;
 
-export default function RetirementPlannerScreen({ navigation }: any) {
+export default function RetirementPlannerScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'RetirementPlanner'>) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useT();

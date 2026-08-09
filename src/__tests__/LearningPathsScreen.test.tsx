@@ -232,13 +232,13 @@ describe('LearningPathsScreen', () => {
   });
 
   it('renders the screen title', async () => {
-    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     expect(getByText('Learning Paths')).toBeTruthy();
   });
 
   it('renders all 3 learning path cards', async () => {
-    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     expect(getByText('Investing Fundamentals')).toBeTruthy();
     expect(getByText('Technical & Fundamental Trader')).toBeTruthy();
@@ -246,7 +246,7 @@ describe('LearningPathsScreen', () => {
   });
 
   it('shows summary stats in banner', async () => {
-    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     expect(getByText('Paths')).toBeTruthy();
     expect(getByText('Courses')).toBeTruthy();
@@ -255,7 +255,7 @@ describe('LearningPathsScreen', () => {
   });
 
   it('shows skill chips for each path', async () => {
-    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     expect(getByText('Stock Market Basics')).toBeTruthy();
     expect(getByText('Technical Analysis')).toBeTruthy();
@@ -263,7 +263,7 @@ describe('LearningPathsScreen', () => {
   });
 
   it('shows duration and lesson counts from mock data', async () => {
-    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     mockLearningPaths.forEach(path => {
       expect(getByText(path.totalDuration)).toBeTruthy();
@@ -272,7 +272,7 @@ describe('LearningPathsScreen', () => {
   });
 
   it('shows target audience for paths', async () => {
-    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     expect(getByText(/Complete beginners/i)).toBeTruthy();
     expect(getByText(/Level up with professional/i)).toBeTruthy();
@@ -280,13 +280,13 @@ describe('LearningPathsScreen', () => {
   });
 
   it('displays start CTA text', async () => {
-    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     expect(getByText('Start Path →')).toBeTruthy();
   });
 
   it('shows grammar-friendly level labels', async () => {
-    const { getAllByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getAllByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     expect(getAllByText('Beginner').length).toBeGreaterThan(0);
     expect(getAllByText('Intermediate').length).toBeGreaterThan(0);
@@ -294,7 +294,7 @@ describe('LearningPathsScreen', () => {
   });
 
   it('navigates to detail view when a path card is pressed', async () => {
-    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LearningPathsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     await flushMicrotasks();
     fireEvent.press(getByText('Investing Fundamentals'));
     expect(mockNavigate).toHaveBeenCalledWith('LearningPathDetail', { pathId: 'path_beginner' });

@@ -7,6 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const MOCK_ROOMS = [
   { id: '1', name: 'Trading Discussion', members: 234, unread: 3 },
@@ -15,7 +18,7 @@ const MOCK_ROOMS = [
   { id: '4', name: 'Technical Analysis', members: 156, unread: 1 },
 ];
 
-export default function ChatRoomListScreen({ navigation }: any) {
+export default function ChatRoomListScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'ChatList'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [search, setSearch] = useState('');

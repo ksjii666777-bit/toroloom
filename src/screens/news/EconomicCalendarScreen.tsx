@@ -7,8 +7,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS } from '../../constants/theme';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
 
-export default function EconomicCalendarScreen({ _navigation }: any) {
+
+export default function EconomicCalendarScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'EconomicCalendar'>) {
   const { colors } = useTheme();
   const { t } = useT();
 

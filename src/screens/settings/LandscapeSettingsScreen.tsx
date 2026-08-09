@@ -9,6 +9,9 @@ import { useT } from '../../hooks/useT';
 import { useResponsiveLayout, BREAKPOINTS } from '../../hooks/useResponsiveLayout';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ─── Default landscape preferences (stored in-memory / AsyncStorage) ──────
 
@@ -28,7 +31,7 @@ const DEFAULT_PREFS: LandscapePrefs = {
   showSideNav: true,
 };
 
-export default function LandscapeSettingsScreen({ _navigation }: any) {
+export default function LandscapeSettingsScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'LandscapeMode'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

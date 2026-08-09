@@ -18,9 +18,15 @@ import StockItem from '../../components/StockItem';
 import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
+import { tickerProvider } from '../../services/tickerProvider';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, PortfolioSkeleton, SkeletonCard } from '../../components/ui/SkeletonLoader';
 import { triggerHaptic } from '../../utils/haptics';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type {RootStackParamList, TabParamList} from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
@@ -66,7 +72,7 @@ const SECTOR_ICONS: Record<string, string> = {
   Automobile: 'car',
 };
 
-export default function WatchlistScreen({ navigation }: any) {
+export default function WatchlistScreen({ navigation }: CompositeScreenProps<BottomTabScreenProps<TabParamList, 'Watchlist'>, NativeStackScreenProps<RootStackParamList>>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -284,6 +290,17 @@ export default function WatchlistScreen({ navigation }: any) {
     }
     return watchlistStocks.some(s => s.id === stockId);
   };
+
+  // ── Hybrid: selecting a stock here pre-selects it in the SnapTrade order
+  // panel via the Ticker Provider (chart + symbol + execution price follow).
+  const openStock = useCallback((s: Stock) => {
+    tickerProvider.selectSymbol({
+      symbol: s.symbol,
+      name: s.name,
+      price: s.price,
+    });
+    navigation.navigate('StockDetail', { stockId: s.id, symbol: s.symbol });
+  }, [navigation]);
 
   const availableStocks = stocks.filter(s => !isStockInWatchlist(s.id));
 
@@ -821,7 +838,7 @@ export default function WatchlistScreen({ navigation }: any) {
                   <Animated.View key={stock.id} style={watchlistStyles[i]}>
                     <StockItem
                       stock={stock}
-                      onPress={(s) => navigation.navigate('StockDetail', { stockId: s.id, symbol: s.symbol })}
+                      onPress={openStock}
                       onLongPress={(s) => openAlertModal(s)}
                       showActions
                       isInWatchlist
@@ -920,7 +937,7 @@ export default function WatchlistScreen({ navigation }: any) {
                       <View style={{ flex: 1 }}>
                         <StockItem
                           stock={stock}
-                          onPress={(s) => navigation.navigate('StockDetail', { stockId: s.id, symbol: s.symbol })}
+                          onPress={openStock}
                         />
                       </View>
                       <AnimatedPressable

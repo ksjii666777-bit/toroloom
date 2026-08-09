@@ -104,7 +104,7 @@ describe('CryptoDetailScreen — Loading State', () => {
   it('shows loading text for crypto name from params', () => {
     const route = { params: { coinId: 'bitcoin', coinSymbol: 'BTC', coinName: 'Bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     // While loading, the screen shows the coinName from route params
     const loadingText = queryByText(/Loading/);
@@ -124,7 +124,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders crypto symbol after data loads', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -135,7 +135,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders crypto name after data loads', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -146,7 +146,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders price in USD format', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -157,7 +157,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders positive change percentage', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -168,7 +168,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders Key Statistics section', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -179,7 +179,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders Market Cap stat', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -190,7 +190,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders 24h Volume stat', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -201,7 +201,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders All-Time High stat', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -212,7 +212,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders Price Change section', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -223,7 +223,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders 1H change pill', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -234,7 +234,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders 24H change pill', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -245,7 +245,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders About section with crypto name', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -256,7 +256,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders Buy and Sell action buttons', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -269,7 +269,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('renders chart timeframe buttons', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -280,7 +280,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('fetches crypto data with coinId from route params', async () => {
     const route = { params: { coinId: 'ethereum' } };
     render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -290,7 +290,7 @@ describe('CryptoDetailScreen — Data Display', () => {
   it('falls back to lowercase coinSymbol when no coinId', async () => {
     const route = { params: { coinSymbol: 'BTC' } };
     render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -310,7 +310,7 @@ describe('CryptoDetailScreen — Error State', () => {
   it('renders error message when API call fails', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -322,7 +322,7 @@ describe('CryptoDetailScreen — Error State', () => {
   it('renders Retry button on error', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 
@@ -343,7 +343,7 @@ describe('CryptoDetailScreen — Disclaimer', () => {
   it('renders cryptocurrency disclaimer', async () => {
     const route = { params: { coinId: 'bitcoin' } };
     const { queryByText } = render(
-      <CryptoDetailScreen route={route} navigation={{ navigate: mockNavigate, goBack: mockNavigate }} />
+      <CryptoDetailScreen route={route as any} navigation={{ navigate: mockNavigate, goBack: mockNavigate } as any} />
     );
     await flushMicrotasks();
 

@@ -150,7 +150,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('renders without crashing when navigation is a frozen object', () => {
       const frozenNav = createFrozenNavigation();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -165,7 +165,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
         navigate: mockNavigate, getState: () => state, getId: () => 'Home',
       });
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -174,7 +174,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('renders full content with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Header elements
       expect(getByText(/Good (Morning|Afternoon|Evening),/)).toBeDefined();
@@ -192,7 +192,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('renders market indices section with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Market Indices')).toBeDefined();
       expect(getByText('See All')).toBeDefined();
@@ -205,7 +205,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('renders level & XP section with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText(/Lvl 12/)).toBeDefined();
       expect(getByText('Trading Pro')).toBeDefined();
@@ -216,7 +216,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('renders Top Gainers and Top Losers with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText(/Top Gainers/)).toBeDefined();
       expect(getByText(/Top Losers/)).toBeDefined();
@@ -228,7 +228,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('renders recent trades and watchlist with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText(/Recent Activity/)).toBeDefined();
       expect(getByText(/My Watchlist/)).toBeDefined();
@@ -239,7 +239,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('renders notification badge and avatar with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Notification badge (2 unread)
       expect(getByText(/^2$/)).toBeDefined();
@@ -255,17 +255,17 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('does NOT attempt to set properties on frozen navigation during mount', () => {
       const frozenNav = createFrozenNavigation();
       expect(() => {
-        renderWithTimeTravel(<HomeScreen navigation={frozenNav as any} />);
+        renderWithTimeTravel(<HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
     });
 
     it('does NOT mutate frozen navigation after re-render', () => {
       const frozenNav = createFrozenNavigation();
       const { update, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => {
-        update(<HomeScreen navigation={frozenNav as any} />);
+        update(<HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
       cleanup();
     });
@@ -273,7 +273,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('handles mount with frozen navigation then unmounts gracefully', () => {
       const frozenNav = createFrozenNavigation();
       const { unmount } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { unmount(); }).not.toThrow();
     });
@@ -281,7 +281,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('preserves frozen status of navigation after render', () => {
       const frozenNav = createFrozenNavigation();
       const { cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { (frozenNav as any).newProp = 'test'; }).toThrow();
       cleanup();
@@ -294,7 +294,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('navigates to Markets when See All is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('See All'));
       expect(mockNavigate).toHaveBeenCalledWith('Markets');
@@ -304,7 +304,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('navigates to Watchlist when Manage is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Manage'));
       expect(mockNavigate).toHaveBeenCalledWith('Watchlist');
@@ -314,7 +314,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('navigates to Notifications when notification badge is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText(/^2$/));
       expect(mockNavigate).toHaveBeenCalledWith('Notifications');
@@ -324,7 +324,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('navigates to Profile when avatar is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText(/^R$/));
       expect(mockNavigate).toHaveBeenCalledWith('Profile');
@@ -334,7 +334,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('navigates via quick actions with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Buy'));
       expect(mockNavigate).toHaveBeenCalledWith('Markets');
@@ -353,7 +353,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('navigates via portfolio action buttons with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Add Funds'));
       expect(mockNavigate).toHaveBeenCalledWith('AddFunds');
@@ -369,7 +369,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('navigates to StockDetail when a top gainer stock is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('BHARTIARTL'));
       expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
@@ -382,7 +382,7 @@ describe('HomeScreen — Frozen Navigation Object', () => {
     it('does not navigate on initial render', () => {
       const frozenNav = createFrozenNavigation();
       const { cleanup } = renderWithTimeTravel(
-        <HomeScreen navigation={frozenNav as any} />,
+        <HomeScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(mockNavigate).not.toHaveBeenCalled();
       cleanup();

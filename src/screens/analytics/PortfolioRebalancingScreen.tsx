@@ -9,13 +9,14 @@ import { useT } from '../../hooks/useT';
 import { useRebalanceStore } from '../../store/rebalanceStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { RebalanceTrade } from '../../types';
+import type {RebalanceTrade, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 /** Format currency in INR */
 const formatINR = (val: number) =>
   '₹' + val.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
-export default function PortfolioRebalancingScreen({ _navigation }: any) {
+export default function PortfolioRebalancingScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'PortfolioRebalancing'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

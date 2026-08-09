@@ -28,7 +28,8 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { kycCallbackStore } from '../../store/kycCallbackStore';
 import { useKycStore, LinkedBankStoreAccount } from '../../store/kycStore';
-import type { IFSCVerificationResult, AccountVerificationResult } from '../../types';
+import type {IFSCVerificationResult, AccountVerificationResult, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // IFSC regex: 4 letters + 0 + 6 alphanumeric
 const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
@@ -37,7 +38,7 @@ const ACCOUNT_REGEX = /^\d{9,18}$/;
 
 type FlowStep = 'ifsc' | 'account' | 'verify' | 'linked' | 'manage';
 
-export default function BankLinkingScreen({ navigation }: any) {
+export default function BankLinkingScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'BankLinking'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

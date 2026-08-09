@@ -22,7 +22,8 @@ import { useUserCourseStore } from '../../store/userCourseStore';
 import { useAuthStore } from '../../store/authStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { UserGeneratedCourse } from '../../types';
+import type {UserGeneratedCourse, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type ReviewFilter = 'pending' | 'approved' | 'rejected' | 'all';
 
@@ -48,7 +49,7 @@ function getSubmissionStats(courses: UserGeneratedCourse[]) {
   return { pending, approved, rejected };
 }
 
-export default function AdminCourseReviewScreen({ navigation }: any) {
+export default function AdminCourseReviewScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AdminCourseReview'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

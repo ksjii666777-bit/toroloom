@@ -7,18 +7,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useSubscriptionStore, SUBSCRIPTION_PLANS } from '../../store/subscriptionStore';
-import type { SubscriptionFeature, SubscriptionTier } from '../../types';
+import type {SubscriptionFeature, SubscriptionTier, RootStackParamList} from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import * as Haptics from 'expo-haptics';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 const CARD_GAP = SPACING.md;
 const CARD_WIDTH = (width - SPACING.xl * 2 - CARD_GAP * 2) / 3;
 
-export default function SubscriptionScreen({ navigation }: any) {
+export default function SubscriptionScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Subscription'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

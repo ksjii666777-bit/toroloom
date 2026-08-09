@@ -18,7 +18,8 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { runMonteCarloSimulation, formatRupees } from '../../services/monteCarloSimulation';
-import type { MonteCarloParams, MonteCarloResult, MonteCarloYearResult } from '../../types';
+import type {MonteCarloParams, MonteCarloResult, MonteCarloYearResult, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_WIDTH = SCREEN_WIDTH - SPACING.xl * 2 - SPACING.xl * 2;
@@ -73,7 +74,7 @@ const PERCENTILE_CONFIGS = [
 // COMPONENT
 // ================================================================
 
-export default function MonteCarloSimulationScreen({ navigation }: any) {
+export default function MonteCarloSimulationScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'MonteCarlo'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

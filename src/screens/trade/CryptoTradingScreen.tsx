@@ -34,6 +34,9 @@ import { newIdempotencyKey } from '../../utils/idempotency';
 
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { CryptoAssetData } from '../../services/api/globalMarkets';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 
 const COIN_ICON_SIZE = 40;
@@ -498,7 +501,7 @@ function TradeModal({
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
-export default function CryptoTradingScreen({ navigation }: any) {
+export default function CryptoTradingScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'CryptoTrading'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
@@ -611,7 +614,6 @@ export default function CryptoTradingScreen({ navigation }: any) {
     navigation.navigate('CryptoDetail', {
       coinId: coin.id,
       coinSymbol: coin.symbol,
-      coinName: coin.name,
     });
   }, [navigation]);
 

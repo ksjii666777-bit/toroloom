@@ -28,7 +28,8 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-import type { LeaderboardSort, LeaderboardPeriod, TraderProfile, LeaderboardEntry } from '../../types';
+import type {LeaderboardSort, LeaderboardPeriod, TraderProfile, LeaderboardEntry, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
@@ -456,7 +457,7 @@ const allocStyles = StyleSheet.create({
 
 // ─── Main Screen ────────────────────────────────────────────────────────────
 
-export default function SocialTradingScreen({ navigation }: any) {
+export default function SocialTradingScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SocialTrading'>) {
   const { t } = useT();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);

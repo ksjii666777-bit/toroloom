@@ -85,7 +85,7 @@ describe('MarketsScreen — Loading State', () => {
   });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -102,26 +102,26 @@ describe('MarketsScreen — Loaded Content', () => {
   });
 
   it('renders the header title', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Markets')).toBeDefined();
   });
 
   it('renders the subtitle', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Real-time stock market data')).toBeDefined();
   });
 
   it('renders the search bar with search icon visible', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Check for the stock list header which confirms the full UI rendered
     expect(getByText('All Stocks')).toBeDefined();
   });
 
   it('renders market indices', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('NIFTY')).toBeDefined();
     expect(getByText('SENSEX')).toBeDefined();
@@ -129,7 +129,7 @@ describe('MarketsScreen — Loaded Content', () => {
   });
 
   it('renders sector filter chips', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('All')).toBeDefined();
     expect(getByText('Technology')).toBeDefined();
@@ -138,13 +138,13 @@ describe('MarketsScreen — Loaded Content', () => {
   });
 
   it('renders the stock list with correct count', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(`${mockStocks.length} stocks`)).toBeDefined();
   });
 
   it('renders individual stocks from the store', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('RELIANCE')).toBeDefined();
     expect(getByText('HDFCBANK')).toBeDefined();
@@ -152,14 +152,14 @@ describe('MarketsScreen — Loaded Content', () => {
   });
 
   it('renders the Gainers / Losers section', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Top Gainers')).toBeDefined();
     expect(getByText('Top Losers')).toBeDefined();
   });
 
   it('renders top gainer stocks with positive change badges', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // BHARTIARTL has the highest changePercent (2.63%)
     expect(getByText('BHARTIARTL')).toBeDefined();
@@ -168,20 +168,20 @@ describe('MarketsScreen — Loaded Content', () => {
   });
 
   it('renders top loser stocks with negative change badges', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // ITC has the most negative changePercent (-1.16%)
     expect(getByText('ITC')).toBeDefined();
   });
 
   it('renders the Sector Performance heatmap', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Sector Performance')).toBeDefined();
   });
 
   it('renders sector names with stock count in heatmap', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // textTransform: uppercase in styles doesn't affect test renderer — match actual values
     expect(getByText('Energy')).toBeDefined();
@@ -191,7 +191,7 @@ describe('MarketsScreen — Loaded Content', () => {
   });
 
   it('navigate callback is not called on initial render', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('RELIANCE')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe('MarketsScreen — Empty State', () => {
   });
 
   it('handles empty stock list gracefully', () => {
-    const { toJSON } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(toJSON).not.toBeNull();
   });
@@ -234,31 +234,31 @@ describe('MarketsScreen — Search Mode', () => {
   });
 
   it('renders search results header with result count', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/Results \(1\)/)).toBeDefined();
   });
 
   it('renders matching search result', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('TCS')).toBeDefined();
   });
 
   it('hides sector filter chips when searching', () => {
-    const { queryByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { queryByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(queryByText('All')).toBeNull();
   });
 
   it('shows close button on search bar', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('1 stocks')).toBeDefined();
   });
 
   it('renders search results in place of full stock list', () => {
-    const { getByText, queryByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText, queryByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Sector chips hidden during search
     expect(queryByText('All')).toBeNull();
@@ -284,7 +284,7 @@ describe('MarketsScreen — Sector Filtering', () => {
   });
 
   it('renders sector filter chips', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('All')).toBeDefined();
     expect(getByText('Technology')).toBeDefined();
@@ -295,7 +295,7 @@ describe('MarketsScreen — Sector Filtering', () => {
   });
 
   it('renders All as the default selected sector', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/All Stocks/)).toBeDefined();
   });
@@ -317,7 +317,7 @@ describe('MarketsScreen — Stock Navigation', () => {
   });
 
   it('navigates to StockDetail when a stock is pressed', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('RELIANCE')); });
     expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
@@ -327,7 +327,7 @@ describe('MarketsScreen — Stock Navigation', () => {
   });
 
   it('does not navigate without pressing a stock', () => {
-    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<MarketsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('RELIANCE')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();

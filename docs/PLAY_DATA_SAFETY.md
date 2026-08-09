@@ -76,20 +76,23 @@ required (financial records).
 - **Data safety declaration:** ✅ Yes, this app collects and shares data
 - **Data collection:** All items from Section 1 marked YES
 - **Security practices:** ✅ Encrypted in transit, ✅ Users can request deletion
-- **Data deletion policy URL:** Use `https://toroloom-production.up.railway.app/privacy`
+- **Data deletion policy URL:** Use `https://<your-domain>.up.railway.app/privacy`
   (includes deletion section)
-- **Privacy policy URL:** `https://toroloom-production.up.railway.app/privacy`
-- **Terms of service URL:** `https://toroloom-production.up.railway.app/terms`
+- **Privacy policy URL:** `https://<your-domain>.up.railway.app/privacy`
+- **Terms of service URL:** `https://<your-domain>.up.railway.app/terms`
 
 ---
 
 ## SECTION 6 — Live URLs (after deploy)
 
+> Replace `<your-domain>` with your deployed Railway domain (see
+> [`PRODUCTION_ENV_CHECKLIST.md`](./PRODUCTION_ENV_CHECKLIST.md) §6).
+
 | Resource | URL |
 |---|---|
-| Privacy policy | `https://toroloom-production.up.railway.app/privacy` |
-| Terms of service | `https://toroloom-production.up.railway.app/terms` |
-| Legal hub | `https://toroloom-production.up.railway.app/legal` |
+| Privacy policy | `https://<your-domain>.up.railway.app/privacy` |
+| Terms of service | `https://<your-domain>.up.railway.app/terms` |
+| Legal hub | `https://<your-domain>.up.railway.app/legal` |
 | Data deletion | Via Privacy policy section + in-app account deletion |
 
 > These are served by the backend (`backend/public/privacy-policy.html` etc.),

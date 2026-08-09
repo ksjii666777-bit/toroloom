@@ -9,8 +9,11 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { formatCurrency } from '../../utils/formatters';
 import { useT } from '../../hooks/useT';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
 
-export default function AIInsightsScreen({ _navigation }: any) {
+
+export default function AIInsightsScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'AIInsights'>) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useT();

@@ -28,6 +28,9 @@ import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import _Button from '../../components/ui/Button';
 import { useT } from '../../hooks/useT';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
@@ -43,7 +46,7 @@ const SUPPORTED_BROKERS = [
   { id: 'schwab', name: 'Charles Schwab', icon: 'S', color: '#1E88E5', desc: 'Full-service US brokerage' },
 ];
 
-export default function SnapTradeConnectScreen({ navigation }: any) {
+export default function SnapTradeConnectScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SnapTradeConnect'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

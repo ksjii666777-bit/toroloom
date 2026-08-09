@@ -14,6 +14,9 @@ import { paymentsApi } from '../../services/api/payments';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
@@ -26,7 +29,7 @@ const PAYMENT_METHODS = [
   { id: 'wallet', label: 'Wallet', icon: 'wallet' as const, desc: 'Paytm, Mobikwik, Freecharge' },
 ];
 
-export default function AddFundsScreen({ navigation }: any) {
+export default function AddFundsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AddFunds'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

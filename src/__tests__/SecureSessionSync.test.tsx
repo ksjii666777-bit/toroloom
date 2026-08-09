@@ -52,22 +52,22 @@ describe('SecureSessionSync', () => {
 
   describe('Rendering', () => {
     it('should render without crashing', () => {
-      const { toJSON } = render(<SecureSessionSync {...defaultProps} />);
+      const { toJSON } = render(<SecureSessionSync {...defaultProps as any} />);
       expect(toJSON()).not.toBeNull();
     });
 
     it('should show loading indicator text', () => {
-      const { getByText } = render(<SecureSessionSync {...defaultProps} />);
+      const { getByText } = render(<SecureSessionSync {...defaultProps as any} />);
       expect(getByText('Establishing secure session...')).toBeTruthy();
     });
 
     it('should show broker type in loading hint', () => {
-      const { getByText } = render(<SecureSessionSync {...defaultProps} />);
+      const { getByText } = render(<SecureSessionSync {...defaultProps as any} />);
       expect(getByText(/zerodha/)).toBeTruthy();
     });
 
     it('should show extraction strategy in loading hint', () => {
-      const { getByText } = render(<SecureSessionSync {...defaultProps} />);
+      const { getByText } = render(<SecureSessionSync {...defaultProps as any} />);
       // The hint contains brokerType + extraction label
       expect(getByText(/zerodha/)).toBeTruthy();
       expect(getByText(/extraction/)).toBeTruthy();
@@ -76,22 +76,22 @@ describe('SecureSessionSync', () => {
 
   describe('Props', () => {
     it('should accept custom onAuthDetection callback', () => {
-      const { toJSON } = render(<SecureSessionSync {...defaultProps} onAuthDetection={vi.fn()} />);
+      const { toJSON } = render(<SecureSessionSync {...defaultProps as any} onAuthDetection={vi.fn()} />);
       expect(toJSON()).not.toBeNull();
     });
 
     it('should accept custom user agent', () => {
-      const { toJSON } = render(<SecureSessionSync {...defaultProps} customUserAgent="Custom Agent" />);
+      const { toJSON } = render(<SecureSessionSync {...defaultProps as any} customUserAgent="Custom Agent" />);
       expect(toJSON()).not.toBeNull();
     });
 
     it('should accept onClose callback', () => {
-      const { toJSON } = render(<SecureSessionSync {...defaultProps} onClose={vi.fn()} />);
+      const { toJSON } = render(<SecureSessionSync {...defaultProps as any} onClose={vi.fn()} />);
       expect(toJSON()).not.toBeNull();
     });
 
     it('should accept loginConfigOverride', () => {
-      const { toJSON } = render(<SecureSessionSync {...defaultProps} loginConfigOverride={{ extractionStrategy: 'token_param' }} />);
+      const { toJSON } = render(<SecureSessionSync {...defaultProps as any} loginConfigOverride={{ extractionStrategy: 'token_param' }} />);
       expect(toJSON()).not.toBeNull();
     });
   });

@@ -120,6 +120,18 @@ export const env = {
   snapTradeClientId: process.env.SNAPTRADE_CLIENT_ID || '',
   /** SnapTrade Consumer Key from https://snaptrade.com/dashboard */
   snapTradeConsumerKey: process.env.SNAPTRADE_CONSUMER_KEY || '',
+  /**
+   * SnapTrade auth mode: 'commercial' (partner keys, registerUser flow) or
+   * 'personal' (personal API keys, OAuth bearer, no registerUser).
+   * Auto-detected from the client ID prefix unless SNAPTRADE_MODE is set.
+   */
+  snapTradeMode:
+    process.env.SNAPTRADE_MODE === 'commercial' ||
+    process.env.SNAPTRADE_MODE === 'personal'
+      ? process.env.SNAPTRADE_MODE
+      : (process.env.SNAPTRADE_CLIENT_ID || '').toUpperCase().startsWith('PERS-')
+        ? 'personal'
+        : 'commercial',
 
   // ──── Payments ───────────────────────────────────────────────────────
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',

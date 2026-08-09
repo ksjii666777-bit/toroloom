@@ -27,7 +27,8 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import { computeDividendState } from '../../services/dividendService';
 import { fetchDividendDataSafe } from '../../services/api/dividends';
-import type { DividendEvent, MonthlyDividend, DividendTrackerState } from '../../types';
+import type {DividendEvent, MonthlyDividend, DividendTrackerState, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
@@ -208,7 +209,7 @@ const TAB_KEYS: { key: TabKey; icon: string }[] = [
 // MAIN SCREEN
 // ══════════════════════════════════════════════════════════════
 
-export default function DividendTrackerScreen({ navigation }: any) {
+export default function DividendTrackerScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'DividendTracker'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabKey>('upcoming');

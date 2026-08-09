@@ -15,9 +15,10 @@ import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { timeAgo } from '../../utils/formatters';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
-import type { NFOItem } from '../../types';
+import type {NFOItem, RootStackParamList} from '../../types';
 import { useNFOStore } from '../../store/nfoStore';
 import InvestNfoModal from '../../components/nfo/InvestNfoModal';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
 
@@ -223,7 +224,7 @@ function PerformanceProjection(_props: { nfo: NFOItem }) {
 
 // ──── Main Screen ──────────────────────────────────────────────────────────
 
-export default function NFODetailScreen({ route, navigation }: any) {
+export default function NFODetailScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'NFODetail'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

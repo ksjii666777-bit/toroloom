@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMarketStore } from '../../store/marketStore';
 import { useT } from '../../hooks/useT';
 import { useWatchlistStore } from '../../store/watchlistStore';
+import { usePortfolioStore } from '../../store/portfolioStore';
 import { useAIStore } from '../../store/aiStore';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
@@ -21,6 +22,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useRealtimePrice } from '../../hooks/useRealtimePrice';
+import { tickerProvider } from '../../services/tickerProvider';
 
 // ── Extracted components ──
 import ChartControls from '../../components/stock/ChartControls';
@@ -32,6 +34,13 @@ import PeerComparison from '../../components/stock/PeerComparison';
 import PatternSummary from '../../components/stock/PatternSummary';
 import BottomActionBar from '../../components/stock/BottomActionBar';
 import FullscreenChartModal from '../../components/stock/FullscreenChartModal';
+import TradingViewChart from '../../components/TradingViewChart';
+import PositionLevelsOverlay from '../../components/PositionLevelsOverlay';
+import { toTradingViewSymbol, toTradingViewInterval } from '../../utils/tradingView';
+import { openExitOrder } from '../../utils/orderExit';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
@@ -48,7 +57,7 @@ function formatCompactMarketCap(marketCap: string): string {
   return marketCap;
 }
 
-export default function StockDetailScreen({ route, navigation }: any) {
+export default function StockDetailScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'StockDetail'>) {
   const { stockId } = route.params;
   const { colors } = useTheme();
   const { t } = useT();
@@ -56,6 +65,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
   const { stocks } = useMarketStore();
   const { insights } = useAIStore();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist, watchlists } = useWatchlistStore();
+  const { holdings: portfolioHoldings } = usePortfolioStore();
 
   const stock = stocks.find(s => s.id === stockId) || stocks[0];
   const [activeTimeframe, setActiveTimeframe] = useState('1M');
@@ -63,6 +73,25 @@ export default function StockDetailScreen({ route, navigation }: any) {
   const [activeIndicators, setActiveIndicators] = useState<IndicatorType[]>([]);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [chartType, setChartType] = useState<ChartType>('candlestick');
+
+  // ── Live chart mode ──
+  // TradingView widget (real, live data) by default; custom candlestick chart
+  // as a fallback when the widget cannot load (offline / blocked CDN).
+  const [chartMode, setChartMode] = useState<'live' | 'custom'>('live');
+  const [tvFailed, setTvFailed] = useState(false);
+  const isLiveChart = chartMode === 'live' && !tvFailed;
+  const tvSymbol = useMemo(() => toTradingViewSymbol(stock.symbol, 'NSE'), [stock.symbol]);
+
+  const handleTvError = useCallback(() => setTvFailed(true), []);
+
+  const handleToggleLive = useCallback(() => {
+    if (isLiveChart) {
+      setChartMode('custom');
+    } else {
+      setTvFailed(false);
+      setChartMode('live');
+    }
+  }, [isLiveChart]);
 
   // ── Drawing state ──
   const [enableDrawing, setEnableDrawing] = useState(false);
@@ -127,6 +156,42 @@ export default function StockDetailScreen({ route, navigation }: any) {
   const aiInsight = insights.find(i => i.stockId === stockId);
   const inWatchlist = isInWatchlist(stockId);
 
+  // ── Live position tag (Indian PlaceOrder flow) ──
+  // Pulls the holding directly from the local portfolio store — the overlay
+  // renders it without calling the SnapTrade backend, and chips pre-fill the
+  // Indian PlaceOrder screen (SL trigger / LIMIT price).
+  const heldPosition = useMemo(() => {
+    const h = portfolioHoldings.find(x => x.stockId === stock.id);
+    if (!h) return null;
+    return {
+      symbol: h.symbol,
+      quantity: h.quantity,
+      avgCost: h.buyPrice,
+      price: h.currentPrice,
+      pnl: h.pnl,
+      pnlPercent: h.pnlPercent,
+    };
+  }, [portfolioHoldings, stock.id]);
+
+  // Shared exit-order wiring (Ticker Provider pre-select + PlaceOrder prefill)
+  // for the live-position overlay's STOP / TARGET chips.
+  const openExit = useCallback(
+    (kind: 'SL' | 'LIMIT', price: number) =>
+      openExitOrder(
+        navigation,
+        {
+          symbol: stock.symbol,
+          exchange: 'NSE',
+          name: stock.name,
+          price: displayPrice,
+          stockId: stock.id,
+        },
+        kind,
+        price,
+      ),
+    [navigation, stock, displayPrice],
+  );
+
   const handleTimeframeChange = useCallback((tf: string) => {
     setActiveTimeframe(tf);
     loadHistory(tf);
@@ -175,13 +240,27 @@ export default function StockDetailScreen({ route, navigation }: any) {
     }
   }, [watchlists, stockId, stock, isInWatchlist, addToWatchlist, removeFromWatchlist]);
 
+  // Hybrid Ticker Provider — pre-select this instrument so the SnapTrade
+  // order panel opens pre-filled with the same symbol, chart and execution
+  // price when the user taps Buy/Sell. Exchange is NSE for Indian equities.
+  const preselectStock = useCallback(() => {
+    tickerProvider.selectSymbol({
+      symbol: stock.symbol,
+      exchange: 'NSE',
+      name: stock.name,
+      price: displayPrice,
+    });
+  }, [stock, displayPrice]);
+
   const handleOpenBuy = useCallback(() => {
+    preselectStock();
     navigation.navigate('PlaceOrder', { stockId: stock.id, symbol: stock.symbol, tradeType: 'buy' });
-  }, [navigation, stock]);
+  }, [navigation, stock, preselectStock]);
 
   const handleOpenSell = useCallback(() => {
+    preselectStock();
     navigation.navigate('PlaceOrder', { stockId: stock.id, symbol: stock.symbol, tradeType: 'sell' });
-  }, [navigation, stock]);
+  }, [navigation, stock, preselectStock]);
 
   const INTRADAY_CANDLE_COUNT = 390;
   const dayHigh = candleHistory.length > 0
@@ -262,6 +341,8 @@ export default function StockDetailScreen({ route, navigation }: any) {
           showPatterns={showPatterns}
           chartType={chartType}
           isFullscreen={isFullscreen}
+          isLive={isLiveChart}
+          onToggleLive={handleToggleLive}
           onToggleMA={() => setShowMA(prev => !prev)}
           onToggleIndicator={handleIndicatorToggle}
           onToggleDrawing={() => { setEnableDrawing(!enableDrawing); if (!enableDrawing) setActiveDrawTool('none'); }}
@@ -294,74 +375,122 @@ export default function StockDetailScreen({ route, navigation }: any) {
         )}
 
         <ChartCrosshairContext.Provider value={{ focusedIndex, setFocusedIndex }}>
-          {/* Drawing Toolbar */}
-          {enableDrawing && (
-            <View style={{ marginBottom: SPACING.sm }}>
-              <DrawingToolbar
-                activeTool={activeDrawTool}
-                onToolChange={setActiveDrawTool}
-                colors={colors}
-                drawingCount={drawings.length}
-                onClearAll={() => setDrawings([])}
-              />
-            </View>
-          )}
+          {isLiveChart ? (
+            <>
+              {/* Live TradingView chart — real, live market data */}
+              <View style={styles.timeframes}>
+                {TIMEFRAMES.map((tf) => (
+                  <TouchableOpacity
+                    key={tf}
+                    style={[styles.timeframeBtn, activeTimeframe === tf && styles.timeframeActive]}
+                    onPress={() => handleTimeframeChange(tf)}
+                  >
+                    <Text style={[styles.timeframeText, activeTimeframe === tf && styles.timeframeTextActive]}>
+                      {tf}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={styles.chartWrap}>
+                <TradingViewChart
+                  symbol={tvSymbol}
+                  interval={toTradingViewInterval(activeTimeframe)}
+                  height={280}
+                  onError={handleTvError}
+                  style={styles.liveChart}
+                />
+                <PositionLevelsOverlay
+                  symbol={stock.symbol}
+                  position={heldPosition}
+                  currency="INR"
+                  onApplyStop={(p) => openExit('SL', p)}
+                  onApplyTarget={(p) => openExit('LIMIT', p)}
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              {/* Drawing Toolbar */}
+              {enableDrawing && (
+                <View style={{ marginBottom: SPACING.sm }}>
+                  <DrawingToolbar
+                    activeTool={activeDrawTool}
+                    onToolChange={setActiveDrawTool}
+                    colors={colors}
+                    drawingCount={drawings.length}
+                    onClearAll={() => setDrawings([])}
+                  />
+                </View>
+              )}
 
-          <CandlestickChart
-            data={candleHistory}
-            height={280}
-            width={width - 64}
-            timeframes={TIMEFRAMES}
-            activeTimeframe={activeTimeframe}
-            onTimeframeChange={handleTimeframeChange}
-            showVolume={true}
-            showMA={showMA}
-            loading={candleHistory.length === 0}
-            chartType={chartType}
-            onChartTypeChange={setChartType}
-            enableDrawing={enableDrawing}
-            drawings={drawings}
-            onDrawingsChange={setDrawings}
-            activeDrawTool={activeDrawTool}
-            onDrawToolChange={setActiveDrawTool}
-            showPatterns={showPatterns}
-            patterns={detectedPatterns}
-          />
+              <View style={styles.chartWrap}>
+                <CandlestickChart
+                  data={candleHistory}
+                  height={280}
+                  width={width - 64}
+                  timeframes={TIMEFRAMES}
+                  activeTimeframe={activeTimeframe}
+                  onTimeframeChange={handleTimeframeChange}
+                  showVolume={true}
+                  showMA={showMA}
+                  loading={candleHistory.length === 0}
+                  chartType={chartType}
+                  onChartTypeChange={setChartType}
+                  enableDrawing={enableDrawing}
+                  drawings={drawings}
+                  onDrawingsChange={setDrawings}
+                  activeDrawTool={activeDrawTool}
+                  onDrawToolChange={setActiveDrawTool}
+                  showPatterns={showPatterns}
+                  patterns={detectedPatterns}
+                />
+                {/* Position tag + STOP/TARGET exit chips stay available even
+                    when the live widget fails — the user can still exit. */}
+                <PositionLevelsOverlay
+                  symbol={stock.symbol}
+                  position={heldPosition}
+                  currency="INR"
+                  onApplyStop={(p) => openExit('SL', p)}
+                  onApplyTarget={(p) => openExit('LIMIT', p)}
+                />
+              </View>
 
-          {/* ── Extracted: Pattern Summary ── */}
-          {showPatterns && detectedPatterns.length > 0 && (
-            <PatternSummary patterns={detectedPatterns} />
-          )}
-          {showPatterns && detectedPatterns.length === 0 && (
-            <View style={{
-              padding: SPACING.md,
-              borderRadius: BORDER_RADIUS.md,
-              backgroundColor: colors.bg,
-              marginBottom: SPACING.sm,
-              alignItems: 'center',
-            }}>
-              <Text style={[{
-                ...FONTS.regular, fontSize: FONTS.size.sm, color: colors.textMuted,
-              }]}>
-                No patterns detected with current settings. Try lowering the confidence threshold or enabling more pattern types in{' '}
-                <Text
-                  style={{ color: colors.primary, textDecorationLine: 'underline' }}
-                  onPress={() => setShowPatternSettings(true)}
-                >
-                  Advanced settings
-                </Text>.
-              </Text>
-            </View>
-          )}
+              {/* ── Extracted: Pattern Summary ── */}
+              {showPatterns && detectedPatterns.length > 0 && (
+                <PatternSummary patterns={detectedPatterns} />
+              )}
+              {showPatterns && detectedPatterns.length === 0 && (
+                <View style={{
+                  padding: SPACING.md,
+                  borderRadius: BORDER_RADIUS.md,
+                  backgroundColor: colors.bg,
+                  marginBottom: SPACING.sm,
+                  alignItems: 'center',
+                }}>
+                  <Text style={[{
+                    ...FONTS.regular, fontSize: FONTS.size.sm, color: colors.textMuted,
+                  }]}>
+                    No patterns detected with current settings. Try lowering the confidence threshold or enabling more pattern types in{' '}
+                    <Text
+                      style={{ color: colors.primary, textDecorationLine: 'underline' }}
+                      onPress={() => setShowPatternSettings(true)}
+                    >
+                      Advanced settings
+                    </Text>.
+                  </Text>
+                </View>
+              )}
 
-          {/* ── Extracted: Technical Indicators ── */}
-          {activeIndicators.length > 0 && (
-            <TechnicalIndicators
-              data={candleHistory}
-              width={width - 64}
-              indicators={activeIndicators}
-              onIndicatorToggle={handleIndicatorToggle}
-            />
+              {/* ── Extracted: Technical Indicators ── */}
+              {activeIndicators.length > 0 && (
+                <TechnicalIndicators
+                  data={candleHistory}
+                  width={width - 64}
+                  indicators={activeIndicators}
+                  onIndicatorToggle={handleIndicatorToggle}
+                />
+              )}
+            </>
           )}
         </ChartCrosshairContext.Provider>
 
@@ -422,7 +551,7 @@ export default function StockDetailScreen({ route, navigation }: any) {
               analysis: aiInsight.analysis,
               targets: aiInsight.targets,
             }}
-            onViewFullAnalysis={() => navigation.navigate('AIInsight')}
+            onViewFullAnalysis={() => navigation.navigate('AIInsights')}
           />
         )}
 
@@ -465,6 +594,9 @@ export default function StockDetailScreen({ route, navigation }: any) {
         priceChangePercent={displayChangePercent}
         isPositive={isPositive}
         isConnected={isConnected}
+        useLiveChart={isLiveChart}
+        tvSymbol={tvSymbol}
+        onTvError={handleTvError}
       />
     </View>
   );
@@ -637,5 +769,39 @@ const createStyles = (colors: any) =>
       color: colors.textSecondary,
       lineHeight: 20,
       paddingTop: SPACING.md,
+    },
+    // ── Live chart timeframe selector ──
+    timeframes: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: BORDER_RADIUS.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.bgCard,
+    },
+    timeframeBtn: {
+      paddingHorizontal: SPACING.sm,
+      paddingVertical: SPACING.xs,
+      borderRadius: BORDER_RADIUS.full,
+    },
+    timeframeActive: {
+      backgroundColor: colors.primary + '25',
+    },
+    timeframeText: {
+      ...FONTS.medium,
+      fontSize: FONTS.size.xs,
+      color: colors.textMuted,
+    },
+    timeframeTextActive: {
+      color: colors.primary,
+      fontWeight: '700',
+    },
+    liveChart: {
+      marginBottom: SPACING.sm,
+    },
+    chartWrap: {
+      position: 'relative',
     },
   });

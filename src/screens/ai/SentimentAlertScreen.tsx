@@ -33,8 +33,9 @@ import {
   generateAlertMessage,
 } from '../../services/ai/sentimentAlertService';
 import { useNotificationStore } from '../../store/notificationStore';
-import type { SentimentAlertRule, SentimentAlertTrigger, SentimentAlertSensitivity, SentimentAlertDirection } from '../../types';
+import type {SentimentAlertRule, SentimentAlertTrigger, SentimentAlertSensitivity, SentimentAlertDirection, RootStackParamList} from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -528,7 +529,7 @@ const modalStyles = StyleSheet.create({
 
 // ─── Main Screen ───────────────────────────────────────────
 
-export default function SentimentAlertScreen({ navigation }: any) {
+export default function SentimentAlertScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SentimentAlert'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

@@ -81,7 +81,7 @@ describe('SignupScreen — Loading State', () => {
   });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { toJSON } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -99,19 +99,19 @@ describe('SignupScreen — Loaded Content', () => {
   });
 
   it('renders the header title', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Create Account')).toBeDefined();
   });
 
   it('renders the subtitle', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Start your investment journey today')).toBeDefined();
   });
 
   it('renders all 5 input labels', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Full Name')).toBeDefined();
     expect(getByText('Email')).toBeDefined();
@@ -121,7 +121,7 @@ describe('SignupScreen — Loaded Content', () => {
   });
 
   it('renders the terms and conditions text', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/By signing up/)).toBeDefined();
     expect(getByText('Terms of Service')).toBeDefined();
@@ -129,25 +129,25 @@ describe('SignupScreen — Loaded Content', () => {
   });
 
   it('renders the Create Account button', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Create Account')).toBeDefined();
   });
 
   it('renders the Log In link', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Log In')).toBeDefined();
   });
 
   it('renders the already have account text', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Already have an account?')).toBeDefined();
   });
 
   it('renders without error state initially', () => {
-    const { queryByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { queryByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(queryByText('This field is required')).toBeNull();
     expect(queryByText('Passwords do not match')).toBeNull();
@@ -168,7 +168,7 @@ describe('SignupScreen — Validation & Error States', () => {
   });
 
   it('shows error when Create Account is pressed with empty fields', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('Create Account')); });
     advanceAndRender(100);
@@ -189,7 +189,7 @@ describe('SignupScreen — Navigation', () => {
   });
 
   it('navigates back when back button is pressed', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Create Account')).toBeDefined();
     expect(mockGoBack).not.toHaveBeenCalled();
@@ -199,14 +199,14 @@ describe('SignupScreen — Navigation', () => {
   });
 
   it('navigates to Login when Log In is pressed', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('Log In')); });
     expect(mockNavigate).toHaveBeenCalledWith('Login');
   });
 
   it('does not navigate on initial render', () => {
-    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Create Account')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -229,8 +229,8 @@ describe('SignupScreen — Referral from Deep Link', () => {
   it('passes route.params.ref to signup when provided via deep link', () => {
     const { getByText, getByPlaceholderText } = render(
       <SignupScreen
-        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
-        route={{ params: { ref: 'friend123' } }}
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+        route={{ params: { ref: 'friend123' } } as any}
       />
     );
     advanceAndRender(500);
@@ -253,7 +253,7 @@ describe('SignupScreen — Referral from Deep Link', () => {
 
   it('passes undefined referralSource when route.params.ref is not provided', () => {
     const { getByText, getByPlaceholderText } = render(
-      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     advanceAndRender(500);
 
@@ -273,8 +273,8 @@ describe('SignupScreen — Referral from Deep Link', () => {
   it('does not call signup when fields are empty even with a ref param', () => {
     const { getByText } = render(
       <SignupScreen
-        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
-        route={{ params: { ref: 'testRef' } }}
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+        route={{ params: { ref: 'testRef' } } as any}
       />
     );
     advanceAndRender(500);
@@ -287,8 +287,8 @@ describe('SignupScreen — Referral from Deep Link', () => {
   it('renders the referral badge with the ref value when route.params.ref is provided', () => {
     const { getByText } = render(
       <SignupScreen
-        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
-        route={{ params: { ref: 'friend123' } }}
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+        route={{ params: { ref: 'friend123' } } as any}
       />
     );
     advanceAndRender(500);
@@ -300,8 +300,8 @@ describe('SignupScreen — Referral from Deep Link', () => {
   it('renders the referral badge with different ref values', () => {
     const { getByText } = render(
       <SignupScreen
-        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
-        route={{ params: { ref: 'partner42' } }}
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+        route={{ params: { ref: 'partner42' } } as any}
       />
     );
     advanceAndRender(500);
@@ -311,7 +311,7 @@ describe('SignupScreen — Referral from Deep Link', () => {
 
   it('does not render the referral badge when route.params.ref is not provided', () => {
     const { queryByText } = render(
-      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     advanceAndRender(500);
 
@@ -321,7 +321,7 @@ describe('SignupScreen — Referral from Deep Link', () => {
 
   it('does not render the referral badge when route.params is undefined', () => {
     const { queryByText } = render(
-      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} route={{}} />
+      <SignupScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{} as any} />
     );
     advanceAndRender(500);
 

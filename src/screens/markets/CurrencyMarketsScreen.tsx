@@ -26,7 +26,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Svg, { Polyline } from 'react-native-svg';
-import type { CurrencyPair } from '../../types';
+import type {CurrencyPair, RootStackParamList} from '../../types';
 import {
   CURRENCIES,
   getCurrency,
@@ -35,6 +35,7 @@ import {
 } from '../../utils/currencyConverter';
 import { useLiveConversion, type UseLiveConversionResult } from '../../hooks/useLiveConversion';
 import { forexApi } from '../../services/api';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
@@ -474,7 +475,7 @@ export function CurrencyConverterModal({
 
 type TabKey = 'inr' | 'crosses' | 'summary';
 
-export default function CurrencyMarketsScreen({ navigation }: any) {
+export default function CurrencyMarketsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'CurrencyMarkets'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabKey>('inr');

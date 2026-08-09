@@ -7,197 +7,104 @@
  * Dashboard. Verifies header, Performance Summary card, P&L Chart section,
  * Dashboard Widgets grid, and Capital Gains & Tax section.
  *
+ * Shared mocks (navigation, services, theme, stores) come from the
+ * ./helpers/widgetTestMocks module — imported FIRST so the mocks register
+ * before the component module graph is evaluated. The PnLChart mock below is
+ * dashboard-specific (only this screen renders it).
+ *
  * ============================================================================
  */
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from './testUtils';
+import { render, expectTextOrder, fireEvent } from './testUtils';
+import { getWidgetMocks, resetWidgetMocks, defaultLayoutWidgets, defaultAnalyticsState, defaultPortfolioState } from './helpers/widgetTestMocks';
 
-// ==================== Mock ThemeContext ====================
-
-vi.mock('../context/ThemeContext', () => ({
-  useTheme: () => ({
-    colors: {
-      primary: '#3B82F6',
-      marketUp: '#00E676',
-      marketDown: '#FF5252',
-      warning: '#FFC107',
-      text: '#E0E6ED',
-      textSecondary: '#94A3B8',
-      textMuted: '#475569',
-      white: '#FFFFFF',
-      bg: '#06080C',
-      bgSecondary: '#0E1117',
-      bgCard: '#1A1D28',
-      bgCardLight: '#232734',
-      bgInput: '#151821',
-      border: 'rgba(255,255,255,0.07)',
-      borderLight: 'rgba(255,255,255,0.04)',
-      divider: 'rgba(255,255,255,0.04)',
-      transparent: 'transparent',
-    },
-    isDark: true,
-  }),
-}));
-
-// ==================== Mock DraggableFlatList ====================
-// Renders data items via renderItem so widget content appears in tree.
-// Uses string component name 'View' to avoid require('react-native')
-// which conflicts with setup.ts's async mock.
-
-vi.mock('react-native-draggable-flatlist', () => {
-  const React = require('react');
-
-  const MockDraggableFlatList = (props: any) => {
-    const { data, renderItem, ListFooterComponent } = props;
-    const children: any[] = [];
-    if (data && Array.isArray(data)) {
-      data.forEach((item: any, index: number) => {
-        const rendered = renderItem({
-          item,
-          drag: vi.fn(),
-          isActive: false,
-          getIndex: () => index,
-        });
-        children.push(React.createElement('View', { key: item.id }, rendered));
-      });
-    }
-    if (ListFooterComponent) {
-      children.push(ListFooterComponent);
-    }
-    return React.createElement(React.Fragment, null, children);
-  };
-
-  const ScaleDecorator = (props: any) => props.children;
-
-  return {
-    default: MockDraggableFlatList,
-    ScaleDecorator,
-  };
-});
+// Shared hoisted mock state (nav, services, theme, stores) — same object the
+// mock factories use, so per-test configuration + assertions stay in sync.
+const widgetMocks = getWidgetMocks();
 
 // ==================== Mock PnLChart ====================
-// Simplifies the SVG-heavy chart to a basic element so tests stay
-// focused on the dashboard layout and integration.
+// Simplifies the SVG-heavy chart to a basic element so tests stay focused on
+// the dashboard layout and integration. It still forwards the `timeframe`
+// prop (so the current selection is visible) and the `onTimeframeChange`
+// callback (so the timeframe-chip handler can be exercised).
 
-vi.mock('../components/PnLChart', () => ({
-  default: () => null,
-}));
-
-// ==================== Mock portfolioAnalyticsStore ====================
-
-const mockAnalyticsState = {
-  getAnalytics: () => ({
-    metrics: {
-      sharpeRatio: 1.85,
-      winRate: 68.5,
-      profitFactor: 2.45,
-      avgHoldingDays: 42,
-      maxDrawdownPercent: 8.3,
-      totalReturn: 425000,
-      totalReturnPercent: 18.7,
-      realizedPnl: 185000,
-      unrealizedPnl: 240000,
-      dayChange: 12500,
-      dayChangePercent: 0.45,
-      totalTrades: 47,
-      winningTrades: 32,
-      losingTrades: 15,
-      avgWin: 18500,
-      avgLoss: 8200,
-      bestTrade: 62500,
-      worstTrade: -15000,
-      consecutiveWins: 8,
-      consecutiveLosses: 3,
-    },
-    capitalGains: {
-      shortTerm: { gains: 225000, count: 28, taxRate: 15, estimatedTax: 33750 },
-      longTerm: { gains: 200000, count: 4, taxRate: 10, exemptLimit: 100000, taxableGains: 100000, estimatedTax: 10000 },
-      totalEstimatedTax: 43750,
-      sttPaid: 425,
-      totalBrokerage: 128,
-    },
-    pnlHistory: [
-      { date: '2025-01-15', value: 623500, cumulativePnl: 0 },
-      { date: '2025-02-15', value: 635000, cumulativePnl: 11500 },
-      { date: '2025-03-15', value: 658000, cumulativePnl: 34500 },
-      { date: '2025-04-15', value: 692000, cumulativePnl: 68500 },
-      { date: '2025-05-15', value: 724000, cumulativePnl: 100500 },
-      { date: '2025-06-15', value: 758000, cumulativePnl: 134500 },
-      { date: '2025-07-15', value: 795000, cumulativePnl: 171500 },
-    ],
-    monthlyReturns: [
-      { month: '2025-01', startValue: 623500, endValue: 635000, return: 11500, returnPercent: 1.84, contributions: 0 },
-    ],
-    sectorAllocation: [
-      { sector: 'Finance', value: 350000, percent: 44.0, count: 2 },
-      { sector: 'Energy', value: 185000, percent: 23.3, count: 2 },
-    ],
-  }),
-};
-
-vi.mock('../store/portfolioAnalyticsStore', () => ({
-  usePortfolioAnalyticsStore: vi.fn((selector?: any) =>
-    selector ? selector(mockAnalyticsState) : mockAnalyticsState
-  ),
-}));
-
-// ==================== Mock widgetStore ====================
-
-const mockLayoutWidgets = [
-  { id: 'w_pnl', type: 'pnl', title: 'P&L Overview', order: 0, size: 'medium', visible: true },
-  { id: 'w_holdings', type: 'holdings', title: 'Holdings Breakdown', order: 1, size: 'medium', visible: true },
-  { id: 'w_risk_metrics', type: 'risk_metrics', title: 'Risk Metrics', order: 2, size: 'medium', visible: true },
-  { id: 'w_sector', type: 'sector_allocation', title: 'Sector Allocation', order: 3, size: 'medium', visible: true },
-  { id: 'w_trades', type: 'recent_trades', title: 'Recent Trades', order: 4, size: 'medium', visible: true },
-  { id: 'w_market', type: 'market_overview', title: 'Market Overview', order: 5, size: 'medium', visible: true },
-];
-
-let mockHydrate = vi.fn();
-
-vi.mock('../store/widgetStore', () => {
-  const mockFn = vi.fn((selector?: any) => {
-    const state = {
-      layout: { widgets: mockLayoutWidgets, version: 1 },
-      reorderWidgets: vi.fn(),
-      hydrate: mockHydrate,
-    };
-    return selector ? selector(state) : state;
-  });
-  // getState is a static method on the Zustand store, not part of the hook return value.
-  // PortfolioAnalyticsDashboardScreen calls useWidgetStore.getState() directly.
-  (mockFn as any).getState = () => ({ hydrate: mockHydrate });
-  return { useWidgetStore: mockFn };
+vi.mock('../components/PnLChart', () => {
+  // Avoid require('react-native') — the async RN mock may not have resolved
+  // when this factory runs; use string host elements (same pattern as the
+  // DraggableFlatList mock in helpers/widgetTestMocks).
+  const React = require('react');
+  return {
+    default: ({ timeframe, onTimeframeChange }: any) =>
+      React.createElement(
+        'View',
+        { testID: 'pnl-chart', onTimeframeChange },
+        React.createElement('Text', { testID: 'timeframe-label' }, timeframe),
+      ),
+  };
 });
+
+// ==================== Mock store states ====================
+// Analytics + portfolio states come from the shared fixtures in
+// ./helpers/widgetTestMocks (defaultAnalyticsState / defaultPortfolioState =
+// realSeedHoldings) so the dashboard renders the same store state as the
+// WidgetGrid suite — 5 holdings, ₹6.74L total, full metrics.
 
 // ==================== Mock useSafeAreaInsets (already in setup.ts) ====================
 // Already mocked in src/__tests__/setup.ts
 
 // ==================== Import ====================
 
+import { NavigationContainer } from '@react-navigation/native';
 import PortfolioAnalyticsDashboardScreen from '../screens/analytics/PortfolioAnalyticsDashboardScreen';
 
 // ==================== Helper ====================
 
-const mockNavigate = vi.fn();
-const mockGoBack = vi.fn();
-
 function renderScreen() {
   return render(
-    <PortfolioAnalyticsDashboardScreen
-      navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
-    />
+    <NavigationContainer>
+      <PortfolioAnalyticsDashboardScreen
+        navigation={{ navigate: widgetMocks.mockNavigate, goBack: widgetMocks.mockGoBack } as any}
+        route={{ params: {} } as any}
+      />
+    </NavigationContainer>
   );
+}
+
+/** True if the given Text host carries the red color in its style array. */
+function isRedStyled(n: any): boolean {
+  const style = n.props.style as any[] | undefined;
+  return Array.isArray(style) && style.some(s => s && s.color === '#FF5252');
+}
+
+/**
+ * True if ANY leaf row labelled `label` contains a red-styled value Text.
+ *
+ * getByText returns the DEEPEST match, which may be a widget's row rather than
+ * the screen's summary card (the same label can appear in several widgets), so
+ * this scans every leaf match. Each leaf Text host sits under a Dummy(Text)
+ * composite in the RN mock, making the container View 2 levels up
+ * (label host → Dummy → container).
+ */
+function anyRowHasRedValue(result: ReturnType<typeof render>, label: string): boolean {
+  return result.getAllByText(label).some(m => {
+    const kids = m.children;
+    const isLeaf = Array.isArray(kids) && kids.every(c => typeof c === 'string');
+    if (!isLeaf) return false;
+    const container = m.parent?.parent as any;
+    return !!container && container.findAll((n: any) => n.type === 'Text').some(isRedStyled);
+  });
 }
 
 // ==================== Tests ====================
 
 describe('PortfolioAnalyticsDashboard — Integration', () => {
   beforeEach(() => {
-    mockNavigate.mockClear();
-    mockGoBack.mockClear();
-    mockHydrate = vi.fn();
+    resetWidgetMocks();
+    widgetMocks.analyticsState = defaultAnalyticsState;
+    widgetMocks.layoutState = { widgets: defaultLayoutWidgets, version: 1 };
+    widgetMocks.portfolioState = defaultPortfolioState;
   });
 
   // ── Header ────────────────────────────────────────────────────────
@@ -259,6 +166,17 @@ describe('PortfolioAnalyticsDashboard — Integration', () => {
     expect(getByText('Sector Allocation')).toBeDefined();
     expect(getByText('Recent Trades')).toBeDefined();
     expect(getByText('Market Overview')).toBeDefined();
+    expect(getByText('Performance Chart')).toBeDefined();
+  });
+
+  it('renders widget titles in layout order', () => {
+    // WidgetGrid renders the layout's widgets in `order` sequence — the grid
+    // must present them exactly as configured (drag-reorder changes layoutState,
+    // so this locks the default order).
+    expectTextOrder(
+      renderScreen(),
+      ['P&L Overview', 'Holdings Breakdown', 'Risk Metrics', 'Sector Allocation', 'Recent Trades', 'Market Overview', 'Performance Chart'],
+    );
   });
 
   it('renders Add Widget footer in the widget grid', () => {
@@ -292,7 +210,77 @@ describe('PortfolioAnalyticsDashboard — Integration', () => {
 
   it('renders gallery button for navigation', () => {
     // Gallery button uses Ionicons "apps" — verified by successful render
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(widgetMocks.mockNavigate).not.toHaveBeenCalled();
+  });
+
+  // ── Interactive handlers ──────────────────────────────────────────
+
+  it('navigates back when the back button is pressed', () => {
+    const result = renderScreen();
+    const backIcon = result.root.findAll(n => n.props && n.props.name === 'arrow-back')[0];
+    expect(backIcon).toBeDefined();
+    fireEvent.trigger(backIcon, 'onPress');
+    expect(widgetMocks.mockGoBack).toHaveBeenCalled();
+  });
+
+  it('opens the Widget Gallery from the header gallery button', () => {
+    const result = renderScreen();
+    const galleryIcon = result.root.findAll(n => n.props && n.props.name === 'apps')[0];
+    expect(galleryIcon).toBeDefined();
+    fireEvent.trigger(galleryIcon, 'onPress');
+    expect(widgetMocks.mockNavigate).toHaveBeenCalledWith('WidgetGallery');
+  });
+
+  it('opens the Widget Gallery from the Manage button', () => {
+    const { getByText } = renderScreen();
+    fireEvent.press(getByText('Manage'));
+    expect(widgetMocks.mockNavigate).toHaveBeenCalledWith('WidgetGallery');
+  });
+
+  it('opens the Widget Gallery from the Add Widget footer button', () => {
+    const { getByText } = renderScreen();
+    fireEvent.press(getByText('Add Widget'));
+    expect(widgetMocks.mockNavigate).toHaveBeenCalledWith('WidgetGallery');
+  });
+
+  it('updates the chart timeframe when a timeframe chip is pressed', () => {
+    const result = renderScreen();
+    expect(result.getByTestId('timeframe-label').children.join('')).toBe('1Y');
+    // fireEvent.trigger wraps the handler call in act() so the state update
+    // (setChartTimeframe) flushes and the re-render passes the new value down.
+    fireEvent.trigger(result.getByTestId('pnl-chart'), 'onTimeframeChange', '1M');
+    expect(result.getByTestId('timeframe-label').children.join('')).toBe('1M');
+  });
+
+  // ── Negative performance (red sign branches) ──────────────────────
+
+  it('renders red styling for negative performance', () => {
+    widgetMocks.analyticsState = {
+      ...defaultAnalyticsState,
+      getAnalytics: () => {
+        const base = defaultAnalyticsState.getAnalytics();
+        return {
+          ...base,
+          metrics: { ...base.metrics, totalReturn: -425000, totalReturnPercent: -18.7 },
+          capitalGains: {
+            ...base.capitalGains,
+            shortTerm: { ...base.capitalGains.shortTerm, gains: -225000 },
+            longTerm: { ...base.capitalGains.longTerm, gains: -200000 },
+          },
+        };
+      },
+    };
+    const result = renderScreen();
+
+    // Negative percent formats with a leading '-' (no '+').
+    expect(result.getByText('-18.70%')).toBeDefined();
+
+    // Total Return value + percent flip to the red branch of the sign ternary
+    // (the summary card's row — first leaf — is one of the red matches).
+    expect(anyRowHasRedValue(result, 'Total Return')).toBe(true);
+
+    // STCG value also flips to red on negative short-term gains.
+    expect(anyRowHasRedValue(result, 'STCG')).toBe(true);
   });
 
   // ── Snapshot ───────────────────────────────────────────────────────
@@ -318,6 +306,6 @@ describe('PortfolioAnalyticsDashboard — Integration', () => {
   it('calls hydrate on mount', () => {
     renderScreen();
     // hydrate is called via useEffect on mount
-    expect(mockHydrate).toHaveBeenCalled();
+    expect(widgetMocks.mockHydrate).toHaveBeenCalled();
   });
 });

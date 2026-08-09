@@ -316,6 +316,18 @@ vi.mock('../services/api', () => ({
   authApi: {
     recordReferral: mockRecordReferral,
   },
+  // Rendered SnapTrade screens (SnapTradeOrderScreen is registered in the
+  // stack) access these at mount time — the mock must provide them.
+  snapTradeApi: {
+    status: () => Promise.resolve({ connected: false }),
+    placeOrder: () => Promise.resolve({ success: true }),
+    getTickerLevels: () =>
+      Promise.resolve({ success: true, connected: false, symbol: '', position: null, levels: null, ironLockActive: false, lockdownStatus: 'none' }),
+  },
+  api: {
+    get: () => Promise.resolve({}),
+    post: () => Promise.resolve({}),
+  },
 }));
 
 vi.mock('../services/analytics', () => ({

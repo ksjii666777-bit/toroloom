@@ -43,40 +43,40 @@ async function renderAndFlush(jsx: React.ReactElement) {
 
 describe('HelpScreen', () => {
   it('renders the screen title', async () => {
-    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Help & Support')).toBeDefined();
   });
 
   it('renders FAQ section header', async () => {
-    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Frequently Asked Questions')).toBeDefined();
   });
 
   it('renders FAQ questions', async () => {
-    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('How do I start investing?')).toBeDefined();
     expect(getByText('How do I withdraw money from my account?')).toBeDefined();
   });
 
   it('renders help categories', async () => {
-    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Open Account')).toBeDefined();
     expect(getByText('Add Funds')).toBeDefined();
   });
 
   it('renders contact options', async () => {
-    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Email Us')).toBeDefined();
     expect(getByText('Live Chat')).toBeDefined();
   });
 
   it('renders contact email', async () => {
-    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('support@toroloom.com')).toBeDefined();
   });
 
   it('renders without crashing', async () => {
-    const { toJSON } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { toJSON } = await renderAndFlush(<HelpScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
   });
 });

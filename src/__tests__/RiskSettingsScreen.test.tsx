@@ -80,7 +80,7 @@ beforeEach(() => {
 describe('RiskSettingsScreen', () => {
   it('renders the screen title and subtitle', () => {
     const { getByText } = render(
-      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} />,
+      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Risk Settings')).toBeDefined();
     expect(getByText('Financial Bodyguard controls')).toBeDefined();
@@ -88,7 +88,7 @@ describe('RiskSettingsScreen', () => {
 
   it('renders tab toggle buttons', () => {
     const { getByText } = render(
-      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} />,
+      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Limits')).toBeDefined();
     expect(getByText('Status')).toBeDefined();
@@ -96,7 +96,7 @@ describe('RiskSettingsScreen', () => {
 
   it('renders the Risk Limits card with limit labels', () => {
     const { getByText } = render(
-      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} />,
+      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Risk Limits')).toBeDefined();
     expect(getByText('Daily Loss Limit')).toBeDefined();
@@ -105,7 +105,7 @@ describe('RiskSettingsScreen', () => {
 
   it('renders Trade Action Check card', () => {
     const { getByText } = render(
-      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} />,
+      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Trade Action Check')).toBeDefined();
     expect(getByText('Buy Stocks')).toBeDefined();
@@ -116,7 +116,7 @@ describe('RiskSettingsScreen', () => {
 
   it('renders without crashing', () => {
     const { toJSON } = render(
-      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} />,
+      <RiskSettingsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />,
     );
     expect(toJSON()).toBeTruthy();
   });

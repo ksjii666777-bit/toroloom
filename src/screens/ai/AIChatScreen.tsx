@@ -14,6 +14,9 @@ import { useAIStore } from '../../store/aiStore';
 import { aiApi } from '../../services/api/ai';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ============================================================================
 // Types
@@ -242,7 +245,7 @@ function generateResponse(query: string, ctx: PortfolioContext, t: any): string 
 // Component
 // ============================================================================
 
-export default function AIChatScreen({ navigation }: any) {
+export default function AIChatScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AIChat'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

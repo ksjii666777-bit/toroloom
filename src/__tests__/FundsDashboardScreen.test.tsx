@@ -107,7 +107,7 @@ describe('FundsDashboardScreen — Loading State', () => {
   });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { toJSON } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -123,32 +123,32 @@ describe('FundsDashboardScreen — Loaded Content', () => {
   });
 
   it('renders the header title', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Funds Dashboard')).toBeDefined();
   });
 
   it('renders the Available Balance card', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Available Balance')).toBeDefined();
   });
 
   it('renders the balance value from user data', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // 2500000 formatted as ₹25.00L
     expect(getByText(/₹/)).toBeDefined();
   });
 
   it('renders the balance subtext', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('₹25,00,000.00')).toBeDefined();
   });
 
   it('renders all 4 quick action buttons', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Add Funds')).toBeDefined();
     expect(getByText('Withdraw')).toBeDefined();
@@ -157,7 +157,7 @@ describe('FundsDashboardScreen — Loaded Content', () => {
   });
 
   it('renders stats grid with 4 stat cards', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Total Added')).toBeDefined();
     expect(getByText('Withdrawn')).toBeDefined();
@@ -166,38 +166,38 @@ describe('FundsDashboardScreen — Loaded Content', () => {
   });
 
   it('renders stat values from seed data (total add 50000+50000+100000)', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/Total Added/)).toBeDefined();
   });
 
   it('renders the This Month activity section', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('This Month')).toBeDefined();
   });
 
   it('renders Recent Transactions section', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Recent Transactions')).toBeDefined();
   });
 
   it('renders transaction items from seed data', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Funds Added')).toBeDefined();
     expect(getByText('Funds Withdrawn')).toBeDefined();
   });
 
   it('renders See All link', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('See All')).toBeDefined();
   });
 
   it('renders the footer summary card', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Total Deposits')).toBeDefined();
     expect(getByText('Total Withdrawals')).toBeDefined();
@@ -205,7 +205,7 @@ describe('FundsDashboardScreen — Loaded Content', () => {
   });
 
   it('renders the history button in header', () => {
-    const { toJSON } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { toJSON } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(toJSON).not.toBeNull();
   });
@@ -222,7 +222,7 @@ describe('FundsDashboardScreen — Transaction Detail', () => {
   });
 
   it('renders transaction amounts with correct signs', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // '+' for add, '-' for withdraw
     expect(getByText(/\+/)).toBeDefined();
@@ -230,7 +230,7 @@ describe('FundsDashboardScreen — Transaction Detail', () => {
   });
 
   it('shows transaction method and timestamp', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // UPI appears as method in seed_1
     expect(getByText(/UPI/)).toBeDefined();
@@ -248,7 +248,7 @@ describe('FundsDashboardScreen — Navigation', () => {
   });
 
   it('navigates to AddFunds when Add Funds quick action is pressed', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     const addFundsLabel = getByText('Add Funds');
     act(() => { fireEvent.press(addFundsLabel); });
@@ -256,14 +256,14 @@ describe('FundsDashboardScreen — Navigation', () => {
   });
 
   it('navigates back when back button is pressed', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Funds Dashboard')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('navigates to Withdraw when Withdraw quick action is pressed', () => {
-    const { getAllByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getAllByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // getAllByText returns DFS order; the quick action label is the one with
     // exactly "Withdraw" text — filter out "Withdrawn" by matching only elements
@@ -279,7 +279,7 @@ describe('FundsDashboardScreen — Navigation', () => {
   });
 
   it('navigates to Transfer when Transfer quick action is pressed', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     const transferLabel = getByText('Transfer');
     act(() => { fireEvent.press(transferLabel); });
@@ -287,7 +287,7 @@ describe('FundsDashboardScreen — Navigation', () => {
   });
 
   it('navigates to UPI when UPI quick action is pressed', () => {
-    const { getAllByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getAllByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // getAllByText matches all elements containing "UPI". Filter to find the
     // quick action label with exactly "UPI".
@@ -301,7 +301,7 @@ describe('FundsDashboardScreen — Navigation', () => {
   });
 
   it('navigates to TransactionHistory when history button is pressed', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     const seeAllLabel = getByText('See All');
     act(() => { fireEvent.press(seeAllLabel); });
@@ -309,7 +309,7 @@ describe('FundsDashboardScreen — Navigation', () => {
   });
 
   it('does not navigate on initial render', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Funds Dashboard')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -330,7 +330,7 @@ describe('FundsDashboardScreen — Empty Transactions', () => {
   });
 
   it('shows empty state when no transactions exist', () => {
-    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<FundsDashboardScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('No transactions yet')).toBeDefined();
     expect(getByText('Add Funds')).toBeDefined();

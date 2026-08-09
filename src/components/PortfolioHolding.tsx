@@ -7,14 +7,19 @@ import { useTheme } from '../context/ThemeContext';
 import { useT } from '../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../constants/theme';
 import AnimatedPressable from './ui/AnimatedPressable';
+import PositionLevelsOverlay from './PositionLevelsOverlay';
 import { formatCurrency, formatPercent } from '../utils/formatters';
 
 interface PortfolioHoldingProps {
   holding: Holding;
   onPress?: (holding: Holding) => void;
+  /** Pre-fill the PlaceOrder stop-loss field (exit via SL trigger). */
+  onApplyStop?: (price: number) => void;
+  /** Pre-fill the PlaceOrder limit field (exit via target LIMIT). */
+  onApplyTarget?: (price: number) => void;
 }
 
-export default function PortfolioHolding({ holding, onPress }: PortfolioHoldingProps) {
+export default function PortfolioHolding({ holding, onPress, onApplyStop, onApplyTarget }: PortfolioHoldingProps) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -74,6 +79,25 @@ export default function PortfolioHolding({ holding, onPress }: PortfolioHoldingP
           {t('components.stockAnalysis.dayLabel', { value: formatPercent(holding.dayChangePercent) })}
         </Text>
       </View>
+
+      {/* Live position tag — same overlay as the detail-screen chart, driven
+          by the local holding data (no SnapTrade fetch) with INR prices.
+          STOP / TARGET chips pre-fill the PlaceOrder exit flow. */}
+      <PositionLevelsOverlay
+        symbol={holding.symbol}
+        position={{
+          symbol: holding.symbol,
+          quantity: holding.quantity,
+          avgCost: holding.buyPrice,
+          price: holding.currentPrice,
+          pnl: holding.pnl,
+          pnlPercent: holding.pnlPercent,
+        }}
+        currency="INR"
+        inline
+        onApplyStop={onApplyStop}
+        onApplyTarget={onApplyTarget}
+      />
       </View>
     </AnimatedPressable>
   );

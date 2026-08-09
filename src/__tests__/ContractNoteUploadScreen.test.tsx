@@ -269,21 +269,21 @@ beforeEach(() => {
 describe('ContractNoteUploadScreen — Header & Layout', () => {
   it('renders the screen title', () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Contract Note Parser')).toBeDefined();
   });
 
   it('renders the screen subtitle', () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Upload broker PDF or paste text to extract trades')).toBeDefined();
   });
 
   it('renders all three action cards', () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(getByText('Upload PDF Contract Note')).toBeDefined();
     expect(getByText('Batch Upload (Multi)')).toBeDefined();
@@ -292,7 +292,7 @@ describe('ContractNoteUploadScreen — Header & Layout', () => {
 
   it('renders the back button', () => {
     const { root } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // Find the Ionicons with arrow-back — rendered inside AnimatedPressable
     expect(root).toBeDefined();
@@ -300,14 +300,14 @@ describe('ContractNoteUploadScreen — Header & Layout', () => {
 
   it('renders without crashing', () => {
     const { toJSON } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(toJSON()).toBeTruthy();
   });
 
   it('shows back arrow in header', () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     // The back button wraps an Ionicons arrow-back — text is empty, but it's pressable
     // We verify by checking the chevron-forward icons exist on action cards
@@ -322,14 +322,14 @@ describe('ContractNoteUploadScreen — Header & Layout', () => {
 describe('ContractNoteUploadScreen — Paste Text Toggle', () => {
   it('starts with paste input hidden', () => {
     const { queryByPlaceholderText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(queryByPlaceholderText('Paste your contract note text here...')).toBeNull();
   });
 
   it('shows paste input when paste card is pressed', () => {
     const { getByText, getByPlaceholderText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Paste Contract Note Text'));
     expect(getByPlaceholderText('Paste your contract note text here...')).toBeDefined();
@@ -337,7 +337,7 @@ describe('ContractNoteUploadScreen — Paste Text Toggle', () => {
 
   it('shows Parse Text button when paste input is visible', () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Paste Contract Note Text'));
     expect(getByText('Parse Text')).toBeDefined();
@@ -345,7 +345,7 @@ describe('ContractNoteUploadScreen — Paste Text Toggle', () => {
 
   it('hides paste input when pressing the paste card again', () => {
     const { getByText, queryByPlaceholderText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Paste Contract Note Text'));
     expect(queryByPlaceholderText('Paste your contract note text here...')).toBeDefined();
@@ -361,7 +361,7 @@ describe('ContractNoteUploadScreen — Paste Text Toggle', () => {
 describe('ContractNoteUploadScreen — Single Upload', () => {
   it('calls pickAndParseContractNote when upload card is pressed', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     expect(mockPickAndParse).toHaveBeenCalledTimes(1);
@@ -372,7 +372,7 @@ describe('ContractNoteUploadScreen — Single Upload', () => {
     // Return a promise that never resolves to keep loading state
     mockPickAndParse.mockImplementationOnce(() => new Promise(() => {}));
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     expect(getByText('Parsing contract note...')).toBeDefined();
@@ -381,7 +381,7 @@ describe('ContractNoteUploadScreen — Single Upload', () => {
 
   it('displays trade results on successful parse', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     // Wait for the async operation to settle
@@ -399,7 +399,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
   it('shows parse failure state when no trades found', async () => {
     mockPickAndParse.mockResolvedValueOnce(noTradesResult);
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     // Double flush — async parse flow settles across multiple steps; a single
@@ -412,7 +412,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
   it('shows error state with retry button on parse failure', async () => {
     mockPickAndParse.mockResolvedValueOnce(noTradesResult);
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     // Double flush — async parse flow settles across multiple steps; a single
@@ -425,7 +425,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
 
   it('shows trades table with correct stats', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     // Double flush — async parse flow settles across multiple steps; a single
@@ -446,7 +446,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
 describe('ContractNoteUploadScreen — Paste Text', () => {
   it('calls parseContractNoteText when Parse Text is pressed', async () => {
     const { getByText, getByPlaceholderText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     // Open paste input
@@ -467,7 +467,7 @@ describe('ContractNoteUploadScreen — Paste Text', () => {
 
   it('shows alert when Parse Text is pressed with empty input', () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Paste Contract Note Text'));
 
@@ -480,7 +480,7 @@ describe('ContractNoteUploadScreen — Paste Text', () => {
   it('displays trade results after parsing pasted text', async () => {
     mockParseText.mockReturnValueOnce(successResult);
     const { getByText, getByPlaceholderText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByText('Paste Contract Note Text'));
@@ -495,7 +495,7 @@ describe('ContractNoteUploadScreen — Paste Text', () => {
   it('shows Export CSV button after successful paste-text parse', async () => {
     mockParseText.mockReturnValueOnce(successResult);
     const { getByText, getByPlaceholderText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByText('Paste Contract Note Text'));
@@ -509,7 +509,7 @@ describe('ContractNoteUploadScreen — Paste Text', () => {
   it('calls exportSingleToCSV when Export CSV is pressed on paste-text results', async () => {
     mockParseText.mockReturnValueOnce(successResult);
     const { getByText, getByPlaceholderText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByText('Paste Contract Note Text'));
@@ -528,7 +528,7 @@ describe('ContractNoteUploadScreen — Paste Text', () => {
   it('does not show Export CSV button when paste-text parse has no trades', async () => {
     mockParseText.mockReturnValueOnce(noTradesResult);
     const { getByText, getByPlaceholderText, queryByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
 
     fireEvent.press(getByText('Paste Contract Note Text'));
@@ -548,7 +548,7 @@ describe('ContractNoteUploadScreen — Paste Text', () => {
 describe('ContractNoteUploadScreen — Batch Upload', () => {
   it('calls pickAndParseBatchContractNotes when batch card is pressed', () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Batch Upload (Multi)'));
     expect(mockPickAndParseBatch).toHaveBeenCalledTimes(1);
@@ -559,7 +559,7 @@ describe('ContractNoteUploadScreen — Batch Upload', () => {
 
   it('displays batch results summary with merged trades', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
@@ -578,7 +578,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
 
   it('shows per-file breakdown with filenames', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
@@ -591,7 +591,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
 
   it('shows broker badges for detected brokers', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
@@ -604,7 +604,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
 
   it('expands a per-file entry to show its trades', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
@@ -621,7 +621,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
   it('shows partial failure info in batch results', async () => {
     mockPickAndParseBatch.mockResolvedValueOnce(batchPartialResult);
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
@@ -639,7 +639,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
       rawTradeCount: 5, // more than mergedTrades.length (3)
     });
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
@@ -657,7 +657,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
 describe('ContractNoteUploadScreen — Clear Results', () => {
   it('clears single parse results when close button is pressed', async () => {
     const { root, getByText, queryByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     // Double flush — async parse flow settles across multiple steps; a single
@@ -681,7 +681,7 @@ await new Promise(resolve => setTimeout(resolve, 0));
 
   it('clears batch results when close button is pressed', async () => {
     const { root, getByText, queryByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Batch Upload (Multi)'));
     // Flush microtasks so that async state updates inside act() complete
@@ -711,7 +711,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
   describe('single-file results', () => {
     it('shows Export CSV button after successful single parse with trades', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Upload PDF Contract Note'));
       // Double flush — async parse flow settles across multiple steps; a single
@@ -724,7 +724,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
 
     it('calls exportSingleToCSV when Export CSV button is pressed', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Upload PDF Contract Note'));
       // Double flush — async parse flow settles across multiple steps; a single
@@ -743,7 +743,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
     it('does not show Export CSV button when single parse has no trades', async () => {
       mockPickAndParse.mockResolvedValueOnce(noTradesResult);
       const { getByText, queryByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Upload PDF Contract Note'));
       // Double flush — async parse flow settles across multiple steps; a single
@@ -761,7 +761,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
       mockExportSingle.mockImplementationOnce(() => new Promise(() => {}));
 
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Upload PDF Contract Note'));
       // Double flush — async parse flow settles across multiple steps; a single
@@ -783,7 +783,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
   describe('batch results', () => {
     it('shows Export All CSV button after batch parse', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -796,7 +796,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
 
     it('calls exportBatchToCSV when Export All CSV button is pressed', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -815,7 +815,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
     it('shows Exporting... while batch CSV is being exported', async () => {
       mockExportBatch.mockImplementationOnce(() => new Promise(() => {}));
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -831,7 +831,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
   describe('select mode', () => {
     it('shows Select button in batch results', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -844,7 +844,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
 
     it('toggles selection mode when Select/Done is pressed', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -863,7 +863,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
 
     it('shows Export Selected button after selecting files', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -881,7 +881,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
 
     it('deselects all files when pressing Deselect All', async () => {
       const { getByText, queryByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -901,7 +901,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
 
     it('calls exportSelectedToCSV when Export Selected is pressed', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -926,7 +926,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
 
     it('shows Export All CSV instead of Export CSV for batch', async () => {
       const { getByText } = render(
-        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+        <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Batch Upload (Multi)'));
       // Double flush — batch results settle across multiple async steps; a single
@@ -945,7 +945,7 @@ describe('ContractNoteUploadScreen — Export CSV', () => {
 describe('ContractNoteUploadScreen — Broker Display', () => {
   it('shows broker badge for detected broker in single parse result', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     // Double flush — async parse flow settles across multiple steps; a single
@@ -957,7 +957,7 @@ await new Promise(resolve => setTimeout(resolve, 50));
 
   it('shows source indicator for backend-parsed files', async () => {
     const { getByText } = render(
-      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+      <ContractNoteUploadScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     fireEvent.press(getByText('Upload PDF Contract Note'));
     // Double flush — async parse flow settles across multiple steps; a single

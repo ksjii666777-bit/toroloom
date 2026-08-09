@@ -9,7 +9,8 @@ import { SkeletonBlock, SkeletonCard } from '../../components/ui/SkeletonLoader'
 import { useT } from '../../hooks/useT';
 import { marketApi } from '../../services/api/market';
 import { mockFundamentals } from '../../constants/mockData';
-import type { CompanyFundamentals, FinancialQuarter } from '../../types';
+import type {CompanyFundamentals, FinancialQuarter, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ──── Helpers ────────────────────────────────────────────────
 const formatRatio = (val: number, decimals = 2) => val.toFixed(decimals);
@@ -143,7 +144,7 @@ function ShareholdingChart({ data }: { data: { label: string; value: number; col
 }
 
 // ──── Main Screen ────────────────────────────────────────────
-export default function CompanyFundamentalsScreen({ route, navigation }: any) {
+export default function CompanyFundamentalsScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'CompanyFundamentals'>) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useT();

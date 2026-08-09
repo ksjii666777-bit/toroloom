@@ -20,7 +20,8 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { shareNative, shareWhatsApp, shareTelegram } from '../../utils/share';
-import type { ReferralReward } from '../../types';
+import type {ReferralReward, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 const REWARD_DISPLAY_COUNT = 20;
@@ -41,7 +42,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 // ─── Component ────────────────────────────────────────────────
-export default function ReferralScreen({ navigation }: any) {
+export default function ReferralScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Referral'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

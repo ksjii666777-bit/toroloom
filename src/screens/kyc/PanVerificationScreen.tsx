@@ -25,12 +25,13 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import { kycCallbackStore } from '../../store/kycCallbackStore';
-import type { PanVerificationResult } from '../../types';
+import type {PanVerificationResult, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // PAN regex: 5 uppercase letters, 4 digits, 1 uppercase letter
 const PAN_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
 
-export default function PanVerificationScreen({ navigation }: any) {
+export default function PanVerificationScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'PanVerification'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

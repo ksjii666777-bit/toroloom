@@ -41,6 +41,9 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 
 import { brokerProxyApi, snapTradeApi } from '../../services/api';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -131,7 +134,7 @@ const BROKERS: BrokerMeta[] = [
 
 // ─── Component ─────────────────────────────────────────────────────────────
 
-export default function ConnectBrokerView({ navigation }: any) {
+export default function ConnectBrokerView({ navigation }: NativeStackScreenProps<RootStackParamList, 'BrokerConnect'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

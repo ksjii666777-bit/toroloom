@@ -29,14 +29,15 @@ import { authApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
-import type { TwoFactorSetupData, TwoFactorStatus } from '../../types';
+import type {TwoFactorSetupData, TwoFactorStatus, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 const QR_SIZE = Math.min(width - SPACING.xl * 4, 220);
 
 type FlowStep = 'loading' | 'setup' | 'verify' | 'backup_codes' | 'manage';
 
-export default function TwoFactorSetupScreen({ navigation }: any) {
+export default function TwoFactorSetupScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'TwoFactorSetup'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

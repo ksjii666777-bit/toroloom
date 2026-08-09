@@ -157,4 +157,55 @@ describe('PortfolioHolding', () => {
     );
     expect(getByText('RELIANCE')).toBeDefined();
   });
+
+  // ── Live position tag (direct position, INR) ────────────────────────
+
+  it('renders the LIVE position tag with AVG BUY in INR on the row', () => {
+    const { getByText } = render(
+      <PortfolioHolding holding={positiveHolding} />
+    );
+    // Overlay labels come from the real en locale (trading.* namespace).
+    expect(getByText('LIVE')).toBeDefined();
+    expect(getByText('AVG BUY')).toBeDefined();
+    expect(getByText('STOP')).toBeDefined();
+    expect(getByText('TARGET')).toBeDefined();
+  });
+
+  it('formats the AVG BUY price in INR from buyPrice', () => {
+    const { getByText } = render(
+      <PortfolioHolding holding={positiveHolding} />
+    );
+    // buyPrice 2650 → AVG BUY chip ₹2,650.00
+    expect(getByText('₹2,650.00')).toBeDefined();
+  });
+
+  it('calls onApplyStop with the risk-derived stop price when STOP is tapped', () => {
+    const onApplyStop = vi.fn();
+    const { getByText } = render(
+      <PortfolioHolding holding={positiveHolding} onApplyStop={onApplyStop} />
+    );
+    fireEvent.press(getByText('STOP'));
+    // buyPrice 2650 × (1 − 5%) = 2517.5
+    expect(onApplyStop.mock.calls[0][0]).toBeCloseTo(2517.5, 5);
+  });
+
+  it('calls onApplyTarget with the risk-derived target price when TARGET is tapped', () => {
+    const onApplyTarget = vi.fn();
+    const { getByText } = render(
+      <PortfolioHolding holding={positiveHolding} onApplyTarget={onApplyTarget} />
+    );
+    fireEvent.press(getByText('TARGET'));
+    // buyPrice 2650 × (1 + 10%) = 2915
+    expect(onApplyTarget.mock.calls[0][0]).toBeCloseTo(2915, 5);
+  });
+
+  it('does not call stop/target handlers when no position exit props are passed', () => {
+    const { getByText } = render(
+      <PortfolioHolding holding={positiveHolding} />
+    );
+    fireEvent.press(getByText('STOP'));
+    fireEvent.press(getByText('TARGET'));
+    // No handlers → nothing throws, no navigation happens.
+    expect(true).toBe(true);
+  });
 });

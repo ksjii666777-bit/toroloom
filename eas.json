@@ -14,8 +14,6 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api",
-        "EXPO_PUBLIC_SENTRY_DSN": "https://7ea1efb01887c82073b8ca44e744b6b4@o4511868933570560.ingest.us.sentry.io/4511868993273856",
         "APP_VARIANT": "development"
       }
     },
@@ -30,8 +28,6 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api",
-        "EXPO_PUBLIC_SENTRY_DSN": "https://7ea1efb01887c82073b8ca44e744b6b4@o4511868933570560.ingest.us.sentry.io/4511868993273856",
         "APP_VARIANT": "development"
       }
     },
@@ -44,8 +40,6 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api",
-        "EXPO_PUBLIC_SENTRY_DSN": "https://7ea1efb01887c82073b8ca44e744b6b4@o4511868933570560.ingest.us.sentry.io/4511868993273856",
         "APP_VARIANT": "preview"
       }
     },
@@ -58,8 +52,6 @@
       },
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://toroloom-production.up.railway.app/api",
-        "EXPO_PUBLIC_SENTRY_DSN": "https://7ea1efb01887c82073b8ca44e744b6b4@o4511868933570560.ingest.us.sentry.io/4511868993273856",
         "APP_VARIANT": "production"
       },
       "channel": "production"

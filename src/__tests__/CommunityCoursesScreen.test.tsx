@@ -298,35 +298,35 @@ describe('CommunityCoursesScreen — Empty State', function() {
 
   it('renders without crashing', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.toJSON()).not.toBeNull();
   });
 
   it('renders the screen title', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Community Courses')).toBeDefined();
   });
 
   it('renders subtitle', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText(/Discover courses/)).toBeDefined();
   });
 
   it('renders search placeholder', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByPlaceholderText('Search courses, creators, or topics...')).toBeDefined();
   });
 
   it('renders stats row with zeros', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Courses')).toBeDefined();
     expect(result.getByText('Featured')).toBeDefined();
@@ -338,7 +338,7 @@ describe('CommunityCoursesScreen — Empty State', function() {
 
   it('renders "No courses yet" empty state', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('No courses yet')).toBeDefined();
     expect(result.getByText(/No published community courses/)).toBeDefined();
@@ -346,7 +346,7 @@ describe('CommunityCoursesScreen — Empty State', function() {
 
   it('calls loadFromCache on focus', function() {
     render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(mockLoadFromCache).toHaveBeenCalled();
   });
@@ -371,7 +371,7 @@ describe('CommunityCoursesScreen — Stats with Data', function() {
 
   it('shows correct total course count (published only)', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Only published courses count (featured + beginner = 2), draft is excluded
     expect(result.getByText('2')).toBeDefined();
@@ -379,14 +379,14 @@ describe('CommunityCoursesScreen — Stats with Data', function() {
 
   it('shows correct featured count', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('1')).toBeDefined();
   });
 
   it('shows correct enrolled count (from enrolledCommunityCourseIds)', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // 1 enrolled (uc_1)
     expect(result.getByText('1')).toBeDefined();
@@ -394,7 +394,7 @@ describe('CommunityCoursesScreen — Stats with Data', function() {
 
   it('shows correct total students (sum of enrolledCount)', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // featured: 342 + beginner: 1289 = 1631
     expect(result.getByText('1631')).toBeDefined();
@@ -402,7 +402,7 @@ describe('CommunityCoursesScreen — Stats with Data', function() {
 
   it('renders stats row labels', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Courses')).toBeDefined();
     expect(result.getByText('Featured')).toBeDefined();
@@ -430,28 +430,28 @@ describe('CommunityCoursesScreen — Course Listing (no featured)', function() {
 
   it('renders "All Community Courses" section header', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('All Community Courses')).toBeDefined();
   });
 
   it('renders course card title', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Stock Market Basics for Beginners')).toBeDefined();
   });
 
   it('renders creator name on card', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText(/by John Investor/)).toBeDefined();
   });
 
   it('renders level badge text', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // react-test-renderer does not apply CSS textTransform, so check base text
     expect(result.getByText('Beginner')).toBeDefined();
@@ -459,28 +459,28 @@ describe('CommunityCoursesScreen — Course Listing (no featured)', function() {
 
   it('renders lesson count', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText(/8 lessons/)).toBeDefined();
   });
 
   it('renders course description', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText(/Start your investing journey/)).toBeDefined();
   });
 
   it('renders enrolled count on card', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('1289')).toBeDefined();
   });
 
   it('renders relative time on card', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // publishedAt is 2026-01-08. With system time frozen at 2026-07-20, diff is ~193 days ≈ 6.4mo
     expect(result.getByText(/(m|h|d|w|mo) ago/)).toBeDefined();
@@ -488,7 +488,7 @@ describe('CommunityCoursesScreen — Course Listing (no featured)', function() {
 
   it('renders Enroll button for non-enrolled course', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Enroll')).toBeDefined();
   });
@@ -513,49 +513,49 @@ describe('CommunityCoursesScreen — Featured Courses Carousel', function() {
 
   it('renders Featured Courses section header', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Featured Courses')).toBeDefined();
   });
 
   it('renders featured card title', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Advanced Options Trading')).toBeDefined();
   });
 
   it('renders featured card creator name', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText(/by Jane Trader/)).toBeDefined();
   });
 
   it('renders featured card lesson and duration', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('6 lessons')).toBeDefined();
   });
 
   it('renders featured card enrolled count', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('342')).toBeDefined();
   });
 
   it('renders Enroll button on featured card for non-enrolled', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Enroll')).toBeDefined();
   });
 
   it('hides Featured section when search query is active', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     const searchInput = result.getByPlaceholderText('Search courses, creators, or topics...');
     act(function() { fireEvent.changeText(searchInput, 'Options'); });
@@ -564,7 +564,7 @@ describe('CommunityCoursesScreen — Featured Courses Carousel', function() {
 
   it('renders "All Community Courses" section alongside featured', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('All Community Courses')).toBeDefined();
   });
@@ -591,14 +591,14 @@ describe('CommunityCoursesScreen — Enrollment Toggle', function() {
 
   it('shows Enrolled badge on enrolled course', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Enrolled')).toBeDefined();
   });
 
   it('calls unenroll when Enrolled button is pressed on featured card', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Enrolled')); });
     expect(mockUnenroll).toHaveBeenCalledWith('uc_1');
@@ -606,7 +606,7 @@ describe('CommunityCoursesScreen — Enrollment Toggle', function() {
 
   it('calls enroll when Enroll button is pressed on regular (non-enrolled) card', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // featured is enrolled (shows "Enrolled"), regular is not (shows "Enroll")
     // getByText('Enroll') uniquely targets the regular card's button
@@ -634,7 +634,7 @@ describe('CommunityCoursesScreen — Filter Expansion', function() {
 
   it('does not show filters by default', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Level and Category labels should NOT be visible when filters are collapsed
     expect(function() { result.getByText('Level'); }).toThrow();
@@ -643,7 +643,7 @@ describe('CommunityCoursesScreen — Filter Expansion', function() {
 
   it('opens and closes filters when filter icon is pressed', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Find the filter toggle icon (IonIonicons with name="options-outline")
     const filterIcon = result.root.findByProps({ name: 'options-outline' });
@@ -664,7 +664,7 @@ describe('CommunityCoursesScreen — Filter Expansion', function() {
 
   it('shows level filter chips when filters are expanded', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Open filters
     const filterIcon = result.root.findByProps({ name: 'options-outline' });
@@ -679,7 +679,7 @@ describe('CommunityCoursesScreen — Filter Expansion', function() {
 
   it('filters courses when a level chip is pressed', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Open filters
     const filterIcon = result.root.findByProps({ name: 'options-outline' });
@@ -709,7 +709,7 @@ describe('CommunityCoursesScreen — Filter Expansion', function() {
 
   it('resets filter when All Levels is pressed', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Open filters
     const filterIcon = result.root.findByProps({ name: 'options-outline' });
@@ -737,7 +737,7 @@ describe('CommunityCoursesScreen — Filter Expansion', function() {
 
   it('shows category filter chips when filters are expanded', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Open filters
     const filterIcon = result.root.findByProps({ name: 'options-outline' });
@@ -751,7 +751,7 @@ describe('CommunityCoursesScreen — Filter Expansion', function() {
 
   it('filters by category when category chip is pressed', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Open filters
     const filterIcon = result.root.findByProps({ name: 'options-outline' });
@@ -790,7 +790,7 @@ describe('CommunityCoursesScreen — Search', function() {
 
   it('search by title filters courses', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     const searchInput = result.getByPlaceholderText('Search courses, creators, or topics...');
     act(function() { fireEvent.changeText(searchInput, 'Options'); });
@@ -802,7 +802,7 @@ describe('CommunityCoursesScreen — Search', function() {
 
   it('search by creator name filters courses', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     const searchInput = result.getByPlaceholderText('Search courses, creators, or topics...');
     act(function() { fireEvent.changeText(searchInput, 'John'); });
@@ -813,7 +813,7 @@ describe('CommunityCoursesScreen — Search', function() {
 
   it('clearing search restores all courses', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     const searchInput = result.getByPlaceholderText('Search courses, creators, or topics...');
     // Type to filter
@@ -827,7 +827,7 @@ describe('CommunityCoursesScreen — Search', function() {
 
   it('clears search text by pressing the close-circle icon', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     const searchInput = result.getByPlaceholderText('Search courses, creators, or topics...');
     // Type to make close-circle icon appear
@@ -844,7 +844,7 @@ describe('CommunityCoursesScreen — Search', function() {
 
   it('search with no results shows empty state', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     const searchInput = result.getByPlaceholderText('Search courses, creators, or topics...');
     act(function() { fireEvent.changeText(searchInput, 'zzzzz_nonexistent'); });
@@ -854,7 +854,7 @@ describe('CommunityCoursesScreen — Search', function() {
 
   it('shows result count header when search has text', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     const searchInput = result.getByPlaceholderText('Search courses, creators, or topics...');
     act(function() { fireEvent.changeText(searchInput, 'Options'); });
@@ -864,7 +864,7 @@ describe('CommunityCoursesScreen — Search', function() {
 
   it('search by description text', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     const searchInput = result.getByPlaceholderText('Search courses, creators, or topics...');
     act(function() { fireEvent.changeText(searchInput, 'spreads'); });
@@ -892,7 +892,7 @@ describe('CommunityCoursesScreen — Draft Courses Excluded', function() {
 
   it('does not show draft courses in community listing', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     // Published count is 0
     const zeros = result.getAllByText('0');
@@ -920,7 +920,7 @@ describe('CommunityCoursesScreen — Back Navigation', function() {
 
   it('renders header with back button area', function() {
     const result = render(
-      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CommunityCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Community Courses')).toBeDefined();
   });

@@ -8,8 +8,8 @@
 
 | Metric | Value |
 |--------|-------|
-| **Files scanned** | 226 |
-| **Files using `useT()` (converted)** | **192 (85%)** |
+| **Files scanned** | 228 |
+| **Files using `useT()` (converted)** | **194 (85%)** |
 | Files with no user-facing strings (not converted) | 34 |
 | Namespaces (en + hi) | **109** |
 | Total translation keys (per locale) | **~4,917** |
@@ -53,7 +53,7 @@ user-facing strings in screens and UI components are routed through `useT()`.
 | Locale parity | `npm run check:i18n` | ✅ 558 keys checked, all match |
 | Lint | `npx eslint` (changed files) | ✅ 0 issues |
 | Unit tests | `npm test` | ✅ 5,355 / 5,355 pass (212 files) |
-| i18n audit | `node scripts/audit-i18n.mjs` | ✅ 192/226 converted |
+| i18n audit | `node scripts/audit-i18n.mjs` | ✅ 194/228 converted |
 
 ---
 

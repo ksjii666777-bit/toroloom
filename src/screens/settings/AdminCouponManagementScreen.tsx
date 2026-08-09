@@ -43,11 +43,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { couponApi, AdminUsageResponse } from '../../services/api/coupons';
-import type { CouponCode } from '../../types';
+import type {CouponCode, RootStackParamList} from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { cacheDirectory, writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ─── Type Helpers ─────────────────────────────────────────────
 
@@ -1166,7 +1167,7 @@ function UsageAnalyticsTab({
 //  MAIN SCREEN
 // ═══════════════════════════════════════════════════════════════
 
-export default function AdminCouponManagementScreen({ navigation }: any) {
+export default function AdminCouponManagementScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AdminCouponManager'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

@@ -53,10 +53,13 @@ import ReportHeader from '../../components/ReportHeader';
 import PeriodTabs from '../../components/PeriodTabs';
 import EmptyReportState from '../../components/EmptyReportState';
 import { computeCognitiveSummary } from '../../services/gateway/cognitiveAnalytics';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ──── Main Screen ───────────────────────────────────────────────────────────
 
-export default function PeriodReportScreen({ navigation }: any) {
+export default function PeriodReportScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'PeriodReport'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

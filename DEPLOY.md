@@ -186,6 +186,8 @@ Alag guide hai — dekho 👉 [`RDS_DEPLOY_GUIDE.md`](./RDS_DEPLOY_GUIDE.md)
 
 # 🛠 Environment Variables
 
+> 📋 **Full production env checklist:** [`docs/PRODUCTION_ENV_CHECKLIST.md`](./docs/PRODUCTION_ENV_CHECKLIST.md) — SnapTrade, Razorpay, AI providers, Sentry, tuning knobs, aur post-deploy verification.
+
 Sabse zaroori variables jo set karne hain:
 
 | Variable | Default | Kya Hai? |
@@ -232,6 +234,8 @@ Sabse zaroori variables jo set karne hain:
 | **Terraform Infrastructure** (IaC for AWS) | [`terraform/README.md`](./terraform/README.md) |
 | **Kubernetes Deployment** (advanced) | [`k8s/`](./k8s/) directory |
 | **Full Scaling Blueprint** | [`SCALING_BLUEPRINT.md`](./SCALING_BLUEPRINT.md) |
+| **Production Env Var Checklist** | [`docs/PRODUCTION_ENV_CHECKLIST.md`](./docs/PRODUCTION_ENV_CHECKLIST.md) |
+| **Railway Deploy Runbook** (step-by-step + smoke tests) | [`docs/RAILWAY_DEPLOY_RUNBOOK.md`](./docs/RAILWAY_DEPLOY_RUNBOOK.md) |
 
 ---
 

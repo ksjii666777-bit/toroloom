@@ -15,7 +15,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { glossaryTerms } from '../../constants/glossaryData';
-import type { GlossaryTerm } from '../../types';
+import type {GlossaryTerm, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ─── Category colors ─────────────────────────────────────────────────────────
 const CATEGORY_COLORS: Record<string, string> = {
@@ -63,7 +64,7 @@ function groupByCategory(terms: GlossaryTerm[]): { type: 'category'; category: s
     .map(([category, terms]) => ({ type: 'category' as const, category, terms }));
 }
 
-export default function GlossaryScreen({ navigation }: any) {
+export default function GlossaryScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Glossary'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

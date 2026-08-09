@@ -32,13 +32,15 @@ import { useFnoStore, ChainSide } from '../../store/fnoStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatCompactNumber } from '../../utils/formatters';
 import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
-import type { FutureContract, FnOPosition, OptionChainRow } from '../../types';
+import { tickerProvider } from '../../services/tickerProvider';
+import type {FutureContract, FnOPosition, OptionChainRow, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const _width = Dimensions.get('window');
 
 const POPULAR_SYMBOLS = ['NIFTY', 'BANKNIFTY', 'RELIANCE', 'HDFCBANK', 'INFY', 'TCS', 'SBIN', 'TATAMOTORS'];
 
-export default function FnOOptionsChainScreen({ navigation }: any) {
+export default function FnOOptionsChainScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'FnOOptionsChain'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -98,10 +100,28 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
     setRefreshing(false);
   }, [selectedSymbol, selectedExpiry, fetchExpiries, fetchFutures, fetchOptionChain, fetchPositions]);
 
+  // Hybrid Ticker Provider — pre-select the underlying instrument so the
+  // SnapTrade order panel opens pre-filled with the same symbol, chart and
+  // execution price when the user taps a contract to trade it.
+  const preselectUnderlying = useCallback((symbol: string) => {
+    // Match the spot-banner precedence (optionChain.spotPrice first, then
+    // spotPrices) so the pre-fill price never diverges from what is shown.
+    const price = symbol === selectedSymbol
+      ? (optionChain?.spotPrice || spotPrices[symbol])
+      : spotPrices[symbol];
+    tickerProvider.selectSymbol({
+      symbol,
+      exchange: 'NSE',
+      name: symbol,
+      price: price || undefined,
+    });
+  }, [spotPrices, selectedSymbol, optionChain]);
+
   const handleSymbolChange = useCallback((symbol: string) => {
     setSelectedSymbol(symbol);
     setShowSymbolPicker(false);
-  }, [setSelectedSymbol]);
+    preselectUnderlying(symbol);
+  }, [setSelectedSymbol, preselectUnderlying]);
 
   const handleExpiryChange = useCallback((expiry: typeof expiries[0]) => {
     setSelectedExpiry(expiry);
@@ -184,7 +204,10 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               {chainSide !== 'PE' && row.ce && (
                 <Pressable
                   style={styles.contractCell}
-                  onPress={() => openOrderModal(row.ce!, 'buy')}
+                  onPress={() => {
+                    preselectUnderlying(selectedSymbol);
+                    openOrderModal(row.ce!, 'buy');
+                  }}
                 >
                   {showGreeks ? (
                     <View style={styles.greeksRow}>
@@ -236,7 +259,10 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
               {chainSide !== 'CE' && row.pe && (
                 <Pressable
                   style={styles.contractCell}
-                  onPress={() => openOrderModal(row.pe!, 'buy')}
+                  onPress={() => {
+                    preselectUnderlying(selectedSymbol);
+                    openOrderModal(row.pe!, 'buy');
+                  }}
                 >
                   {showGreeks ? (
                     <View style={styles.greeksRow}>
@@ -392,11 +418,14 @@ export default function FnOOptionsChainScreen({ navigation }: any) {
             <Pressable
               key={pos.id}
               style={({pressed}) => [[styles.positionCard, { borderColor: colors.border }], {opacity: pressed ? 0.7 : 1}]}
-              onPress={() => navigation.navigate('StrategyBuilder', {
-                symbol: pos.symbol,
-                type: pos.type,
-                strike: pos.strike,
-              })}
+              onPress={() => {
+                preselectUnderlying(pos.symbol);
+                navigation.navigate('StrategyBuilder', {
+                  symbol: pos.symbol,
+                  type: pos.type,
+                  strike: pos.strike,
+                });
+              }}
             >
               <View style={styles.positionHeader}>
                 <View style={styles.positionLeft}>

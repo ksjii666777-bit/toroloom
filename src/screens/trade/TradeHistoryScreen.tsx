@@ -7,13 +7,17 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatDate} from '../../utils/formatters';
+import { tickerProvider } from '../../services/tickerProvider';
 import { Trade } from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
 type FilterType = 'all' | 'buy' | 'sell';
 
-export default function TradeHistoryScreen({ navigation }: any) {
+export default function TradeHistoryScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'TradeHistory'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -147,7 +151,18 @@ export default function TradeHistoryScreen({ navigation }: any) {
                   <TouchableOpacity
                     key={trade.id}
                     style={styles.tradeItem}
-                    onPress={() => navigation.navigate('StockDetail', { stockId: trade.stockId, symbol: trade.symbol })}
+                    onPress={() => {
+                      // Hybrid Ticker Provider — pre-select the traded symbol so
+                      // the SnapTrade order panel opens pre-filled with the same
+                      // instrument, chart and execution price. Indian equities → NSE.
+                      tickerProvider.selectSymbol({
+                        symbol: trade.symbol,
+                        exchange: 'NSE',
+                        name: trade.name,
+                        price: trade.price,
+                      });
+                      navigation.navigate('StockDetail', { stockId: trade.stockId, symbol: trade.symbol });
+                    }}
                   >
                     <View style={styles.tradeLeft}>
                       <View style={[styles.tradeTypeBadge, {

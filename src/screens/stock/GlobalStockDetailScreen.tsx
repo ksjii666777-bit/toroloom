@@ -24,7 +24,10 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useT } from '../../hooks/useT';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { mockEuropeanStocks, mockAsianStocks } from '../../constants/mockData';
-import type { InternationalStock } from '../../types';
+import TradingViewChart from '../../components/TradingViewChart';
+import { toTradingViewSymbol } from '../../utils/tradingView';
+import type {InternationalStock, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - SPACING.xl * 2 - SPACING.lg * 2;
@@ -128,8 +131,8 @@ function mergeApiToStock(stock: InternationalStock, api: { price: number; change
 }
 
 // ──── Main Screen ────────────────────────────────────────────
-export default function GlobalStockDetailScreen({ route, navigation }: any) {
-  const { stockId, symbol, _region } = route.params || {};
+export default function GlobalStockDetailScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'GlobalStockDetail'>) {
+  const { stockId, symbol } = route.params || {};
   const { colors } = useTheme();
   const { t } = useT();
 
@@ -142,6 +145,13 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
   const [stock, setStock] = useState<InternationalStock>(mockStock);
   const [detailLoading, setDetailLoading] = useState(true);
   const [usingLiveData, setUsingLiveData] = useState(false);
+  const [chartFailed, setChartFailed] = useState(false);
+
+  // TradingView symbol for the live chart (e.g. LSE:ULVR, XETR:SAP)
+  const tvSymbol = useMemo(
+    () => toTradingViewSymbol(stock.symbol, stock.exchange, stock.country),
+    [stock.symbol, stock.exchange, stock.country],
+  );
 
   // Fetch live quote from backend on mount
   useEffect(() => {
@@ -241,14 +251,17 @@ export default function GlobalStockDetailScreen({ route, navigation }: any) {
             </View>
           </View>
 
-          {/* Mini Chart */}
+          {/* Live Chart — TradingView widget with real market data */}
           <View style={[styles.chartContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <MiniPriceChart isPositive={isPositive} />
-            <View style={styles.chartTimeframes}>
-              {['1D', '1W', '1M', '3M', '1Y', 'Max'].map(tf => (
-                <Text key={tf} style={[styles.chartTf, { color: tf === '1Y' ? colors.primary : colors.textMuted }]}>{tf}</Text>
-              ))}
-            </View>
+            {chartFailed ? (
+              <MiniPriceChart isPositive={isPositive} />
+            ) : (
+              <TradingViewChart
+                symbol={tvSymbol}
+                height={CHART_HEIGHT}
+                onError={() => setChartFailed(true)}
+              />
+            )}
           </View>
         </Animated.View>
 
@@ -360,8 +373,6 @@ const styles = StyleSheet.create({
     padding: SPACING.lg, borderRadius: BORDER_RADIUS.lg, borderWidth: 1,
     marginTop: SPACING.lg, alignItems: 'center',
   },
-  chartTimeframes: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.sm },
-  chartTf: { ...FONTS.semiBold, fontSize: FONTS.size.xs },
 
   section: {
     padding: SPACING.lg, borderRadius: BORDER_RADIUS.lg, borderWidth: 1, marginBottom: SPACING.lg,

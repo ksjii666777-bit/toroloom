@@ -29,11 +29,14 @@ import { SkeletonBlock, PortfolioSkeleton } from '../../components/ui/SkeletonLo
 import { getMockAlertRules, getMockAlertTriggers, createDefaultRule } from '../../services/ai/sentimentAlertService';
 import { mockSentimentData, mockNews } from '../../constants/mockData';
 import { newsApi } from '../../services/api';
-import type { SentimentAlertRule, SentimentAlertSensitivity, SentimentAlertDirection } from '../../types';
+import type {SentimentAlertRule, SentimentAlertSensitivity, SentimentAlertDirection, RootStackParamList, TabParamList} from '../../types';
 import { generateInitialFeedEvents, generateRandomFeedEvent, formatFeedTimestamp, getSourceIcon } from '../../services/ai/sentimentLiveFeed';
 import type { LiveFeedEvent } from '../../services/ai/sentimentLiveFeed';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
 
-export default function HomeScreen({ navigation }: any) {
+export default function HomeScreen({ navigation }: CompositeScreenProps<BottomTabScreenProps<TabParamList, 'Home'>, NativeStackScreenProps<RootStackParamList>>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -375,7 +378,7 @@ export default function HomeScreen({ navigation }: any) {
               { icon: 'pie-chart', label: t('home.sip'), screen: 'SIPCalculator', color: colors.primary },
               { icon: 'school', label: t('home.learn'), screen: 'Learn', color: colors.warning },
             ].map((item, i) => (
-              <AnimatedPressable key={i} testID={`home-quick-${item.screen.toLowerCase()}`} onPress={() => navigation.navigate(item.screen)} haptic="light" scaleTo={0.92}>
+              <AnimatedPressable key={i} testID={`home-quick-${item.screen.toLowerCase()}`} onPress={() => (navigation.navigate as (screenName: string) => void)(item.screen)} haptic="light" scaleTo={0.92}>
                 <View style={styles.quickAction}>
                   <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }]}>
                     <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={item.color} />
@@ -393,7 +396,7 @@ export default function HomeScreen({ navigation }: any) {
                 <AnimatedPressable
                   key={i}
                   testID={`home-priority-${item.screen.toLowerCase()}`}
-                  onPress={() => navigation.navigate(item.screen)}
+                  onPress={() => (navigation.navigate as (screenName: string) => void)(item.screen)}
                   haptic="light"
                   scaleTo={0.97}
                   accessibilityLabel={item.label}
@@ -559,7 +562,7 @@ export default function HomeScreen({ navigation }: any) {
             renderItem={({ item: calc }) => (
               <TouchableOpacity
                 style={[styles.calcCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                onPress={() => navigation.navigate(calc.screen)}
+                onPress={() => (navigation.navigate as (screenName: string) => void)(calc.screen)}
                 activeOpacity={0.7}
               >
                 <View style={[styles.calcIcon, { backgroundColor: `${calc.color}20` }]}>

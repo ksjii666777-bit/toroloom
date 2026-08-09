@@ -26,7 +26,8 @@ import { useT } from '../../hooks/useT';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { UserGeneratedCourse } from '../../types';
+import type {UserGeneratedCourse, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type LevelFilter = 'all' | 'beginner' | 'intermediate' | 'advanced';
 
@@ -54,7 +55,7 @@ const LEVEL_COLORS: Record<string, [string, string]> = {
   return t('time.monthsAgo', { count: Math.floor(days / 30) });
 }
 
-export default function CommunityCoursesScreen({ navigation }: any) {
+export default function CommunityCoursesScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'CommunityCourses'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

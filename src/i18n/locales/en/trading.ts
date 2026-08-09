@@ -131,6 +131,18 @@ export default {
     usOrderFailed: 'Order Failed',
     usOrderFailedMsg: 'Failed to place order. Please try again.',
     usOrderInfo: 'Orders are placed via your connected SnapTrade brokerage. Check your brokerage account for order status and confirmations.',
+    // ── Hybrid chart (TradingView ⇄ SnapTrade) ──────────────────────────
+    selectSymbolChart: 'Enter a symbol to see the live chart',
+    chartReadOnly: 'Read-only market view — connect a broker to trade',
+    chartFallbackTitle: 'Live price',
+    chartFallbackHint: 'TradingView chart unavailable — using live price feed',
+    positionLive: 'LIVE',
+    positionAvgBuy: 'AVG BUY',
+    positionStop: 'STOP',
+    positionTarget: 'TARGET',
+    positionNoPosition: 'No open position',
+    positionViewOnly: 'View-only — connect a broker to trade',
+    positionIronLock: 'IRON LOCK ACTIVE',
     // ── FnO Options Chain ──────────────────────────────────────────────────
     all: 'All',
     optionChain: 'Option Chain',

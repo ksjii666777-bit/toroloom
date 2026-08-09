@@ -12,6 +12,11 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock, SkeletonCard } from '../../components/ui/SkeletonLoader';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type {RootStackParamList, TabParamList} from '../../types';
+
 
 const { width } = Dimensions.get('window');
 const SECTORS = ['All', 'Technology', 'Finance', 'Energy', 'Consumer', 'Automobile', 'Telecom'];
@@ -21,7 +26,7 @@ const SUGGESTED_SEARCHES = ['RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'SBIN', 'ICIC
 
 const HEATMAP_HOT_THRESHOLD = 1.5;
 
-export default function MarketsScreen({ navigation }: any) {
+export default function MarketsScreen({ navigation }: CompositeScreenProps<BottomTabScreenProps<TabParamList, 'Markets'>, NativeStackScreenProps<RootStackParamList>>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

@@ -80,7 +80,7 @@ describe('LoginScreen — Loading State', () => {
   });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -97,74 +97,74 @@ describe('LoginScreen — Loaded Content', () => {
   });
 
   it('renders the app name', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Toroloom')).toBeDefined();
   });
 
   it('renders the tagline', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Intelligence Meets Execution')).toBeDefined();
   });
 
   it('renders the welcome back header', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/Welcome Back/)).toBeDefined();
   });
 
   it('renders the subtitle', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Log in to your account')).toBeDefined();
   });
 
   it('renders the Email input label', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Email')).toBeDefined();
   });
 
   it('renders the Password input label', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Password')).toBeDefined();
   });
 
   it('renders the Forgot Password link', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Forgot Password?')).toBeDefined();
   });
 
   it('renders the Log In button', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Log In')).toBeDefined();
   });
 
   it('renders the social login divider', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('or continue with')).toBeDefined();
   });
 
   it('renders social login buttons', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // social buttons render as TouchableOpacity with Ionicons inside
     expect(getByText("Don't have an account?")).toBeDefined();
   });
 
   it('renders the Sign Up link', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Sign Up')).toBeDefined();
   });
 
   it('renders without error state initially', () => {
-    const { queryByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { queryByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(queryByText('This field is required')).toBeNull();
     expect(queryByText('Invalid credentials. Try again.')).toBeNull();
@@ -183,7 +183,7 @@ describe('LoginScreen — Validation & Error States', () => {
   });
 
   it('shows error when Log In is pressed with empty fields', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('Log In')); });
     advanceAndRender(100);
@@ -193,7 +193,7 @@ describe('LoginScreen — Validation & Error States', () => {
   it('shows error when login returns false (invalid credentials)', async () => {
     mockLogin.mockResolvedValue(false);
 
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
 
     // We can't easily set input values in the custom test renderer, but the
@@ -220,7 +220,7 @@ describe('LoginScreen — Validation & Error States', () => {
     // The actual login failure path is triggered by the handleLogin function
     // after validation passes. We test this by simulating the flow through
     // the auth store mock.
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Initial state has no error
     expect(getByText('Log In')).toBeDefined();
@@ -239,7 +239,7 @@ describe('LoginScreen — Loading State on Button', () => {
   });
 
   it('renders Log In button (no loading indicator by default)', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Log In')).toBeDefined();
   });
@@ -257,14 +257,14 @@ describe('LoginScreen — Navigation', () => {
   });
 
   it('navigates to Signup when Sign Up is pressed', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     act(() => { fireEvent.press(getByText('Sign Up')); });
     expect(mockNavigate).toHaveBeenCalledWith('Signup');
   });
 
   it('does not navigate on initial render', () => {
-    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<LoginScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Toroloom')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();

@@ -33,6 +33,9 @@ import Badge from '../../components/ui/Badge';
 import { triggerHaptic } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { showShareSheet, ShareContent } from '../../utils/share';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 const VERIFIED_USERS = ['Priya Patel', 'Arun Kumar', 'Vikram Reddy'];
@@ -155,7 +158,7 @@ function AutoGrowingInput({
 
 // ─── Main Screen ────────────────────────────────────────────────────────────
 
-export default function PostDetailScreen({ navigation, route }: any) {
+export default function PostDetailScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'CommunityPost'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

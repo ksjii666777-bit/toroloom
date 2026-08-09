@@ -42,6 +42,8 @@ Service → Settings → Root Directory → Change from "/" to "/backend"
 
 ## 🔐 Step 4: Environment Variables Set Karo
 
+> 📋 **Complete checklist:** [`docs/PRODUCTION_ENV_CHECKLIST.md`](./docs/PRODUCTION_ENV_CHECKLIST.md) — saare env vars (SnapTrade, Razorpay, AI, Sentry, tuning) with sources + post-deploy verification.
+
 Backend service → **Variables** tab mein yeh sab add karo:
 
 ### ⚡ Required (App chalne ke liye zaroori)
@@ -335,6 +337,7 @@ curl https://your-service.up.railway.app/health
 
 ## 🆘 Support
 
+- **Toroloom Env Checklist:** [`docs/PRODUCTION_ENV_CHECKLIST.md`](./docs/PRODUCTION_ENV_CHECKLIST.md)
 - **Railway Docs:** [docs.railway.com](https://docs.railway.com)
 - **Razorpay Docs:** [razorpay.com/docs](https://razorpay.com/docs)
 - **SnapTrade Docs:** [docs.snaptrade.com](https://docs.snaptrade.com)

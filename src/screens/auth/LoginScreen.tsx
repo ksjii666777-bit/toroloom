@@ -10,9 +10,10 @@ import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 import { useT } from '../../hooks/useT';
 
-interface LoginScreenProps {
-  navigation: any;
-}
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
+type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: LoginScreenProps) {
   const { colors } = useTheme();

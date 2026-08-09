@@ -132,7 +132,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('renders without crashing when navigation is a frozen object', () => {
       const frozenNav = createFrozenNavigation();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -151,7 +151,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
         getId: () => 'Portfolio',
       });
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -160,7 +160,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('renders full content with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Portfolio')).toBeDefined();
       expect(getByText('Track your investments')).toBeDefined();
@@ -172,7 +172,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('renders holdings with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('RELIANCE')).toBeDefined();
       expect(getByText('HDFCBANK')).toBeDefined();
@@ -183,7 +183,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('renders summary stats with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Holdings')).toBeDefined();
       expect(getByText('Trades')).toBeDefined();
@@ -196,17 +196,17 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('does NOT attempt to set properties on frozen navigation during mount', () => {
       const frozenNav = createFrozenNavigation();
       expect(() => {
-        renderWithTimeTravel(<PortfolioScreen navigation={frozenNav as any} />);
+        renderWithTimeTravel(<PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
     });
 
     it('does NOT mutate frozen navigation after re-render', () => {
       const frozenNav = createFrozenNavigation();
       const { update, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => {
-        update(<PortfolioScreen navigation={frozenNav as any} />);
+        update(<PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
       cleanup();
     });
@@ -214,7 +214,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('handles mount with frozen navigation then unmounts gracefully', () => {
       const frozenNav = createFrozenNavigation();
       const { unmount } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { unmount(); }).not.toThrow();
     });
@@ -224,7 +224,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('toggle between holdings and trades views with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Holdings toggle should be present
       expect(getByText(/Holdings/)).toBeDefined();
@@ -237,7 +237,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('navigates to Reports when analytics CTA is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Advanced Analytics'));
       expect(mockNavigate).toHaveBeenCalledWith('Reports');
@@ -247,7 +247,7 @@ describe('PortfolioScreen — Frozen Navigation Object', () => {
     it('does not navigate without explicit interaction', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <PortfolioScreen navigation={frozenNav as any} />,
+        <PortfolioScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Portfolio')).toBeDefined();
       expect(mockNavigate).not.toHaveBeenCalled();

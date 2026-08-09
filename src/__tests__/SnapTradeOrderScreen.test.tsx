@@ -102,8 +102,8 @@ async function advanceAndFlush() {
 async function setupAndSubmit() {
   const utils = render(
     <SnapTradeOrderScreen
-      route={{ params: { symbol: 'AAPL', price: 200 } }}
-      navigation={{ navigate: vi.fn(), goBack: vi.fn() }}
+      route={{ params: { symbol: 'AAPL', price: 200 } } as any}
+      navigation={{ navigate: vi.fn(), goBack: vi.fn() } as any}
     />,
   );
   await advanceAndFlush();

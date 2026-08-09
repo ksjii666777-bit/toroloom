@@ -96,7 +96,7 @@ import AddFundsScreen from '../screens/funds/AddFundsScreen';
 // ── Helpers ──────────────────────────────────────────────────
 
 function renderAddFunds() {
-  return render(<AddFundsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+  return render(<AddFundsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 }
 
 function changeText(input: ReactTestInstance, text: string) {

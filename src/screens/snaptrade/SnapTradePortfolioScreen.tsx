@@ -25,10 +25,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { snapTradeApi } from '../../services/api';
+import { tickerProvider } from '../../services/tickerProvider';
 import type { SnapTradeHolding, SnapTradePosition, SnapTradeStatus } from '../../services/api/snaptrade';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 
 // ──── Format helpers ──────────────────────────────────────────
@@ -45,7 +49,7 @@ const formatCompactUSD = (n: number): string => {
 };
 
 // ──── Main Screen ─────────────────────────────────────────────
-export default function SnapTradePortfolioScreen({ navigation }: any) {
+export default function SnapTradePortfolioScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SnapTradePortfolio'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
@@ -285,11 +289,23 @@ export default function SnapTradePortfolioScreen({ navigation }: any) {
               return (
                 <AnimatedPressable
                   key={h.symbol}
-                  onPress={() => navigation.navigate('SnapTradeOrder', {
-                    symbol: h.symbol,
-                    name: h.name,
-                    price: h.price,
-                  })}
+                  onPress={() => {
+                    // Hybrid Ticker Provider — pre-select this holding so the
+                    // order panel opens pre-filled with the same symbol, chart
+                    // and execution price. SnapTrade holdings are US equities,
+                    // so map with the NASDAQ exchange (order panel default).
+                    tickerProvider.selectSymbol({
+                      symbol: h.symbol,
+                      exchange: 'NASDAQ',
+                      name: h.name,
+                      price: h.price,
+                    });
+                    navigation.navigate('SnapTradeOrder', {
+                      symbol: h.symbol,
+                      name: h.name,
+                      price: h.price,
+                    });
+                  }}
                   haptic="light"
                   scaleTo={0.98}
                 >

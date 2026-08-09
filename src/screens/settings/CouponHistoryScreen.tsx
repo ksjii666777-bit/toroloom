@@ -15,6 +15,9 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import * as Haptics from 'expo-haptics';
 import { useT } from '../../hooks/useT';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ─── Type Color Helpers ──────────────────────────────────────
 
@@ -85,7 +88,7 @@ function UsageCard({ usage, index }: { usage: CouponUsageDisplay; index: number 
 
 // ─── Main Screen ──────────────────────────────────────────────
 
-export default function CouponHistoryScreen({ navigation }: any) {
+export default function CouponHistoryScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'CouponHistory'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

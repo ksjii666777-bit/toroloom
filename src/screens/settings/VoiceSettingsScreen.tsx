@@ -10,6 +10,9 @@ import { useVoiceStore, VOICE_MESSAGES } from '../../store/voiceStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
@@ -33,7 +36,7 @@ const getTestMessages = (t: any) => [
   { label: t('voiceSettings.testVolatility'), message: VOICE_MESSAGES.marketVolatility },
 ];
 
-export default function VoiceSettingsScreen({ navigation }: any) {
+export default function VoiceSettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'VoiceSettings'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = createStyles(colors);

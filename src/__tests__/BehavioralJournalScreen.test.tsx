@@ -182,7 +182,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders the header title', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const text = root.root.findByProps({ children: 'Behavioural Journal' });
     expect(text).toBeDefined();
@@ -191,7 +191,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders the header subtitle', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const text = root.root.findByProps({ children: 'Track your trading psychology' });
     expect(text).toBeDefined();
@@ -200,7 +200,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders tab bar with Dashboard, Entries, Reports labels', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     expect(root.root.findByProps({ children: 'Dashboard' })).toBeDefined();
     expect(root.root.findByProps({ children: 'Entries' })).toBeDefined();
@@ -210,7 +210,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders performance metrics section (win rate 50% from mock)', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const winRate = root.root.findAllByProps({ children: '50%' });
     expect(winRate.length).toBeGreaterThanOrEqual(1);
@@ -219,7 +219,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders improvement tip from weekly report on dashboard', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const tips = root.root.findAllByProps({ children: 'Improvement Tip' });
     expect(tips.length).toBeGreaterThanOrEqual(1);
@@ -228,7 +228,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders plan compliance rate (80%) from metrics', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const compValues = root.root.findAllByProps({ children: '80%' });
     expect(compValues.length).toBeGreaterThanOrEqual(1);
@@ -237,7 +237,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders the FAB "add" button', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const addIcons = root.root.findAllByProps({ children: 'add' });
     expect(addIcons.length).toBeGreaterThanOrEqual(1);
@@ -246,7 +246,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders WeeklyReportCard with "Week of" in reports section when reports tab is clicked', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
 
     // Find all TouchableOpacity elements and click the "Reports" one
@@ -272,7 +272,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders week-of date text when reports tab is active', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
 
     // Find and click Reports tab to switch active tab
@@ -300,7 +300,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders performance overview section title', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const sec = root.root.findByProps({ children: 'Performance Overview' });
     expect(sec).toBeDefined();
@@ -309,7 +309,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders emotional state breakdown section', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const sectionTitle = root.root.findByProps({ children: 'Emotional State Breakdown' });
     expect(sectionTitle).toBeDefined();
@@ -318,7 +318,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders mistake frequency section', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const sectionTitle = root.root.findByProps({ children: 'Most Common Mistakes' });
     expect(sectionTitle).toBeDefined();
@@ -327,7 +327,7 @@ describe('BehavioralJournalScreen', () => {
   it('renders streak metrics (max win/loss streaks)', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<BehavioralJournalScreen />);
+      root = TestRenderer.create(<BehavioralJournalScreen {...({} as any)} />);
     });
     const streakLabels = ['Max Win Streak', 'Max Loss Streak', 'Max Drawdown'];
     streakLabels.forEach(label => {

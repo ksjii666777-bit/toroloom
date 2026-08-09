@@ -41,6 +41,9 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ──── Category Config ──────────────────────────────────────────────────────
 
@@ -73,7 +76,7 @@ const EXPERIMENT_COLORS: Record<ExperimentVariant, string> = {
 
 // ──── Component ────────────────────────────────────────────────────────────
 
-export default function FeatureFlagsScreen({ navigation }: any) {
+export default function FeatureFlagsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'FeatureFlags'>) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t } = useT();

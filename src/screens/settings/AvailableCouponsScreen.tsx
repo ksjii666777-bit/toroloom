@@ -20,10 +20,11 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 
-import type { CouponCode } from '../../types';
+import type {CouponCode, RootStackParamList} from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import * as Haptics from 'expo-haptics';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ─── Coupon Type Helpers ──────────────────────────────────────
 
@@ -219,7 +220,7 @@ function CouponCard({
 
 // ─── Main Screen ──────────────────────────────────────────────
 
-export default function AvailableCouponsScreen({ navigation }: any) {
+export default function AvailableCouponsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AvailableCoupons'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

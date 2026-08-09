@@ -165,6 +165,53 @@ export const snapTradeApi = {
   },
 
   /**
+   * Hybrid ticker data for one symbol — open position + Iron Lock/risk
+   * levels. Powers the chart's position-levels overlay. No credentials
+   * are ever exposed (broker secrets stay server-side).
+   */
+  getTickerLevels: async (symbol: string): Promise<{
+    success: boolean;
+    connected: boolean;
+    symbol: string;
+    position: {
+      symbol: string;
+      quantity: number;
+      avgCost: number;
+      price: number;
+      pnl: number;
+      pnlPercent: number;
+    } | null;
+    levels: {
+      dailyLossLimit: number;
+      dailyLossPercentLimit: number;
+      maxPositionSizePercent: number;
+    } | null;
+    ironLockActive: boolean;
+    lockdownStatus: string;
+  }> => {
+    return api.get<{
+      success: boolean;
+      connected: boolean;
+      symbol: string;
+      position: {
+        symbol: string;
+        quantity: number;
+        avgCost: number;
+        price: number;
+        pnl: number;
+        pnlPercent: number;
+      } | null;
+      levels: {
+        dailyLossLimit: number;
+        dailyLossPercentLimit: number;
+        maxPositionSizePercent: number;
+      } | null;
+      ironLockActive: boolean;
+      lockdownStatus: string;
+    }>(`/snaptrade/ticker/${encodeURIComponent(symbol)}`);
+  },
+
+  /**
    * Place an order via SnapTrade.
    */
   placeOrder: async (order: {

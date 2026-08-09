@@ -81,7 +81,9 @@ beforeEach(() => {
 function renderScreen() {
   return render(
     <StockScreenerScreen
-      navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+      navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+    route={{ params: {} } as any}
+
     />
   );
 }

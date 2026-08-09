@@ -90,7 +90,7 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('renders without crashing when navigation is a frozen object', () => {
       const frozenNav = createFrozenNavigation();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -109,7 +109,7 @@ describe('LearnScreen — Frozen Navigation Object', () => {
         getId: () => 'Learn',
       });
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -118,7 +118,7 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('renders full content with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Learning Hub')).toBeDefined();
       expect(getByText('Master the markets, one lesson at a time')).toBeDefined();
@@ -130,7 +130,7 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('renders course titles with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Stock Market Basics')).toBeDefined();
       expect(getByText('Technical Analysis')).toBeDefined();
@@ -141,7 +141,7 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('renders course level badges with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('beginner')).toBeDefined();
       expect(getByText('intermediate')).toBeDefined();
@@ -152,7 +152,7 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('renders progress percentages with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('30% complete')).toBeDefined();
       cleanup();
@@ -163,17 +163,17 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('does NOT attempt to set properties on frozen navigation during mount', () => {
       const frozenNav = createFrozenNavigation();
       expect(() => {
-        renderWithTimeTravel(<LearnScreen navigation={frozenNav as any} />);
+        renderWithTimeTravel(<LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
     });
 
     it('does NOT mutate frozen navigation after re-render', () => {
       const frozenNav = createFrozenNavigation();
       const { update, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => {
-        update(<LearnScreen navigation={frozenNav as any} />);
+        update(<LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
       cleanup();
     });
@@ -181,7 +181,7 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('handles mount with frozen navigation then unmounts gracefully', () => {
       const frozenNav = createFrozenNavigation();
       const { unmount } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { unmount(); }).not.toThrow();
     });
@@ -191,12 +191,11 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('navigates to CourseDetail when a course is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Stock Market Basics'));
       expect(mockNavigate).toHaveBeenCalledWith('CourseDetail', {
         courseId: 'c1',
-        course: defaultCourses[0],
       });
       cleanup();
     });
@@ -204,7 +203,7 @@ describe('LearnScreen — Frozen Navigation Object', () => {
     it('does not navigate without explicit interaction', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <LearnScreen navigation={frozenNav as any} />,
+        <LearnScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Learning Hub')).toBeDefined();
       expect(mockNavigate).not.toHaveBeenCalled();

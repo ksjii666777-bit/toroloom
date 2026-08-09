@@ -297,6 +297,8 @@ function renderScreen() {
   return render(
     <IPODashboardScreen
       navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+    route={{ params: {} } as any}
+
     />
   );
 }

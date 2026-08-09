@@ -338,23 +338,23 @@ beforeEach(() => {
 
 describe('ReportsScreen — Header & Layout', () => {
   it('renders analytics title and subtitle', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('Analytics')).toBeDefined();
     expect(getByText('Advanced portfolio intelligence')).toBeDefined();
   });
 
   it('calls getAnalytics on mount', () => {
-    render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getAnalyticsSpy).toHaveBeenCalled();
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { toJSON } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
   });
 
   it('renders all five tab labels', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('P&L')).toBeDefined();
     expect(getByText('Performance')).toBeDefined();
     expect(getByText('Tax')).toBeDefined();
@@ -365,18 +365,18 @@ describe('ReportsScreen — Header & Layout', () => {
 
 describe('ReportsScreen — Portfolio Snapshot', () => {
   it('shows portfolio value', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('₹81,910')).toBeDefined();
   });
 
   it('shows total return label and percentage', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('Total Return')).toBeDefined();
     expect(getByText('7.35%')).toBeDefined();
   });
 
   it('shows snapshot metric labels', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('Win Rate')).toBeDefined();
     expect(getByText('Sharpe')).toBeDefined();
     expect(getByText('Max DD')).toBeDefined();
@@ -386,30 +386,30 @@ describe('ReportsScreen — Portfolio Snapshot', () => {
 
 describe('ReportsScreen — P&L Tab Content', () => {
   it('shows P&L Over Time section heading', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('P&L Over Time')).toBeDefined();
   });
 
   it('shows realized and unrealized P&L cards', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('Realized P&L')).toBeDefined();
     expect(getByText('Unrealized P&L')).toBeDefined();
   });
 
   it('shows today\'s performance card', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText("Today's Performance")).toBeDefined();
     expect(getByText('Day Change')).toBeDefined();
     expect(getByText('Day Return')).toBeDefined();
   });
 
   it('shows monthly returns section', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('Monthly Returns')).toBeDefined();
   });
 
   it('formats monthly return labels', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('May 2025')).toBeDefined();
     expect(getByText('Apr 2025')).toBeDefined();
   });
@@ -421,7 +421,7 @@ describe('ReportsScreen — P&L Tab Content', () => {
 
 describe('ReportsScreen — Performance Tab', () => {
   it('shows trade statistics after switching to Performance tab', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     // Use exact match regex to avoid matching "Today's Performance" in the P&L tab
     fireEvent.press(getByText(/^Performance$/));
     expect(getByText('Trade Statistics')).toBeDefined();
@@ -430,26 +430,26 @@ describe('ReportsScreen — Performance Tab', () => {
 
 describe('ReportsScreen — Tax Tab', () => {
   it('shows capital gains summary after switching', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Tax'));
     expect(getByText('Capital Gains Tax Summary')).toBeDefined();
   });
 
   it('shows STCG and LTCG sections', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Tax'));
     expect(getByText('Short-Term')).toBeDefined();
     expect(getByText('Long-Term')).toBeDefined();
   });
 
   it('shows tax rules information section', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Tax'));
     expect(getByText('Tax Rules (India FY 2025-26)')).toBeDefined();
   });
 
   it('shows tax saving tips section', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Tax'));
     expect(getByText('Tax Saving Tips')).toBeDefined();
     expect(getByText('Tax Harvesting')).toBeDefined();
@@ -459,13 +459,13 @@ describe('ReportsScreen — Tax Tab', () => {
 
 describe('ReportsScreen — Holdings Tab', () => {
   it('shows sector allocation after switching', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Holdings'));
     expect(getByText('Sector Allocation')).toBeDefined();
   });
 
   it('shows sector names', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Holdings'));
     expect(getByText('Finance')).toBeDefined();
     expect(getByText('Technology')).toBeDefined();
@@ -473,7 +473,7 @@ describe('ReportsScreen — Holdings Tab', () => {
   });
 
   it('shows holdings list with stock symbols', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Holdings'));
     expect(getByText('RELIANCE')).toBeDefined();
     expect(getByText('TCS')).toBeDefined();
@@ -484,7 +484,7 @@ describe('ReportsScreen — Holdings Tab', () => {
 describe('ReportsScreen — Empty State', () => {
   it('shows empty state in Holdings tab when no holdings exist', () => {
     mockPortfolioState.holdings = [];
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Holdings'));
     expect(getByText('No Holdings')).toBeDefined();
     expect(getByText('Start investing to see your holdings here')).toBeDefined();
@@ -497,14 +497,14 @@ describe('ReportsScreen — Empty State', () => {
 
 describe('ReportsScreen — Structure', () => {
   it('renders a complex tree with snapshot, tabs, and tab content', () => {
-    const { toJSON } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { toJSON } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     const tree = toJSON();
     expect(tree).toBeTruthy();
     expect(typeof tree).toBe('object');
   });
 
   it('renders quick summary values section', () => {
-    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />);
+    const { getByText } = render(<ReportsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('Portfolio Value')).toBeDefined();
     expect(getByText('Advanced portfolio intelligence')).toBeDefined();
   });

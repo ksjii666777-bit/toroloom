@@ -86,33 +86,33 @@ describe('AadhaarVerificationScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('renders the header with title', () => {
-    const { getByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     expect(getByText('Aadhaar eKYC')).toBeDefined();
   });
 
   it('shows step indicator', () => {
-    const { getByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     expect(getByText('Step 1 of 2')).toBeDefined();
   });
 
   it('shows info about UIDAI verification', () => {
-    const { getByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     expect(getByText(/UIDAI/)).toBeDefined();
     expect(getByText(/masked data/)).toBeDefined();
   });
 
   it('shows Aadhaar input with correct placeholder', () => {
-    const { getByPlaceholderText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     expect(getByPlaceholderText('XXXX XXXX XXXX')).toBeDefined();
   });
 
   it('shows the consent checkbox text', () => {
-    const { getByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     expect(getByText(/I consent to verify my Aadhaar/)).toBeDefined();
   });
 
   it('shows Send OTP button', () => {
-    const { getAllByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getAllByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     expect(getAllByText('Send OTP').length).toBeGreaterThan(0);
   });
 
@@ -121,7 +121,7 @@ describe('AadhaarVerificationScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('calls sendAadhaarOtp when Send OTP is pressed with valid input and consent', () => {
-    const { getByPlaceholderText, getAllByText, getByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getAllByText, getByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('XXXX XXXX XXXX');
 
     act(() => { fireEvent.changeText(input, '234567891011'); });
@@ -134,7 +134,7 @@ describe('AadhaarVerificationScreen', () => {
   });
 
   it('transitions to OTP input step after successful OTP send', async () => {
-    const { getByPlaceholderText, getByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('XXXX XXXX XXXX');
 
     act(() => { fireEvent.changeText(input, '234567891011'); });
@@ -149,7 +149,7 @@ describe('AadhaarVerificationScreen', () => {
   });
 
   it('shows demo hint with mock 123456 code in OTP step', async () => {
-    const { getByPlaceholderText, getByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByPlaceholderText, getByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     const input = getByPlaceholderText('XXXX XXXX XXXX');
 
     act(() => { fireEvent.changeText(input, '234567891011'); });
@@ -161,7 +161,7 @@ describe('AadhaarVerificationScreen', () => {
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { toJSON } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     expect(toJSON()).toBeTruthy();
   });
 
@@ -170,7 +170,7 @@ describe('AadhaarVerificationScreen', () => {
   // ═══════════════════════════════════════════════════════════════
 
   it('renders demo hint text for mock OTP', () => {
-    const { getByText } = render(<AadhaarVerificationScreen {...baseProps} />);
+    const { getByText } = render(<AadhaarVerificationScreen {...baseProps as any} />);
     expect(getByText(/12-digit number found/)).toBeDefined();
   });
 });

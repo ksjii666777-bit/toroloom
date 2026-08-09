@@ -12,6 +12,9 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 Dimensions.get('window');
 
 const kycSteps = [
@@ -29,7 +32,7 @@ const KYC_SCREENS: Record<string, string> = {
   digilocker: 'DigiLocker',
 };
 
-export default function ProfileScreen({ navigation }: any) {
+export default function ProfileScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Profile'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -89,7 +92,7 @@ export default function ProfileScreen({ navigation }: any) {
         markStepCompleted(stepKey as 'pan' | 'aadhaar' | 'digilocker' | 'bank');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       });
-      navigation.navigate(screen);
+      (navigation.navigate as (screenName: string) => void)(screen);
     }
   }, [navigation, completedStepsCount, markStepCompleted]);
 

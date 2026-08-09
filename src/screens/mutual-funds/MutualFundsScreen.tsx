@@ -13,6 +13,9 @@ import { useT } from '../../hooks/useT';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
@@ -29,7 +32,7 @@ const frequencyOptions: { label: string; value: SIPPlan['frequency']; tKey: stri
   { label: 'Quarterly', value: 'quarterly', tKey: 'mutualFunds.quarterly' },
 ];
 
-export default function MutualFundsScreen({ navigation }: any) {
+export default function MutualFundsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'MutualFunds' | 'SIPs'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

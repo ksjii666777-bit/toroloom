@@ -15,11 +15,17 @@ import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
+import { openExitOrder } from '../../utils/orderExit';
 import { SkeletonBlock, SkeletonCard, PortfolioSkeleton } from '../../components/ui/SkeletonLoader';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type {RootStackParamList, TabParamList} from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
-export default function PortfolioScreen({ navigation }: any) {
+export default function PortfolioScreen({ navigation }: CompositeScreenProps<BottomTabScreenProps<TabParamList, 'Portfolio'>, NativeStackScreenProps<RootStackParamList>>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -224,6 +230,30 @@ export default function PortfolioScreen({ navigation }: any) {
                   <PortfolioHolding
                     holding={holding}
                     onPress={(h) => navigation.navigate('StockDetail', { stockId: h.stockId, symbol: h.symbol })}
+                    onApplyStop={(p) => openExitOrder(
+                      navigation,
+                      {
+                        symbol: holding.symbol,
+                        exchange: 'NSE',
+                        name: holding.name,
+                        price: holding.currentPrice,
+                        stockId: holding.stockId,
+                      },
+                      'SL',
+                      p,
+                    )}
+                    onApplyTarget={(p) => openExitOrder(
+                      navigation,
+                      {
+                        symbol: holding.symbol,
+                        exchange: 'NSE',
+                        name: holding.name,
+                        price: holding.currentPrice,
+                        stockId: holding.stockId,
+                      },
+                      'LIMIT',
+                      p,
+                    )}
                   />
                 </ReanimatedAnimated.View>
               ))

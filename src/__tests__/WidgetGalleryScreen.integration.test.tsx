@@ -70,7 +70,9 @@ const mockGoBack = vi.fn();
 function renderScreen() {
   return render(
     <WidgetGalleryScreen
-      navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+      navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+    route={{ params: {} } as any}
+
     />
   );
 }

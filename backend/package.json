@@ -42,7 +42,7 @@
     "razorpay": "^2.9.6",
     "resend": "^6.18.0",
     "smartapi-javascript": "^1.0.27",
-    "snaptrade-typescript-sdk": "^10.0.18",
+    "snaptrade-typescript-sdk": "^11.1.0",
     "speakeasy": "^2.0.0",
     "uuid": "^11.0.3",
     "ws": "^8.18.0",

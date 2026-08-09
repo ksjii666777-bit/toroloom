@@ -166,22 +166,22 @@ describe('LiveFeedScreen', () => {
   // ── Rendering ───────────────────────────────────────────
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { toJSON } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(toJSON).toBeDefined();
   });
 
   it('renders the header title', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('Live Sentiment Feed')).toBeTruthy();
   });
 
   it('renders the search input with correct placeholder', () => {
-    const { getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByPlaceholderText('Search by symbol, name, or message...')).toBeTruthy();
   });
 
   it('renders all 5 source filter chips', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('All')).toBeTruthy();
     expect(getByText('News')).toBeTruthy();
     expect(getByText('Social')).toBeTruthy();
@@ -190,7 +190,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('renders all 3 direction filter buttons', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('All')).toBeTruthy();
     expect(getByText('Up')).toBeTruthy();
     expect(getByText('Down')).toBeTruthy();
@@ -199,7 +199,7 @@ describe('LiveFeedScreen', () => {
   // ── Header Stats ────────────────────────────────────────
 
   it('shows header subtitle with event count and direction breakdown', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     // Subtitle shows "8 events · 5 ↑ 3 ↓"
     expect(getByText(/8 events/)).toBeTruthy();
   });
@@ -207,7 +207,7 @@ describe('LiveFeedScreen', () => {
   // ── Event Cards ─────────────────────────────────────────
 
   it('renders event cards for all 8 mock events', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     // Each event card shows the symbol
     expect(getByText('RELIANCE')).toBeTruthy();
     expect(getByText('TCS')).toBeTruthy();
@@ -220,7 +220,7 @@ describe('LiveFeedScreen', () => {
   // ── Source Filtering ────────────────────────────────────
 
   it('filters events by "News" source when News chip is tapped', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Find and press the "News" filter chip
     const newsChip = getByText('News');
@@ -237,7 +237,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('filters events by "Social" source when Social chip is tapped', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const socialChip = getByText('Social');
     fireEvent.press(socialChip);
@@ -248,7 +248,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('filters events by "Analyst" source when Analyst chip is tapped', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const analystChip = getByText('Analyst');
     fireEvent.press(analystChip);
@@ -259,7 +259,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('filters events by "AI" source when AI chip is tapped', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const aiChip = getByText('AI');
     fireEvent.press(aiChip);
@@ -270,7 +270,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('returns to showing all events when "All" filter is tapped after a source filter', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // First apply a filter
     const socialChip = getByText('Social');
@@ -292,7 +292,7 @@ describe('LiveFeedScreen', () => {
   // ── Direction Filtering ─────────────────────────────────
 
   it('filters events to improving only when "Up" direction is tapped', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const upChip = getByText('Up');
     fireEvent.press(upChip);
@@ -307,7 +307,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('filters events to deteriorating only when "Down" direction is tapped', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const downChip = getByText('Down');
     fireEvent.press(downChip);
@@ -321,7 +321,7 @@ describe('LiveFeedScreen', () => {
   // ── Combined Filters ────────────────────────────────────
 
   it('combines source and direction filters', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Filter: News + Improving
     const newsChip = getByText('News');
@@ -342,7 +342,7 @@ describe('LiveFeedScreen', () => {
   // ── Search ──────────────────────────────────────────────
 
   it('filters events by symbol search query', () => {
-    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     act(() => {
       fireEvent.changeText(getByPlaceholderText('Search by symbol, name, or message...'), 'INFY');
@@ -353,7 +353,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('filters events by stock name search query', () => {
-    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     act(() => {
       fireEvent.changeText(getByPlaceholderText('Search by symbol, name, or message...'), 'HDFC Bank');
@@ -364,7 +364,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('filters events by message text search query', () => {
-    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     act(() => {
       fireEvent.changeText(getByPlaceholderText('Search by symbol, name, or message...'), 'chatter');
@@ -377,13 +377,13 @@ describe('LiveFeedScreen', () => {
   // ── Search — Clear Button ───────────────────────────────
 
   it('does not show the clear button when search is empty', () => {
-    const { queryByTestId } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { queryByTestId } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     // Clear button is conditionally rendered: searchQuery.length > 0
     expect(queryByTestId('search-clear-btn')).toBeNull();
   });
 
   it('shows the clear button after typing a search query', () => {
-    const { queryByTestId, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { queryByTestId, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Type a search query
     act(() => {
@@ -395,7 +395,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('clears the search input and restores all events when clear button is pressed', () => {
-    const { getByText, getByPlaceholderText, queryByTestId } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText, getByPlaceholderText, queryByTestId } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Step 1: Type a search query that filters events
     act(() => {
@@ -424,7 +424,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('clears the search and hides the clear button when clear is pressed (verifies blur code path does not crash)', () => {
-    const { getByText, getByPlaceholderText, queryByTestId } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText, getByPlaceholderText, queryByTestId } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Type a query to make the clear button visible
     act(() => {
@@ -448,7 +448,7 @@ describe('LiveFeedScreen', () => {
   // ── Empty States ────────────────────────────────────────
 
   it('shows "No Events" and search-specific message when search yields no results', () => {
-    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const searchInput = getByPlaceholderText('Search by symbol, name, or message...');
     act(() => {
@@ -460,7 +460,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('shows "No Events" when combined filters + search yield 0 results', () => {
-    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Apply Social filter (SBIN + TCS)
     fireEvent.press(getByText('Social'));
@@ -476,7 +476,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('shows source filter count badge for active filter', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // When "All" is active, it shows count badge with total
     const allChip = getByText('All');
@@ -492,7 +492,7 @@ describe('LiveFeedScreen', () => {
   // ── Navigation ──────────────────────────────────────────
 
   it('triggers goBack when back button area is pressed', () => {
-    render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     // The back button is a TouchableOpacity wrapping an Ionicons.
     // In the mocked react-native, Ionicons renders as the string 'IonIonicons'.
     // TouchableOpacity wraps it directly, so there's no child <Text> to query.
@@ -503,7 +503,7 @@ describe('LiveFeedScreen', () => {
   // ── Source Distribution Counts ──────────────────────────
 
   it('correctly computes source distribution for active filter', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     // All filter active by default, total = 8 events
     // Source counts: news=2 (RELIANCE, ICICIBANK), social=2 (TCS, SBIN),
     //               analyst=2 (HDFCBANK, RELIANCE-analyst), ai=2 (INFY, TCS-ai)
@@ -513,12 +513,12 @@ describe('LiveFeedScreen', () => {
   // ── Share Button ──────────────────────────────────────
 
   it('does not call shareNative on initial render', () => {
-    render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(mockShareNative).not.toHaveBeenCalled();
   });
 
   it('calls shareNative with correct event data for improving event when share button is pressed', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const pressed = await triggerShareButton(getByText, 'Score: +55');
     expect(pressed).toBe(true);
@@ -541,7 +541,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('calls shareNative with correct event data for deteriorating event when share button is pressed', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const pressed = await triggerShareButton(getByText, 'Score: -20');
     expect(pressed).toBe(true);
@@ -564,7 +564,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('calls shareNative with shared via Toroloom footer', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const pressed = await triggerShareButton(getByText, 'Score: +55');
     expect(pressed).toBe(true);
@@ -576,7 +576,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('shows checkmark icon after successful share (shared state becomes true)', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Press the share button — shareNative resolves to true, setting shared=true
     const pressed = await triggerShareButton(getByText, 'Score: +55');
@@ -592,7 +592,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('calls shareNative for each event card independently', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Press share on RELIANCE (score=55)
     expect(await triggerShareButton(getByText, 'Score: +55')).toBe(true);
@@ -614,7 +614,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('calls shareNative with correct score sign format', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Click on INFY (deteriorating, score=-10)
     expect(await triggerShareButton(getByText, 'Score: -10')).toBe(true);
@@ -627,12 +627,12 @@ describe('LiveFeedScreen', () => {
   // ── Share Button — Long Press ─────────────────────────
 
   it('does not call showShareSheet on initial render', () => {
-    render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(mockShowShareSheet).not.toHaveBeenCalled();
   });
 
   it('calls showShareSheet with correct event data for improving event on long-press', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const pressed = await triggerShareButton(getByText, 'Score: +55', 'onLongPress');
     expect(pressed).toBe(true);
@@ -645,7 +645,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('calls showShareSheet with correct event data for deteriorating event on long-press', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const pressed = await triggerShareButton(getByText, 'Score: -20', 'onLongPress');
     expect(pressed).toBe(true);
@@ -658,7 +658,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('does not call shareNative when share button is long-pressed', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const pressed = await triggerShareButton(getByText, 'Score: +55', 'onLongPress');
     expect(pressed).toBe(true);
@@ -669,7 +669,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('does not call showShareSheet when share button is pressed (short press)', async () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     const pressed = await triggerShareButton(getByText, 'Score: +55');
     expect(pressed).toBe(true);
@@ -682,13 +682,13 @@ describe('LiveFeedScreen', () => {
   // ── Sentiment Frequency Chart ─────────────────────────
 
   it('renders the chart header with "Frequency" title when events exist', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     // The chart card shows a "Frequency" title
     expect(getByText('Frequency')).toBeTruthy();
   });
 
   it('renders the peak badge showing max events per bucket', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     // All 8 mock events have the same timestamp (±60s), so they all fall
     // into the same bucket → maxCount = 8
     expect(getByText(/Peak/)).toBeTruthy();
@@ -696,7 +696,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('renders "Up" and "Dn" legend items', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('Up')).toBeTruthy();
     expect(getByText('Dn')).toBeTruthy();
   });
@@ -705,7 +705,7 @@ describe('LiveFeedScreen', () => {
     // Override the mock to return empty events for this test
     vi.mocked(generateInitialFeedEvents).mockReturnValue([]);
 
-    const { queryByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { queryByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // The chart should not render — no "Frequency" title or peak badge
     expect(queryByText('Frequency')).toBeNull();
@@ -718,7 +718,7 @@ describe('LiveFeedScreen', () => {
   it('computes stacked bar proportions correctly', () => {
     // All 8 mock events share the same timestamp (±60s) → all fall in bucket 0.
     // With 5 improving + 3 deteriorating = 8 total in bucket 0 → maxCount = 8
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Peak badge shows "Peak 8/bucket"
     const peakText = getByText(/\d+\/bucket/);
@@ -731,7 +731,7 @@ describe('LiveFeedScreen', () => {
   // ── Timeframe Buttons ──────────────────────────────
 
   it('renders all 4 timeframe buttons (All, 5m, 15m, 1h) in the chart header', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(getByText('All')).toBeTruthy();
     expect(getByText('5m')).toBeTruthy();
     expect(getByText('15m')).toBeTruthy();
@@ -739,7 +739,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('pressing a timeframe button does not crash the chart', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Press each timeframe button in turn and verify the chart still renders
     fireEvent.press(getByText('5m'));
@@ -756,7 +756,7 @@ describe('LiveFeedScreen', () => {
   });
 
   it('switching timeframe and back to All preserves the chart rendering', () => {
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Switch to 5m, then back to All
     fireEvent.press(getByText('5m'));
@@ -778,7 +778,7 @@ describe('LiveFeedScreen', () => {
       makeMockEvent('e', { timestamp: new Date(now - 900000).toISOString() }),
     ]);
 
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Default "All" shows all 5 events → chart renders
     expect(getByText('Frequency')).toBeTruthy();
@@ -801,7 +801,7 @@ describe('LiveFeedScreen', () => {
 
   it('each timeframe button keeps chart rendering with recent-only events', () => {
     // All 8 default mock events are 1 min old → pass every timeframe
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('5m'));
     expect(getByText('Frequency')).toBeTruthy();
     fireEvent.press(getByText('15m'));
@@ -827,7 +827,7 @@ describe('LiveFeedScreen', () => {
       makeMockEvent('o3', { score: 13, timestamp: new Date(now - 600000).toISOString() }),
     ]);
 
-    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { getByText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 
     // Default "All" timeframe: all 9 events are visible
     // The count badge should show "9" (not appearing in any score: 11,22,33,44,47,58,71,82,13)
@@ -876,12 +876,12 @@ describe('LiveFeedScreen - search snapshots', () => {
   });
 
   it('matches snapshot with empty search', () => {
-    const { toJSON } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { toJSON } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     expect(toJSON()).toMatchSnapshot();
   });
 
   it('matches snapshot with search query typed', () => {
-    const { toJSON, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { toJSON, getByPlaceholderText } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     act(() => {
       fireEvent.changeText(getByPlaceholderText('Search by symbol, name, or message...'), 'INFY');
     });
@@ -889,7 +889,7 @@ describe('LiveFeedScreen - search snapshots', () => {
   });
 
   it('matches snapshot after clearing search', () => {
-    const { toJSON, getByPlaceholderText, getByTestId } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+    const { toJSON, getByPlaceholderText, getByTestId } = render(<LiveFeedScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     act(() => {
       fireEvent.changeText(getByPlaceholderText('Search by symbol, name, or message...'), 'INFY');
     });

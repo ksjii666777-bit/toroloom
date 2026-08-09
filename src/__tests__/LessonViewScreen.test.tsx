@@ -209,7 +209,7 @@ describe('LessonViewScreen — Loading State', () => {
   it('renders without crashing during loading', () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { toJSON } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     expect(toJSON).not.toBeNull();
   });
@@ -234,7 +234,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('renders the lesson number and title in header', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -245,7 +245,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('renders the lesson duration', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -255,7 +255,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('renders the lesson content title as heading', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -265,7 +265,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('renders the lesson content body', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -275,7 +275,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('renders the Key Takeaways section', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -285,7 +285,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('renders the Summary section', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -295,7 +295,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('renders the Test Your Knowledge quiz button', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -305,7 +305,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('shows quiz question count on the start button', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -316,7 +316,7 @@ describe('LessonViewScreen — Loaded Content', () => {
     mockCurrentLesson = lessonData['l6'];
     const route = { params: { lessonId: 'l6', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -326,7 +326,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('renders next lesson navigation', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -338,7 +338,7 @@ describe('LessonViewScreen — Loaded Content', () => {
     mockCurrentLesson = lessonData['l2'];
     const route = { params: { lessonId: 'l2', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -349,7 +349,7 @@ describe('LessonViewScreen — Loaded Content', () => {
   it('does not navigate on initial render', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -378,7 +378,7 @@ describe('LessonViewScreen — Quiz Flow', () => {
   it('shows quiz questions when Test Your Knowledge is pressed', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -394,7 +394,7 @@ describe('LessonViewScreen — Quiz Flow', () => {
   it('renders quiz question options', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -410,7 +410,7 @@ describe('LessonViewScreen — Quiz Flow', () => {
   it('shows Submit Answers button when quiz is opened', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -441,7 +441,7 @@ describe('LessonViewScreen — Last Lesson Navigation', () => {
   it('does not show Next button on last lesson', async () => {
     const route = { params: { lessonId: 'l8', courseId: 'c1' } };
     const { getByText, queryByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -468,7 +468,7 @@ describe('LessonViewScreen — Download Flow', () => {
   it('does not call downloadVideo on initial render', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -478,7 +478,7 @@ describe('LessonViewScreen — Download Flow', () => {
   it('does not call removeOfflineVideo on initial render', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -488,7 +488,7 @@ describe('LessonViewScreen — Download Flow', () => {
   it('isVideoDownloaded is called during render to determine download state', async () => {
     const route = { params: { lessonId: 'l6', courseId: 'c1' } };
     render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -498,7 +498,7 @@ describe('LessonViewScreen — Download Flow', () => {
   it('downloads video when download button is pressed', async () => {
     const route = { params: { lessonId: 'l1', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -544,7 +544,7 @@ describe('LessonViewScreen — Auto-Advance on Complete', () => {
   it('shows auto-advance overlay when Mark as Complete is pressed', async () => {
     const route = { params: { lessonId: 'l6', courseId: 'c1' } };
     const { getByText, queryByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -565,7 +565,7 @@ describe('LessonViewScreen — Auto-Advance on Complete', () => {
   it('calls markLessonComplete and addXp when Mark as Complete is pressed', async () => {
     const route = { params: { lessonId: 'l6', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -581,7 +581,7 @@ describe('LessonViewScreen — Auto-Advance on Complete', () => {
   it('navigates to next lesson after 2 seconds', async () => {
     const route = { params: { lessonId: 'l6', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -604,7 +604,7 @@ describe('LessonViewScreen — Auto-Advance on Complete', () => {
   it('does not auto-advance when there is no next lesson', async () => {
     const route = { params: { lessonId: 'l8', courseId: 'c1' } };
     const { queryByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});
@@ -632,7 +632,7 @@ describe('LessonViewScreen — Missing Lesson', () => {
   it('renders lesson not found for invalid lessonId', async () => {
     const route = { params: { lessonId: 'nonexistent', courseId: 'c1' } };
     const { getByText } = render(
-      <LessonViewScreen route={route} navigation={mockNav} />
+      <LessonViewScreen route={route as any} navigation={mockNav as any} />
     );
     advanceAndRender(500);
     await act(async () => {});

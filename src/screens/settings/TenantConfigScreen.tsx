@@ -38,10 +38,13 @@ import {
 import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const TIERS: SubscriptionTier[] = ['free', 'pro', 'elite'];
 
-export default function TenantConfigScreen({ navigation }: any) {
+export default function TenantConfigScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'TenantConfig'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

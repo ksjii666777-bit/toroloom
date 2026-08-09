@@ -80,7 +80,7 @@ describe('AIInsightsScreen — Loading State', () => {
   });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -96,25 +96,25 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders the header title', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('AI Insights')).toBeDefined();
   });
 
   it('renders the subtitle', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Powered by advanced market analysis')).toBeDefined();
   });
 
   it('renders the AI Market Overview card', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('AI Market Overview')).toBeDefined();
   });
 
   it('renders insight type counts in overview (bullish/bearish/neutral)', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/bullish/)).toBeDefined();
     expect(getByText(/bearish/)).toBeDefined();
@@ -122,13 +122,13 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders the Stock Analysis section title', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Stock Analysis')).toBeDefined();
   });
 
   it('renders all stock symbols from insights', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('RELIANCE')).toBeDefined();
     expect(getByText('TCS')).toBeDefined();
@@ -137,7 +137,7 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders insight type badges (Bullish, Bearish, Neutral)', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Bullish')).toBeDefined();
     expect(getByText('Bearish')).toBeDefined();
@@ -145,7 +145,7 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders confidence badges for each insight', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('85% Confidence')).toBeDefined();
     expect(getByText('72% Confidence')).toBeDefined();
@@ -154,7 +154,7 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders insight summary text', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Strong breakout above resistance with high volume')).toBeDefined();
     expect(getByText('Forming lower highs; weak momentum')).toBeDefined();
@@ -163,7 +163,7 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders target prices for each insight', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // RELIANCE targets
     expect(getByText('₹2,950.00')).toBeDefined();
@@ -176,7 +176,7 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders target labels (Target 1, Target 2, Target 3)', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Target 1')).toBeDefined();
     expect(getByText('Target 2')).toBeDefined();
@@ -184,7 +184,7 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders probability percentages for targets', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('75% probability')).toBeDefined();
     expect(getByText('45% probability')).toBeDefined();
@@ -192,7 +192,7 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('renders insight analysis text (at least first few chars)', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Each insight has analysis truncated to 3 lines — check key phrases
     expect(getByText(/RELIANCE has broken/)).toBeDefined();
@@ -202,7 +202,7 @@ describe('AIInsightsScreen — Loaded Content', () => {
   });
 
   it('does not call navigate on initial render', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('AI Insights')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -224,13 +224,13 @@ describe('AIInsightsScreen — Empty Insights', () => {
   });
 
   it('renders gracefully with no insights', () => {
-    const { toJSON } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(toJSON).not.toBeNull();
   });
 
   it('renders overview with zero counts when no insights', () => {
-    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<AIInsightsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // The overview counts should be 0 for all types
     expect(getByText(/0 bullish/)).toBeDefined();

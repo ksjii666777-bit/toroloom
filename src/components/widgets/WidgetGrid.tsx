@@ -52,7 +52,10 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType<{ size: WidgetSi
 
 // ──── Draggable Widget Row ───────────────────────────────────────────────
 
-function DraggableWidgetRow({ item, drag, isActive }: RenderItemParams<DashboardWidget>) {
+// Exported for direct unit testing of the defensive visible-guard (the grid
+// pre-filters via visibleWidgets, so this branch is unreachable through the
+// public API).
+export function DraggableWidgetRow({ item, drag, isActive }: RenderItemParams<DashboardWidget>) {
   const { colors } = useTheme();
   const WidgetComponent = WIDGET_COMPONENTS[item.type];
 

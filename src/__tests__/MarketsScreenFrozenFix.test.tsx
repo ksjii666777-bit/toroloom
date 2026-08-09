@@ -109,7 +109,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('renders without crashing when navigation is a frozen object', () => {
       const frozenNav = createFrozenNavigation();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -128,7 +128,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
         getId: () => 'Markets',
       });
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -137,7 +137,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('renders full content with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Markets')).toBeDefined();
       expect(getByText('Real-time stock market data')).toBeDefined();
@@ -147,7 +147,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('renders market indices with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('NIFTY')).toBeDefined();
       expect(getByText('SENSEX')).toBeDefined();
@@ -158,7 +158,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('renders sector chips with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('All')).toBeDefined();
       expect(getByText('Technology')).toBeDefined();
@@ -170,7 +170,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('renders stock list with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('RELIANCE')).toBeDefined();
       expect(getByText('HDFCBANK')).toBeDefined();
@@ -181,7 +181,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('renders Gainers / Losers section with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Top Gainers')).toBeDefined();
       expect(getByText('Top Losers')).toBeDefined();
@@ -191,7 +191,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('renders Sector Performance heatmap with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Sector Performance')).toBeDefined();
       expect(getByText('Technology')).toBeDefined();
@@ -204,17 +204,17 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('does NOT attempt to set properties on frozen navigation during mount', () => {
       const frozenNav = createFrozenNavigation();
       expect(() => {
-        renderWithTimeTravel(<MarketsScreen navigation={frozenNav as any} />);
+        renderWithTimeTravel(<MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
     });
 
     it('does NOT mutate frozen navigation after re-render', () => {
       const frozenNav = createFrozenNavigation();
       const { update, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => {
-        update(<MarketsScreen navigation={frozenNav as any} />);
+        update(<MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
       cleanup();
     });
@@ -222,7 +222,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('handles mount with frozen navigation then unmounts gracefully', () => {
       const frozenNav = createFrozenNavigation();
       const { unmount } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { unmount(); }).not.toThrow();
     });
@@ -232,7 +232,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('navigates to StockDetail when a stock is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('RELIANCE'));
       expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
@@ -245,7 +245,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('navigates to StockScreener when screener button is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Screener'));
       expect(mockNavigate).toHaveBeenCalledWith('StockScreener');
@@ -255,7 +255,7 @@ describe('MarketsScreen — Frozen Navigation Object', () => {
     it('does not navigate without explicit interaction', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MarketsScreen navigation={frozenNav as any} />,
+        <MarketsScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Markets')).toBeDefined();
       expect(mockNavigate).not.toHaveBeenCalled();

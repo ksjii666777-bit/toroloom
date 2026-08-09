@@ -102,12 +102,12 @@ describe('ChatRoomListScreen', () => {
   });
 
   it('renders the screen title', () => {
-    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
+    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     expect(getByText('Chat Rooms')).toBeDefined();
   });
 
   it('renders room names', () => {
-    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
+    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     expect(getByText('Trading Discussion')).toBeDefined();
     expect(getByText('Nifty Options')).toBeDefined();
     expect(getByText('Stock Picks')).toBeDefined();
@@ -115,35 +115,35 @@ describe('ChatRoomListScreen', () => {
   });
 
   it('renders member count for rooms', () => {
-    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
+    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     expect(getByText('234 members')).toBeDefined();
     expect(getByText('189 members')).toBeDefined();
     expect(getByText('312 members')).toBeDefined();
   });
 
   it('renders unread badge numbers', () => {
-    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
+    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     expect(getByText('3')).toBeDefined();
     expect(getByText('7')).toBeDefined();
     expect(getByText('1')).toBeDefined();
   });
 
   it('navigates to chat room on press', () => {
-    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation} />);
+    const { getByText } = render(<ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     fireEvent.press(getByText('Trading Discussion'));
     expect(mockNavigate).toHaveBeenCalledWith('ChatRoom', { roomId: '1' });
   });
 
   it('has search input with correct placeholder', () => {
     const { getByPlaceholderText } = render(
-      <ChatRoomListScreen navigation={mockNavigation} />
+      <ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />
     );
     expect(getByPlaceholderText('Search rooms...')).toBeDefined();
   });
 
   it('filters rooms by search', () => {
     const { getByText, getByPlaceholderText } = render(
-      <ChatRoomListScreen navigation={mockNavigation} />
+      <ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />
     );
 
     const searchInput = getByPlaceholderText('Search rooms...');
@@ -155,7 +155,7 @@ describe('ChatRoomListScreen', () => {
 
   it('shows empty state when no rooms match search', () => {
     const { getByText, getByPlaceholderText } = render(
-      <ChatRoomListScreen navigation={mockNavigation} />
+      <ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />
     );
 
     const searchInput = getByPlaceholderText('Search rooms...');
@@ -167,7 +167,7 @@ describe('ChatRoomListScreen', () => {
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<ChatRoomListScreen navigation={mockNavigation} />);
+    const { toJSON } = render(<ChatRoomListScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
   });
 });

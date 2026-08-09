@@ -15,6 +15,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useNotificationStore } from '../../store/notificationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
@@ -37,7 +40,7 @@ const PREFERENCE_SECTIONS = [
   },
 ];
 
-export default function NotificationPreferencesScreen({ navigation }: any) {
+export default function NotificationPreferencesScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'NotificationPreferences'>) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useT();

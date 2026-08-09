@@ -28,7 +28,7 @@ vi.mock('../hooks/useT', () => ({
 describe('ReportHeader', () => {
   it('renders title and subtitle', () => {
     const { getByText } = render(
-      <ReportHeader navigation={{ goBack: vi.fn() }} hasAnalytics={false} isExporting={false} onExport={vi.fn()} />,
+      <ReportHeader navigation={{ goBack: vi.fn() } as any} hasAnalytics={false} isExporting={false} onExport={vi.fn()} />,
     );
     expect(getByText('Period Report')).toBeDefined();
     expect(getByText('Your trading performance')).toBeDefined();
@@ -36,14 +36,14 @@ describe('ReportHeader', () => {
 
   it('shows LIVE badge when hasAnalytics is true', () => {
     const { getByText } = render(
-      <ReportHeader navigation={{ goBack: vi.fn() }} hasAnalytics={true} isExporting={false} onExport={vi.fn()} />,
+      <ReportHeader navigation={{ goBack: vi.fn() } as any} hasAnalytics={true} isExporting={false} onExport={vi.fn()} />,
     );
     expect(getByText('LIVE')).toBeDefined();
   });
 
   it('hides LIVE badge when hasAnalytics is false', () => {
     const { queryByText } = render(
-      <ReportHeader navigation={{ goBack: vi.fn() }} hasAnalytics={false} isExporting={false} onExport={vi.fn()} />,
+      <ReportHeader navigation={{ goBack: vi.fn() } as any} hasAnalytics={false} isExporting={false} onExport={vi.fn()} />,
     );
     expect(queryByText('LIVE')).toBeNull();
   });
@@ -52,7 +52,7 @@ describe('ReportHeader', () => {
     // Back button renders only Ionicons — no queryable text, but it exists in the tree
     const goBack = vi.fn();
     const { getByText } = render(
-      <ReportHeader navigation={{ goBack }} hasAnalytics={false} isExporting={false} onExport={vi.fn()} />,
+      <ReportHeader navigation={{ goBack } as any} hasAnalytics={false} isExporting={false} onExport={vi.fn()} />,
     );
     // Verify the title and subtitle render (confirms component mounts)
     expect(getByText('Period Report')).toBeDefined();
@@ -62,7 +62,7 @@ describe('ReportHeader', () => {
   it('calls onExport when export button pressed', () => {
     const onExport = vi.fn();
     const { getByTestId } = render(
-      <ReportHeader navigation={{ goBack: vi.fn() }} hasAnalytics={false} isExporting={false} onExport={onExport} />,
+      <ReportHeader navigation={{ goBack: vi.fn() } as any} hasAnalytics={false} isExporting={false} onExport={onExport} />,
     );
     fireEvent.press(getByTestId('export-pdf-btn'));
     expect(onExport).toHaveBeenCalled();

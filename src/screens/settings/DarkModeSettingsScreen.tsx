@@ -28,6 +28,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { useThemeStore, type ThemeOverride } from '../../store/themeStore';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ──── Options ──────────────────────────────────────────────────────────────
 
@@ -69,7 +72,7 @@ const OPTIONS: OptionConfig[] = [
 
 // ──── Component ────────────────────────────────────────────────────────────
 
-export default function DarkModeSettingsScreen({ navigation }: any) {
+export default function DarkModeSettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'DarkMode'>) {
   const insets = useSafeAreaInsets();
   const { t } = useT();
   const { colors, setOverride, isDark } = useTheme();

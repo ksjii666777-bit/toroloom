@@ -34,7 +34,8 @@ import {
   generateMockHoldings,
   generateMockTrades,
 } from '../../services/taxHarvestingService';
-import type { TaxHarvestOpportunity, RealizedLoss } from '../../types';
+import type {TaxHarvestOpportunity, RealizedLoss, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
@@ -58,7 +59,7 @@ function recColor(rec: TaxHarvestOpportunity['recommendation']): string {
 
 type TabKey = 'opportunities' | 'losses' | 'simulator';
 
-export default function TaxHarvestingCalendarScreen({ navigation }: any) {
+export default function TaxHarvestingCalendarScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'TaxHarvesting'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [activeTab, setActiveTab] = useState<TabKey>('opportunities');

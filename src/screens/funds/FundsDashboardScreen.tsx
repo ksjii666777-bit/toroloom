@@ -10,12 +10,15 @@ import { useAuthStore } from '../../store/authStore';
 import { useFundStore, FundTransaction } from '../../store/fundStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatTimestamp } from '../../utils/formatters';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
 // quickActions moved inside component for t() access
 
-export default function FundsDashboardScreen({ navigation }: any) {
+export default function FundsDashboardScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'FundsDashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
@@ -65,7 +68,7 @@ export default function FundsDashboardScreen({ navigation }: any) {
   const recentTx = useMemo(() => transactions.slice(0, 5), [transactions]);
 
   const handleQuickAction = (screen: string) => {
-    navigation.navigate(screen);
+    (navigation.navigate as (screenName: string) => void)(screen);
   };
 
   const formatLargeCurrency = (val: number) => {

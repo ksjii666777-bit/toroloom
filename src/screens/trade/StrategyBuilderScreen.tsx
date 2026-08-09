@@ -31,8 +31,10 @@ import { formatCurrency } from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { StrategyLeg } from '../../types';
+import { tickerProvider } from '../../services/tickerProvider';
+import type {StrategyLeg, RootStackParamList} from '../../types';
 import { fnoApi, PrebuiltStrategy } from '../../services/api/fno';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_HEIGHT = 200;
@@ -46,7 +48,7 @@ const STRATEGY_TYPE_COLORS: Record<string, string> = {
   FUTURE: '#3B82F6',
 };
 
-export default function StrategyBuilderScreen({ navigation }: any) {
+export default function StrategyBuilderScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'StrategyBuilder'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -100,7 +102,20 @@ export default function StrategyBuilderScreen({ navigation }: any) {
     }
   };
 
+  // Hybrid Ticker Provider — pre-select the underlying instrument so the
+  // SnapTrade order panel opens pre-filled with the same symbol, chart and
+  // execution price when the user engages with a strategy on it.
+  const preselectUnderlying = useCallback(() => {
+    tickerProvider.selectSymbol({
+      symbol: selectedSymbol,
+      exchange: 'NSE',
+      name: selectedSymbol,
+      price: spotPrice,
+    });
+  }, [selectedSymbol, spotPrice]);
+
   const handleSelectPrebuilt = useCallback((strategy: PrebuiltStrategy) => {
+    preselectUnderlying();
     setSelectedPrebuilt(strategy);
     setSelectedStrategyName(strategy.name);
     setShowPrebuilt(false);
@@ -135,7 +150,7 @@ export default function StrategyBuilderScreen({ navigation }: any) {
 
     // Auto-analyze after setting up legs
     setTimeout(() => analyzeStrategy(spotPrice), 300);
-  }, [spotPrice, clearStrategyLegs, addStrategyLeg, analyzeStrategy, setSelectedStrategyName]);
+  }, [preselectUnderlying, spotPrice, clearStrategyLegs, addStrategyLeg, analyzeStrategy, setSelectedStrategyName]);
 
   const handleAddCustomLeg = useCallback(() => {
     const newLeg: StrategyLeg = {
@@ -153,9 +168,10 @@ export default function StrategyBuilderScreen({ navigation }: any) {
   }, [spotPrice, addStrategyLeg]);
 
   const handleAnalyze = useCallback(() => {
+    preselectUnderlying();
     analyzeStrategy(spotPrice);
     setSelectedPrebuilt(null);
-  }, [analyzeStrategy, spotPrice]);
+  }, [preselectUnderlying, analyzeStrategy, spotPrice]);
 
   const renderPnLChart = () => {
     if (!strategyResult || !strategyResult.pnlChart) return null;

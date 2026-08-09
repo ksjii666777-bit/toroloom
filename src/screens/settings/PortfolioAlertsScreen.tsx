@@ -20,6 +20,9 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import { formatCurrency} from '../../utils/formatters';
 import { sendPortfolioAlert } from '../../services/notificationService';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
@@ -119,7 +122,7 @@ const ALERT_KINDS: {
 const HOLDING_KINDS: PortfolioAlertKind[] = ['holding_day_gain_pct', 'holding_pnl_pct'];
 const HOLDING_KINDS_SET = new Set(HOLDING_KINDS);
 
-export default function PortfolioAlertsScreen({ navigation }: any) {
+export default function PortfolioAlertsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'PortfolioAlerts'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

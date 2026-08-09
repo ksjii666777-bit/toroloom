@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable, TextInput,
   Alert, Platform, Keyboard,
@@ -33,6 +33,12 @@ import { useBiometricStore } from '../../store/biometricStore';
 import { biometricAuth } from '../../services/biometricService';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { newIdempotencyKey } from '../../utils/idempotency';
+import TradingViewChart from '../../components/TradingViewChart';
+import PositionLevelsOverlay from '../../components/PositionLevelsOverlay';
+import { tickerProvider, useTicker, useExecutionPrice } from '../../services/tickerProvider';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 
 type TradeAction = 'BUY' | 'SELL';
@@ -43,7 +49,7 @@ const ORDER_TYPES: OrderType[] = ['Market', 'Limit', 'StopLoss', 'StopLimit'];
 const QUICK_QTYS = [1, 10, 50, 100, 500];
 
 // ──── Main Screen ─────────────────────────────────────────────
-export default function SnapTradeOrderScreen({ route, navigation }: any) {
+export default function SnapTradeOrderScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'SnapTradeOrder'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
@@ -52,28 +58,104 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
   const prefillSymbol = route.params?.symbol as string | undefined;
   const _prefillName = route.params?.name as string | undefined;
   const prefillPrice = route.params?.price as number | undefined;
+  // Optional stop/limit pre-fills — set by the live-position overlay when the
+  // user taps a STOP/TARGET chip on a stock-detail chart.
+  const prefillStop = route.params?.prefillStop as number | undefined;
+  const prefillLimit = route.params?.prefillLimit as number | undefined;
 
   const [action, setAction] = useState<TradeAction>('BUY');
-  const [orderType, setOrderType] = useState<OrderType>('Market');
+  // Pre-fill the order type + prices when the live-position overlay opened
+  // this screen via a STOP/TARGET chip tap on a stock-detail chart.
+  const [orderType, setOrderType] = useState<OrderType>(
+    prefillStop ? 'StopLoss' : prefillLimit ? 'Limit' : 'Market',
+  );
   const [timeInForce, setTimeInForce] = useState<TimeInForce>('Day');
   const [symbol, setSymbol] = useState(prefillSymbol || '');
   const [quantityStr, setQuantityStr] = useState('');
-  const [limitPriceStr, setLimitPriceStr] = useState(prefillPrice ? String(prefillPrice) : '');
-  const [stopPriceStr, setStopPriceStr] = useState('');
+  const [limitPriceStr, setLimitPriceStr] = useState(
+    prefillLimit ? String(prefillLimit) : prefillPrice ? String(prefillPrice) : '',
+  );
+  const [stopPriceStr, setStopPriceStr] = useState(prefillStop ? String(prefillStop) : '');
   const [isPlacing, setIsPlacing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [orderResult, setOrderResult] = useState<{ orderId: string | null; status: string } | null>(null);
 
+  // ── Hybrid ticker integration (TradingView ⇄ SnapTrade) ─────────────
+  const providerTicker = useTicker();
+  const executionQuote = useExecutionPrice();
+  const [chartSymbol, setChartSymbol] = useState('');
+  const [tvFailed, setTvFailed] = useState(false);
+  const [isBrokerConnected, setIsBrokerConnected] = useState(false);
+  const didInitRef = useRef(false);
+  const executionPrice = executionQuote?.price ?? null;
+  const defaultExchange = (route.params?.exchange as string | undefined) || 'NASDAQ';
+
   const qty = parseInt(quantityStr) || 0;
   const limitPrice = parseFloat(limitPriceStr) || 0;
   const stopPrice = parseFloat(stopPriceStr) || 0;
-  const displayPrice = orderType === 'Market' ? (prefillPrice || 0) : limitPrice;
+  // Single execution-price source: the provider's live quote (never the chart).
+  const displayPrice = orderType === 'Market' ? (executionPrice || prefillPrice || 0) : limitPrice;
   const estimatedTotal = displayPrice * qty;
 
   const canPlaceOrder = symbol.trim().length > 0 && qty > 0
     && (orderType === 'Market' || limitPrice > 0)
     && (orderType !== 'StopLoss' && orderType !== 'StopLimit' || stopPrice > 0)
     && !isPlacing;
+
+  // ── Seed the provider from route params (once) ───────────────────────
+  useEffect(() => {
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+    const initial = (prefillSymbol || tickerProvider.getTicker()?.symbol || '').toUpperCase().trim();
+    if (initial) {
+      tickerProvider.selectSymbol({
+        symbol: initial,
+        exchange: defaultExchange,
+        name: route.params?.name as string | undefined,
+        price: prefillPrice,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Provider → local (symbol field + chart symbol stay in sync) ──────
+  useEffect(() => {
+    if (!providerTicker) return;
+    setSymbol(providerTicker.symbol);
+    setChartSymbol(providerTicker.tvSymbol);
+  }, [providerTicker]);
+
+  // ── Local symbol edits → provider (debounced; no-op when unchanged) ───
+  useEffect(() => {
+    const clean = symbol.trim().toUpperCase();
+    if (!clean) return;
+    if (providerTicker && providerTicker.symbol === clean) return;
+    const handle = setTimeout(() => {
+      tickerProvider.selectSymbol({ symbol: clean, exchange: defaultExchange, price: prefillPrice });
+    }, 600);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbol]);
+
+  // ── Broker connection status → read-only mode flag ───────────────────
+  useEffect(() => {
+    let mounted = true;
+    snapTradeApi.status()
+      .then((s) => { if (mounted) setIsBrokerConnected(s.connected); })
+      .catch(() => { /* broker API down — stays read-only */ });
+    return () => { mounted = false; };
+  }, []);
+
+  // ── Single execution-price feed (WS primary, simulated fallback) ─────
+  useEffect(() => {
+    const sym = symbol.trim().toUpperCase();
+    if (!sym) return;
+    if (prefillPrice && prefillPrice > 0) {
+      tickerProvider.publishPrice(prefillPrice, sym, 'manual');
+    }
+    return tickerProvider.startExecutionPriceFeed(sym);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbol]);
 
   // ── Pre-validate order with backend risk engine ────────────
   const preValidateOrder = useCallback(async (): Promise<string | null> => {
@@ -288,6 +370,53 @@ export default function SnapTradeOrderScreen({ route, navigation }: any) {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        {/* ── Live TradingView chart + position levels (hybrid) ── */}
+        <Animated.View entering={FadeInUp.duration(250)} style={styles.chartSection}>
+          {!isBrokerConnected && (
+            <View style={[styles.readOnlyBanner, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="eye-outline" size={13} color={colors.textMuted} />
+              <Text style={[styles.readOnlyText, { color: colors.textMuted }]}>{t('trading.chartReadOnly')}</Text>
+            </View>
+          )}
+
+          {!symbol.trim() ? (
+            <View style={[styles.chartPlaceholder, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="analytics-outline" size={22} color={colors.textMuted} />
+              <Text style={[styles.chartPlaceholderText, { color: colors.textMuted }]}>{t('trading.selectSymbolChart')}</Text>
+            </View>
+          ) : tvFailed ? (
+            /* TradingView unavailable → live-price fallback so exits stay possible */
+            <View style={[styles.chartFallback, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="pulse" size={20} color={colors.primary} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.chartFallbackTitle, { color: colors.text }]}>{t('trading.chartFallbackTitle')}</Text>
+                <Text style={[styles.chartFallbackHint, { color: colors.textMuted }]}>{t('trading.chartFallbackHint')}</Text>
+              </View>
+              <Text style={[styles.chartFallbackPrice, { color: colors.text }]}>
+                {executionPrice ? `$${executionPrice.toFixed(2)}` : prefillPrice ? `$${prefillPrice.toFixed(2)}` : '—'}
+              </Text>
+              <Pressable onPress={() => setTvFailed(false)} hitSlop={8}>
+                <Ionicons name="refresh" size={18} color={colors.primary} />
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.chartWrap}>
+              <TradingViewChart
+                symbol={chartSymbol || tickerProvider.toTradingViewSymbol(symbol, defaultExchange)}
+                interval="D"
+                height={230}
+                allowSymbolChange={false}
+                onError={() => setTvFailed(true)}
+              />
+              <PositionLevelsOverlay
+                symbol={symbol}
+                onApplyStop={(p) => { if (p > 0) { setOrderType('StopLoss'); setStopPriceStr(String(p)); } }}
+                onApplyTarget={(p) => { if (p > 0) { setOrderType('Limit'); setLimitPriceStr(String(p)); } }}
+              />
+            </View>
+          )}
+        </Animated.View>
+
         {/* Symbol Input */}
         <Animated.View entering={FadeInUp.duration(300)} style={styles.fieldGroup}>
           <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('trading.symbol')}</Text>
@@ -540,6 +669,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
     paddingTop: SPACING.xl,
   },
+
+  // ── Hybrid chart section ──
+  chartSection: { marginBottom: SPACING.lg },
+  chartWrap: {
+    position: 'relative',
+    borderRadius: BORDER_RADIUS.lg,
+    overflow: 'hidden',
+  },
+  chartPlaceholder: {
+    height: 120,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+  },
+  chartPlaceholderText: { ...FONTS.medium, fontSize: FONTS.size.sm },
+  chartFallback: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    minHeight: 90,
+  },
+  chartFallbackTitle: { ...FONTS.semiBold, fontSize: FONTS.size.sm },
+  chartFallbackHint: { ...FONTS.regular, fontSize: FONTS.size.xs, marginTop: 2 },
+  chartFallbackPrice: {
+    ...FONTS.black,
+    fontSize: FONTS.size.lg,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  readOnlyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    alignSelf: 'flex-start',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginBottom: SPACING.sm,
+  },
+  readOnlyText: { ...FONTS.medium, fontSize: FONTS.size.xs },
 
   // Fields
   fieldGroup: { marginBottom: SPACING.lg },

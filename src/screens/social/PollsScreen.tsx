@@ -11,7 +11,8 @@ import { usePollStore } from '../../store/pollStore';
 import { POLL_CATEGORIES } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { Poll, PollCategory } from '../../types';
+import type {Poll, PollCategory, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 /** Format a relative time string */
 function formatRelativeTime(t: any, dateStr: string): string {
@@ -36,7 +37,7 @@ function timeRemaining(t: any, expiresAt: string): string {
   return t('polls.daysLeft', { count: Math.floor(hours / 24) });
 }
 
-export default function PollsScreen({ navigation }: any) {
+export default function PollsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Polls'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

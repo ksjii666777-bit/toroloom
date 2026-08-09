@@ -106,7 +106,7 @@ describe('WatchlistScreen — Loading State', () => {
   afterEach(() => { vi.useRealTimers(); });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -121,51 +121,51 @@ describe('WatchlistScreen — Single Watchlist (default view with suggested stoc
   afterEach(() => { vi.useRealTimers(); });
 
   it('renders the header title', () => {
-    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(getByText('Watchlist')).toBeDefined();
   });
 
   it('renders the subtitle', () => {
-    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(getByText('Monitor your favorite stocks')).toBeDefined();
   });
 
   it('renders suggested stocks section', () => {
-    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(getByText('Suggested Stocks')).toBeDefined();
   });
 
   it('shows suggested stocks not already in watchlist', () => {
-    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(getByText('HDFCBANK')).toBeDefined();
   });
 
   it('renders sort indicator showing default sort', () => {
-    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(getByText(/Sorted by:/)).toBeDefined();
   });
 
   it('renders Alert button for watchlist stocks', () => {
-    const { getAllByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getAllByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     const alertBtns = getAllByText('Alert');
     expect(alertBtns.length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows "No alerts set" for stocks without alerts', () => {
-    const { getAllByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getAllByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     const noAlertTexts = getAllByText('No alerts set');
     expect(noAlertTexts.length).toBeGreaterThanOrEqual(1);
   });
 
   it('opens price alert modal on long-press of a stock item', () => {
-    const { getByText, queryByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText, queryByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(queryByText('Current Price')).toBeNull();
     fireEvent.trigger(getByText('RELIANCE'), 'onLongPress');
@@ -183,34 +183,34 @@ describe('WatchlistScreen — Multi-Watchlist All View', () => {
   afterEach(() => { vi.useRealTimers(); });
 
   it('renders watchlist tabs with stock counts', () => {
-    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(getByText('My Watchlist (4)')).toBeDefined();
     expect(getByText('Tech Stocks (3)')).toBeDefined();
   });
 
   it('renders stocks from all watchlists combined', () => {
-    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(getByText('RELIANCE')).toBeDefined();
     expect(getByText('TCS')).toBeDefined();
   });
 
   it('shows All tab with combined unique stock count', () => {
-    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     // 6 unique: RELIANCE, INFY, SBIN, BAJFINANCE, TCS, HINDUNILVR (INFY deduped)
     expect(getByText('All (6)')).toBeDefined();
   });
 
   it('does NOT show suggested stocks in All view', () => {
-    const { queryByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { queryByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(queryByText('Suggested Stocks')).toBeNull();
   });
 
   it('shows watchlist source badges for stocks in combined view', () => {
-    const { root } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { root } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     // INFY is in both watchlists — should have source badges with watchlist names
     const badgeTexts = root.findAll(
@@ -221,7 +221,7 @@ describe('WatchlistScreen — Multi-Watchlist All View', () => {
   });
 
   it('opens price alert modal on long-press in All view', () => {
-    const { getByText, queryByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText, queryByText } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(queryByText('Current Price')).toBeNull();
     fireEvent.trigger(getByText('RELIANCE'), 'onLongPress');
@@ -239,7 +239,7 @@ describe('WatchlistScreen — No Watchlists', () => {
   afterEach(() => { vi.useRealTimers(); });
 
   it('handles empty watchlists array gracefully', () => {
-    const { toJSON } = render(<WatchlistScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<WatchlistScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advance(500);
     expect(toJSON).not.toBeNull();
   });

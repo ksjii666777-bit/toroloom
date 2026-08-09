@@ -34,6 +34,9 @@ import { formatTimeAgo } from '../../utils/formatters';
 import { triggerHaptic } from '../../utils/haptics';
 import { notificationAsync, NotificationFeedbackType } from 'expo-haptics';
 import { showShareSheet, ShareContent } from '../../utils/share';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 
 const trendingTags = ['RELIANCE', 'Nifty', 'SIP', 'Budget2025', 'TCS', 'IPO', 'Dividend', 'Crypto'];
@@ -181,7 +184,7 @@ function PostCard({
 
 // ─── Main Community Screen ─────────────────────────────────────────────────
 
-export default function CommunityScreen({ navigation }: any) {
+export default function CommunityScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Community'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

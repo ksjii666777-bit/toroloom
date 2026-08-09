@@ -374,14 +374,14 @@ describe('DrawingTools Component — Rendering', () => {
   });
 
   it('renders without crashing with minimum props', () => {
-    const { toJSON } = render(<DrawingTools {...baseProps} />);
+    const { toJSON } = render(<DrawingTools {...baseProps as any} />);
     expect(toJSON).not.toBeNull();
   });
 
   it('renders without crashing with all drawing types', () => {
     const { toJSON } = render(
       <DrawingTools
-        {...baseProps}
+        {...baseProps as any}
         drawings={[trendlineDrawing, horizontalLineDrawing, verticalLineDrawing, rayDrawing, fibonacciDrawing, annotationDrawing]}
       />
     );
@@ -391,7 +391,7 @@ describe('DrawingTools Component — Rendering', () => {
   it('renders without crashing when enabled with a draw tool', () => {
     const { toJSON } = render(
       <DrawingTools
-        {...baseProps}
+        {...baseProps as any}
         enabled={true}
         activeTool="trendline"
       />
@@ -402,7 +402,7 @@ describe('DrawingTools Component — Rendering', () => {
   it('renders without crashing in fullscreen mode', () => {
     const { toJSON } = render(
       <DrawingTools
-        {...baseProps}
+        {...baseProps as any}
         isFullscreen={true}
         drawings={[trendlineDrawing]}
       />
@@ -413,7 +413,7 @@ describe('DrawingTools Component — Rendering', () => {
   it('renders without crashing with nextDrawingColor', () => {
     const { toJSON } = render(
       <DrawingTools
-        {...baseProps}
+        {...baseProps as any}
         nextDrawingColor="#FF5252"
       />
     );
@@ -430,19 +430,19 @@ describe('DrawingTools Component — Rendering', () => {
       annotationDrawing,
     ];
     const { toJSON } = render(
-      <DrawingTools {...baseProps} drawings={allDrawings} enabled={true} activeTool="none" />
+      <DrawingTools {...baseProps as any} drawings={allDrawings} enabled={true} activeTool="none" />
     );
     expect(toJSON).not.toBeNull();
   });
 
   it('renders correctly when toggled between enabled and disabled', () => {
     const { toJSON, update } = render(
-      <DrawingTools {...baseProps} enabled={false} activeTool="none" />
+      <DrawingTools {...baseProps as any} enabled={false} activeTool="none" />
     );
     expect(toJSON).not.toBeNull();
 
     update(
-      <DrawingTools {...baseProps} enabled={true} activeTool="trendline" />
+      <DrawingTools {...baseProps as any} enabled={true} activeTool="trendline" />
     );
     expect(toJSON).not.toBeNull();
   });

@@ -19,7 +19,8 @@ import { useT } from '../../hooks/useT';
 import { useTheme } from '../../context/ThemeContext';
 import { useIPOStore } from '../../store/ipoStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import type { IPOItem } from '../../types';
+import type {IPOItem, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
@@ -42,7 +43,7 @@ function daysUntil(dateStr: string): number {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-export default function IPOCalendarScreen({ _navigation }: any) {
+export default function IPOCalendarScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'IPOCalendar'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

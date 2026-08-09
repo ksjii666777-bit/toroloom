@@ -34,7 +34,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { getFuturesCurve } from '../../services/api';
-import type { FuturesCurveData, FuturesCurvePoint } from '../../types';
+import type {FuturesCurveData, FuturesCurvePoint, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -541,7 +542,7 @@ const tableStyles = StyleSheet.create({
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
-export default function FuturesCurveScreen({ navigation }: any) {
+export default function FuturesCurveScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'FuturesCurve'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [selectedSymbol, setSelectedSymbol] = useState<SymbolKey>('NIFTY');

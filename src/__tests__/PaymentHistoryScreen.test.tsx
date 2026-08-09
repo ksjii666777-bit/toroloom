@@ -117,7 +117,7 @@ afterEach(() => {
 
 function renderScreen() {
   const result = render(
-    <PaymentHistoryScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+    <PaymentHistoryScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
   );
   act(() => { vi.advanceTimersByTime(500); });
   return result;

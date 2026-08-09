@@ -10,12 +10,15 @@ import { useT } from '../../hooks/useT';
 import { useFundStore, FundTransaction } from '../../store/fundStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency, formatTimestamp } from '../../utils/formatters';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
 type TxFilter = 'all' | 'add' | 'withdraw';
 
-export default function TransactionHistoryScreen({ navigation }: any) {
+export default function TransactionHistoryScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'TransactionHistory'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

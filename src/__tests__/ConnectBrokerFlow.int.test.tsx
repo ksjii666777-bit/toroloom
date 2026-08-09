@@ -90,7 +90,7 @@ async function flushPromises() {
 }
 
 function renderView() {
-  return render(<ConnectBrokerView navigation={{ goBack: mockGoBack }} />);
+  return render(<ConnectBrokerView navigation={{ goBack: mockGoBack } as any} route={{ params: {} } as any} />);
 }
 
 beforeEach(() => {

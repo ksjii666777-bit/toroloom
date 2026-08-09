@@ -11,7 +11,8 @@ import { usePollStore } from '../../store/pollStore';
 import { POLL_CATEGORIES } from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { PollCategory, PollDuration } from '../../types';
+import type {PollCategory, PollDuration, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const DURATION_OPTIONS: { value: PollDuration; label: string; desc: string }[] = [
   { value: 24,  label: '1 Day',   desc: 'Quick poll' },
@@ -23,7 +24,7 @@ const DURATION_OPTIONS: { value: PollDuration; label: string; desc: string }[] =
 const MAX_OPTIONS = 6;
 const MIN_OPTIONS = 2;
 
-export default function CreatePollScreen({ navigation }: any) {
+export default function CreatePollScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'CreatePoll'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

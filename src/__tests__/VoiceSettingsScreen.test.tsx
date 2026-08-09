@@ -86,7 +86,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders the header title', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     const text = root.root.findByProps({ children: 'Voice Settings' });
     expect(text).toBeDefined();
@@ -95,7 +95,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders the subtitle', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     const text = root.root.findByProps({ children: 'AI Companion voice preferences' });
     expect(text).toBeDefined();
@@ -104,7 +104,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders voice toggle section with ON status', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     const toggleText = root.root.findByProps({ children: 'Voice is ON' });
     expect(toggleText).toBeDefined();
@@ -113,7 +113,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders speech rate presets — Slow, Fast found', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     const slow = root.root.findByProps({ children: 'Slow' });
     const fast = root.root.findByProps({ children: 'Fast' });
@@ -124,7 +124,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders voice pitch presets — Low, High found', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     const low = root.root.findByProps({ children: 'Low' });
     const high = root.root.findByProps({ children: 'High' });
@@ -135,7 +135,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders test voice buttons', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     const testLabels = ['Stop-Loss Alert', 'Profit Target', 'Lockdown Lifted', 'Daily Loss Warning'];
     testLabels.forEach(label => {
@@ -147,7 +147,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders voice events list section', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     // Event names are rendered via key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
     // For camelCase keys like 'stopLossBreached', JS \b only matches at start of string
@@ -159,7 +159,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders Speech Rate card title', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     const titles = root.root.findAllByProps({ children: 'Speech Rate' });
     expect(titles.length).toBeGreaterThanOrEqual(1);
@@ -168,7 +168,7 @@ describe('VoiceSettingsScreen', () => {
   it('renders Voice Pitch card title', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
     const titles = root.root.findAllByProps({ children: 'Voice Pitch' });
     expect(titles.length).toBeGreaterThanOrEqual(1);
@@ -177,7 +177,7 @@ describe('VoiceSettingsScreen', () => {
   it('calls speak when a test button is pressed', () => {
     let root: any;
     act(() => {
-      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() }} />);
+      root = TestRenderer.create(<VoiceSettingsScreen navigation={{ goBack: vi.fn() } as any} route={{ params: {} } as any} />);
     });
 
     // Find and press the Stop-Loss Alert test button

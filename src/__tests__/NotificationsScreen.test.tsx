@@ -55,29 +55,29 @@ beforeEach(() => {
 
 describe('NotificationsScreen', () => {
   it('renders the screen title', () => {
-    const { getByText } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Notifications')).toBeDefined();
   });
 
   it('renders notification titles', () => {
-    const { getByText } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Trade Executed')).toBeDefined();
     expect(getByText('Price Alert')).toBeDefined();
   });
 
   it('renders notification messages', () => {
-    const { getByText } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Your buy order for RELIANCE has been executed at ₹2,500')).toBeDefined();
   });
 
   it('renders empty state when no notifications', () => {
     mockStoreState.notifications = [];
-    const { getByText } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText("You're all caught up! Notifications will appear here.")).toBeDefined();
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { toJSON } = render(<NotificationsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
   });
 });

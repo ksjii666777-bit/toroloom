@@ -1,3 +1,5 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 // ============ User & Auth ============
 export interface User {
   id: string;
@@ -2833,20 +2835,200 @@ export interface NFOApplication {
   returnPercent?: number;
 }
 
-export type RootStackParamList = {
-  Auth: undefined;
-  Main: undefined;
-  StockDetail: { stockId: string; symbol: string };
-  CourseDetail: { courseId: string };
-  LessonView: { lessonId: string; courseId: string };
-  ContractNoteParser: { brokerFormat?: string };
-  AIInsight: { stockId?: string };
-  CommunityPost: { postId: string };
-  Profile: undefined;
+// ============ Navigation Route Params ============
+
+/** Params for the PlaceOrder (Indian broker) screen. */
+export interface PlaceOrderRouteParams {
+  stockId?: string;
+  symbol?: string;
+  tradeType?: 'buy' | 'sell';
+  /**
+   * Pre-fill from the live-position overlay chip taps
+   * (STOP → 'SL' with `prefillTrigger`, TARGET → 'LIMIT' with `prefillLimit`).
+   */
+  prefillOrderType?: 'MARKET' | 'LIMIT' | 'SL' | 'SL-M';
+  /** Pre-filled limit price (string, mirrors the form's text input). */
+  prefillLimit?: string;
+  /** Pre-filled trigger price for stop-loss orders (string). */
+  prefillTrigger?: string;
+}
+
+/** Params for the SnapTradeOrder (US broker) screen. */
+export interface SnapTradeOrderRouteParams {
+  symbol?: string;
+  name?: string;
+  price?: number;
+  exchange?: string;
+  /** Pre-filled stop-loss price (raw number — the screen casts to string). */
+  prefillStop?: number;
+  /** Pre-filled limit price (raw number). */
+  prefillLimit?: number;
+}
+
+/** Params for the bottom-tab navigator (rendered by the MainTabs screen). */
+export type TabParamList = {
+  More: undefined;
+  Home: undefined;
+  Markets: undefined;
+  Portfolio: undefined;
+  Watchlist: undefined;
 };
 
-export type AuthStackParamList = {
+/**
+ * Authoritative root-stack param list — every route registered in
+ * src/navigation/AppNavigator.tsx maps to a key here, so screen names and
+ * params are compile-checked against
+ * `createNativeStackNavigator<RootStackParamList>()`.
+ */
+export type RootStackParamList = {
+  // ── Auth & entry ──
   Login: undefined;
   Signup: { ref?: string } | undefined;
-  ForgotPassword: undefined;
+  Loading: undefined;
+  Onboarding: undefined;
+  MainTabs: NavigatorScreenParams<TabParamList> | undefined;
+
+  // ── Markets ──
+  StockDetail: { stockId: string; symbol?: string };
+  StockScreener: undefined;
+  NewsFeed: undefined;
+  IPOCalendar: undefined;
+  IPODashboard: undefined;
+  IPODetail: { ipoId: string };
+  NFODashboard: undefined;
+  NFODetail: { nfoId: string };
+  EconomicCalendar: undefined;
+  USMarkets: undefined;
+  BondDashboard: undefined;
+  CurrencyMarkets: undefined;
+  TaxHarvesting: undefined;
+  CommodityMarkets: undefined;
+  FuturesCurve: undefined;
+  USStockDetail: { stockId?: string; symbol?: string; source?: string; name?: string; price?: number };
+  GlobalStockDetail: { stockId?: string; symbol?: string; region?: string };
+  CompanyFundamentals: { symbol?: string; stockId?: string };
+  CryptoDetail: { coinId?: string; coinSymbol?: string };
+
+  // ── Social & community ──
+  ChatList: undefined;
+  ChatRoom: { roomId?: string };
+  BehavioralJournal: undefined;
+  Community: undefined;
+  CommunityPost: { postId: string };
+  SocialTrading: undefined;
+  TraderProfile: { traderId: string };
+  LiveFeed: undefined;
+  Polls: undefined;
+  CreatePoll: undefined;
+  RevenueDashboard: undefined;
+
+  // ── AI & analytics ──
+  AIInsights: undefined;
+  AIChat: undefined;
+  AITradeAssistant: undefined;
+  EarningsCall: undefined;
+  SentimentAnalysis: undefined;
+  SentimentAlert: undefined;
+
+  // ── Profile & funds ──
+  Profile: undefined;
+  AddFunds: undefined;
+  Withdraw: undefined;
+  TransactionHistory: undefined;
+  Transfer: undefined;
+  UPI: undefined;
+  FundsDashboard: undefined;
+  BrokerConnect: undefined;
+  PaymentHistory: undefined;
+  Subscription: undefined;
+  AvailableCoupons: undefined;
+  CouponHistory: undefined;
+  Referral: undefined;
+
+  // ── Mutual funds & SIPs ──
+  MutualFunds: undefined;
+  SIPs: undefined;
+  SIPCalculator: undefined;
+  StepUpSip: undefined;
+  LumpsumCalculator: undefined;
+  EMICalculator: undefined;
+  TaxCalculator: undefined;
+  CurrencyConverter: undefined;
+
+  // ── Trading ──
+  TradeHistory: undefined;
+  PlaceOrder: PlaceOrderRouteParams;
+  OpenOrders: undefined;
+  FnOOptionsChain: undefined;
+  StrategyBuilder: { symbol?: string; type?: 'CE' | 'PE' | 'FUTURE'; strike?: number } | undefined;
+  StrategyPerformance: undefined;
+  USStocksTrading: undefined;
+  CryptoTrading: undefined;
+  SnapTradeConnect: undefined;
+  SnapTradePortfolio: undefined;
+  SnapTradeOrder: SnapTradeOrderRouteParams | undefined;
+
+  // ── Education ──
+  Learn: undefined;
+  CourseDetail: { courseId: string };
+  LessonView: { lessonId: string; courseId: string };
+  QuizResult: { result: QuizResult; lessonId: string; courseId: string };
+  Glossary: undefined;
+  MyCourses: undefined;
+  CreateCourse: { courseId?: string };
+  CommunityCourses: undefined;
+  LearningPaths: undefined;
+  LearningPathDetail: { pathId: string };
+  Certificate: { courseId?: string };
+
+  // ── Wealth & analytics ──
+  WealthDashboard: undefined;
+  GoalCreate: undefined;
+  GoalDetail: { goalId?: string };
+  RetirementPlanner: undefined;
+  MonteCarlo: undefined;
+  PortfolioRebalancing: undefined;
+  DividendTracker: undefined;
+  CorrelationMatrix: undefined;
+  FactorAnalysis: undefined;
+
+  // ── Reports, alerts & notifications ──
+  Reports: undefined;
+  PeriodReport: undefined;
+  ContractNoteParser: { brokerFormat?: string } | undefined;
+  Notifications: undefined;
+  NotificationPreferences: undefined;
+  PortfolioAlerts: undefined;
+  Achievements: undefined;
+
+  // ── Settings & security ──
+  Settings: undefined;
+  Help: undefined;
+  WidgetSettings: undefined;
+  TenantConfig: undefined;
+  VoiceSettings: undefined;
+  SecuritySettings: undefined;
+  SecurityAuditLog: undefined;
+  ApiKeys: undefined;
+  Webhooks: undefined;
+  TwoFactorSetup: undefined;
+  FeatureFlags: undefined;
+  ABTestRunner: undefined;
+  TelegramConnect: undefined;
+  AISettings: undefined;
+  DarkMode: undefined;
+  Accessibility: undefined;
+  LandscapeMode: undefined;
+  CDNOptimization: undefined;
+
+  // ── KYC & verification ──
+  PanVerification: undefined;
+  AadhaarVerification: undefined;
+  DigiLocker: undefined;
+  BankLinking: undefined;
+
+  // ── Admin ──
+  AdminCouponManager: undefined;
+  AdminCourseReview: undefined;
 };
+

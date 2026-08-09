@@ -129,7 +129,7 @@ describe('PortfolioScreen — Loading State', () => {
   });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -145,31 +145,31 @@ describe('PortfolioScreen — Loaded Holdings', () => {
   });
 
   it('renders the header title', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Portfolio')).toBeDefined();
   });
 
   it('renders the subtitle', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Track your investments')).toBeDefined();
   });
 
   it('renders holdings section by default', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(`Holdings (${mockHoldings.length})`)).toBeDefined();
   });
 
   it('renders the toggle for holdings view', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Recent Trades')).toBeDefined();
   });
 
   it('renders individual holding symbols', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('RELIANCE')).toBeDefined();
     expect(getByText('HDFCBANK')).toBeDefined();
@@ -179,7 +179,7 @@ describe('PortfolioScreen — Loaded Holdings', () => {
   });
 
   it('renders stats in summary card', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Holdings')).toBeDefined();
     expect(getByText('Trades')).toBeDefined();
@@ -198,7 +198,7 @@ describe('PortfolioScreen — Trades View', () => {
   });
 
   it('renders toggle without navigation being called', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     const tradesToggle = getByText('Recent Trades');
     expect(tradesToggle).toBeDefined();
@@ -226,7 +226,7 @@ describe('PortfolioScreen — Empty Holdings', () => {
   });
 
   it('renders empty state when no holdings exist', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Holdings (0)')).toBeDefined();
     expect(getByText('No Holdings Yet')).toBeDefined();
@@ -246,26 +246,26 @@ describe('PortfolioScreen — Dividend Calendar', () => {
   });
 
   it('renders the Dividend Calendar section title', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Dividend Calendar')).toBeDefined();
   });
 
   it('renders the total annual dividend chip with ₹ amount', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Find text that includes '/yr' to identify the annual dividend chip
     expect(getByText(/\/yr/)).toBeDefined();
   });
 
   it('renders the Upcoming Estimates section when stocks have dividends', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Upcoming Estimates')).toBeDefined();
   });
 
   it('renders dividend stock symbols in the summary', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Holdings with dividends (RELIANCE 0.85%, HDFCBANK 1.05%, TCS 1.20%, INFY 1.80%, SBIN 2.15%)
     expect(getByText('RELIANCE')).toBeDefined();
@@ -276,7 +276,7 @@ describe('PortfolioScreen — Dividend Calendar', () => {
   });
 
   it('renders dividend yield percentages for holdings', () => {
-    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // All mock holdings have dividend > 0, so yield text should appear
     expect(getByText(/% yield/)).toBeDefined();
@@ -304,14 +304,14 @@ describe('PortfolioScreen — No Dividend Stocks', () => {
   });
 
   it('does NOT render Upcoming Estimates when no stocks pay dividends', () => {
-    const { queryByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { queryByText } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Holdings exist but none pay dividends → timeline section should not appear
     expect(queryByText('Upcoming Estimates')).toBeNull();
   });
 
   it('does NOT crash when all stocks have zero dividend', () => {
-    const { toJSON } = render(<PortfolioScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<PortfolioScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(toJSON).not.toBeNull();
   });

@@ -253,28 +253,28 @@ describe('MyCoursesScreen — Initial State', function() {
 
   it('renders without crashing', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.toJSON()).not.toBeNull();
   });
 
   it('renders the screen title', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('My Courses')).toBeDefined();
   });
 
   it('renders subtitle', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText(/Create and manage your own courses/)).toBeDefined();
   });
 
   it('renders stats bar with zeroes', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Total')).toBeDefined();
     expect(result.getByText('Published')).toBeDefined();
@@ -284,14 +284,14 @@ describe('MyCoursesScreen — Initial State', function() {
 
   it('renders Create New Course button', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Create New Course')).toBeDefined();
   });
 
   it('renders filter chips', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('All')).toBeDefined();
     expect(result.getByText('Published')).toBeDefined();
@@ -301,14 +301,14 @@ describe('MyCoursesScreen — Initial State', function() {
 
   it('renders empty state when no courses exist', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('No courses yet')).toBeDefined();
   });
 
   it('calls loadFromCache on focus', function() {
     render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(mockLoadFromCache).toHaveBeenCalled();
   });
@@ -353,7 +353,7 @@ describe('MyCoursesScreen — With Courses', function() {
 
   it('renders course card titles', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Options Strategies')).toBeDefined();
     expect(result.getByText('My New Course')).toBeDefined();
@@ -361,7 +361,7 @@ describe('MyCoursesScreen — With Courses', function() {
 
   it('renders status badges', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('Published')).toBeDefined();
     expect(result.getByText('Draft')).toBeDefined();
@@ -369,7 +369,7 @@ describe('MyCoursesScreen — With Courses', function() {
 
   it('renders lesson counts on cards', function() {
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     expect(result.getByText('6 lessons')).toBeDefined();
     expect(result.getByText('2 lessons')).toBeDefined();
@@ -379,7 +379,7 @@ describe('MyCoursesScreen — With Courses', function() {
     const draftCourse = { ...mockDraft, id: 'uc_new' };
     mockCreateDraft.mockReturnValue(draftCourse);
     const result = render(
-      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <MyCoursesScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Create New Course')); });
     expect(mockCreateDraft).toHaveBeenCalled();

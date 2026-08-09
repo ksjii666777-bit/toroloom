@@ -5,7 +5,7 @@
 > **🗂 Canonical Production Project (IMPORTANT):**
 > - **Project:** `friendly-consideration` (production)
 > - **Service:** `toroloom` (backend) + `Postgres` (database)
-> - **URL:** `https://toroloom-production.up.railway.app`
+> - **URL:** `https://<your-domain>.up.railway.app`
 > - **⚠️ In dono services ko DELETE mat karna** — yeh LIVE production hain. `toroloom` service domain mapping carry karti hai; delete karne par backend offline + domain loss hota hai.
 > - Purana `toroloom-backend` project (FAILED deploys wala) delete ho chuka hai — usse confuse mat hona.
 
@@ -64,10 +64,10 @@ Railway ka `healthcheckPath` ab **`/ready`** hai (liveness `/health` se alag rea
 
 ```bash
 # Readiness — Railway healthcheck yahi hit karta hai
-curl https://toroloom-production.up.railway.app/ready
+curl https://<your-domain>.up.railway.app/ready
 
 # Liveness — process up hai ya nahi
-curl https://toroloom-production.up.railway.app/health
+curl https://<your-domain>.up.railway.app/health
 ```
 
 Expected:

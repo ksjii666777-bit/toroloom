@@ -12,11 +12,12 @@ import { educationApi } from '../../services/api/education';
 import Card from '../../components/ui/Card';
 import VideoLessonPlayer from '../../components/video/VideoLessonPlayer';
 import QuizComponent from '../../components/quiz/QuizComponent';
-import type { QuizResult } from '../../types';
+import type {QuizResult, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
-export default function LessonViewScreen({ route, navigation }: any) {
+export default function LessonViewScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'LessonView'>) {
   const { lessonId, courseId } = route.params;
   const { colors } = useTheme();
   const { t } = useT();

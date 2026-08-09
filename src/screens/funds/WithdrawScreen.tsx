@@ -15,10 +15,13 @@ import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constant
 import { formatCurrency } from '../../utils/formatters';
 import { LINKED_BANKS, WITHDRAW_PRESETS } from '../../services/mockDataService';
 import { fundsApi } from '../../services/api';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
-export default function WithdrawScreen({ navigation }: any) {
+export default function WithdrawScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Withdraw'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

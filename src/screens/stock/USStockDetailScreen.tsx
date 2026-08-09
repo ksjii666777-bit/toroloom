@@ -23,7 +23,14 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useT } from '../../hooks/useT';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { mockUSStocks, mockUSETFs } from '../../constants/mockData';
-import type { USStock } from '../../types';
+import TradingViewChart from '../../components/TradingViewChart';
+import PositionLevelsOverlay from '../../components/PositionLevelsOverlay';
+import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import { toTradingViewSymbol } from '../../utils/tradingView';
+import { openExitOrder } from '../../utils/orderExit';
+import { tickerProvider } from '../../services/tickerProvider';
+import type {USStock, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ──── Helper: merge API quote into USStock mock ─────────────────
 function mergeApiToStock(stock: USStock, api: { price: number; change: number; changePercent: number; isPositive: boolean; volume?: string; high52?: number; low52?: number }): USStock {
@@ -107,8 +114,8 @@ function StatRow({ label, value, highlightColor }: { label: string; value: strin
 
 // ──── Main Screen ──────────────────────────────────────────────────────────
 
-export default function USStockDetailScreen({ route, navigation }: any) {
-  const { stockId, symbol, _source } = route.params || {};
+export default function USStockDetailScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'USStockDetail'>) {
+  const { stockId, symbol } = route.params || {};
   const { colors } = useTheme();
   const { t } = useT();
 
@@ -118,6 +125,26 @@ export default function USStockDetailScreen({ route, navigation }: any) {
   const [stock, setStock] = useState<USStock>(mockStock);
   const [detailLoading, setDetailLoading] = useState(true);
   const [usingLiveData, setUsingLiveData] = useState(false);
+  const [chartFailed, setChartFailed] = useState(false);
+
+  // TradingView symbol for the live chart (e.g. NASDAQ:AAPL)
+  const tvSymbol = useMemo(
+    () => toTradingViewSymbol(stock.symbol, stock.exchange),
+    [stock.symbol, stock.exchange],
+  );
+
+  // ── Hybrid: keep the Ticker Provider in sync with the viewed stock ──
+  // So opening the SnapTrade order panel pre-selects THIS symbol (chart,
+  // symbol field, and execution-price feed all follow the provider).
+  useEffect(() => {
+    if (!stock?.symbol) return;
+    tickerProvider.selectSymbol({
+      symbol: stock.symbol,
+      exchange: stock.exchange,
+      name: stock.name,
+      price: stock.price,
+    });
+  }, [stock.symbol, stock.exchange, stock.name, stock.price]);
 
   // Fetch live quote from backend on mount
   useEffect(() => {
@@ -143,6 +170,23 @@ export default function USStockDetailScreen({ route, navigation }: any) {
     e => e.category.toLowerCase().includes(stock.sector.toLowerCase()) ||
          e.name.toLowerCase().includes(stock.sector.toLowerCase()),
   ).slice(0, 3);
+
+  // ── Shared exit wiring: pre-select the provider, then open the SnapTrade
+  // order panel pre-filled with the risk-derived stop / target level. ──
+  const openExit = (kind: 'SL' | 'LIMIT', exitPrice: number) =>
+    openExitOrder(
+      navigation,
+      {
+        symbol: stock.symbol,
+        exchange: stock.exchange,
+        name: stock.name,
+        price: stock.price,
+        stockId: stock.id,
+      },
+      kind,
+      exitPrice,
+      { route: 'SnapTradeOrder' },
+    );
 
   if (detailLoading) {
     return (
@@ -204,15 +248,42 @@ export default function USStockDetailScreen({ route, navigation }: any) {
             </View>
           </View>
 
-          {/* Mini Chart */}
+          {/* Live Chart — TradingView widget with real market data, overlaid
+              with the live-position tag (avg buy / stop / target) that follows
+              the Ticker Provider's active symbol. */}
           <View style={[styles.chartContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <MiniPriceChart isPositive={isPositive} />
-            <View style={styles.chartTimeframes}>
-              {['1D', '1W', '1M', '3M', '1Y', 'Max'].map(tf => (
-                <Text key={tf} style={[styles.chartTf, { color: tf === '1Y' ? colors.primary : colors.textMuted }]}>{tf}</Text>
-              ))}
-            </View>
+            {chartFailed ? (
+              <MiniPriceChart isPositive={isPositive} />
+            ) : (
+              <View style={styles.chartWrap}>
+                <TradingViewChart
+                  symbol={tvSymbol}
+                  height={CHART_HEIGHT}
+                  onError={() => setChartFailed(true)}
+                />
+                <PositionLevelsOverlay
+                  // No symbol prop — follows the Ticker Provider's active ticker.
+                  onApplyStop={(p) => openExit('SL', p)}
+                  onApplyTarget={(p) => openExit('LIMIT', p)}
+                />
+              </View>
+            )}
           </View>
+
+          {/* Trade CTA — opens the SnapTrade order panel pre-selected to this symbol */}
+          <AnimatedPressable
+            onPress={() => navigation.navigate('SnapTradeOrder', {
+              symbol: stock.symbol,
+              name: stock.name,
+              price: stock.price,
+            })}
+            haptic="medium"
+            scaleTo={0.97}
+            style={[styles.tradeBtn, { backgroundColor: colors.primary }]}
+          >
+            <Ionicons name="swap-horizontal" size={16} color="#fff" />
+            <Text style={styles.tradeBtnText}>{t('snaptrade.trade')}</Text>
+          </AnimatedPressable>
         </Animated.View>
 
         {/* Key Stats */}
@@ -349,12 +420,22 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
     alignItems: 'center',
   },
-  chartTimeframes: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-    marginTop: SPACING.sm,
+  chartWrap: {
+    position: 'relative',
+    alignSelf: 'stretch',
   },
-  chartTf: { ...FONTS.semiBold, fontSize: FONTS.size.xs },
+
+  // ── Trade CTA ──
+  tradeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  tradeBtnText: { ...FONTS.bold, fontSize: FONTS.size.md, color: '#fff' },
 
   // ── Stats ──
   section: {

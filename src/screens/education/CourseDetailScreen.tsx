@@ -11,6 +11,9 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { educationApi } from '../../services/api/education';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const levelGradients: Record<string, readonly [string, string]> = {
   beginner: GRADIENTS.success,
@@ -18,7 +21,7 @@ const levelGradients: Record<string, readonly [string, string]> = {
   advanced: GRADIENTS.danger,
 };
 
-export default function CourseDetailScreen({ route, navigation }: any) {
+export default function CourseDetailScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'CourseDetail'>) {
   const { courseId } = route.params;
   const { colors } = useTheme();
   const { t } = useT();

@@ -32,9 +32,12 @@ import { biometricAuth } from '../../services/biometricService';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
 
 
-export default function SecuritySettingsScreen({ navigation }: any) {
+
+export default function SecuritySettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SecuritySettings'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = createStyles(colors);

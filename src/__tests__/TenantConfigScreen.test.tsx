@@ -188,7 +188,7 @@ describe('TenantConfigScreen — Empty Form', () => {
 
   it('renders the header with title and back button', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Tenant Config')).toBeDefined();
@@ -196,7 +196,7 @@ describe('TenantConfigScreen — Empty Form', () => {
 
   it('renders all four configuration sections', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Tenant Identity')).toBeDefined();
@@ -207,7 +207,7 @@ describe('TenantConfigScreen — Empty Form', () => {
 
   it('renders text input fields with correct placeholders', () => {
     const { getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByPlaceholderText('e.g. broker_x')).toBeDefined();
@@ -218,7 +218,7 @@ describe('TenantConfigScreen — Empty Form', () => {
 
   it('renders all 15 feature override rows from the matrix', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -230,7 +230,7 @@ describe('TenantConfigScreen — Empty Form', () => {
 
   it('renders pricing inputs for Pro and Elite plans', () => {
     const { getByText, getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Pro')).toBeDefined();
@@ -246,7 +246,7 @@ describe('TenantConfigScreen — Empty Form', () => {
 
   it('renders Razorpay key inputs', () => {
     const { getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByPlaceholderText('e.g. rzp_live_xxxxxxxx')).toBeDefined();
@@ -255,7 +255,7 @@ describe('TenantConfigScreen — Empty Form', () => {
 
   it('renders Save button', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Save Tenant Config')).toBeDefined();
@@ -263,7 +263,7 @@ describe('TenantConfigScreen — Empty Form', () => {
 
   it('does NOT render Reset button or Active Config section when no tenant configured', () => {
     const { queryByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(queryByText('Reset to Default')).toBeNull();
@@ -298,7 +298,7 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
 
   it('shows pre-filled config values rendered in Active Config preview', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('broker_x')).toBeDefined();
@@ -308,7 +308,7 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
 
   it('renders Active Config section with tenant details', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -320,7 +320,7 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
 
   it('shows feature override count in active config', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('2 feature(s)')).toBeDefined();
@@ -328,7 +328,7 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
 
   it('shows Razorpay key preview in active config', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText(/Razorpay/)).toBeDefined();
@@ -337,7 +337,7 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
 
   it('shows pricing override count in active config', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('1 plan(s)')).toBeDefined();
@@ -345,7 +345,7 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
 
   it('renders Reset button when non-default tenant is configured', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Reset to Default')).toBeDefined();
@@ -353,7 +353,7 @@ describe('TenantConfigScreen — Pre-filled Form', () => {
 
   it('renders primary color swatch in active config preview', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Primary Color:')).toBeDefined();
@@ -370,7 +370,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
 
   it('does not throw when pressing the back button area', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(() => {
@@ -382,7 +382,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText, getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -408,7 +408,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText, getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -433,7 +433,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText, getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -454,7 +454,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
 
   it('shows validation alert when tenant ID is empty', () => {
     const { getByText, getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -469,7 +469,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
 
   it('shows validation alert when tenant name is empty', () => {
     const { getByText, getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -484,7 +484,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
 
   it('shows validation alert when domain is empty', () => {
     const { getByText, getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -501,7 +501,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const r = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -549,7 +549,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -583,7 +583,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     resetStore(tenantWithOverride);
 
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -595,7 +595,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const r = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -628,7 +628,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
       const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
       const r = render(
-        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       advanceAnimations();
 
@@ -658,7 +658,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
       const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
       const r = render(
-        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       advanceAnimations();
 
@@ -714,7 +714,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
       const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
       const r = render(
-        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       advanceAnimations();
 
@@ -760,7 +760,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
       const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
       const r = render(
-        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       advanceAnimations();
 
@@ -792,7 +792,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
       const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
       const r = render(
-        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       advanceAnimations();
 
@@ -867,7 +867,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
       const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
       const r = render(
-        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       advanceAnimations();
 
@@ -887,7 +887,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
       const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
       const r = render(
-        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+        <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
       );
       advanceAnimations();
 
@@ -922,7 +922,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const r = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -951,7 +951,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const r = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -976,7 +976,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const r = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -999,7 +999,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const r = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -1022,7 +1022,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const r = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -1043,7 +1043,7 @@ describe('TenantConfigScreen — Form Interactions', () => {
 
   it('updates pricing override input when typing', () => {
     const { getByPlaceholderText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -1077,7 +1077,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
 
   it('renders Reset to Default button', () => {
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Reset to Default')).toBeDefined();
@@ -1086,7 +1086,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
   it('does not render Reset button when default tenant is configured', () => {
     resetStore({ id: 'default', name: 'Toroloom', domain: 'toroloom.app' });
     const { queryByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(queryByText('Reset to Default')).toBeNull();
@@ -1095,7 +1095,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
   it('does not render Active Config when default tenant is configured', () => {
     resetStore({ id: 'default', name: 'Toroloom', domain: 'toroloom.app' });
     const { queryByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(queryByText('Active Config')).toBeNull();
@@ -1105,7 +1105,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -1136,7 +1136,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
     const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
     const { getByText, getByPlaceholderText, queryByPlaceholderText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -1156,7 +1156,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
     act(() => { vi.advanceTimersByTime(0); });
 
     act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     });
 
     // All inputs should now be empty
@@ -1175,7 +1175,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
     const configureTenantSpy = spyOnConfigureTenantWithStoreUpdate();
 
     const { getByText, queryByText, update } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -1191,7 +1191,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
     act(() => { vi.advanceTimersByTime(0); });
 
     act(() => {
-      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />);
+      update(<TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />);
     });
 
     expect(queryByText('Active Config')).toBeNull();
@@ -1205,7 +1205,7 @@ describe('TenantConfigScreen — Reset Flow', () => {
     const configureTenantSpy = spyOnConfigureTenant();
 
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -1232,7 +1232,7 @@ describe('TenantConfigScreen — Edge Cases', () => {
   it('renders without crashing with null tenantConfig', () => {
     resetStore(null);
     const { toJSON } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(toJSON).not.toBeNull();
@@ -1246,7 +1246,7 @@ describe('TenantConfigScreen — Edge Cases', () => {
     });
 
     const { toJSON } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(toJSON).not.toBeNull();
   });
@@ -1260,7 +1260,7 @@ describe('TenantConfigScreen — Edge Cases', () => {
     });
 
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -1280,7 +1280,7 @@ describe('TenantConfigScreen — Edge Cases', () => {
     });
 
     const { getByText } = render(
-      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <TenantConfigScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 

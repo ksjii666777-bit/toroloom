@@ -33,6 +33,19 @@ const mockCloseOrderModal = vi.fn();
 const mockSetOrderQuantity = vi.fn();
 const mockPlaceOrder = vi.fn();
 
+// Ticker Provider — spy on selectSymbol to verify the hybrid pre-select wiring.
+const { mockSelectSymbol } = vi.hoisted(() => ({
+  mockSelectSymbol: vi.fn(),
+}));
+
+vi.mock('../services/tickerProvider', () => ({
+  tickerProvider: {
+    selectSymbol: (...args: unknown[]) => mockSelectSymbol(...args),
+  },
+  useTicker: () => null,
+  useExecutionPrice: () => null,
+}));
+
 const mockExpiries = [
   { id: 'e1', symbol: 'NIFTY', date: '2026-07-09T00:00:00.000Z', daysToExpiry: 12, isMonthly: false },
   { id: 'e2', symbol: 'NIFTY', date: '2026-07-16T00:00:00.000Z', daysToExpiry: 19, isMonthly: false },
@@ -198,12 +211,12 @@ import { useFnoStore } from '../store/fnoStore';
 // ==================== Helpers ====================
 
 function renderScreen() {
-  return render(<FnOOptionsChainScreen navigation={navMock} />);
+  return render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
 }
 
 function renderWithView(view: 'option-chain' | 'futures' | 'positions') {
   (useFnoStore as any).mockImplementation(() => defaultStoreMock(view));
-  const result = render(<FnOOptionsChainScreen navigation={navMock} />);
+  const result = render(<FnOOptionsChainScreen navigation={navMock as any} route={{ params: {} } as any} />);
   return result;
 }
 
@@ -677,5 +690,88 @@ describe('FnOOptionsChainScreen — Position Card Navigation', () => {
       type: 'CE',
       strike: 24000,
     });
+  });
+});
+
+describe('FnOOptionsChainScreen — Ticker Provider Pre-fill', () => {
+  beforeEach(() => {
+    mockSelectSymbol.mockClear();
+    mockOpenOrderModal.mockClear();
+    mockNavigate.mockClear();
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
+  });
+
+  afterEach(() => {
+    (useFnoStore as any).mockImplementation(defaultStoreMock);
+  });
+
+  it('pre-selects the underlying symbol when a symbol chip is tapped', () => {
+    const { getByText } = renderScreen();
+    act(() => {
+      fireEvent.press(getByText('BANKNIFTY'));
+    });
+
+    // NSE exchange + name + the spot price for BANKNIFTY from spotPrices.
+    expect(mockSelectSymbol).toHaveBeenCalledWith({
+      symbol: 'BANKNIFTY',
+      exchange: 'NSE',
+      name: 'BANKNIFTY',
+      price: 51200.00,
+    });
+  });
+
+  it('pre-selects the underlying when a CE contract is tapped to trade', () => {
+    const { getByText } = renderScreen();
+    act(() => {
+      fireEvent.press(getByText('₹185.50'));
+    });
+
+    // NIFTY CE at strike 24000 with the spot price from the option chain.
+    expect(mockSelectSymbol).toHaveBeenCalledWith({
+      symbol: 'NIFTY',
+      exchange: 'NSE',
+      name: 'NIFTY',
+      price: 23456.80,
+    });
+    expect(mockOpenOrderModal).toHaveBeenCalled();
+  });
+
+  it('pre-selects the underlying when a PE contract is tapped to trade', () => {
+    const { getByText } = renderScreen();
+    act(() => {
+      fireEvent.press(getByText('₹125.75'));
+    });
+
+    expect(mockSelectSymbol).toHaveBeenCalledWith({
+      symbol: 'NIFTY',
+      exchange: 'NSE',
+      name: 'NIFTY',
+      price: 23456.80,
+    });
+    expect(mockOpenOrderModal).toHaveBeenCalled();
+  });
+
+  it('pre-selects the position symbol when a position card opens the strategy builder', () => {
+    const { getByText } = renderWithView('positions');
+    act(() => {
+      fireEvent.press(getByText('LONG'));
+    });
+
+    expect(mockSelectSymbol).toHaveBeenCalledWith({
+      symbol: 'NIFTY',
+      exchange: 'NSE',
+      name: 'NIFTY',
+      price: 23456.80,
+    });
+    expect(mockNavigate).toHaveBeenCalledWith('StrategyBuilder', {
+      symbol: 'NIFTY',
+      type: 'CE',
+      strike: 24000,
+    });
+  });
+
+  it('does not touch the ticker provider on plain render', () => {
+    renderScreen();
+    expect(mockSelectSymbol).not.toHaveBeenCalled();
   });
 });

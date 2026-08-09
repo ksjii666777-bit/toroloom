@@ -15,8 +15,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { useIPOStore } from '../../store/ipoStore';
-import type { IPOItem, IPOApplication } from '../../types';
+import type {IPOItem, IPOApplication, RootStackParamList} from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ──── Constants ────────────────────────────────────────────────────────────
 
@@ -778,7 +779,7 @@ const modalStyles = StyleSheet.create({
 
 // ──── Main Screen ──────────────────────────────────────────────────────────
 
-export default function IPODashboardScreen({ navigation }: any) {
+export default function IPODashboardScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'IPODashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

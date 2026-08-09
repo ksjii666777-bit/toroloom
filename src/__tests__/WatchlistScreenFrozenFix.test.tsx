@@ -122,7 +122,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('renders without crashing when navigation is a frozen object', () => {
       const frozenNav = createFrozenNavigation();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -137,7 +137,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
         navigate: mockNavigate, getState: () => state, getId: () => 'Watchlist',
       });
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -146,7 +146,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('renders full content with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Watchlist')).toBeDefined();
       expect(getByText('Monitor your favorite stocks')).toBeDefined();
@@ -156,7 +156,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('renders suggested stocks section with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Suggested Stocks')).toBeDefined();
       expect(getByText('HDFCBANK')).toBeDefined(); // Stock not in watchlist
@@ -166,7 +166,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('renders sort indicator with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText(/Sorted by:/)).toBeDefined();
       cleanup();
@@ -175,7 +175,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('renders Alert button for watchlist stocks with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getAllByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       const alertBtns = getAllByText('Alert');
       expect(alertBtns.length).toBeGreaterThanOrEqual(1);
@@ -185,7 +185,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('renders "No alerts set" text with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getAllByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       const noAlertTexts = getAllByText('No alerts set');
       expect(noAlertTexts.length).toBeGreaterThanOrEqual(1);
@@ -195,7 +195,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('renders stock items with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('RELIANCE')).toBeDefined();
       expect(getByText('SBIN')).toBeDefined();
@@ -210,17 +210,17 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('does NOT attempt to set properties on frozen navigation during mount', () => {
       const frozenNav = createFrozenNavigation();
       expect(() => {
-        renderWithTimeTravel(<WatchlistScreen navigation={frozenNav as any} />);
+        renderWithTimeTravel(<WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
     });
 
     it('does NOT mutate frozen navigation after re-render', () => {
       const frozenNav = createFrozenNavigation();
       const { update, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => {
-        update(<WatchlistScreen navigation={frozenNav as any} />);
+        update(<WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
       cleanup();
     });
@@ -228,7 +228,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('handles mount with frozen navigation then unmounts gracefully', () => {
       const frozenNav = createFrozenNavigation();
       const { unmount } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { unmount(); }).not.toThrow();
     });
@@ -236,7 +236,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('preserves frozen status of navigation after render', () => {
       const frozenNav = createFrozenNavigation();
       const { cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { (frozenNav as any).newProp = 'test'; }).toThrow();
       cleanup();
@@ -249,7 +249,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('navigates to StockDetail when a stock item is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('RELIANCE'));
       expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
@@ -262,7 +262,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('opens price alert modal on long-press with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.trigger(getByText('RELIANCE'), 'onLongPress');
       expect(getByText('Current Price')).toBeDefined();
@@ -273,7 +273,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('toggles sort direction without navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Tap the sort direction toggle (click on sort indicator)
       // The sort button with funnel icon is rendered
@@ -286,7 +286,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('sets alert modal direction buttons with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Open alert modal via long-press
       fireEvent.trigger(getByText('RELIANCE'), 'onLongPress');
@@ -299,7 +299,7 @@ describe('WatchlistScreen — Frozen Navigation Object', () => {
     it('navigates to StockDetail after interacting with filters', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <WatchlistScreen navigation={frozenNav as any} />,
+        <WatchlistScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Interact with sort indicator first
       fireEvent.press(getByText(/Sorted by:/));

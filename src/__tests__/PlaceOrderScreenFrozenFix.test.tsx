@@ -236,7 +236,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('renders without crashing when navigation is a frozen object', () => {
       const frozenNav = createFrozenNavigation();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -251,7 +251,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
         navigate: mockNavigate, goBack: mockGoBack, getState: () => state, getId: () => 'PlaceOrder',
       });
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -260,7 +260,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('renders full content with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(getByText('RELIANCE')).toBeDefined();
       expect(getByText('Reliance Industries Ltd.')).toBeDefined();
@@ -276,7 +276,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('renders order type chips with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getAllByText, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(getAllByText('MARKET')[0]).toBeDefined();
       expect(getAllByText('LIMIT')[0]).toBeDefined();
@@ -288,7 +288,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('renders product type chips with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getAllByText, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(getAllByText('CNC')[0]).toBeDefined();
       expect(getAllByText('MIS')[0]).toBeDefined();
@@ -299,7 +299,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('renders quantity presets with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(getByText('10')).toBeDefined();
       expect(getByText('50')).toBeDefined();
@@ -311,7 +311,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('renders order summary card when quantity is entered with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByTestId, getByText, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       act(() => { fireEvent.press(getByTestId('quickQty_10')); });
       expect(getByText('Order Summary')).toBeDefined();
@@ -328,7 +328,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
       const frozenNav = createFrozenNavigation();
       expect(() => {
         renderWithTimeTravel(
-          <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+          <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
         );
       }).not.toThrow();
     });
@@ -336,10 +336,10 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('does NOT mutate frozen navigation after re-render', () => {
       const frozenNav = createFrozenNavigation();
       const { update, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(() => {
-        update(<PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />);
+        update(<PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />);
       }).not.toThrow();
       cleanup();
     });
@@ -347,7 +347,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('handles mount with frozen navigation then unmounts gracefully', () => {
       const frozenNav = createFrozenNavigation();
       const { unmount } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(() => { unmount(); }).not.toThrow();
     });
@@ -355,7 +355,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('preserves frozen status of navigation after render', () => {
       const frozenNav = createFrozenNavigation();
       const { cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       expect(() => { (frozenNav as any).newProp = 'test'; }).toThrow();
       cleanup();
@@ -368,7 +368,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('calls goBack when close button is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByTestId, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       act(() => { fireEvent.press(getByTestId('backBtn')); });
       expect(mockGoBack).toHaveBeenCalled();
@@ -378,7 +378,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('toggles between Buy and Sell with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByTestId, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       // Toggle to Sell
       act(() => { fireEvent.press(getByTestId('sellToggle')); });
@@ -391,7 +391,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('selects order type LIMIT showing price fields with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByTestId, getByText, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       act(() => { fireEvent.press(getByTestId('orderType_LIMIT')); });
       expect(getByText('Limit Price (₹)')).toBeDefined();
@@ -402,7 +402,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('selects product type MIS with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByTestId, getByText, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       act(() => { fireEvent.press(getByTestId('productType_MIS')); });
       expect(getByText(/Intraday/)).toBeDefined();
@@ -413,7 +413,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('selects quick quantity preset with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByTestId, getByText, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       act(() => { fireEvent.press(getByTestId('quickQty_50')); });
       expect(getByText('50 shares')).toBeDefined();
@@ -424,7 +424,7 @@ describe('PlaceOrderScreen — Frozen Navigation Object', () => {
     it('can navigate back after interacting with order form', () => {
       const frozenNav = createFrozenNavigation();
       const { getByTestId, cleanup } = renderWithTimeTravel(
-        <PlaceOrderScreen route={defaultRoute} navigation={frozenNav as any} />,
+        <PlaceOrderScreen route={defaultRoute as any} navigation={frozenNav as any} />,
       );
       // Interact with the form
       act(() => { fireEvent.press(getByTestId('quickQty_10')); });

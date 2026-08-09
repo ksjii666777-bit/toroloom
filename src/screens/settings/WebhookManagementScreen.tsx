@@ -32,6 +32,9 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { WebhookConfig, WebhookEvent, WebhookDeliveryLog, WebhookEventMeta } from '../../types';
 import { WEBHOOK_EVENTS } from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -344,7 +347,7 @@ const cardStyles = StyleSheet.create({
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
-export default function WebhookManagementScreen({ navigation }: any) {
+export default function WebhookManagementScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Webhooks'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [webhooks, setWebhooks] = useState<WebhookConfig[]>(MOCK_WEBHOOKS);

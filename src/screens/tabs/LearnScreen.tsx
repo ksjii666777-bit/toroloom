@@ -12,10 +12,13 @@ import Badge from '../../components/ui/Badge';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock} from '../../components/ui/SkeletonLoader';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
-export default function LearnScreen({ navigation }: any) {
+export default function LearnScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Learn'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -113,7 +116,7 @@ export default function LearnScreen({ navigation }: any) {
               {continueCourses.map((course, i) => (
                 <Animated.View key={course.id} style={continueStyles[i]}>
                   <AnimatedPressable
-                    onPress={() => navigation.navigate('CourseDetail', { courseId: course.id, course })}
+                    onPress={() => navigation.navigate('CourseDetail', { courseId: course.id })}
                     haptic="light"
                     scaleTo={0.97}
                   >
@@ -295,7 +298,7 @@ export default function LearnScreen({ navigation }: any) {
             {courses.map((course, i) => (
               <Animated.View key={course.id} style={courseStyles[i]}>
                 <AnimatedPressable
-                  onPress={() => navigation.navigate('CourseDetail', { courseId: course.id, course })}
+                  onPress={() => navigation.navigate('CourseDetail', { courseId: course.id })}
                   haptic="selection"
                   scaleTo={0.98}
                 >

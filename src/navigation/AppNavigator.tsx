@@ -4,6 +4,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-na
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import type { RootStackParamList, TabParamList } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
 import { useOnboardingStore } from '../store/onboardingStore';
@@ -112,6 +113,7 @@ import FuturesCurveScreen from '../screens/markets/FuturesCurveScreen';
 import NewsFeedScreen from '../screens/news/NewsFeedScreen';
 import IPOCalendarScreen from '../screens/news/IPOCalendarScreen';
 import IPODashboardScreen from '../screens/ipos/IPODashboardScreen';
+import IPODetailScreen from '../screens/ipos/IPODetailScreen';
 import NFODashboardScreen from '../screens/nfo/NFODashboardScreen';
 import NFODetailScreen from '../screens/nfo/NFODetailScreen';
 import DividendTrackerScreen from '../screens/analytics/DividendTrackerScreen';
@@ -164,8 +166,8 @@ import { useCacheInvalidation } from '../hooks/useCacheInvalidation';
 import { offlineCache } from '../services/offlineCache';
 import { startWidgetAutoUpdate } from '../services/widgetService';
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
 
 /**
  * Tab bar button wrapper that adds a testID for E2E test targeting.
@@ -504,6 +506,7 @@ export default function AppNavigator() {
             <Stack.Screen name="NewsFeed" component={NewsFeedScreen} />
             <Stack.Screen name="IPOCalendar" component={IPOCalendarScreen} />
             <Stack.Screen name="IPODashboard" component={IPODashboardScreen} />
+            <Stack.Screen name="IPODetail" component={IPODetailScreen} />
             <Stack.Screen name="NFODashboard" component={NFODashboardScreen} />
             <Stack.Screen name="NFODetail" component={NFODetailScreen} />
             <Stack.Screen name="EconomicCalendar" component={EconomicCalendarScreen} />
@@ -549,7 +552,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
             <Stack.Screen name="LessonView" component={LessonViewScreen} />
-            <Stack.Screen name="QuizResult" component={QuizResultScreen as any} />
+            <Stack.Screen name="QuizResult" component={QuizResultScreen} />
             <Stack.Screen name="Glossary" component={GlossaryScreen} />
             <Stack.Screen name="MyCourses" component={MyCoursesScreen} />
             <Stack.Screen name="CreateCourse" component={CreateCourseScreen} />

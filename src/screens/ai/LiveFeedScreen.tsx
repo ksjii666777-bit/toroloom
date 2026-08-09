@@ -35,6 +35,9 @@ import { shareNative, showShareSheet } from '../../utils/share';
 import type { ShareContent } from '../../utils/share';
 import type { LiveFeedEvent } from '../../services/ai/sentimentLiveFeed';
 import AnimatedScaleButton from '../../components/AnimatedScaleButton';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -539,7 +542,7 @@ const eventStyles = StyleSheet.create({
 
 // ─── Main Screen ───────────────────────────────────────────
 
-export default function LiveFeedScreen({ navigation }: any) {
+export default function LiveFeedScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'LiveFeed'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

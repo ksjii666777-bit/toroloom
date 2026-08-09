@@ -14,8 +14,11 @@ import {
 import OptimizedImage from '../../components/ui/OptimizedImage';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
 
-export default function CDNOptimizationScreen({ _navigation }: any) {
+
+export default function CDNOptimizationScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'CDNOptimization'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

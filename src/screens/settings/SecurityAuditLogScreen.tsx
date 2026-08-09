@@ -29,7 +29,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useT } from '../../hooks/useT';
-import type { LoginEvent, ActiveSession } from '../../types';
+import type {LoginEvent, ActiveSession, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -573,7 +574,7 @@ const chipStyles = StyleSheet.create({
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
-export default function SecurityAuditLogScreen({ navigation }: any) {
+export default function SecurityAuditLogScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SecurityAuditLog'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [activeFilter, setActiveFilter] = useState<'all' | 'success' | 'failed'>('all');

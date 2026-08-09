@@ -15,7 +15,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { useIPOStore } from '../../store/ipoStore';
-import type { IPOItem } from '../../types';
+import type { IPOItem, RootStackParamList } from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
 
@@ -150,7 +151,7 @@ function BulletList({ items, color }: { items: string[]; color: string }) {
 
 // ──── Main Screen ──────────────────────────────────────────────────────────
 
-export default function IPODetailScreen({ route, navigation }: any) {
+export default function IPODetailScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'IPODetail'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

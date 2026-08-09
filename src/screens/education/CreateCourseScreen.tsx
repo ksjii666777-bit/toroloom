@@ -10,7 +10,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { CourseDraftLesson, QuizQuestion } from '../../types';
+import type {CourseDraftLesson, QuizQuestion, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const COURSE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
 const COURSE_CATEGORIES = [
@@ -19,7 +20,7 @@ const COURSE_CATEGORIES = [
 ] as const;
 const THUMBNAIL_OPTIONS = ['📚', '📊', '📈', '💰', '🎯', '🧠', '🏦', '📐', '🚀', '📋'];
 
-export default function CreateCourseScreen({ route, navigation }: any) {
+export default function CreateCourseScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'CreateCourse'>) {
   const { courseId } = route.params || {};
   const { colors } = useTheme();
   const { t } = useT();

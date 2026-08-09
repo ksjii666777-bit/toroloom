@@ -168,6 +168,8 @@ function renderScreen() {
   return render(
     <CurrencyMarketsScreen
       navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
+    route={{ params: {} } as any}
+
     />
   );
 }

@@ -10,6 +10,7 @@
 
 import { act } from 'react';
 import TestRenderer from 'react-test-renderer';
+import { expect } from 'vitest';
 import type { ReactElement } from 'react';
 
 // ── Types ────────────────────────────────────────────────────
@@ -202,6 +203,67 @@ export function render(component: ReactElement): RenderResult {
     getByPlaceholderText,
     queryByPlaceholderText,
   };
+}
+
+// ── Text-order assertion ──────────────────────────────────────
+
+/** Escape a string for use inside a RegExp. */
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Assert that the given text strings appear in the rendered tree in exactly
+ * this order (document / DFS order). Useful for verifying sorted row order in
+ * list-rendering widgets (e.g. holdings sorted by value).
+ *
+ * Implementation: matches host elements whose joined text equals one of the
+ * strings exactly (anchored alternation). Only LEAF host elements are kept —
+ * composite wrappers (e.g. the RN mock's Text component) duplicate every text
+ * parent-first, and parent host containers whose children include other
+ * elements join multiple texts (so they never match the anchored pattern) or
+ * wrap a single child host element (duplicating its text, e.g. a View holding
+ * one Text). A leaf host element has only primitive string children, so it
+ * appears exactly once per rendered string.
+ *
+ * Matches inside a HIDDEN Modal are excluded: real React Native renders
+ * nothing when `visible={false}` (its default), but the RN test mock renders
+ * children unconditionally — so a widget's title (header + hidden action-menu
+ * modal) would otherwise appear twice. Content of a VISIBLE modal is still
+ * counted.
+ */
+export function expectTextOrder(
+  result: RenderResult,
+  expected: string[]
+): void {
+  const pattern = new RegExp(
+    `^(${expected.map(escapeRegExp).join('|')})$`
+  );
+  const actual = result
+    .getAllByText(pattern)
+    .filter((el) => typeof el.type === 'string')
+    .filter((el) => {
+      const children = Array.isArray(el.children) ? el.children : [el.children];
+      return children.every((c) => typeof c === 'string');
+    })
+    .filter((el) => !insideHiddenModal(el))
+    .map((el) => collectText(el).join(''));
+  expect(actual).toEqual(expected);
+}
+
+/** True when the element is inside a Modal whose `visible` prop is falsy. */
+function insideHiddenModal(el: TestRenderer.ReactTestInstance): boolean {
+  let cur: TestRenderer.ReactTestInstance | null = el;
+  while (cur) {
+    // Host Modal elements have a string type; composite wrappers do not.
+    // (Cast: the RN mock uses arbitrary host names like 'Modal' that TS
+    // narrows away from the HTML-tag union.)
+    if (String(cur.type) === 'Modal' && !(cur.props as Record<string, any>)?.visible) {
+      return true;
+    }
+    cur = cur.parent as TestRenderer.ReactTestInstance | null;
+  }
+  return false;
 }
 
 // ── FireEvent ────────────────────────────────────────────────

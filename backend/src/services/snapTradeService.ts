@@ -1,15 +1,19 @@
 /**
  * ============================================================================
- * Toroloom — SnapTrade Service (Official SDK)
+ * Toroloom — SnapTrade Service (Official SDK v11)
  * ============================================================================
  *
- * Uses the official `snaptrade-typescript-sdk` (v10) for all SnapTrade API
- * interactions:
+ * Uses the official `snaptrade-typescript-sdk` (v11) for all SnapTrade API
+ * interactions. Supports BOTH auth modes via `SnaptradeAuth`:
  *
- *   npm install snaptrade-typescript-sdk
+ *   - commercialApiKey  → Partner keys (clientId + consumerKey + registerUser)
+ *   - personalApiKey    → Personal keys (clientId + consumerKey, NO registerUser)
+ *
+ * In personal mode:
+ *   - `registerUser()` is NOT available (SnapTrade auto-provisions the user)
+ *   - All calls OMIT `userId` / `userSecret` (the key IS the user context)
  *
  * Key SDK methods used:
- *   - authentication.registerSnapTradeUser()   — Register user
  *   - authentication.loginSnapTradeUser()       — Get OAuth connection portal URL
  *   - connections.listBrokerageAuthorizations()  — List connections
  *   - connections.detailBrokerageAuthorization() — Get single connection
@@ -23,7 +27,7 @@
  * ============================================================================
  */
 
-import { Snaptrade } from 'snaptrade-typescript-sdk';
+import { Snaptrade, SnaptradeAuth } from 'snaptrade-typescript-sdk';
 import { env } from '../config/env';
 
 // ──── Types (re-exported from SDK for convenience) ─────────────────────────
@@ -36,18 +40,29 @@ export interface SnapTradeUser {
 // ──── Service ──────────────────────────────────────────────────────────────
 
 class SnapTradeService {
-  private _client: Snaptrade | null = null;
+  private _client: Snaptrade<any> | null = null;
+
+  /** Personal keys auto-provision their user — there is no registerUser step. */
+  isPersonalMode(): boolean {
+    return env.snapTradeMode === 'personal';
+  }
 
   /**
    * Lazy-initialized SnapTrade SDK client.
-   * Uses `consumerKey` and `clientId` from env.
+   * Uses `consumerKey` + `clientId` from env; auth mode from env.snapTradeMode.
    */
-  private get client(): Snaptrade {
+  private get client(): Snaptrade<any> {
     if (!this._client) {
-      this._client = new Snaptrade({
-        clientId: env.snapTradeClientId,
-        consumerKey: env.snapTradeConsumerKey,
-      });
+      const auth = this.isPersonalMode()
+        ? SnaptradeAuth.personalApiKey({
+            clientId: env.snapTradeClientId,
+            consumerKey: env.snapTradeConsumerKey,
+          })
+        : SnaptradeAuth.commercialApiKey({
+            clientId: env.snapTradeClientId,
+            consumerKey: env.snapTradeConsumerKey,
+          });
+      this._client = new Snaptrade({ auth } as any);
     }
     return this._client;
   }
@@ -65,10 +80,20 @@ class SnapTradeService {
    * Register a user with SnapTrade.
    * POST /snapTrade/registerUser
    *
+   * NOTE: In personal mode this is a NO-OP — SnapTrade auto-provisions the
+   * user at signup, so there is no userSecret to create or store. The route
+   * layer should treat personal mode as always-registered.
+   *
    * @param userId - Your internal user ID (prefixed as toroloom_{userId})
-   * @returns The userSecret (must be stored encrypted)
+   * @returns The userSecret (must be stored encrypted) or a no-op marker
    */
   async registerUser(userId: string): Promise<SnapTradeUser> {
+    if (this.isPersonalMode()) {
+      console.log(`[SnapTrade] Personal mode — user ${userId} is auto-provisioned, skipping registerUser`);
+      // Personal keys don't create users; return a sentinel so the route can
+      // short-circuit gracefully. A real personal session never needs this.
+      return { userId, userSecret: 'personal-auto-provisioned' };
+    }
     const response = await this.client.authentication.registerSnapTradeUser({
       userId,
     });
@@ -81,9 +106,13 @@ class SnapTradeService {
 
   /**
    * Delete a user from SnapTrade.
-   * DELETE /snapTrade/deleteUser
+   * DELETE /snapTrade/deleteUser (commercial mode only)
    */
   async deleteUser(userId: string): Promise<void> {
+    if (this.isPersonalMode()) {
+      console.warn('[SnapTrade] deleteUser is not available in personal mode — skipping');
+      return;
+    }
     await this.client.authentication.deleteSnapTradeUser({ userId });
   }
 
@@ -96,8 +125,8 @@ class SnapTradeService {
    *
    * POST /snapTrade/login
    *
-   * @param userId - SnapTrade user ID
-   * @param userSecret - SnapTrade user secret
+   * @param userId - SnapTrade user ID (omitted in personal mode)
+   * @param userSecret - SnapTrade user secret (omitted in personal mode)
    * @param redirectUri - URI to redirect to after OAuth
    * @returns The Connection Portal URL
    */
@@ -106,9 +135,9 @@ class SnapTradeService {
     userSecret: string,
     redirectUri: string,
   ): Promise<{ url: string }> {
+    const personal = this.isPersonalMode();
     const response = await this.client.authentication.loginSnapTradeUser({
-      userId,
-      userSecret,
+      ...(personal ? {} : { userId, userSecret }),
       customRedirect: redirectUri,
       immediateRedirect: true,
       connectionPortalVersion: 'v4',
@@ -128,9 +157,9 @@ class SnapTradeService {
     userId: string,
     userSecret: string,
   ): Promise<any[]> {
+    const personal = this.isPersonalMode();
     const response = await this.client.connections.listBrokerageAuthorizations({
-      userId,
-      userSecret,
+      ...(personal ? {} : { userId, userSecret }),
     });
     return response.data || [];
   }
@@ -144,10 +173,10 @@ class SnapTradeService {
     userId: string,
     userSecret: string,
   ): Promise<any | null> {
+    const personal = this.isPersonalMode();
     const response = await this.client.connections.detailBrokerageAuthorization({
       authorizationId,
-      userId,
-      userSecret,
+      ...(personal ? {} : { userId, userSecret }),
     });
     return response.data || null;
   }
@@ -159,9 +188,9 @@ class SnapTradeService {
    * GET /accounts
    */
   async getAccounts(userId: string, userSecret: string): Promise<any[]> {
+    const personal = this.isPersonalMode();
     const response = await this.client.accountInformation.listUserAccounts({
-      userId,
-      userSecret,
+      ...(personal ? {} : { userId, userSecret }),
     });
     return response.data || [];
   }
@@ -175,10 +204,10 @@ class SnapTradeService {
     userSecret: string,
     accountId: string,
   ): Promise<any> {
+    const personal = this.isPersonalMode();
     const response = await this.client.accountInformation.getUserHoldings({
-      userId,
-      userSecret,
       accountId,
+      ...(personal ? {} : { userId, userSecret }),
     });
     return response.data || {};
   }
@@ -192,10 +221,10 @@ class SnapTradeService {
     userSecret: string,
     accountId: string,
   ): Promise<any[]> {
+    const personal = this.isPersonalMode();
     const response = await this.client.accountInformation.getAllAccountPositions({
-      userId,
-      userSecret,
       accountId,
+      ...(personal ? {} : { userId, userSecret }),
     });
     return response.data?.positions || [];
   }
@@ -209,10 +238,10 @@ class SnapTradeService {
     userSecret: string,
     accountId: string,
   ): Promise<any | null> {
+    const personal = this.isPersonalMode();
     const response = await this.client.accountInformation.getUserAccountDetails({
-      userId,
-      userSecret,
       accountId,
+      ...(personal ? {} : { userId, userSecret }),
     });
     return response.data || null;
   }
@@ -226,10 +255,10 @@ class SnapTradeService {
     userSecret: string,
     accountId: string,
   ): Promise<any[]> {
+    const personal = this.isPersonalMode();
     const response = await this.client.accountInformation.getUserAccountBalance({
-      userId,
-      userSecret,
       accountId,
+      ...(personal ? {} : { userId, userSecret }),
     });
     return response.data || [];
   }
@@ -243,10 +272,10 @@ class SnapTradeService {
     userSecret: string,
     accountId: string,
   ): Promise<any[]> {
+    const personal = this.isPersonalMode();
     const response = await this.client.accountInformation.getUserAccountOrders({
-      userId,
-      userSecret,
       accountId,
+      ...(personal ? {} : { userId, userSecret }),
       state: 'all',
       days: 30,
     });
@@ -273,9 +302,8 @@ class SnapTradeService {
       timeInForce?: 'Day' | 'GTC' | 'Gtc';
     },
   ): Promise<any> {
+    const personal = this.isPersonalMode();
     const response = await this.client.trading.placeForceOrder({
-      userId,
-      userSecret,
       account_id: accountId,
       action: order.action as any,
       symbol: order.symbol,
@@ -284,6 +312,7 @@ class SnapTradeService {
       price: order.price,
       stop: order.stopPrice,
       units: order.quantity,
+      ...(personal ? {} : { userId, userSecret }),
     } as any);
     return response.data || {};
   }
@@ -298,11 +327,11 @@ class SnapTradeService {
     accountId: string,
     brokerageOrderId: string,
   ): Promise<any> {
+    const personal = this.isPersonalMode();
     const response = await this.client.trading.cancelUserAccountOrder({
-      userId,
-      userSecret,
       accountId,
       brokerage_order_id: brokerageOrderId,
+      ...(personal ? {} : { userId, userSecret }),
     } as any);
     return response.data || {};
   }
@@ -319,10 +348,10 @@ class SnapTradeService {
     userSecret: string,
   ): Promise<boolean> {
     try {
+      const personal = this.isPersonalMode();
       const _response = await this.client.connections.removeBrokerageAuthorization({
         authorizationId,
-        userId,
-        userSecret,
+        ...(personal ? {} : { userId, userSecret }),
       });
       return true;
     } catch {

@@ -31,8 +31,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { mockBonds } from '../../constants/mockData';
-import type { Bond } from '../../types';
+import type {Bond, RootStackParamList} from '../../types';
 import { bondsApi } from '../../services/api';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
@@ -177,7 +178,7 @@ function BondRow({
 // MAIN SCREEN
 // ══════════════════════════════════════════════════════════════
 
-export default function BondDashboardScreen({ navigation }: any) {
+export default function BondDashboardScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'BondDashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const [bondData, setBondData] = useState<Bond[]>(mockBonds);

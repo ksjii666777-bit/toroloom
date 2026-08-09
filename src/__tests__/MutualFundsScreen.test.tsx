@@ -58,44 +58,44 @@ beforeEach(() => {
 
 describe('MutualFundsScreen', () => {
   it('renders the screen title', () => {
-    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Mutual Funds')).toBeDefined();
   });
 
   it('renders category filter buttons', () => {
-    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('All')).toBeDefined();
     expect(getByText('Equity')).toBeDefined();
     expect(getByText('Debt')).toBeDefined();
   });
 
   it('renders fund names', () => {
-    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Axis Bluechip Fund')).toBeDefined();
     expect(getByText('SBI Debt Fund')).toBeDefined();
   });
 
   it('renders fund NAV values', () => {
-    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('₹45.67')).toBeDefined();
     expect(getByText('₹120.34')).toBeDefined();
   });
 
   it('renders risk levels', () => {
-    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Moderate')).toBeDefined();
     expect(getByText('Low')).toBeDefined();
     expect(getByText('High')).toBeDefined();
   });
 
   it('renders returns information', () => {
-    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('+12.5%')).toBeDefined();
     expect(getByText('+7.8%')).toBeDefined();
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { toJSON } = render(<MutualFundsScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
   });
 });

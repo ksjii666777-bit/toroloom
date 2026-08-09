@@ -16,10 +16,13 @@ import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constant
 import { formatCurrency} from '../../utils/formatters';
 import { LINKED_UPI_ACCOUNTS, RECENT_UPI_CONTACTS, UPI_PRESETS } from '../../services/mockDataService';
 import type { UPILinkedAccount } from '../../services/mockDataService';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
-export default function UPIScreen({ navigation }: any) {
+export default function UPIScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'UPI'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

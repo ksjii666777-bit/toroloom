@@ -81,18 +81,18 @@ describe('NewsFeedScreen', () => {
   });
 
   it('renders the screen title', () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     expect(getByText('Market News')).toBeDefined();
   });
 
   it('renders article count after loading', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     expect(getByText(/articles/)).toBeDefined();
   });
 
   it('renders all category chips', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     expect(getByText('All')).toBeDefined();
     expect(getByText('Markets')).toBeDefined();
@@ -104,13 +104,13 @@ describe('NewsFeedScreen', () => {
   });
 
   it('renders a news card title', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     expect(getByText(mockNews[0].title)).toBeDefined();
   });
 
   it('filters articles by market category', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     fireEvent.press(getByText('Markets'));
     const marketsArticles = mockNews.filter(function(n) { return n.category === 'markets'; });
@@ -119,7 +119,7 @@ describe('NewsFeedScreen', () => {
 
   it('shows empty state when search yields no matches', async () => {
     const { getByText, getByPlaceholderText } = render(
-      <NewsFeedScreen navigation={mockNavigation} />
+      <NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />
     );
     await flushPromises();
 
@@ -137,7 +137,7 @@ describe('NewsFeedScreen', () => {
   });
 
   it('renders sentiment badges', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     expect(getByText('Positive')).toBeDefined();
     expect(getByText('Negative')).toBeDefined();
@@ -145,7 +145,7 @@ describe('NewsFeedScreen', () => {
   });
 
   it('switches category and returns to all', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     fireEvent.press(getByText('IPO'));
     fireEvent.press(getByText('All'));
@@ -153,24 +153,24 @@ describe('NewsFeedScreen', () => {
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { toJSON } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
   });
 
   it('renders Breaking News banner with BREAKING badge', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     expect(getByText('BREAKING')).toBeDefined();
   });
 
   it('renders Trending Symbols section', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     expect(getByText('Trending')).toBeDefined();
   });
 
   it('renders Trending symbol chips from mock data', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     // At least one trending symbol should be displayed
     const trendingSymbolsFromMock = new Set(mockNews.filter(n => n.symbol).map(n => n.symbol));
@@ -181,13 +181,13 @@ describe('NewsFeedScreen', () => {
   });
 
   it('renders Saved (bookmark) filter chip', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     expect(getByText('Saved')).toBeDefined();
   });
 
   it('renders Hero Featured Card with Read Now', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     expect(getByText('Read Now')).toBeDefined();
     // Hero card shows the first article's title
@@ -195,7 +195,7 @@ describe('NewsFeedScreen', () => {
   });
 
   it('filters news by bookmarked when Saved chip is toggled', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     // Toggle the Saved bookmark filter
     fireEvent.press(getByText('Saved'));
@@ -209,7 +209,7 @@ describe('NewsFeedScreen', () => {
   });
 
   it('filters by trending symbol chip', async () => {
-    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation} />);
+    const { getByText } = render(<NewsFeedScreen navigation={mockNavigation as any} route={{ params: {} } as any} />);
     await flushPromises();
     // Find a trending symbol chip and press it
     const trendingSymbolsFromMock = new Set(mockNews.filter(n => n.symbol).map(n => n.symbol));

@@ -101,7 +101,7 @@ beforeEach(() => {
 
 function renderTxHistory() {
   return render(
-    <TransactionHistoryScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />,
+    <TransactionHistoryScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
   );
 }
 

@@ -144,7 +144,7 @@ describe('BrokerConnectScreen — Loading State', () => {
 
   it('renders loading indicator while fetching status', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText('Checking connection status...')).toBeDefined();
@@ -152,7 +152,7 @@ describe('BrokerConnectScreen — Loading State', () => {
 
   it('does not render broker cards while loading', async () => {
     const { queryByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(queryByText('Angel One')).toBeNull();
@@ -162,7 +162,7 @@ describe('BrokerConnectScreen — Loading State', () => {
 
   it('does not render the info box while loading', async () => {
     const { queryByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(queryByText(/encrypted and securely stored/)).toBeNull();
@@ -194,7 +194,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders the header with title and back button', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText('Connect Broker')).toBeDefined();
@@ -203,7 +203,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders all three broker cards', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText('Angel One')).toBeDefined();
@@ -213,7 +213,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders broker taglines', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText("India's largest retail broking house")).toBeDefined();
@@ -223,7 +223,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders broker features on each card', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText('SmartAPI')).toBeDefined();
@@ -234,7 +234,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders Connect button on non-OAuth brokers', async () => {
     const { getAllByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     // There should be at least 2 "Connect" texts (Angel One and Groww)
@@ -244,7 +244,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders OAuth Connect on disconnected broker cards', async () => {
     const { getAllByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     const oauthLabels = getAllByText('OAuth Connect');
@@ -253,7 +253,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders the OAuth Secure indicator on Zerodha card', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText('OAuth Secure')).toBeDefined();
@@ -261,7 +261,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders the section title for choosing broker', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText('Choose Your Broker')).toBeDefined();
@@ -269,7 +269,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('renders the info box with security message', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText(/SnapTrade provides secure/)).toBeDefined();
@@ -277,7 +277,7 @@ describe('BrokerConnectScreen — Disconnected State', () => {
 
   it('does NOT render connected banner when disconnected', async () => {
     const { queryByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(queryByText(/Connected to/)).toBeNull();
@@ -307,7 +307,7 @@ describe('BrokerConnectScreen — Connected State', () => {
 
   it('renders connected banner with broker name', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText(/Connected to Angel One/)).toBeDefined();
@@ -315,7 +315,7 @@ describe('BrokerConnectScreen — Connected State', () => {
 
   it('renders connected status badge on the connected broker card', async () => {
     const { getAllByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     const connectedBadges = getAllByText('Connected');
@@ -324,7 +324,7 @@ describe('BrokerConnectScreen — Connected State', () => {
 
   it('renders Disconnect button in the banner', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText('Disconnect')).toBeDefined();
@@ -332,7 +332,7 @@ describe('BrokerConnectScreen — Connected State', () => {
 
   it('renders the subtitle asking to switch broker', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(getByText('Switch to a different broker below')).toBeDefined();
@@ -340,7 +340,7 @@ describe('BrokerConnectScreen — Connected State', () => {
 
   it('still renders OAuth Connect text on non-connected broker cards', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     // Non-connected brokers show OAuth Connect badge
@@ -371,7 +371,7 @@ describe('BrokerConnectScreen — Connect Flow', () => {
 
   it('shows connecting overlay when tapping Angel One', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
 
@@ -385,7 +385,7 @@ describe('BrokerConnectScreen — Connect Flow', () => {
 
   it('shows connecting overlay when Angel is selected (SnapTrade connect)', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
 
@@ -397,7 +397,7 @@ describe('BrokerConnectScreen — Connect Flow', () => {
 
   it('does not show old credentials modal for SnapTrade brokers', async () => {
     const { getByText, queryByText, queryByPlaceholderText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
 
@@ -411,7 +411,7 @@ describe('BrokerConnectScreen — Connect Flow', () => {
 
   it('triggers SnapTrade connect when tapping a broker', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
 
@@ -447,7 +447,7 @@ describe('BrokerConnectScreen — Disconnect Flow', () => {
 
   it('shows disconnect confirmation alert when Disconnect is pressed (API not called yet)', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
 
@@ -461,7 +461,7 @@ describe('BrokerConnectScreen — Disconnect Flow', () => {
 
   it('tapping the connected broker card also triggers disconnect (does not call API yet)', async () => {
     const { getByText } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
 
@@ -493,7 +493,7 @@ describe('BrokerConnectScreen — Edge Cases', () => {
     mockApiGet.mockRejectedValue(new Error('Network error'));
 
     const { toJSON } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(toJSON).not.toBeNull();
@@ -503,7 +503,7 @@ describe('BrokerConnectScreen — Edge Cases', () => {
     mockApiGet.mockResolvedValue({});
 
     const { toJSON } = render(
-      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <BrokerConnectScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     await advanceAndFlush();
     expect(toJSON).not.toBeNull();

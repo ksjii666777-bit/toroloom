@@ -14,18 +14,10 @@ import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { QuizResult } from '../../types';
+import type { QuizResult, RootStackParamList } from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-interface QuizResultScreenProps {
-  route: {
-    params: {
-      result: QuizResult;
-      lessonId: string;
-      courseId: string;
-    };
-  };
-  navigation: any;
-}
+type QuizResultScreenProps = NativeStackScreenProps<RootStackParamList, 'QuizResult'>;
 
 export default function QuizResultScreen({ route, navigation }: QuizResultScreenProps) {
   const { result, lessonId, courseId } = route.params;

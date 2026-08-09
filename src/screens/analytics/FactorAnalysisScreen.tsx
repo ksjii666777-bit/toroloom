@@ -32,7 +32,8 @@ import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { computeFactorAnalysis, FACTOR_META } from '../../services/factorAnalysis';
 import { usePortfolioStore } from '../../store/portfolioStore';
-import type { FactorAnalysisResult, FactorName } from '../../types';
+import type {FactorAnalysisResult, FactorName, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -40,7 +41,7 @@ const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 // COMPONENT
 // ══════════════════════════════════════════════════════════════
 
-export default function FactorAnalysisScreen({ navigation }: any) {
+export default function FactorAnalysisScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'FactorAnalysis'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

@@ -175,7 +175,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('renders the hero section with default branding', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Unlock Toroloom Premium')).toBeDefined();
@@ -184,7 +184,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('renders billing toggle with Monthly and Yearly options', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Monthly')).toBeDefined();
@@ -193,7 +193,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('renders plan cards with correct default pricing', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -207,7 +207,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('shows yearly plan pricing when Yearly toggle is selected', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -223,7 +223,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('renders the CTA button with default text', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Select a plan to upgrade')).toBeDefined();
@@ -231,7 +231,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('renders secure payment info text', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Secure payment via Razorpay')).toBeDefined();
@@ -239,7 +239,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('renders Compare Plans table with feature rows', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     // Comparison table header
@@ -255,7 +255,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('renders a back button', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     // Back button exists next to the title
@@ -264,7 +264,7 @@ describe('SubscriptionScreen — Free User', () => {
 
   it('selecting a plan highlights it', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -287,7 +287,7 @@ describe('SubscriptionScreen — Pro User', () => {
 
   it('renders hero with Pro badge', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText("You're on the Pro plan. Enjoy premium features!")).toBeDefined();
@@ -297,7 +297,7 @@ describe('SubscriptionScreen — Pro User', () => {
 
   it('renders status card with auto-renew info', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Active — Auto-Renew On')).toBeDefined();
@@ -305,7 +305,7 @@ describe('SubscriptionScreen — Pro User', () => {
 
   it('renders Cancel Auto-Renew button', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Cancel Auto-Renew')).toBeDefined();
@@ -313,7 +313,7 @@ describe('SubscriptionScreen — Pro User', () => {
 
   it('does NOT render billing toggle', () => {
     const { queryByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(queryByText('Monthly')).toBeNull();
@@ -322,7 +322,7 @@ describe('SubscriptionScreen — Pro User', () => {
 
   it('does NOT render upgrade CTA button', () => {
     const { queryByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(queryByText('Select a plan to upgrade')).toBeNull();
@@ -330,7 +330,7 @@ describe('SubscriptionScreen — Pro User', () => {
 
   it('renders plan cards with the current plan dimmed', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     // The CURRENT PLAN label should be visible on the Pro card
@@ -339,7 +339,7 @@ describe('SubscriptionScreen — Pro User', () => {
 
   it('still shows the comparison table for pro users', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Compare Plans')).toBeDefined();
@@ -356,7 +356,7 @@ describe('SubscriptionScreen — Elite User', () => {
 
   it('renders hero with Elite badge', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText("You're on the Elite plan. Enjoy premium features!")).toBeDefined();
@@ -365,7 +365,7 @@ describe('SubscriptionScreen — Elite User', () => {
 
   it('renders cancel button for elite subscription', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Cancel Auto-Renew')).toBeDefined();
@@ -394,7 +394,7 @@ describe('SubscriptionScreen — Tenant Branding', () => {
     });
 
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Unlock BrokerX Premium')).toBeDefined();
@@ -410,7 +410,7 @@ describe('SubscriptionScreen — Tenant Branding', () => {
     });
 
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Unlock Toroloom Premium')).toBeDefined();
@@ -419,7 +419,7 @@ describe('SubscriptionScreen — Tenant Branding', () => {
   it('shows default title when no tenant is configured', () => {
     resetStore();
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(getByText('Unlock Toroloom Premium')).toBeDefined();
@@ -456,7 +456,7 @@ describe('SubscriptionScreen — Dynamic Pricing', () => {
     });
 
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -470,7 +470,7 @@ describe('SubscriptionScreen — Dynamic Pricing', () => {
     resetStore();
 
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -488,7 +488,7 @@ describe('SubscriptionScreen — Feature Comparison Table', () => {
 
   it('renders all 15 features from the matrix', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -503,7 +503,7 @@ describe('SubscriptionScreen — Feature Comparison Table', () => {
   it('renders checkmark icons for free-tier features in free column', () => {
     // We verify the comparison table renders by checking known free features
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -515,7 +515,7 @@ describe('SubscriptionScreen — Feature Comparison Table', () => {
 
   it('shows yearly discount savings when yearly toggle is active', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -540,7 +540,7 @@ describe('SubscriptionScreen — Feature List', () => {
 
   it('renders feature labels from the matrix in plan cards', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -550,7 +550,7 @@ describe('SubscriptionScreen — Feature List', () => {
 
   it('renders pro-tier features in the Pro plan card', () => {
     const { getByText } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
 
@@ -570,7 +570,7 @@ describe('SubscriptionScreen — Edge Cases', () => {
   it('renders without crashing when subscription is cancelled', () => {
     resetStore({ tier: 'pro', planId: 'plan_pro', status: 'cancelled', autoRenew: false });
     const { toJSON } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     advanceAnimations();
     expect(toJSON).not.toBeNull();
@@ -585,7 +585,7 @@ describe('SubscriptionScreen — Edge Cases', () => {
     });
 
     const { toJSON } = render(
-      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+      <SubscriptionScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
     );
     expect(toJSON).not.toBeNull();
   });

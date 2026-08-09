@@ -10,7 +10,8 @@ import { useT } from '../../hooks/useT';
 import { useRevenueStore } from '../../store/revenueStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { RevenueTransaction, PayoutRequest, RevenueSource } from '../../types';
+import type {RevenueTransaction, PayoutRequest, RevenueSource, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 /** Format currency in INR */
 const formatINR = (val: number) =>
@@ -36,7 +37,7 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export default function RevenueDashboardScreen({ _navigation }: any) {
+export default function RevenueDashboardScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'RevenueDashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

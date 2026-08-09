@@ -20,7 +20,7 @@
 import React from 'react';
 import { Dimensions } from 'react-native';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from './testUtils';
+import { render, fireEvent } from './testUtils';
 
 // ==================== Mock ThemeContext ====================
 
@@ -426,6 +426,77 @@ describe('PerformanceChartWidget', () => {
       const { getByText } = render(<PerformanceChartWidget size="small" />);
       expect(getByText('₹5.00L')).toBeDefined();
     });
+  });
+
+  // ── Range Pill Presses ────────────────────────────────────────────
+
+  describe('range pill presses', () => {
+    it('filters history to the last 7 days when 1W is pressed', () => {
+      mockAnalyticsStore = buildStoreState({
+        pnlHistory: [
+          { date: daysAgo(300), value: 600000, cumulativePnl: 0 },
+          { date: daysAgo(10), value: 700000, cumulativePnl: 100000 },
+          { date: daysAgo(2), value: 710000, cumulativePnl: 110000 },
+        ],
+      });
+      const { getByText } = render(<PerformanceChartWidget size="medium" />);
+      // 1Y default: all 3 points survive → chart renders
+      expect(getByText('₹7.10L')).toBeDefined();
+      fireEvent.press(getByText('1W'));
+      // Only the 2-day-old point survives the 7-day cutoff → insufficient data
+      expect(getByText('Not enough data for this range')).toBeDefined();
+    });
+
+    it('presses 3M and keeps points inside the 90-day window', () => {
+      mockAnalyticsStore = buildStoreState({
+        pnlHistory: [
+          { date: daysAgo(400), value: 640000, cumulativePnl: 65000 },
+          { date: daysAgo(60), value: 750000, cumulativePnl: 126500 },
+          { date: daysAgo(30), value: 795000, cumulativePnl: 171500 },
+        ],
+      });
+      const { getByText, queryByText } = render(<PerformanceChartWidget size="medium" />);
+      fireEvent.press(getByText('3M'));
+      // The 400-day point is dropped; the two recent points remain → chart
+      expect(getByText('₹7.95L')).toBeDefined();
+      expect(queryByText('Not enough data for this range')).toBeNull();
+    });
+
+    it('presses ALL to disable the date cutoff entirely', () => {
+      mockAnalyticsStore = buildStoreState({
+        pnlHistory: [
+          { date: daysAgo(700), value: 550000, cumulativePnl: -25000 },
+          { date: daysAgo(100), value: 795000, cumulativePnl: 171500 },
+        ],
+      });
+      const { getByText } = render(<PerformanceChartWidget size="medium" />);
+      fireEvent.press(getByText('ALL'));
+      // days < Infinity is false → merged array returned unfiltered
+      expect(getByText('₹7.95L')).toBeDefined();
+    });
+  });
+
+  // ── Negative Medium ────────────────────────────────────────────────
+
+  it('renders negative total return in red for medium size', () => {
+    mockAnalyticsStore = buildStoreState({ pnlHistory: NEGATIVE_HISTORY });
+    const { root } = render(<PerformanceChartWidget size="medium" />);
+    const redTexts = root.findAll((n: any) =>
+      String(n.type) === 'Text' && Array.isArray(n.props?.style) &&
+      n.props.style.some((s: any) => s?.color === '#FF5252')
+    );
+    expect(redTexts.length).toBeGreaterThan(0);
+  });
+
+  it('positions the latest dot with a flat history (zero range guard)', () => {
+    const flatHistory = [
+      { date: daysAgo(300), value: 500000, cumulativePnl: 0 },
+      { date: daysAgo(60), value: 500000, cumulativePnl: 0 },
+    ];
+    mockAnalyticsStore = buildStoreState({ pnlHistory: flatHistory });
+    const { getByText } = render(<PerformanceChartWidget size="medium" />);
+    // maxValue - minValue === 0 → || 1 fallback keeps the Circle positioned
+    expect(getByText('₹5.00L')).toBeDefined();
   });
 
   // ── Snapshot ──────────────────────────────────────────────────────

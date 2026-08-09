@@ -23,6 +23,9 @@ import { aiApi, type AIStatusResponse } from '../../services/api/ai';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ──── Provider Meta ─────────────────────────────────────────────────────
 
@@ -54,7 +57,7 @@ const PROVIDER_META: Record<string, {
 
 // ──── Component ─────────────────────────────────────────────────────────
 
-export default function AISettingsScreen({ navigation }: any) {
+export default function AISettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AISettings'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

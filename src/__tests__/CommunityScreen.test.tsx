@@ -63,40 +63,40 @@ beforeEach(() => {
 
 describe('CommunityScreen', () => {
   it('renders the screen title', () => {
-    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Community')).toBeDefined();
   });
 
   it('renders trending topics section', () => {
-    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Trending Topics')).toBeDefined();
   });
 
   it('renders trending topic names', () => {
-    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('#RELIANCE')).toBeDefined();
     expect(getByText('#Budget2025')).toBeDefined();
   });
 
   it('renders post user names', () => {
-    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('TraderJoe')).toBeDefined();
     expect(getByText('StockGuru')).toBeDefined();
   });
 
   it('renders post content', () => {
-    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Just made my first profitable trade!')).toBeDefined();
   });
 
   it('renders post tags', () => {
-    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('trading')).toBeDefined();
     expect(getByText('analysis')).toBeDefined();
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { toJSON } = render(<CommunityScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
   });
 });

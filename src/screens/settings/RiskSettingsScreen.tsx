@@ -16,10 +16,13 @@ import { formatCurrency} from '../../utils/formatters';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
-export default function RiskSettingsScreen({ navigation }: any) {
+export default function RiskSettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Settings'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

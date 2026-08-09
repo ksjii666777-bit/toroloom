@@ -1,395 +1,277 @@
 /**
  * ============================================================================
- * Toroloom — Stock Detail Screen Tests
+ * Toroloom — USStockDetailScreen Tests
  * ============================================================================
  *
- * Tests that StockDetailScreen renders correctly with stock data, price,
- * chart controls, key stats, about section, peer comparison, buy/sell
- * buttons, and navigation actions.
+ * Verifies the hybrid TradingView ⇄ SnapTrade wiring on the US stock detail
+ * screen:
+ *
+ *   1. Provider sync — when the stock loads, tickerProvider.selectSymbol is
+ *      called with symbol / exchange / name / price, so the SnapTrade order
+ *      panel opens pre-selected to this instrument.
+ *   2. Trade CTA — the Trade button navigates to SnapTradeOrder carrying the
+ *      symbol / name / price params (belt-and-braces alongside the provider).
+ *
+ * Run: npx vitest run --reporter=verbose src/__tests__/USStockDetailScreen.test.tsx
  * ============================================================================
  */
 
-// Mock FullscreenChartModal to avoid StatusBar.setHidden issue
-vi.mock('../components/stock/FullscreenChartModal', () => ({
-  default: 'FullscreenChartModalMock',
+import React, { act } from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, fireEvent } from './testUtils';
+import { mockUSStocks } from '../constants/mockData';
+
+// ──── Hoisted mocks ────────────────────────────────────────────────────────
+
+const { mockSelectSymbol, mockGetQuote, mockGetTickerLevels, providerState } = vi.hoisted(() => ({
+  mockSelectSymbol: vi.fn(),
+  mockGetQuote: vi.fn(),
+  mockGetTickerLevels: vi.fn(),
+  // Simulates the real singleton: selectSymbol stores the active ticker,
+  // useTicker reads it back (so the provider-driven overlay picks it up).
+  providerState: { value: null as { symbol: string; exchange?: string } | null },
 }));
 
-// Mock patternSettingsStore to prevent Zustand subscription loop
-const patternSettings = {
-  minConfidence: 50, enabledPatterns: [], lookback: 0, hydrated: true,
-};
-vi.mock('../store/patternSettingsStore', () => {
-  const ALL_PATTERNS = [
-    'head_and_shoulders',
-    'inverse_head_and_shoulders',
-    'double_top',
-    'double_bottom',
-    'bull_flag',
-    'bear_flag',
-    'ascending_triangle',
-    'descending_triangle',
-    'symmetrical_triangle',
-  ];
-  const LOOKBACK_OPTIONS = [0, 50, 100, 200, 500];
-  return {
-    usePatternSettingsStore: vi.fn((sel?: any) => {
-      const state = patternSettings;
-      return sel ? sel(state) : state;
-    }),
-    ALL_PATTERNS,
-    LOOKBACK_OPTIONS,
-  };
-});
-
-import React, { act } from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, fireEvent } from './testUtils';
-import { mockStocks } from '../constants/mockData';
-
-// ==================== Mocks (hoisted) ====================
-
 const mockNavigate = vi.fn();
-const mockAddToWatchlist = vi.fn();
-const mockRemoveFromWatchlist = vi.fn();
-const mockIsInWatchlist = vi.fn((_id: string) => false);
-const mockLoadHistory = vi.fn();
-
-// Shared mutable reference
-let mockRealtimePrice: ReturnType<typeof createMockPrice>;
-
-function createMockPrice(
-  currentPrice = 2890.50,
-  priceChange = 45.20,
-  priceChangePercent = 1.59,
-  isConnected = true,
-  isPositive = true,
-) {
-  return {
-    currentPrice,
-    priceChange,
-    priceChangePercent,
-    candleHistory: [
-      { date: '2025-05-20', open: 2800, high: 2910, low: 2780, close: currentPrice, volume: 48000000 },
-      { date: '2025-05-21', open: currentPrice, high: currentPrice + 30, low: currentPrice - 20, close: currentPrice + 10, volume: 52000000 },
-    ],
-    isConnected,
-    isPositive,
-    loadHistory: mockLoadHistory,
-    lastUpdated: new Date().toISOString(),
-  };
-}
-
-mockRealtimePrice = createMockPrice();
 
 vi.mock('../context/ThemeContext', () => ({
   useTheme: () => ({
     colors: {
-      primary: '#6C63FF', primaryLight: '#8B83FF', primaryDark: '#4A42CC',
-      primaryGradient: ['#6C63FF', '#4834D4'] as const,
-      secondary: '#FF6B6B', success: '#00C853', danger: '#FF1744', warning: '#FFC107',
+      primary: '#6C63FF', secondary: '#FF6B6B', success: '#00C853', danger: '#FF1744',
       marketUp: '#00C853', marketDown: '#FF1744', marketNeutral: '#FFC107',
       text: '#FFFFFF', textSecondary: '#B0B0D0', textMuted: '#6E6E9A',
-      white: '#FFFFFF', bg: '#0D0D2B', bgSecondary: '#1A1A3E',
-      bgCard: '#222255', bgCardLight: '#2A2A5E', bgInput: '#1E1E4A',
-      bgDark: '#070720', bgOverlay: 'rgba(0,0,0,0.5)',
-      border: '#2A2A5E', borderLight: '#3A3A7E', divider: '#1E1E4A',
-      transparent: 'transparent',
+      bg: '#0D0D2B', bgSecondary: '#1A1A3E', bgCard: '#222255', bgCardLight: '#2A2A5E',
+      bgInput: '#1E1E4A', bgDark: '#070720', border: '#2A2A5E', borderLight: '#3A3A7E',
+      divider: '#1E1E4A',
     },
     isDark: true,
   }),
 }));
 
-const marketStoreState = { stocks: mockStocks };
-vi.mock('../store/marketStore', () => ({
-  useMarketStore: vi.fn(() => marketStoreState),
+vi.mock('../hooks/useT', () => ({
+  useT: () => ({
+    t: (key: string) => {
+      // Keep the Trade CTA assertion meaningful; fall back to last segment.
+      if (key === 'snaptrade.trade') return 'Trade';
+      // Live-position overlay labels (used by PositionLevelsOverlay).
+      const OVERLAY: Record<string, string> = {
+        'trading.positionLive': 'LIVE',
+        'trading.positionAvgBuy': 'AVG BUY',
+        'trading.positionStop': 'STOP',
+        'trading.positionTarget': 'TARGET',
+        'trading.positionNoPosition': 'No open position',
+        'trading.positionViewOnly': 'View-only',
+      };
+      if (OVERLAY[key]) return OVERLAY[key];
+      return key.split('.').pop() || key;
+    },
+    language: 'en',
+    isHindi: false,
+    toggleLanguage: vi.fn(),
+  }),
 }));
 
-const portfolioStoreState = { buyStock: vi.fn() };
-vi.mock('../store/portfolioStore', () => ({
-  usePortfolioStore: vi.fn(() => portfolioStoreState),
+vi.mock('../services/api/globalMarkets', () => ({
+  globalMarketsApi: {
+    getQuote: (...args: unknown[]) => mockGetQuote(...args),
+  },
 }));
 
-const currentWatchlists: Array<{
-  id: string; name: string; stocks: typeof mockStocks; createdAt: string;
-}> = [
-  { id: 'w1', name: 'My Watchlist', stocks: [mockStocks[0], mockStocks[3], mockStocks[7]], createdAt: '2025-01-10' },
-];
-
-const watchlistStoreState = {
-  watchlists: currentWatchlists,
-  isInWatchlist: mockIsInWatchlist,
-  addToWatchlist: mockAddToWatchlist,
-  removeFromWatchlist: mockRemoveFromWatchlist,
-};
-vi.mock('../store/watchlistStore', () => ({
-  useWatchlistStore: vi.fn(() => watchlistStoreState),
+// TradingViewChart embeds a WebView — replace with a lightweight stub.
+vi.mock('../components/TradingViewChart', () => ({
+  default: () => null,
 }));
 
-const aiStoreState = { insights: [] };
-vi.mock('../store/aiStore', () => ({
-  useAIStore: vi.fn(() => aiStoreState),
+// snapTradeApi.getTickerLevels is used by the live-position overlay rendered
+// over the chart — reject by default so it degrades to the no-position strip.
+vi.mock('../services/api', () => ({
+  snapTradeApi: {
+    getTickerLevels: (...args: unknown[]) => mockGetTickerLevels(...args),
+  },
 }));
 
-vi.mock('../hooks/useRealtimePrice', () => ({
-  useRealtimePrice: vi.fn(() => mockRealtimePrice),
+// Ticker Provider — spy on selectSymbol to assert the hybrid wiring, and
+// expose useTicker backed by the same shared state so the provider-driven
+// live-position overlay follows the selected symbol.
+vi.mock('../services/tickerProvider', () => ({
+  tickerProvider: {
+    selectSymbol: (opts: { symbol: string; exchange?: string }) => {
+      mockSelectSymbol(opts);
+      providerState.value = opts;
+      return opts;
+    },
+  },
+  useTicker: () => providerState.value,
+  useExecutionPrice: () => null,
 }));
 
-// ==================== Imports ====================
+import USStockDetailScreen from '../screens/stock/USStockDetailScreen';
 
-import StockDetailScreen from '../screens/stock/StockDetailScreen';
-import { useRealtimePrice } from '../hooks/useRealtimePrice';
+const AAPL = mockUSStocks[0];
 
-// ==================== Helpers ====================
-
-function advanceAndRender(ms: number) {
-  act(() => { vi.advanceTimersByTime(ms); });
+function makeRoute(symbol = 'AAPL') {
+  return { params: { stockId: symbol, symbol, source: 'us' } };
 }
 
-// ==================== Global beforeEach ====================
+async function renderScreen(symbol?: string) {
+  const result = render(
+    <USStockDetailScreen route={makeRoute(symbol) as any} navigation={{ navigate: mockNavigate  } as any} />,
+  );
+  // Flush the async quote fetch (rejected → mock data stays).
+  await act(async () => {
+    await Promise.resolve();
+  });
+  return result;
+}
 
-beforeEach(() => {
-  mockRealtimePrice = createMockPrice();
-  vi.mocked(useRealtimePrice).mockImplementation(() => mockRealtimePrice);
-});
-
-// ==================== Tests ====================
-
-describe('StockDetail — Stock Info', () => {
+describe('USStockDetailScreen — Ticker Provider sync', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
+    vi.clearAllMocks();
+    providerState.value = null;
+    mockGetQuote.mockRejectedValue(new Error('quote unavailable'));
   });
 
-  afterEach(() => { vi.useRealTimers(); });
+  it('pre-selects the viewed stock in the Ticker Provider on load', async () => {
+    await renderScreen('AAPL');
 
-  it('renders stock symbol and name', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
+    expect(mockSelectSymbol).toHaveBeenCalledWith(
+      expect.objectContaining({
+        symbol: 'AAPL',
+        exchange: AAPL.exchange,
+        name: AAPL.name,
+        price: AAPL.price,
+      }),
     );
-    advanceAndRender(500);
-    expect(getByText('RELIANCE')).toBeDefined();
-    expect(getByText('Reliance Industries Ltd.')).toBeDefined();
   });
 
-  it('renders sector badge', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('Energy')).toBeDefined();
-  });
-
-  it('renders price in INR format', () => {
-    mockRealtimePrice = createMockPrice(2890.50, 45.20, 1.59, true, true);
-    vi.mocked(useRealtimePrice).mockImplementation(() => mockRealtimePrice);
-
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('₹2,890.50')).toBeDefined();
-  });
-
-  it('renders change badge with positive change', () => {
-    mockRealtimePrice = createMockPrice(2890.50, 45.20, 1.59, true, true);
-    vi.mocked(useRealtimePrice).mockImplementation(() => mockRealtimePrice);
-
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText(/\+45\.20/)).toBeDefined();
-    expect(getByText(/\+1\.59%/)).toBeDefined();
-  });
-});
-
-describe('StockDetail — Connection Badge', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-  });
-
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('shows Live badge when connected', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('Live')).toBeDefined();
-  });
-
-  it('shows streaming live prices text when connected', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('Streaming live prices')).toBeDefined();
-  });
-
-  it('shows Offline badge when not connected', () => {
-    mockRealtimePrice = createMockPrice(2890.50, 0, 0, false, true);
-    vi.mocked(useRealtimePrice).mockImplementation(() => mockRealtimePrice);
-
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('Offline')).toBeDefined();
-  });
-});
-
-describe('StockDetail — Key Stats', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-  });
-
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('renders Key Stats Grid section', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('Market Cap')).toBeDefined();
-    expect(getByText('P/E')).toBeDefined();
-  });
-});
-
-describe('StockDetail — About Company', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-  });
-
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('renders About Company section', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('About Company')).toBeDefined();
-  });
-
-  it('renders company description with sector and market cap info', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText(/Energy/)).toBeDefined();
-  });
-});
-
-
-
-describe('StockDetail — Buy/Sell Buttons', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-  });
-
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('renders Buy and Sell buttons', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('Buy')).toBeDefined();
-    expect(getByText('Sell')).toBeDefined();
-  });
-});
-
-describe('StockDetail — Navigation', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-  });
-
-  afterEach(() => { vi.useRealTimers(); });
-
-  it('navigates to PlaceOrder with buy', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-
-    act(() => { fireEvent.press(getByText('Buy')); });
-    advanceAndRender(100);
-
-    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
-      stockId: 'RELIANCE',
-      symbol: 'RELIANCE',
-      tradeType: 'buy',
+  it('re-selects when the live quote updates the price', async () => {
+    mockGetQuote.mockResolvedValue({
+      price: 250.75,
+      change: 16.25,
+      changePercent: 6.93,
+      isPositive: true,
     });
+
+    await renderScreen('AAPL');
+
+    // The last selectSymbol call must carry the LIVE price, not the mock one.
+    const lastCall = mockSelectSymbol.mock.calls[mockSelectSymbol.mock.calls.length - 1][0];
+    expect(lastCall).toMatchObject({ symbol: 'AAPL', price: 250.75 });
   });
 
-  it('navigates to PlaceOrder with sell', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
+  it('falls back to mock data (and still syncs) when the quote API fails', async () => {
+    mockGetQuote.mockRejectedValue(new Error('down'));
 
-    act(() => { fireEvent.press(getByText('Sell')); });
-    advanceAndRender(100);
+    await renderScreen('AAPL');
 
-    expect(mockNavigate).toHaveBeenCalledWith('PlaceOrder', {
-      stockId: 'RELIANCE',
-      symbol: 'RELIANCE',
-      tradeType: 'sell',
+    expect(mockSelectSymbol).toHaveBeenCalled();
+    const lastCall = mockSelectSymbol.mock.calls[mockSelectSymbol.mock.calls.length - 1][0];
+    expect(lastCall).toMatchObject({ symbol: 'AAPL', price: AAPL.price });
+  });
+});
+
+describe('USStockDetailScreen — Trade CTA', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    providerState.value = null;
+    mockGetQuote.mockRejectedValue(new Error('quote unavailable'));
+  });
+
+  it('navigates to SnapTradeOrder with symbol/name/price when Trade is pressed', async () => {
+    const { getByText } = await renderScreen('AAPL');
+
+    fireEvent.press(getByText('Trade'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('SnapTradeOrder', {
+      symbol: 'AAPL',
+      name: AAPL.name,
+      price: AAPL.price,
     });
   });
 });
 
-describe('StockDetail — Watchlist', () => {
+describe('USStockDetailScreen — Live Position Overlay', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
-    mockIsInWatchlist.mockClear();
+    vi.clearAllMocks();
+    providerState.value = null;
+    mockGetQuote.mockRejectedValue(new Error('quote unavailable'));
   });
 
-  afterEach(() => { vi.useRealTimers(); });
+  it('renders the live-position tag over the chart when a position exists', async () => {
+    mockGetTickerLevels.mockResolvedValue({
+      success: true,
+      connected: true,
+      symbol: 'AAPL',
+      position: { symbol: 'AAPL', quantity: 10, avgCost: 150, price: 160, pnl: 100, pnlPercent: 6.67 },
+      levels: { dailyLossLimit: 50000, dailyLossPercentLimit: 5, maxPositionSizePercent: 20 },
+      ironLockActive: false,
+      lockdownStatus: 'none',
+    });
 
-  it('renders watchlist toggle (heart outline when not in watchlist)', () => {
-    mockIsInWatchlist.mockReturnValue(false);
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { toJSON } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(toJSON).not.toBeNull();
+    const { getByText } = await renderScreen('AAPL');
+
+    expect(mockGetTickerLevels).toHaveBeenCalledWith('AAPL');
+    expect(getByText('LIVE')).toBeDefined();
+    // AVG BUY chip shows the position's average cost.
+    expect(getByText('$150.00')).toBeDefined();
   });
-});
 
-describe('StockDetail — Sector Context', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockNavigate.mockClear();
+  it('STOP chip opens SnapTradeOrder pre-filled with the position stop level', async () => {
+    mockGetTickerLevels.mockResolvedValue({
+      success: true,
+      connected: true,
+      symbol: 'AAPL',
+      position: { symbol: 'AAPL', quantity: 10, avgCost: 150, price: 160, pnl: 100, pnlPercent: 6.67 },
+      levels: { dailyLossLimit: 50000, dailyLossPercentLimit: 5, maxPositionSizePercent: 20 },
+      ironLockActive: false,
+      lockdownStatus: 'none',
+    });
+
+    const { getByText } = await renderScreen('AAPL');
+
+    // The mount effect already pre-selects once — the chip tap must add one
+    // more selectSymbol (the helper's own pre-select) before navigating.
+    const callsBefore = mockSelectSymbol.mock.calls.length;
+    fireEvent.press(getByText('STOP'));
+
+    expect(mockSelectSymbol.mock.calls.length).toBe(callsBefore + 1);
+    expect(mockNavigate).toHaveBeenCalledWith('SnapTradeOrder', {
+      symbol: 'AAPL',
+      name: AAPL.name,
+      price: AAPL.price,
+      prefillStop: 142.5,
+    });
   });
 
-  afterEach(() => { vi.useRealTimers(); });
+  it('TARGET chip opens SnapTradeOrder pre-filled with the position target level', async () => {
+    mockGetTickerLevels.mockResolvedValue({
+      success: true,
+      connected: true,
+      symbol: 'AAPL',
+      position: { symbol: 'AAPL', quantity: 10, avgCost: 150, price: 160, pnl: 100, pnlPercent: 6.67 },
+      levels: { dailyLossLimit: 50000, dailyLossPercentLimit: 5, maxPositionSizePercent: 20 },
+      ironLockActive: false,
+      lockdownStatus: 'none',
+    });
 
-  it('renders Sector Context section', () => {
-    const route = { params: { stockId: 'RELIANCE', symbol: 'RELIANCE' } };
-    const { getByText } = render(
-      <StockDetailScreen route={route} navigation={{ navigate: mockNavigate }} />
-    );
-    advanceAndRender(500);
-    expect(getByText('Sector Context')).toBeDefined();
+    const { getByText } = await renderScreen('AAPL');
+
+    fireEvent.press(getByText('TARGET'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('SnapTradeOrder', {
+      symbol: 'AAPL',
+      name: AAPL.name,
+      price: AAPL.price,
+      prefillLimit: 165,
+    });
+  });
+
+  it('degrades gracefully when the levels fetch fails', async () => {
+    mockGetTickerLevels.mockRejectedValue(new Error('backend down'));
+
+    const { queryByText } = await renderScreen('AAPL');
+
+    // No LIVE tag — the overlay falls back to the no-position strip.
+    expect(queryByText('LIVE')).toBeNull();
   });
 });

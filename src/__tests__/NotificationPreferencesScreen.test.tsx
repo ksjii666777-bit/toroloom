@@ -43,72 +43,72 @@ beforeEach(() => {
 
 describe('NotificationPreferencesScreen', () => {
   it('renders the screen title', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Notification Preferences')).toBeDefined();
   });
 
   it('renders Notification Types section', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Notification Types')).toBeDefined();
   });
 
   it('renders Alert Behavior section', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Alert Behavior')).toBeDefined();
   });
 
   it('renders Price Alerts preference', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Price Alerts')).toBeDefined();
   });
 
   it('renders Trade Confirmations preference', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Trade Confirmations')).toBeDefined();
   });
 
   it('renders Learning Reminders preference', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Learning Reminders')).toBeDefined();
   });
 
   it('renders System Updates preference', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('System Updates')).toBeDefined();
   });
 
   it('renders Sound preference', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Sound')).toBeDefined();
   });
 
   it('renders Vibration preference', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Vibration')).toBeDefined();
   });
 
   it('renders Price Alert Threshold section', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Price Alert Threshold')).toBeDefined();
   });
 
   it('renders Quiet Hours section', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Quiet Hours')).toBeDefined();
   });
 
   it('renders Email Notifications section', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Email Notifications')).toBeDefined();
   });
 
   it('renders Reset to Defaults button', () => {
-    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { getByText } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(getByText('Reset to Defaults')).toBeDefined();
   });
 
   it('renders without crashing', () => {
-    const { toJSON } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} />);
+    const { toJSON } = render(<NotificationPreferencesScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON()).toBeTruthy();
   });
 });

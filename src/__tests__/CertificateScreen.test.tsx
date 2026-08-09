@@ -263,21 +263,21 @@ describe('CertificateScreen — Empty State', function() {
 
   it('renders without crashing', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.toJSON()).not.toBeNull();
   });
 
   it('renders the certificates title in header', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Certificates')).toBeDefined();
   });
 
   it('renders empty state when no certificates exist', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('No certificates yet')).toBeDefined();
     expect(result.getByText(/Complete all lessons/i)).toBeDefined();
@@ -285,14 +285,14 @@ describe('CertificateScreen — Empty State', function() {
 
   it('renders Browse Courses button in empty state', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Browse Courses')).toBeDefined();
   });
 
   it('navigates to Learn when Browse Courses is pressed', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Browse Courses')); });
     expect(mockNavigate).toHaveBeenCalledWith('Learn');
@@ -318,21 +318,21 @@ describe('CertificateScreen — Eligible Courses in Empty State', function() {
 
   it('shows eligible section when completed courses without cert exist', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Courses Ready for Certificate')).toBeDefined();
   });
 
   it('shows eligible course title', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Mutual Funds & SIP')).toBeDefined();
   });
 
   it('shows eligible course metadata', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText(/6 lessons/)).toBeDefined();
     expect(result.getByText(/4 hours/)).toBeDefined();
@@ -345,7 +345,7 @@ describe('CertificateScreen — Eligible Courses in Empty State', function() {
       grade: 'A', issuedAt: '2026-03-01T00:00:00.000Z', serialNumber: 'SN-003', pdfUri: undefined,
     });
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Mutual Funds & SIP')); });
     expect(mockGenerateCertificate).toHaveBeenCalledWith('c3');
@@ -354,7 +354,7 @@ describe('CertificateScreen — Eligible Courses in Empty State', function() {
   it('hides eligible section when completed course already has a certificate', function() {
     mockCertificates = [{ ...mockCertA, courseId: 'c3' }];
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     // Has 1 cert, so renders list view, not empty state
     expect(result.getByText('Your Certificates')).toBeDefined();
@@ -365,7 +365,7 @@ describe('CertificateScreen — Eligible Courses in Empty State', function() {
   it('shows error alert when generate returns null', async function() {
     mockGenerateCertificate.mockResolvedValue(null);
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Mutual Funds & SIP')); });
     // Wait for the async handleGenerate to complete
@@ -395,14 +395,14 @@ describe('CertificateScreen — Certificate List', function() {
 
   it('renders Your Certificates section title', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Your Certificates')).toBeDefined();
   });
 
   it('renders certificate course titles', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Stock Market Basics')).toBeDefined();
     expect(result.getByText('Technical Analysis Mastery')).toBeDefined();
@@ -410,7 +410,7 @@ describe('CertificateScreen — Certificate List', function() {
 
   it('renders grade badges', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Distinction')).toBeDefined();
     expect(result.getByText('Merit')).toBeDefined();
@@ -418,7 +418,7 @@ describe('CertificateScreen — Certificate List', function() {
 
   it('renders serial numbers for each certificate', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('#SN-001')).toBeDefined();
     expect(result.getByText('#SN-002')).toBeDefined();
@@ -426,14 +426,14 @@ describe('CertificateScreen — Certificate List', function() {
 
   it('renders lesson completion stats', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('8/8 lessons')).toBeDefined();
   });
 
   it('renders quiz percentages', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Quiz: 95%')).toBeDefined();
     expect(result.getByText('Quiz: 82%')).toBeDefined();
@@ -441,7 +441,7 @@ describe('CertificateScreen — Certificate List', function() {
 
   it('renders certificate dates', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     const dates = result.getAllByText('Jan 15, 2026');
     expect(dates.length).toBeGreaterThan(0);
@@ -449,7 +449,7 @@ describe('CertificateScreen — Certificate List', function() {
 
   it('renders Learning Stats card', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Learning Stats')).toBeDefined();
     expect(result.getByText('Certificates')).toBeDefined();
@@ -459,14 +459,14 @@ describe('CertificateScreen — Certificate List', function() {
 
   it('renders header count badge', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('2')).toBeDefined();
   });
 
   it('opens certificate preview when a card is pressed', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     // Preview should show the certificate header
@@ -494,7 +494,7 @@ describe('CertificateScreen — Certificate Preview', function() {
 
   it('shows recipient name in preview', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('Test Student')).toBeDefined();
@@ -502,7 +502,7 @@ describe('CertificateScreen — Certificate Preview', function() {
 
   it('shows course title in preview', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('Stock Market Basics')).toBeDefined();
@@ -510,7 +510,7 @@ describe('CertificateScreen — Certificate Preview', function() {
 
   it('shows With Distinction grade badge for grade A', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('With Distinction')).toBeDefined();
@@ -519,7 +519,7 @@ describe('CertificateScreen — Certificate Preview', function() {
   it('shows With Merit grade badge for grade B', function() {
     mockCertificates = [mockCertB];
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Technical Analysis Mastery')); });
     expect(result.getByText('With Merit')).toBeDefined();
@@ -527,7 +527,7 @@ describe('CertificateScreen — Certificate Preview', function() {
 
   it('shows lesson stats in preview', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('8/8')).toBeDefined();
@@ -537,7 +537,7 @@ describe('CertificateScreen — Certificate Preview', function() {
 
   it('shows quiz score in preview', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('95%')).toBeDefined();
@@ -546,7 +546,7 @@ describe('CertificateScreen — Certificate Preview', function() {
 
   it('shows serial number in preview', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('Serial No: SN-001')).toBeDefined();
@@ -573,7 +573,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
   it('shows PDF generated status when pdfUri exists', function() {
     mockCertificates = [mockCertA];
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('PDF generated successfully')).toBeDefined();
@@ -582,7 +582,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
   it('shows PDF not generated status when no pdfUri', function() {
     mockCertificates = [mockCertB];
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Technical Analysis Mastery')); });
     expect(result.getByText('PDF not yet generated')).toBeDefined();
@@ -591,7 +591,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
   it('shows Share PDF text when pdfUri exists', function() {
     mockCertificates = [mockCertA];
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     expect(result.getByText('Share PDF')).toBeDefined();
@@ -600,7 +600,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
   it('shows Generate & Share PDF text when pdfUri is empty', function() {
     mockCertificates = [mockCertB];
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Technical Analysis Mastery')); });
     expect(result.getByText('Generate & Share PDF')).toBeDefined();
@@ -609,7 +609,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
   it('calls Share.share when Share PDF is pressed (pdfUri exists)', async function() {
     mockCertificates = [mockCertA];
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     act(function() { fireEvent.press(result.getByText('Share PDF')); });
@@ -621,7 +621,7 @@ describe('CertificateScreen — PDF Status & Sharing', function() {
   it('includes course title and serial in share content', async function() {
     mockCertificates = [mockCertA];
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     act(function() { fireEvent.press(result.getByText('Stock Market Basics')); });
     act(function() { fireEvent.press(result.getByText('Share PDF')); });
@@ -652,7 +652,7 @@ describe('CertificateScreen — Generating Overlay', function() {
 
   it('shows generating overlay when isGeneratingCertificate is true', function() {
     const result = render(
-      <CertificateScreen route={{ params: {} }} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+      <CertificateScreen route={{ params: {} } as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
     );
     expect(result.getByText('Generating your certificate...')).toBeDefined();
   });
@@ -682,8 +682,8 @@ describe('CertificateScreen — Auto-generate via Route Params', function() {
   it('auto-generates when courseId is passed and no cert exists for it', function() {
     render(
       <CertificateScreen
-        route={{ params: { courseId: 'c3' } }}
-        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+        route={{ params: { courseId: 'c3' } } as any}
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
       />
     );
     expect(mockGenerateCertificate).toHaveBeenCalledWith('c3');
@@ -693,8 +693,8 @@ describe('CertificateScreen — Auto-generate via Route Params', function() {
     mockCertificates = [mockCertA];
     render(
       <CertificateScreen
-        route={{ params: { courseId: 'c1' } }}
-        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+        route={{ params: { courseId: 'c1' } } as any}
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
       />
     );
     expect(mockGenerateCertificate).not.toHaveBeenCalled();
@@ -703,8 +703,8 @@ describe('CertificateScreen — Auto-generate via Route Params', function() {
   it('does not auto-generate when no courseId in params', function() {
     render(
       <CertificateScreen
-        route={{ params: {} }}
-        navigation={{ navigate: mockNavigate, goBack: mockGoBack }}
+        route={{ params: {} } as any}
+        navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any}
       />
     );
     expect(mockGenerateCertificate).not.toHaveBeenCalled();

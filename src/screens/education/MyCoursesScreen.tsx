@@ -10,7 +10,8 @@ import { useT } from '../../hooks/useT';
 import { useUserCourseStore } from '../../store/userCourseStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { UserGeneratedCourse } from '../../types';
+import type {UserGeneratedCourse, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 /** Format a relative time string */
 function formatRelativeTime(dateStr: string, t: any): string {
@@ -54,7 +55,7 @@ function statusLabel(status: string): string {
   }
 }
 
-export default function MyCoursesScreen({ navigation }: any) {
+export default function MyCoursesScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'MyCourses'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

@@ -9,10 +9,10 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 import { useT } from '../../hooks/useT';
 
-interface SignupScreenProps {
-  navigation: any;
-  route?: any;
-}
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
+type SignupScreenProps = NativeStackScreenProps<RootStackParamList, 'Signup'>;
 
 export default function SignupScreen({ navigation, route }: SignupScreenProps) {
   const { colors } = useTheme();

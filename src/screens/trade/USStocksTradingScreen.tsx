@@ -29,8 +29,12 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { globalMarketsApi } from '../../services/api/globalMarkets';
 import { snapTradeApi, api } from '../../services/api';
+import { tickerProvider } from '../../services/tickerProvider';
 import { newIdempotencyKey } from '../../utils/idempotency';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ─── Types ─────────────────────────────────────────────────────────────
 
@@ -495,7 +499,7 @@ function TradeModal({
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
-export default function USStocksTradingScreen({ navigation }: any) {
+export default function USStocksTradingScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'USStocksTrading'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
@@ -610,21 +614,35 @@ export default function USStocksTradingScreen({ navigation }: any) {
     );
   }, [stocks, searchQuery]);
 
+  // Hybrid Ticker Provider — pre-select the instrument so the SnapTrade
+  // order panel opens pre-filled with the same symbol, chart and execution
+  // price whether the user taps BUY/SELL or opens the stock detail.
+  const preselectStock = useCallback((stock: USStockDisplay) => {
+    tickerProvider.selectSymbol({
+      symbol: stock.symbol,
+      exchange: stock.exchange,
+      name: stock.name,
+      price: stock.price,
+    });
+  }, []);
+
   // Open trade modal
   const openTrade = useCallback((stock: USStockDisplay, action: TradeAction) => {
+    preselectStock(stock);
     setSelectedStock(stock);
     setTradeAction(action);
     setTradeModalVisible(true);
-  }, []);
+  }, [preselectStock]);
 
   // Navigate to detail
   const goToDetail = useCallback((stock: USStockDisplay) => {
+    preselectStock(stock);
     navigation.navigate('USStockDetail', {
       symbol: stock.symbol,
       name: stock.name,
       price: stock.price,
     });
-  }, [navigation]);
+  }, [navigation, preselectStock]);
 
   // Tabs
   const tabs: { key: typeof selectedTab; label: string; icon: string }[] = [

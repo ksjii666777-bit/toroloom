@@ -112,7 +112,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('renders without crashing when navigation is a frozen object', () => {
       const frozenNav = createFrozenNavigation();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -127,7 +127,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
         navigate: mockNavigate, goBack: mockGoBack, getState: () => state, getId: () => 'StockScreener',
       });
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -136,7 +136,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('renders full content with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Stock Screener')).toBeDefined();
       expect(getByText('Price Range')).toBeDefined();
@@ -151,7 +151,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('renders action buttons with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Clear All')).toBeDefined();
       expect(getByText('Save')).toBeDefined();
@@ -162,7 +162,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('renders filter chips with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Technology')).toBeDefined();
       expect(getByText('Finance')).toBeDefined();
@@ -176,7 +176,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('renders results section with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Results should show since screenerResults has data
       expect(getByText(/Results/)).toBeDefined();
@@ -187,7 +187,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('renders sort options with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Sort by')).toBeDefined();
       expect(getByText('Symbol')).toBeDefined();
@@ -203,17 +203,17 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('does NOT attempt to set properties on frozen navigation during mount', () => {
       const frozenNav = createFrozenNavigation();
       expect(() => {
-        renderWithTimeTravel(<StockScreenerScreen navigation={frozenNav as any} />);
+        renderWithTimeTravel(<StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
     });
 
     it('does NOT mutate frozen navigation after re-render', () => {
       const frozenNav = createFrozenNavigation();
       const { update, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => {
-        update(<StockScreenerScreen navigation={frozenNav as any} />);
+        update(<StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
       cleanup();
     });
@@ -221,7 +221,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('handles mount with frozen navigation then unmounts gracefully', () => {
       const frozenNav = createFrozenNavigation();
       const { unmount } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { unmount(); }).not.toThrow();
     });
@@ -229,7 +229,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('preserves frozen status of navigation after render', () => {
       const frozenNav = createFrozenNavigation();
       const { cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => { (frozenNav as any).newProp = 'test'; }).toThrow();
       cleanup();
@@ -242,7 +242,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('navigates to StockDetail when a stock result is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('RELIANCE'));
       expect(mockNavigate).toHaveBeenCalledWith('StockDetail', {
@@ -257,7 +257,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
       // Press the back button (Ionicons "arrow-back" is inside a TouchableOpacity)
       // Find the back button by looking for the goBack register
       const { cleanup, root } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // The back button is a TouchableOpacity — fire its onPress
       const backBtn = root.find(
@@ -275,7 +275,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('opens export sheet when Export button is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Export'));
       expect(getByText('Export Results')).toBeDefined();
@@ -287,7 +287,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('opens save modal when Save button is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, getByPlaceholderText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Save'));
       expect(getByText('Save Filters')).toBeDefined();
@@ -298,7 +298,7 @@ describe('StockScreenerScreen — Frozen Navigation Object', () => {
     it('clicking sort option changes sort order indicator', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <StockScreenerScreen navigation={frozenNav as any} />,
+        <StockScreenerScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Default sort is Symbol ↑ — click Price to change sort
       fireEvent.press(getByText('Price'));

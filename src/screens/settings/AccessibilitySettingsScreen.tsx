@@ -25,6 +25,9 @@ import { useT } from '../../hooks/useT';
 import { useAccessibilityStore, FontScaleLevel, FONT_SCALE_VALUES } from '../../store/accessibilityStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -139,7 +142,7 @@ function getFontLabel(t: (key: string) => string, level: FontScaleLevel): string
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
-export default function AccessibilitySettingsScreen({ navigation }: any) {
+export default function AccessibilitySettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Accessibility'>) {
   const { colors } = useTheme();
   const { t } = useT();
 

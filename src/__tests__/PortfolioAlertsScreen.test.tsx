@@ -172,7 +172,7 @@ function renderScreen(overrides?: Record<string, any>) {
   (useNotificationStore as any).mockImplementation(() => defaultStore);
 
   return render(
-    <PortfolioAlertsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />,
+    <PortfolioAlertsScreen navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} route={{ params: {} } as any} />,
   );
 }
 

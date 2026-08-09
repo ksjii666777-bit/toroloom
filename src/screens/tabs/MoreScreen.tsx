@@ -15,6 +15,11 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { SkeletonBlock } from '../../components/ui/SkeletonLoader';
 import SyncStatusIndicator from '../../components/ui/SyncStatusIndicator';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type {RootStackParamList, TabParamList} from '../../types';
+
 
 const { width } = Dimensions.get('window');
 const BADGE_DISPLAY_COUNT = 8;
@@ -161,7 +166,7 @@ const menuItems: MenuSection[] = [
   },
 ];
 
-export default function MoreScreen({ navigation }: any) {
+export default function MoreScreen({ navigation }: CompositeScreenProps<BottomTabScreenProps<TabParamList, 'More'>, NativeStackScreenProps<RootStackParamList>>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -284,7 +289,7 @@ export default function MoreScreen({ navigation }: any) {
         ]
       );
     } else {
-      navigation.navigate(item.screen);
+      (navigation.navigate as (screenName: string) => void)(item.screen);
     }
   };
 

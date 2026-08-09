@@ -10,9 +10,10 @@ import { useT } from '../../hooks/useT';
 import { useABTestStore } from '../../store/abTestStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { ABExperiment, ABTestStatus } from '../../types';
+import type {ABExperiment, ABTestStatus, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-export default function ABTestRunnerScreen({ _navigation }: any) {
+export default function ABTestRunnerScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'ABTestRunner'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

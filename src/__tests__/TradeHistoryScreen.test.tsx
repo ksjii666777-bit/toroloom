@@ -83,7 +83,7 @@ describe('TradeHistoryScreen — Loading State', () => {
   });
 
   it('renders without crashing during loading', () => {
-    const { toJSON } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { toJSON } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     expect(toJSON).not.toBeNull();
   });
 });
@@ -100,38 +100,38 @@ describe('TradeHistoryScreen — Loaded Content', () => {
   });
 
   it('renders the header title', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Trade History')).toBeDefined();
   });
 
   it('renders the subtitle with total trade count', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/5 total trades/)).toBeDefined();
   });
 
   it('renders the Total Buys stat card', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Total Buys')).toBeDefined();
   });
 
   it('renders the Total Sells stat card', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Total Sells')).toBeDefined();
   });
 
   it('renders the search bar', () => {
-    const { getByPlaceholderText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByPlaceholderText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     const input = getByPlaceholderText('Search by symbol or name...');
     expect(input).toBeDefined();
   });
 
   it('renders filter tabs (All, Buy, Sell)', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('All')).toBeDefined();
     expect(getByText('Buy')).toBeDefined();
@@ -139,7 +139,7 @@ describe('TradeHistoryScreen — Loaded Content', () => {
   });
 
   it('renders trade symbols from store', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('RELIANCE')).toBeDefined();
     expect(getByText('TCS')).toBeDefined();
@@ -149,7 +149,7 @@ describe('TradeHistoryScreen — Loaded Content', () => {
   });
 
   it('renders trade quantities and prices', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('50 @ ₹2,650.00')).toBeDefined();
     expect(getByText('10 @ ₹3,920.00')).toBeDefined();
@@ -159,7 +159,7 @@ describe('TradeHistoryScreen — Loaded Content', () => {
   });
 
   it('renders trade totals with sign', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/₹1,32,500.00/)).toBeDefined();
     // Sell total uses compact format: 10 * 3920 = 39,200 → ₹39.2K
@@ -167,13 +167,13 @@ describe('TradeHistoryScreen — Loaded Content', () => {
   });
 
   it('renders the buy orders count in stat card', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/4 orders/)).toBeDefined();
   });
 
   it('does not call navigate on initial render', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Trade History')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -192,7 +192,7 @@ describe('TradeHistoryScreen — Search & Filter', () => {
   });
 
   it('renders All as the default active filter', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // All filter should be present
     expect(getByText('All')).toBeDefined();
@@ -213,14 +213,14 @@ describe('TradeHistoryScreen — Sell Trades Only', () => {
   });
 
   it('renders only sell trades when filtered', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Only TCS sell trade should appear
     expect(getByText('TCS')).toBeDefined();
   });
 
   it('renders sell type badge for the trade', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     // Sell total should be prefixed with '+'
     expect(getByText(/\+/)).toBeDefined();
@@ -239,20 +239,20 @@ describe('TradeHistoryScreen — Empty Trades', () => {
   });
 
   it('shows empty state when no trades exist', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('No Trades Found')).toBeDefined();
     expect(getByText(/Start trading/)).toBeDefined();
   });
 
   it('shows 0 total trades in subtitle', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText(/0 total trades/)).toBeDefined();
   });
 
   it('renders stats cards even with no trades', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Total Buys')).toBeDefined();
     expect(getByText('Total Sells')).toBeDefined();
@@ -271,7 +271,7 @@ describe('TradeHistoryScreen — Navigation', () => {
   });
 
   it('navigates back when back button is pressed', () => {
-    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate }} />);
+    const { getByText } = render(<TradeHistoryScreen navigation={{ navigate: mockNavigate } as any} route={{ params: {} } as any} />);
     advanceAndRender(500);
     expect(getByText('Trade History')).toBeDefined();
     expect(mockNavigate).not.toHaveBeenCalled();

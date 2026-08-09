@@ -15,7 +15,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useChatStore } from '../../store/chatStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
-import type { ChatMessage } from '../../types';
+import type {ChatMessage, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 function isToday(date: Date): boolean {
   const now = new Date();
@@ -29,7 +30,7 @@ function formatTime(iso: string): string {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-export default function ChatRoomScreen({ navigation, route }: any) {
+export default function ChatRoomScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'ChatRoom'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

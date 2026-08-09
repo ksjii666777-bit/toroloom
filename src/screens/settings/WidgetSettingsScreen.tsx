@@ -30,6 +30,9 @@ import { widgetService, WidgetPreferences, WidgetPortfolioSnapshot } from '../..
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 
 import Svg, { Rect, Text as SvgText, Circle, G, Defs, LinearGradient, Stop } from 'react-native-svg';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 // ──── Widget Preview Component ─────────────────────────────────────────────
 
@@ -146,7 +149,7 @@ const widgetPreviewStyles = StyleSheet.create({
 
 // ──── Main Screen ──────────────────────────────────────────────────────────
 
-export default function WidgetSettingsScreen({ navigation }: any) {
+export default function WidgetSettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'WidgetSettings'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

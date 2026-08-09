@@ -24,10 +24,11 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { useEducationStore } from '../../store/educationStore';
-import type { LearningPath } from '../../types';
+import type {LearningPath, RootStackParamList} from '../../types';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-export default function LearningPathsScreen({ navigation }: any) {
+export default function LearningPathsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'LearningPaths'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

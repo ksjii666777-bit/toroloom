@@ -32,9 +32,8 @@ import { formatCurrency } from '../../utils/formatters';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import PnLChart from '../../components/PnLChart';
 import Badge from '../../components/ui/Badge';
-import type {
-  TraderProfile, TraderPublicTrade, TraderPnLPoint,
-} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type {TraderProfile, TraderPublicTrade, TraderPnLPoint, RootStackParamList} from '../../types';
 
 const { width } = Dimensions.get('window');
 
@@ -259,7 +258,7 @@ const tradeStyles = StyleSheet.create({
 
 // ─── Main Trader Profile Screen ─────────────────────────────────────────────
 
-export default function TraderProfileScreen({ navigation, route }: any) {
+export default function TraderProfileScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'TraderProfile'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

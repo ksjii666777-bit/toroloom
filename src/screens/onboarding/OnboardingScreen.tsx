@@ -20,6 +20,9 @@ import { analytics } from '../../services/analytics';
 import * as Haptics from 'expo-haptics';
 import { renderIllustration } from '../../components/onboarding/onboardingUtils';
 import OnboardingLottie from '../../components/onboarding/OnboardingLottie';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width - SPACING.xl * 2;
@@ -726,7 +729,7 @@ function AnimatedStepCard({ index, style, children }: {
 // Main Component
 // ────────────────────────────────────────────────────────
 
-export default function OnboardingScreen({ _navigation }: any) {
+export default function OnboardingScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'Onboarding'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

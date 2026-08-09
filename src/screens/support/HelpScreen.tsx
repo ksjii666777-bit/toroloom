@@ -6,6 +6,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS, COLORS } from '../../constants/theme';
 import { supportApi, FAQ } from '../../services/api/support';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 
 const { width } = Dimensions.get('window');
@@ -39,7 +42,7 @@ const contactOptions = [
   { icon: 'chatbubbles', label: 'liveChat', detail: 'chatDetail', hours: 'chatHours', gradient: GRADIENTS.accent, link: '' },
 ];
 
-export default function HelpScreen({ navigation }: any) {
+export default function HelpScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Help'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

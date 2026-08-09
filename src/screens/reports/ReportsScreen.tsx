@@ -24,13 +24,16 @@ import Card from '../../components/ui/Card';
 
 import PnLChart from '../../components/PnLChart';
 import { exportPDF, exportCSV } from '../../services/reportExport';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 
 const { width } = Dimensions.get('window');
 
 type ReportTab = 'pnl' | 'performance' | 'tax' | 'holdings' | 'history';
 
-export default function ReportsScreen({ navigation }: any) {
+export default function ReportsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Reports'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

@@ -29,7 +29,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { mockEarningsData } from '../../constants/mockData';
-import type { EarningsSummary } from '../../types';
+import type {EarningsSummary, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -220,7 +221,7 @@ const consensusStyles = StyleSheet.create({
 
 // ─── Main Screen ────────────────────────────────────────────
 
-export default function EarningsCallScreen({ navigation }: any) {
+export default function EarningsCallScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'EarningsCall'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();

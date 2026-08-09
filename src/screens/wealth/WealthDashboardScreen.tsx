@@ -28,6 +28,9 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useWealthStore, type FinancialGoal } from '../../store/wealthStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
@@ -115,7 +118,7 @@ function GoalCard({ goal, index, onPress }: { goal: FinancialGoal; index: number
 // MAIN SCREEN
 // ═════════════════════════════════════════════════════════════════════════
 
-export default function WealthDashboardScreen({ navigation }: any) {
+export default function WealthDashboardScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'WealthDashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
@@ -195,7 +198,7 @@ export default function WealthDashboardScreen({ navigation }: any) {
           {quickActions.map((action, _i) => (
             <AnimatedPressable
               key={action.screen}
-              onPress={() => navigation.navigate(action.screen)}
+              onPress={() => (navigation.navigate as (screenName: string) => void)(action.screen)}
               haptic="light"
               scaleTo={0.93}
             >

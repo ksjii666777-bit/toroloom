@@ -33,7 +33,8 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { computeCorrelationMatrix } from '../../services/correlationMatrix';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
-import type { CorrelationMatrix } from '../../types';
+import type {CorrelationMatrix, RootStackParamList} from '../../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -79,7 +80,7 @@ function formatCorr(v: number): string {
 // COMPONENT
 // ══════════════════════════════════════════════════════════════
 
-export default function CorrelationMatrixScreen({ navigation }: any) {
+export default function CorrelationMatrixScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'CorrelationMatrix'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);

@@ -133,7 +133,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('renders without crashing when navigation is a frozen object', () => {
       const frozenNav = createFrozenNavigation();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -152,7 +152,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
         getId: () => 'More',
       });
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -161,7 +161,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('renders without crashing with partially frozen navigation', () => {
       const nav = createNavigationWithFrozenState();
       const { toJSON, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={nav as any} />,
+        <MoreScreen navigation={nav as any} route={{ params: {} } as any} />,
       );
       expect(toJSON()).toBeTruthy();
       cleanup();
@@ -170,7 +170,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('renders full content with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Verify all major sections render
       expect(getByText('More')).toBeDefined();
@@ -186,7 +186,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('renders quick actions with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Add Funds')).toBeDefined();
       expect(getByText('Withdraw')).toBeDefined();
@@ -198,7 +198,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('renders menu items with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(getByText('Fund Dashboard')).toBeDefined();
       expect(getByText('Mutual Funds')).toBeDefined();
@@ -213,7 +213,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('renders achievements preview with frozen navigation', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Achievements section should render
       expect(getByText('Achievements')).toBeDefined();
@@ -231,7 +231,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
       // This test verifies the fix prevents that crash.
       const frozenNav = createFrozenNavigation();
       expect(() => {
-        renderWithTimeTravel(<MoreScreen navigation={frozenNav as any} />);
+        renderWithTimeTravel(<MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
     });
 
@@ -240,11 +240,11 @@ describe('MoreScreen — Frozen Navigation Object', () => {
       // re-renders. Verify these re-renders don't attempt mutations either.
       const frozenNav = createFrozenNavigation();
       const { update, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Trigger a re-render
       expect(() => {
-        update(<MoreScreen navigation={frozenNav as any} />);
+        update(<MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />);
       }).not.toThrow();
       cleanup();
     });
@@ -254,7 +254,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
       // rendering with a frozen navigation object.
       const frozenNav = createFrozenNavigation();
       const { unmount } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       expect(() => {
         unmount();
@@ -264,7 +264,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('preserves frozen status of navigation after render', () => {
       const frozenNav = createFrozenNavigation();
       const { cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Object.isFrozen is not available in all JS environments, so
       // verify that attempting to set a property still throws after render.
@@ -281,7 +281,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('navigates when profile card is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Press on the profile avatar text (user's first initial or name)
       fireEvent.press(getByText('TraderJoe'));
@@ -292,7 +292,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('navigates when "Add Funds" quick action is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Add Funds'));
       expect(mockNavigate).toHaveBeenCalledWith('AddFunds');
@@ -302,7 +302,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('navigates when "Withdraw" quick action is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Withdraw'));
       expect(mockNavigate).toHaveBeenCalledWith('Withdraw');
@@ -312,7 +312,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('navigates when "Transfer" quick action is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Transfer'));
       expect(mockNavigate).toHaveBeenCalledWith('Transfer');
@@ -322,7 +322,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('navigates when "UPI" quick action is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('UPI'));
       expect(mockNavigate).toHaveBeenCalledWith('UPI');
@@ -332,7 +332,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('navigates to the correct screen when a menu item is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       // Test a menu item from each section
       fireEvent.press(getByText('Fund Dashboard'));
@@ -349,7 +349,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('calls logout when "Log Out" is pressed', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Log Out'));
       expect(mockLogout).toHaveBeenCalled();
@@ -359,7 +359,7 @@ describe('MoreScreen — Frozen Navigation Object', () => {
     it('navigates to Achievements from achievements preview card', () => {
       const frozenNav = createFrozenNavigation();
       const { getByText, cleanup } = renderWithTimeTravel(
-        <MoreScreen navigation={frozenNav as any} />,
+        <MoreScreen navigation={frozenNav as any} route={{ params: {} } as any} />,
       );
       fireEvent.press(getByText('Achievements'));
       expect(mockNavigate).toHaveBeenCalledWith('Achievements');

@@ -26,6 +26,9 @@ import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { api, ApiError } from '../../services/api/client';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 const { width } = Dimensions.get('window');
 
@@ -37,8 +40,17 @@ const ORDER_TYPES: OrderType[] = ['MARKET', 'LIMIT', 'SL', 'SL-M'];
 const PRODUCT_TYPES: ProductType[] = ['CNC', 'MIS', 'NRML'];
 const QUICK_QTYS = [10, 50, 100, 'Max'] as const;
 
-export default function PlaceOrderScreen({ route, navigation }: any) {
-  const { stockId, symbol: paramSymbol, tradeType: initialTradeType = 'buy' } = route.params ?? {};
+export default function PlaceOrderScreen({ route, navigation }: NativeStackScreenProps<RootStackParamList, 'PlaceOrder'>) {
+  const {
+    stockId,
+    symbol: paramSymbol,
+    tradeType: initialTradeType = 'buy',
+    // Live-position overlay chip taps pre-fill the order type + prices
+    // (STOP → SL with trigger, TARGET → LIMIT with limit price).
+    prefillOrderType,
+    prefillLimit,
+    prefillTrigger,
+  } = route.params ?? {};
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -50,11 +62,13 @@ export default function PlaceOrderScreen({ route, navigation }: any) {
   const stock = stocks.find(s => s.id === stockId || s.symbol === paramSymbol) || stocks[0];
 
   const [tradeType, setTradeType] = useState<TradeType>(initialTradeType);
-  const [orderType, setOrderType] = useState<OrderType>('MARKET');
+  const [orderType, setOrderType] = useState<OrderType>(prefillOrderType || 'MARKET');
   const [productType, setProductType] = useState<ProductType>('CNC');
   const [quantity, setQuantity] = useState('');
-  const [limitPrice, setLimitPrice] = useState(stock ? String(Math.round(stock.price)) : '');
-  const [triggerPrice, setTriggerPrice] = useState('');
+  const [limitPrice, setLimitPrice] = useState(
+    prefillLimit ? String(prefillLimit) : stock ? String(Math.round(stock.price)) : '',
+  );
+  const [triggerPrice, setTriggerPrice] = useState(prefillTrigger ? String(prefillTrigger) : '');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [_showOrderTypes, _setShowOrderTypes] = useState(false);

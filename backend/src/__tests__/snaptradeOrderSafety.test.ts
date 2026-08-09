@@ -37,6 +37,7 @@ const getPositionsMock = vi.fn();
 vi.mock('../services/snapTradeService', () => ({
   snapTradeService: {
     isConfigured: () => true,
+    isPersonalMode: () => false,
     placeOrder: (...args: unknown[]) => placeOrderMock(...args),
     getPositions: (...args: unknown[]) => getPositionsMock(...args),
   },

@@ -15,12 +15,15 @@ import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constant
 import { formatCurrency } from '../../utils/formatters';
 import { LINKED_BANKS, INTERNAL_ACCOUNTS, TRANSFER_PRESETS } from '../../services/mockDataService';
 import { fundsApi } from '../../services/api';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types';
+
 
 Dimensions.get('window');
 
 type TransferTab = 'internal' | 'external';
 
-export default function TransferScreen({ navigation }: any) {
+export default function TransferScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Transfer'>) {
   const { colors } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
