@@ -236,6 +236,7 @@ Sabse zaroori variables jo set karne hain:
 | **Full Scaling Blueprint** | [`SCALING_BLUEPRINT.md`](./SCALING_BLUEPRINT.md) |
 | **Production Env Var Checklist** | [`docs/PRODUCTION_ENV_CHECKLIST.md`](./docs/PRODUCTION_ENV_CHECKLIST.md) |
 | **Railway Deploy Runbook** (step-by-step + smoke tests) | [`docs/RAILWAY_DEPLOY_RUNBOOK.md`](./docs/RAILWAY_DEPLOY_RUNBOOK.md) |
+| **SnapTrade Partner Access** (apply + get keys + verify) | [`docs/SNAPTRADE_PARTNER_GUIDE.md`](./docs/SNAPTRADE_PARTNER_GUIDE.md) |
 
 ---
 
