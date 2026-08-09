@@ -84,6 +84,12 @@ describe('SnapTrade personal mode', () => {
     expect(snapTradeService.isPersonalMode()).toBe(false);
   });
 
+  it('also auto-detects personal mode from a PERS_ client ID (underscore format)', async () => {
+    process.env.SNAPTRADE_CLIENT_ID = 'PERS_AUZ_UNDERSCORE_FORMAT';
+    const { env } = await import('../config/env');
+    expect(env.snapTradeMode).toBe('personal');
+  });
+
   it('respects an explicit SNAPTRADE_MODE=commercial override', async () => {
     process.env.SNAPTRADE_MODE = 'commercial';
     const { env } = await import('../config/env');

@@ -123,13 +123,14 @@ export const env = {
   /**
    * SnapTrade auth mode: 'commercial' (partner keys, registerUser flow) or
    * 'personal' (personal API keys, OAuth bearer, no registerUser).
-   * Auto-detected from the client ID prefix unless SNAPTRADE_MODE is set.
+   * Auto-detected from the client ID prefix (PERS- or PERS_) unless
+   * SNAPTRADE_MODE is set explicitly.
    */
   snapTradeMode:
     process.env.SNAPTRADE_MODE === 'commercial' ||
     process.env.SNAPTRADE_MODE === 'personal'
       ? process.env.SNAPTRADE_MODE
-      : (process.env.SNAPTRADE_CLIENT_ID || '').toUpperCase().startsWith('PERS-')
+      : /^PERS[-_]/i.test(process.env.SNAPTRADE_CLIENT_ID || '')
         ? 'personal'
         : 'commercial',
 
@@ -234,10 +235,25 @@ export function validateRequiredEnv(): string[] {
     );
   }
 
-  if (isProduction && !env.snapTradeEncryptionKey) {
+  // Encryption key only matters in COMMERCIAL mode — personal mode has no
+  // userSecret to encrypt, so the warning would be misleading noise.
+  if (isProduction && env.snapTradeMode === 'commercial' && !env.snapTradeEncryptionKey) {
     console.warn(
       '[env] WARNING: SNAPTRADE_ENCRYPTION_KEY not set. Broker session tokens will use DEV key.\n' +
       '      Generate a key with: openssl rand -hex 32',
+    );
+  }
+
+  // Mixed-mode guard: explicit commercial override with personal (PERS-) keys
+  // would build a commercial client and fail registerUser with a confusing 400.
+  if (
+    isProduction &&
+    env.snapTradeMode === 'commercial' &&
+    /^PERS[-_]/i.test(env.snapTradeClientId)
+  ) {
+    console.warn(
+      '[env] WARNING: SNAPTRADE_MODE=commercial but SNAPTRADE_CLIENT_ID looks personal (PERS- prefix).\n' +
+      '      registerUser will fail — either remove SNAPTRADE_MODE (auto-detect) or set it to personal.',
     );
   }
 
