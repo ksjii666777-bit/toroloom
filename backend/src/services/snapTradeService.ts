@@ -197,7 +197,10 @@ class SnapTradeService {
 
   /**
    * Get holdings for a specific account.
-   * GET /accounts/{accountId}/holdings
+   *
+   * NOTE: the legacy GET /accounts/{accountId}/holdings endpoint (getUserHoldings)
+   * returns HTTP 410 for accounts created after 2026-04-25, so holdings are
+   * derived from the unified positions endpoint + balance instead.
    */
   async getHoldings(
     userId: string,
@@ -205,16 +208,27 @@ class SnapTradeService {
     accountId: string,
   ): Promise<any> {
     const personal = this.isPersonalMode();
-    const response = await this.client.accountInformation.getUserHoldings({
-      accountId,
-      ...(personal ? {} : { userId, userSecret }),
-    });
-    return response.data || {};
+    const positions = await this.getPositions(userId, userSecret, accountId);
+    let balances: any[] = [];
+    try {
+      const response = await this.client.accountInformation.getUserAccountBalance({
+        accountId,
+        ...(personal ? {} : { userId, userSecret }),
+      });
+      balances = this._normalizeBalances(response.data || []);
+    } catch {
+      // Balance is best-effort — holdings still return positions.
+    }
+    return { holdings: positions, balances };
   }
 
   /**
    * Get all positions for a specific account.
    * GET /accounts/{accountId}/positions/all
+   *
+   * Returns normalized, flat positions:
+   *   { symbol, name, units, price, avgCost, pnl, pnlPercent, currency }
+   * (v11 returns instrument.symbol + string-typed units/price/cost_basis.)
    */
   async getPositions(
     userId: string,
@@ -226,7 +240,45 @@ class SnapTradeService {
       accountId,
       ...(personal ? {} : { userId, userSecret }),
     });
-    return response.data?.positions || [];
+    return this._normalizePositions(response.data?.results || []);
+  }
+
+  /** Normalize v11 AccountPosition[] → flat position objects. */
+  private _normalizePositions(raw: any[]): any[] {
+    return raw.map((p: any) => {
+      const symbol = String(p.instrument?.symbol || p.instrument?.raw_symbol || p.symbol || '');
+      const units = Number(p.units) || 0;
+      const price = Number(p.price) || 0;
+      const avgCost = Number(p.cost_basis) || 0;
+      const pnl = avgCost > 0 ? (price - avgCost) * units : 0;
+      const pnlPercent = avgCost > 0 ? ((price - avgCost) / avgCost) * 100 : 0;
+      return {
+        symbol,
+        name: p.instrument?.description || '',
+        units,
+        price,
+        avgCost,
+        pnl,
+        pnlPercent,
+        currency: p.currency || 'USD',
+      };
+    });
+  }
+
+  /** Normalize v11 Balance[] → flat { currency, total, cash, buyingPower }. */
+  private _normalizeBalances(raw: any[]): any[] {
+    return raw.map((b: any) => {
+      const bpSnake = Number(b.buying_power);
+      const bpCamel = Number(b.buyingPower);
+      const buyingPower = !Number.isNaN(bpSnake) ? bpSnake : !Number.isNaN(bpCamel) ? bpCamel : 0;
+      const cash = Number(b.cash) || 0;
+      return {
+        currency: b.currency?.code || 'USD',
+        cash,
+        buyingPower,
+        total: cash,
+      };
+    });
   }
 
   /**
@@ -260,12 +312,15 @@ class SnapTradeService {
       accountId,
       ...(personal ? {} : { userId, userSecret }),
     });
-    return response.data || [];
+    return this._normalizeBalances(response.data || []);
   }
 
   /**
    * Get recent orders for an account.
    * GET /accounts/{accountId}/orders
+   *
+   * Returns normalized, flat orders:
+   *   { id, symbol, action, quantity, price, status, filledQuantity, createdAt }
    */
   async getOrders(
     userId: string,
@@ -279,7 +334,17 @@ class SnapTradeService {
       state: 'all',
       days: 30,
     });
-    return response.data || [];
+    const raw = response.data || [];
+    return raw.map((o: any) => ({
+      id: o.brokerage_order_id || o.id || '',
+      symbol: o.symbol || o.universal_symbol?.symbol || '',
+      action: o.action || '',
+      quantity: Number(o.total_quantity) || 0,
+      price: Number(o.execution_price) || Number(o.limit_price) || 0,
+      status: o.status || '',
+      filledQuantity: Number(o.filled_quantity) || 0,
+      createdAt: o.time_placed || o.created_at || '',
+    }));
   }
 
   // ── Trading ──────────────────────────────────────────────────────────

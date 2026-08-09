@@ -420,15 +420,16 @@ router.get('/holdings', async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: (holdings.holdings || []).map((h: any) => ({
-        symbol: h.symbol?.symbol || '',
-        name: h.symbol?.name || '',
+        symbol: h.symbol || '',
+        name: h.name || '',
         quantity: h.units || h.quantity || 0,
         price: h.price || 0,
         avgCost: h.avgCost || h.averageCost || 0,
         pnl: h.pnl || 0,
         pnlPercent: h.pnlPercent || 0,
-        currency: h.currency?.code || 'USD',
+        currency: h.currency || 'USD',
       })),
+      balances: holdings.balances || [],
       count: holdings.holdings?.length || 0,
     });
   } catch (err: any) {
@@ -468,8 +469,8 @@ router.get('/positions', async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: positions.map((p: any) => ({
-        symbol: p.symbol?.symbol || '',
-        name: p.symbol?.name || '',
+        symbol: p.symbol || '',
+        name: p.name || '',
         quantity: p.units || 0,
         price: p.price || 0,
         avgCost: p.avgCost || 0,
@@ -515,14 +516,14 @@ router.get('/orders', async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: orders.map((o: any) => ({
-        id: o.id,
-        symbol: o.symbol?.symbol || '',
-        action: o.action || o.side,
-        quantity: o.units || o.quantity || 0,
+        id: o.id || '',
+        symbol: o.symbol || '',
+        action: o.action || '',
+        quantity: o.quantity || 0,
         price: o.price || 0,
-        status: o.orderStatus || o.status,
-        filledQuantity: o.filledUnits || 0,
-        createdAt: o.createdAt || o.createdDate,
+        status: o.status || '',
+        filledQuantity: o.filledQuantity || 0,
+        createdAt: o.createdAt || '',
       })),
       count: orders.length,
     });
@@ -563,7 +564,7 @@ router.get('/balances', async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: balances.map((b: any) => ({
-        currency: b.currency?.code || 'USD',
+        currency: b.currency || 'USD',
         total: b.total || 0,
         cash: b.cash || 0,
         buyingPower: b.buyingPower || 0,
@@ -624,9 +625,7 @@ router.get('/ticker/:symbol', async (req: Request, res: Response) => {
         connection.accountId,
       );
       const pos = (positions as any[]).find(
-        (p: any) =>
-          p.symbol?.symbol &&
-          String(p.symbol.symbol).toUpperCase().trim() === symbol,
+        (p: any) => p.symbol && String(p.symbol).toUpperCase().trim() === symbol,
       );
       if (pos && Number(pos.units) > 0) {
         position = {
@@ -725,8 +724,7 @@ router.post('/place-order', async (req: Request, res: Response) => {
       );
       const sym = String(symbol).toUpperCase().trim();
       const pos = (positions as any[]).find(
-        (p: any) =>
-          p.symbol?.symbol && String(p.symbol.symbol).toUpperCase().trim() === sym,
+        (p: any) => p.symbol && String(p.symbol).toUpperCase().trim() === sym,
       );
       if (pos && Number(pos.units) > 0) {
         currentPosition = { quantity: Number(pos.units), avgPrice: Number(pos.avgCost) || 0 };

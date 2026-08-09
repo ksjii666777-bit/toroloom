@@ -115,7 +115,7 @@ function request(
 }
 
 const POSITION_FIXTURE = {
-  symbol: { symbol: 'AAPL' },
+  symbol: 'AAPL',
   units: 10,
   avgCost: 185.5,
   price: 190,

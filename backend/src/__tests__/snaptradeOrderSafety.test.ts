@@ -217,7 +217,7 @@ describe('SnapTrade Order Safety', () => {
   it('treats a SELL of a held position as an EXIT (allowed even when new buys are blocked)', async () => {
     // User holds 20 AAPL shares → SELL is an exit action (never blocked)
     getPositionsMock.mockResolvedValue([
-      { symbol: { symbol: 'AAPL' }, units: 20, avgCost: 180 },
+      { symbol: 'AAPL', units: 20, avgCost: 180 },
     ]);
 
     // Tight gate that would block a fresh BUY order of this size
