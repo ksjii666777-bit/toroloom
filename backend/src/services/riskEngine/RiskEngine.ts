@@ -300,6 +300,20 @@ export class RiskEngine {
 
     this.rotateDailyIfNeeded(profile);
 
+    // ── Portfolio value seeding ────────────────────────────────────────
+    // Routes pass `portfolioValue` (their own fallback, e.g. ₹10L when the
+    // profile is unseeded) in the context, but the position-size gate below
+    // reads profile.portfolioValueAtOpen. If that is still 0 (no market-
+    // open sync has run), seed it from the context so live orders aren't
+    // blocked by a ₹0 max-position-size. setPortfolioValue persists too.
+    if (
+      profile.portfolioValueAtOpen <= 0 &&
+      context.portfolioValue &&
+      context.portfolioValue > 0
+    ) {
+      this.setPortfolioValue(userId, context.portfolioValue);
+    }
+
     if (this.isExitAction(context)) {
       return {
         allowed: true,

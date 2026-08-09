@@ -205,6 +205,42 @@ describe('RiskEngine — Financial Bodyguard', () => {
     expect(result.allowed).toBe(true);
   });
 
+  it('seeds portfolioValueAtOpen from context when profile value is 0 (unseeded user)', () => {
+    // No setPortfolioValue call — profile defaults to portfolioValueAtOpen: 0.
+    // A route-level fallback (e.g. ₹10L) arrives via context.portfolioValue and
+    // must be used by the position-size gate, otherwise EVERY live order is
+    // blocked by a ₹0 max-position-size.
+    engine.updateLimits(testUserId, { maxPositionSizePercent: 5 });
+
+    // 1 share @ ₹2890 = ₹2,890 < 5% of ₹10L (₹50,000) → allowed thanks to seeding
+    const result = engine.evaluate(testUserId, buyContext({ quantity: 1 }));
+    expect(result.allowed).toBe(true);
+    expect(result.decision).toBe(RiskDecision.ALLOWED);
+
+    // And the profile is now seeded so later calls use the same value.
+    expect(engine.getState(testUserId).portfolioValueAtOpen).toBe(1000000);
+
+    // A large order relative to the SEEDED value is still blocked correctly.
+    const big = engine.evaluate(testUserId, buyContext({ quantity: 5000 }));
+    expect(big.allowed).toBe(false);
+    expect(big.decision).toBe(RiskDecision.BLOCKED_POSITION_SIZE);
+  });
+
+  it('does not overwrite a real seeded portfolio value with a smaller context value', () => {
+    engine.setPortfolioValue(testUserId, 1000000); // real market-open sync
+    engine.updateLimits(testUserId, { maxPositionSizePercent: 5 });
+
+    // Context fallback of ₹10L (same) must not clobber; smaller context
+    // (e.g. a stale fallback) must be ignored because profile is already > 0.
+    const result = engine.evaluate(
+      testUserId,
+      buyContext({ quantity: 10, portfolioValue: 1000 }),
+    );
+    // 10 shares @ ₹2890 = ₹28,900 < 5% of ₹10L → allowed with the SEEDED value
+    expect(result.allowed).toBe(true);
+    expect(engine.getState(testUserId).portfolioValueAtOpen).toBe(1000000);
+  });
+
   // ==================== Daily MTM Rotation ====================
 
   it('should reset daily MTM tracking for a new day', () => {
