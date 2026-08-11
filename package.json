@@ -37,6 +37,7 @@
     "expo-task-manager": "~56.0.21",
     "expo-video": "~56.1.4",
     "i18next": "^26.3.4",
+    "lightweight-charts": "^5.2.0",
     "lottie-react-native": "~7.3.4",
     "lz-string": "^1.5.0",
     "react": "19.2.3",
@@ -86,6 +87,8 @@
     }
   },
   "scripts": {
+    "postinstall": "node scripts/clean-rn-razorpay-build.mjs",
+    "clean:razorpay": "node scripts/clean-rn-razorpay-build.mjs",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",

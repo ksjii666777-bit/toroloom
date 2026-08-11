@@ -81,6 +81,13 @@ interface FullscreenChartModalProps {
   tvSymbol?: string;
   /** Called when the live widget fails to load */
   onTvError?: () => void;
+  /** Pass-through chart options for the live TradingView widget */
+  tvOptions?: {
+    hideSideToolbar?: boolean;
+    withDateRanges?: boolean;
+    saveImage?: boolean;
+    showPopupButton?: boolean;
+  };
   // Stock info for header
   symbol: string;
   name: string;
@@ -121,6 +128,7 @@ export default function FullscreenChartModal({
   useLiveChart,
   tvSymbol,
   onTvError,
+  tvOptions,
   symbol,
   name,
   currentPrice,
@@ -243,6 +251,7 @@ export default function FullscreenChartModal({
             symbol={tvSymbol}
             interval={toTradingViewInterval(activeTimeframe)}
             onError={onTvError}
+            {...tvOptions}
           />
         ) : (
           <CandlestickChart

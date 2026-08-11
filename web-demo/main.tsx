@@ -32,6 +32,8 @@ import LumpsumCalculator from '../src/screens/calculators/LumpsumCalculator';
 import TaxCalculator from '../src/screens/calculators/TaxCalculator';
 import StepUpSipScreen from '../src/screens/calculators/StepUpSipScreen';
 import CurrencyConverterScreen from '../src/screens/calculators/CurrencyConverterScreen';
+import LightweightChartDemo from './LightweightChartDemo';
+import TradingViewWidgetDemo from './TradingViewWidgetDemo';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { configureApi } from '../src/services/api/client';
 import { useThemeStore } from '../src/store/themeStore';
@@ -388,6 +390,16 @@ function DemoApp() {
         <div className="card calc-card" style={{ marginTop: 12 }}>
           <CurrencyConverterScreen />
         </div>
+      </section>
+
+      <section>
+        <h2>TradingView Lightweight Charts™ — candlestick + volume (theme-aware, live ticks)</h2>
+        <LightweightChartDemo />
+      </section>
+
+      <section>
+        <h2>TradingView Advanced Chart widget™ — REAL live market data (WebView-equivalent embed)</h2>
+        <TradingViewWidgetDemo />
       </section>
 
       <section>

@@ -1,5 +1,9 @@
 export default {
     overview: 'अवलोकन',
+    chartOptions: 'चार्ट विकल्प',
+    showSideToolbar: 'साइड टूलबार',
+    showDateRanges: 'तारीख रेंज',
+    saveImage: 'इमेज सेव करें',
     statistics: 'आँकड़े',
     about: 'परिचय',
     price: 'मूल्य',

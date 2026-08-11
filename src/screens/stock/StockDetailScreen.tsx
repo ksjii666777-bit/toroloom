@@ -74,6 +74,9 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [chartType, setChartType] = useState<ChartType>('candlestick');
 
+  // ── Live TradingView chart options (settings row below) ──
+  const [chartOptions, setChartOptions] = useState({ hideSideToolbar: false, withDateRanges: true, saveImage: true });
+
   // ── Live chart mode ──
   // TradingView widget (real, live data) by default; custom candlestick chart
   // as a fallback when the widget cannot load (offline / blocked CDN).
@@ -351,6 +354,36 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
           onToggleFullscreen={() => setIsFullscreen(prev => !prev)}
         />
 
+        {/* ── Live chart options row (only affects the live TradingView widget) ── */}
+        {isLiveChart && (
+        <View style={styles.chartOptionsRow}>
+          <Text style={[styles.chartOptionsLabel, { color: colors.textMuted }]}>{t('stockDetail.chartOptions')}</Text>
+          {[
+            { key: 'hideSideToolbar' as const, label: t('stockDetail.showSideToolbar'), active: !chartOptions.hideSideToolbar },
+            { key: 'withDateRanges' as const, label: t('stockDetail.showDateRanges'), active: chartOptions.withDateRanges },
+            { key: 'saveImage' as const, label: t('stockDetail.saveImage'), active: chartOptions.saveImage },
+          ].map((opt) => (
+            <TouchableOpacity
+              key={opt.key}
+              style={[
+                styles.chartOptionChip,
+                {
+                  backgroundColor: opt.active ? colors.primary + '20' : colors.bgCard,
+                  borderColor: opt.active ? colors.primary + '40' : colors.border,
+                },
+              ]}
+              onPress={() => {
+                if (opt.key === 'hideSideToolbar') setChartOptions((p) => ({ ...p, hideSideToolbar: !p.hideSideToolbar }));
+                else if (opt.key === 'withDateRanges') setChartOptions((p) => ({ ...p, withDateRanges: !p.withDateRanges }));
+                else setChartOptions((p) => ({ ...p, saveImage: !p.saveImage }));
+              }}
+            >
+              <Text style={[styles.chartOptionText, { color: opt.active ? colors.primary : colors.textMuted }]}>{opt.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        )}
+
         {/* Pattern Settings gear icon (visible when patterns are toggled on) */}
         {showPatterns && (
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: SPACING.sm }}>
@@ -398,6 +431,9 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
                   height={280}
                   onError={handleTvError}
                   style={styles.liveChart}
+                  hideSideToolbar={chartOptions.hideSideToolbar}
+                  withDateRanges={chartOptions.withDateRanges}
+                  saveImage={chartOptions.saveImage}
                 />
                 <PositionLevelsOverlay
                   symbol={stock.symbol}
@@ -597,6 +633,7 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
         useLiveChart={isLiveChart}
         tvSymbol={tvSymbol}
         onTvError={handleTvError}
+        tvOptions={chartOptions}
       />
     </View>
   );
@@ -757,6 +794,29 @@ const createStyles = (colors: any) =>
       marginTop: 2,
     },
     advancedLabel: {
+      ...FONTS.medium,
+      fontSize: FONTS.size.xs,
+    },
+    chartOptionsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: SPACING.sm,
+      flexWrap: 'wrap',
+      marginBottom: SPACING.sm,
+    },
+    chartOptionsLabel: {
+      ...FONTS.medium,
+      fontSize: FONTS.size.xs,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    chartOptionChip: {
+      paddingHorizontal: SPACING.md,
+      paddingVertical: 6,
+      borderRadius: BORDER_RADIUS.full,
+      borderWidth: 1,
+    },
+    chartOptionText: {
       ...FONTS.medium,
       fontSize: FONTS.size.xs,
     },

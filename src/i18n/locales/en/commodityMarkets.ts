@@ -2,6 +2,7 @@
 export default {
     title: 'Commodities',
     subtitle: 'Global Markets Dashboard',
+    liveChart: 'Live Chart',
     scanning: 'Scanning…',
     live: 'Live',
     offline: 'Offline',

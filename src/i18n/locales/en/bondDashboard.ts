@@ -2,6 +2,7 @@
 export default {
     title: 'Bond Dashboard',
     subtitle: 'Fixed Income Marketplace',
+    yieldChart: 'Yield Chart',
     govt: 'Govt',
     corporate: 'Corporate',
     taxFreeTab: 'Tax-Free',

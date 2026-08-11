@@ -33,6 +33,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { mockBonds } from '../../constants/mockData';
 import type {Bond, RootStackParamList} from '../../types';
 import { bondsApi } from '../../services/api';
+import TradingViewChart from '../../components/TradingViewChart';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
@@ -49,6 +50,14 @@ const RATING_COLORS: Record<string, string> = {
   BB:  '#FF6B6B',
   B:   '#FF1744',
 };
+
+// TradingView symbols for the live yield chart (real market data).
+const TV_YIELD_SYMBOLS = [
+  { label: 'US 10Y', symbol: 'TVC:US10Y' },
+  { label: 'US 2Y', symbol: 'TVC:US2Y' },
+  { label: 'US 30Y', symbol: 'TVC:US30Y' },
+  { label: 'GER 10Y', symbol: 'TVC:DE10Y' },
+] as const;
 
 // ─── Yield curve labels ─────────────────────────────────────
 function yearsToBucket(y: number): string {
@@ -183,6 +192,7 @@ export default function BondDashboardScreen({ navigation }: NativeStackScreenPro
   const { t } = useT();
   const [bondData, setBondData] = useState<Bond[]>(mockBonds);
   const [activeTab, setActiveTab] = useState<TabKey>('govt');
+  const [tvYieldSymbol, setTvYieldSymbol] = useState<string>('TVC:US10Y');
 
   // Tab config (inside component for t() access)
   const TABS = useMemo(() => [
@@ -392,6 +402,29 @@ export default function BondDashboardScreen({ navigation }: NativeStackScreenPro
         {/* ── SUMMARY TAB ── */}
         {activeTab === 'summary' && (
           <Animated.View entering={FadeInDown.duration(300)}>
+            {/* Live Yield Chart (real TradingView data) */}
+            <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <View style={styles.yieldChartHeader}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.yieldChart')}</Text>
+                <Text style={[styles.yieldChartSymbol, { color: colors.primary }]}>{tvYieldSymbol}</Text>
+              </View>
+              <View style={styles.yieldChartChips}>
+                {TV_YIELD_SYMBOLS.map((y) => {
+                  const active = y.symbol === tvYieldSymbol;
+                  return (
+                    <Pressable
+                      key={y.symbol}
+                      onPress={() => setTvYieldSymbol(y.symbol)}
+                      style={[styles.yieldChartChip, { backgroundColor: active ? colors.primary + '20' : colors.bgInput, borderColor: active ? colors.primary + '40' : colors.border }]}
+                    >
+                      <Text style={[styles.yieldChartChipText, { color: active ? colors.primary : colors.textMuted }]}>{y.label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <TradingViewChart symbol={tvYieldSymbol} interval="D" height={240} allowSymbolChange={false} />
+            </View>
+
             {/* Overview Cards */}
             <View style={styles.summaryGrid}>
               {[
@@ -626,6 +659,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { ...FONTS.semiBold, fontSize: FONTS.size.md },
   sectionSubtitle: { ...FONTS.regular, fontSize: FONTS.size.xs, marginTop: 2 },
+  yieldChartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm },
+  yieldChartSymbol: { ...FONTS.medium, fontSize: FONTS.size.xs },
+  yieldChartChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: SPACING.md },
+  yieldChartChip: { paddingHorizontal: SPACING.md, paddingVertical: 6, borderRadius: BORDER_RADIUS.full, borderWidth: 1 },
+  yieldChartChipText: { ...FONTS.medium, fontSize: FONTS.size.xs },
 
   // ── Yield Curve ──
   yieldCurveContent: {

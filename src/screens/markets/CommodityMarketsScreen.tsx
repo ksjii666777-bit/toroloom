@@ -34,9 +34,19 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import Svg, { Polyline } from 'react-native-svg';
 import type {CommodityAsset, RootStackParamList} from '../../types';
 import { useCommodityPrices } from '../../hooks/useCommodityPrices';
+import TradingViewChart from '../../components/TradingViewChart';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
+
+// TradingView symbols for the live chart selector (real market data).
+const TV_COMMODITY_SYMBOLS = [
+  { label: 'Gold', symbol: 'TVC:GOLD' },
+  { label: 'Silver', symbol: 'TVC:SILVER' },
+  { label: 'Crude', symbol: 'TVC:USOIL' },
+  { label: 'Nat Gas', symbol: 'TVC:NATGAS' },
+  { label: 'Copper', symbol: 'TVC:COPPER' },
+] as const;
 
 // ══════════════════════════════════════════════════════════════
 // STATIC COMMODITY BASE DATA (id, name, metadata)
@@ -469,6 +479,7 @@ export default function CommodityMarketsScreen({ navigation }: NativeStackScreen
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [calculatorVisible, setCalculatorVisible] = useState(false);
+  const [tvSymbol, setTvSymbol] = useState<string>('TVC:GOLD');
 
   // ── Live WebSocket prices (auto-detects backend) ────────────
   const { prices: livePrices, connected, source: wsSource, isDetecting } = useCommodityPrices();
@@ -585,6 +596,29 @@ export default function CommodityMarketsScreen({ navigation }: NativeStackScreen
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* ── Live Chart (real TradingView data) ── */}
+        <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+          <View style={styles.liveChartHeader}>
+            <Text style={[styles.liveChartTitle, { color: colors.text }]}>{t('commodityMarkets.liveChart')}</Text>
+            <Text style={[styles.liveChartSymbol, { color: colors.primary }]}>{tvSymbol}</Text>
+          </View>
+          <View style={styles.liveChartChips}>
+            {TV_COMMODITY_SYMBOLS.map((c) => {
+              const active = c.symbol === tvSymbol;
+              return (
+                <Pressable
+                  key={c.symbol}
+                  onPress={() => setTvSymbol(c.symbol)}
+                  style={[styles.liveChartChip, { backgroundColor: active ? colors.primary + '20' : colors.bgInput, borderColor: active ? colors.primary + '40' : colors.border }]}
+                >
+                  <Text style={[styles.liveChartChipText, { color: active ? colors.primary : colors.textMuted }]}>{c.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <TradingViewChart symbol={tvSymbol} interval="D" height={240} allowSymbolChange={false} />
+        </View>
+
         {/* ── List View ── */}
         {(activeTab !== 'summary') && (
           <View>
@@ -788,6 +822,12 @@ const styles = StyleSheet.create({
   summaryValue: { ...FONTS.bold, fontSize: FONTS.size.lg },
   summaryLabel: { ...FONTS.regular, fontSize: FONTS.size.xs, textAlign: 'center' },
   sectionCard: { padding: SPACING.lg, borderRadius: BORDER_RADIUS.lg, borderWidth: 1, marginBottom: SPACING.md },
+  liveChartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm },
+  liveChartTitle: { ...FONTS.semiBold, fontSize: FONTS.size.md },
+  liveChartSymbol: { ...FONTS.medium, fontSize: FONTS.size.xs },
+  liveChartChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: SPACING.md },
+  liveChartChip: { paddingHorizontal: SPACING.md, paddingVertical: 6, borderRadius: BORDER_RADIUS.full, borderWidth: 1 },
+  liveChartChipText: { ...FONTS.medium, fontSize: FONTS.size.xs },
   sectionTitle: { ...FONTS.semiBold, fontSize: FONTS.size.md },
   catRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: SPACING.md },
   catLabel: { ...FONTS.semiBold, fontSize: FONTS.size.sm },

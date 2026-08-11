@@ -2,6 +2,7 @@
 export default {
     title: 'बॉन्ड डैशबोर्ड',
     subtitle: 'निश्चित आय बाज़ार',
+    yieldChart: 'यील्ड चार्ट',
     govt: 'सरकारी',
     corporate: 'कॉर्पोरेट',
     taxFreeTab: 'कर-मुक्त',

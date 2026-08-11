@@ -75,6 +75,19 @@ can be verified live — without booting the full native app.
     original shown below each key.
 18. **Interpolated strings** — `time.daysLeft` (`{{count}} दिन शेष`) and
     `components.stockAnalysis.shares` with `{{count}}`.
+19. **TradingView Lightweight Charts™** — official open-source charting
+    (`lightweight-charts@5.2`, display-only): 6-symbol × 5-timeframe
+    candlestick chart with volume histogram, TradingView-style crosshair OHLC
+    legend, LIVE tick simulation (`series.update()`), TOROLOOM watermark and
+    full dark/light theme awareness via the real `useTheme()`.
+    (`web-demo/LightweightChartDemo.tsx`)
+20. **TradingView Advanced Chart widget (REAL data)** — the same official
+    widget the native app renders via react-native-webview, embedded here
+    through the app's real `buildTradingViewWidgetHtml()` helper inside a
+    sandboxed `<iframe srcDoc>`: 8 symbols (NSE large-caps, NASDAQ:AAPL,
+    BINANCE:BTCUSDT) × 7 intervals, dark/light theme aware, LIVE badge.
+    Display-only — real prices come from TradingView (no key needed for
+    embedding). (`web-demo/TradingViewWidgetDemo.tsx`)
 
 ### Scripted verification (no clicks needed)
 

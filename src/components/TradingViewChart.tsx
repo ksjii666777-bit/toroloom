@@ -42,6 +42,8 @@ export interface TradingViewChartProps {
   allowSymbolChange?: boolean;
   hideSideToolbar?: boolean;
   withDateRanges?: boolean;
+  saveImage?: boolean;
+  showPopupButton?: boolean;
   locale?: string;
   /** IANA timezone (e.g. "Asia/Kolkata") or "exchange". */
   timezone?: string;
@@ -58,6 +60,8 @@ export default function TradingViewChart({
   allowSymbolChange = true,
   hideSideToolbar = false,
   withDateRanges = true,
+  saveImage = true,
+  showPopupButton = false,
   locale = 'en',
   timezone,
   onError,
@@ -80,6 +84,8 @@ export default function TradingViewChart({
         allowSymbolChange,
         hideSideToolbar,
         withDateRanges,
+        saveImage,
+        showPopupButton,
       }),
     [
       symbol,
@@ -91,6 +97,8 @@ export default function TradingViewChart({
       allowSymbolChange,
       hideSideToolbar,
       withDateRanges,
+      saveImage,
+      showPopupButton,
     ],
   );
 

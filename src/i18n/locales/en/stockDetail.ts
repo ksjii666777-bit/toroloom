@@ -1,5 +1,9 @@
 export default {
     overview: 'Overview',
+    chartOptions: 'Chart Options',
+    showSideToolbar: 'Side Toolbar',
+    showDateRanges: 'Date Ranges',
+    saveImage: 'Save Image',
     statistics: 'Statistics',
     about: 'About',
     price: 'Price',

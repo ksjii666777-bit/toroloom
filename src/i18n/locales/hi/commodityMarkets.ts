@@ -2,6 +2,7 @@
 export default {
     title: 'कमोडिटी',
     subtitle: 'वैश्विक बाज़ार डैशबोर्ड',
+    liveChart: 'लाइव चार्ट',
     scanning: 'स्कैन हो रहा है…',
     live: 'लाइव',
     offline: 'ऑफलाइन',

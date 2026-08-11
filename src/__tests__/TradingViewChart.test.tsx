@@ -77,6 +77,20 @@ describe('TradingViewChart', () => {
     expect(html).toContain('"style":"3"');
   });
 
+  it('defaults save_image on and show_popup_button off', () => {
+    render(<TradingViewChart symbol="NSE:RELIANCE" />);
+    const html = capturedWebViewProps.source?.html as string;
+    expect(html).toContain('"save_image":true');
+    expect(html).toContain('"show_popup_button":false');
+  });
+
+  it('passes saveImage and showPopupButton through to the widget config', () => {
+    render(<TradingViewChart symbol="NSE:RELIANCE" saveImage={false} showPopupButton />);
+    const html = capturedWebViewProps.source?.html as string;
+    expect(html).toContain('"save_image":false');
+    expect(html).toContain('"show_popup_button":true');
+  });
+
   it('enables JavaScript and DOM storage on the WebView', () => {
     render(<TradingViewChart symbol="NSE:RELIANCE" />);
     expect(capturedWebViewProps.javaScriptEnabled).toBe(true);
