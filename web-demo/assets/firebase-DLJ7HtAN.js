@@ -1,0 +1,2 @@
+var e=async()=>void 0,t=()=>({logEvent:e,setUserId:e,setUserProperties:e,setCurrentScreen:e,logLogin:e,logSignUp:e,logScreenView:e,logPurchase:e,logAddToCart:e,logEcommercePurchase:e,setAnalyticsCollectionEnabled:e,setSessionTimeoutDuration:e}),n={initializeApp:e,deleteApp:e,apps:[],app:()=>void 0,utils:{getApp:()=>void 0},messaging:()=>void 0};export{t as analytics,t as default,n as firebase,e as initializeApp};
+//# sourceMappingURL=firebase-DLJ7HtAN.js.map
