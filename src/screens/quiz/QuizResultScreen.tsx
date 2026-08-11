@@ -14,7 +14,7 @@ import { useEducationStore } from '../../store/educationStore';
 import { useGamificationStore } from '../../store/gamificationStore';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
-import type { QuizResult, RootStackParamList } from '../../types';
+import type { RootStackParamList } from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type QuizResultScreenProps = NativeStackScreenProps<RootStackParamList, 'QuizResult'>;

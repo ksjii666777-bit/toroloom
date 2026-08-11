@@ -182,7 +182,7 @@ export default function CompanyFundamentalsScreen({ route, navigation }: NativeS
     } finally {
       setIsLoading(false);
     }
-  }, [symbol]);
+  }, [symbol, t]);
 
   useEffect(() => {
     fetchFundamentals();

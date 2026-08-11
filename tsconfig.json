@@ -3,5 +3,5 @@
   "compilerOptions": {
     "strict": true
   },
-  "exclude": ["backend", "coverage"]
+  "exclude": ["backend", "coverage", "web-demo/dist", "web-demo/stubs"]
 }
