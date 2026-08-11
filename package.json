@@ -89,6 +89,7 @@
   "scripts": {
     "postinstall": "node scripts/clean-rn-razorpay-build.mjs",
     "clean:razorpay": "node scripts/clean-rn-razorpay-build.mjs",
+    "deploy:pages": "node scripts/deploy-pages.mjs",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",

@@ -106,6 +106,30 @@ npx vite preview --config web-demo/vite.config.ts --port 4175
 # open http://localhost:4175
 ```
 
+## Deploy to GitHub Pages
+
+The live demo is served from the **`docs/` folder of `master`** (Repo Settings →
+Pages → Source: *Deploy from a branch → master → /docs*), so the built site
+lives at `docs/web-demo/` and is reachable at
+`https://<owner>.github.io/toroloom/web-demo/`.
+
+One-command redeploy (builds with the correct `base` + copies to `docs/web-demo/`):
+
+```bash
+npm run deploy:pages
+```
+
+Then commit and push (the script intentionally does not auto-commit):
+
+```bash
+git add docs/web-demo
+git commit -m "docs: redeploy web-demo"
+git push origin master
+```
+
+The site usually goes live within ~30 seconds. To just re-copy the last build
+without rebuilding, use `npm run deploy:pages -- --skip-build`.
+
 Click **हिन्दी में देखें** to switch to Hindi, **🌙/☀️ Dark/Light Mode** to
 switch the theme. All four combinations (en/hi × dark/light) are verified to
 render correctly.
