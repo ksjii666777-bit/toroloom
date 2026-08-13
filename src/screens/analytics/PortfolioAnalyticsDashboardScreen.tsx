@@ -19,6 +19,7 @@ import { useWidgetStore } from '../../store/widgetStore';
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 import PnLChart from '../../components/PnLChart';
 import { WidgetGrid } from '../../components/widgets';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -27,7 +28,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const analytics = usePortfolioAnalyticsStore(s => s.getAnalytics());
   const { metrics, pnlHistory } = analytics;
@@ -39,141 +39,142 @@ export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <LinearGradient
-        colors={['#3B82F620', colors.bg]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={[styles.header, { paddingTop: insets.top + 12 }]}
+          <AppScreen scroll={false} padded={false}
       >
-        <View style={styles.headerTop}>
-          <TouchableOpacity
-            style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={20} color={colors.text} />
-          </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: SPACING.md }}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('portfolioAnalytics.title')}</Text>
-            <Text style={[styles.headerSub, { color: colors.textMuted }]}>
-              {t('portfolioAnalytics.subtitle')}
-            </Text>
+  {/* Header */}
+        <LinearGradient
+          colors={['#3B82F620', colors.bg]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={[styles.header]}
+        >
+          <View style={styles.headerTop}>
+            <TouchableOpacity
+              style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={20} color={colors.text} />
+            </TouchableOpacity>
+            <View style={{ flex: 1, marginLeft: SPACING.md }}>
+              <Text style={[styles.headerTitle, { color: colors.text }]}>{t('portfolioAnalytics.title')}</Text>
+              <Text style={[styles.headerSub, { color: colors.textMuted }]}>
+                {t('portfolioAnalytics.subtitle')}
+              </Text>
+            </View>
+            {/* Gallery button */}
+            <TouchableOpacity
+              style={[styles.galleryBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
+              onPress={() => navigation.navigate('WidgetGallery')}
+            >
+              <Ionicons name="apps" size={18} color={colors.primary} />
+            </TouchableOpacity>
           </View>
-          {/* Gallery button */}
-          <TouchableOpacity
-            style={[styles.galleryBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
-            onPress={() => navigation.navigate('WidgetGallery')}
-          >
-            <Ionicons name="apps" size={18} color={colors.primary} />
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Performance Summary ── */}
-        <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.summaryHeader}>
-            <Ionicons name="trophy" size={16} color="#FFC107" />
-            <Text style={[styles.summaryTitle, { color: colors.text }]}>{t('portfolioAnalytics.performanceSummary')}</Text>
-          </View>
-          <View style={styles.summaryGrid}>
-            <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.totalReturn')}</Text>
-              <Text style={[styles.summaryValue, { color: metrics.totalReturn >= 0 ? '#00E676' : '#FF5252' }]}>
-                {formatCurrency(metrics.totalReturn, true)}
-              </Text>
-              <Text style={[styles.summaryPct, { color: metrics.totalReturnPercent >= 0 ? '#00E676' : '#FF5252' }]}>
-                {formatPercent(metrics.totalReturnPercent)}
-              </Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* ── Performance Summary ── */}
+          <View style={[styles.summaryCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.summaryHeader}>
+              <Ionicons name="trophy" size={16} color="#FFC107" />
+              <Text style={[styles.summaryTitle, { color: colors.text }]}>{t('portfolioAnalytics.performanceSummary')}</Text>
             </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.realizedPnl')}</Text>
-              <Text style={[styles.summaryValue, { color: colors.text }]}>
-                {formatCurrency(metrics.realizedPnl, true)}
-              </Text>
-              <Text style={[styles.summaryPct, { color: colors.textMuted }]}>{t('portfolioAnalytics.realized')}</Text>
-            </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryItem}>
-              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.unrealized')}</Text>
-              <Text style={[styles.summaryValue, { color: colors.text }]}>
-                {formatCurrency(metrics.unrealizedPnl, true)}
-              </Text>
-              <Text style={[styles.summaryPct, { color: colors.textMuted }]}>{t('portfolioAnalytics.unrealizedLabel')}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── P&L Chart ── */}
-        <View style={styles.chartWrapper}>
-          <PnLChart
-            data={pnlHistory}
-            height={180}
-            width={SCREEN_WIDTH - SPACING.xl * 2}
-            timeframe={chartTimeframe}
-            onTimeframeChange={setChartTimeframe}
-          />
-        </View>
-
-        {/* ── Widgets Section ── */}
-        <View style={styles.sectionHeader}>
-          <Ionicons name="grid" size={16} color={colors.primary} />
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('portfolioAnalytics.dashboardWidgets')}</Text>
-          <TouchableOpacity
-            style={[styles.sectionAction, { backgroundColor: colors.primary + '15' }]}
-            onPress={() => navigation.navigate('WidgetGallery')}
-          >
-            <Ionicons name="add" size={14} color={colors.primary} />
-            <Text style={[styles.sectionActionText, { color: colors.primary }]}>{t('portfolioAnalytics.manage')}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <WidgetGrid onAddWidget={() => navigation.navigate('WidgetGallery')} />
-
-        {/* ── Capital Gains Summary ── */}
-        <View style={[styles.chartCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.extraHeader}>
-            <Ionicons name="receipt" size={16} color={colors.primary} />
-            <Text style={[styles.extraTitle, { color: colors.text }]}>{t('portfolioAnalytics.capitalGainsTax')}</Text>
-          </View>
-          <View style={styles.cgGrid}>
-            <View style={styles.cgItem}>
-              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.stcg')}</Text>
-              <Text style={[styles.cgValue, { color: analytics.capitalGains.shortTerm.gains >= 0 ? '#00E676' : '#FF5252' }]}>
-                {formatCurrency(analytics.capitalGains.shortTerm.gains)}
-              </Text>
-              <Text style={[styles.cgTax, { color: colors.textMuted }]}>
-                {t('portfolioAnalytics.taxLabel', { amount: formatCurrency(analytics.capitalGains.shortTerm.estimatedTax) })}
-              </Text>
-            </View>
-            <View style={[styles.cgDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.cgItem}>
-              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.ltcg')}</Text>
-              <Text style={[styles.cgValue, { color: analytics.capitalGains.longTerm.gains >= 0 ? '#00E676' : '#FF5252' }]}>
-                {formatCurrency(analytics.capitalGains.longTerm.gains)}
-              </Text>
-              <Text style={[styles.cgTax, { color: colors.textMuted }]}>
-                {t('portfolioAnalytics.taxLabel', { amount: formatCurrency(analytics.capitalGains.longTerm.estimatedTax) })}
-              </Text>
-            </View>
-            <View style={[styles.cgDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.cgItem}>
-              <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.totalTax')}</Text>
-              <Text style={[styles.cgValue, { color: '#FF5252' }]}>
-                {formatCurrency(analytics.capitalGains.totalEstimatedTax)}
-              </Text>
-              <Text style={[styles.cgTax, { color: colors.textMuted }]}>
-                {t('portfolioAnalytics.sttLabel', { amount: formatCurrency(analytics.capitalGains.sttPaid) })}
-              </Text>
+            <View style={styles.summaryGrid}>
+              <View style={styles.summaryItem}>
+                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.totalReturn')}</Text>
+                <Text style={[styles.summaryValue, { color: metrics.totalReturn >= 0 ? '#00E676' : '#FF5252' }]}>
+                  {formatCurrency(metrics.totalReturn, true)}
+                </Text>
+                <Text style={[styles.summaryPct, { color: metrics.totalReturnPercent >= 0 ? '#00E676' : '#FF5252' }]}>
+                  {formatPercent(metrics.totalReturnPercent)}
+                </Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.realizedPnl')}</Text>
+                <Text style={[styles.summaryValue, { color: colors.text }]}>
+                  {formatCurrency(metrics.realizedPnl, true)}
+                </Text>
+                <Text style={[styles.summaryPct, { color: colors.textMuted }]}>{t('portfolioAnalytics.realized')}</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.unrealized')}</Text>
+                <Text style={[styles.summaryValue, { color: colors.text }]}>
+                  {formatCurrency(metrics.unrealizedPnl, true)}
+                </Text>
+                <Text style={[styles.summaryPct, { color: colors.textMuted }]}>{t('portfolioAnalytics.unrealizedLabel')}</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          {/* ── P&L Chart ── */}
+          <View style={styles.chartWrapper}>
+            <PnLChart
+              data={pnlHistory}
+              height={180}
+              width={SCREEN_WIDTH - SPACING.xl * 2}
+              timeframe={chartTimeframe}
+              onTimeframeChange={setChartTimeframe}
+            />
+          </View>
+
+          {/* ── Widgets Section ── */}
+          <View style={styles.sectionHeader}>
+            <Ionicons name="grid" size={16} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('portfolioAnalytics.dashboardWidgets')}</Text>
+            <TouchableOpacity
+              style={[styles.sectionAction, { backgroundColor: colors.primary + '15' }]}
+              onPress={() => navigation.navigate('WidgetGallery')}
+            >
+              <Ionicons name="add" size={14} color={colors.primary} />
+              <Text style={[styles.sectionActionText, { color: colors.primary }]}>{t('portfolioAnalytics.manage')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <WidgetGrid onAddWidget={() => navigation.navigate('WidgetGallery')} />
+
+          {/* ── Capital Gains Summary ── */}
+          <View style={[styles.chartCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.extraHeader}>
+              <Ionicons name="receipt" size={16} color={colors.primary} />
+              <Text style={[styles.extraTitle, { color: colors.text }]}>{t('portfolioAnalytics.capitalGainsTax')}</Text>
+            </View>
+            <View style={styles.cgGrid}>
+              <View style={styles.cgItem}>
+                <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.stcg')}</Text>
+                <Text style={[styles.cgValue, { color: analytics.capitalGains.shortTerm.gains >= 0 ? '#00E676' : '#FF5252' }]}>
+                  {formatCurrency(analytics.capitalGains.shortTerm.gains)}
+                </Text>
+                <Text style={[styles.cgTax, { color: colors.textMuted }]}>
+                  {t('portfolioAnalytics.taxLabel', { amount: formatCurrency(analytics.capitalGains.shortTerm.estimatedTax) })}
+                </Text>
+              </View>
+              <View style={[styles.cgDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.cgItem}>
+                <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.ltcg')}</Text>
+                <Text style={[styles.cgValue, { color: analytics.capitalGains.longTerm.gains >= 0 ? '#00E676' : '#FF5252' }]}>
+                  {formatCurrency(analytics.capitalGains.longTerm.gains)}
+                </Text>
+                <Text style={[styles.cgTax, { color: colors.textMuted }]}>
+                  {t('portfolioAnalytics.taxLabel', { amount: formatCurrency(analytics.capitalGains.longTerm.estimatedTax) })}
+                </Text>
+              </View>
+              <View style={[styles.cgDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.cgItem}>
+                <Text style={[styles.cgLabel, { color: colors.textMuted }]}>{t('portfolioAnalytics.totalTax')}</Text>
+                <Text style={[styles.cgValue, { color: '#FF5252' }]}>
+                  {formatCurrency(analytics.capitalGains.totalEstimatedTax)}
+                </Text>
+                <Text style={[styles.cgTax, { color: colors.textMuted }]}>
+                  {t('portfolioAnalytics.sttLabel', { amount: formatCurrency(analytics.capitalGains.sttPaid) })}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -182,7 +183,6 @@ export default function PortfolioAnalyticsDashboardScreen({ navigation }: any) {
 const CARD_PADDING = SPACING.lg;
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1 },
   scrollContent: { paddingBottom: 40 },
 
   // Header

@@ -19,6 +19,7 @@ import type {NFOItem, RootStackParamList} from '../../types';
 import { useNFOStore } from '../../store/nfoStore';
 import InvestNfoModal from '../../components/nfo/InvestNfoModal';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
 
@@ -245,291 +246,294 @@ export default function NFODetailScreen({ route, navigation }: NativeStackScreen
 
   if (!nfo) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
-        <Ionicons name="alert-circle" size={48} color={colors.textMuted} />
-        <Text style={[styles.notFoundText, { color: colors.textMuted }]}>{t('nfo.notFound')}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.notFoundLink, { color: colors.primary }]}>{t('nfo.goBack')}</Text>
-        </TouchableOpacity>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Ionicons name="alert-circle" size={48} color={colors.textMuted} />
+          <Text style={[styles.notFoundText, { color: colors.textMuted }]}>{t('nfo.notFound')}</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={[styles.notFoundLink, { color: colors.primary }]}>{t('nfo.goBack')}</Text>
+          </TouchableOpacity>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* ── Hero Header ── */}
-        <LinearGradient
-          colors={[nfo.subscriptionStatus === 'open' ? '#3B82F620' : '#64748B30', colors.bg]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={[styles.hero, { paddingTop: insets.top + 12 }]}
-        >
-          {/* Back button */}
-          <View style={styles.heroTop}>
-            <TouchableOpacity
-              style={[styles.heroBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-              onPress={() => navigation.goBack()}
-            >
-              <Ionicons name="arrow-back" size={20} color={colors.text} />
-            </TouchableOpacity>
-            <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
-              <StatusBadge status={nfo.subscriptionStatus} />
-              <RiskBadge level={nfo.riskLevel} />
-            </View>
-          </View>
-
-          {/* Scheme Info */}
-          <View style={styles.heroInfo}>
-            <View style={[styles.heroLogo, { backgroundColor: 'rgba(59,130,246,0.15)' }]}>
-              <Text style={[styles.heroLogoText, { color: colors.primary }]}>{nfo.logo}</Text>
-            </View>
-            <View style={styles.heroDetails}>
-              <Text style={[styles.heroName, { color: colors.text }]}>{nfo.schemeName}</Text>
-              <Text style={[styles.heroAmc, { color: colors.textMuted }]}>{nfo.amcName}</Text>
-              <View style={styles.heroMetaRow}>
-                <Text style={[styles.heroMeta, { color: colors.textSecondary }]}>{nfo.category}</Text>
-                <View style={[styles.heroMetaDot, { backgroundColor: colors.textMuted }]} />
-                <Text style={[styles.heroMeta, { color: colors.textSecondary }]}>{nfo.subCategory}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+          {/* ── Hero Header ── */}
+          <LinearGradient
+            colors={[nfo.subscriptionStatus === 'open' ? '#3B82F620' : '#64748B30', colors.bg]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={[styles.hero, { paddingTop: insets.top + 12 }]}
+          >
+            {/* Back button */}
+            <View style={styles.heroTop}>
+              <TouchableOpacity
+                style={[styles.heroBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons name="arrow-back" size={20} color={colors.text} />
+              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
+                <StatusBadge status={nfo.subscriptionStatus} />
+                <RiskBadge level={nfo.riskLevel} />
               </View>
             </View>
-          </View>
-        </LinearGradient>
 
-        {/* ── Stats Row ── */}
-        <View style={styles.statsRow}>
-          <StatCard label={t('nfo.minInvest')} value={formatCompact(nfo.minInvestment)} icon="wallet" />
-          <StatCard label={t('nfo.expense')} value={`${nfo.expenseRatio}%`} icon="pricetag" />
-          <StatCard label={t('nfo.target')} value={formatCr(nfo.targetSize)} icon="flag" />
-        </View>
-
-        {/* ── Investment Objective ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.objective')} icon="bulb" color="#FFC107" />
-          <Text style={[styles.objectiveText, { color: colors.textSecondary }]}>{nfo.objective}</Text>
-        </View>
-
-        {/* ── Investment Strategy ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.strategy')} icon="git-branch" color="#8B5CF6" />
-          <Text style={[styles.strategyText, { color: colors.textSecondary }]}>{nfo.strategy}</Text>
-        </View>
-
-        {/* ── Asset Allocation ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.assetAllocation')} icon="pie-chart" />
-          <AllocationSegment allocation={nfo.assetAllocation} />
-        </View>
-
-        {/* ── Performance Projections ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.projections')} icon="trending-up" color="#00E676" />
-          <PerformanceProjection nfo={nfo} />
-        </View>
-
-        {/* ── Key Details ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.keyDetails')} icon="information-circle" />
-          <View style={styles.detailGrid}>
-            <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.fundManagerLabel')}</Text>
-              <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.fundManagers.join(', ')}</Text>
-            </View>
-            <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.benchmark')}</Text>
-              <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.benchmark}</Text>
-            </View>
-            <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.entryLoad')}</Text>
-              <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.entryLoad}%</Text>
-            </View>
-            <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.exitLoad')}</Text>
-              <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.exitLoad}</Text>
-            </View>
-            <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.detailItem}>
-              <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.minInvestment')}</Text>
-              <Text style={[styles.detailValue, { color: colors.text }]}>{formatCompact(nfo.minInvestment)}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── AMC Info ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.amcDetails')} icon="business" />
-          <View style={styles.amcGrid}>
-            <View style={styles.amcItem}>
-              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.rating')}</Text>
-              <View style={styles.stars}>
-                {[1, 2, 3, 4, 5].map(s => (
-                  <Ionicons key={s} name={s <= nfo.amcRating ? 'star' : 'star-outline'} size={14} color={s <= nfo.amcRating ? '#FFC107' : colors.textMuted} />
-                ))}
+            {/* Scheme Info */}
+            <View style={styles.heroInfo}>
+              <View style={[styles.heroLogo, { backgroundColor: 'rgba(59,130,246,0.15)' }]}>
+                <Text style={[styles.heroLogoText, { color: colors.primary }]}>{nfo.logo}</Text>
+              </View>
+              <View style={styles.heroDetails}>
+                <Text style={[styles.heroName, { color: colors.text }]}>{nfo.schemeName}</Text>
+                <Text style={[styles.heroAmc, { color: colors.textMuted }]}>{nfo.amcName}</Text>
+                <View style={styles.heroMetaRow}>
+                  <Text style={[styles.heroMeta, { color: colors.textSecondary }]}>{nfo.category}</Text>
+                  <View style={[styles.heroMetaDot, { backgroundColor: colors.textMuted }]} />
+                  <Text style={[styles.heroMeta, { color: colors.textSecondary }]}>{nfo.subCategory}</Text>
+                </View>
               </View>
             </View>
-            <View style={styles.amcItem}>
-              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.aum')}</Text>
-              <Text style={[styles.amcValue, { color: colors.text }]}>{nfo.amcAum}</Text>
-            </View>
-            <View style={styles.amcItem}>
-              <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.funds')}</Text>
-              <Text style={[styles.amcValue, { color: colors.text }]}>{t('nfo.schemes', { count: nfo.amcFundsCount })}</Text>
-            </View>
-          </View>
-        </View>
+          </LinearGradient>
 
-        {/* ── Collection Progress ── */}
-        {nfo.collectedAmount > 0 && (
+          {/* ── Stats Row ── */}
+          <View style={styles.statsRow}>
+            <StatCard label={t('nfo.minInvest')} value={formatCompact(nfo.minInvestment)} icon="wallet" />
+            <StatCard label={t('nfo.expense')} value={`${nfo.expenseRatio}%`} icon="pricetag" />
+            <StatCard label={t('nfo.target')} value={formatCr(nfo.targetSize)} icon="flag" />
+          </View>
+
+          {/* ── Investment Objective ── */}
           <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <SectionHeader title={t('nfo.collectionProgress')} icon="pulse" color="#00E676" />
-            <View style={styles.collectionHeader}>
-              <Text style={[styles.collectionAmount, { color: '#00E676' }]}>{formatCr(nfo.collectedAmount)}</Text>
-              <Text style={[styles.collectionTarget, { color: colors.textMuted }]}>
-                {t('nfo.ofTarget', { target: formatCr(nfo.targetSize), percent: collectedPercent.toFixed(0) })}
-              </Text>
+            <SectionHeader title={t('nfo.objective')} icon="bulb" color="#FFC107" />
+            <Text style={[styles.objectiveText, { color: colors.textSecondary }]}>{nfo.objective}</Text>
+          </View>
+
+          {/* ── Investment Strategy ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.strategy')} icon="git-branch" color="#8B5CF6" />
+            <Text style={[styles.strategyText, { color: colors.textSecondary }]}>{nfo.strategy}</Text>
+          </View>
+
+          {/* ── Asset Allocation ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.assetAllocation')} icon="pie-chart" />
+            <AllocationSegment allocation={nfo.assetAllocation} />
+          </View>
+
+          {/* ── Performance Projections ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.projections')} icon="trending-up" color="#00E676" />
+            <PerformanceProjection nfo={nfo} />
+          </View>
+
+          {/* ── Key Details ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.keyDetails')} icon="information-circle" />
+            <View style={styles.detailGrid}>
+              <View style={styles.detailItem}>
+                <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.fundManagerLabel')}</Text>
+                <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.fundManagers.join(', ')}</Text>
+              </View>
+              <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.detailItem}>
+                <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.benchmark')}</Text>
+                <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.benchmark}</Text>
+              </View>
+              <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.detailItem}>
+                <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.entryLoad')}</Text>
+                <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.entryLoad}%</Text>
+              </View>
+              <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.detailItem}>
+                <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.exitLoad')}</Text>
+                <Text style={[styles.detailValue, { color: colors.text }]}>{nfo.exitLoad}</Text>
+              </View>
+              <View style={[styles.detailDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.detailItem}>
+                <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('nfo.minInvestment')}</Text>
+                <Text style={[styles.detailValue, { color: colors.text }]}>{formatCompact(nfo.minInvestment)}</Text>
+              </View>
             </View>
-            <View style={[styles.collectionBar, { backgroundColor: colors.bgInput }]}>
-              <LinearGradient
-                colors={['#00E676', '#00C853']}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={[styles.collectionFill, { width: `${collectedPercent}%` }]}
-              />
+          </View>
+
+          {/* ── AMC Info ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.amcDetails')} icon="business" />
+            <View style={styles.amcGrid}>
+              <View style={styles.amcItem}>
+                <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.rating')}</Text>
+                <View style={styles.stars}>
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <Ionicons key={s} name={s <= nfo.amcRating ? 'star' : 'star-outline'} size={14} color={s <= nfo.amcRating ? '#FFC107' : colors.textMuted} />
+                  ))}
+                </View>
+              </View>
+              <View style={styles.amcItem}>
+                <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.aum')}</Text>
+                <Text style={[styles.amcValue, { color: colors.text }]}>{nfo.amcAum}</Text>
+              </View>
+              <View style={styles.amcItem}>
+                <Text style={[styles.amcLabel, { color: colors.textMuted }]}>{t('nfo.funds')}</Text>
+                <Text style={[styles.amcValue, { color: colors.text }]}>{t('nfo.schemes', { count: nfo.amcFundsCount })}</Text>
+              </View>
             </View>
-            <View style={styles.collectionMeta}>
-              <Text style={[styles.collectionMetaText, { color: colors.textMuted }]}>
-                {t('nfo.collectionMeta', {
-                  investors: (nfo.totalInvestors / 1000).toFixed(1),
-                  applications: nfo.applications.toLocaleString('en-IN'),
-                })}
-              </Text>
-              <View style={styles.collectionUpdatedRow}>
-                <Ionicons name="refresh" size={10} color={colors.textMuted} />
-                <Text style={[styles.collectionUpdated, { color: colors.textMuted }]}>
-                  {t('nfo.updated', { time: timeAgo(screenLoadedAt) })}
+          </View>
+
+          {/* ── Collection Progress ── */}
+          {nfo.collectedAmount > 0 && (
+            <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <SectionHeader title={t('nfo.collectionProgress')} icon="pulse" color="#00E676" />
+              <View style={styles.collectionHeader}>
+                <Text style={[styles.collectionAmount, { color: '#00E676' }]}>{formatCr(nfo.collectedAmount)}</Text>
+                <Text style={[styles.collectionTarget, { color: colors.textMuted }]}>
+                  {t('nfo.ofTarget', { target: formatCr(nfo.targetSize), percent: collectedPercent.toFixed(0) })}
                 </Text>
               </View>
+              <View style={[styles.collectionBar, { backgroundColor: colors.bgInput }]}>
+                <LinearGradient
+                  colors={['#00E676', '#00C853']}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                  style={[styles.collectionFill, { width: `${collectedPercent}%` }]}
+                />
+              </View>
+              <View style={styles.collectionMeta}>
+                <Text style={[styles.collectionMetaText, { color: colors.textMuted }]}>
+                  {t('nfo.collectionMeta', {
+                    investors: (nfo.totalInvestors / 1000).toFixed(1),
+                    applications: nfo.applications.toLocaleString('en-IN'),
+                  })}
+                </Text>
+                <View style={styles.collectionUpdatedRow}>
+                  <Ionicons name="refresh" size={10} color={colors.textMuted} />
+                  <Text style={[styles.collectionUpdated, { color: colors.textMuted }]}>
+                    {t('nfo.updated', { time: timeAgo(screenLoadedAt) })}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* ── Key Dates Timeline ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.keyDates')} icon="calendar" />
+            <View style={styles.timeline}>
+              <TimelineItem
+                label={t('nfo.openDateLabel')}
+                date={nfo.openDate}
+                isActive={nfo.subscriptionStatus === 'open' || nfo.subscriptionStatus === 'closed'}
+                color="#3B82F6"
+              />
+              <TimelineItem
+                label={t('nfo.closeDateLabel')}
+                date={nfo.closeDate}
+                isActive={nfo.subscriptionStatus === 'closed' || nfo.subscriptionStatus === 'matured'}
+                color="#00E676"
+              />
+              <TimelineItem
+                label={t('nfo.allotment')}
+                date={nfo.maturityDate}
+                isActive={nfo.subscriptionStatus === 'matured'}
+                color="#8B5CF6"
+              />
+              <TimelineItem
+                label={t('nfo.maturityListing')}
+                date={nfo.maturityDate}
+                isActive={nfo.subscriptionStatus === 'matured'}
+                isLast
+                color="#FFC107"
+              />
             </View>
           </View>
-        )}
 
-        {/* ── Key Dates Timeline ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.keyDates')} icon="calendar" />
-          <View style={styles.timeline}>
-            <TimelineItem
-              label={t('nfo.openDateLabel')}
-              date={nfo.openDate}
-              isActive={nfo.subscriptionStatus === 'open' || nfo.subscriptionStatus === 'closed'}
-              color="#3B82F6"
-            />
-            <TimelineItem
-              label={t('nfo.closeDateLabel')}
-              date={nfo.closeDate}
-              isActive={nfo.subscriptionStatus === 'closed' || nfo.subscriptionStatus === 'matured'}
-              color="#00E676"
-            />
-            <TimelineItem
-              label={t('nfo.allotment')}
-              date={nfo.maturityDate}
-              isActive={nfo.subscriptionStatus === 'matured'}
-              color="#8B5CF6"
-            />
-            <TimelineItem
-              label={t('nfo.maturityListing')}
-              date={nfo.maturityDate}
-              isActive={nfo.subscriptionStatus === 'matured'}
-              isLast
-              color="#FFC107"
-            />
+          {/* ── Top Sectors ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.topSectors')} icon="layers" color="#8B5CF6" />
+            <View style={styles.sectorRow}>
+              {nfo.topSectors.map((s, i) => (
+                <SectorChip key={i} label={s} color={[colors.primary, '#00E676', '#8B5CF6', '#FF9800', '#FF5252'][i % 5]} />
+              ))}
+            </View>
           </View>
-        </View>
 
-        {/* ── Top Sectors ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.topSectors')} icon="layers" color="#8B5CF6" />
-          <View style={styles.sectorRow}>
-            {nfo.topSectors.map((s, i) => (
-              <SectorChip key={i} label={s} color={[colors.primary, '#00E676', '#8B5CF6', '#FF9800', '#FF5252'][i % 5]} />
-            ))}
+          {/* ── About ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.aboutScheme')} icon="information-circle" />
+            <Text style={[styles.aboutText, { color: colors.textSecondary }]}>{nfo.about}</Text>
           </View>
-        </View>
 
-        {/* ── About ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.aboutScheme')} icon="information-circle" />
-          <Text style={[styles.aboutText, { color: colors.textSecondary }]}>{nfo.about}</Text>
-        </View>
+          {/* ── Strengths ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.strengths')} icon="shield-checkmark" color="#00E676" />
+            <BulletList items={nfo.strengths} color="#00E676" />
+          </View>
 
-        {/* ── Strengths ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.strengths')} icon="shield-checkmark" color="#00E676" />
-          <BulletList items={nfo.strengths} color="#00E676" />
-        </View>
+          {/* ── Risks ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('nfo.risks')} icon="warning" color="#FF5252" />
+            <BulletList items={nfo.risks} color="#FF5252" />
+          </View>
 
-        {/* ── Risks ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('nfo.risks')} icon="warning" color="#FF5252" />
-          <BulletList items={nfo.risks} color="#FF5252" />
-        </View>
+        </ScrollView>
 
-      </ScrollView>
-
-      {/* ── Bottom Action Bar ── */}
-      <View style={[styles.bottomBar, { backgroundColor: colors.bgSecondary, borderTopColor: colors.border }]}>
-        <View style={styles.bottomLeft}>
-          <Text style={[styles.bottomTarget, { color: colors.textMuted }]}>{t('nfo.bottomTarget', { target: formatCr(nfo.targetSize) })}</Text>
-          {nfo.collectedAmount > 0 && (
-            <Text style={[styles.bottomCollected, { color: '#00E676' }]}>
-              {t('nfo.bottomCollected', { percent: collectedPercent.toFixed(0) })}
-            </Text>
+        {/* ── Bottom Action Bar ── */}
+        <View style={[styles.bottomBar, { backgroundColor: colors.bgSecondary, borderTopColor: colors.border }]}>
+          <View style={styles.bottomLeft}>
+            <Text style={[styles.bottomTarget, { color: colors.textMuted }]}>{t('nfo.bottomTarget', { target: formatCr(nfo.targetSize) })}</Text>
+            {nfo.collectedAmount > 0 && (
+              <Text style={[styles.bottomCollected, { color: '#00E676' }]}>
+                {t('nfo.bottomCollected', { percent: collectedPercent.toFixed(0) })}
+              </Text>
+            )}
+          </View>
+          {canInvest ? (
+            <TouchableOpacity
+              style={styles.bottomInvestBtn}
+              onPress={() => setShowInvest(true)}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={['#3B82F6', '#1D4ED8']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.bottomInvestGradient}
+              >
+                <Ionicons name="wallet-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.bottomInvestText}>{t('nfo.investNow')}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ) : nfo.subscriptionStatus === 'upcoming' ? (
+            <View style={[styles.bottomStatus, { backgroundColor: '#3B82F620' }]}>
+              <Ionicons name="time-outline" size={16} color="#3B82F6" />
+              <Text style={[styles.bottomStatusText, { color: '#3B82F6' }]}>{t('nfo.statusUpcoming')}</Text>
+            </View>
+          ) : (
+            <View style={[styles.bottomStatus, { backgroundColor: '#64748B20' }]}>
+              <Ionicons name="lock-closed" size={16} color="#64748B" />
+              <Text style={[styles.bottomStatusText, { color: '#64748B' }]}>{t('nfo.statusClosed')}</Text>
+            </View>
           )}
         </View>
-        {canInvest ? (
-          <TouchableOpacity
-            style={styles.bottomInvestBtn}
-            onPress={() => setShowInvest(true)}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#3B82F6', '#1D4ED8']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.bottomInvestGradient}
-            >
-              <Ionicons name="wallet-outline" size={16} color="#FFFFFF" />
-              <Text style={styles.bottomInvestText}>{t('nfo.investNow')}</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        ) : nfo.subscriptionStatus === 'upcoming' ? (
-          <View style={[styles.bottomStatus, { backgroundColor: '#3B82F620' }]}>
-            <Ionicons name="time-outline" size={16} color="#3B82F6" />
-            <Text style={[styles.bottomStatusText, { color: '#3B82F6' }]}>{t('nfo.statusUpcoming')}</Text>
-          </View>
-        ) : (
-          <View style={[styles.bottomStatus, { backgroundColor: '#64748B20' }]}>
-            <Ionicons name="lock-closed" size={16} color="#64748B" />
-            <Text style={[styles.bottomStatusText, { color: '#64748B' }]}>{t('nfo.statusClosed')}</Text>
-          </View>
-        )}
-      </View>
 
-      {/* Invest Modal */}
-      <InvestNfoModal
-        nfo={showInvest ? nfo : null}
-        visible={showInvest}
-        onClose={() => setShowInvest(false)}
-      />
-    </View>
+        {/* Invest Modal */}
+        <InvestNfoModal
+          nfo={showInvest ? nfo : null}
+          visible={showInvest}
+          onClose={() => setShowInvest(false)}
+        />
+      </AppScreen>
   );
 }
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
 
   // Hero
   hero: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.xxl },

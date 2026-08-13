@@ -14,6 +14,7 @@ import VideoLessonPlayer from '../../components/video/VideoLessonPlayer';
 import QuizComponent from '../../components/quiz/QuizComponent';
 import type {QuizResult, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -131,243 +132,243 @@ export default function LessonViewScreen({ route, navigation }: NativeStackScree
 
   if (!lesson) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }}>{t('education.lessonNotFound')}</Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }}>{t('education.lessonNotFound')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Auto-advance overlay */}
-      {autoAdvancing && (
-        <Animated.View style={[styles.autoAdvanceOverlay, { opacity: fadeAnim }]}>
-          <View style={styles.autoAdvanceCard}>
-            <Ionicons name="checkmark-circle" size={48} color="#00C853" />
-            <Text style={styles.autoAdvanceTitle}>{t('education.lessonComplete')}</Text>
-            <Text style={styles.autoAdvanceSub}>{t('education.movingToNext')}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Auto-advance overlay */}
+        {autoAdvancing && (
+          <Animated.View style={[styles.autoAdvanceOverlay, { opacity: fadeAnim }]}>
+            <View style={styles.autoAdvanceCard}>
+              <Ionicons name="checkmark-circle" size={48} color="#00C853" />
+              <Text style={styles.autoAdvanceTitle}>{t('education.lessonComplete')}</Text>
+              <Text style={styles.autoAdvanceSub}>{t('education.movingToNext')}</Text>
+            </View>
+          </Animated.View>
+        )}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={styles.headerInfo}>
+              <Text style={styles.headerLessonNum}>{t('education.lessonOfTotal', { current: currentIndex + 1, total: courseLessons.length })}</Text>
+              <Text style={styles.headerTitle} numberOfLines={1}>{lesson.title}</Text>
+            </View>
+            {isCompleted && (
+              <View style={styles.completedBadge}>
+                <Ionicons name="checkmark-circle" size={20} color="#00C853" />
+              </View>
+            )}
           </View>
-        </Animated.View>
-      )}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={styles.headerInfo}>
-            <Text style={styles.headerLessonNum}>{t('education.lessonOfTotal', { current: currentIndex + 1, total: courseLessons.length })}</Text>
-            <Text style={styles.headerTitle} numberOfLines={1}>{lesson.title}</Text>
+
+          {/* Duration & Status */}
+          <View style={styles.lessonMeta}>
+            <Ionicons name="time-outline" size={14} color={colors.textMuted} />
+            <Text style={styles.lessonMetaText}>{lesson.duration}</Text>
+            {hasVideo && (
+              <>
+                <Ionicons name="videocam" size={14} color={colors.primary} />
+                <Text style={styles.lessonMetaText}>{t('education.videoLesson')}</Text>
+              </>
+            )}
+            {lesson.quiz && (
+              <>
+                <Ionicons name="help-circle-outline" size={14} color={colors.textMuted} />
+                <Text style={styles.lessonMetaText}>{t('education.includesQuiz')}</Text>
+              </>
+            )}
           </View>
-          {isCompleted && (
-            <View style={styles.completedBadge}>
+
+          {/* ─── Video Player ─── */}
+          {hasVideo && lesson.videoUrl && (
+            <VideoLessonPlayer
+              videoUrl={lesson.videoUrl}
+              transcript={lesson.transcript}
+              bookmarks={lessonBookmarks}
+              progress={lessonVideoProgress}
+              onAddBookmark={handleAddBookmark}
+              onDeleteBookmark={handleDeleteBookmark}
+              onProgressUpdate={handleVideoProgress}
+              onVideoComplete={handleVideoComplete}
+              isDownloaded={lessonIsDownloaded}
+              isDownloading={lessonIsDownloading}
+              downloadProgress={lessonDownloadProgress}
+              onDownload={handleDownload}
+              onRemoveDownload={handleRemoveDownload}
+            />
+          )}
+
+          {/* Video Completion Indicator */}
+          {hasVideo && videoCompleted && !isCompleted && (
+            <View style={styles.videoCompleteBanner}>
               <Ionicons name="checkmark-circle" size={20} color="#00C853" />
+              <Text style={styles.videoCompleteText}>{t('education.videoCompleteXp')}</Text>
             </View>
           )}
-        </View>
 
-        {/* Duration & Status */}
-        <View style={styles.lessonMeta}>
-          <Ionicons name="time-outline" size={14} color={colors.textMuted} />
-          <Text style={styles.lessonMetaText}>{lesson.duration}</Text>
-          {hasVideo && (
-            <>
-              <Ionicons name="videocam" size={14} color={colors.primary} />
-              <Text style={styles.lessonMetaText}>{t('education.videoLesson')}</Text>
-            </>
-          )}
-          {lesson.quiz && (
-            <>
-              <Ionicons name="help-circle-outline" size={14} color={colors.textMuted} />
-              <Text style={styles.lessonMetaText}>{t('education.includesQuiz')}</Text>
-            </>
-          )}
-        </View>
+          {/* Content (shown below video or as main content) */}
+          <Card noPadding style={styles.contentCard}>
+            <View style={styles.contentInner}>
+              <Text style={styles.contentTitle}>{lesson.title}</Text>
+              <Text style={styles.contentBody}>{lesson.content}</Text>
 
-        {/* ─── Video Player ─── */}
-        {hasVideo && lesson.videoUrl && (
-          <VideoLessonPlayer
-            videoUrl={lesson.videoUrl}
-            transcript={lesson.transcript}
-            bookmarks={lessonBookmarks}
-            progress={lessonVideoProgress}
-            onAddBookmark={handleAddBookmark}
-            onDeleteBookmark={handleDeleteBookmark}
-            onProgressUpdate={handleVideoProgress}
-            onVideoComplete={handleVideoComplete}
-            isDownloaded={lessonIsDownloaded}
-            isDownloading={lessonIsDownloading}
-            downloadProgress={lessonDownloadProgress}
-            onDownload={handleDownload}
-            onRemoveDownload={handleRemoveDownload}
-          />
-        )}
-
-        {/* Video Completion Indicator */}
-        {hasVideo && videoCompleted && !isCompleted && (
-          <View style={styles.videoCompleteBanner}>
-            <Ionicons name="checkmark-circle" size={20} color="#00C853" />
-            <Text style={styles.videoCompleteText}>{t('education.videoCompleteXp')}</Text>
-          </View>
-        )}
-
-        {/* Content (shown below video or as main content) */}
-        <Card noPadding style={styles.contentCard}>
-          <View style={styles.contentInner}>
-            <Text style={styles.contentTitle}>{lesson.title}</Text>
-            <Text style={styles.contentBody}>{lesson.content}</Text>
-
-            {/* Educational content sections */}
-            <View style={styles.contentSection}>
-              <View style={styles.contentSectionHeader}>
-                <Ionicons name="bulb-outline" size={18} color="#FFC107" />
-                <Text style={styles.contentSectionTitle}>{t('education.keyTakeaways')}</Text>
+              {/* Educational content sections */}
+              <View style={styles.contentSection}>
+                <View style={styles.contentSectionHeader}>
+                  <Ionicons name="bulb-outline" size={18} color="#FFC107" />
+                  <Text style={styles.contentSectionTitle}>{t('education.keyTakeaways')}</Text>
+                </View>
+                <View style={styles.takeaways}>
+                  {[
+                    'Understanding core concepts and terminology',
+                    'Real-world applications and examples',
+                    'Practical tips for your trading journey',
+                  ].map((item, i) => (
+                    <View key={`takeaway_${i}`} style={styles.takeawayRow}>
+                      <Ionicons name="checkmark-circle" size={16} color="#00C853" />
+                      <Text style={styles.takeawayText}>{item}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-              <View style={styles.takeaways}>
-                {[
-                  'Understanding core concepts and terminology',
-                  'Real-world applications and examples',
-                  'Practical tips for your trading journey',
-                ].map((item, i) => (
-                  <View key={`takeaway_${i}`} style={styles.takeawayRow}>
-                    <Ionicons name="checkmark-circle" size={16} color="#00C853" />
-                    <Text style={styles.takeawayText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
 
-            <View style={styles.contentSection}>
-              <View style={styles.contentSectionHeader}>
-                <Ionicons name="book-outline" size={18} color="#6C63FF" />
-                <Text style={styles.contentSectionTitle}>{t('education.summary')}</Text>
+              <View style={styles.contentSection}>
+                <View style={styles.contentSectionHeader}>
+                  <Ionicons name="book-outline" size={18} color="#6C63FF" />
+                  <Text style={styles.contentSectionTitle}>{t('education.summary')}</Text>
+                </View>
+                <Text style={styles.contentBody}>
+                  This lesson covered the fundamental concepts that form the building blocks of
+                  stock market knowledge. Apply these concepts in practice through the exercises
+                  and quiz to reinforce your learning.
+                </Text>
               </View>
-              <Text style={styles.contentBody}>
-                This lesson covered the fundamental concepts that form the building blocks of
-                stock market knowledge. Apply these concepts in practice through the exercises
-                and quiz to reinforce your learning.
-              </Text>
-            </View>
-          </View>
-        </Card>
-
-        {/* Quiz Section */}
-        {lesson.quiz && !showQuiz && (
-          <Pressable
-            style={styles.startQuizBtn}
-            onPress={() => setShowQuiz(true)}
-          >
-            <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.quizGradient}>
-              <Ionicons name="help-circle" size={24} color={colors.white} />
-              <View>
-                <Text style={styles.quizBtnTitle}>{t('education.testKnowledge')}</Text>
-                <Text style={styles.quizBtnSub}>{t('education.questions', { count: lesson.quiz.questions.length })}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
-            </LinearGradient>
-          </Pressable>
-        )}
-
-        {showQuiz && lesson.quiz && !quizResult && (
-          <Card title={lesson.quiz.title} subtitle={t('education.testUnderstanding')} noPadding>
-            <View style={styles.quizComponentWrapper}>
-              <QuizComponent
-                quiz={lesson.quiz}
-                onComplete={handleQuizComplete}
-                timerMinutes={5}
-                passingPercent={60}
-                passXp={30}
-                attemptXp={10}
-              />
             </View>
           </Card>
-        )}
 
-        {/* Mark Complete Button — only if quiz passed or no quiz */}
-        {!isCompleted && (!lesson?.quiz || quizResult?.passed) && (
-          <Pressable
-            style={styles.completeBtn}
-            onPress={handleMarkComplete}
-          >
-            <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.completeGradient}>
-              <Ionicons name="checkmark-circle" size={22} color={colors.white} />
-              <Text style={styles.completeText}>{t('education.markComplete')}</Text>
-            </LinearGradient>
-          </Pressable>
-        )}
+          {/* Quiz Section */}
+          {lesson.quiz && !showQuiz && (
+            <Pressable
+              style={styles.startQuizBtn}
+              onPress={() => setShowQuiz(true)}
+            >
+              <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.quizGradient}>
+                <Ionicons name="help-circle" size={24} color={colors.white} />
+                <View>
+                  <Text style={styles.quizBtnTitle}>{t('education.testKnowledge')}</Text>
+                  <Text style={styles.quizBtnSub}>{t('education.questions', { count: lesson.quiz.questions.length })}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
+              </LinearGradient>
+            </Pressable>
+          )}
 
-        {/* View Detailed Results */}
-        {quizResult && (
-          <Pressable
-            style={[styles.continueBtn, { marginTop: 0, marginBottom: SPACING.lg }]}
-            onPress={() => navigation.navigate('QuizResult', {
-              result: quizResult,
-              lessonId,
-              courseId,
-            })}
-          >
-            <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
-              <Ionicons name="analytics" size={20} color={colors.white} />
-              <Text style={styles.continueText}>{t('education.viewDetailedResults')}</Text>
-            </LinearGradient>
-          </Pressable>
-        )}
+          {showQuiz && lesson.quiz && !quizResult && (
+            <Card title={lesson.quiz.title} subtitle={t('education.testUnderstanding')} noPadding>
+              <View style={styles.quizComponentWrapper}>
+                <QuizComponent
+                  quiz={lesson.quiz}
+                  onComplete={handleQuizComplete}
+                  timerMinutes={5}
+                  passingPercent={60}
+                  passXp={30}
+                  attemptXp={10}
+                />
+              </View>
+            </Card>
+          )}
 
-        {/* Auto-advance in progress indicator */}
-        {autoAdvancing && (
-          <View style={styles.autoAdvanceInline}>
-            <Ionicons name="hourglass-outline" size={16} color="#00C853" />
-            <Text style={styles.autoAdvanceInlineText}>{t('education.autoAdvancing')}</Text>
+          {/* Mark Complete Button — only if quiz passed or no quiz */}
+          {!isCompleted && (!lesson?.quiz || quizResult?.passed) && (
+            <Pressable
+              style={styles.completeBtn}
+              onPress={handleMarkComplete}
+            >
+              <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.completeGradient}>
+                <Ionicons name="checkmark-circle" size={22} color={colors.white} />
+                <Text style={styles.completeText}>{t('education.markComplete')}</Text>
+              </LinearGradient>
+            </Pressable>
+          )}
+
+          {/* View Detailed Results */}
+          {quizResult && (
+            <Pressable
+              style={[styles.continueBtn, { marginTop: 0, marginBottom: SPACING.lg }]}
+              onPress={() => navigation.navigate('QuizResult', {
+                result: quizResult,
+                lessonId,
+                courseId,
+              })}
+            >
+              <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
+                <Ionicons name="analytics" size={20} color={colors.white} />
+                <Text style={styles.continueText}>{t('education.viewDetailedResults')}</Text>
+              </LinearGradient>
+            </Pressable>
+          )}
+
+          {/* Auto-advance in progress indicator */}
+          {autoAdvancing && (
+            <View style={styles.autoAdvanceInline}>
+              <Ionicons name="hourglass-outline" size={16} color="#00C853" />
+              <Text style={styles.autoAdvanceInlineText}>{t('education.autoAdvancing')}</Text>
+            </View>
+          )}
+
+          {/* Navigation */}
+          <View style={styles.lessonNav}>
+            {prevLesson && (
+              <Pressable
+                style={styles.lessonNavBtn}
+                onPress={() => {
+                  setShowQuiz(false);
+                  setQuizResult(null);
+                  navigation.replace('LessonView', { lessonId: prevLesson.id, courseId });
+                }}
+              >
+                <Ionicons name="chevron-back" size={18} color={colors.text} />
+                <View>
+                  <Text style={styles.navLabel}>{t('education.previous')}</Text>
+                  <Text style={styles.navLessonTitle} numberOfLines={1}>{prevLesson.title}</Text>
+                </View>
+              </Pressable>
+            )}
+            {nextLesson && (
+              <Pressable
+                style={[styles.lessonNavBtn, styles.lessonNavBtnRight]}
+                onPress={() => {
+                  setShowQuiz(false);
+                  setQuizResult(null);
+                  navigation.replace('LessonView', { lessonId: nextLesson.id, courseId });
+                }}
+              >
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={[styles.navLabel, { textAlign: 'right' }]}>{t('education.next')}</Text>
+                  <Text style={[styles.navLessonTitle, { textAlign: 'right' }]} numberOfLines={1}>{nextLesson.title}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.text} />
+              </Pressable>
+            )}
           </View>
-        )}
 
-        {/* Navigation */}
-        <View style={styles.lessonNav}>
-          {prevLesson && (
-            <Pressable
-              style={styles.lessonNavBtn}
-              onPress={() => {
-                setShowQuiz(false);
-                setQuizResult(null);
-                navigation.replace('LessonView', { lessonId: prevLesson.id, courseId });
-              }}
-            >
-              <Ionicons name="chevron-back" size={18} color={colors.text} />
-              <View>
-                <Text style={styles.navLabel}>{t('education.previous')}</Text>
-                <Text style={styles.navLessonTitle} numberOfLines={1}>{prevLesson.title}</Text>
-              </View>
-            </Pressable>
-          )}
-          {nextLesson && (
-            <Pressable
-              style={[styles.lessonNavBtn, styles.lessonNavBtnRight]}
-              onPress={() => {
-                setShowQuiz(false);
-                setQuizResult(null);
-                navigation.replace('LessonView', { lessonId: nextLesson.id, courseId });
-              }}
-            >
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={[styles.navLabel, { textAlign: 'right' }]}>{t('education.next')}</Text>
-                <Text style={[styles.navLessonTitle, { textAlign: 'right' }]} numberOfLines={1}>{nextLesson.title}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.text} />
-            </Pressable>
-          )}
-        </View>
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
     paddingHorizontal: SPACING.xl,

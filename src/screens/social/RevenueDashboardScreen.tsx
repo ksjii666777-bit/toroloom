@@ -12,6 +12,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {RevenueTransaction, PayoutRequest, RevenueSource, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 /** Format currency in INR */
 const formatINR = (val: number) =>
@@ -57,188 +58,189 @@ export default function RevenueDashboardScreen({ navigation: _navigation  }: Nat
   );
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('revenueDashboard.title')}</Text>
-          <Text style={styles.subtitle}>{t('revenueDashboard.subtitle')}</Text>
-        </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('revenueDashboard.title')}</Text>
+            <Text style={styles.subtitle}>{t('revenueDashboard.subtitle')}</Text>
+          </View>
 
-        {/* ── Earnings Summary Cards ── */}
-        <View style={styles.summaryRow}>
-          <View style={[styles.summaryCard, { borderLeftColor: '#6C63FF' }]}>
-            <Text style={styles.summaryLabel}>{t('revenueDashboard.netEarnings')}</Text>
-            <Text style={[styles.summaryValue, { color: '#6C63FF' }]}>{formatINR(dashboard.netEarnings)}</Text>
-          </View>
-          <View style={[styles.summaryCard, { borderLeftColor: '#00C853' }]}>
-            <Text style={styles.summaryLabel}>{t('revenueDashboard.paidOut')}</Text>
-            <Text style={[styles.summaryValue, { color: '#00C853' }]}>{formatINR(dashboard.totalPaidOut)}</Text>
-          </View>
-        </View>
-
-        <View style={styles.summaryRow}>
-          <View style={[styles.summaryCard, { borderLeftColor: '#FFC107' }]}>
-            <Text style={styles.summaryLabel}>{t('revenueDashboard.pendingBalance')}</Text>
-            <Text style={[styles.summaryValue, { color: '#FFC107' }]}>{formatINR(dashboard.pendingBalance)}</Text>
-          </View>
-          <View style={[styles.summaryCard, { borderLeftColor: '#FF6B6B' }]}>
-            <Text style={styles.summaryLabel}>{t('revenueDashboard.totalFees')}</Text>
-            <Text style={[styles.summaryValue, { color: '#FF6B6B' }]}>{formatINR(dashboard.totalFees)}</Text>
-          </View>
-        </View>
-
-        {/* Payout CTA */}
-        {dashboard.pendingBalance >= 100 && (
-          <AnimatedPressable
-            onPress={() => setShowPayoutModal(true)}
-            haptic="medium"
-            scaleTo={0.97}
-          >
-            <View style={styles.payoutCta}>
-              <Ionicons name="wallet-outline" size={22} color="#fff" />
-              <View>
-                <Text style={styles.payoutCtaTitle}>
-                  {t('revenueDashboard.withdraw', { amount: formatINR(dashboard.pendingBalance) })}
-                </Text>
-                <Text style={styles.payoutCtaSub}>{t('revenueDashboard.availablePayout')}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+          {/* ── Earnings Summary Cards ── */}
+          <View style={styles.summaryRow}>
+            <View style={[styles.summaryCard, { borderLeftColor: '#6C63FF' }]}>
+              <Text style={styles.summaryLabel}>{t('revenueDashboard.netEarnings')}</Text>
+              <Text style={[styles.summaryValue, { color: '#6C63FF' }]}>{formatINR(dashboard.netEarnings)}</Text>
             </View>
-          </AnimatedPressable>
-        )}
+            <View style={[styles.summaryCard, { borderLeftColor: '#00C853' }]}>
+              <Text style={styles.summaryLabel}>{t('revenueDashboard.paidOut')}</Text>
+              <Text style={[styles.summaryValue, { color: '#00C853' }]}>{formatINR(dashboard.totalPaidOut)}</Text>
+            </View>
+          </View>
 
-        {/* Tab Bar */}
-        <View style={styles.tabRow}>
-          {(['overview', 'transactions', 'payouts'] as const).map(tab => (
+          <View style={styles.summaryRow}>
+            <View style={[styles.summaryCard, { borderLeftColor: '#FFC107' }]}>
+              <Text style={styles.summaryLabel}>{t('revenueDashboard.pendingBalance')}</Text>
+              <Text style={[styles.summaryValue, { color: '#FFC107' }]}>{formatINR(dashboard.pendingBalance)}</Text>
+            </View>
+            <View style={[styles.summaryCard, { borderLeftColor: '#FF6B6B' }]}>
+              <Text style={styles.summaryLabel}>{t('revenueDashboard.totalFees')}</Text>
+              <Text style={[styles.summaryValue, { color: '#FF6B6B' }]}>{formatINR(dashboard.totalFees)}</Text>
+            </View>
+          </View>
+
+          {/* Payout CTA */}
+          {dashboard.pendingBalance >= 100 && (
             <AnimatedPressable
-              key={tab}
-              onPress={() => setActiveTab(tab)}
-              haptic="selection"
-              scaleTo={0.94}
+              onPress={() => setShowPayoutModal(true)}
+              haptic="medium"
+              scaleTo={0.97}
             >
-              <View style={[
-                styles.tabChip,
-                activeTab === tab && { backgroundColor: colors.primary + '25', borderColor: colors.primary },
-              ]}>
-                <Text style={[
-                  styles.tabChipText,
-                  activeTab === tab && { color: colors.primary },
-                ]}>
-                  {tab === 'overview' ? t('revenueDashboard.tabOverview') : tab === 'transactions' ? t('revenueDashboard.tabTransactions') : t('revenueDashboard.tabPayoutHistory')}
-                </Text>
+              <View style={styles.payoutCta}>
+                <Ionicons name="wallet-outline" size={22} color="#fff" />
+                <View>
+                  <Text style={styles.payoutCtaTitle}>
+                    {t('revenueDashboard.withdraw', { amount: formatINR(dashboard.pendingBalance) })}
+                  </Text>
+                  <Text style={styles.payoutCtaSub}>{t('revenueDashboard.availablePayout')}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
               </View>
             </AnimatedPressable>
-          ))}
-        </View>
+          )}
 
-        {/* ── Tab Content ── */}
-        {activeTab === 'overview' && (
-          <>
-            {/* Breakdown by Source */}
-            <Animated.View entering={FadeInDown.springify()} style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('revenueDashboard.earningsBySource')}</Text>
-              <View style={styles.sourceGrid}>
-                {sourceEntries.map(([source, data]) => {
-                  const percent = dashboard.netEarnings > 0
-                    ? Math.round((data.amount / dashboard.netEarnings) * 100)
-                    : 0;
-                  return (
-                    <View key={source} style={styles.sourceCard}>
-                      <View style={[styles.sourceIcon, { backgroundColor: data.color + '20' }]}>
-                        <Ionicons name={data.icon as any} size={20} color={data.color} />
-                      </View>
-                      <Text style={styles.sourceLabel}>{data.label}</Text>
-                      <Text style={styles.sourceAmount}>{formatINR(data.amount)}</Text>
-                      <View style={styles.sourceBarBg}>
-                        <View style={[styles.sourceBarFill, { width: `${percent}%`, backgroundColor: data.color }]} />
-                      </View>
-                      <Text style={styles.sourcePercent}>{percent}%</Text>
-                      <Text style={styles.sourceCount}>{t('revenueDashboard.transactionsLabel', { count: data.count })}</Text>
-                    </View>
-                  );
-                })}
-              </View>
-            </Animated.View>
+          {/* Tab Bar */}
+          <View style={styles.tabRow}>
+            {(['overview', 'transactions', 'payouts'] as const).map(tab => (
+              <AnimatedPressable
+                key={tab}
+                onPress={() => setActiveTab(tab)}
+                haptic="selection"
+                scaleTo={0.94}
+              >
+                <View style={[
+                  styles.tabChip,
+                  activeTab === tab && { backgroundColor: colors.primary + '25', borderColor: colors.primary },
+                ]}>
+                  <Text style={[
+                    styles.tabChipText,
+                    activeTab === tab && { color: colors.primary },
+                  ]}>
+                    {tab === 'overview' ? t('revenueDashboard.tabOverview') : tab === 'transactions' ? t('revenueDashboard.tabTransactions') : t('revenueDashboard.tabPayoutHistory')}
+                  </Text>
+                </View>
+              </AnimatedPressable>
+            ))}
+          </View>
 
-            {/* Monthly Chart */}
-            {dashboard.monthlyHistory.length > 0 && (
-              <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-                <Text style={styles.sectionTitle}>{t('revenueDashboard.monthlyEarnings')}</Text>
-                <View style={styles.chartContainer}>
-                  <View style={styles.chartBars}>
-                    {dashboard.monthlyHistory.slice(0, 6).map((month, idx) => {
-                      const height = Math.max((month.total / barMax) * 140, 8);
-                      return (
-                        <View key={idx} style={styles.chartCol}>
-                          <Text style={styles.chartValue}>{formatINR(month.total)}</Text>
-                          <View style={[styles.chartBar, { height, backgroundColor: colors.primary }]} />
-                          <Text style={styles.chartLabel}>{month.month.split(' ')[0]}</Text>
+          {/* ── Tab Content ── */}
+          {activeTab === 'overview' && (
+            <>
+              {/* Breakdown by Source */}
+              <Animated.View entering={FadeInDown.springify()} style={styles.section}>
+                <Text style={styles.sectionTitle}>{t('revenueDashboard.earningsBySource')}</Text>
+                <View style={styles.sourceGrid}>
+                  {sourceEntries.map(([source, data]) => {
+                    const percent = dashboard.netEarnings > 0
+                      ? Math.round((data.amount / dashboard.netEarnings) * 100)
+                      : 0;
+                    return (
+                      <View key={source} style={styles.sourceCard}>
+                        <View style={[styles.sourceIcon, { backgroundColor: data.color + '20' }]}>
+                          <Ionicons name={data.icon as any} size={20} color={data.color} />
                         </View>
-                      );
-                    })}
-                  </View>
+                        <Text style={styles.sourceLabel}>{data.label}</Text>
+                        <Text style={styles.sourceAmount}>{formatINR(data.amount)}</Text>
+                        <View style={styles.sourceBarBg}>
+                          <View style={[styles.sourceBarFill, { width: `${percent}%`, backgroundColor: data.color }]} />
+                        </View>
+                        <Text style={styles.sourcePercent}>{percent}%</Text>
+                        <Text style={styles.sourceCount}>{t('revenueDashboard.transactionsLabel', { count: data.count })}</Text>
+                      </View>
+                    );
+                  })}
                 </View>
               </Animated.View>
-            )}
-          </>
-        )}
 
-        {activeTab === 'transactions' && (
-          <Animated.View entering={FadeInDown.springify()}>
-            {dashboard.recentTransactions.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="receipt-outline" size={48} color={colors.textMuted} />
-                <Text style={styles.emptyText}>{t('revenueDashboard.noTransactions')}</Text>
-              </View>
-            ) : (
-              dashboard.recentTransactions.map((txn, idx) => (
-                <Animated.View
-                  key={txn.id}
-                  entering={FadeInDown.delay(idx * 30).springify()}
-                  layout={LinearTransition.springify()}
-                >
-                  <TransactionRow txn={txn} colors={colors} styles={styles} />
+              {/* Monthly Chart */}
+              {dashboard.monthlyHistory.length > 0 && (
+                <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
+                  <Text style={styles.sectionTitle}>{t('revenueDashboard.monthlyEarnings')}</Text>
+                  <View style={styles.chartContainer}>
+                    <View style={styles.chartBars}>
+                      {dashboard.monthlyHistory.slice(0, 6).map((month, idx) => {
+                        const height = Math.max((month.total / barMax) * 140, 8);
+                        return (
+                          <View key={idx} style={styles.chartCol}>
+                            <Text style={styles.chartValue}>{formatINR(month.total)}</Text>
+                            <View style={[styles.chartBar, { height, backgroundColor: colors.primary }]} />
+                            <Text style={styles.chartLabel}>{month.month.split(' ')[0]}</Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
                 </Animated.View>
-              ))
-            )}
-          </Animated.View>
-        )}
+              )}
+            </>
+          )}
 
-        {activeTab === 'payouts' && (
-          <Animated.View entering={FadeInDown.springify()}>
-            {dashboard.payoutHistory.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="cash-outline" size={48} color={colors.textMuted} />
-                <Text style={styles.emptyText}>{t('revenueDashboard.noPayouts')}</Text>
-              </View>
-            ) : (
-              dashboard.payoutHistory.map((payout, idx) => (
-                <Animated.View
-                  key={payout.id}
-                  entering={FadeInDown.delay(idx * 30).springify()}
-                  layout={LinearTransition.springify()}
-                >
-                  <PayoutRow payout={payout} colors={colors} styles={styles} />
-                </Animated.View>
-              ))
-            )}
-          </Animated.View>
-        )}
+          {activeTab === 'transactions' && (
+            <Animated.View entering={FadeInDown.springify()}>
+              {dashboard.recentTransactions.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Ionicons name="receipt-outline" size={48} color={colors.textMuted} />
+                  <Text style={styles.emptyText}>{t('revenueDashboard.noTransactions')}</Text>
+                </View>
+              ) : (
+                dashboard.recentTransactions.map((txn, idx) => (
+                  <Animated.View
+                    key={txn.id}
+                    entering={FadeInDown.delay(idx * 30).springify()}
+                    layout={LinearTransition.springify()}
+                  >
+                    <TransactionRow txn={txn} colors={colors} styles={styles} />
+                  </Animated.View>
+                ))
+              )}
+            </Animated.View>
+          )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
+          {activeTab === 'payouts' && (
+            <Animated.View entering={FadeInDown.springify()}>
+              {dashboard.payoutHistory.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Ionicons name="cash-outline" size={48} color={colors.textMuted} />
+                  <Text style={styles.emptyText}>{t('revenueDashboard.noPayouts')}</Text>
+                </View>
+              ) : (
+                dashboard.payoutHistory.map((payout, idx) => (
+                  <Animated.View
+                    key={payout.id}
+                    entering={FadeInDown.delay(idx * 30).springify()}
+                    layout={LinearTransition.springify()}
+                  >
+                    <PayoutRow payout={payout} colors={colors} styles={styles} />
+                  </Animated.View>
+                ))
+              )}
+            </Animated.View>
+          )}
 
-      {/* Payout Modal */}
-      <PayoutModal
-        visible={showPayoutModal}
-        onClose={() => setShowPayoutModal(false)}
-        maxAmount={dashboard.pendingBalance}
-        onRequestPayout={requestPayout}
-        colors={colors}
-        styles={styles}
-      />
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+
+        {/* Payout Modal */}
+        <PayoutModal
+          visible={showPayoutModal}
+          onClose={() => setShowPayoutModal(false)}
+          maxAmount={dashboard.pendingBalance}
+          onRequestPayout={requestPayout}
+          colors={colors}
+          styles={styles}
+        />
+      </AppScreen>
   );
 }
 
@@ -430,16 +432,13 @@ function PayoutModal({
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   title: {

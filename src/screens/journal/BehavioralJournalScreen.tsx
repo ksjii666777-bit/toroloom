@@ -18,6 +18,7 @@ import { AppHeader } from '../../components/ui/AppHeader';
 import { SegmentedTabs } from '../../components/ui/SegmentedTabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 type TabKey = 'Dashboard' | 'Entries' | 'Reports';
@@ -211,54 +212,55 @@ export default function BehavioralJournalScreen({ navigation: _navigation  }: Na
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header — compact, safe-area padded by the parent */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary, paddingTop: insets.top + 12 }]}>
-        <AppHeader title={t('journal.title')} subtitle={t('journal.subtitle')} />
-      </View>
-
-      {/* Segmented control — zero extra margins so content starts immediately */}
-      <View style={[styles.tabBar, { backgroundColor: colors.bgSecondary }]}>
-        <SegmentedTabs
-          tabs={tabs.map(tab => ({ key: tab, label: tabLabels[tab] }))}
-          active={activeTab}
-          onChange={setActiveTab}
-        />
-      </View>
-
-      {/* Content */}
-      <ScrollView
-        style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+          <AppScreen scroll={false} padded={false}
       >
-        {activeTab === 'Dashboard' && renderDashboard()}
-        {activeTab === 'Reports' && renderReports()}
-      </ScrollView>
-
-      {/* Entries tab is FlatList-based, so we render it separately */}
-      {activeTab === 'Entries' && (
-        <View style={styles.entriesContainer}>
-          {renderEntries()}
+  {/* Header — compact, safe-area padded by the parent */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary, }]}>
+          <AppHeader title={t('journal.title')} subtitle={t('journal.subtitle')} />
         </View>
-      )}
 
-      {/* FAB — safe-area aware: floats above the system navigation bar */}
-      <Pressable
-        style={[
-          styles.fab,
-          {
-            backgroundColor: colors.primary,
-            bottom: Math.max(insets.bottom, SPACING.md) + SPACING.lg,
-          },
-        ]}
-        onPress={() => setShowEntryModal(true)}
-        accessibilityRole="button"
-        accessibilityLabel="add"
-      >
-        <Ionicons name="add" size={24} color="#FFF" />
-      </Pressable>
-    </View>
+        {/* Segmented control — zero extra margins so content starts immediately */}
+        <View style={[styles.tabBar, { backgroundColor: colors.bgSecondary }]}>
+          <SegmentedTabs
+            tabs={tabs.map(tab => ({ key: tab, label: tabLabels[tab] }))}
+            active={activeTab}
+            onChange={setActiveTab}
+          />
+        </View>
+
+        {/* Content */}
+        <ScrollView
+          style={styles.scrollArea}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {activeTab === 'Dashboard' && renderDashboard()}
+          {activeTab === 'Reports' && renderReports()}
+        </ScrollView>
+
+        {/* Entries tab is FlatList-based, so we render it separately */}
+        {activeTab === 'Entries' && (
+          <View style={styles.entriesContainer}>
+            {renderEntries()}
+          </View>
+        )}
+
+        {/* FAB — safe-area aware: floats above the system navigation bar */}
+        <Pressable
+          style={[
+            styles.fab,
+            {
+              backgroundColor: colors.primary,
+              bottom: Math.max(insets.bottom, SPACING.md) + SPACING.lg,
+            },
+          ]}
+          onPress={() => setShowEntryModal(true)}
+          accessibilityRole="button"
+          accessibilityLabel="add"
+        >
+          <Ionicons name="add" size={24} color="#FFF" />
+        </Pressable>
+      </AppScreen>
   );
 }
 
@@ -273,7 +275,6 @@ function MetricCard({ label, value, color }: { label: string; value: string; col
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
   tabBar: {
     flexDirection: 'row',

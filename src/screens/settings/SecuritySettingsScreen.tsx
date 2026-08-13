@@ -34,6 +34,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 
@@ -120,321 +121,318 @@ export default function SecuritySettingsScreen({ navigation }: NativeStackScreen
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <View>
-            <Text style={styles.title}>{t('security.title')}</Text>
-            <Text style={styles.subtitle}>
-              {t('security.biometricSettings')}
-            </Text>
-          </View>
-        </View>
-
-        {/* Device Status Card */}
-        <Card
-          title={t('security.deviceStatus')}
-          subtitle={t('security.deviceStatusSub')}
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.statusRow}>
-            <View style={[styles.statusIcon, {
-              backgroundColor: biometricAvailable
-                ? `${colors.marketUp}20`
-                : `${colors.marketDown}15`,
-            }]}>
-              <Ionicons
-                name={biometricAvailable ? 'checkmark-circle' : 'alert-circle'}
-                size={24}
-                color={biometricAvailable ? colors.marketUp : colors.marketDown}
-              />
-            </View>
-            <View style={styles.statusInfo}>
-              <Text style={[styles.statusLabel, { color: colors.text }]}>
-                {isChecking
-                  ? t('status.loading')
-                  : biometricAvailable
-                    ? t('security.biometricAvailable', { biometric: biometricLabel })
-                    : t('security.biometricNotAvailable', { biometric: biometricLabel })}
-              </Text>
-              <Text style={[styles.statusDesc, { color: colors.textMuted }]}>
-                {biometricAvailable
-                  ? t('security.deviceSupports', { biometric: biometricLabel })
-                  : t('security.setupToEnable', { biometric: biometricLabel })}
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <View>
+              <Text style={styles.title}>{t('security.title')}</Text>
+              <Text style={styles.subtitle}>
+                {t('security.biometricSettings')}
               </Text>
             </View>
           </View>
 
-          <View style={styles.biometricTypeRow}>
-            <View style={[styles.biometricBadge, {
-              backgroundColor: `${colors.primary}15`,
-              borderColor: `${colors.primary}30`,
-            }]}>
-              <Ionicons
-                name={biometricIcon as keyof typeof Ionicons.glyphMap}
-                size={16}
-                color={colors.primary}
-              />
-              <Text style={[styles.biometricBadgeText, { color: colors.primary }]}>
-                {biometricLabel}
-              </Text>
-            </View>
-            {biometricAvailable && (
-              <TouchableOpacity
-                style={[styles.testBtn, { borderColor: colors.border }]}
-                onPress={handleTestBiometric}
-              >
-                <Ionicons name="play" size={14} color={colors.primary} />
-                <Text style={[styles.testBtnText, { color: colors.primary }]}>
-                  {t('security.test')}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </Card>
-
-        {/* App Unlock Setting */}
-        <Card
-          title={t('security.appUnlock')}
-          subtitle={t('security.appUnlockSub', { biometric: biometricLabel })}
-          style={{ marginTop: SPACING.md }}
-        >
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Ionicons
-                name={enabled ? 'lock-closed' : 'lock-open'}
-                size={22}
-                color={enabled ? colors.primary : colors.textMuted}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>
-                  {enabled
-                    ? t('security.lockOn', { biometric: biometricLabel })
-                    : t('security.lockOff', { biometric: biometricLabel })}
-                </Text>
-                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  {enabled
-                    ? t('security.requireWhenBg', { biometric: biometricLabel })
-                    : t('security.noAuth')}
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={enabled}
-              onValueChange={handleBiometricToggle}
-              trackColor={{ false: colors.border, true: `${colors.primary}60` }}
-              thumbColor={enabled ? colors.primary : colors.textMuted}
-              disabled={!biometricAvailable || isChecking}
-            />
-          </View>
-        </Card>
-
-        {/* Trade Confirmation Setting */}
-        <Card
-          title={t('security.tradeConfirmation')}
-          subtitle={t('security.requireBioBefore', { biometric: biometricLabel })}
-          style={{ marginTop: SPACING.md }}
-        >
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Ionicons
-                name={requireForTrades ? 'shield-checkmark' : 'shield-outline'}
-                size={22}
-                color={requireForTrades ? colors.primary : colors.textMuted}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>
-                  {requireForTrades
-                    ? t('security.confirmTradesBio')
-                    : t('security.noBioConfirmation')}
-                </Text>
-                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  {requireForTrades
-                    ? t('security.requireBioExecuting', { biometric: biometricLabel })
-                    : t('security.ordersWithoutBio')}
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={requireForTrades}
-              onValueChange={handleTradeToggle}
-              trackColor={{ false: colors.border, true: `${colors.primary}60` }}
-              thumbColor={requireForTrades ? colors.primary : colors.textMuted}
-              disabled={!enabled || !biometricAvailable}
-            />
-          </View>
-
-          {enabled && !requireForTrades && (
-            <View style={[styles.warningBox, {
-              backgroundColor: `${colors.marketDown}10`,
-              borderColor: `${colors.marketDown}20`,
-            }]}>
-              <Ionicons name="warning" size={16} color={colors.marketDown} />
-              <Text style={[styles.warningText, { color: colors.marketDown }]}>
-                {t('security.tradeConfirmWarning')}
-              </Text>
-            </View>
-          )}
-        </Card>
-
-        {/* Info Card */}
-        <Card
-          title={t('security.howItWorks')}
-          subtitle={t('security.howItWorksSub')}
-          style={{ marginTop: SPACING.md }}
-        >
-          <View style={styles.infoRow}>
-            <Ionicons name="phone-portrait" size={20} color={colors.textMuted} />
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              {t('security.usesBuiltIn', { biometric: biometricLabel.toLowerCase() })}
-            </Text>
-          </View>
-          <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
-          <View style={styles.infoRow}>
-            <Ionicons name="shield-checkmark" size={20} color={colors.textMuted} />
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              {t('security.whenEnabled')}
-            </Text>
-          </View>
-          <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
-          <View style={styles.infoRow}>
-            <Ionicons name="trending-up" size={20} color={colors.textMuted} />
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              {t('security.tradeAddSecurity')}
-            </Text>
-          </View>
-        </Card>
-
-        {/* Audit Log Section */}
-        <Card
-          title={t('security.auditLog')}
-          subtitle={t('security.auditLogSub')}
-          style={{ marginTop: SPACING.md }}
-        >
-          <AnimatedPressable
-            onPress={() => navigation.navigate('SecurityAuditLog')}
-            haptic="medium"
-            scaleTo={0.97}
+          {/* Device Status Card */}
+          <Card
+            title={t('security.deviceStatus')}
+            subtitle={t('security.deviceStatusSub')}
           >
-            <View style={styles.settingRow}>
-              <View style={styles.settingInfo}>
-                <View style={[styles.manageIconBox, { backgroundColor: colors.warning + '20' }]}>
-                  <Ionicons name="receipt" size={22} color={colors.warning} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.settingLabel, { color: colors.text }]}>
-                    {t('security.securityAuditLog')}
-                  </Text>
-                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                    {t('security.reviewLoginHistory')}
-                  </Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-            </View>
-          </AnimatedPressable>
-        </Card>
-
-        {/* Two-Factor Authentication Section */}
-        <Card
-          title={t('security.twoFactor')}
-          subtitle={t('security.twoFactorSub')}
-          style={{ marginTop: SPACING.md }}
-        >
-          <AnimatedPressable
-            onPress={() => navigation.navigate('TwoFactorSetup')}
-            haptic="medium"
-            scaleTo={0.97}
-          >
-            <View style={styles.settingRow}>
-              <View style={styles.settingInfo}>
-                <View style={[styles.manageIconBox, { backgroundColor: colors.primary + '20' }]}>
-                  <Ionicons name="shield-checkmark" size={22} color={colors.primary} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.settingLabel, { color: colors.text }]}>
-                    {t('security.twoFactor')}
-                  </Text>
-                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                    {t('security.totpBased')}
-                  </Text>
-                </View>
-              </View>
-              <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-            </View>
-          </AnimatedPressable>
-        </Card>
-
-          {/* Developer Section */}          <Card
-          title={t('security.developer')}
-          subtitle={t('security.developerSub')}
-          style={{ marginTop: SPACING.md }}
-        >
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <View style={[styles.manageIconBox, {
-                backgroundColor: isAdmin ? `${colors.warning}20` : `${colors.textMuted}15`
+            <View style={styles.statusRow}>
+              <View style={[styles.statusIcon, {
+                backgroundColor: biometricAvailable
+                  ? `${colors.marketUp}20`
+                  : `${colors.marketDown}15`,
               }]}>
                 <Ionicons
-                  name="shield-checkmark"
-                  size={22}
-                  color={isAdmin ? colors.warning : colors.textMuted}
+                  name={biometricAvailable ? 'checkmark-circle' : 'alert-circle'}
+                  size={24}
+                  color={biometricAvailable ? colors.marketUp : colors.marketDown}
                 />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>
-                  {t('security.adminMode')}
+              <View style={styles.statusInfo}>
+                <Text style={[styles.statusLabel, { color: colors.text }]}>
+                  {isChecking
+                    ? t('status.loading')
+                    : biometricAvailable
+                      ? t('security.biometricAvailable', { biometric: biometricLabel })
+                      : t('security.biometricNotAvailable', { biometric: biometricLabel })}
                 </Text>
-                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  {isAdmin
-                    ? t('security.adminModeEnabled')
-                    : t('security.adminModeDisabled')}
+                <Text style={[styles.statusDesc, { color: colors.textMuted }]}>
+                  {biometricAvailable
+                    ? t('security.deviceSupports', { biometric: biometricLabel })
+                    : t('security.setupToEnable', { biometric: biometricLabel })}
                 </Text>
               </View>
             </View>
-            <Switch
-              value={isAdmin}
-              onValueChange={(val) => {
-                triggerHaptic();
-                setIsAdmin(val);
-              }}
-              trackColor={{ false: colors.border, true: `${colors.warning}60` }}
-              thumbColor={isAdmin ? colors.warning : colors.textMuted}
-            />
-          </View>
 
-          {isAdmin && (
-            <View style={[styles.warningBox, {
-              backgroundColor: `${colors.warning}10`,
-              borderColor: `${colors.warning}20`,
-            }]}>
-              <Ionicons name="warning" size={16} color={colors.warning} />
-              <Text style={[styles.warningText, { color: colors.warning }]}>
-                {t('security.adminModeWarning')}
+            <View style={styles.biometricTypeRow}>
+              <View style={[styles.biometricBadge, {
+                backgroundColor: `${colors.primary}15`,
+                borderColor: `${colors.primary}30`,
+              }]}>
+                <Ionicons
+                  name={biometricIcon as keyof typeof Ionicons.glyphMap}
+                  size={16}
+                  color={colors.primary}
+                />
+                <Text style={[styles.biometricBadgeText, { color: colors.primary }]}>
+                  {biometricLabel}
+                </Text>
+              </View>
+              {biometricAvailable && (
+                <TouchableOpacity
+                  style={[styles.testBtn, { borderColor: colors.border }]}
+                  onPress={handleTestBiometric}
+                >
+                  <Ionicons name="play" size={14} color={colors.primary} />
+                  <Text style={[styles.testBtnText, { color: colors.primary }]}>
+                    {t('security.test')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Card>
+
+          {/* App Unlock Setting */}
+          <Card
+            title={t('security.appUnlock')}
+            subtitle={t('security.appUnlockSub', { biometric: biometricLabel })}
+            style={{ marginTop: SPACING.md }}
+          >
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Ionicons
+                  name={enabled ? 'lock-closed' : 'lock-open'}
+                  size={22}
+                  color={enabled ? colors.primary : colors.textMuted}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>
+                    {enabled
+                      ? t('security.lockOn', { biometric: biometricLabel })
+                      : t('security.lockOff', { biometric: biometricLabel })}
+                  </Text>
+                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                    {enabled
+                      ? t('security.requireWhenBg', { biometric: biometricLabel })
+                      : t('security.noAuth')}
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={enabled}
+                onValueChange={handleBiometricToggle}
+                trackColor={{ false: colors.border, true: `${colors.primary}60` }}
+                thumbColor={enabled ? colors.primary : colors.textMuted}
+                disabled={!biometricAvailable || isChecking}
+              />
+            </View>
+          </Card>
+
+          {/* Trade Confirmation Setting */}
+          <Card
+            title={t('security.tradeConfirmation')}
+            subtitle={t('security.requireBioBefore', { biometric: biometricLabel })}
+            style={{ marginTop: SPACING.md }}
+          >
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Ionicons
+                  name={requireForTrades ? 'shield-checkmark' : 'shield-outline'}
+                  size={22}
+                  color={requireForTrades ? colors.primary : colors.textMuted}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>
+                    {requireForTrades
+                      ? t('security.confirmTradesBio')
+                      : t('security.noBioConfirmation')}
+                  </Text>
+                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                    {requireForTrades
+                      ? t('security.requireBioExecuting', { biometric: biometricLabel })
+                      : t('security.ordersWithoutBio')}
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={requireForTrades}
+                onValueChange={handleTradeToggle}
+                trackColor={{ false: colors.border, true: `${colors.primary}60` }}
+                thumbColor={requireForTrades ? colors.primary : colors.textMuted}
+                disabled={!enabled || !biometricAvailable}
+              />
+            </View>
+
+            {enabled && !requireForTrades && (
+              <View style={[styles.warningBox, {
+                backgroundColor: `${colors.marketDown}10`,
+                borderColor: `${colors.marketDown}20`,
+              }]}>
+                <Ionicons name="warning" size={16} color={colors.marketDown} />
+                <Text style={[styles.warningText, { color: colors.marketDown }]}>
+                  {t('security.tradeConfirmWarning')}
+                </Text>
+              </View>
+            )}
+          </Card>
+
+          {/* Info Card */}
+          <Card
+            title={t('security.howItWorks')}
+            subtitle={t('security.howItWorksSub')}
+            style={{ marginTop: SPACING.md }}
+          >
+            <View style={styles.infoRow}>
+              <Ionicons name="phone-portrait" size={20} color={colors.textMuted} />
+              <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+                {t('security.usesBuiltIn', { biometric: biometricLabel.toLowerCase() })}
               </Text>
             </View>
-          )}
-        </Card>
+            <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
+            <View style={styles.infoRow}>
+              <Ionicons name="shield-checkmark" size={20} color={colors.textMuted} />
+              <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+                {t('security.whenEnabled')}
+              </Text>
+            </View>
+            <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
+            <View style={styles.infoRow}>
+              <Ionicons name="trending-up" size={20} color={colors.textMuted} />
+              <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+                {t('security.tradeAddSecurity')}
+              </Text>
+            </View>
+          </Card>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          {/* Audit Log Section */}
+          <Card
+            title={t('security.auditLog')}
+            subtitle={t('security.auditLogSub')}
+            style={{ marginTop: SPACING.md }}
+          >
+            <AnimatedPressable
+              onPress={() => navigation.navigate('SecurityAuditLog')}
+              haptic="medium"
+              scaleTo={0.97}
+            >
+              <View style={styles.settingRow}>
+                <View style={styles.settingInfo}>
+                  <View style={[styles.manageIconBox, { backgroundColor: colors.warning + '20' }]}>
+                    <Ionicons name="receipt" size={22} color={colors.warning} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.settingLabel, { color: colors.text }]}>
+                      {t('security.securityAuditLog')}
+                    </Text>
+                    <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                      {t('security.reviewLoginHistory')}
+                    </Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </View>
+            </AnimatedPressable>
+          </Card>
+
+          {/* Two-Factor Authentication Section */}
+          <Card
+            title={t('security.twoFactor')}
+            subtitle={t('security.twoFactorSub')}
+            style={{ marginTop: SPACING.md }}
+          >
+            <AnimatedPressable
+              onPress={() => navigation.navigate('TwoFactorSetup')}
+              haptic="medium"
+              scaleTo={0.97}
+            >
+              <View style={styles.settingRow}>
+                <View style={styles.settingInfo}>
+                  <View style={[styles.manageIconBox, { backgroundColor: colors.primary + '20' }]}>
+                    <Ionicons name="shield-checkmark" size={22} color={colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.settingLabel, { color: colors.text }]}>
+                      {t('security.twoFactor')}
+                    </Text>
+                    <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                      {t('security.totpBased')}
+                    </Text>
+                  </View>
+                </View>
+                <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </View>
+            </AnimatedPressable>
+          </Card>
+
+            {/* Developer Section */}          <Card
+            title={t('security.developer')}
+            subtitle={t('security.developerSub')}
+            style={{ marginTop: SPACING.md }}
+          >
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.manageIconBox, {
+                  backgroundColor: isAdmin ? `${colors.warning}20` : `${colors.textMuted}15`
+                }]}>
+                  <Ionicons
+                    name="shield-checkmark"
+                    size={22}
+                    color={isAdmin ? colors.warning : colors.textMuted}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>
+                    {t('security.adminMode')}
+                  </Text>
+                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                    {isAdmin
+                      ? t('security.adminModeEnabled')
+                      : t('security.adminModeDisabled')}
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={isAdmin}
+                onValueChange={(val) => {
+                  triggerHaptic();
+                  setIsAdmin(val);
+                }}
+                trackColor={{ false: colors.border, true: `${colors.warning}60` }}
+                thumbColor={isAdmin ? colors.warning : colors.textMuted}
+              />
+            </View>
+
+            {isAdmin && (
+              <View style={[styles.warningBox, {
+                backgroundColor: `${colors.warning}10`,
+                borderColor: `${colors.warning}20`,
+              }]}>
+                <Ionicons name="warning" size={16} color={colors.warning} />
+                <Text style={[styles.warningText, { color: colors.warning }]}>
+                  {t('security.adminModeWarning')}
+                </Text>
+              </View>
+            )}
+          </Card>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     scrollContent: {
       paddingHorizontal: SPACING.xl,
       paddingBottom: 20,

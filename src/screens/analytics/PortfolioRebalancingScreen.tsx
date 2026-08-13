@@ -11,6 +11,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {RebalanceTrade, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 /** Format currency in INR */
 const formatINR = (val: number) =>
@@ -46,197 +47,198 @@ export default function PortfolioRebalancingScreen({ navigation: _navigation  }:
     : currentAllocation.slice(0, 5);
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('portfolioRebalancing.title')}</Text>
-          <Text style={styles.subtitle}>
-            {t('portfolioRebalancing.subtitle', { value: formatINR(portfolioValue) })}
-          </Text>
-        </View>
-
-        {/* ── Allocation Profile Selector ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('portfolioRebalancing.targetProfile')}</Text>
-          <View style={styles.profileRow}>
-            {profiles.map(p => {
-              const isActive = p.id === selectedProfileId;
-              const riskColor = p.riskLevel === 'conservative' ? '#00C853' :
-                p.riskLevel === 'moderate' ? '#FFC107' : '#FF5252';
-              return (
-                <AnimatedPressable
-                  key={p.id}
-                  onPress={() => selectProfile(p.id)}
-                  haptic="selection"
-                  scaleTo={0.94}
-                >
-                  <View style={[
-                    styles.profileCard,
-                    isActive && { borderColor: riskColor, backgroundColor: riskColor + '10' },
-                  ]}>
-                    <Text style={[styles.profileName, isActive && { color: riskColor }]}>{p.name}</Text>
-                    <Text style={[styles.profileRisk, { color: riskColor }]}>
-                      {p.riskLevel.charAt(0).toUpperCase() + p.riskLevel.slice(1)}
-                    </Text>
-                    <Text style={styles.profileDesc} numberOfLines={2}>{p.description}</Text>
-                  </View>
-                </AnimatedPressable>
-              );
-            })}
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('portfolioRebalancing.title')}</Text>
+            <Text style={styles.subtitle}>
+              {t('portfolioRebalancing.subtitle', { value: formatINR(portfolioValue) })}
+            </Text>
           </View>
-        </View>
 
-        {/* ── Analysis Summary Cards ── */}
-        {isAnalyzing ? (
-          <View style={styles.loadingState}>
-            <Ionicons name="sync" size={32} color={colors.primary} />
-            <Text style={styles.loadingText}>{t('portfolioRebalancing.analyzing')}</Text>
-          </View>
-        ) : analysis && (
-          <>
-            <Animated.View entering={FadeInDown.springify()} style={styles.summaryRow}>
-              <View style={[styles.summaryCard, { borderLeftColor: '#6C63FF' }]}>
-                <Text style={styles.summaryLabel}>{t('portfolioRebalancing.deviations')}</Text>
-                <Text style={[styles.summaryValue, { color: '#6C63FF' }]}>{analysis.deviationCount}</Text>
-              </View>
-              <View style={[styles.summaryCard, { borderLeftColor: '#FFC107' }]}>
-                <Text style={styles.summaryLabel}>{t('portfolioRebalancing.avgDeviation')}</Text>
-                <Text style={[styles.summaryValue, { color: '#FFC107' }]}>{analysis.avgDeviation}%</Text>
-              </View>
-              <View style={[styles.summaryCard, { borderLeftColor: '#FF5252' }]}>
-                <Text style={styles.summaryLabel}>{t('portfolioRebalancing.tradeAmount')}</Text>
-                <Text style={[styles.summaryValue, { color: '#FF5252', fontSize: 14 }]}>
-                  {formatINR(analysis.totalTradeAmount)}
-                </Text>
-              </View>
-            </Animated.View>
-
-            {/* ── Current vs Target Allocation ── */}
-            <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-              <View style={styles.sectionHeaderRow}>
-                <Text style={styles.sectionTitle}>{t('portfolioRebalancing.currentVsTarget')}</Text>
-                <AnimatedPressable
-                  onPress={() => setShowAllSectors(!showAllSectors)}
-                  haptic="selection"
-                  scaleTo={0.94}
-                >
-                  <Text style={styles.seeAllText}>
-                    {showAllSectors ? t('portfolioRebalancing.showLess') : t('portfolioRebalancing.showAll', { count: currentAllocation.length })}
-                  </Text>
-                </AnimatedPressable>
-              </View>
-
-              {displaySectors.map((sector, idx) => {
-                const target = selectedProfile.targets.find(t => t.label === sector.label);
-                if (!target) return null;
-                const diff = target.percent - sector.currentPercent;
-                const diffAbs = Math.abs(diff);
-                const isOverweight = diff < 0;
-
+          {/* ── Allocation Profile Selector ── */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('portfolioRebalancing.targetProfile')}</Text>
+            <View style={styles.profileRow}>
+              {profiles.map(p => {
+                const isActive = p.id === selectedProfileId;
+                const riskColor = p.riskLevel === 'conservative' ? '#00C853' :
+                  p.riskLevel === 'moderate' ? '#FFC107' : '#FF5252';
                 return (
-                  <Animated.View
-                    key={sector.label}
-                    entering={FadeInDown.delay(idx * 40).springify()}
-                    layout={LinearTransition.springify()}
+                  <AnimatedPressable
+                    key={p.id}
+                    onPress={() => selectProfile(p.id)}
+                    haptic="selection"
+                    scaleTo={0.94}
                   >
-                    <View style={styles.allocationRow}>
-                      <View style={styles.allocationLeft}>
-                        <Text style={styles.allocationIcon}>{sector.icon}</Text>
-                        <Text style={styles.allocationLabel}>{sector.label}</Text>
-                      </View>
-                      <View style={styles.allocationBars}>
-                        {/* Current bar */}
-                        <View style={styles.allocationBarRow}>
-                          <View style={[styles.allocationBar, { width: `${sector.currentPercent}%`, backgroundColor: sector.color }]} />
-                        </View>
-                        {/* Target bar */}
-                        <View style={styles.allocationBarRow}>
-                          <View style={[styles.allocationBar, { width: `${target.percent}%`, backgroundColor: sector.color + '50' }]} />
-                        </View>
-                      </View>
-                      <View style={styles.allocationRight}>
-                        <Text style={styles.allocationPct}>{sector.currentPercent}%</Text>
-                        <Text style={styles.allocationTarget}>{target.percent}%</Text>
-                        {diffAbs >= 1 && (
-                          <View style={[
-                            styles.diffBadge,
-                            { backgroundColor: isOverweight ? '#FF525220' : '#00C85320' },
-                          ]}>
-                            <Ionicons
-                              name={isOverweight ? 'arrow-down' : 'arrow-up'}
-                              size={10}
-                              color={isOverweight ? '#FF5252' : '#00C853'}
-                            />
-                            <Text style={[
-                              styles.diffText,
-                              { color: isOverweight ? '#FF5252' : '#00C853' },
-                            ]}>{diffAbs.toFixed(1)}%</Text>
-                          </View>
-                        )}
-                      </View>
+                    <View style={[
+                      styles.profileCard,
+                      isActive && { borderColor: riskColor, backgroundColor: riskColor + '10' },
+                    ]}>
+                      <Text style={[styles.profileName, isActive && { color: riskColor }]}>{p.name}</Text>
+                      <Text style={[styles.profileRisk, { color: riskColor }]}>
+                        {p.riskLevel.charAt(0).toUpperCase() + p.riskLevel.slice(1)}
+                      </Text>
+                      <Text style={styles.profileDesc} numberOfLines={2}>{p.description}</Text>
                     </View>
-                  </Animated.View>
+                  </AnimatedPressable>
                 );
               })}
-            </Animated.View>
-
-            {/* ── Suggested Trades ── */}
-            <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
-              <Text style={styles.sectionTitle}>
-                {t('portfolioRebalancing.suggestedTrades', { count: sortedTrades.length })}
-              </Text>
-
-              {sortedTrades.length === 0 ? (
-                <View style={styles.perfectAllocation}>
-                  <Ionicons name="checkmark-circle" size={48} color="#00C853" />
-                  <Text style={styles.perfectText}>{t('portfolioRebalancing.perfectAllocation')}</Text>
-                  <Text style={styles.perfectSubtext}>{t('portfolioRebalancing.noChangesNeeded')}</Text>
-                </View>
-              ) : (
-                sortedTrades.map((trade, idx) => (
-                  <Animated.View
-                    key={trade.id}
-                    entering={FadeInDown.delay(idx * 40 + 100).springify()}
-                    layout={LinearTransition.springify()}
-                  >
-                    <TradeCard trade={trade} colors={colors} styles={styles} />
-                  </Animated.View>
-                ))
-              )}
-            </Animated.View>
-
-            {/* ── Tax Impact Summary ── */}
-            {analysis.estimatedTaxImpact > 0 && (
-              <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.taxCard}>
-                <View style={styles.taxLeft}>
-                  <Ionicons name="calculator-outline" size={20} color="#FFC107" />
-                  <View>
-                    <Text style={styles.taxTitle}>{t('portfolioRebalancing.estimatedTaxImpact')}</Text>
-                    <Text style={styles.taxDesc}>
-                      {t('portfolioRebalancing.taxImpactDesc')}
-                    </Text>
-                  </View>
-                </View>
-                <Text style={styles.taxAmount}>{formatINR(analysis.estimatedTaxImpact)}</Text>
-              </Animated.View>
-            )}
-
-            {/* ── Action Buttons ── */}
-            <View style={styles.actionRow}>
-              <AnimatedPressable onPress={resetToDefaults} haptic="medium" scaleTo={0.97}>
-                <View style={styles.resetBtn}>
-                  <Ionicons name="refresh" size={18} color={colors.textMuted} />
-                  <Text style={styles.resetBtnText}>{t('portfolioRebalancing.reset')}</Text>
-                </View>
-              </AnimatedPressable>
             </View>
-          </>
-        )}
+          </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          {/* ── Analysis Summary Cards ── */}
+          {isAnalyzing ? (
+            <View style={styles.loadingState}>
+              <Ionicons name="sync" size={32} color={colors.primary} />
+              <Text style={styles.loadingText}>{t('portfolioRebalancing.analyzing')}</Text>
+            </View>
+          ) : analysis && (
+            <>
+              <Animated.View entering={FadeInDown.springify()} style={styles.summaryRow}>
+                <View style={[styles.summaryCard, { borderLeftColor: '#6C63FF' }]}>
+                  <Text style={styles.summaryLabel}>{t('portfolioRebalancing.deviations')}</Text>
+                  <Text style={[styles.summaryValue, { color: '#6C63FF' }]}>{analysis.deviationCount}</Text>
+                </View>
+                <View style={[styles.summaryCard, { borderLeftColor: '#FFC107' }]}>
+                  <Text style={styles.summaryLabel}>{t('portfolioRebalancing.avgDeviation')}</Text>
+                  <Text style={[styles.summaryValue, { color: '#FFC107' }]}>{analysis.avgDeviation}%</Text>
+                </View>
+                <View style={[styles.summaryCard, { borderLeftColor: '#FF5252' }]}>
+                  <Text style={styles.summaryLabel}>{t('portfolioRebalancing.tradeAmount')}</Text>
+                  <Text style={[styles.summaryValue, { color: '#FF5252', fontSize: 14 }]}>
+                    {formatINR(analysis.totalTradeAmount)}
+                  </Text>
+                </View>
+              </Animated.View>
+
+              {/* ── Current vs Target Allocation ── */}
+              <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
+                <View style={styles.sectionHeaderRow}>
+                  <Text style={styles.sectionTitle}>{t('portfolioRebalancing.currentVsTarget')}</Text>
+                  <AnimatedPressable
+                    onPress={() => setShowAllSectors(!showAllSectors)}
+                    haptic="selection"
+                    scaleTo={0.94}
+                  >
+                    <Text style={styles.seeAllText}>
+                      {showAllSectors ? t('portfolioRebalancing.showLess') : t('portfolioRebalancing.showAll', { count: currentAllocation.length })}
+                    </Text>
+                  </AnimatedPressable>
+                </View>
+
+                {displaySectors.map((sector, idx) => {
+                  const target = selectedProfile.targets.find(t => t.label === sector.label);
+                  if (!target) return null;
+                  const diff = target.percent - sector.currentPercent;
+                  const diffAbs = Math.abs(diff);
+                  const isOverweight = diff < 0;
+
+                  return (
+                    <Animated.View
+                      key={sector.label}
+                      entering={FadeInDown.delay(idx * 40).springify()}
+                      layout={LinearTransition.springify()}
+                    >
+                      <View style={styles.allocationRow}>
+                        <View style={styles.allocationLeft}>
+                          <Text style={styles.allocationIcon}>{sector.icon}</Text>
+                          <Text style={styles.allocationLabel}>{sector.label}</Text>
+                        </View>
+                        <View style={styles.allocationBars}>
+                          {/* Current bar */}
+                          <View style={styles.allocationBarRow}>
+                            <View style={[styles.allocationBar, { width: `${sector.currentPercent}%`, backgroundColor: sector.color }]} />
+                          </View>
+                          {/* Target bar */}
+                          <View style={styles.allocationBarRow}>
+                            <View style={[styles.allocationBar, { width: `${target.percent}%`, backgroundColor: sector.color + '50' }]} />
+                          </View>
+                        </View>
+                        <View style={styles.allocationRight}>
+                          <Text style={styles.allocationPct}>{sector.currentPercent}%</Text>
+                          <Text style={styles.allocationTarget}>{target.percent}%</Text>
+                          {diffAbs >= 1 && (
+                            <View style={[
+                              styles.diffBadge,
+                              { backgroundColor: isOverweight ? '#FF525220' : '#00C85320' },
+                            ]}>
+                              <Ionicons
+                                name={isOverweight ? 'arrow-down' : 'arrow-up'}
+                                size={10}
+                                color={isOverweight ? '#FF5252' : '#00C853'}
+                              />
+                              <Text style={[
+                                styles.diffText,
+                                { color: isOverweight ? '#FF5252' : '#00C853' },
+                              ]}>{diffAbs.toFixed(1)}%</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    </Animated.View>
+                  );
+                })}
+              </Animated.View>
+
+              {/* ── Suggested Trades ── */}
+              <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
+                <Text style={styles.sectionTitle}>
+                  {t('portfolioRebalancing.suggestedTrades', { count: sortedTrades.length })}
+                </Text>
+
+                {sortedTrades.length === 0 ? (
+                  <View style={styles.perfectAllocation}>
+                    <Ionicons name="checkmark-circle" size={48} color="#00C853" />
+                    <Text style={styles.perfectText}>{t('portfolioRebalancing.perfectAllocation')}</Text>
+                    <Text style={styles.perfectSubtext}>{t('portfolioRebalancing.noChangesNeeded')}</Text>
+                  </View>
+                ) : (
+                  sortedTrades.map((trade, idx) => (
+                    <Animated.View
+                      key={trade.id}
+                      entering={FadeInDown.delay(idx * 40 + 100).springify()}
+                      layout={LinearTransition.springify()}
+                    >
+                      <TradeCard trade={trade} colors={colors} styles={styles} />
+                    </Animated.View>
+                  ))
+                )}
+              </Animated.View>
+
+              {/* ── Tax Impact Summary ── */}
+              {analysis.estimatedTaxImpact > 0 && (
+                <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.taxCard}>
+                  <View style={styles.taxLeft}>
+                    <Ionicons name="calculator-outline" size={20} color="#FFC107" />
+                    <View>
+                      <Text style={styles.taxTitle}>{t('portfolioRebalancing.estimatedTaxImpact')}</Text>
+                      <Text style={styles.taxDesc}>
+                        {t('portfolioRebalancing.taxImpactDesc')}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.taxAmount}>{formatINR(analysis.estimatedTaxImpact)}</Text>
+                </Animated.View>
+              )}
+
+              {/* ── Action Buttons ── */}
+              <View style={styles.actionRow}>
+                <AnimatedPressable onPress={resetToDefaults} haptic="medium" scaleTo={0.97}>
+                  <View style={styles.resetBtn}>
+                    <Ionicons name="refresh" size={18} color={colors.textMuted} />
+                    <Text style={styles.resetBtnText}>{t('portfolioRebalancing.reset')}</Text>
+                  </View>
+                </AnimatedPressable>
+              </View>
+            </>
+          )}
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -307,16 +309,13 @@ function TradeCard({ trade, colors, styles }: { trade: RebalanceTrade; colors: a
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   title: {

@@ -26,6 +26,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatDate } from '../../utils/formatters';
 import type {CourseCertificate, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const gradeConfig: Record<CourseCertificate['grade'], { label: string; color: string; bg: string }> = {
   A: { label: 'Distinction', color: '#FFD700', bg: '#FFD70015' },
@@ -111,208 +112,209 @@ export default function CertificateScreen({ navigation: _navigation, route  }: N
     : null;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => {
-          if (selectedCert) {
-            setSelectedCert(null);
-          } else {
-            nav.goBack();
-          }
-        }} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name={selectedCert ? 'close' : 'arrow-back'} size={20} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {selectedCert ? t('education.certificate') : t('education.certificatesTitle')}
-        </Text>
-        {certificates.length > 0 && !selectedCert && (
-          <Text style={[styles.headerCount, { color: colors.textMuted }]}>
-            {certificates.length}
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
+          <TouchableOpacity onPress={() => {
+            if (selectedCert) {
+              setSelectedCert(null);
+            } else {
+              nav.goBack();
+            }
+          }} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name={selectedCert ? 'close' : 'arrow-back'} size={20} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            {selectedCert ? t('education.certificate') : t('education.certificatesTitle')}
           </Text>
-        )}
-        {!selectedCert && <View style={{ width: 40 }} />}
-      </View>
+          {certificates.length > 0 && !selectedCert && (
+            <Text style={[styles.headerCount, { color: colors.textMuted }]}>
+              {certificates.length}
+            </Text>
+          )}
+          {!selectedCert && <View style={{ width: 40 }} />}
+        </View>
 
-      {selectedCertData ? (
-        /* ── Certificate Detail / Preview ── */
-        <CertificatePreview
-          cert={selectedCertData}
-          colors={colors}
-          onShare={() => handleSharePDF(selectedCertData)}
-          onBack={() => setSelectedCert(null)}
-          sharing={sharingId === selectedCertData.id}
-        />
-      ) : (
-        /* ── Certificate List ── */
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
-          showsVerticalScrollIndicator={false}
-        >
-          {certificates.length === 0 ? (
-            <View style={styles.emptyState}>
-              <View style={[styles.emptyIconRing, { borderColor: colors.border }]}>
-                <Ionicons name="ribbon-outline" size={48} color={colors.textMuted} />
-              </View>
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('education.noCertificatesYet')}</Text>
-              <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>{t('education.noCertificatesDesc')}</Text>
-
-              {/* Eligible courses — computed in component body */}
-              {eligible.length > 0 && (
-                <View style={{ width: '100%', marginTop: SPACING.xl }}>
-                  <Text style={[styles.eligibleTitle, { color: colors.text }]}>
-                    {t('education.coursesReadyForCert')}
-                  </Text>
-                  {eligible.map(course => (
-                    <TouchableOpacity
-                      key={course.id}
-                      style={[styles.eligibleCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                      onPress={() => handleGenerate(course.id)}
-                    >
-                      <View style={styles.eligibleCardLeft}>
-                        <Text style={styles.eligibleIcon}>{course.thumbnail}</Text>
-                        <View style={{ flex: 1 }}>
-                          <Text style={[styles.eligibleName, { color: colors.text }]}>{course.title}</Text>
-                          <Text style={[styles.eligibleLabel, { color: colors.textMuted }]}>
-                            {course.lessons} {t('education.lessonsLabel')} · {course.duration}
-                          </Text>
-                        </View>
-                      </View>
-                      <Ionicons name="ribbon-outline" size={22} color={colors.primary} />
-                    </TouchableOpacity>
-                  ))}
+        {selectedCertData ? (
+          /* ── Certificate Detail / Preview ── */
+          <CertificatePreview
+            cert={selectedCertData}
+            colors={colors}
+            onShare={() => handleSharePDF(selectedCertData)}
+            onBack={() => setSelectedCert(null)}
+            sharing={sharingId === selectedCertData.id}
+          />
+        ) : (
+          /* ── Certificate List ── */
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+            showsVerticalScrollIndicator={false}
+          >
+            {certificates.length === 0 ? (
+              <View style={styles.emptyState}>
+                <View style={[styles.emptyIconRing, { borderColor: colors.border }]}>
+                  <Ionicons name="ribbon-outline" size={48} color={colors.textMuted} />
                 </View>
-              )}
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('education.noCertificatesYet')}</Text>
+                <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>{t('education.noCertificatesDesc')}</Text>
 
-              {/* Link to courses */}
-              <TouchableOpacity
-                style={[styles.browseBtn, { backgroundColor: colors.primary }]}
-                onPress={() => nav.navigate('Learn' as never)}
-              >
-                <Ionicons name="school-outline" size={18} color="#FFF" />
-                <Text style={styles.browseBtnText}>{t('education.browseCourses')}</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            /* Certificate Cards */
-            <View style={styles.certList}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                {t('education.yourCertificates')}
-              </Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
-                {certificates.length} {t('education.course')}{certificates.length !== 1 ? 's' : ''} {t('education.completed')}
-              </Text>
-
-              {certificates.map((cert, _index) => {
-                const grade = gradeConfig[cert.grade];
-                return (
-                  <TouchableOpacity
-                    key={cert.id}
-                    style={[styles.certCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                    onPress={() => setSelectedCert(cert.id)}
-                    activeOpacity={0.7}
-                  >
-                    {/* Decorative top accent */}
-                    <LinearGradient
-                      colors={[grade.color + '60', grade.color + '10']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.certAccent}
-                    />
-
-                    <View style={styles.certCardContent}>
-                      {/* Icon & Grade */}
-                      <View style={[styles.certIconBox, { backgroundColor: grade.bg }]}>
-                        <Ionicons name="ribbon" size={28} color={grade.color} />
-                      </View>
-
-                      {/* Info */}
-                      <View style={styles.certInfo}>
-                        <Text style={[styles.certCourseTitle, { color: colors.text }]} numberOfLines={2}>
-                          {cert.courseTitle}
-                        </Text>
-                        <View style={styles.certMeta}>
-                          <View style={[styles.gradeBadge, { backgroundColor: grade.bg, borderColor: grade.color + '40' }]}>
-                            <Text style={[styles.gradeText, { color: grade.color }]}>{t('education.' + cert.grade.toLowerCase())}</Text>
-                          </View>
-                          <Text style={[styles.certDate, { color: colors.textMuted }]}>
-                            {formatDate(cert.issuedAt)}
-                          </Text>
-                        </View>
-                        <View style={styles.certStats}>
-                          <Text style={[styles.certStatText, { color: colors.textMuted }]}>
-                            {cert.completedLessons}/{cert.totalLessons} {t('education.lessonsLabel')}
-                          </Text>
-                          {cert.quizPercent !== undefined && (
-                            <>
-                              <Text style={[styles.certStatDivider, { color: colors.divider }]}>·</Text>
-                              <Text style={[styles.certStatText, { color: colors.textMuted }]}>
-                                Quiz: {cert.quizPercent}%
-                              </Text>
-                            </>
-                          )}
-                        </View>
-                      </View>
-
-                      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-                    </View>
-
-                    {/* Footer serial */}
-                    <View style={[styles.certFooter, { borderTopColor: colors.divider }]}>
-                      <Ionicons name="finger-print" size={12} color={colors.textMuted} />
-                      <Text style={[styles.serialText, { color: colors.textMuted }]}>
-                        #{cert.serialNumber}
-                      </Text>
-                      <View style={{ flex: 1 }} />
-                      {/* Quick share */}
+                {/* Eligible courses — computed in component body */}
+                {eligible.length > 0 && (
+                  <View style={{ width: '100%', marginTop: SPACING.xl }}>
+                    <Text style={[styles.eligibleTitle, { color: colors.text }]}>
+                      {t('education.coursesReadyForCert')}
+                    </Text>
+                    {eligible.map(course => (
                       <TouchableOpacity
-                        style={[styles.quickShareBtn, { backgroundColor: colors.primary + '15' }]}
-                        onPress={() => handleSharePDF(cert)}
+                        key={course.id}
+                        style={[styles.eligibleCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                        onPress={() => handleGenerate(course.id)}
                       >
-                        <Ionicons name="share-outline" size={14} color={colors.primary} />
+                        <View style={styles.eligibleCardLeft}>
+                          <Text style={styles.eligibleIcon}>{course.thumbnail}</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={[styles.eligibleName, { color: colors.text }]}>{course.title}</Text>
+                            <Text style={[styles.eligibleLabel, { color: colors.textMuted }]}>
+                              {course.lessons} {t('education.lessonsLabel')} · {course.duration}
+                            </Text>
+                          </View>
+                        </View>
+                        <Ionicons name="ribbon-outline" size={22} color={colors.primary} />
                       </TouchableOpacity>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
+                    ))}
+                  </View>
+                )}
 
-              {/* Lifetime stats */}
-              <View style={[styles.statsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}><Text style={[styles.statsTitle, { color: colors.text }]}>{t('education.learningStats')}</Text>
-                <View style={styles.statsRow}>
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: colors.primary }]}>{certificates.length}</Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.certificatesTitle')}</Text>
-                  </View>
-                  <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: colors.primary }]}>
-                      {certificates.reduce((sum, c) => sum + c.completedLessons, 0)}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.lessonsDone')}</Text>
-                  </View>
-                  <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: colors.accent }]}>
-                      {certificates.filter(c => c.grade === 'A').length}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.distinctions')}</Text>
+                {/* Link to courses */}
+                <TouchableOpacity
+                  style={[styles.browseBtn, { backgroundColor: colors.primary }]}
+                  onPress={() => nav.navigate('Learn' as never)}
+                >
+                  <Ionicons name="school-outline" size={18} color="#FFF" />
+                  <Text style={styles.browseBtnText}>{t('education.browseCourses')}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              /* Certificate Cards */
+              <View style={styles.certList}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  {t('education.yourCertificates')}
+                </Text>
+                <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
+                  {certificates.length} {t('education.course')}{certificates.length !== 1 ? 's' : ''} {t('education.completed')}
+                </Text>
+
+                {certificates.map((cert, _index) => {
+                  const grade = gradeConfig[cert.grade];
+                  return (
+                    <TouchableOpacity
+                      key={cert.id}
+                      style={[styles.certCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                      onPress={() => setSelectedCert(cert.id)}
+                      activeOpacity={0.7}
+                    >
+                      {/* Decorative top accent */}
+                      <LinearGradient
+                        colors={[grade.color + '60', grade.color + '10']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.certAccent}
+                      />
+
+                      <View style={styles.certCardContent}>
+                        {/* Icon & Grade */}
+                        <View style={[styles.certIconBox, { backgroundColor: grade.bg }]}>
+                          <Ionicons name="ribbon" size={28} color={grade.color} />
+                        </View>
+
+                        {/* Info */}
+                        <View style={styles.certInfo}>
+                          <Text style={[styles.certCourseTitle, { color: colors.text }]} numberOfLines={2}>
+                            {cert.courseTitle}
+                          </Text>
+                          <View style={styles.certMeta}>
+                            <View style={[styles.gradeBadge, { backgroundColor: grade.bg, borderColor: grade.color + '40' }]}>
+                              <Text style={[styles.gradeText, { color: grade.color }]}>{t('education.' + cert.grade.toLowerCase())}</Text>
+                            </View>
+                            <Text style={[styles.certDate, { color: colors.textMuted }]}>
+                              {formatDate(cert.issuedAt)}
+                            </Text>
+                          </View>
+                          <View style={styles.certStats}>
+                            <Text style={[styles.certStatText, { color: colors.textMuted }]}>
+                              {cert.completedLessons}/{cert.totalLessons} {t('education.lessonsLabel')}
+                            </Text>
+                            {cert.quizPercent !== undefined && (
+                              <>
+                                <Text style={[styles.certStatDivider, { color: colors.divider }]}>·</Text>
+                                <Text style={[styles.certStatText, { color: colors.textMuted }]}>
+                                  Quiz: {cert.quizPercent}%
+                                </Text>
+                              </>
+                            )}
+                          </View>
+                        </View>
+
+                        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                      </View>
+
+                      {/* Footer serial */}
+                      <View style={[styles.certFooter, { borderTopColor: colors.divider }]}>
+                        <Ionicons name="finger-print" size={12} color={colors.textMuted} />
+                        <Text style={[styles.serialText, { color: colors.textMuted }]}>
+                          #{cert.serialNumber}
+                        </Text>
+                        <View style={{ flex: 1 }} />
+                        {/* Quick share */}
+                        <TouchableOpacity
+                          style={[styles.quickShareBtn, { backgroundColor: colors.primary + '15' }]}
+                          onPress={() => handleSharePDF(cert)}
+                        >
+                          <Ionicons name="share-outline" size={14} color={colors.primary} />
+                        </TouchableOpacity>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+
+                {/* Lifetime stats */}
+                <View style={[styles.statsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}><Text style={[styles.statsTitle, { color: colors.text }]}>{t('education.learningStats')}</Text>
+                  <View style={styles.statsRow}>
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: colors.primary }]}>{certificates.length}</Text>
+                      <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.certificatesTitle')}</Text>
+                    </View>
+                    <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: colors.primary }]}>
+                        {certificates.reduce((sum, c) => sum + c.completedLessons, 0)}
+                      </Text>
+                      <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.lessonsDone')}</Text>
+                    </View>
+                    <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: colors.accent }]}>
+                        {certificates.filter(c => c.grade === 'A').length}
+                      </Text>
+                      <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('education.distinctions')}</Text>
+                    </View>
                   </View>
                 </View>
               </View>
-            </View>
-          )}
+            )}
 
-          {/* Loading overlay */}
-          {isGeneratingCertificate && (
-            <View style={styles.generatingOverlay}>
-              <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.generatingText, { color: colors.text }]}>{t('education.generatingCertificate')}</Text>
-            </View>
-          )}
-        </ScrollView>
-      )}
-    </View>
+            {/* Loading overlay */}
+            {isGeneratingCertificate && (
+              <View style={styles.generatingOverlay}>
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text style={[styles.generatingText, { color: colors.text }]}>{t('education.generatingCertificate')}</Text>
+              </View>
+            )}
+          </ScrollView>
+        )}
+      </AppScreen>
   );
 }
 
@@ -452,7 +454,6 @@ function CertificatePreview({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

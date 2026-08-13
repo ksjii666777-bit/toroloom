@@ -50,6 +50,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const { width } = Dimensions.get('window');
@@ -57,7 +58,6 @@ const BOT_USERNAME = 'ToroloomBot';
 
 export default function TelegramConnectScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'TelegramConnect'>) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useT();
   const styles = createStyles(colors);
 
@@ -253,256 +253,256 @@ export default function TelegramConnectScreen({ navigation }: NativeStackScreenP
 
   if (loading && !linked) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.title}>{t('telegramConnect.connect')}</Text>
-        </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>{t('telegramConnect.loading')}</Text>
-        </View>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      header={
+  <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={styles.title}>{t('telegramConnect.connect')}</Text>
+          </View>
+      }
+      >
+  <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.loadingText}>{t('telegramConnect.loading')}</Text>
+          </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.title}>{t('telegramConnect.connect')}</Text>
-        </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={styles.title}>{t('telegramConnect.connect')}</Text>
+          </View>
 
-        {/* Hero Section */}
-        <LinearGradient
-          colors={['#1E3A5F', '#0F1923']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.heroCard}
-        >
-          <Animated.View style={[styles.telegramIconContainer, pulseStyle]}>
-            <Ionicons name="paper-plane" size={48} color="#0088CC" />
-          </Animated.View>
-          <Text style={styles.heroTitle}>{t('telegramConnect.heroTitle')}</Text>
-          <Text style={styles.heroSubtitle}>
-            {t('telegramConnect.heroSubtitle')}
-          </Text>
-        </LinearGradient>
+          {/* Hero Section */}
+          <LinearGradient
+            colors={['#1E3A5F', '#0F1923']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.heroCard}
+          >
+            <Animated.View style={[styles.telegramIconContainer, pulseStyle]}>
+              <Ionicons name="paper-plane" size={48} color="#0088CC" />
+            </Animated.View>
+            <Text style={styles.heroTitle}>{t('telegramConnect.heroTitle')}</Text>
+            <Text style={styles.heroSubtitle}>
+              {t('telegramConnect.heroSubtitle')}
+            </Text>
+          </LinearGradient>
 
-        {/* Features */}
-        <View style={styles.featuresRow}>
-          {[
-            { icon: 'trending-up', label: t('telegramConnect.priceAlerts'), color: '#00C853' },
-            { icon: 'checkmark-circle', label: t('telegramConnect.featTradeConfirms'), color: '#3B82F6' },
-            { icon: 'pie-chart', label: t('telegramConnect.featPortfolioUpdates'), color: '#8B5CF6' },
-            { icon: 'newspaper', label: t('telegramConnect.featMarketNews'), color: '#FFC107' },
-          ].map((feat) => (
-            <View key={feat.label} style={styles.featureItem}>
-              <View style={[styles.featureIcon, { backgroundColor: feat.color + '20' }]}>
-                <Ionicons name={feat.icon as any} size={20} color={feat.color} />
-              </View>
-              <Text style={styles.featureLabel}>{feat.label}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Linked State */}
-        {linked ? (
-          <Animated.View entering={FadeIn.duration(300)} style={styles.linkedSection}>
-            {/* Status Card */}
-            <View style={styles.statusCard}>
-              <View style={styles.statusIconRow}>
-                <View style={styles.statusIcon}>
-                  <Ionicons name="checkmark-circle" size={32} color="#22C55E" />
+          {/* Features */}
+          <View style={styles.featuresRow}>
+            {[
+              { icon: 'trending-up', label: t('telegramConnect.priceAlerts'), color: '#00C853' },
+              { icon: 'checkmark-circle', label: t('telegramConnect.featTradeConfirms'), color: '#3B82F6' },
+              { icon: 'pie-chart', label: t('telegramConnect.featPortfolioUpdates'), color: '#8B5CF6' },
+              { icon: 'newspaper', label: t('telegramConnect.featMarketNews'), color: '#FFC107' },
+            ].map((feat) => (
+              <View key={feat.label} style={styles.featureItem}>
+                <View style={[styles.featureIcon, { backgroundColor: feat.color + '20' }]}>
+                  <Ionicons name={feat.icon as any} size={20} color={feat.color} />
                 </View>
-                <View style={styles.statusInfo}>
-                  <Text style={styles.statusTitle}>{t('telegramConnect.connected')}</Text>
-                  <Text style={styles.statusSubtitle}>
-                    {telegramInfo.firstName || t('telegramConnect.userFallback')}{telegramInfo.username ? ` (@${telegramInfo.username})` : ''}
+                <Text style={styles.featureLabel}>{feat.label}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Linked State */}
+          {linked ? (
+            <Animated.View entering={FadeIn.duration(300)} style={styles.linkedSection}>
+              {/* Status Card */}
+              <View style={styles.statusCard}>
+                <View style={styles.statusIconRow}>
+                  <View style={styles.statusIcon}>
+                    <Ionicons name="checkmark-circle" size={32} color="#22C55E" />
+                  </View>
+                  <View style={styles.statusInfo}>
+                    <Text style={styles.statusTitle}>{t('telegramConnect.connected')}</Text>
+                    <Text style={styles.statusSubtitle}>
+                      {telegramInfo.firstName || t('telegramConnect.userFallback')}{telegramInfo.username ? ` (@${telegramInfo.username})` : ''}
+                    </Text>
+                  </View>
+                </View>
+                {telegramInfo.linkedAt && (
+                  <Text style={styles.linkedDate}>
+                    {t('telegramConnect.linkedOn', { date: new Date(telegramInfo.linkedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) })}
                   </Text>
-                </View>
-              </View>
-              {telegramInfo.linkedAt && (
-                <Text style={styles.linkedDate}>
-                  {t('telegramConnect.linkedOn', { date: new Date(telegramInfo.linkedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) })}
-                </Text>
-              )}
-
-              <View style={styles.statusDivider} />
-
-              {/* Test Button */}
-              <AnimatedPressable
-                onPress={handleTestMessage}
-                disabled={sendingTest}
-                style={styles.actionBtn}
-                haptic="light"
-                scaleTo={0.97}
-              >
-                {sendingTest ? (
-                  <ActivityIndicator size="small" color={colors.primary} />
-                ) : (
-                  <>
-                    <Ionicons name="send" size={18} color={colors.primary} />
-                    <Text style={styles.actionBtnText}>{t('telegramConnect.sendTest')}</Text>
-                  </>
                 )}
-              </AnimatedPressable>
 
-              {/* Unlink Button */}
-              <AnimatedPressable
-                onPress={handleUnlink}
-                style={[styles.actionBtn, styles.unlinkBtn]}
-                haptic="warning"
-                scaleTo={0.97}
-              >
-                <Ionicons name="link-outline" size={18} color={colors.danger} />
-                <Text style={[styles.actionBtnText, { color: colors.danger }]}>{t('telegramConnect.unlink')}</Text>
-              </AnimatedPressable>
-            </View>
+                <View style={styles.statusDivider} />
 
-            {/* Info Note */}
-            <View style={styles.infoNote}>
-              <Ionicons name="information-circle" size={16} color={colors.primary} />
-              <Text style={styles.infoNoteText}>
-                {t('telegramConnect.blockNote', { bot: BOT_USERNAME })}
-              </Text>
-            </View>
-          </Animated.View>
-        ) : linkCode ? (
-          // ── Code Display ──
-          <Animated.View entering={FadeIn.duration(300)} style={styles.codeSection}>
-            <View style={styles.codeCard}>
-              <Text style={styles.codeTitle}>{t('telegramConnect.linkCodeTitle')}</Text>
-              <Animated.View style={[styles.codeBox, codeStyle]}>
-                <Text style={styles.codeText}>{linkCode}</Text>
-              </Animated.View>
-
-              {/* Instructions */}
-              <View style={styles.instructionsList}>
-                <View style={styles.instructionStep}>
-                  <View style={styles.stepDot}>
-                    <Text style={styles.stepDotText}>1</Text>
-                  </View>
-                  <Text style={styles.instructionText}>
-                    {t('telegramConnect.step1Prefix')}<Text style={styles.bold}>@{BOT_USERNAME}</Text>
-                  </Text>
-                </View>
-                <View style={styles.instructionStep}>
-                  <View style={styles.stepDot}>
-                    <Text style={styles.stepDotText}>2</Text>
-                  </View>
-                  <Text style={styles.instructionText}>
-                    {t('telegramConnect.step2Prefix')}<Text style={styles.codeInline}>/start {linkCode}</Text>
-                  </Text>
-                </View>
-                <View style={styles.instructionStep}>
-                  <View style={styles.stepDot}>
-                    <Text style={styles.stepDotText}>3</Text>
-                  </View>
-                  <Text style={styles.instructionText}>
-                    {t('telegramConnect.step3Text')}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Copy button */}
-              <AnimatedPressable onPress={handleCopyCode} style={styles.copyBtn} haptic="light" scaleTo={0.97}>
-                <Ionicons name="copy-outline" size={18} color="#0D0D0D" />
-                <Text style={styles.copyBtnText}>{t('telegramConnect.copyToClipboard')}</Text>
-              </AnimatedPressable>
-
-              {/* Check connection */}
-              <AnimatedPressable onPress={handleCheckLinked} style={styles.checkBtn} haptic="medium" scaleTo={0.97}>
-                <Ionicons name="refresh-outline" size={18} color="#FFFFFF" />
-                <Text style={styles.checkBtnText}>{t('telegramConnect.checkConnection')}</Text>
-              </AnimatedPressable>
-
-              {/* Expiry timer */}
-              <View style={styles.expiryRow}>
-                <Ionicons name="time-outline" size={14} color={codeExpiresIn <= 60 ? '#EF4444' : colors.textMuted} />
-                <Text style={[styles.expiryText, codeExpiresIn <= 60 && { color: '#EF4444' }]}>
-                  {t('telegramConnect.codeExpiresIn', { time: formatExpiry(codeExpiresIn) })}
-                </Text>
-              </View>
-
-              {/* Cancel */}
-              <TouchableOpacity
-                onPress={() => setLinkCode(null)}
-                style={styles.cancelLinkBtn}
-              >
-                <Text style={styles.cancelLinkText}>{t('telegramConnect.cancel')}</Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
-        ) : (
-          // ── Connect Button ──
-          <Animated.View entering={FadeIn.duration(400)}>
-            <View style={styles.connectCard}>
-              <Text style={styles.connectTitle}>{t('telegramConnect.readyToConnect')}</Text>
-              <Text style={styles.connectSubtitle}>
-                {t('telegramConnect.connectSubtitle')}
-              </Text>
-
-              <View style={styles.connectSteps}>
-                <View style={styles.connectStep}>
-                  <Ionicons name="link-outline" size={16} color="#3B82F6" />
-                  <Text style={styles.connectStepText}>{t('telegramConnect.connectStep1')}</Text>
-                </View>
-                <View style={styles.connectStep}>
-                  <Ionicons name="send" size={16} color="#3B82F6" />
-                  <Text style={styles.connectStepText}>{t('telegramConnect.connectStep2', { bot: BOT_USERNAME })}</Text>
-                </View>
-                <View style={styles.connectStep}>
-                  <Ionicons name="checkmark-circle" size={16} color="#3B82F6" />
-                  <Text style={styles.connectStepText}>{t('telegramConnect.connectStep3')}</Text>
-                </View>
-              </View>
-
-              <AnimatedPressable
-                onPress={handleConnect}
-                disabled={linking}
-                style={styles.connectBtn}
-                haptic="medium"
-                scaleTo={0.97}
-              >
-                <LinearGradient
-                  colors={['#0088CC', '#006699']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.connectBtnGradient}
+                {/* Test Button */}
+                <AnimatedPressable
+                  onPress={handleTestMessage}
+                  disabled={sendingTest}
+                  style={styles.actionBtn}
+                  haptic="light"
+                  scaleTo={0.97}
                 >
-                  {linking ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  {sendingTest ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
                   ) : (
                     <>
-                      <Ionicons name="paper-plane" size={20} color="#FFFFFF" />
-                      <Text style={styles.connectBtnText}>{t('telegramConnect.connect')}</Text>
+                      <Ionicons name="send" size={18} color={colors.primary} />
+                      <Text style={styles.actionBtnText}>{t('telegramConnect.sendTest')}</Text>
                     </>
                   )}
-                </LinearGradient>
-              </AnimatedPressable>
-            </View>
-          </Animated.View>
-        )}
+                </AnimatedPressable>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+                {/* Unlink Button */}
+                <AnimatedPressable
+                  onPress={handleUnlink}
+                  style={[styles.actionBtn, styles.unlinkBtn]}
+                  haptic="warning"
+                  scaleTo={0.97}
+                >
+                  <Ionicons name="link-outline" size={18} color={colors.danger} />
+                  <Text style={[styles.actionBtnText, { color: colors.danger }]}>{t('telegramConnect.unlink')}</Text>
+                </AnimatedPressable>
+              </View>
+
+              {/* Info Note */}
+              <View style={styles.infoNote}>
+                <Ionicons name="information-circle" size={16} color={colors.primary} />
+                <Text style={styles.infoNoteText}>
+                  {t('telegramConnect.blockNote', { bot: BOT_USERNAME })}
+                </Text>
+              </View>
+            </Animated.View>
+          ) : linkCode ? (
+            // ── Code Display ──
+            <Animated.View entering={FadeIn.duration(300)} style={styles.codeSection}>
+              <View style={styles.codeCard}>
+                <Text style={styles.codeTitle}>{t('telegramConnect.linkCodeTitle')}</Text>
+                <Animated.View style={[styles.codeBox, codeStyle]}>
+                  <Text style={styles.codeText}>{linkCode}</Text>
+                </Animated.View>
+
+                {/* Instructions */}
+                <View style={styles.instructionsList}>
+                  <View style={styles.instructionStep}>
+                    <View style={styles.stepDot}>
+                      <Text style={styles.stepDotText}>1</Text>
+                    </View>
+                    <Text style={styles.instructionText}>
+                      {t('telegramConnect.step1Prefix')}<Text style={styles.bold}>@{BOT_USERNAME}</Text>
+                    </Text>
+                  </View>
+                  <View style={styles.instructionStep}>
+                    <View style={styles.stepDot}>
+                      <Text style={styles.stepDotText}>2</Text>
+                    </View>
+                    <Text style={styles.instructionText}>
+                      {t('telegramConnect.step2Prefix')}<Text style={styles.codeInline}>/start {linkCode}</Text>
+                    </Text>
+                  </View>
+                  <View style={styles.instructionStep}>
+                    <View style={styles.stepDot}>
+                      <Text style={styles.stepDotText}>3</Text>
+                    </View>
+                    <Text style={styles.instructionText}>
+                      {t('telegramConnect.step3Text')}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Copy button */}
+                <AnimatedPressable onPress={handleCopyCode} style={styles.copyBtn} haptic="light" scaleTo={0.97}>
+                  <Ionicons name="copy-outline" size={18} color="#0D0D0D" />
+                  <Text style={styles.copyBtnText}>{t('telegramConnect.copyToClipboard')}</Text>
+                </AnimatedPressable>
+
+                {/* Check connection */}
+                <AnimatedPressable onPress={handleCheckLinked} style={styles.checkBtn} haptic="medium" scaleTo={0.97}>
+                  <Ionicons name="refresh-outline" size={18} color="#FFFFFF" />
+                  <Text style={styles.checkBtnText}>{t('telegramConnect.checkConnection')}</Text>
+                </AnimatedPressable>
+
+                {/* Expiry timer */}
+                <View style={styles.expiryRow}>
+                  <Ionicons name="time-outline" size={14} color={codeExpiresIn <= 60 ? '#EF4444' : colors.textMuted} />
+                  <Text style={[styles.expiryText, codeExpiresIn <= 60 && { color: '#EF4444' }]}>
+                    {t('telegramConnect.codeExpiresIn', { time: formatExpiry(codeExpiresIn) })}
+                  </Text>
+                </View>
+
+                {/* Cancel */}
+                <TouchableOpacity
+                  onPress={() => setLinkCode(null)}
+                  style={styles.cancelLinkBtn}
+                >
+                  <Text style={styles.cancelLinkText}>{t('telegramConnect.cancel')}</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          ) : (
+            // ── Connect Button ──
+            <Animated.View entering={FadeIn.duration(400)}>
+              <View style={styles.connectCard}>
+                <Text style={styles.connectTitle}>{t('telegramConnect.readyToConnect')}</Text>
+                <Text style={styles.connectSubtitle}>
+                  {t('telegramConnect.connectSubtitle')}
+                </Text>
+
+                <View style={styles.connectSteps}>
+                  <View style={styles.connectStep}>
+                    <Ionicons name="link-outline" size={16} color="#3B82F6" />
+                    <Text style={styles.connectStepText}>{t('telegramConnect.connectStep1')}</Text>
+                  </View>
+                  <View style={styles.connectStep}>
+                    <Ionicons name="send" size={16} color="#3B82F6" />
+                    <Text style={styles.connectStepText}>{t('telegramConnect.connectStep2', { bot: BOT_USERNAME })}</Text>
+                  </View>
+                  <View style={styles.connectStep}>
+                    <Ionicons name="checkmark-circle" size={16} color="#3B82F6" />
+                    <Text style={styles.connectStepText}>{t('telegramConnect.connectStep3')}</Text>
+                  </View>
+                </View>
+
+                <AnimatedPressable
+                  onPress={handleConnect}
+                  disabled={linking}
+                  style={styles.connectBtn}
+                  haptic="medium"
+                  scaleTo={0.97}
+                >
+                  <LinearGradient
+                    colors={['#0088CC', '#006699']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.connectBtnGradient}
+                  >
+                    {linking ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <>
+                        <Ionicons name="paper-plane" size={20} color="#FFFFFF" />
+                        <Text style={styles.connectBtnText}>{t('telegramConnect.connect')}</Text>
+                      </>
+                    )}
+                  </LinearGradient>
+                </AnimatedPressable>
+              </View>
+            </Animated.View>
+          )}
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ── Styles ──
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
     paddingHorizontal: SPACING.xl,

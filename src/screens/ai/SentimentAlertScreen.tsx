@@ -36,6 +36,7 @@ import { useNotificationStore } from '../../store/notificationStore';
 import type {SentimentAlertRule, SentimentAlertTrigger, SentimentAlertSensitivity, SentimentAlertDirection, RootStackParamList} from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -532,7 +533,6 @@ const modalStyles = StyleSheet.create({
 export default function SentimentAlertScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SentimentAlert'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [rules, setRules] = useState<SentimentAlertRule[]>(getMockAlertRules);
@@ -637,134 +637,134 @@ export default function SentimentAlertScreen({ navigation }: NativeStackScreenPr
   const inactiveRules = useMemo(() => rules.filter(r => !r.enabled), [rules]);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>{t('sentimentAlerts.title')}</Text>
-            <Text style={styles.headerSubtitle}>
-              {t('sentimentAlerts.rulesCount', { count: rules.length })} · {unreadTriggerCount > 0 ? t('sentimentAlerts.newAlertsCount', { count: unreadTriggerCount }) : t('sentimentAlerts.noNewAlerts')}
-            </Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header]}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.headerTitle}>{t('sentimentAlerts.title')}</Text>
+              <Text style={styles.headerSubtitle}>
+                {t('sentimentAlerts.rulesCount', { count: rules.length })} · {unreadTriggerCount > 0 ? t('sentimentAlerts.newAlertsCount', { count: unreadTriggerCount }) : t('sentimentAlerts.noNewAlerts')}
+              </Text>
+            </View>
+            <Pressable onPress={() => setShowAddModal(true)} style={styles.addBtn}>
+              <Ionicons name="add" size={24} color={colors.primary} />
+            </Pressable>
           </View>
-          <Pressable onPress={() => setShowAddModal(true)} style={styles.addBtn}>
-            <Ionicons name="add" size={24} color={colors.primary} />
-          </Pressable>
+
+          {/* Tabs */}
+          <View style={styles.tabsRow}>
+            <Pressable
+              style={[styles.tab, activeTab === 'rules' && styles.tabActive]}
+              onPress={() => setActiveTab('rules')}
+            >
+              <Ionicons name="notifications" size={16} color={activeTab === 'rules' ? colors.primary : colors.textMuted} />
+              <Text style={[styles.tabLabel, activeTab === 'rules' && styles.tabLabelActive]}>{t('sentimentAlerts.rules')}</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.tab, activeTab === 'history' && styles.tabActive]}
+              onPress={() => setActiveTab('history')}
+            >
+              <Ionicons name="time" size={16} color={activeTab === 'history' ? colors.primary : colors.textMuted} />
+              <Text style={[styles.tabLabel, activeTab === 'history' && styles.tabLabelActive]}>{t('sentimentAlerts.history')}</Text>
+              {unreadTriggerCount > 0 && (
+                <View style={styles.badgeCount}>
+                  <Text style={styles.badgeCountText}>{unreadTriggerCount}</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
         </View>
 
-        {/* Tabs */}
-        <View style={styles.tabsRow}>
-          <Pressable
-            style={[styles.tab, activeTab === 'rules' && styles.tabActive]}
-            onPress={() => setActiveTab('rules')}
-          >
-            <Ionicons name="notifications" size={16} color={activeTab === 'rules' ? colors.primary : colors.textMuted} />
-            <Text style={[styles.tabLabel, activeTab === 'rules' && styles.tabLabelActive]}>{t('sentimentAlerts.rules')}</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.tab, activeTab === 'history' && styles.tabActive]}
-            onPress={() => setActiveTab('history')}
-          >
-            <Ionicons name="time" size={16} color={activeTab === 'history' ? colors.primary : colors.textMuted} />
-            <Text style={[styles.tabLabel, activeTab === 'history' && styles.tabLabelActive]}>{t('sentimentAlerts.history')}</Text>
-            {unreadTriggerCount > 0 && (
-              <View style={styles.badgeCount}>
-                <Text style={styles.badgeCountText}>{unreadTriggerCount}</Text>
-              </View>
-            )}
-          </Pressable>
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {activeTab === 'rules' ? (
-          <>
-            {/* Active Rules */}
-            <Text style={styles.sectionTitle}>{t('sentimentAlerts.activeRules', { count: activeRules.length })}</Text>
-            {activeRules.length > 0 ? (
-              activeRules.map(rule => (
-                <RuleCard
-                  key={rule.id}
-                  rule={rule}
-                  onToggle={() => handleToggleRule(rule.id)}
-                  onDelete={() => handleDeleteRule(rule.id)}
-                  onPress={() => markTriggerRead(rule.id)}
-                />
-              ))
-            ) : (
-              <View style={styles.emptyCard}>
-                <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>{t('sentimentAlerts.noActiveRules')}</Text>
-                <Text style={styles.emptyDesc}>{t('sentimentAlerts.noActiveRulesDesc')}</Text>
-              </View>
-            )}
-
-            {/* Inactive Rules */}
-            {inactiveRules.length > 0 && (
-              <>
-                <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>{t('sentimentAlerts.inactiveRules', { count: inactiveRules.length })}</Text>
-                {inactiveRules.map(rule => (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {activeTab === 'rules' ? (
+            <>
+              {/* Active Rules */}
+              <Text style={styles.sectionTitle}>{t('sentimentAlerts.activeRules', { count: activeRules.length })}</Text>
+              {activeRules.length > 0 ? (
+                activeRules.map(rule => (
                   <RuleCard
                     key={rule.id}
                     rule={rule}
                     onToggle={() => handleToggleRule(rule.id)}
                     onDelete={() => handleDeleteRule(rule.id)}
-                    onPress={() => {}}
+                    onPress={() => markTriggerRead(rule.id)}
                   />
-                ))}
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            {/* History Header */}
-            <View style={styles.historyHeader}>
-              <Text style={styles.sectionTitle}>
-                {t('sentimentAlerts.triggerHistory', { count: triggers.length })}
-              </Text>
-              {unreadTriggerCount > 0 && (
-                <Pressable onPress={handleMarkAllRead}>
-                  <Text style={[styles.markAllRead, { color: colors.primary }]}>{t('sentimentAlerts.markAllRead')}</Text>
-                </Pressable>
+                ))
+              ) : (
+                <View style={styles.emptyCard}>
+                  <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
+                  <Text style={styles.emptyTitle}>{t('sentimentAlerts.noActiveRules')}</Text>
+                  <Text style={styles.emptyDesc}>{t('sentimentAlerts.noActiveRulesDesc')}</Text>
+                </View>
               )}
-            </View>
 
-            {triggers.length > 0 ? (
-              triggers.map(trigger => (
-                <Pressable key={trigger.id} onPress={() => markTriggerRead(trigger.id)} style={({pressed}) => ({opacity: pressed ? 0.9 : 1})}>
-                  <TriggerItem trigger={trigger} />
-                </Pressable>
-              ))
-            ) : (
-              <View style={styles.emptyCard}>
-                <Ionicons name="pulse-outline" size={40} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>{t('sentimentAlerts.noTriggers')}</Text>
-                <Text style={styles.emptyDesc}>{t('sentimentAlerts.noTriggersDesc')}</Text>
+              {/* Inactive Rules */}
+              {inactiveRules.length > 0 && (
+                <>
+                  <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>{t('sentimentAlerts.inactiveRules', { count: inactiveRules.length })}</Text>
+                  {inactiveRules.map(rule => (
+                    <RuleCard
+                      key={rule.id}
+                      rule={rule}
+                      onToggle={() => handleToggleRule(rule.id)}
+                      onDelete={() => handleDeleteRule(rule.id)}
+                      onPress={() => {}}
+                    />
+                  ))}
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {/* History Header */}
+              <View style={styles.historyHeader}>
+                <Text style={styles.sectionTitle}>
+                  {t('sentimentAlerts.triggerHistory', { count: triggers.length })}
+                </Text>
+                {unreadTriggerCount > 0 && (
+                  <Pressable onPress={handleMarkAllRead}>
+                    <Text style={[styles.markAllRead, { color: colors.primary }]}>{t('sentimentAlerts.markAllRead')}</Text>
+                  </Pressable>
+                )}
               </View>
-            )}
-          </>
-        )}
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
+              {triggers.length > 0 ? (
+                triggers.map(trigger => (
+                  <Pressable key={trigger.id} onPress={() => markTriggerRead(trigger.id)} style={({pressed}) => ({opacity: pressed ? 0.9 : 1})}>
+                    <TriggerItem trigger={trigger} />
+                  </Pressable>
+                ))
+              ) : (
+                <View style={styles.emptyCard}>
+                  <Ionicons name="pulse-outline" size={40} color={colors.textMuted} />
+                  <Text style={styles.emptyTitle}>{t('sentimentAlerts.noTriggers')}</Text>
+                  <Text style={styles.emptyDesc}>{t('sentimentAlerts.noTriggersDesc')}</Text>
+                </View>
+              )}
+            </>
+          )}
 
-      {/* Add Rule Modal */}
-      <AddRuleModal
-        visible={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={handleAddRule}
-      />
-    </View>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+
+        {/* Add Rule Modal */}
+        <AddRuleModal
+          visible={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onAdd={handleAddRule}
+        />
+      </AppScreen>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
   header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginBottom: SPACING.md },
   backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.bgCard, justifyContent: 'center', alignItems: 'center' },

@@ -30,6 +30,7 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 // ──── Options ──────────────────────────────────────────────────────────────
@@ -73,121 +74,121 @@ const OPTIONS: OptionConfig[] = [
 // ──── Component ────────────────────────────────────────────────────────────
 
 export default function DarkModeSettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'DarkMode'>) {
-  const insets = useSafeAreaInsets();
   const { t } = useT();
   const { colors, setOverride, isDark } = useTheme();
   const override = useThemeStore((s) => s.override);
   const styles = createStyles(colors);
 
   return (
-    <View style={styles.container}>
-      {/* ── Header ── */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </Pressable>
-        <Text style={styles.headerTitle}>{t('darkMode.title')}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* ── Mode Preview Card ── */}
-        <View style={[styles.previewCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: colors.border }]}>
-          <View style={[styles.previewBar, { backgroundColor: isDark ? '#0A0D14' : '#FFFFFF', borderColor: colors.border }]}>
-            <View style={styles.previewBarContent}>
-              <Ionicons name={isDark ? 'moon' : 'sunny'} size={16} color={colors.text} />
-              <Text style={[styles.previewBarText, { color: colors.text }]}>
-                {(isDark ? t('darkMode.dark') : t('darkMode.light'))} — {t('darkMode.active')}
-              </Text>
-            </View>
-            <View style={[styles.modeDot, { backgroundColor: isDark ? '#3B82F6' : '#3B82F6' }]} />
-          </View>
-          <View style={styles.previewBody}>
-            <View style={[styles.previewRow, { backgroundColor: colors.bgCard }]}>
-              <View style={[styles.previewAvatar, { backgroundColor: colors.primary }]} />
-              <View style={{ flex: 1 }}>
-                <View style={[styles.previewLine, { backgroundColor: colors.text, width: '60%' }]} />
-                <View style={[styles.previewLine, { backgroundColor: colors.textMuted, width: '40%', marginTop: 4 }]} />
-              </View>
-            </View>
-            <View style={[styles.previewChart, { backgroundColor: colors.bgCardLight }]}>
-              <View style={[styles.chartBar, { backgroundColor: colors.marketUp, height: 24 }]} />
-              <View style={[styles.chartBar, { backgroundColor: colors.primary, height: 32 }]} />
-              <View style={[styles.chartBar, { backgroundColor: colors.marketUp, height: 20 }]} />
-              <View style={[styles.chartBar, { backgroundColor: colors.warning, height: 28 }]} />
-              <View style={[styles.chartBar, { backgroundColor: colors.marketDown, height: 16 }]} />
-            </View>
-          </View>
+  {/* ── Header ── */}
+        <View style={[styles.header]}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>{t('darkMode.title')}</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        {/* ── Option Cards ── */}
-        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t('darkMode.chooseTheme')}</Text>
-
-        {OPTIONS.map((opt) => {
-          const isSelected = override === opt.key;
-          return (
-            <Pressable
-              key={opt.key}
-              onPress={() => {
-                setOverride(opt.key);
-              }}
-              style={({ pressed }) => [
-                styles.optionCard,
-                {
-                  backgroundColor: isSelected
-                    ? colors.primary + '12'
-                    : 'rgba(255,255,255,0.03)',
-                  borderColor: isSelected
-                    ? colors.primary + '40'
-                    : 'rgba(255,255,255,0.06)',
-                  opacity: pressed ? 0.85 : 1,
-                },
-              ]}
-            >
-              {/* Preview mini card */}
-              <View style={[styles.optionPreview, { backgroundColor: opt.previewDark }]}>
-                <Ionicons name={opt.icon} size={20} color={opt.previewLight} />
-              </View>
-
-              {/* Info */}
-              <View style={styles.optionInfo}>
-                <Text style={[styles.optionLabel, { color: colors.text }]}>
-                  {t(opt.labelKey)}
-                </Text>
-                <Text style={[styles.optionDesc, { color: colors.textMuted }]}>
-                  {t(opt.descKey)}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ── Mode Preview Card ── */}
+          <View style={[styles.previewCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: colors.border }]}>
+            <View style={[styles.previewBar, { backgroundColor: isDark ? '#0A0D14' : '#FFFFFF', borderColor: colors.border }]}>
+              <View style={styles.previewBarContent}>
+                <Ionicons name={isDark ? 'moon' : 'sunny'} size={16} color={colors.text} />
+                <Text style={[styles.previewBarText, { color: colors.text }]}>
+                  {(isDark ? t('darkMode.dark') : t('darkMode.light'))} — {t('darkMode.active')}
                 </Text>
               </View>
-
-              {/* Selection indicator */}
-              <View style={[
-                styles.radioOuter,
-                {
-                  borderColor: isSelected ? colors.primary : 'rgba(255,255,255,0.2)',
-                },
-              ]}>
-                {isSelected && (
-                  <View style={[styles.radioInner, { backgroundColor: colors.primary }]} />
-                )}
+              <View style={[styles.modeDot, { backgroundColor: isDark ? '#3B82F6' : '#3B82F6' }]} />
+            </View>
+            <View style={styles.previewBody}>
+              <View style={[styles.previewRow, { backgroundColor: colors.bgCard }]}>
+                <View style={[styles.previewAvatar, { backgroundColor: colors.primary }]} />
+                <View style={{ flex: 1 }}>
+                  <View style={[styles.previewLine, { backgroundColor: colors.text, width: '60%' }]} />
+                  <View style={[styles.previewLine, { backgroundColor: colors.textMuted, width: '40%', marginTop: 4 }]} />
+                </View>
               </View>
-            </Pressable>
-          );
-        })}
+              <View style={[styles.previewChart, { backgroundColor: colors.bgCardLight }]}>
+                <View style={[styles.chartBar, { backgroundColor: colors.marketUp, height: 24 }]} />
+                <View style={[styles.chartBar, { backgroundColor: colors.primary, height: 32 }]} />
+                <View style={[styles.chartBar, { backgroundColor: colors.marketUp, height: 20 }]} />
+                <View style={[styles.chartBar, { backgroundColor: colors.warning, height: 28 }]} />
+                <View style={[styles.chartBar, { backgroundColor: colors.marketDown, height: 16 }]} />
+              </View>
+            </View>
+          </View>
 
-        {/* ── Quick Tips ── */}
-        <View style={[styles.tipCard, { backgroundColor: 'rgba(59, 130, 246, 0.05)', borderColor: 'rgba(59, 130, 246, 0.15)' }]}>
-          <Ionicons name="bulb" size={16} color="#60A5FA" />
-          <Text style={styles.tipText}>
-            {t('darkMode.tip')}
-          </Text>
-        </View>
+          {/* ── Option Cards ── */}
+          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t('darkMode.chooseTheme')}</Text>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          {OPTIONS.map((opt) => {
+            const isSelected = override === opt.key;
+            return (
+              <Pressable
+                key={opt.key}
+                onPress={() => {
+                  setOverride(opt.key);
+                }}
+                style={({ pressed }) => [
+                  styles.optionCard,
+                  {
+                    backgroundColor: isSelected
+                      ? colors.primary + '12'
+                      : 'rgba(255,255,255,0.03)',
+                    borderColor: isSelected
+                      ? colors.primary + '40'
+                      : 'rgba(255,255,255,0.06)',
+                    opacity: pressed ? 0.85 : 1,
+                  },
+                ]}
+              >
+                {/* Preview mini card */}
+                <View style={[styles.optionPreview, { backgroundColor: opt.previewDark }]}>
+                  <Ionicons name={opt.icon} size={20} color={opt.previewLight} />
+                </View>
+
+                {/* Info */}
+                <View style={styles.optionInfo}>
+                  <Text style={[styles.optionLabel, { color: colors.text }]}>
+                    {t(opt.labelKey)}
+                  </Text>
+                  <Text style={[styles.optionDesc, { color: colors.textMuted }]}>
+                    {t(opt.descKey)}
+                  </Text>
+                </View>
+
+                {/* Selection indicator */}
+                <View style={[
+                  styles.radioOuter,
+                  {
+                    borderColor: isSelected ? colors.primary : 'rgba(255,255,255,0.2)',
+                  },
+                ]}>
+                  {isSelected && (
+                    <View style={[styles.radioInner, { backgroundColor: colors.primary }]} />
+                  )}
+                </View>
+              </Pressable>
+            );
+          })}
+
+          {/* ── Quick Tips ── */}
+          <View style={[styles.tipCard, { backgroundColor: 'rgba(59, 130, 246, 0.05)', borderColor: 'rgba(59, 130, 246, 0.15)' }]}>
+            <Ionicons name="bulb" size={16} color="#60A5FA" />
+            <Text style={styles.tipText}>
+              {t('darkMode.tip')}
+            </Text>
+          </View>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -195,10 +196,6 @@ export default function DarkModeSettingsScreen({ navigation }: NativeStackScreen
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     header: {
       flexDirection: 'row',
       alignItems: 'center',

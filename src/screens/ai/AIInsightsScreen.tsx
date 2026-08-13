@@ -11,6 +11,7 @@ import { formatCurrency } from '../../utils/formatters';
 import { useT } from '../../hooks/useT';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 export default function AIInsightsScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'AIInsights'>) {
@@ -41,106 +42,104 @@ export default function AIInsightsScreen({ navigation: _navigation  }: NativeSta
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('ai.title')}</Text>
-          <Text style={styles.subtitle}>{t('ai.insightsSubtitle')}</Text>
-        </View>
-
-        {/* Market Overview */}
-        <Card gradient={GRADIENTS.primary} style={styles.overviewCard}>
-          <View style={styles.overviewRow}>
-            <Ionicons name="bulb" size={28} color="#FFFFFF" />
-            <View style={styles.overviewText}>
-              <Text style={styles.overviewTitle}>{t('ai.marketOverview')}</Text>
-              <Text style={styles.overviewSub}>
-                {insights.filter(i => i.type === 'bullish').length} {t('ai.bullish').toLowerCase()} · {insights.filter(i => i.type === 'bearish').length} {t('ai.bearish').toLowerCase()} · {insights.filter(i => i.type === 'neutral').length} {t('ai.neutral').toLowerCase()}
-              </Text>
-            </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('ai.title')}</Text>
+            <Text style={styles.subtitle}>{t('ai.insightsSubtitle')}</Text>
           </View>
-          <Text style={styles.overviewNote}>{t('ai.insightDisclaimer')}</Text>
-        </Card>
 
-        {/* Insights List */}
-        <Text style={styles.sectionTitle}>{t('ai.stockAnalysis')}</Text>
-
-        {/* ── Loading State ── */}
-        {isLoading && insights.length === 0 && (
-          <View style={styles.stateContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.stateText, { color: colors.textMuted }]}>{t('ai.generating')}</Text>
-          </View>
-        )}
-
-        {/* ── Empty State ── */}
-        {!isLoading && insights.length === 0 && (
-          <View style={styles.stateContainer}>
-            <Ionicons name="bulb-outline" size={48} color={colors.textMuted} />
-            <Text style={[styles.stateTitle, { color: colors.text }]}>{t('ai.noInsights')}</Text>
-            <Text style={[styles.stateText, { color: colors.textMuted }]}>{t('ai.pullToRefresh')}</Text>
-          </View>
-        )}
-
-        {/* ── Data ── */}
-        {insights.map(insight => (
-          <Pressable key={insight.id} style={styles.insightCard}>
-            <View style={styles.insightHeader}>
-              <View>
-                <Text style={styles.insightSymbol}>{insight.symbol}</Text>
-                <Text style={styles.insightName}>{insight.name}</Text>
-              </View>
-              <View style={[styles.signelBadge, { backgroundColor: getTypeColor(insight.type) + '20' }]}>
-                <Text style={styles.signelEmoji}>{getTypeEmoji(insight.type)}</Text>
-                <Text style={[styles.signelText, { color: getTypeColor(insight.type) }]}>
-                  {insight.type.charAt(0).toUpperCase() + insight.type.slice(1)}
+          {/* Market Overview */}
+          <Card gradient={GRADIENTS.primary} style={styles.overviewCard}>
+            <View style={styles.overviewRow}>
+              <Ionicons name="bulb" size={28} color="#FFFFFF" />
+              <View style={styles.overviewText}>
+                <Text style={styles.overviewTitle}>{t('ai.marketOverview')}</Text>
+                <Text style={styles.overviewSub}>
+                  {insights.filter(i => i.type === 'bullish').length} {t('ai.bullish').toLowerCase()} · {insights.filter(i => i.type === 'bearish').length} {t('ai.bearish').toLowerCase()} · {insights.filter(i => i.type === 'neutral').length} {t('ai.neutral').toLowerCase()}
                 </Text>
               </View>
             </View>
+            <Text style={styles.overviewNote}>{t('ai.insightDisclaimer')}</Text>
+          </Card>
 
-            <Text style={styles.insightSummary}>{insight.summary}</Text>
-            <Text style={styles.insightAnalysis} numberOfLines={3}>{insight.analysis}</Text>
+          {/* Insights List */}
+          <Text style={styles.sectionTitle}>{t('ai.stockAnalysis')}</Text>
 
-            <View style={styles.confidenceRow}>
-              <Badge label={t('ai.confidence', { value: insight.confidence })} variant={insight.confidence > 75 ? 'success' : 'warning'} />
-              <Text style={styles.insightTime}>{new Date(insight.timestamp).toLocaleDateString()}</Text>
+          {/* ── Loading State ── */}
+          {isLoading && insights.length === 0 && (
+            <View style={styles.stateContainer}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={[styles.stateText, { color: colors.textMuted }]}>{t('ai.generating')}</Text>
             </View>
+          )}
 
-            {insight.targets.length > 0 && (
-              <View style={styles.targetsRow}>
-                {insight.targets.map((target, i) => (
-                  <View key={`insight_${i}`} style={styles.targetItem}>
-                    <Text style={styles.targetLabel}>{t('ai.target', { num: i + 1 })}</Text>
-                    <Text style={styles.targetValue}>{formatCurrency(target.target)}</Text>
-                    <View style={styles.targetBar}>
-                      <View style={[styles.targetFill, { width: `${target.probability}%` }]} />
-                    </View>
-                    <Text style={styles.targetProb}>{t('ai.probability', { value: target.probability })}</Text>
-                  </View>
-                ))}
+          {/* ── Empty State ── */}
+          {!isLoading && insights.length === 0 && (
+            <View style={styles.stateContainer}>
+              <Ionicons name="bulb-outline" size={48} color={colors.textMuted} />
+              <Text style={[styles.stateTitle, { color: colors.text }]}>{t('ai.noInsights')}</Text>
+              <Text style={[styles.stateText, { color: colors.textMuted }]}>{t('ai.pullToRefresh')}</Text>
+            </View>
+          )}
+
+          {/* ── Data ── */}
+          {insights.map(insight => (
+            <Pressable key={insight.id} style={styles.insightCard}>
+              <View style={styles.insightHeader}>
+                <View>
+                  <Text style={styles.insightSymbol}>{insight.symbol}</Text>
+                  <Text style={styles.insightName}>{insight.name}</Text>
+                </View>
+                <View style={[styles.signelBadge, { backgroundColor: getTypeColor(insight.type) + '20' }]}>
+                  <Text style={styles.signelEmoji}>{getTypeEmoji(insight.type)}</Text>
+                  <Text style={[styles.signelText, { color: getTypeColor(insight.type) }]}>
+                    {insight.type.charAt(0).toUpperCase() + insight.type.slice(1)}
+                  </Text>
+                </View>
               </View>
-            )}
-          </Pressable>
-        ))}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+              <Text style={styles.insightSummary}>{insight.summary}</Text>
+              <Text style={styles.insightAnalysis} numberOfLines={3}>{insight.analysis}</Text>
+
+              <View style={styles.confidenceRow}>
+                <Badge label={t('ai.confidence', { value: insight.confidence })} variant={insight.confidence > 75 ? 'success' : 'warning'} />
+                <Text style={styles.insightTime}>{new Date(insight.timestamp).toLocaleDateString()}</Text>
+              </View>
+
+              {insight.targets.length > 0 && (
+                <View style={styles.targetsRow}>
+                  {insight.targets.map((target, i) => (
+                    <View key={`insight_${i}`} style={styles.targetItem}>
+                      <Text style={styles.targetLabel}>{t('ai.target', { num: i + 1 })}</Text>
+                      <Text style={styles.targetValue}>{formatCurrency(target.target)}</Text>
+                      <View style={styles.targetBar}>
+                        <View style={[styles.targetFill, { width: `${target.probability}%` }]} />
+                      </View>
+                      <Text style={styles.targetProb}>{t('ai.probability', { value: target.probability })}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </Pressable>
+          ))}
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     scrollContent: {
       paddingHorizontal: SPACING.xl,
       paddingBottom: SPACING.xl,
     },
     header: {
-      paddingTop: 60,
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       marginBottom: SPACING.xl,
     },
     title: {

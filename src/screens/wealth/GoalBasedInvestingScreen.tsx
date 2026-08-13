@@ -27,6 +27,7 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useWealthStore, type GoalCategory } from '../../store/wealthStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 // ─── Category Data ─────────────────────────────────────────────────────
@@ -68,7 +69,6 @@ const formatCompactINR = (n: number): string => {
 export function GoalCreateScreen({ navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const addGoal = useWealthStore(s => s.addGoal);
 
   const [name, setName] = useState('');
@@ -138,182 +138,184 @@ export function GoalCreateScreen({ navigation }: any) {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <View style={[styles.header, { paddingTop: 50 + insets.top, backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="close" size={24} color={colors.text} />
-          </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('wealth.createGoal')}</Text>
+          <AppScreen scroll={false} padded={false}
+      header={
+  <View style={[styles.header, {backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="close" size={24} color={colors.text} />
+            </Pressable>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('wealth.createGoal')}</Text>
+          </View>
         </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Goal Name */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('wealth.goalName')}</Text>
-        <TextInput
-          style={[styles.input, inputStyle(name)]}
-          value={name}
-          onChangeText={setName}
-          placeholder={t('wealth.goalNamePlaceholder')}
-          placeholderTextColor={colors.textMuted}
-        />
-
-        {/* Category */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.category')}</Text>
-        <View style={styles.categoryGrid}>
-          {CATEGORIES.map(cat => {
-            const isActive = category === cat.key;
-            return (
-              <Pressable
-                key={cat.key}
-                onPress={() => setCategory(cat.key)}
-                style={[styles.categoryChip, {
-                  backgroundColor: isActive ? cat.color + '20' : colors.bgInput,
-                  borderColor: isActive ? cat.color + '40' : colors.border,
-                }]}
-              >
-                <Text style={{ fontSize: 20 }}>{cat.icon}</Text>
-                <Text style={[styles.categoryLabel, { color: isActive ? cat.color : colors.textMuted }]}>{t(cat.labelKey)}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Target Amount */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.targetAmount')}</Text>
-        <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: targetAmount ? colors.primary : colors.border }]}>
-          <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
+      }
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Goal Name */}
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('wealth.goalName')}</Text>
           <TextInput
-            style={[styles.inputFlex, { color: colors.text }]}
-            value={targetAmount}
-            onChangeText={setTargetAmount}
-            keyboardType="numeric"
-            placeholder="500000"
+            style={[styles.input, inputStyle(name)]}
+            value={name}
+            onChangeText={setName}
+            placeholder={t('wealth.goalNamePlaceholder')}
             placeholderTextColor={colors.textMuted}
           />
-        </View>
-        {targetAmt > 0 && (
-          <Text style={[styles.fieldHint, { color: colors.textMuted }]}>{formatINR(targetAmt)}</Text>
-        )}
-        <View style={styles.suggestionRow}>
-          {catInfo.suggestions.map(s => (
-            <Pressable
-              key={s.label}
-              style={[styles.suggestionChip, { backgroundColor: colors.bgInput, borderColor: targetAmount === String(s.amount) ? colors.primary : colors.border }]}
-              onPress={() => setTargetAmount(String(s.amount))}
-            >
-              <Text style={[styles.suggestionText, { color: targetAmount === String(s.amount) ? colors.primary : colors.textMuted }]}>{s.label}</Text>
-            </Pressable>
-          ))}
-        </View>
 
-        {/* Timeframe */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.targetTimeframe')}</Text>
-        <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: targetYears ? colors.primary : colors.border, width: 120 }]}>
-          <TextInput
-            style={[styles.inputFlex, { color: colors.text }]}
-            value={targetYears}
-            onChangeText={setTargetYears}
-            keyboardType="numeric"
-          />
-          <Text style={[styles.inputSuffix, { color: colors.textMuted }]}>{t('wealth.yrsSuffix')}</Text>
-        </View>
-        <View style={styles.suggestionRow}>
-          {[1, 3, 5, 10, 15, 20].map(y => (
-            <Pressable
-              key={y}
-              style={[styles.suggestionChip, { backgroundColor: colors.bgInput, borderColor: targetYears === String(y) ? colors.primary : colors.border }]}
-              onPress={() => setTargetYears(String(y))}
-            >
-              <Text style={[styles.suggestionText, { color: targetYears === String(y) ? colors.primary : colors.textMuted }]}>{y}Y</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* Expected Return */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.expectedReturn')}</Text>
-        <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: expectedReturn ? colors.primary : colors.border, width: 100 }]}>
-          <TextInput
-            style={[styles.inputFlex, { color: colors.text }]}
-            value={expectedReturn}
-            onChangeText={setExpectedReturn}
-            keyboardType="decimal-pad"
-          />
-          <Text style={[styles.inputSuffix, { color: colors.textMuted }]}>%</Text>
-        </View>
-        <View style={styles.suggestionRow}>
-          {[8, 10, 12, 15].map(r => (
-            <Pressable
-              key={r}
-              style={[styles.suggestionChip, { backgroundColor: colors.bgInput, borderColor: expectedReturn === String(r) ? colors.primary : colors.border }]}
-              onPress={() => setExpectedReturn(String(r))}
-            >
-              <Text style={[styles.suggestionText, { color: expectedReturn === String(r) ? colors.primary : colors.textMuted }]}>{r}%</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* Priority */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.priority')}</Text>
-        <View style={styles.priorityRow}>
-          {(['low', 'medium', 'high'] as const).map(p => (
-            <Pressable
-              key={p}
-              onPress={() => setPriority(p)}
-              style={[styles.priorityBtn, {
-                backgroundColor: priority === p ? (p === 'high' ? '#FF525220' : p === 'medium' ? '#FFC10720' : '#00C85320') : colors.bgInput,
-                borderColor: priority === p ? (p === 'high' ? '#FF525240' : p === 'medium' ? '#FFC10740' : '#00C85340') : colors.border,
-              }]}
-            >
-              <Text style={[styles.priorityText, { color: priority === p ? (p === 'high' ? '#FF5252' : p === 'medium' ? '#FFC107' : '#00C853') : colors.textMuted }]}>
-                {p === 'low' ? t('wealth.priorityLow') : p === 'medium' ? t('wealth.priorityMedium') : t('wealth.priorityHigh')}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* SIP Estimate Card */}
-        {targetAmt > 0 && years > 0 && ret > 0 && (
-          <Animated.View entering={FadeInUp.duration(400)} style={[styles.sipEstimateCard, { backgroundColor: colors.bgCard, borderColor: colors.primary + '30' }]}>
-            <Text style={[styles.sipEstimateTitle, { color: colors.text }]}>{t('wealth.monthlySipNeeded')}</Text>
-            <Text style={[styles.sipEstimateAmount, { color: colors.primary }]}>
-              {formatCompactINR(estimatedSIP)}
-            </Text>
-            <Text style={[styles.sipEstimateNote, { color: colors.textMuted }]}>
-              {t('wealth.sipEstimateNote', {
-                amount: formatCompactINR(estimatedSIP),
-                return: ret,
-                years,
-                target: formatCompactINR(targetAmt),
-              })}
-            </Text>
-          </Animated.View>
-        )}
-
-        {/* Notes */}
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.notesOptional')}</Text>
-        <TextInput
-          style={[styles.textArea, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
-          value={notes}
-          onChangeText={setNotes}
-          placeholder={t('wealth.goalNotesPlaceholder')}
-          placeholderTextColor={colors.textMuted}
-          multiline
-          numberOfLines={3}
-        />
-
-        {/* Create Button */}
-        <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.97} style={{ marginTop: SPACING.xl }}>
-          <View style={[styles.createBtn, { backgroundColor: colors.primary }]}>
-            <Ionicons name="flag" size={20} color="#fff" />
-            <Text style={styles.createBtnText}>{t('wealth.createGoal')}</Text>
+          {/* Category */}
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.category')}</Text>
+          <View style={styles.categoryGrid}>
+            {CATEGORIES.map(cat => {
+              const isActive = category === cat.key;
+              return (
+                <Pressable
+                  key={cat.key}
+                  onPress={() => setCategory(cat.key)}
+                  style={[styles.categoryChip, {
+                    backgroundColor: isActive ? cat.color + '20' : colors.bgInput,
+                    borderColor: isActive ? cat.color + '40' : colors.border,
+                  }]}
+                >
+                  <Text style={{ fontSize: 20 }}>{cat.icon}</Text>
+                  <Text style={[styles.categoryLabel, { color: isActive ? cat.color : colors.textMuted }]}>{t(cat.labelKey)}</Text>
+                </Pressable>
+              );
+            })}
           </View>
-        </AnimatedPressable>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          {/* Target Amount */}
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.targetAmount')}</Text>
+          <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: targetAmount ? colors.primary : colors.border }]}>
+            <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
+            <TextInput
+              style={[styles.inputFlex, { color: colors.text }]}
+              value={targetAmount}
+              onChangeText={setTargetAmount}
+              keyboardType="numeric"
+              placeholder="500000"
+              placeholderTextColor={colors.textMuted}
+            />
+          </View>
+          {targetAmt > 0 && (
+            <Text style={[styles.fieldHint, { color: colors.textMuted }]}>{formatINR(targetAmt)}</Text>
+          )}
+          <View style={styles.suggestionRow}>
+            {catInfo.suggestions.map(s => (
+              <Pressable
+                key={s.label}
+                style={[styles.suggestionChip, { backgroundColor: colors.bgInput, borderColor: targetAmount === String(s.amount) ? colors.primary : colors.border }]}
+                onPress={() => setTargetAmount(String(s.amount))}
+              >
+                <Text style={[styles.suggestionText, { color: targetAmount === String(s.amount) ? colors.primary : colors.textMuted }]}>{s.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Timeframe */}
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.targetTimeframe')}</Text>
+          <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: targetYears ? colors.primary : colors.border, width: 120 }]}>
+            <TextInput
+              style={[styles.inputFlex, { color: colors.text }]}
+              value={targetYears}
+              onChangeText={setTargetYears}
+              keyboardType="numeric"
+            />
+            <Text style={[styles.inputSuffix, { color: colors.textMuted }]}>{t('wealth.yrsSuffix')}</Text>
+          </View>
+          <View style={styles.suggestionRow}>
+            {[1, 3, 5, 10, 15, 20].map(y => (
+              <Pressable
+                key={y}
+                style={[styles.suggestionChip, { backgroundColor: colors.bgInput, borderColor: targetYears === String(y) ? colors.primary : colors.border }]}
+                onPress={() => setTargetYears(String(y))}
+              >
+                <Text style={[styles.suggestionText, { color: targetYears === String(y) ? colors.primary : colors.textMuted }]}>{y}Y</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Expected Return */}
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.expectedReturn')}</Text>
+          <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: expectedReturn ? colors.primary : colors.border, width: 100 }]}>
+            <TextInput
+              style={[styles.inputFlex, { color: colors.text }]}
+              value={expectedReturn}
+              onChangeText={setExpectedReturn}
+              keyboardType="decimal-pad"
+            />
+            <Text style={[styles.inputSuffix, { color: colors.textMuted }]}>%</Text>
+          </View>
+          <View style={styles.suggestionRow}>
+            {[8, 10, 12, 15].map(r => (
+              <Pressable
+                key={r}
+                style={[styles.suggestionChip, { backgroundColor: colors.bgInput, borderColor: expectedReturn === String(r) ? colors.primary : colors.border }]}
+                onPress={() => setExpectedReturn(String(r))}
+              >
+                <Text style={[styles.suggestionText, { color: expectedReturn === String(r) ? colors.primary : colors.textMuted }]}>{r}%</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Priority */}
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.priority')}</Text>
+          <View style={styles.priorityRow}>
+            {(['low', 'medium', 'high'] as const).map(p => (
+              <Pressable
+                key={p}
+                onPress={() => setPriority(p)}
+                style={[styles.priorityBtn, {
+                  backgroundColor: priority === p ? (p === 'high' ? '#FF525220' : p === 'medium' ? '#FFC10720' : '#00C85320') : colors.bgInput,
+                  borderColor: priority === p ? (p === 'high' ? '#FF525240' : p === 'medium' ? '#FFC10740' : '#00C85340') : colors.border,
+                }]}
+              >
+                <Text style={[styles.priorityText, { color: priority === p ? (p === 'high' ? '#FF5252' : p === 'medium' ? '#FFC107' : '#00C853') : colors.textMuted }]}>
+                  {p === 'low' ? t('wealth.priorityLow') : p === 'medium' ? t('wealth.priorityMedium') : t('wealth.priorityHigh')}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* SIP Estimate Card */}
+          {targetAmt > 0 && years > 0 && ret > 0 && (
+            <Animated.View entering={FadeInUp.duration(400)} style={[styles.sipEstimateCard, { backgroundColor: colors.bgCard, borderColor: colors.primary + '30' }]}>
+              <Text style={[styles.sipEstimateTitle, { color: colors.text }]}>{t('wealth.monthlySipNeeded')}</Text>
+              <Text style={[styles.sipEstimateAmount, { color: colors.primary }]}>
+                {formatCompactINR(estimatedSIP)}
+              </Text>
+              <Text style={[styles.sipEstimateNote, { color: colors.textMuted }]}>
+                {t('wealth.sipEstimateNote', {
+                  amount: formatCompactINR(estimatedSIP),
+                  return: ret,
+                  years,
+                  target: formatCompactINR(targetAmt),
+                })}
+              </Text>
+            </Animated.View>
+          )}
+
+          {/* Notes */}
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('wealth.notesOptional')}</Text>
+          <TextInput
+            style={[styles.textArea, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
+            value={notes}
+            onChangeText={setNotes}
+            placeholder={t('wealth.goalNotesPlaceholder')}
+            placeholderTextColor={colors.textMuted}
+            multiline
+            numberOfLines={3}
+          />
+
+          {/* Create Button */}
+          <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.97} style={{ marginTop: SPACING.xl }}>
+            <View style={[styles.createBtn, { backgroundColor: colors.primary }]}>
+              <Ionicons name="flag" size={20} color="#fff" />
+              <Text style={styles.createBtnText}>{t('wealth.createGoal')}</Text>
+            </View>
+          </AnimatedPressable>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -324,7 +326,6 @@ export function GoalCreateScreen({ navigation }: any) {
 export function GoalDetailScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const { goalId } = route.params || {};
   const { goals, deleteGoal, contributeToGoal, getGoalProgress } = useWealthStore();
   const goal = goals.find(g => g.id === goalId);
@@ -333,10 +334,13 @@ export function GoalDetailScreen({ route, navigation }: any) {
 
   if (!goal) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
-        <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>{t('wealth.goalNotFound')}</Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: SPACING.md }]}>{t('wealth.goalNotFound')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -350,156 +354,158 @@ export function GoalDetailScreen({ route, navigation }: any) {
   const _inputStyle = { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <View style={[styles.header, { paddingTop: 50 + insets.top, backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('wealth.goalDetails')}</Text>
-          <Pressable
-            onPress={() => {
-              Alert.alert(t('wealth.deleteGoal'), t('wealth.deleteGoalMsg', { name: goal.name }), [
-                { text: t('app.cancel'), style: 'cancel' },
-                { text: t('app.delete'), style: 'destructive', onPress: () => { deleteGoal(goal.id); navigation.goBack(); } },
-              ]);
-            }}
-          >
-            <Ionicons name="trash-outline" size={22} color="#FF5252" />
-          </Pressable>
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Hero */}
-        <View style={[styles.heroCard, { backgroundColor: goal.color + '15', borderColor: goal.color + '30' }]}>
-          <Text style={{ fontSize: 48 }}>{goal.icon}</Text>
-          <Text style={[styles.heroTitle, { color: colors.text }]}>{goal.name}</Text>
-          <Text style={[styles.heroCategory, { color: goal.color }]}>
-            {t(CATEGORIES.find(c => c.key === goal.category)?.labelKey || 'wealth.catCustom')}
-          </Text>
-
-          <View style={styles.heroProgressContainer}>
-            <Text style={[styles.heroProgressText, { color: colors.text }]}>{t('wealth.percentComplete', { progress: progress.toFixed(1) })}</Text>
-            <View style={[styles.progressBarBg, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-              <View style={[styles.progressBarFill, { width: `${Math.min(100, progress)}%`, backgroundColor: goal.color }]} />
-            </View>
-          </View>
-        </View>
-
-        {/* Amounts */}
-        <View style={[styles.amountsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.amountsRow}>
-            <View style={styles.amountsItem}>
-              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.targetLabel')}</Text>
-              <Text style={[styles.amountsValue, { color: colors.text }]}>{formatCompactINR(goal.targetAmount)}</Text>
-            </View>
-            <View style={[styles.amountsDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.amountsItem}>
-              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.saved')}</Text>
-              <Text style={[styles.amountsValue, { color: goal.color }]}>{formatCompactINR(goal.currentAmount)}</Text>
-            </View>
-            <View style={[styles.amountsDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.amountsItem}>
-              <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.remaining')}</Text>
-              <Text style={[styles.amountsValue, { color: '#FFC107' }]}>{formatCompactINR(remaining)}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Stats */}
-        <View style={[styles.statsGrid, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Ionicons name="calendar" size={16} color={colors.textMuted} />
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.targetDate')}</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>
-                {targetDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="time" size={16} color={colors.textMuted} />
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.timeLeft')}</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>{t('wealth.monthsLeft', { count: monthsLeft })}</Text>
-            </View>
-          </View>
-          <View style={[styles.statsDivider, { backgroundColor: colors.divider }]} />
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Ionicons name="trending-up" size={16} color={colors.textMuted} />
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.monthlySip')}</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>{formatCompactINR(goal.monthlyContribution)}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="pulse" size={16} color={colors.textMuted} />
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.requiredSip')}</Text>
-              <Text style={[styles.statValue, { color: '#FFC107' }]}>{formatCompactINR(sipRequired)}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Quick Contribute */}
-        <View style={[styles.contributeCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.contributeTitle, { color: colors.text }]}>{t('wealth.quickContribute')}</Text>
-          <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-            <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
-            <TextInput
-              style={[styles.inputFlex, { color: colors.text }]}
-              value={addAmount}
-              onChangeText={setAddAmount}
-              keyboardType="numeric"
-              placeholder={t('wealth.enterAmount')}
-              placeholderTextColor={colors.textMuted}
-            />
+          <AppScreen scroll={false} padded={false}
+      header={
+  <View style={[styles.header, {backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('wealth.goalDetails')}</Text>
             <Pressable
               onPress={() => {
-                const amt = parseFloat(addAmount);
-                if (amt > 0) { contributeToGoal(goal.id, amt); setAddAmount(''); Alert.alert(t('wealth.addedTitle'), t('wealth.addedMsg', { amount: amt.toLocaleString('en-IN'), name: goal.name })); }
-                else Alert.alert(t('wealth.invalidAmount'), t('wealth.invalidAmountMsg2'));
+                Alert.alert(t('wealth.deleteGoal'), t('wealth.deleteGoalMsg', { name: goal.name }), [
+                  { text: t('app.cancel'), style: 'cancel' },
+                  { text: t('app.delete'), style: 'destructive', onPress: () => { deleteGoal(goal.id); navigation.goBack(); } },
+                ]);
               }}
-              style={[styles.contributeBtn, { backgroundColor: colors.primary }]}
             >
-              <Text style={styles.contributeBtnText}>{t('wealth.add')}</Text>
+              <Ionicons name="trash-outline" size={22} color="#FF5252" />
             </Pressable>
           </View>
-          <View style={styles.quickAmtRow}>
-            {[5000, 10000, 25000, 50000].map(amt => (
-              <Pressable
-                key={amt}
-                style={[styles.quickAmtChip, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
-                onPress={() => setAddAmount(String(amt))}
-              >
-                <Text style={[styles.quickAmtText, { color: colors.textMuted }]}>{formatCompactINR(amt)}</Text>
-              </Pressable>
-            ))}
-          </View>
         </View>
-
-        {/* Notes */}
-        {goal.notes ? (
-          <View style={[styles.notesCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.notesLabel, { color: colors.textMuted }]}>{t('wealth.notes')}</Text>
-            <Text style={[styles.notesText, { color: colors.text }]}>{goal.notes}</Text>
-          </View>
-        ) : null}
-
-        {/* Priority Badge */}
-        <View style={[styles.priorityCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.priorityCardLabel, { color: colors.textMuted }]}>{t('wealth.priorityLabel')}</Text>
-          <View style={[styles.priorityBadge, {
-            backgroundColor: goal.priority === 'high' ? '#FF525220' : goal.priority === 'medium' ? '#FFC10720' : '#00C85320',
-          }]}>
-            <Text style={[styles.priorityBadgeText, {
-              color: goal.priority === 'high' ? '#FF5252' : goal.priority === 'medium' ? '#FFC107' : '#00C853',
-            }]}>
-              {goal.priority === 'low' ? t('wealth.priorityLow') : goal.priority === 'medium' ? t('wealth.priorityMedium') : t('wealth.priorityHigh')}
+      }
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Hero */}
+          <View style={[styles.heroCard, { backgroundColor: goal.color + '15', borderColor: goal.color + '30' }]}>
+            <Text style={{ fontSize: 48 }}>{goal.icon}</Text>
+            <Text style={[styles.heroTitle, { color: colors.text }]}>{goal.name}</Text>
+            <Text style={[styles.heroCategory, { color: goal.color }]}>
+              {t(CATEGORIES.find(c => c.key === goal.category)?.labelKey || 'wealth.catCustom')}
             </Text>
-          </View>
-        </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+            <View style={styles.heroProgressContainer}>
+              <Text style={[styles.heroProgressText, { color: colors.text }]}>{t('wealth.percentComplete', { progress: progress.toFixed(1) })}</Text>
+              <View style={[styles.progressBarBg, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                <View style={[styles.progressBarFill, { width: `${Math.min(100, progress)}%`, backgroundColor: goal.color }]} />
+              </View>
+            </View>
+          </View>
+
+          {/* Amounts */}
+          <View style={[styles.amountsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.amountsRow}>
+              <View style={styles.amountsItem}>
+                <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.targetLabel')}</Text>
+                <Text style={[styles.amountsValue, { color: colors.text }]}>{formatCompactINR(goal.targetAmount)}</Text>
+              </View>
+              <View style={[styles.amountsDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.amountsItem}>
+                <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.saved')}</Text>
+                <Text style={[styles.amountsValue, { color: goal.color }]}>{formatCompactINR(goal.currentAmount)}</Text>
+              </View>
+              <View style={[styles.amountsDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.amountsItem}>
+                <Text style={[styles.amountsLabel, { color: colors.textMuted }]}>{t('wealth.remaining')}</Text>
+                <Text style={[styles.amountsValue, { color: '#FFC107' }]}>{formatCompactINR(remaining)}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Stats */}
+          <View style={[styles.statsGrid, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Ionicons name="calendar" size={16} color={colors.textMuted} />
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.targetDate')}</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>
+                  {targetDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Ionicons name="time" size={16} color={colors.textMuted} />
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.timeLeft')}</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>{t('wealth.monthsLeft', { count: monthsLeft })}</Text>
+              </View>
+            </View>
+            <View style={[styles.statsDivider, { backgroundColor: colors.divider }]} />
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Ionicons name="trending-up" size={16} color={colors.textMuted} />
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.monthlySip')}</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>{formatCompactINR(goal.monthlyContribution)}</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Ionicons name="pulse" size={16} color={colors.textMuted} />
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('wealth.requiredSip')}</Text>
+                <Text style={[styles.statValue, { color: '#FFC107' }]}>{formatCompactINR(sipRequired)}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Quick Contribute */}
+          <View style={[styles.contributeCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.contributeTitle, { color: colors.text }]}>{t('wealth.quickContribute')}</Text>
+            <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+              <Text style={[styles.inputPrefix, { color: colors.textMuted }]}>₹</Text>
+              <TextInput
+                style={[styles.inputFlex, { color: colors.text }]}
+                value={addAmount}
+                onChangeText={setAddAmount}
+                keyboardType="numeric"
+                placeholder={t('wealth.enterAmount')}
+                placeholderTextColor={colors.textMuted}
+              />
+              <Pressable
+                onPress={() => {
+                  const amt = parseFloat(addAmount);
+                  if (amt > 0) { contributeToGoal(goal.id, amt); setAddAmount(''); Alert.alert(t('wealth.addedTitle'), t('wealth.addedMsg', { amount: amt.toLocaleString('en-IN'), name: goal.name })); }
+                  else Alert.alert(t('wealth.invalidAmount'), t('wealth.invalidAmountMsg2'));
+                }}
+                style={[styles.contributeBtn, { backgroundColor: colors.primary }]}
+              >
+                <Text style={styles.contributeBtnText}>{t('wealth.add')}</Text>
+              </Pressable>
+            </View>
+            <View style={styles.quickAmtRow}>
+              {[5000, 10000, 25000, 50000].map(amt => (
+                <Pressable
+                  key={amt}
+                  style={[styles.quickAmtChip, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                  onPress={() => setAddAmount(String(amt))}
+                >
+                  <Text style={[styles.quickAmtText, { color: colors.textMuted }]}>{formatCompactINR(amt)}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          {/* Notes */}
+          {goal.notes ? (
+            <View style={[styles.notesCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Text style={[styles.notesLabel, { color: colors.textMuted }]}>{t('wealth.notes')}</Text>
+              <Text style={[styles.notesText, { color: colors.text }]}>{goal.notes}</Text>
+            </View>
+          ) : null}
+
+          {/* Priority Badge */}
+          <View style={[styles.priorityCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.priorityCardLabel, { color: colors.textMuted }]}>{t('wealth.priorityLabel')}</Text>
+            <View style={[styles.priorityBadge, {
+              backgroundColor: goal.priority === 'high' ? '#FF525220' : goal.priority === 'medium' ? '#FFC10720' : '#00C85320',
+            }]}>
+              <Text style={[styles.priorityBadgeText, {
+                color: goal.priority === 'high' ? '#FF5252' : goal.priority === 'medium' ? '#FFC107' : '#00C853',
+              }]}>
+                {goal.priority === 'low' ? t('wealth.priorityLow') : goal.priority === 'medium' ? t('wealth.priorityMedium') : t('wealth.priorityHigh')}
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -509,7 +515,6 @@ export function GoalDetailScreen({ route, navigation }: any) {
 // ═════════════════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.md },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   backBtn: { padding: 4 },

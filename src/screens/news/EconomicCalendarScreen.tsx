@@ -9,6 +9,7 @@ import { useT } from '../../hooks/useT';
 import { SPACING, FONTS } from '../../constants/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 export default function EconomicCalendarScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'EconomicCalendar'>) {
@@ -16,25 +17,27 @@ export default function EconomicCalendarScreen({ navigation: _navigation  }: Nat
   const { t } = useT();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <Text style={[styles.title, { color: colors.text }]}>{t('economicCalendar.title')}</Text>
-      </View>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.emptyState}>
-          <Ionicons name="calendar-outline" size={64} color={colors.textMuted} />
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('economicCalendar.noEvents')}</Text>
-          <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
-            {t('economicCalendar.noEventsDesc')}
-          </Text>
+          <AppScreen scroll={false} padded={false}
+      header={
+  <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <Text style={[styles.title, { color: colors.text }]}>{t('economicCalendar.title')}</Text>
         </View>
-      </ScrollView>
-    </View>
+      }
+      >
+  <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.emptyState}>
+            <Ionicons name="calendar-outline" size={64} color={colors.textMuted} />
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('economicCalendar.noEvents')}</Text>
+            <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
+              {t('economicCalendar.noEventsDesc')}
+            </Text>
+          </View>
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { padding: SPACING.xl, paddingTop: 60 },
   title: { fontSize: 22, fontWeight: '800' },
   content: { padding: SPACING.xl },

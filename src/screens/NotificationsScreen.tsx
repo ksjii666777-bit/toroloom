@@ -17,6 +17,7 @@ import { formatRelativeTime } from '../utils/formatters';
 import Card from '../components/ui/Card';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types';
+import AppScreen from '../components/ui/AppScreen';
 
 
 const NOTIFICATION_ICONS: Record<string, { icon: string; color: string }> = {
@@ -155,12 +156,9 @@ export default function NotificationsScreen({ navigation }: NativeStackScreenPro
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        container: {
-          flex: 1,
-          backgroundColor: colors.bg,
-        },
         header: {
-          paddingTop: 60,
+          // AppScreen already pads for the status-bar/safe-area inset
+          paddingTop: SPACING.xl,
           paddingHorizontal: SPACING.xl,
           paddingBottom: SPACING.lg,
         },
@@ -387,144 +385,145 @@ export default function NotificationsScreen({ navigation }: NativeStackScreenPro
   );
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View>
-            <Text style={styles.headerTitle}>{t('notifications.title')}</Text>
-            <Text style={styles.headerSubtitle}>
-              {unreadCountLocal > 0
-                ? t('notifications.unread', { count: unreadCountLocal })
-                : t('notifications.allCaughtUp')}
-            </Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View>
+              <Text style={styles.headerTitle}>{t('notifications.title')}</Text>
+              <Text style={styles.headerSubtitle}>
+                {unreadCountLocal > 0
+                  ? t('notifications.unread', { count: unreadCountLocal })
+                  : t('notifications.allCaughtUp')}
+              </Text>
+            </View>
+            <View style={styles.headerActions}>
+              {unreadCountLocal > 0 && (
+                <Pressable onPress={markAllAsRead} style={styles.headerActionBtn}>
+                  <Ionicons name="checkmark-done" size={20} color={colors.primary} />
+                </Pressable>
+              )}
+              {notifications.length > 0 && (
+                <Pressable onPress={handleClearAll} style={styles.headerActionBtn}>
+                  <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                </Pressable>
+              )}
+            </View>
           </View>
-          <View style={styles.headerActions}>
-            {unreadCountLocal > 0 && (
-              <Pressable onPress={markAllAsRead} style={styles.headerActionBtn}>
-                <Ionicons name="checkmark-done" size={20} color={colors.primary} />
+
+          {/* Tab Filters */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll}>
+            {tabs.map(tab => (
+              <Pressable
+                key={tab.key}
+                style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+                onPress={() => setActiveTab(tab.key)}
+              >
+                <Ionicons
+                  name={tab.icon as keyof typeof Ionicons.glyphMap}
+                  size={16}
+                  color={activeTab === tab.key ? colors.primary : colors.textMuted}
+                />
+                <Text style={[styles.tabLabel, activeTab === tab.key && styles.tabLabelActive]}>
+                  {tab.label}
+                </Text>
               </Pressable>
-            )}
-            {notifications.length > 0 && (
-              <Pressable onPress={handleClearAll} style={styles.headerActionBtn}>
-                <Ionicons name="trash-outline" size={20} color={colors.danger} />
-              </Pressable>
-            )}
-          </View>
+            ))}
+          </ScrollView>
         </View>
 
-        {/* Tab Filters */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsScroll}>
-          {tabs.map(tab => (
-            <Pressable
-              key={tab.key}
-              style={[styles.tab, activeTab === tab.key && styles.tabActive]}
-              onPress={() => setActiveTab(tab.key)}
-            >
-              <Ionicons
-                name={tab.icon as keyof typeof Ionicons.glyphMap}
-                size={16}
-                color={activeTab === tab.key ? colors.primary : colors.textMuted}
-              />
-              <Text style={[styles.tabLabel, activeTab === tab.key && styles.tabLabelActive]}>
-                {tab.label}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        {/* Price Alert Rules */}
-        {activeTab === 'all' && priceAlertRules.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('notifications.activePriceAlerts')}</Text>
-            {priceAlertRules.filter(r => !r.triggered).map(rule => (
-              <View key={rule.id} style={styles.alertRuleCard}>
-                <View style={styles.alertRuleInfo}>
-                  <Text style={styles.alertRuleSymbol}>{rule.symbol}</Text>
-                  <Text style={styles.alertRuleTarget}>
-                    {rule.direction === 'above' ? t('notifications.above') : t('notifications.below')} ₹{rule.targetPrice.toFixed(2)}
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={() => removePriceAlertRule(rule.id)}
-                  style={styles.alertRuleRemove}
-                >
-                  <Ionicons name="close-circle" size={22} color={colors.textMuted} />
-                </Pressable>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Notification Preferences (inline settings) */}
-        {activeTab === 'all' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('notifications.preferences')}</Text>
-            <Card>
-              {([
-                { key: 'priceAlerts' as const, label: t('notifications.priceAlerts'), icon: 'trending-up', color: '#FFC107', desc: t('notifications.prefPriceAlertsDesc') },
-                { key: 'tradeConfirmations' as const, label: t('notifications.tradeConfirmations'), icon: 'swap-horizontal', color: '#00C853', desc: t('notifications.prefTradeConfirmationsDesc') },
-                { key: 'educationalReminders' as const, label: t('notifications.prefEducationalReminders'), icon: 'school', color: '#6C63FF', desc: t('notifications.prefEducationalRemindersDesc') },
-                { key: 'systemUpdates' as const, label: t('notifications.systemUpdates'), icon: 'settings', color: '#6E6E9A', desc: t('notifications.prefSystemUpdatesDesc') },
-              ] as const).map(item => (
-                <View key={item.key} style={styles.prefItem}>
-                  <View style={[styles.prefIcon, { backgroundColor: item.color + '20' }]}>
-                    <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={18} color={item.color} />
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+          {/* Price Alert Rules */}
+          {activeTab === 'all' && priceAlertRules.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('notifications.activePriceAlerts')}</Text>
+              {priceAlertRules.filter(r => !r.triggered).map(rule => (
+                <View key={rule.id} style={styles.alertRuleCard}>
+                  <View style={styles.alertRuleInfo}>
+                    <Text style={styles.alertRuleSymbol}>{rule.symbol}</Text>
+                    <Text style={styles.alertRuleTarget}>
+                      {rule.direction === 'above' ? t('notifications.above') : t('notifications.below')} ₹{rule.targetPrice.toFixed(2)}
+                    </Text>
                   </View>
-                  <View style={styles.prefInfo}>
-                    <Text style={styles.prefLabel}>{item.label}</Text>
-                    <Text style={styles.prefDesc}>{item.desc}</Text>
-                  </View>
-                  <Switch
-                    value={preferences[item.key]}
-                    onValueChange={val => updatePreference(item.key, val)}
-                    trackColor={{ false: colors.bgInput, true: colors.primary + '60' }}
-                    thumbColor={preferences[item.key] ? colors.primary : colors.textMuted}
-                  />
+                  <Pressable
+                    onPress={() => removePriceAlertRule(rule.id)}
+                    style={styles.alertRuleRemove}
+                  >
+                    <Ionicons name="close-circle" size={22} color={colors.textMuted} />
+                  </Pressable>
                 </View>
               ))}
-
-              {/* Price Alert Threshold */}
-              <View style={styles.prefItem}>
-                <View style={[styles.prefIcon, { backgroundColor: '#FFC10720' }]}>
-                  <Ionicons name="speedometer" size={18} color="#FFC107" />
-                </View>
-                <View style={styles.prefInfo}>
-                  <Text style={styles.prefLabel}>{t('notifications.alertThreshold')}</Text>
-                  <Text style={styles.prefDesc}>{t('notifications.priceChange', { percent: preferences.priceAlertThreshold })}</Text>
-                </View>
-              </View>
-            </Card>
-          </View>
-        )}
-
-        {/* Notification List */}
-        {sections.length > 0 ? (
-          sections.map(section => (
-            <View key={section.title} style={styles.section}>
-              <Text style={styles.sectionTitle}>{section.title}</Text>
-              {section.data.map(renderNotificationItem)}
             </View>
-          ))
-        ) : (
-          <View style={styles.emptyState}>
-            <Ionicons name="notifications-off-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>{t('notifications.noNotifications')}</Text>
-            <Text style={styles.emptyDesc}>
-              {activeTab === 'all'
-                ? t('notifications.caughtUpMsg')
-                : t('notifications.noTabNotifications', { tab: activeTab })}
-            </Text>
-          </View>
-        )}
+          )}
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+          {/* Notification Preferences (inline settings) */}
+          {activeTab === 'all' && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('notifications.preferences')}</Text>
+              <Card>
+                {([
+                  { key: 'priceAlerts' as const, label: t('notifications.priceAlerts'), icon: 'trending-up', color: '#FFC107', desc: t('notifications.prefPriceAlertsDesc') },
+                  { key: 'tradeConfirmations' as const, label: t('notifications.tradeConfirmations'), icon: 'swap-horizontal', color: '#00C853', desc: t('notifications.prefTradeConfirmationsDesc') },
+                  { key: 'educationalReminders' as const, label: t('notifications.prefEducationalReminders'), icon: 'school', color: '#6C63FF', desc: t('notifications.prefEducationalRemindersDesc') },
+                  { key: 'systemUpdates' as const, label: t('notifications.systemUpdates'), icon: 'settings', color: '#6E6E9A', desc: t('notifications.prefSystemUpdatesDesc') },
+                ] as const).map(item => (
+                  <View key={item.key} style={styles.prefItem}>
+                    <View style={[styles.prefIcon, { backgroundColor: item.color + '20' }]}>
+                      <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={18} color={item.color} />
+                    </View>
+                    <View style={styles.prefInfo}>
+                      <Text style={styles.prefLabel}>{item.label}</Text>
+                      <Text style={styles.prefDesc}>{item.desc}</Text>
+                    </View>
+                    <Switch
+                      value={preferences[item.key]}
+                      onValueChange={val => updatePreference(item.key, val)}
+                      trackColor={{ false: colors.bgInput, true: colors.primary + '60' }}
+                      thumbColor={preferences[item.key] ? colors.primary : colors.textMuted}
+                    />
+                  </View>
+                ))}
+
+                {/* Price Alert Threshold */}
+                <View style={styles.prefItem}>
+                  <View style={[styles.prefIcon, { backgroundColor: '#FFC10720' }]}>
+                    <Ionicons name="speedometer" size={18} color="#FFC107" />
+                  </View>
+                  <View style={styles.prefInfo}>
+                    <Text style={styles.prefLabel}>{t('notifications.alertThreshold')}</Text>
+                    <Text style={styles.prefDesc}>{t('notifications.priceChange', { percent: preferences.priceAlertThreshold })}</Text>
+                  </View>
+                </View>
+              </Card>
+            </View>
+          )}
+
+          {/* Notification List */}
+          {sections.length > 0 ? (
+            sections.map(section => (
+              <View key={section.title} style={styles.section}>
+                <Text style={styles.sectionTitle}>{section.title}</Text>
+                {section.data.map(renderNotificationItem)}
+              </View>
+            ))
+          ) : (
+            <View style={styles.emptyState}>
+              <Ionicons name="notifications-off-outline" size={64} color={colors.textMuted} />
+              <Text style={styles.emptyTitle}>{t('notifications.noNotifications')}</Text>
+              <Text style={styles.emptyDesc}>
+                {activeTab === 'all'
+                  ? t('notifications.caughtUpMsg')
+                  : t('notifications.noTabNotifications', { tab: activeTab })}
+              </Text>
+            </View>
+          )}
+
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }

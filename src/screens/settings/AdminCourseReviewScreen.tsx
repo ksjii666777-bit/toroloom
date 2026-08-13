@@ -24,6 +24,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {UserGeneratedCourse, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 type ReviewFilter = 'pending' | 'approved' | 'rejected' | 'all';
 
@@ -153,150 +154,151 @@ export default function AdminCourseReviewScreen({ navigation }: NativeStackScree
   }, [toggleFeatured, t]);
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </AnimatedPressable>
-            <Text style={styles.title}>{t('adminCourseReview.title')}</Text>
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
+                <Ionicons name="arrow-back" size={24} color={colors.text} />
+              </AnimatedPressable>
+              <Text style={styles.title}>{t('adminCourseReview.title')}</Text>
+            </View>
+            <Text style={styles.subtitle}>{t('adminCourseReview.subtitle')}</Text>
           </View>
-          <Text style={styles.subtitle}>{t('adminCourseReview.subtitle')}</Text>
-        </View>
 
-        {/* Stats Bar */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: colors.warning + '40' }]}>
-            <Text style={[styles.statValue, { color: colors.warning }]}>{stats.pending.length}</Text>
-            <Text style={styles.statLabel}>{t('adminCourseReview.pendingLabel')}</Text>
+          {/* Stats Bar */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { borderColor: colors.warning + '40' }]}>
+              <Text style={[styles.statValue, { color: colors.warning }]}>{stats.pending.length}</Text>
+              <Text style={styles.statLabel}>{t('adminCourseReview.pendingLabel')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderColor: colors.success + '40' }]}>
+              <Text style={[styles.statValue, { color: colors.success }]}>{stats.approved.length}</Text>
+              <Text style={styles.statLabel}>{t('adminCourseReview.approvedLabel')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderColor: colors.danger + '40' }]}>
+              <Text style={[styles.statValue, { color: colors.danger }]}>{stats.rejected.length}</Text>
+              <Text style={styles.statLabel}>{t('adminCourseReview.rejectedLabel')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderColor: colors.textMuted + '40' }]}>
+              <Text style={[styles.statValue, { color: colors.text }]}>{myCourses.length}</Text>
+              <Text style={styles.statLabel}>{t('adminCourseReview.totalLabel')}</Text>
+            </View>
           </View>
-          <View style={[styles.statCard, { borderColor: colors.success + '40' }]}>
-            <Text style={[styles.statValue, { color: colors.success }]}>{stats.approved.length}</Text>
-            <Text style={styles.statLabel}>{t('adminCourseReview.approvedLabel')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: colors.danger + '40' }]}>
-            <Text style={[styles.statValue, { color: colors.danger }]}>{stats.rejected.length}</Text>
-            <Text style={styles.statLabel}>{t('adminCourseReview.rejectedLabel')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: colors.textMuted + '40' }]}>
-            <Text style={[styles.statValue, { color: colors.text }]}>{myCourses.length}</Text>
-            <Text style={styles.statLabel}>{t('adminCourseReview.totalLabel')}</Text>
-          </View>
-        </View>
 
-        {/* Filter Chips */}
-        <View style={styles.filterRow}>
-          {(['pending', 'approved', 'rejected', 'all'] as const).map(filter => {
-            const isActive = activeFilter === filter;
-            const count = filter === 'pending' ? stats.pending.length
-              : filter === 'approved' ? stats.approved.length
-              : filter === 'rejected' ? stats.rejected.length
-              : stats.pending.length + stats.approved.length + stats.rejected.length;
-            return (
-              <AnimatedPressable
-                key={filter}
-                onPress={() => setActiveFilter(filter)}
-                haptic="selection"
-                scaleTo={0.94}
-              >
-                <View style={[
-                  styles.filterChip,
-                  isActive && {
-                    backgroundColor: filter === 'pending' ? colors.warning + '30'
-                      : filter === 'approved' ? colors.success + '30'
-                      : filter === 'rejected' ? colors.danger + '30'
-                      : colors.primary + '30',
-                    borderColor: filter === 'pending' ? colors.warning
-                      : filter === 'approved' ? colors.success
-                      : filter === 'rejected' ? colors.danger
-                      : colors.primary,
-                  },
-                ]}>
-                  <Text style={[
-                    styles.filterChipText,
+          {/* Filter Chips */}
+          <View style={styles.filterRow}>
+            {(['pending', 'approved', 'rejected', 'all'] as const).map(filter => {
+              const isActive = activeFilter === filter;
+              const count = filter === 'pending' ? stats.pending.length
+                : filter === 'approved' ? stats.approved.length
+                : filter === 'rejected' ? stats.rejected.length
+                : stats.pending.length + stats.approved.length + stats.rejected.length;
+              return (
+                <AnimatedPressable
+                  key={filter}
+                  onPress={() => setActiveFilter(filter)}
+                  haptic="selection"
+                  scaleTo={0.94}
+                >
+                  <View style={[
+                    styles.filterChip,
                     isActive && {
-                      color: filter === 'pending' ? colors.warning
+                      backgroundColor: filter === 'pending' ? colors.warning + '30'
+                        : filter === 'approved' ? colors.success + '30'
+                        : filter === 'rejected' ? colors.danger + '30'
+                        : colors.primary + '30',
+                      borderColor: filter === 'pending' ? colors.warning
                         : filter === 'approved' ? colors.success
                         : filter === 'rejected' ? colors.danger
                         : colors.primary,
                     },
                   ]}>
-                    {filter === 'pending' ? t('adminCourseReview.pendingLabel') : filter === 'approved' ? t('adminCourseReview.approvedLabel') : filter === 'rejected' ? t('adminCourseReview.rejectedLabel') : t('adminCourseReview.totalLabel')}
-                  </Text>
-                  {count > 0 && (
-                    <View style={[styles.filterCount, {
-                      backgroundColor: isActive
-                        ? (filter === 'pending' ? colors.warning
+                    <Text style={[
+                      styles.filterChipText,
+                      isActive && {
+                        color: filter === 'pending' ? colors.warning
                           : filter === 'approved' ? colors.success
                           : filter === 'rejected' ? colors.danger
-                          : colors.primary)
-                        : colors.bgCardLight,
-                    }]}>
-                      <Text style={[styles.filterCountText, {
-                        color: isActive ? '#fff' : colors.text,
-                      }]}>{count}</Text>
-                    </View>
-                  )}
-                </View>
-              </AnimatedPressable>
-            );
-          })}
-        </View>
-
-        {/* Course Cards */}
-        {sortedCourses.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons
-              name={activeFilter === 'pending' ? 'checkmark-done-circle-outline'
-                : 'document-text-outline'}
-              size={64}
-              color={colors.textMuted}
-            />
-            <Text style={styles.emptyTitle}>
-              {activeFilter === 'pending' ? t('adminCourseReview.noPending') :
-               activeFilter === 'approved' ? t('adminCourseReview.noApproved') :
-               activeFilter === 'rejected' ? t('adminCourseReview.noRejected') :
-               t('adminCourseReview.noReviewed')}
-            </Text>
-            <Text style={styles.emptySubtitle}>
-              {activeFilter === 'pending'
-                ? t('adminCourseReview.pendingEmpty')
-                : t('adminCourseReview.noMatchFilter')}
-            </Text>
+                          : colors.primary,
+                      },
+                    ]}>
+                      {filter === 'pending' ? t('adminCourseReview.pendingLabel') : filter === 'approved' ? t('adminCourseReview.approvedLabel') : filter === 'rejected' ? t('adminCourseReview.rejectedLabel') : t('adminCourseReview.totalLabel')}
+                    </Text>
+                    {count > 0 && (
+                      <View style={[styles.filterCount, {
+                        backgroundColor: isActive
+                          ? (filter === 'pending' ? colors.warning
+                            : filter === 'approved' ? colors.success
+                            : filter === 'rejected' ? colors.danger
+                            : colors.primary)
+                          : colors.bgCardLight,
+                      }]}>
+                        <Text style={[styles.filterCountText, {
+                          color: isActive ? '#fff' : colors.text,
+                        }]}>{count}</Text>
+                      </View>
+                    )}
+                  </View>
+                </AnimatedPressable>
+              );
+            })}
           </View>
-        ) : (
-          sortedCourses.map((course, idx) => (
-            <Animated.View
-              key={course.id}
-              entering={FadeInDown.delay(idx * 50).springify()}
-              layout={Layout.springify()}
-            >
-              <ReviewCard
-                course={course}
-                isExpanded={expandedCourseId === course.id}
-                onToggleExpand={() => setExpandedCourseId(
-                  prev => prev === course.id ? null : course.id
-                )}
-                onApprove={() => handleApprove(course)}
-                onReject={() => handleRejectWithNotes(course)}
-                onToggleFeatured={() => handleToggleFeatured(course)}
-                rejectNotes={rejectNotes}
-                setRejectNotes={setRejectNotes}
-                colors={colors}
-                styles={styles}
-              />
-            </Animated.View>
-          ))
-        )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          {/* Course Cards */}
+          {sortedCourses.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons
+                name={activeFilter === 'pending' ? 'checkmark-done-circle-outline'
+                  : 'document-text-outline'}
+                size={64}
+                color={colors.textMuted}
+              />
+              <Text style={styles.emptyTitle}>
+                {activeFilter === 'pending' ? t('adminCourseReview.noPending') :
+                 activeFilter === 'approved' ? t('adminCourseReview.noApproved') :
+                 activeFilter === 'rejected' ? t('adminCourseReview.noRejected') :
+                 t('adminCourseReview.noReviewed')}
+              </Text>
+              <Text style={styles.emptySubtitle}>
+                {activeFilter === 'pending'
+                  ? t('adminCourseReview.pendingEmpty')
+                  : t('adminCourseReview.noMatchFilter')}
+              </Text>
+            </View>
+          ) : (
+            sortedCourses.map((course, idx) => (
+              <Animated.View
+                key={course.id}
+                entering={FadeInDown.delay(idx * 50).springify()}
+                layout={Layout.springify()}
+              >
+                <ReviewCard
+                  course={course}
+                  isExpanded={expandedCourseId === course.id}
+                  onToggleExpand={() => setExpandedCourseId(
+                    prev => prev === course.id ? null : course.id
+                  )}
+                  onApprove={() => handleApprove(course)}
+                  onReject={() => handleRejectWithNotes(course)}
+                  onToggleFeatured={() => handleToggleFeatured(course)}
+                  rejectNotes={rejectNotes}
+                  setRejectNotes={setRejectNotes}
+                  colors={colors}
+                  styles={styles}
+                />
+              </Animated.View>
+            ))
+          )}
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -498,16 +500,13 @@ function ReviewCard({
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   headerRow: {

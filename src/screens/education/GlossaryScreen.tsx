@@ -17,6 +17,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { glossaryTerms } from '../../constants/glossaryData';
 import type {GlossaryTerm, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 // ─── Category colors ─────────────────────────────────────────────────────────
 const CATEGORY_COLORS: Record<string, string> = {
@@ -292,173 +293,170 @@ export default function GlossaryScreen({ navigation }: NativeStackScreenProps<Ro
   // ─── Main render ────────────────────────────────────────────────────────────
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </Pressable>
-        <View style={styles.headerTextContainer}>
-          <Text style={styles.title}>{t('education.financialGlossary')}</Text>
-          <Text style={styles.subtitle}>{t('education.termsCount', { count: glossaryTerms.length })}</Text>
-        </View>
-        <Pressable onPress={() => setShowFilters(!showFilters)} style={styles.filterBtn}>
-          <Ionicons
-            name={showFilters ? 'options' : 'options-outline'}
-            size={22}
-            color={showFilters ? colors.primary : colors.textMuted}
-          />
-        </Pressable>
-      </View>
-
-      {/* Search bar */}
-      <View style={[styles.searchContainer, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-        <Ionicons name="search" size={18} color={colors.textMuted} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
-          placeholder={t('education.searchGlossary')}
-          placeholderTextColor={colors.textMuted}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        {searchQuery.length > 0 && (
-          <Pressable onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-          </Pressable>
-        )}
-      </View>
-
-      {/* Filter bar */}
-      {showFilters && (
-        <Animated.View entering={FadeInDown.springify()} style={styles.filterBar}>
-          {/* Sort toggle */}
-          <View style={styles.filterRow}>
-            <Text style={styles.filterLabel}>{t('education.sortBy')}</Text>
-            <View style={styles.sortToggle}>
-              <Pressable
-                style={[styles.sortBtn, sortBy === 'alpha' && { backgroundColor: colors.primary + '20' }]}
-                onPress={() => setSortBy('alpha')}
-              >
-                <Text style={[styles.sortBtnText, { color: sortBy === 'alpha' ? colors.primary : colors.textMuted }]}>
-                  {t('education.sortAZ')}
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[styles.sortBtn, sortBy === 'category' && { backgroundColor: colors.primary + '20' }]}
-                onPress={() => setSortBy('category')}
-              >
-                <Text style={[styles.sortBtnText, { color: sortBy === 'category' ? colors.primary : colors.textMuted }]}>
-                  {t('education.sortCategory')}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Favorites filter */}
-          <View style={styles.filterRow}>
-            <Pressable
-              style={[styles.favToggle, showFavorites && { backgroundColor: '#FF5252' + '20' }]}
-              onPress={() => setShowFavorites(!showFavorites)}
-            >
-              <Ionicons name={showFavorites ? 'heart' : 'heart-outline'} size={16} color="#FF5252" />
-              <Text style={[styles.favToggleText, showFavorites && { color: '#FF5252' }]}>
-                {t('education.bookmarks', { count: favorites.size })}
-              </Text>              </Pressable>
-          </View>
-
-          {/* Category filters */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-            <Pressable
-              style={[styles.categoryChip, !selectedCategory && { backgroundColor: colors.primary + '20' }]}
-              onPress={() => setSelectedCategory(null)}
-            >
-              <Text style={[styles.categoryChipText, !selectedCategory && { color: colors.primary }]}>
-                {t('education.all')}
-              </Text>              </Pressable>
-            {categories.map(cat => (
-              <Pressable
-                key={cat}
-                style={[
-                  styles.categoryChip,
-                  { borderColor: getCategoryColor(cat) + '30' },
-                  selectedCategory === cat && { backgroundColor: getCategoryColor(cat) + '20' },
-                ]}
-                onPress={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-              >
-                <View style={[styles.catDot, { backgroundColor: getCategoryColor(cat) }]} />
-                <Text
-                  style={[
-                    styles.categoryChipText,
-                    { color: selectedCategory === cat ? getCategoryColor(cat) : colors.textMuted },
-                  ]}
-                >
-                  {cat}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </Animated.View>
-      )}
-
-      {/* Results count */}
-      <View style={styles.resultInfo}>
-        <Text style={styles.resultCount}>
-          {t('education.termsFound', { count: filteredTerms.length })}
-        </Text>
-      </View>
-
-      {/* Terms list */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+          <AppScreen scroll={false} padded={false}
       >
-        {groupedTerms.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-            <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
-              {t('education.noTermsFound')}
-            </Text>
-            <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              {showFavorites
-                ? t('education.bookmarkHint')
-                : t('education.clearFilterHint')}
-            </Text>
+  {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </Pressable>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.title}>{t('education.financialGlossary')}</Text>
+            <Text style={styles.subtitle}>{t('education.termsCount', { count: glossaryTerms.length })}</Text>
           </View>
-        ) : (
-          groupedTerms.map((group, _gi) => (
-            <View key={group.type === 'alpha' ? group.letter : group.category} style={styles.groupSection}>
-              <View style={styles.groupHeader}>
-                <View style={[styles.groupLetterCircle, { backgroundColor: colors.primary + '15' }]}>
-                  <Text style={[styles.groupLetter, { color: colors.primary }]}>
-                    {group.type === 'alpha' ? group.letter : group.category[0]}
-                  </Text>
-                </View>
-                <Text style={styles.groupTitle}>{group.type === 'alpha' ? t('education.letter', { letter: group.letter }) : group.category}</Text>
-                <Text style={styles.groupCount}>{group.terms.length}</Text>
-              </View>
-              {group.terms.map((term, i) => renderTermCard(term, i))}
-            </View>
-          ))
-        )}
-        <View style={{ height: 40 }} />
-      </ScrollView>
+          <Pressable onPress={() => setShowFilters(!showFilters)} style={styles.filterBtn}>
+            <Ionicons
+              name={showFilters ? 'options' : 'options-outline'}
+              size={22}
+              color={showFilters ? colors.primary : colors.textMuted}
+            />
+          </Pressable>
+        </View>
 
-      {/* Term Detail Modal */}
-      {renderTermDetail()}
-    </View>
+        {/* Search bar */}
+        <View style={[styles.searchContainer, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+          <Ionicons name="search" size={18} color={colors.textMuted} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder={t('education.searchGlossary')}
+            placeholderTextColor={colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </Pressable>
+          )}
+        </View>
+
+        {/* Filter bar */}
+        {showFilters && (
+          <Animated.View entering={FadeInDown.springify()} style={styles.filterBar}>
+            {/* Sort toggle */}
+            <View style={styles.filterRow}>
+              <Text style={styles.filterLabel}>{t('education.sortBy')}</Text>
+              <View style={styles.sortToggle}>
+                <Pressable
+                  style={[styles.sortBtn, sortBy === 'alpha' && { backgroundColor: colors.primary + '20' }]}
+                  onPress={() => setSortBy('alpha')}
+                >
+                  <Text style={[styles.sortBtnText, { color: sortBy === 'alpha' ? colors.primary : colors.textMuted }]}>
+                    {t('education.sortAZ')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.sortBtn, sortBy === 'category' && { backgroundColor: colors.primary + '20' }]}
+                  onPress={() => setSortBy('category')}
+                >
+                  <Text style={[styles.sortBtnText, { color: sortBy === 'category' ? colors.primary : colors.textMuted }]}>
+                    {t('education.sortCategory')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Favorites filter */}
+            <View style={styles.filterRow}>
+              <Pressable
+                style={[styles.favToggle, showFavorites && { backgroundColor: '#FF5252' + '20' }]}
+                onPress={() => setShowFavorites(!showFavorites)}
+              >
+                <Ionicons name={showFavorites ? 'heart' : 'heart-outline'} size={16} color="#FF5252" />
+                <Text style={[styles.favToggleText, showFavorites && { color: '#FF5252' }]}>
+                  {t('education.bookmarks', { count: favorites.size })}
+                </Text>              </Pressable>
+            </View>
+
+            {/* Category filters */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+              <Pressable
+                style={[styles.categoryChip, !selectedCategory && { backgroundColor: colors.primary + '20' }]}
+                onPress={() => setSelectedCategory(null)}
+              >
+                <Text style={[styles.categoryChipText, !selectedCategory && { color: colors.primary }]}>
+                  {t('education.all')}
+                </Text>              </Pressable>
+              {categories.map(cat => (
+                <Pressable
+                  key={cat}
+                  style={[
+                    styles.categoryChip,
+                    { borderColor: getCategoryColor(cat) + '30' },
+                    selectedCategory === cat && { backgroundColor: getCategoryColor(cat) + '20' },
+                  ]}
+                  onPress={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                >
+                  <View style={[styles.catDot, { backgroundColor: getCategoryColor(cat) }]} />
+                  <Text
+                    style={[
+                      styles.categoryChipText,
+                      { color: selectedCategory === cat ? getCategoryColor(cat) : colors.textMuted },
+                    ]}
+                  >
+                    {cat}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </Animated.View>
+        )}
+
+        {/* Results count */}
+        <View style={styles.resultInfo}>
+          <Text style={styles.resultCount}>
+            {t('education.termsFound', { count: filteredTerms.length })}
+          </Text>
+        </View>
+
+        {/* Terms list */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {groupedTerms.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="search-outline" size={48} color={colors.textMuted} />
+              <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
+                {t('education.noTermsFound')}
+              </Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
+                {showFavorites
+                  ? t('education.bookmarkHint')
+                  : t('education.clearFilterHint')}
+              </Text>
+            </View>
+          ) : (
+            groupedTerms.map((group, _gi) => (
+              <View key={group.type === 'alpha' ? group.letter : group.category} style={styles.groupSection}>
+                <View style={styles.groupHeader}>
+                  <View style={[styles.groupLetterCircle, { backgroundColor: colors.primary + '15' }]}>
+                    <Text style={[styles.groupLetter, { color: colors.primary }]}>
+                      {group.type === 'alpha' ? group.letter : group.category[0]}
+                    </Text>
+                  </View>
+                  <Text style={styles.groupTitle}>{group.type === 'alpha' ? t('education.letter', { letter: group.letter }) : group.category}</Text>
+                  <Text style={styles.groupCount}>{group.terms.length}</Text>
+                </View>
+                {group.terms.map((term, i) => renderTermCard(term, i))}
+              </View>
+            ))
+          )}
+          <View style={{ height: 40 }} />
+        </ScrollView>
+
+        {/* Term Detail Modal */}
+        {renderTermDetail()}
+      </AppScreen>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

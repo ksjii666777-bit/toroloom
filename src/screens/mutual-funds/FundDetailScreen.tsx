@@ -33,6 +33,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import { formatCurrency } from '../../utils/formatters';
 import type { MutualFund } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -188,13 +189,16 @@ export default function FundDetailScreen({ navigation, route }: any) {
 
   if (!fund) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('mutualFunds.fundNotFound')}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: SPACING.md }}>
-          <Text style={[styles.emptyText, { color: colors.primary }]}>{t('mutualFunds.goBack')}</Text>
-        </TouchableOpacity>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('mutualFunds.fundNotFound')}</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: SPACING.md }}>
+            <Text style={[styles.emptyText, { color: colors.primary }]}>{t('mutualFunds.goBack')}</Text>
+          </TouchableOpacity>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -209,259 +213,257 @@ export default function FundDetailScreen({ navigation, route }: any) {
   const riskColor = fund.riskLevel === 'low' ? '#00E676' : fund.riskLevel === 'moderate' ? '#FFC107' : '#FF5252';
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </AnimatedPressable>
-            <View style={{ flex: 1, marginLeft: SPACING.md }}>
-              <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
-                {fund.name}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Fund Overview Card ── */}
-        <LinearGradient
-          colors={GRADIENTS.card}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.overviewCard, { borderColor: colors.border }]}
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.overviewTop}>
-            <View style={styles.overviewMeta}>
-              <Badge label={fund.category} variant="primary" size="small" />
-              <View style={[styles.riskDot, { backgroundColor: riskColor }]} />
-              <Text style={[styles.riskText, { color: riskColor }]}>
-                {t('mutualFunds.riskLabel', { level: fund.riskLevel.charAt(0).toUpperCase() + fund.riskLevel.slice(1) })}
-              </Text>
-            </View>
-            <View style={styles.ratingRow}>
-              <Text style={styles.ratingStars}>{'★'.repeat(fund.rating)}</Text>
-              <Text style={[styles.ratingEmpty, { color: colors.textMuted }]}>{'★'.repeat(5 - fund.rating)}</Text>
-            </View>
-          </View>
-
-          {/* NAV Display */}
-          <View style={styles.navSection}>
-            <View>
-              <Text style={[styles.navLabel, { color: colors.textSecondary }]}>{t('mutualFunds.nav')}</Text>
-              <Text style={[styles.navValue, { color: colors.text }]}>
-                ₹{fund.nav.toFixed(2)}
-              </Text>
-              <View style={styles.navChange}>
-                <Ionicons
-                  name={isPositive ? 'caret-up' : 'caret-down'}
-                  size={14}
-                  color={isPositive ? '#00E676' : '#FF5252'}
-                />
-                <Text style={[styles.navChangeText, { color: isPositive ? '#00E676' : '#FF5252' }]}>
-                  {fund.dayChange.toFixed(2)} ({fund.dayChangePercent.toFixed(2)}%)
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+                <Ionicons name="arrow-back" size={24} color={colors.text} />
+              </AnimatedPressable>
+              <View style={{ flex: 1, marginLeft: SPACING.md }}>
+                <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+                  {fund.name}
                 </Text>
               </View>
             </View>
-            <NAVSparkline data={filteredNav} />
           </View>
 
-          {/* AUM & Min Investment */}
-          <View style={styles.overviewStats}>
-            <View style={styles.overviewStat}>
-              <Text style={[styles.overviewStatLabel, { color: colors.textMuted }]}>{t('mutualFunds.aum')}</Text>
-              <Text style={[styles.overviewStatValue, { color: colors.text }]}>{fund.fundSize}</Text>
+          {/* ── Fund Overview Card ── */}
+          <LinearGradient
+            colors={GRADIENTS.card}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.overviewCard, { borderColor: colors.border }]}
+          >
+            <View style={styles.overviewTop}>
+              <View style={styles.overviewMeta}>
+                <Badge label={fund.category} variant="primary" size="small" />
+                <View style={[styles.riskDot, { backgroundColor: riskColor }]} />
+                <Text style={[styles.riskText, { color: riskColor }]}>
+                  {t('mutualFunds.riskLabel', { level: fund.riskLevel.charAt(0).toUpperCase() + fund.riskLevel.slice(1) })}
+                </Text>
+              </View>
+              <View style={styles.ratingRow}>
+                <Text style={styles.ratingStars}>{'★'.repeat(fund.rating)}</Text>
+                <Text style={[styles.ratingEmpty, { color: colors.textMuted }]}>{'★'.repeat(5 - fund.rating)}</Text>
+              </View>
             </View>
-            <View style={[styles.overviewStatDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.overviewStat}>
-              <Text style={[styles.overviewStatLabel, { color: colors.textMuted }]}>{t('mutualFunds.minInvestment')}</Text>
-              <Text style={[styles.overviewStatValue, { color: colors.text }]}>
-                {formatCurrency(fund.minInvestment)}
-              </Text>
-            </View>
-          </View>
-        </LinearGradient>
 
-        {/* ── Return Comparison Bars ── */}
-        <Card title={t('mutualFunds.returns')} style={styles.card}>
-          {returns.map((r, i) => {
-            const pct = Math.abs(r.value) / maxReturn;
-            return (
+            {/* NAV Display */}
+            <View style={styles.navSection}>
+              <View>
+                <Text style={[styles.navLabel, { color: colors.textSecondary }]}>{t('mutualFunds.nav')}</Text>
+                <Text style={[styles.navValue, { color: colors.text }]}>
+                  ₹{fund.nav.toFixed(2)}
+                </Text>
+                <View style={styles.navChange}>
+                  <Ionicons
+                    name={isPositive ? 'caret-up' : 'caret-down'}
+                    size={14}
+                    color={isPositive ? '#00E676' : '#FF5252'}
+                  />
+                  <Text style={[styles.navChangeText, { color: isPositive ? '#00E676' : '#FF5252' }]}>
+                    {fund.dayChange.toFixed(2)} ({fund.dayChangePercent.toFixed(2)}%)
+                  </Text>
+                </View>
+              </View>
+              <NAVSparkline data={filteredNav} />
+            </View>
+
+            {/* AUM & Min Investment */}
+            <View style={styles.overviewStats}>
+              <View style={styles.overviewStat}>
+                <Text style={[styles.overviewStatLabel, { color: colors.textMuted }]}>{t('mutualFunds.aum')}</Text>
+                <Text style={[styles.overviewStatValue, { color: colors.text }]}>{fund.fundSize}</Text>
+              </View>
+              <View style={[styles.overviewStatDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.overviewStat}>
+                <Text style={[styles.overviewStatLabel, { color: colors.textMuted }]}>{t('mutualFunds.minInvestment')}</Text>
+                <Text style={[styles.overviewStatValue, { color: colors.text }]}>
+                  {formatCurrency(fund.minInvestment)}
+                </Text>
+              </View>
+            </View>
+          </LinearGradient>
+
+          {/* ── Return Comparison Bars ── */}
+          <Card title={t('mutualFunds.returns')} style={styles.card}>
+            {returns.map((r, i) => {
+              const pct = Math.abs(r.value) / maxReturn;
+              return (
+                <Animated.View
+                  key={r.label}
+                  entering={FadeInDown.delay(i * 80).springify()}
+                  style={styles.returnRow}
+                >
+                  <Text style={[styles.returnLabel, { color: colors.textMuted }]}>{r.label}</Text>
+                  <View style={[styles.returnTrack, { backgroundColor: colors.border }]}>
+                    <View
+                      style={[
+                        styles.returnFill,
+                        {
+                          width: `${pct * 100}%`,
+                          backgroundColor: r.color,
+                        },
+                      ]}
+                    />
+                  </View>
+                  <Text style={[styles.returnValue, { color: r.color }]}>
+                    {r.value >= 0 ? '+' : ''}{r.value.toFixed(1)}%
+                  </Text>
+                </Animated.View>
+              );
+            })}
+          </Card>
+
+          {/* ── NAV Chart ── */}
+          <Card title={t('mutualFunds.navHistory')} style={styles.card}>
+            <View style={styles.timeframeRow}>
+              {['1M', '3M', '6M', '1Y', 'All'].map(tf => (
+                <TouchableOpacity
+                  key={tf}
+                  style={[
+                    styles.timeframeBtn,
+                    { backgroundColor: chartTimeframe === tf ? colors.primary + '20' : colors.bgInput },
+                  ]}
+                  onPress={() => setChartTimeframe(tf)}
+                >
+                  <Text style={[styles.timeframeText, {
+                    color: chartTimeframe === tf ? colors.primary : colors.textMuted,
+                  }]}>{tf}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {filteredNav.length > 1 && (
+              <NAVSparkline data={filteredNav} width={width - SPACING.xl * 2 - SPACING.xxl * 2} height={60} />
+            )}
+          </Card>
+
+          {/* ── Sector Allocation ── */}
+          <Card title={t('mutualFunds.sectorAllocation')} style={styles.card}>
+            {sectorAllocation.map((item, i) => (
               <Animated.View
-                key={r.label}
-                entering={FadeInDown.delay(i * 80).springify()}
-                style={styles.returnRow}
+                key={item.sector}
+                entering={FadeInDown.delay(i * 50).springify()}
+                style={styles.sectorRow}
               >
-                <Text style={[styles.returnLabel, { color: colors.textMuted }]}>{r.label}</Text>
-                <View style={[styles.returnTrack, { backgroundColor: colors.border }]}>
+                <Text style={[styles.sectorLabel, { color: colors.text }]}>{item.sector}</Text>
+                <View style={[styles.sectorTrack, { backgroundColor: colors.border }]}>
                   <View
                     style={[
-                      styles.returnFill,
+                      styles.sectorFill,
                       {
-                        width: `${pct * 100}%`,
-                        backgroundColor: r.color,
+                        width: `${item.percent}%`,
+                        backgroundColor: ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#6366F1'][i % 7],
                       },
                     ]}
                   />
                 </View>
-                <Text style={[styles.returnValue, { color: r.color }]}>
-                  {r.value >= 0 ? '+' : ''}{r.value.toFixed(1)}%
-                </Text>
+                <Text style={[styles.sectorPercent, { color: colors.textMuted }]}>{item.percent}%</Text>
               </Animated.View>
-            );
-          })}
-        </Card>
-
-        {/* ── NAV Chart ── */}
-        <Card title={t('mutualFunds.navHistory')} style={styles.card}>
-          <View style={styles.timeframeRow}>
-            {['1M', '3M', '6M', '1Y', 'All'].map(tf => (
-              <TouchableOpacity
-                key={tf}
-                style={[
-                  styles.timeframeBtn,
-                  { backgroundColor: chartTimeframe === tf ? colors.primary + '20' : colors.bgInput },
-                ]}
-                onPress={() => setChartTimeframe(tf)}
-              >
-                <Text style={[styles.timeframeText, {
-                  color: chartTimeframe === tf ? colors.primary : colors.textMuted,
-                }]}>{tf}</Text>
-              </TouchableOpacity>
             ))}
-          </View>
-          {filteredNav.length > 1 && (
-            <NAVSparkline data={filteredNav} width={width - SPACING.xl * 2 - SPACING.xxl * 2} height={60} />
-          )}
-        </Card>
+          </Card>
 
-        {/* ── Sector Allocation ── */}
-        <Card title={t('mutualFunds.sectorAllocation')} style={styles.card}>
-          {sectorAllocation.map((item, i) => (
-            <Animated.View
-              key={item.sector}
-              entering={FadeInDown.delay(i * 50).springify()}
-              style={styles.sectorRow}
-            >
-              <Text style={[styles.sectorLabel, { color: colors.text }]}>{item.sector}</Text>
-              <View style={[styles.sectorTrack, { backgroundColor: colors.border }]}>
-                <View
-                  style={[
-                    styles.sectorFill,
-                    {
-                      width: `${item.percent}%`,
-                      backgroundColor: ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#6366F1'][i % 7],
-                    },
-                  ]}
-                />
+          {/* ── Key Stats ── */}
+          <Card title={t('mutualFunds.fundDetails')} style={styles.card}>
+            <View style={styles.statsGrid}>
+              <View style={styles.statBox}>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.expenseRatio')}</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>{(Math.random() * 1.5 + 0.5).toFixed(2)}%</Text>
               </View>
-              <Text style={[styles.sectorPercent, { color: colors.textMuted }]}>{item.percent}%</Text>
-            </Animated.View>
-          ))}
-        </Card>
+              <View style={styles.statBox}>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.fundManager')}</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>Mr. Sharma</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.launchDate')}</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>
+                  {new Date(Date.now() - Math.random() * 10 * 365 * 86400000).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })}
+                </Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.exitLoad')}</Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>1% (within 3M)</Text>
+              </View>
+            </View>
+          </Card>
 
-        {/* ── Key Stats ── */}
-        <Card title={t('mutualFunds.fundDetails')} style={styles.card}>
-          <View style={styles.statsGrid}>
-            <View style={styles.statBox}>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.expenseRatio')}</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>{(Math.random() * 1.5 + 0.5).toFixed(2)}%</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.fundManager')}</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>Mr. Sharma</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.launchDate')}</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>
-                {new Date(Date.now() - Math.random() * 10 * 365 * 86400000).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })}
-              </Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('mutualFunds.exitLoad')}</Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>1% (within 3M)</Text>
-            </View>
+          {/* ── Action Buttons ── */}
+          <View style={styles.actionsRow}>
+            <AnimatedPressable
+              onPress={() => {
+                Alert.alert(t('mutualFunds.investTitle'), t('mutualFunds.investConfirmMsg', { name: fund.name }), [
+                  { text: t('app.cancel'), style: 'cancel' },
+                  {
+                    text: t('mutualFunds.investButton', { amount: fund.minInvestment }),
+                    onPress: () => {
+                      investInFund(fund.id, fund.minInvestment);
+                      Alert.alert(t('mutualFunds.investedTitle'), t('mutualFunds.investedMsg', { amount: `₹${fund.minInvestment}`, name: fund.name }));
+                    },
+                  },
+                ]);
+              }}
+              haptic="light"
+              scaleTo={0.97}
+              style={{ flex: 1 }}
+            >
+              <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
+                <Ionicons name="wallet-outline" size={18} color="#fff" />
+                <Text style={styles.actionBtnText}>{t('mutualFunds.investNow')}</Text>
+              </LinearGradient>
+            </AnimatedPressable>
+            <AnimatedPressable
+              onPress={() => {
+                Alert.alert(t('mutualFunds.startSipTitle'), t('mutualFunds.startSipConfirmMsg', { name: fund.name, amount: fund.minInvestment }), [
+                  { text: t('app.cancel'), style: 'cancel' },
+                  {
+                    text: t('mutualFunds.start5kButton'),
+                    onPress: () => {
+                      startSIP(fund.id, 5000, 'monthly');
+                      Alert.alert(t('mutualFunds.sipStartedTitle'), t('mutualFunds.sipStartedMonthlyMsg', { amount: '5,000', name: fund.name }));
+                    },
+                  },
+                  {
+                    text: t('mutualFunds.start10kButton'),
+                    onPress: () => {
+                      startSIP(fund.id, 10000, 'monthly');
+                      Alert.alert(t('mutualFunds.sipStartedTitle'), t('mutualFunds.sipStartedMonthlyMsg', { amount: '10,000', name: fund.name }));
+                    },
+                  },
+                ]);
+              }}
+              haptic="medium"
+              scaleTo={0.97}
+              style={{ flex: 1 }}
+            >
+              <View style={[styles.actionBtn, { backgroundColor: colors.bgCard, borderWidth: 1.5, borderColor: colors.primary }]}>
+                <Ionicons name="calendar-outline" size={18} color={colors.primary} />
+                <Text style={[styles.actionBtnText, { color: colors.primary }]}>{t('mutualFunds.startSip')}</Text>
+              </View>
+            </AnimatedPressable>
           </View>
-        </Card>
 
-        {/* ── Action Buttons ── */}
-        <View style={styles.actionsRow}>
-          <AnimatedPressable
-            onPress={() => {
-              Alert.alert(t('mutualFunds.investTitle'), t('mutualFunds.investConfirmMsg', { name: fund.name }), [
-                { text: t('app.cancel'), style: 'cancel' },
-                {
-                  text: t('mutualFunds.investButton', { amount: fund.minInvestment }),
-                  onPress: () => {
-                    investInFund(fund.id, fund.minInvestment);
-                    Alert.alert(t('mutualFunds.investedTitle'), t('mutualFunds.investedMsg', { amount: `₹${fund.minInvestment}`, name: fund.name }));
-                  },
-                },
-              ]);
-            }}
-            haptic="light"
-            scaleTo={0.97}
-            style={{ flex: 1 }}
-          >
-            <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
-              <Ionicons name="wallet-outline" size={18} color="#fff" />
-              <Text style={styles.actionBtnText}>{t('mutualFunds.investNow')}</Text>
-            </LinearGradient>
-          </AnimatedPressable>
-          <AnimatedPressable
-            onPress={() => {
-              Alert.alert(t('mutualFunds.startSipTitle'), t('mutualFunds.startSipConfirmMsg', { name: fund.name, amount: fund.minInvestment }), [
-                { text: t('app.cancel'), style: 'cancel' },
-                {
-                  text: t('mutualFunds.start5kButton'),
-                  onPress: () => {
-                    startSIP(fund.id, 5000, 'monthly');
-                    Alert.alert(t('mutualFunds.sipStartedTitle'), t('mutualFunds.sipStartedMonthlyMsg', { amount: '5,000', name: fund.name }));
-                  },
-                },
-                {
-                  text: t('mutualFunds.start10kButton'),
-                  onPress: () => {
-                    startSIP(fund.id, 10000, 'monthly');
-                    Alert.alert(t('mutualFunds.sipStartedTitle'), t('mutualFunds.sipStartedMonthlyMsg', { amount: '10,000', name: fund.name }));
-                  },
-                },
-              ]);
-            }}
-            haptic="medium"
-            scaleTo={0.97}
-            style={{ flex: 1 }}
-          >
-            <View style={[styles.actionBtn, { backgroundColor: colors.bgCard, borderWidth: 1.5, borderColor: colors.primary }]}>
-              <Ionicons name="calendar-outline" size={18} color={colors.primary} />
-              <Text style={[styles.actionBtnText, { color: colors.primary }]}>{t('mutualFunds.startSip')}</Text>
-            </View>
-          </AnimatedPressable>
-        </View>
-
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ─── Styles ────────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.md,
   },
   headerRow: {

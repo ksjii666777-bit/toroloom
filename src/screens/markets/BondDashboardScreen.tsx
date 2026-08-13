@@ -35,6 +35,7 @@ import type {Bond, RootStackParamList} from '../../types';
 import { bondsApi } from '../../services/api';
 import TradingViewChart from '../../components/TradingViewChart';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -298,205 +299,207 @@ export default function BondDashboardScreen({ navigation }: NativeStackScreenPro
   }, [activeTab, t]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={styles.headerTitles}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('bondDashboard.title')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('bondDashboard.subtitle')}</Text>
+          <AppScreen scroll={false} padded={false}
+      header={
+  <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={styles.headerTitles}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('bondDashboard.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('bondDashboard.subtitle')}</Text>
+            </View>
           </View>
-        </View>
 
-        {/* Tabs */}
-        <View style={styles.tabRow}>
-          {TABS.map(tab => {
-            const isActive = activeTab === tab.key;
-            return (
-              <Pressable
-                key={tab.key}
-                onPress={() => { setActiveTab(tab.key); setExpandedId(null); setFilterCategory(null); setSearchQuery(''); }}
-                style={[
-                  styles.tabBtn,
-                  { backgroundColor: isActive ? colors.primary + '20' : 'transparent', borderColor: isActive ? colors.primary + '40' : 'transparent' },
-                ]}
-              >
-                <Ionicons name={tab.icon as any} size={14} color={isActive ? colors.primary : colors.textMuted} />
-                <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Search (hidden on summary tab) */}
-        {activeTab !== 'summary' && (
-          <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-            <Ionicons name="search" size={16} color={colors.textMuted} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.text }]}
-              placeholder={searchPlaceholder}
-              placeholderTextColor={colors.textMuted}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <Pressable onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={16} color={colors.textMuted} />
-              </Pressable>
-            )}
-          </View>
-        )}
-
-        {/* Sector filter (corporate tab) */}
-        {activeTab === 'corporate' && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-            {corpSectors.map(s => {
-              const isActive = filterCategory === s || (s === t('bondDashboard.all') && !filterCategory);
+        
+          <View style={styles.tabRow}>
+            {TABS.map(tab => {
+              const isActive = activeTab === tab.key;
               return (
                 <Pressable
-                  key={s}
-                  onPress={() => setFilterCategory(s === t('bondDashboard.all') ? null : s)}
-                  style={[styles.filterChip, { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary + '40' : colors.border }]}
+                  key={tab.key}
+                  onPress={() => { setActiveTab(tab.key); setExpandedId(null); setFilterCategory(null); setSearchQuery(''); }}
+                  style={[
+                    styles.tabBtn,
+                    { backgroundColor: isActive ? colors.primary + '20' : 'transparent', borderColor: isActive ? colors.primary + '40' : 'transparent' },
+                  ]}
                 >
-                  <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textMuted }]}>{s}</Text>
+                  <Ionicons name={tab.icon as any} size={14} color={isActive ? colors.primary : colors.textMuted} />
+                  <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
                 </Pressable>
               );
             })}
-          </ScrollView>
-        )}
-      </View>
+          </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          {/* Search (hidden on summary tab) */}
+          {activeTab !== 'summary' && (
+            <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+              <Ionicons name="search" size={16} color={colors.textMuted} />
+              <TextInput
+                style={[styles.searchInput, { color: colors.text }]}
+                placeholder={searchPlaceholder}
+                placeholderTextColor={colors.textMuted}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={16} color={colors.textMuted} />
+                </Pressable>
+              )}
+            </View>
+          )}
+
+          {/* Sector filter (corporate tab) */}
+          {activeTab === 'corporate' && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+              {corpSectors.map(s => {
+                const isActive = filterCategory === s || (s === t('bondDashboard.all') && !filterCategory);
+                return (
+                  <Pressable
+                    key={s}
+                    onPress={() => setFilterCategory(s === t('bondDashboard.all') ? null : s)}
+                    style={[styles.filterChip, { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary + '40' : colors.border }]}
+                  >
+                    <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textMuted }]}>{s}</Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          )}
+        </View>
+      }
       >
-        {/* ── BOND LIST TABS ── */}
-        {(activeTab === 'govt' || activeTab === 'corporate' || activeTab === 'taxfree') && (
-          <Animated.View entering={FadeInDown.duration(300)}>
-            <View style={styles.resultCountRow}>
-              <Text style={[styles.resultCount, { color: colors.textMuted }]}>
-                {t('bondDashboard.bondCount', { count: filteredBonds.length })}
-              </Text>
-            </View>
-            {filteredBonds.length > 0 ? (
-              filteredBonds.map(bond => (
-                <BondRow
-                  key={bond.id}
-                  bond={bond}
-                  isExpanded={expandedId === bond.id}
-                  onPress={() => handleBondPress(bond.id)}
-                />
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('bondDashboard.noBondsFound')}</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('bondDashboard.adjustSearch')}</Text>
-              </View>
-            )}
-          </Animated.View>
-        )}
-
-        {/* ── SUMMARY TAB ── */}
-        {activeTab === 'summary' && (
-          <Animated.View entering={FadeInDown.duration(300)}>
-            {/* Live Yield Chart (real TradingView data) */}
-            <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <View style={styles.yieldChartHeader}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.yieldChart')}</Text>
-                <Text style={[styles.yieldChartSymbol, { color: colors.primary }]}>{tvYieldSymbol}</Text>
-              </View>
-              <View style={styles.yieldChartChips}>
-                {TV_YIELD_SYMBOLS.map((y) => {
-                  const active = y.symbol === tvYieldSymbol;
-                  return (
-                    <Pressable
-                      key={y.symbol}
-                      onPress={() => setTvYieldSymbol(y.symbol)}
-                      style={[styles.yieldChartChip, { backgroundColor: active ? colors.primary + '20' : colors.bgInput, borderColor: active ? colors.primary + '40' : colors.border }]}
-                    >
-                      <Text style={[styles.yieldChartChipText, { color: active ? colors.primary : colors.textMuted }]}>{y.label}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-              <TradingViewChart symbol={tvYieldSymbol} interval="D" height={240} allowSymbolChange={false} />
-            </View>
-
-            {/* Overview Cards */}
-            <View style={styles.summaryGrid}>
-              {[
-                { label: t('bondDashboard.totalBonds'), value: summaryStats.all.toString(), icon: '📊', color: '#6C63FF' },
-                { label: t('bondDashboard.avgGovtYtm'), value: fmtPct(summaryStats.govt.avgYTM), icon: '🏛️', color: '#3B82F6' },
-                { label: t('bondDashboard.avgCorpYtm'), value: fmtPct(summaryStats.corp.avgYTM), icon: '🏢', color: '#00E676' },
-                { label: t('bondDashboard.avgTaxFreeYtm'), value: fmtPct(summaryStats.taxfree.avgYTM), icon: '🌿', color: '#FFC107' },
-              ].map((stat, i) => (
-                <Animated.View key={stat.label} entering={FadeInUp.duration(300).delay(i * 60)} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
-                  <Text style={styles.summaryIcon}>{stat.icon}</Text>
-                  <Text style={[styles.summaryValue, { color: stat.color }]}>{stat.value}</Text>
-                  <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{stat.label}</Text>
-                </Animated.View>
-              ))}
-            </View>
-
-            {/* Yield Curve */}
-            <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.yieldCurve')}</Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('bondDashboard.yieldCurveSub')}</Text>
-              <View style={styles.yieldCurveContent}>
-                {yieldCurve.map((pt, _i) => {
-                  const maxYield = Math.max(...yieldCurve.map(p => p.avgYield), 1);
-                  const barHeight = (pt.avgYield / maxYield) * 120;
-                  return (
-                    <View key={pt.label} style={styles.curveBarCol}>
-                      <Text style={[styles.curveYield, { color: colors.text }]}>{pt.avgYield.toFixed(1)}%</Text>
-                      <View style={[styles.curveBar, { height: barHeight, backgroundColor: colors.primary }]} />
-                      <Text style={[styles.curveLabel, { color: colors.textMuted }]}>{pt.label}</Text>
-                      <Text style={[styles.curveCount, { color: colors.textMuted }]}>({pt.count})</Text>
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-
-            {/* Category Breakdown */}
-            <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.categoryBreakdown')}</Text>
-              {[
-                { label: t('bondDashboard.govtBonds'), icon: '🏛️', count: summaryStats.govt.count, avgCoupon: summaryStats.govt.avgCoupon, color: '#3B82F6' },
-                { label: t('bondDashboard.stateBonds'), icon: '🏙️', count: 2, avgCoupon: 7.32, color: '#6C63FF' },
-                { label: t('bondDashboard.corpBonds'), icon: '🏢', count: summaryStats.corp.count, avgCoupon: summaryStats.corp.avgCoupon, color: '#00E676' },
-                { label: t('bondDashboard.taxFreeBonds'), icon: '🌿', count: summaryStats.taxfree.count, avgCoupon: summaryStats.taxfree.avgCoupon, color: '#FFC107' },
-              ].map((cat, i) => (
-                <View key={cat.label} style={[styles.catRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                  <Text style={styles.catIcon}>{cat.icon}</Text>
-                  <View style={styles.catInfo}>
-                    <Text style={[styles.catLabel, { color: colors.text }]}>{cat.label}</Text>
-                    <Text style={[styles.catCount, { color: colors.textMuted }]}>{t('bondDashboard.bondCount', { count: cat.count })}</Text>
-                  </View>
-                  <Text style={[styles.catYield, { color: cat.color }]}>{fmtPct(cat.avgCoupon)}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Market Info */}
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Ionicons name="information-circle" size={18} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('bondDashboard.aboutBondMarkets')}</Text>
-                <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  {t('bondDashboard.aboutBondMarketsDesc')}
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ── BOND LIST TABS ── */}
+          {(activeTab === 'govt' || activeTab === 'corporate' || activeTab === 'taxfree') && (
+            <Animated.View entering={FadeInDown.duration(300)}>
+              <View style={styles.resultCountRow}>
+                <Text style={[styles.resultCount, { color: colors.textMuted }]}>
+                  {t('bondDashboard.bondCount', { count: filteredBonds.length })}
                 </Text>
               </View>
-            </View>
-          </Animated.View>
-        )}
+              {filteredBonds.length > 0 ? (
+                filteredBonds.map(bond => (
+                  <BondRow
+                    key={bond.id}
+                    bond={bond}
+                    isExpanded={expandedId === bond.id}
+                    onPress={() => handleBondPress(bond.id)}
+                  />
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Ionicons name="search-outline" size={48} color={colors.textMuted} />
+                  <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('bondDashboard.noBondsFound')}</Text>
+                  <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('bondDashboard.adjustSearch')}</Text>
+                </View>
+              )}
+            </Animated.View>
+          )}
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+          {/* ── SUMMARY TAB ── */}
+          {activeTab === 'summary' && (
+            <Animated.View entering={FadeInDown.duration(300)}>
+              {/* Live Yield Chart (real TradingView data) */}
+              <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={styles.yieldChartHeader}>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.yieldChart')}</Text>
+                  <Text style={[styles.yieldChartSymbol, { color: colors.primary }]}>{tvYieldSymbol}</Text>
+                </View>
+                <View style={styles.yieldChartChips}>
+                  {TV_YIELD_SYMBOLS.map((y) => {
+                    const active = y.symbol === tvYieldSymbol;
+                    return (
+                      <Pressable
+                        key={y.symbol}
+                        onPress={() => setTvYieldSymbol(y.symbol)}
+                        style={[styles.yieldChartChip, { backgroundColor: active ? colors.primary + '20' : colors.bgInput, borderColor: active ? colors.primary + '40' : colors.border }]}
+                      >
+                        <Text style={[styles.yieldChartChipText, { color: active ? colors.primary : colors.textMuted }]}>{y.label}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <TradingViewChart symbol={tvYieldSymbol} interval="D" height={240} allowSymbolChange={false} />
+              </View>
+
+              {/* Overview Cards */}
+              <View style={styles.summaryGrid}>
+                {[
+                  { label: t('bondDashboard.totalBonds'), value: summaryStats.all.toString(), icon: '📊', color: '#6C63FF' },
+                  { label: t('bondDashboard.avgGovtYtm'), value: fmtPct(summaryStats.govt.avgYTM), icon: '🏛️', color: '#3B82F6' },
+                  { label: t('bondDashboard.avgCorpYtm'), value: fmtPct(summaryStats.corp.avgYTM), icon: '🏢', color: '#00E676' },
+                  { label: t('bondDashboard.avgTaxFreeYtm'), value: fmtPct(summaryStats.taxfree.avgYTM), icon: '🌿', color: '#FFC107' },
+                ].map((stat, i) => (
+                  <Animated.View key={stat.label} entering={FadeInUp.duration(300).delay(i * 60)} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
+                    <Text style={styles.summaryIcon}>{stat.icon}</Text>
+                    <Text style={[styles.summaryValue, { color: stat.color }]}>{stat.value}</Text>
+                    <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{stat.label}</Text>
+                  </Animated.View>
+                ))}
+              </View>
+
+              {/* Yield Curve */}
+              <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.yieldCurve')}</Text>
+                <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('bondDashboard.yieldCurveSub')}</Text>
+                <View style={styles.yieldCurveContent}>
+                  {yieldCurve.map((pt, _i) => {
+                    const maxYield = Math.max(...yieldCurve.map(p => p.avgYield), 1);
+                    const barHeight = (pt.avgYield / maxYield) * 120;
+                    return (
+                      <View key={pt.label} style={styles.curveBarCol}>
+                        <Text style={[styles.curveYield, { color: colors.text }]}>{pt.avgYield.toFixed(1)}%</Text>
+                        <View style={[styles.curveBar, { height: barHeight, backgroundColor: colors.primary }]} />
+                        <Text style={[styles.curveLabel, { color: colors.textMuted }]}>{pt.label}</Text>
+                        <Text style={[styles.curveCount, { color: colors.textMuted }]}>({pt.count})</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+
+              {/* Category Breakdown */}
+              <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('bondDashboard.categoryBreakdown')}</Text>
+                {[
+                  { label: t('bondDashboard.govtBonds'), icon: '🏛️', count: summaryStats.govt.count, avgCoupon: summaryStats.govt.avgCoupon, color: '#3B82F6' },
+                  { label: t('bondDashboard.stateBonds'), icon: '🏙️', count: 2, avgCoupon: 7.32, color: '#6C63FF' },
+                  { label: t('bondDashboard.corpBonds'), icon: '🏢', count: summaryStats.corp.count, avgCoupon: summaryStats.corp.avgCoupon, color: '#00E676' },
+                  { label: t('bondDashboard.taxFreeBonds'), icon: '🌿', count: summaryStats.taxfree.count, avgCoupon: summaryStats.taxfree.avgCoupon, color: '#FFC107' },
+                ].map((cat, i) => (
+                  <View key={cat.label} style={[styles.catRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                    <Text style={styles.catIcon}>{cat.icon}</Text>
+                    <View style={styles.catInfo}>
+                      <Text style={[styles.catLabel, { color: colors.text }]}>{cat.label}</Text>
+                      <Text style={[styles.catCount, { color: colors.textMuted }]}>{t('bondDashboard.bondCount', { count: cat.count })}</Text>
+                    </View>
+                    <Text style={[styles.catYield, { color: cat.color }]}>{fmtPct(cat.avgCoupon)}</Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Market Info */}
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="information-circle" size={18} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>{t('bondDashboard.aboutBondMarkets')}</Text>
+                  <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                    {t('bondDashboard.aboutBondMarketsDesc')}
+                  </Text>
+                </View>
+              </View>
+            </Animated.View>
+          )}
+
+          <View style={{ height: 80 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -505,7 +508,6 @@ export default function BondDashboardScreen({ navigation }: NativeStackScreenPro
 // ══════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     padding: SPACING.xl,
     paddingTop: 60,

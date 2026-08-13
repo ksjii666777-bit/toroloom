@@ -12,6 +12,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {ABExperiment, ABTestStatus, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 export default function ABTestRunnerScreen({ navigation: _navigation  }: NativeStackScreenProps<RootStackParamList, 'ABTestRunner'>) {
   const { colors } = useTheme();
@@ -78,102 +79,103 @@ export default function ABTestRunnerScreen({ navigation: _navigation  }: NativeS
   }, [archiveExperiment, t, startExperiment, pauseExperiment, resumeExperiment, completeExperiment, simulateMetrics, deleteExperiment, selectedExperimentId, selectExperiment]);
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('abTestRunner.title')}</Text>
-          <Text style={styles.subtitle}>{t('abTestRunner.subtitle')}</Text>
-        </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('abTestRunner.title')}</Text>
+            <Text style={styles.subtitle}>{t('abTestRunner.subtitle')}</Text>
+          </View>
 
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderLeftColor: colors.primary }]}>
-            <Text style={styles.statValue}>{stats.total}</Text>
-            <Text style={styles.statLabel}>{t('abTestRunner.total')}</Text>
+          {/* Stats */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { borderLeftColor: colors.primary }]}>
+              <Text style={styles.statValue}>{stats.total}</Text>
+              <Text style={styles.statLabel}>{t('abTestRunner.total')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderLeftColor: '#00C853' }]}>
+              <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.running}</Text>
+              <Text style={styles.statLabel}>{t('abTestRunner.running')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderLeftColor: '#6C63FF' }]}>
+              <Text style={[styles.statValue, { color: '#6C63FF' }]}>{stats.completed}</Text>
+              <Text style={styles.statLabel}>{t('abTestRunner.completed')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderLeftColor: '#FFC107' }]}>
+              <Text style={[styles.statValue, { color: '#FFC107' }]}>{stats.draft}</Text>
+              <Text style={styles.statLabel}>{t('abTestRunner.drafts')}</Text>
+            </View>
           </View>
-          <View style={[styles.statCard, { borderLeftColor: '#00C853' }]}>
-            <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.running}</Text>
-            <Text style={styles.statLabel}>{t('abTestRunner.running')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderLeftColor: '#6C63FF' }]}>
-            <Text style={[styles.statValue, { color: '#6C63FF' }]}>{stats.completed}</Text>
-            <Text style={styles.statLabel}>{t('abTestRunner.completed')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderLeftColor: '#FFC107' }]}>
-            <Text style={[styles.statValue, { color: '#FFC107' }]}>{stats.draft}</Text>
-            <Text style={styles.statLabel}>{t('abTestRunner.drafts')}</Text>
-          </View>
-        </View>
 
-        {/* Create Button */}
-        <AnimatedPressable onPress={() => setShowCreate(true)} haptic="medium" scaleTo={0.97}>
-          <View style={styles.createBtn}>
-            <Ionicons name="flask" size={20} color="#fff" />
-            <Text style={styles.createBtnText}>{t('abTestRunner.newExperiment')}</Text>
-          </View>
-        </AnimatedPressable>
+          {/* Create Button */}
+          <AnimatedPressable onPress={() => setShowCreate(true)} haptic="medium" scaleTo={0.97}>
+            <View style={styles.createBtn}>
+              <Ionicons name="flask" size={20} color="#fff" />
+              <Text style={styles.createBtnText}>{t('abTestRunner.newExperiment')}</Text>
+            </View>
+          </AnimatedPressable>
 
-        {/* Filter */}
-        <View style={styles.filterRow}>
-          {(['all', 'running', 'draft', 'completed', 'paused'] as const).map(status => {
-            const isActive = activeFilter === status;
-            return (
-              <AnimatedPressable
-                key={status}
-                onPress={() => setActiveFilter(status)}
-                haptic="selection"
-                scaleTo={0.94}
+          {/* Filter */}
+          <View style={styles.filterRow}>
+            {(['all', 'running', 'draft', 'completed', 'paused'] as const).map(status => {
+              const isActive = activeFilter === status;
+              return (
+                <AnimatedPressable
+                  key={status}
+                  onPress={() => setActiveFilter(status)}
+                  haptic="selection"
+                  scaleTo={0.94}
+                >
+                  <View style={[styles.filterChip, isActive && { backgroundColor: colors.primary + '25', borderColor: colors.primary }]}>
+                    <Text style={[styles.filterChipText, isActive && { color: colors.primary }]}>
+                      {status === 'all' ? t('abTestRunner.all') : t('abTestRunner.' + status)}
+                    </Text>
+                  </View>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
+          {/* Experiment Cards */}
+          {filteredExperiments.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="flask-outline" size={64} color={colors.textMuted} />
+              <Text style={styles.emptyTitle}>{t('abTestRunner.noExperiments')}</Text>
+              <Text style={styles.emptySubtitle}>{t('abTestRunner.noExperimentsSub')}</Text>
+            </View>
+          ) : (
+            filteredExperiments.map((exp, idx) => (
+              <Animated.View
+                key={exp.id}
+                entering={FadeInDown.delay(idx * 50).springify()}
+                layout={LinearTransition.springify()}
               >
-                <View style={[styles.filterChip, isActive && { backgroundColor: colors.primary + '25', borderColor: colors.primary }]}>
-                  <Text style={[styles.filterChipText, isActive && { color: colors.primary }]}>
-                    {status === 'all' ? t('abTestRunner.all') : t('abTestRunner.' + status)}
-                  </Text>
-                </View>
-              </AnimatedPressable>
-            );
-          })}
-        </View>
+                <ExperimentCard
+                  exp={exp}
+                  isSelected={selectedExperimentId === exp.id}
+                  onSelect={() => selectExperiment(selectedExperimentId === exp.id ? null : exp.id)}
+                  onAction={handleExperimentAction}
+                  getSnapshot={getMetricSnapshot}
+                  colors={colors}
+                  styles={styles}
+                  t={t}
+                />
+              </Animated.View>
+            ))
+          )}
 
-        {/* Experiment Cards */}
-        {filteredExperiments.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="flask-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>{t('abTestRunner.noExperiments')}</Text>
-            <Text style={styles.emptySubtitle}>{t('abTestRunner.noExperimentsSub')}</Text>
-          </View>
-        ) : (
-          filteredExperiments.map((exp, idx) => (
-            <Animated.View
-              key={exp.id}
-              entering={FadeInDown.delay(idx * 50).springify()}
-              layout={LinearTransition.springify()}
-            >
-              <ExperimentCard
-                exp={exp}
-                isSelected={selectedExperimentId === exp.id}
-                onSelect={() => selectExperiment(selectedExperimentId === exp.id ? null : exp.id)}
-                onAction={handleExperimentAction}
-                getSnapshot={getMetricSnapshot}
-                colors={colors}
-                styles={styles}
-                t={t}
-              />
-            </Animated.View>
-          ))
-        )}
+          <View style={{ height: 100 }} />
+        </ScrollView>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
-      {/* Create Modal */}
-      <CreateExperimentModal
-        visible={showCreate}
-        onClose={() => setShowCreate(false)}
-        colors={colors}
-        styles={styles}
-      />
-    </View>
+        {/* Create Modal */}
+        <CreateExperimentModal
+          visible={showCreate}
+          onClose={() => setShowCreate(false)}
+          colors={colors}
+          styles={styles}
+        />
+      </AppScreen>
   );
 }
 
@@ -533,7 +535,6 @@ function CreateExperimentModal({
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
   scrollContent: { paddingHorizontal: SPACING.xl, paddingBottom: 20 },
   header: { paddingTop: 60, marginBottom: SPACING.lg },
   title: { ...FONTS.bold, fontSize: FONTS.size.title, color: colors.text },

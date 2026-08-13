@@ -14,6 +14,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 Dimensions.get('window');
 
@@ -114,260 +115,257 @@ export default function ProfileScreen({ navigation }: NativeStackScreenProps<Roo
   ];
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.title}>{t('profile.profileKyc')}</Text>
-        </View>
-
-        {/* Profile Banner */}
-        <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.banner}>
-          <View style={styles.bannerRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{user?.name?.[0] || 'R'}</Text>
-            </View>
-            <View style={styles.bannerInfo}>
-              <Text style={styles.bannerName}>{user?.name || 'Rahul Sharma'}</Text>
-              <Text style={styles.bannerLevel}>{userLevel.title} · Level {userLevel.level}</Text>
-              <View style={styles.bannerBadges}>
-                <Badge label={`PAN: ${user?.panNumber || 'ABCDE1234F'}`} variant="primary" size="medium" />
-                {user?.kycStatus === 'verified' && <Badge label="KYC ✓" variant="success" size="medium" />}
-              </View>
-            </View>
-          </View>
-          <View style={styles.bannerStats}>
-            <View style={styles.bannerStat}>
-              <Text style={styles.bannerStatValue}>{formatCurrency(user?.balance || 2500000, true)}</Text>
-              <Text style={styles.bannerStatLabel}>{t('profile.availableBalance')}</Text>
-            </View>
-            <View style={styles.bannerStatDivider} />
-            <View style={styles.bannerStat}>
-              <Text style={styles.bannerStatValue}>{userLevel.totalXp.toLocaleString()} XP</Text>
-              <Text style={styles.bannerStatLabel}>{t('profile.lifetimeXp')}</Text>
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsGrid}>
-          {[
-            { icon: 'add-circle', label: t('funds.addFunds'), color: '#00C853', gradient: GRADIENTS.success },
-            { icon: 'arrow-up-circle', label: t('profile.withdraw'), color: '#FF1744', gradient: GRADIENTS.danger },
-            { icon: 'swap-horizontal', label: t('funds.transfer'), color: '#6C63FF', gradient: GRADIENTS.primary },
-            { icon: 'qr-code', label: t('profile.upiSettings'), color: '#00D2FF', gradient: GRADIENTS.accent },
-          ].map((action, idx) => (
-            <TouchableOpacity key={idx} style={styles.quickAction}>
-              <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
-                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={24} color={colors.white} />
-              </LinearGradient>
-              <Text style={styles.qaLabel}>{action.label}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
-          ))}
-        </View>
+            <Text style={styles.title}>{t('profile.profileKyc')}</Text>
+          </View>
 
-        {/* Tab Toggle */}
-        <View style={styles.toggleRow}>
-          <TouchableOpacity
-            style={[styles.toggleBtn, activeTab === 'profile' && styles.toggleBtnActive]}
-            onPress={() => setActiveTab('profile')}
-          >
-            <Ionicons name="person-outline" size={16} color={activeTab === 'profile' ? colors.white : colors.textMuted} />
-            <Text style={[styles.toggleText, activeTab === 'profile' && styles.toggleTextActive]}>{t('profile.title')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toggleBtn, activeTab === 'kyc' && styles.toggleBtnActive]}
-            onPress={() => setActiveTab('kyc')}
-          >
-            <Ionicons name="shield-checkmark-outline" size={16} color={activeTab === 'kyc' ? colors.white : colors.textMuted} />
-            <Text style={[styles.toggleText, activeTab === 'kyc' && styles.toggleTextActive]}>{t('profile.kycAndBanks')}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {activeTab === 'profile' ? (
-          <>
-            {/* Account Details */}
-            <Card title={t('profile.accountDetails')} subtitle={t('profile.accountDetailsSub')}>
-              <View style={styles.detailsList}>
-                {accountDetails.map((item, _i) => (
-                  <View key={item.label} style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{t(`profile.${item.label}`)}</Text>
-                    <Text style={styles.detailValue}>{item.value}</Text>
-                  </View>
-                ))}
+          {/* Profile Banner */}
+          <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.banner}>
+            <View style={styles.bannerRow}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{user?.name?.[0] || 'R'}</Text>
               </View>
-            </Card>
+              <View style={styles.bannerInfo}>
+                <Text style={styles.bannerName}>{user?.name || 'Rahul Sharma'}</Text>
+                <Text style={styles.bannerLevel}>{userLevel.title} · Level {userLevel.level}</Text>
+                <View style={styles.bannerBadges}>
+                  <Badge label={`PAN: ${user?.panNumber || 'ABCDE1234F'}`} variant="primary" size="medium" />
+                  {user?.kycStatus === 'verified' && <Badge label="KYC ✓" variant="success" size="medium" />}
+                </View>
+              </View>
+            </View>
+            <View style={styles.bannerStats}>
+              <View style={styles.bannerStat}>
+                <Text style={styles.bannerStatValue}>{formatCurrency(user?.balance || 2500000, true)}</Text>
+                <Text style={styles.bannerStatLabel}>{t('profile.availableBalance')}</Text>
+              </View>
+              <View style={styles.bannerStatDivider} />
+              <View style={styles.bannerStat}>
+                <Text style={styles.bannerStatValue}>{userLevel.totalXp.toLocaleString()} XP</Text>
+                <Text style={styles.bannerStatLabel}>{t('profile.lifetimeXp')}</Text>
+              </View>
+            </View>
+          </LinearGradient>
 
-            {/* Personal Info */}
-            <Card title={t('profile.personalInformation')} style={{ marginTop: SPACING.md }}>
-              <TouchableOpacity style={styles.menuRow}>
-                <View style={[styles.menuIconBox, { backgroundColor: '#6C63FF20' }]}>
-                  <Ionicons name="person" size={18} color="#6C63FF" />
-                </View>
-                <View style={styles.menuRowInfo}>
-                  <Text style={styles.menuRowLabel}>{t('profile.editProfile')}</Text>
-                  <Text style={styles.menuRowSub}>{t('profile.editProfileSub')}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          {/* Quick Actions */}
+          <View style={styles.quickActionsGrid}>
+            {[
+              { icon: 'add-circle', label: t('funds.addFunds'), color: '#00C853', gradient: GRADIENTS.success },
+              { icon: 'arrow-up-circle', label: t('profile.withdraw'), color: '#FF1744', gradient: GRADIENTS.danger },
+              { icon: 'swap-horizontal', label: t('funds.transfer'), color: '#6C63FF', gradient: GRADIENTS.primary },
+              { icon: 'qr-code', label: t('profile.upiSettings'), color: '#00D2FF', gradient: GRADIENTS.accent },
+            ].map((action, idx) => (
+              <TouchableOpacity key={idx} style={styles.quickAction}>
+                <LinearGradient colors={action.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.qaIcon}>
+                  <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={24} color={colors.white} />
+                </LinearGradient>
+                <Text style={styles.qaLabel}>{action.label}</Text>
               </TouchableOpacity>
-              <View style={styles.menuDivider} />
-              <TouchableOpacity style={styles.menuRow}>
-                <View style={[styles.menuIconBox, { backgroundColor: '#00D2FF20' }]}>
-                  <Ionicons name="lock-closed" size={18} color="#00D2FF" />
+            ))}
+          </View>
+
+          {/* Tab Toggle */}
+          <View style={styles.toggleRow}>
+            <TouchableOpacity
+              style={[styles.toggleBtn, activeTab === 'profile' && styles.toggleBtnActive]}
+              onPress={() => setActiveTab('profile')}
+            >
+              <Ionicons name="person-outline" size={16} color={activeTab === 'profile' ? colors.white : colors.textMuted} />
+              <Text style={[styles.toggleText, activeTab === 'profile' && styles.toggleTextActive]}>{t('profile.title')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleBtn, activeTab === 'kyc' && styles.toggleBtnActive]}
+              onPress={() => setActiveTab('kyc')}
+            >
+              <Ionicons name="shield-checkmark-outline" size={16} color={activeTab === 'kyc' ? colors.white : colors.textMuted} />
+              <Text style={[styles.toggleText, activeTab === 'kyc' && styles.toggleTextActive]}>{t('profile.kycAndBanks')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {activeTab === 'profile' ? (
+            <>
+              {/* Account Details */}
+              <Card title={t('profile.accountDetails')} subtitle={t('profile.accountDetailsSub')}>
+                <View style={styles.detailsList}>
+                  {accountDetails.map((item, _i) => (
+                    <View key={item.label} style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>{t(`profile.${item.label}`)}</Text>
+                      <Text style={styles.detailValue}>{item.value}</Text>
+                    </View>
+                  ))}
                 </View>
-                <View style={styles.menuRowInfo}>
-                  <Text style={styles.menuRowLabel}>{t('profile.changePassword')}</Text>
-                  <Text style={styles.menuRowSub}>{t('profile.changePasswordSub')}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-              </TouchableOpacity>
-              <View style={styles.menuDivider} />
-              <TouchableOpacity style={styles.menuRow} onPress={() => navigation.navigate('NotificationPreferences')}>
-                <View style={[styles.menuIconBox, { backgroundColor: '#FFC10720' }]}>
-                  <Ionicons name="notifications" size={18} color="#FFC107" />
-                </View>
-                <View style={styles.menuRowInfo}>
-                  <Text style={styles.menuRowLabel}>{t('profile.notificationPreferences')}</Text>
-                  <Text style={styles.menuRowSub}>{t('profile.notificationPrefsSub')}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-              </TouchableOpacity>
-            </Card>
-          </>
-        ) : (
-          <>
-            {/* KYC Status */}
-            <Card title={t('profile.kycStatus')} subtitle={t('kyc.title')} style={{ marginBottom: SPACING.md }} testID="kyc-status-card">
-              <View style={styles.kycHeader}>
-                <View style={[styles.kycStatusBadge, {
-                  backgroundColor: completedStepsCount >= 4 ? '#00C85320' : colors.bgInput,
-                }]}>
-                  <Ionicons
-                    name={completedStepsCount >= 4 ? 'checkmark-circle' : 'time-outline'}
-                    size={20}
-                    color={completedStepsCount >= 4 ? '#00C853' : colors.textMuted}
-                  />
-                  <Text style={[styles.kycStatusText, {
-                    color: completedStepsCount >= 4 ? '#00C853' : colors.textMuted,
+              </Card>
+
+              {/* Personal Info */}
+              <Card title={t('profile.personalInformation')} style={{ marginTop: SPACING.md }}>
+                <TouchableOpacity style={styles.menuRow}>
+                  <View style={[styles.menuIconBox, { backgroundColor: '#6C63FF20' }]}>
+                    <Ionicons name="person" size={18} color="#6C63FF" />
+                  </View>
+                  <View style={styles.menuRowInfo}>
+                    <Text style={styles.menuRowLabel}>{t('profile.editProfile')}</Text>
+                    <Text style={styles.menuRowSub}>{t('profile.editProfileSub')}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+                <View style={styles.menuDivider} />
+                <TouchableOpacity style={styles.menuRow}>
+                  <View style={[styles.menuIconBox, { backgroundColor: '#00D2FF20' }]}>
+                    <Ionicons name="lock-closed" size={18} color="#00D2FF" />
+                  </View>
+                  <View style={styles.menuRowInfo}>
+                    <Text style={styles.menuRowLabel}>{t('profile.changePassword')}</Text>
+                    <Text style={styles.menuRowSub}>{t('profile.changePasswordSub')}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+                <View style={styles.menuDivider} />
+                <TouchableOpacity style={styles.menuRow} onPress={() => navigation.navigate('NotificationPreferences')}>
+                  <View style={[styles.menuIconBox, { backgroundColor: '#FFC10720' }]}>
+                    <Ionicons name="notifications" size={18} color="#FFC107" />
+                  </View>
+                  <View style={styles.menuRowInfo}>
+                    <Text style={styles.menuRowLabel}>{t('profile.notificationPreferences')}</Text>
+                    <Text style={styles.menuRowSub}>{t('profile.notificationPrefsSub')}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+              </Card>
+            </>
+          ) : (
+            <>
+              {/* KYC Status */}
+              <Card title={t('profile.kycStatus')} subtitle={t('kyc.title')} style={{ marginBottom: SPACING.md }} testID="kyc-status-card">
+                <View style={styles.kycHeader}>
+                  <View style={[styles.kycStatusBadge, {
+                    backgroundColor: completedStepsCount >= 4 ? '#00C85320' : colors.bgInput,
                   }]}>
-                    {completedStepsCount >= 4 ? t('profile.kycVerified') : `${completedStepsCount}/4 ${t('kyc.verified')}`}
-                  </Text>
-                </View>
-              </View>
-              {/* Progress Bar */}
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${(completedStepsCount / 4) * 100}%` }]} />
-              </View>
-              <View style={styles.kycSteps}>
-                {kycStepsDisplay.map((step) => (
-                  <TouchableOpacity
-                    key={step.key}
-                    style={styles.kycStepRow}
-                    onPress={() => handleKycStepPress(step.key)}
-                    activeOpacity={0.7}
-                    testID={`kyc-step-${step.key}`}
-                  >
-                    <View style={[
-                      styles.kycStepIcon,
-                      step.done ? { backgroundColor: '#00C85320' }
-                        : step.key === 'complete' && completedStepsCount >= 4
-                          ? { backgroundColor: colors.primary + '20' }
-                          : { backgroundColor: colors.bgInput },
-                    ]}>
-                      <Ionicons
-                        name={step.done ? 'checkmark-circle'
-                          : (step.key === 'complete' && completedStepsCount >= 4)
-                            ? 'checkmark-circle'
-                            : step.icon as keyof typeof Ionicons.glyphMap}
-                        size={20}
-                        color={step.done ? '#00C853'
-                          : (step.key === 'complete' && completedStepsCount >= 4)
-                            ? colors.primary
-                            : colors.textMuted}
-                      />
-                    </View>
-                    <Text style={[
-                      styles.kycStepLabel,
-                      (step.done || (step.key === 'complete' && completedStepsCount >= 4))
-                        ? { color: colors.text }
-                        : {},
-                    ]}>
-                      {t(step.label)}
+                    <Ionicons
+                      name={completedStepsCount >= 4 ? 'checkmark-circle' : 'time-outline'}
+                      size={20}
+                      color={completedStepsCount >= 4 ? '#00C853' : colors.textMuted}
+                    />
+                    <Text style={[styles.kycStatusText, {
+                      color: completedStepsCount >= 4 ? '#00C853' : colors.textMuted,
+                    }]}>
+                      {completedStepsCount >= 4 ? t('profile.kycVerified') : `${completedStepsCount}/4 ${t('kyc.verified')}`}
                     </Text>
-                    {step.done && (
-                      <Ionicons name="checkmark" size={16} color={colors.success} />
-                    )}
-                    {!step.done && step.key !== 'complete' && (
-                      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-              {/* Helper text */}
-              {completedStepsCount < 4 && (
-                <Text style={styles.kycHelperText}>
-                  {t('profile.kycHelperText')}
-                </Text>
-              )}
-            </Card>
-
-            {/* Linked Bank Accounts */}                <Card title={t('profile.linkedBanks')} subtitle={t('profile.banksLinked', { count: bankDetails.length })}>
-              {bankDetails.map((bank, i) => (
-                <View key={i}>
-                  <View style={styles.bankCard}>
-                    <View style={styles.bankRow}>
-                      <View style={[styles.bankIcon, { backgroundColor: '#6C63FF20' }]}>
-                        <Ionicons name="business" size={20} color="#6C63FF" />
+                  </View>
+                </View>
+                {/* Progress Bar */}
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: `${(completedStepsCount / 4) * 100}%` }]} />
+                </View>
+                <View style={styles.kycSteps}>
+                  {kycStepsDisplay.map((step) => (
+                    <TouchableOpacity
+                      key={step.key}
+                      style={styles.kycStepRow}
+                      onPress={() => handleKycStepPress(step.key)}
+                      activeOpacity={0.7}
+                      testID={`kyc-step-${step.key}`}
+                    >
+                      <View style={[
+                        styles.kycStepIcon,
+                        step.done ? { backgroundColor: '#00C85320' }
+                          : step.key === 'complete' && completedStepsCount >= 4
+                            ? { backgroundColor: colors.primary + '20' }
+                            : { backgroundColor: colors.bgInput },
+                      ]}>
+                        <Ionicons
+                          name={step.done ? 'checkmark-circle'
+                            : (step.key === 'complete' && completedStepsCount >= 4)
+                              ? 'checkmark-circle'
+                              : step.icon as keyof typeof Ionicons.glyphMap}
+                          size={20}
+                          color={step.done ? '#00C853'
+                            : (step.key === 'complete' && completedStepsCount >= 4)
+                              ? colors.primary
+                              : colors.textMuted}
+                        />
                       </View>
-                      <View style={styles.bankInfo}>
-                        <View style={styles.bankNameRow}>
-                          <Text style={styles.bankName}>{bank.bank}</Text>
-                          {bank.primary && <Badge label={t('profile.primary')} variant="primary" />}
+                      <Text style={[
+                        styles.kycStepLabel,
+                        (step.done || (step.key === 'complete' && completedStepsCount >= 4))
+                          ? { color: colors.text }
+                          : {},
+                      ]}>
+                        {t(step.label)}
+                      </Text>
+                      {step.done && (
+                        <Ionicons name="checkmark" size={16} color={colors.success} />
+                      )}
+                      {!step.done && step.key !== 'complete' && (
+                        <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {/* Helper text */}
+                {completedStepsCount < 4 && (
+                  <Text style={styles.kycHelperText}>
+                    {t('profile.kycHelperText')}
+                  </Text>
+                )}
+              </Card>
+
+              {/* Linked Bank Accounts */}                <Card title={t('profile.linkedBanks')} subtitle={t('profile.banksLinked', { count: bankDetails.length })}>
+                {bankDetails.map((bank, i) => (
+                  <View key={i}>
+                    <View style={styles.bankCard}>
+                      <View style={styles.bankRow}>
+                        <View style={[styles.bankIcon, { backgroundColor: '#6C63FF20' }]}>
+                          <Ionicons name="business" size={20} color="#6C63FF" />
                         </View>
-                        <Text style={styles.bankAccount}>{bank.account} · {bank.type}</Text>
-                        <Text style={styles.bankIfsc}>{t('profile.ifsc')}: {bank.ifsc}</Text>
+                        <View style={styles.bankInfo}>
+                          <View style={styles.bankNameRow}>
+                            <Text style={styles.bankName}>{bank.bank}</Text>
+                            {bank.primary && <Badge label={t('profile.primary')} variant="primary" />}
+                          </View>
+                          <Text style={styles.bankAccount}>{bank.account} · {bank.type}</Text>
+                          <Text style={styles.bankIfsc}>{t('profile.ifsc')}: {bank.ifsc}</Text>
+                        </View>
                       </View>
                     </View>
+                    {i < bankDetails.length - 1 && <View style={styles.menuDivider} />}
                   </View>
-                  {i < bankDetails.length - 1 && <View style={styles.menuDivider} />}
-                </View>
-              ))}
-              <TouchableOpacity
-                style={styles.addBankBtn}
-                onPress={() => {
-                  kycCallbackStore.setStepCallback('bank', () => {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  });
-                  navigation.navigate('BankLinking');
-                }}
-              >
-                <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
-                <Text style={styles.addBankText}>{t('profile.addBankAccount')}</Text>
-              </TouchableOpacity>
-            </Card>
-          </>
-        )}
+                ))}
+                <TouchableOpacity
+                  style={styles.addBankBtn}
+                  onPress={() => {
+                    kycCallbackStore.setStepCallback('bank', () => {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    });
+                    navigation.navigate('BankLinking');
+                  }}
+                >
+                  <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+                  <Text style={styles.addBankText}>{t('profile.addBankAccount')}</Text>
+                </TouchableOpacity>
+              </Card>
+            </>
+          )}
 
-        {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-          <Text style={styles.logoutText}>{t('profile.logout')}</Text>
-        </TouchableOpacity>
+          {/* Logout */}
+          <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+            <Ionicons name="log-out-outline" size={20} color={colors.danger} />
+            <Text style={styles.logoutText}>{t('profile.logout')}</Text>
+          </TouchableOpacity>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
     paddingHorizontal: SPACING.xl,

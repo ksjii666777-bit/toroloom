@@ -17,6 +17,7 @@ import { useNotificationStore } from '../../store/notificationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 Dimensions.get('window');
@@ -78,187 +79,185 @@ export default function NotificationPreferencesScreen({ navigation }: NativeStac
   }, [preferences.priceAlertThreshold, handleToggle]);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={styles.headerInfo}>
-            <Text style={styles.title}>{t('notificationPrefs.title')}</Text>
-            <Text style={styles.subtitle}>{t('notificationPrefs.subtitle')}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={styles.headerInfo}>
+              <Text style={styles.title}>{t('notificationPrefs.title')}</Text>
+              <Text style={styles.subtitle}>{t('notificationPrefs.subtitle')}</Text>
+            </View>
           </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Preference Sections */}
-        {PREFERENCE_SECTIONS.map(section => (
-          <View key={section.titleKey} style={styles.section}>
-            <Text style={styles.sectionTitle}>{t(section.titleKey)}</Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Preference Sections */}
+          {PREFERENCE_SECTIONS.map(section => (
+            <View key={section.titleKey} style={styles.section}>
+              <Text style={styles.sectionTitle}>{t(section.titleKey)}</Text>
+              <View style={styles.card}>
+                {section.items.map((item, i) => (
+                  <React.Fragment key={item.key}>
+                    <View style={styles.prefRow}>
+                      <View style={[styles.prefIcon, { backgroundColor: item.color + '20' }]}>
+                        <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={item.color} />
+                      </View>
+                      <View style={styles.prefInfo}>
+                        <Text style={styles.prefLabel}>{t(item.labelKey)}</Text>
+                        <Text style={styles.prefDesc}>{t(item.descKey)}</Text>
+                      </View>
+                      <Switch
+                        value={preferences[item.key] as boolean}
+                        onValueChange={val => handleToggle(item.key, val)}
+                        trackColor={{ false: colors.bgInput, true: colors.primary + '60' }}
+                        thumbColor={preferences[item.key] ? colors.primary : colors.textMuted}
+                        ios_backgroundColor={colors.bgInput}
+                      />
+                    </View>
+                    {i < section.items.length - 1 && <View style={styles.divider} />}
+                  </React.Fragment>
+                ))}
+              </View>
+            </View>
+          ))}
+
+          {/* Alert Threshold */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('notificationPrefs.priceAlertThreshold')}</Text>
             <View style={styles.card}>
-              {section.items.map((item, i) => (
-                <React.Fragment key={item.key}>
-                  <View style={styles.prefRow}>
-                    <View style={[styles.prefIcon, { backgroundColor: item.color + '20' }]}>
-                      <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={item.color} />
-                    </View>
-                    <View style={styles.prefInfo}>
-                      <Text style={styles.prefLabel}>{t(item.labelKey)}</Text>
-                      <Text style={styles.prefDesc}>{t(item.descKey)}</Text>
-                    </View>
-                    <Switch
-                      value={preferences[item.key] as boolean}
-                      onValueChange={val => handleToggle(item.key, val)}
-                      trackColor={{ false: colors.bgInput, true: colors.primary + '60' }}
-                      thumbColor={preferences[item.key] ? colors.primary : colors.textMuted}
-                      ios_backgroundColor={colors.bgInput}
-                    />
-                  </View>
-                  {i < section.items.length - 1 && <View style={styles.divider} />}
-                </React.Fragment>
-              ))}
+              <View style={styles.thresholdRow}>
+                <View style={[styles.prefIcon, { backgroundColor: '#FFC10720' }]}>
+                  <Ionicons name="speedometer" size={20} color="#FFC107" />
+                </View>
+                <View style={styles.thresholdInfo}>
+                  <Text style={styles.prefLabel}>{t('notificationPrefs.priceChangeThreshold')}</Text>
+                  <Text style={styles.prefDesc}>
+                    {t('notificationPrefs.alertWhenMoves', { value: preferences.priceAlertThreshold })}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.thresholdControls}>
+                <Pressable style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
+                  <Ionicons name="remove" size={22} color={colors.primary} />
+                </Pressable>
+                <View style={styles.thresholdValueWrap}>
+                  <Text style={styles.thresholdValue}>{preferences.priceAlertThreshold}%</Text>
+                </View>
+                <Pressable style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
+                  <Ionicons name="add" size={22} color={colors.primary} />
+                </Pressable>
+              </View>
+              <View style={styles.thresholdRange}>
+                <Text style={styles.thresholdRangeText}>0.5%</Text>
+                <View style={styles.thresholdBarBg}>
+                  <View
+                    style={[
+                      styles.thresholdBarFill,
+                      { width: `${((preferences.priceAlertThreshold - 0.5) / 9.5) * 100}%` },
+                    ]}
+                  />
+                </View>
+                <Text style={styles.thresholdRangeText}>10%</Text>
+              </View>
             </View>
           </View>
-        ))}
 
-        {/* Alert Threshold */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('notificationPrefs.priceAlertThreshold')}</Text>
-          <View style={styles.card}>
-            <View style={styles.thresholdRow}>
-              <View style={[styles.prefIcon, { backgroundColor: '#FFC10720' }]}>
-                <Ionicons name="speedometer" size={20} color="#FFC107" />
-              </View>
-              <View style={styles.thresholdInfo}>
-                <Text style={styles.prefLabel}>{t('notificationPrefs.priceChangeThreshold')}</Text>
-                <Text style={styles.prefDesc}>
-                  {t('notificationPrefs.alertWhenMoves', { value: preferences.priceAlertThreshold })}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.thresholdControls}>
-              <Pressable style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
-                <Ionicons name="remove" size={22} color={colors.primary} />
-              </Pressable>
-              <View style={styles.thresholdValueWrap}>
-                <Text style={styles.thresholdValue}>{preferences.priceAlertThreshold}%</Text>
-              </View>
-              <Pressable style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
-                <Ionicons name="add" size={22} color={colors.primary} />
-              </Pressable>
-            </View>
-            <View style={styles.thresholdRange}>
-              <Text style={styles.thresholdRangeText}>0.5%</Text>
-              <View style={styles.thresholdBarBg}>
-                <View
-                  style={[
-                    styles.thresholdBarFill,
-                    { width: `${((preferences.priceAlertThreshold - 0.5) / 9.5) * 100}%` },
-                  ]}
+          {/* Quiet Hours */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('notificationPrefs.quietHours')}</Text>
+            <View style={styles.card}>
+              <View style={styles.prefRow}>
+                <View style={[styles.prefIcon, { backgroundColor: '#6C63FF20' }]}>
+                  <Ionicons name="moon" size={20} color="#6C63FF" />
+                </View>
+                <View style={styles.prefInfo}>
+                  <Text style={styles.prefLabel}>{t('notificationPrefs.quietHours')}</Text>
+                  <Text style={styles.prefDesc}>
+                    {showQuietHours
+                      ? t('notificationPrefs.quietHoursDescOn', { start: preferences.quietHoursStart || '10:00 PM', end: preferences.quietHoursEnd || '7:00 AM' })
+                      : t('notificationPrefs.quietHoursDescOff')}
+                  </Text>
+                </View>
+                <Switch
+                  value={showQuietHours}
+                  onValueChange={val => {
+                    setShowQuietHours(val);
+                    handleToggle('quietHoursStart', val ? '10:00 PM' : null);
+                    handleToggle('quietHoursEnd', val ? '7:00 AM' : null);
+                  }}
+                  trackColor={{ false: colors.bgInput, true: colors.primary + '60' }}
+                  thumbColor={showQuietHours ? colors.primary : colors.textMuted}
+                  ios_backgroundColor={colors.bgInput}
                 />
               </View>
-              <Text style={styles.thresholdRangeText}>10%</Text>
+
+              {showQuietHours && (
+                <>
+                  <View style={styles.divider} />
+                  <View style={styles.quietTimeRow}>
+                    <View style={styles.quietTimeBlock}>
+                      <Text style={styles.quietTimeLabel}>{t('notificationPrefs.from')}</Text>
+                      <Pressable style={styles.quietTimePicker}>
+                        <Text style={styles.quietTimeValue}>{preferences.quietHoursStart || '10:00 PM'}</Text>
+                        <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
+                      </Pressable>
+                    </View>
+                    <View style={styles.quietTimeArrow}>
+                      <Ionicons name="arrow-forward" size={18} color={colors.textMuted} />
+                    </View>
+                    <View style={styles.quietTimeBlock}>
+                      <Text style={styles.quietTimeLabel}>{t('notificationPrefs.to')}</Text>
+                      <Pressable style={styles.quietTimePicker}>
+                        <Text style={styles.quietTimeValue}>{preferences.quietHoursEnd || '7:00 AM'}</Text>
+                        <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
+                      </Pressable>
+                    </View>
+                  </View>
+                </>
+              )}
             </View>
           </View>
-        </View>
 
-        {/* Quiet Hours */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('notificationPrefs.quietHours')}</Text>
-          <View style={styles.card}>
-            <View style={styles.prefRow}>
-              <View style={[styles.prefIcon, { backgroundColor: '#6C63FF20' }]}>
-                <Ionicons name="moon" size={20} color="#6C63FF" />
-              </View>
-              <View style={styles.prefInfo}>
-                <Text style={styles.prefLabel}>{t('notificationPrefs.quietHours')}</Text>
-                <Text style={styles.prefDesc}>
-                  {showQuietHours
-                    ? t('notificationPrefs.quietHoursDescOn', { start: preferences.quietHoursStart || '10:00 PM', end: preferences.quietHoursEnd || '7:00 AM' })
-                    : t('notificationPrefs.quietHoursDescOff')}
-                </Text>
-              </View>
-              <Switch
-                value={showQuietHours}
-                onValueChange={val => {
-                  setShowQuietHours(val);
-                  handleToggle('quietHoursStart', val ? '10:00 PM' : null);
-                  handleToggle('quietHoursEnd', val ? '7:00 AM' : null);
-                }}
-                trackColor={{ false: colors.bgInput, true: colors.primary + '60' }}
-                thumbColor={showQuietHours ? colors.primary : colors.textMuted}
-                ios_backgroundColor={colors.bgInput}
-              />
-            </View>
-
-            {showQuietHours && (
-              <>
-                <View style={styles.divider} />
-                <View style={styles.quietTimeRow}>
-                  <View style={styles.quietTimeBlock}>
-                    <Text style={styles.quietTimeLabel}>{t('notificationPrefs.from')}</Text>
-                    <Pressable style={styles.quietTimePicker}>
-                      <Text style={styles.quietTimeValue}>{preferences.quietHoursStart || '10:00 PM'}</Text>
-                      <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
-                    </Pressable>
-                  </View>
-                  <View style={styles.quietTimeArrow}>
-                    <Ionicons name="arrow-forward" size={18} color={colors.textMuted} />
-                  </View>
-                  <View style={styles.quietTimeBlock}>
-                    <Text style={styles.quietTimeLabel}>{t('notificationPrefs.to')}</Text>
-                    <Pressable style={styles.quietTimePicker}>
-                      <Text style={styles.quietTimeValue}>{preferences.quietHoursEnd || '7:00 AM'}</Text>
-                      <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
-                    </Pressable>
-                  </View>
+          {/* Email Notifications Summary */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('notificationPrefs.emailNotifications')}</Text>
+            <View style={styles.card}>
+              <View style={styles.emailRow}>
+                <View style={[styles.prefIcon, { backgroundColor: '#00D2FF20' }]}>
+                  <Ionicons name="mail" size={20} color="#00D2FF" />
                 </View>
-              </>
-            )}
-          </View>
-        </View>
-
-        {/* Email Notifications Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('notificationPrefs.emailNotifications')}</Text>
-          <View style={styles.card}>
-            <View style={styles.emailRow}>
-              <View style={[styles.prefIcon, { backgroundColor: '#00D2FF20' }]}>
-                <Ionicons name="mail" size={20} color="#00D2FF" />
+                <View style={styles.prefInfo}>
+                  <Text style={styles.prefLabel}>{t('notificationPrefs.emailSummary')}</Text>
+                  <Text style={styles.prefDesc}>
+                    {t('notificationPrefs.emailSummaryDesc')}
+                  </Text>
+                </View>
+                <Text style={styles.emailBadge}>{t('notificationPrefs.comingSoon')}</Text>
               </View>
-              <View style={styles.prefInfo}>
-                <Text style={styles.prefLabel}>{t('notificationPrefs.emailSummary')}</Text>
-                <Text style={styles.prefDesc}>
-                  {t('notificationPrefs.emailSummaryDesc')}
-                </Text>
-              </View>
-              <Text style={styles.emailBadge}>{t('notificationPrefs.comingSoon')}</Text>
             </View>
           </View>
-        </View>
 
-        {/* Reset Button */}
-        <Pressable style={({pressed}) => [styles.resetBtn, {opacity: pressed ? 0.7 : 1}]} onPress={handleReset}>
-          <Ionicons name="refresh" size={18} color={colors.danger} />
-          <Text style={styles.resetText}>{t('notificationPrefs.resetToDefaults')}</Text>
-        </Pressable>
+          {/* Reset Button */}
+          <Pressable style={({pressed}) => [styles.resetBtn, {opacity: pressed ? 0.7 : 1}]} onPress={handleReset}>
+            <Ionicons name="refresh" size={18} color={colors.danger} />
+            <Text style={styles.resetText}>{t('notificationPrefs.resetToDefaults')}</Text>
+          </Pressable>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     header: {
-      paddingTop: 60,
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       paddingHorizontal: SPACING.xl,
       paddingBottom: SPACING.lg,
     },

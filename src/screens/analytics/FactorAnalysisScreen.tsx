@@ -34,6 +34,7 @@ import { computeFactorAnalysis, FACTOR_META } from '../../services/factorAnalysi
 import { usePortfolioStore } from '../../store/portfolioStore';
 import type {FactorAnalysisResult, FactorName, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -87,337 +88,338 @@ export default function FactorAnalysisScreen({ navigation }: NativeStackScreenPr
   const hasHoldings = holdings && holdings.length > 0;
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* ── Header ───────────────────────────────────────── */}
-        <View style={styles.header}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-            <View style={styles.backBtn}>
-              <Ionicons name="arrow-back" size={22} color={colors.text} />
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ── Header ───────────────────────────────────────── */}
+          <View style={styles.header}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <View style={styles.backBtn}>
+                <Ionicons name="arrow-back" size={22} color={colors.text} />
+              </View>
+            </AnimatedPressable>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>{t('factorAnalysis.title')}</Text>
+              <Text style={styles.subtitle}>{t('factorAnalysis.subtitle')}</Text>
             </View>
-          </AnimatedPressable>
-          <View style={styles.headerContent}>
-            <Text style={styles.title}>{t('factorAnalysis.title')}</Text>
-            <Text style={styles.subtitle}>{t('factorAnalysis.subtitle')}</Text>
           </View>
-        </View>
 
-        {/* ── Info Banner ──────────────────────────────────── */}
-        <Animated.View entering={FadeInUp.springify()}>
-          <LinearGradient
-            colors={['rgba(108,99,255,0.15)', 'rgba(59,130,246,0.05)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.infoBanner}
-          >
-            <Ionicons name="information-circle" size={18} color="#6C63FF" />
-            <Text style={styles.infoText}>
-              {t('factorAnalysis.infoText')}
-            </Text>
-          </LinearGradient>
-        </Animated.View>
-
-        {/* ── Analyze Button ───────────────────────────────── */}
-        {hasHoldings && (
-          <AnimatedPressable
-            onPress={handleAnalyze}
-            haptic="medium"
-            scaleTo={0.97}
-          >
+          {/* ── Info Banner ──────────────────────────────────── */}
+          <Animated.View entering={FadeInUp.springify()}>
             <LinearGradient
-              colors={GRADIENTS.primary}
+              colors={['rgba(108,99,255,0.15)', 'rgba(59,130,246,0.05)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.runBtn}
+              style={styles.infoBanner}
             >
-              <Ionicons name="analytics" size={22} color="#fff" />
-              <Text style={styles.runBtnText}>
-                {result ? t('factorAnalysis.reanalyzeFactors') : t('factorAnalysis.analyzeFactors')}
+              <Ionicons name="information-circle" size={18} color="#6C63FF" />
+              <Text style={styles.infoText}>
+                {t('factorAnalysis.infoText')}
               </Text>
             </LinearGradient>
-          </AnimatedPressable>
-        )}
-
-        {/* ── No Holdings State ────────────────────────────── */}
-        {!hasHoldings && (
-          <Animated.View entering={FadeInUp.delay(100).springify()}>
-            <Card title={t('factorAnalysis.noPortfolioData')} style={styles.sectionCard}>
-              <View style={styles.emptyContent}>
-                <Ionicons name="analytics-outline" size={64} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>{t('factorAnalysis.noHoldingsFound')}</Text>
-                <Text style={styles.emptyDesc}>
-                  {t('factorAnalysis.noHoldingsDesc')}
-                </Text>
-                <AnimatedPressable
-                  onPress={handleUseMock}
-                  haptic="light"
-                  scaleTo={0.95}
-                  style={styles.mockBtn}
-                >
-                  <Text style={styles.mockBtnText}>{t('factorAnalysis.useSample')}</Text>
-                </AnimatedPressable>
-              </View>
-            </Card>
           </Animated.View>
-        )}
 
-        {/* ── Results ──────────────────────────────────────── */}
-        {result && (
-          <Animated.View entering={FadeInUp.delay(100).springify()}>
-            {/* ── Dominant Style Badge ─────────────────────── */}
-            <View style={styles.styleBadgeRow}>
+          {/* ── Analyze Button ───────────────────────────────── */}
+          {hasHoldings && (
+            <AnimatedPressable
+              onPress={handleAnalyze}
+              haptic="medium"
+              scaleTo={0.97}
+            >
               <LinearGradient
-                colors={['rgba(108,99,255,0.2)', 'rgba(59,130,246,0.1)']}
+                colors={GRADIENTS.primary}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.styleBadge}
+                style={styles.runBtn}
               >
-                <Ionicons name="flag" size={16} color="#6C63FF" />
-                <Text style={styles.styleBadgeLabel}>{t('factorAnalysis.dominantStyle')}</Text>
-                <Text style={styles.styleBadgeValue}>{result.dominantStyle}</Text>
+                <Ionicons name="analytics" size={22} color="#fff" />
+                <Text style={styles.runBtnText}>
+                  {result ? t('factorAnalysis.reanalyzeFactors') : t('factorAnalysis.analyzeFactors')}
+                </Text>
               </LinearGradient>
-            </View>
+            </AnimatedPressable>
+          )}
 
-            {/* ── Factor Exposure Bars ─────────────────────── */}
-            <Card title={t('factorAnalysis.factorExposures')} subtitle={t('factorAnalysis.factorExposuresSub')} style={styles.sectionCard}>
-              <View style={styles.factorsList}>
-                {result.factors.map((factor, _i) => (
+          {/* ── No Holdings State ────────────────────────────── */}
+          {!hasHoldings && (
+            <Animated.View entering={FadeInUp.delay(100).springify()}>
+              <Card title={t('factorAnalysis.noPortfolioData')} style={styles.sectionCard}>
+                <View style={styles.emptyContent}>
+                  <Ionicons name="analytics-outline" size={64} color={colors.textMuted} />
+                  <Text style={styles.emptyTitle}>{t('factorAnalysis.noHoldingsFound')}</Text>
+                  <Text style={styles.emptyDesc}>
+                    {t('factorAnalysis.noHoldingsDesc')}
+                  </Text>
                   <AnimatedPressable
-                    key={factor.factor}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSelectedFactor(selectedFactor === factor.factor ? null : factor.factor);
-                    }}
-                    haptic="selection"
-                    scaleTo={0.98}
-                    highlight
-                    highlightColor={factor.color}
-                  >
-                    <View style={styles.factorRow}>
-                      <View style={styles.factorHeader}>
-                        <Text style={styles.factorIcon}>{factor.icon}</Text>
-                        <Text style={styles.factorLabel}>{factor.label}</Text>
-                        <View style={[
-                          styles.tiltBadge,
-                          {
-                            backgroundColor: factor.tilt === 'overweight'
-                              ? `${factor.color}20`
-                              : factor.tilt === 'underweight'
-                                ? 'rgba(255,82,82,0.15)'
-                                : 'rgba(255,255,255,0.05)',
-                          },
-                        ]}>
-                          <Text style={[
-                            styles.tiltText,
-                            {
-                              color: factor.tilt === 'overweight'
-                                ? factor.color
-                                : factor.tilt === 'underweight'
-                                  ? '#FF5252'
-                                  : colors.textMuted,
-                            },
-                          ]}>
-                            {factor.tilt === 'overweight' ? '▲ +' : factor.tilt === 'underweight' ? '▼ −' : '● '}
-                            {factor.tilt === 'overweight' ? t('factorAnalysis.over') : factor.tilt === 'underweight' ? t('factorAnalysis.under') : t('factorAnalysis.neutral')}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {/* Score bar */}
-                      <View style={styles.scoreBarContainer}>
-                        <View style={styles.scoreBarTrack}>
-                          {/* Benchmark line */}
-                          <View
-                            style={[
-                              styles.benchmarkLine,
-                              { left: `${factor.benchmark}%` },
-                            ]}
-                          />
-                          {/* Score fill */}
-                          <View
-                            style={[
-                              styles.scoreBarFill,
-                              {
-                                width: `${factor.score}%`,
-                                backgroundColor: factor.color,
-                              },
-                            ]}
-                          />
-                        </View>
-                        <View style={styles.scoreLabels}>
-                          <Text style={styles.scoreText}>{factor.score}</Text>
-                          <Text style={styles.benchmarkText}>{t('factorAnalysis.benchmarkPrefix', { value: factor.benchmark })}</Text>
-                        </View>
-                      </View>
-
-                      {/* Expanded interpretation */}
-                      {selectedFactor === factor.factor && (
-                        <Animated.View entering={FadeInUp.duration(200)} style={styles.factorDetail}>
-                          <Text style={styles.factorInterpretation}>{factor.interpretation}</Text>
-                        </Animated.View>
-                      )}
-                    </View>
-                  </AnimatedPressable>
-                ))}
-              </View>
-            </Card>
-
-            {/* ── Stock Contributions ───────────────────────── */}
-            <Card
-              title={t('factorAnalysis.stockContributions')}
-              subtitle={t('factorAnalysis.stockContributionsSub')}
-              style={styles.sectionCard}
-              rightAction={
-                result.stockContributions.length > 3 ? (
-                  <AnimatedPressable
-                    onPress={() => setShowAllStocks(!showAllStocks)}
+                    onPress={handleUseMock}
                     haptic="light"
                     scaleTo={0.95}
-                    style={styles.showAllBtn}
+                    style={styles.mockBtn}
                   >
-                    <Text style={styles.showAllBtnText}>
-                      {showAllStocks ? t('factorAnalysis.showLess') : t('factorAnalysis.allCount', { count: result.stockContributions.length })}
-                    </Text>
+                    <Text style={styles.mockBtnText}>{t('factorAnalysis.useSample')}</Text>
                   </AnimatedPressable>
-                ) : undefined
-              }
-            >
-              <View style={styles.contributionsList}>
-                {/* Table header */}
-                <View style={styles.contribHeader}>
-                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.stockHeader')}</Text>
-                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.wtHeader')}</Text>
-                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorMom')}</Text>
-                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorVal')}</Text>
-                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorSize')}</Text>
-                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorQual')}</Text>
-                  <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorVol')}</Text>
                 </View>
+              </Card>
+            </Animated.View>
+          )}
 
-                {(showAllStocks ? result.stockContributions : result.stockContributions.slice(0, 3)).map((sc, i) => (
-                  <View
-                    key={sc.symbol}
-                    style={[
-                      styles.contribRow,
-                      i < (showAllStocks ? result.stockContributions.length - 1 : Math.min(3, result.stockContributions.length) - 1) && styles.contribRowBorder,
-                    ]}
-                  >
-                    <View style={styles.contribStockCell}>
-                      <Text style={styles.contribSymbol}>{sc.symbol}</Text>
-                      <Text style={styles.contribName} numberOfLines={1}>{sc.name}</Text>
-                    </View>
-                    <Text style={styles.contribValue}>{sc.weight}%</Text>
-                    {(['momentum', 'value', 'size', 'quality', 'low_volatility'] as FactorName[]).map(f => {
-                      const val = sc.contributions[f];
-                      return (
-                        <View key={f} style={[
-                          styles.contribDot,
-                          {
-                            backgroundColor: val !== undefined
-                              ? val > 0.5
-                                ? FACTOR_COLORS[f]
-                                : `${FACTOR_COLORS[f]}40`
-                              : 'rgba(255,255,255,0.05)',
-                          },
-                        ]} />
-                      );
-                    })}
-                  </View>
-                ))}
+          {/* ── Results ──────────────────────────────────────── */}
+          {result && (
+            <Animated.View entering={FadeInUp.delay(100).springify()}>
+              {/* ── Dominant Style Badge ─────────────────────── */}
+              <View style={styles.styleBadgeRow}>
+                <LinearGradient
+                  colors={['rgba(108,99,255,0.2)', 'rgba(59,130,246,0.1)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.styleBadge}
+                >
+                  <Ionicons name="flag" size={16} color="#6C63FF" />
+                  <Text style={styles.styleBadgeLabel}>{t('factorAnalysis.dominantStyle')}</Text>
+                  <Text style={styles.styleBadgeValue}>{result.dominantStyle}</Text>
+                </LinearGradient>
               </View>
-            </Card>
 
-            {/* ── Insights ──────────────────────────────────── */}
-            <Card title={t('factorAnalysis.keyInsights')} style={styles.sectionCard}>
-              <View style={styles.insightsList}>
-                {result.insights.map((insight, i) => (
-                  <Animated.View
-                    key={`insight-${i}`}
-                    entering={FadeInDown.delay(100 + i * 60).springify()}
-                    style={styles.insightRow}
-                  >
-                    <View style={[styles.insightBullet, { backgroundColor: `${result.factors[i % result.factors.length]?.color || '#6C63FF'}20` }]}>
-                      <Text style={styles.insightBulletIcon}>
-                        {result.factors[i % result.factors.length]?.icon || '💡'}
+              {/* ── Factor Exposure Bars ─────────────────────── */}
+              <Card title={t('factorAnalysis.factorExposures')} subtitle={t('factorAnalysis.factorExposuresSub')} style={styles.sectionCard}>
+                <View style={styles.factorsList}>
+                  {result.factors.map((factor, _i) => (
+                    <AnimatedPressable
+                      key={factor.factor}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setSelectedFactor(selectedFactor === factor.factor ? null : factor.factor);
+                      }}
+                      haptic="selection"
+                      scaleTo={0.98}
+                      highlight
+                      highlightColor={factor.color}
+                    >
+                      <View style={styles.factorRow}>
+                        <View style={styles.factorHeader}>
+                          <Text style={styles.factorIcon}>{factor.icon}</Text>
+                          <Text style={styles.factorLabel}>{factor.label}</Text>
+                          <View style={[
+                            styles.tiltBadge,
+                            {
+                              backgroundColor: factor.tilt === 'overweight'
+                                ? `${factor.color}20`
+                                : factor.tilt === 'underweight'
+                                  ? 'rgba(255,82,82,0.15)'
+                                  : 'rgba(255,255,255,0.05)',
+                            },
+                          ]}>
+                            <Text style={[
+                              styles.tiltText,
+                              {
+                                color: factor.tilt === 'overweight'
+                                  ? factor.color
+                                  : factor.tilt === 'underweight'
+                                    ? '#FF5252'
+                                    : colors.textMuted,
+                              },
+                            ]}>
+                              {factor.tilt === 'overweight' ? '▲ +' : factor.tilt === 'underweight' ? '▼ −' : '● '}
+                              {factor.tilt === 'overweight' ? t('factorAnalysis.over') : factor.tilt === 'underweight' ? t('factorAnalysis.under') : t('factorAnalysis.neutral')}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Score bar */}
+                        <View style={styles.scoreBarContainer}>
+                          <View style={styles.scoreBarTrack}>
+                            {/* Benchmark line */}
+                            <View
+                              style={[
+                                styles.benchmarkLine,
+                                { left: `${factor.benchmark}%` },
+                              ]}
+                            />
+                            {/* Score fill */}
+                            <View
+                              style={[
+                                styles.scoreBarFill,
+                                {
+                                  width: `${factor.score}%`,
+                                  backgroundColor: factor.color,
+                                },
+                              ]}
+                            />
+                          </View>
+                          <View style={styles.scoreLabels}>
+                            <Text style={styles.scoreText}>{factor.score}</Text>
+                            <Text style={styles.benchmarkText}>{t('factorAnalysis.benchmarkPrefix', { value: factor.benchmark })}</Text>
+                          </View>
+                        </View>
+
+                        {/* Expanded interpretation */}
+                        {selectedFactor === factor.factor && (
+                          <Animated.View entering={FadeInUp.duration(200)} style={styles.factorDetail}>
+                            <Text style={styles.factorInterpretation}>{factor.interpretation}</Text>
+                          </Animated.View>
+                        )}
+                      </View>
+                    </AnimatedPressable>
+                  ))}
+                </View>
+              </Card>
+
+              {/* ── Stock Contributions ───────────────────────── */}
+              <Card
+                title={t('factorAnalysis.stockContributions')}
+                subtitle={t('factorAnalysis.stockContributionsSub')}
+                style={styles.sectionCard}
+                rightAction={
+                  result.stockContributions.length > 3 ? (
+                    <AnimatedPressable
+                      onPress={() => setShowAllStocks(!showAllStocks)}
+                      haptic="light"
+                      scaleTo={0.95}
+                      style={styles.showAllBtn}
+                    >
+                      <Text style={styles.showAllBtnText}>
+                        {showAllStocks ? t('factorAnalysis.showLess') : t('factorAnalysis.allCount', { count: result.stockContributions.length })}
                       </Text>
+                    </AnimatedPressable>
+                  ) : undefined
+                }
+              >
+                <View style={styles.contributionsList}>
+                  {/* Table header */}
+                  <View style={styles.contribHeader}>
+                    <Text style={styles.contribHeaderCell}>{t('factorAnalysis.stockHeader')}</Text>
+                    <Text style={styles.contribHeaderCell}>{t('factorAnalysis.wtHeader')}</Text>
+                    <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorMom')}</Text>
+                    <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorVal')}</Text>
+                    <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorSize')}</Text>
+                    <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorQual')}</Text>
+                    <Text style={styles.contribHeaderCell}>{t('factorAnalysis.factorVol')}</Text>
+                  </View>
+
+                  {(showAllStocks ? result.stockContributions : result.stockContributions.slice(0, 3)).map((sc, i) => (
+                    <View
+                      key={sc.symbol}
+                      style={[
+                        styles.contribRow,
+                        i < (showAllStocks ? result.stockContributions.length - 1 : Math.min(3, result.stockContributions.length) - 1) && styles.contribRowBorder,
+                      ]}
+                    >
+                      <View style={styles.contribStockCell}>
+                        <Text style={styles.contribSymbol}>{sc.symbol}</Text>
+                        <Text style={styles.contribName} numberOfLines={1}>{sc.name}</Text>
+                      </View>
+                      <Text style={styles.contribValue}>{sc.weight}%</Text>
+                      {(['momentum', 'value', 'size', 'quality', 'low_volatility'] as FactorName[]).map(f => {
+                        const val = sc.contributions[f];
+                        return (
+                          <View key={f} style={[
+                            styles.contribDot,
+                            {
+                              backgroundColor: val !== undefined
+                                ? val > 0.5
+                                  ? FACTOR_COLORS[f]
+                                  : `${FACTOR_COLORS[f]}40`
+                                : 'rgba(255,255,255,0.05)',
+                            },
+                          ]} />
+                        );
+                      })}
                     </View>
-                    <Text style={styles.insightText}>{insight}</Text>
-                  </Animated.View>
-                ))}
-              </View>
-            </Card>
+                  ))}
+                </View>
+              </Card>
 
-            {/* ── Recommendations ───────────────────────────── */}
-            <Card title={t('factorAnalysis.recommendations')} style={styles.sectionCard}>
-              <View style={styles.recommendationsList}>
-                {result.recommendations.map((rec, i) => (
-                  <Animated.View
-                    key={`rec-${i}`}
-                    entering={FadeInDown.delay(100 + i * 80).springify()}
-                    style={styles.recRow}
-                  >
-                    <View style={styles.recNum}>
-                      <Text style={styles.recNumText}>{i + 1}</Text>
+              {/* ── Insights ──────────────────────────────────── */}
+              <Card title={t('factorAnalysis.keyInsights')} style={styles.sectionCard}>
+                <View style={styles.insightsList}>
+                  {result.insights.map((insight, i) => (
+                    <Animated.View
+                      key={`insight-${i}`}
+                      entering={FadeInDown.delay(100 + i * 60).springify()}
+                      style={styles.insightRow}
+                    >
+                      <View style={[styles.insightBullet, { backgroundColor: `${result.factors[i % result.factors.length]?.color || '#6C63FF'}20` }]}>
+                        <Text style={styles.insightBulletIcon}>
+                          {result.factors[i % result.factors.length]?.icon || '💡'}
+                        </Text>
+                      </View>
+                      <Text style={styles.insightText}>{insight}</Text>
+                    </Animated.View>
+                  ))}
+                </View>
+              </Card>
+
+              {/* ── Recommendations ───────────────────────────── */}
+              <Card title={t('factorAnalysis.recommendations')} style={styles.sectionCard}>
+                <View style={styles.recommendationsList}>
+                  {result.recommendations.map((rec, i) => (
+                    <Animated.View
+                      key={`rec-${i}`}
+                      entering={FadeInDown.delay(100 + i * 80).springify()}
+                      style={styles.recRow}
+                    >
+                      <View style={styles.recNum}>
+                        <Text style={styles.recNumText}>{i + 1}</Text>
+                      </View>
+                      <Text style={styles.recText}>{rec}</Text>
+                    </Animated.View>
+                  ))}
+                </View>
+              </Card>
+
+              {/* ── Methodology ───────────────────────────────── */}
+              <Card title={t('factorAnalysis.methodology')} style={styles.sectionCard}>
+                <View style={styles.methodContent}>
+                  <View style={styles.methodRow}>
+                    <Text style={styles.methodIcon}>📈</Text>
+                    <View style={styles.methodInfo}>
+                      <Text style={styles.methodTitle}>{t('factorAnalysis.methodMomentumTitle')}</Text>
+                      <Text style={styles.methodDesc}>{t('factorAnalysis.methodMomentumDesc')}</Text>
                     </View>
-                    <Text style={styles.recText}>{rec}</Text>
-                  </Animated.View>
-                ))}
-              </View>
-            </Card>
+                  </View>
+                  <View style={styles.methodDivider} />
+                  <View style={styles.methodRow}>
+                    <Text style={styles.methodIcon}>💎</Text>
+                    <View style={styles.methodInfo}>
+                      <Text style={styles.methodTitle}>{t('factorAnalysis.methodValueTitle')}</Text>
+                      <Text style={styles.methodDesc}>{t('factorAnalysis.methodValueDesc')}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.methodDivider} />
+                  <View style={styles.methodRow}>
+                    <Text style={styles.methodIcon}>📏</Text>
+                    <View style={styles.methodInfo}>
+                      <Text style={styles.methodTitle}>{t('factorAnalysis.methodSizeTitle')}</Text>
+                      <Text style={styles.methodDesc}>{t('factorAnalysis.methodSizeDesc')}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.methodDivider} />
+                  <View style={styles.methodRow}>
+                    <Text style={styles.methodIcon}>✨</Text>
+                    <View style={styles.methodInfo}>
+                      <Text style={styles.methodTitle}>{t('factorAnalysis.methodQualityTitle')}</Text>
+                      <Text style={styles.methodDesc}>{t('factorAnalysis.methodQualityDesc')}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.methodDivider} />
+                  <View style={styles.methodRow}>
+                    <Text style={styles.methodIcon}>🛡️</Text>
+                    <View style={styles.methodInfo}>
+                      <Text style={styles.methodTitle}>{t('factorAnalysis.methodVolatilityTitle')}</Text>
+                      <Text style={styles.methodDesc}>{t('factorAnalysis.methodVolatilityDesc')}</Text>
+                    </View>
+                  </View>
+                </View>
+              </Card>
+            </Animated.View>
+          )}
 
-            {/* ── Methodology ───────────────────────────────── */}
-            <Card title={t('factorAnalysis.methodology')} style={styles.sectionCard}>
-              <View style={styles.methodContent}>
-                <View style={styles.methodRow}>
-                  <Text style={styles.methodIcon}>📈</Text>
-                  <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodMomentumTitle')}</Text>
-                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodMomentumDesc')}</Text>
-                  </View>
-                </View>
-                <View style={styles.methodDivider} />
-                <View style={styles.methodRow}>
-                  <Text style={styles.methodIcon}>💎</Text>
-                  <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodValueTitle')}</Text>
-                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodValueDesc')}</Text>
-                  </View>
-                </View>
-                <View style={styles.methodDivider} />
-                <View style={styles.methodRow}>
-                  <Text style={styles.methodIcon}>📏</Text>
-                  <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodSizeTitle')}</Text>
-                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodSizeDesc')}</Text>
-                  </View>
-                </View>
-                <View style={styles.methodDivider} />
-                <View style={styles.methodRow}>
-                  <Text style={styles.methodIcon}>✨</Text>
-                  <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodQualityTitle')}</Text>
-                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodQualityDesc')}</Text>
-                  </View>
-                </View>
-                <View style={styles.methodDivider} />
-                <View style={styles.methodRow}>
-                  <Text style={styles.methodIcon}>🛡️</Text>
-                  <View style={styles.methodInfo}>
-                    <Text style={styles.methodTitle}>{t('factorAnalysis.methodVolatilityTitle')}</Text>
-                    <Text style={styles.methodDesc}>{t('factorAnalysis.methodVolatilityDesc')}</Text>
-                  </View>
-                </View>
-              </View>
-            </Card>
-          </Animated.View>
-        )}
-
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 80 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -435,10 +437,6 @@ const FACTOR_COLORS: Record<FactorName, string> = {
 // ══════════════════════════════════════════════════════════════
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 100,
     paddingHorizontal: SPACING.xl,

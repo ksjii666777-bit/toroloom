@@ -14,6 +14,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
+import AppScreen from '../../components/ui/AppScreen';
 
 // Indian tax regime constants (FY 2025-26)
 const STCG_TAX_RATE = 0.20; // 20% for STCG on equities (if STT paid)
@@ -96,225 +97,225 @@ export default function TaxCalculator() {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name="arrow-back" size={20} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Ionicons name="receipt" size={20} color={colors.secondary} />
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.tax')}</Text>
-        </View>
-        <TouchableOpacity onPress={handleClear} style={[styles.clearBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name="refresh" size={18} color={colors.textMuted} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Holding Period Toggle */}
-        <View style={[styles.toggleCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.holdingPeriod')}</Text>
-          <View style={[styles.toggleRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <TouchableOpacity
-              style={[styles.toggleOption, isSTCG && { backgroundColor: colors.danger }]}
-              onPress={() => setHoldingPeriod('stcg')}
-            >
-              <Text style={[styles.toggleText, { color: isSTCG ? colors.white : colors.textMuted }]}>
-                {t('calculators.stcg')}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.toggleOption, !isSTCG && { backgroundColor: colors.primary }]}
-              onPress={() => setHoldingPeriod('ltcg')}
-            >
-              <Text style={[styles.toggleText, { color: !isSTCG ? colors.white : colors.textMuted }]}>
-                {t('calculators.ltcg')}
-              </Text>
-            </TouchableOpacity>
+  {/* Header */}
+        <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="arrow-back" size={20} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Ionicons name="receipt" size={20} color={colors.secondary} />
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.tax')}</Text>
           </View>
-          <Text style={[styles.hintText, { color: colors.textMuted }]}>
-            {isSTCG
-              ? t('calculators.stcgDesc')
-              : t('calculators.ltcgDesc')}
-          </Text>
+          <TouchableOpacity onPress={handleClear} style={[styles.clearBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="refresh" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
         </View>
 
-        {/* Result Card */}
-        <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <View style={styles.resultHeader}>
-            <Text style={[styles.resultLabel, { color: colors.textMuted }]}>
-              {isSTCG ? t('calculators.shortTermGains') : t('calculators.longTermGains')}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Holding Period Toggle */}
+          <View style={[styles.toggleCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.holdingPeriod')}</Text>
+            <View style={[styles.toggleRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <TouchableOpacity
+                style={[styles.toggleOption, isSTCG && { backgroundColor: colors.danger }]}
+                onPress={() => setHoldingPeriod('stcg')}
+              >
+                <Text style={[styles.toggleText, { color: isSTCG ? colors.white : colors.textMuted }]}>
+                  {t('calculators.stcg')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.toggleOption, !isSTCG && { backgroundColor: colors.primary }]}
+                onPress={() => setHoldingPeriod('ltcg')}
+              >
+                <Text style={[styles.toggleText, { color: !isSTCG ? colors.white : colors.textMuted }]}>
+                  {t('calculators.ltcg')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={[styles.hintText, { color: colors.textMuted }]}>
+              {isSTCG
+                ? t('calculators.stcgDesc')
+                : t('calculators.ltcgDesc')}
             </Text>
-            <View style={[styles.profitBadge, { backgroundColor: isProfit ? colors.accent + '20' : colors.danger + '20' }]}>
-              <Text style={[styles.profitBadgeText, { color: isProfit ? colors.accent : colors.danger }]}>
-                {isProfit ? t('calculators.profit') : t('calculators.loss')}
-              </Text>
-            </View>
           </View>
-          <Text style={[styles.gainAmount, { color: isProfit ? colors.accent : colors.danger }]}>
-            {isProfit ? '' : '-'}{formatCurrency(Math.abs(grossProfit))}
-          </Text>
 
-          <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
-
-          {/* Tax Breakdown */}
-          <View style={styles.taxBreakdown}>
-            <View style={styles.taxRow}>
-              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.grossProfit')}</Text>
-              <Text style={[styles.taxValue, { color: colors.text }]}>{formatCurrency(grossProfit)}</Text>
+          {/* Result Card */}
+          <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+            <View style={styles.resultHeader}>
+              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>
+                {isSTCG ? t('calculators.shortTermGains') : t('calculators.longTermGains')}
+              </Text>
+              <View style={[styles.profitBadge, { backgroundColor: isProfit ? colors.accent + '20' : colors.danger + '20' }]}>
+                <Text style={[styles.profitBadgeText, { color: isProfit ? colors.accent : colors.danger }]}>
+                  {isProfit ? t('calculators.profit') : t('calculators.loss')}
+                </Text>
+              </View>
             </View>
-            {!isSTCG && (
+            <Text style={[styles.gainAmount, { color: isProfit ? colors.accent : colors.danger }]}>
+              {isProfit ? '' : '-'}{formatCurrency(Math.abs(grossProfit))}
+            </Text>
+
+            <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
+
+            {/* Tax Breakdown */}
+            <View style={styles.taxBreakdown}>
               <View style={styles.taxRow}>
-                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.ltcgExemption')}</Text>
-                <Text style={[styles.taxValue, { color: colors.text }]}>-{formatCurrency(LTCG_EXEMPTION)}</Text>
+                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.grossProfit')}</Text>
+                <Text style={[styles.taxValue, { color: colors.text }]}>{formatCurrency(grossProfit)}</Text>
+              </View>
+              {!isSTCG && (
+                <View style={styles.taxRow}>
+                  <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.ltcgExemption')}</Text>
+                  <Text style={[styles.taxValue, { color: colors.text }]}>-{formatCurrency(LTCG_EXEMPTION)}</Text>
+                </View>
+              )}
+              <View style={styles.taxRow}>
+                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.taxableGains')}</Text>
+                <Text style={[styles.taxValue, { color: colors.text }]}>{formatCurrency(taxableGains)}</Text>
+              </View>
+              <View style={[styles.taxDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.taxRow}>
+                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.taxAmount', { rate: isSTCG ? '20' : '10' })}</Text>
+                <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(taxAmount)}</Text>
+              </View>
+              {surchargeAmount > 0 && (
+                <View style={styles.taxRow}>
+                  <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.surcharge')}</Text>
+                  <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(surchargeAmount)}</Text>
+                </View>
+              )}
+              <View style={styles.taxRow}>
+                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.cess')}</Text>
+                <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(cessAmount)}</Text>
+              </View>
+              <View style={[styles.taxDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.taxRow}>
+                <Text style={[styles.taxLabelBold, { color: colors.text }]}>{t('calculators.totalTaxLiability')}</Text>
+                <Text style={[styles.taxValueBold, { color: colors.danger }]}>{formatCurrency(totalTaxLiability)}</Text>
+              </View>
+            </View>
+
+            {isProfit && totalTaxLiability > 0 && (
+              <View style={[styles.effectiveRate, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.effectiveLabel, { color: colors.textMuted }]}>{t('calculators.effectiveTaxRate')}</Text>
+                <Text style={[styles.effectiveValue, { color: colors.text }]}>{effectiveTaxRate}%</Text>
               </View>
             )}
-            <View style={styles.taxRow}>
-              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.taxableGains')}</Text>
-              <Text style={[styles.taxValue, { color: colors.text }]}>{formatCurrency(taxableGains)}</Text>
-            </View>
-            <View style={[styles.taxDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.taxRow}>
-              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.taxAmount', { rate: isSTCG ? '20' : '10' })}</Text>
-              <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(taxAmount)}</Text>
-            </View>
-            {surchargeAmount > 0 && (
-              <View style={styles.taxRow}>
-                <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.surcharge')}</Text>
-                <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(surchargeAmount)}</Text>
-              </View>
-            )}
-            <View style={styles.taxRow}>
-              <Text style={[styles.taxLabel, { color: colors.textMuted }]}>{t('calculators.cess')}</Text>
-              <Text style={[styles.taxValue, { color: colors.danger }]}>{formatCurrency(cessAmount)}</Text>
-            </View>
-            <View style={[styles.taxDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.taxRow}>
-              <Text style={[styles.taxLabelBold, { color: colors.text }]}>{t('calculators.totalTaxLiability')}</Text>
-              <Text style={[styles.taxValueBold, { color: colors.danger }]}>{formatCurrency(totalTaxLiability)}</Text>
-            </View>
-          </View>
 
-          {isProfit && totalTaxLiability > 0 && (
-            <View style={[styles.effectiveRate, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.effectiveLabel, { color: colors.textMuted }]}>{t('calculators.effectiveTaxRate')}</Text>
-              <Text style={[styles.effectiveValue, { color: colors.text }]}>{effectiveTaxRate}%</Text>
-            </View>
-          )}
-
-          {/* Net Proceeds */}
-          <View style={[styles.proceedsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="cash-outline" size={18} color={colors.primary} />
-            <View style={styles.proceedsContent}>
-              <Text style={[styles.proceedsLabel, { color: colors.textMuted }]}>{t('calculators.netProceeds')}</Text>
-              <Text style={[styles.proceedsValue, { color: colors.text }]}>
-                {formatCurrency(grossProfit - totalTaxLiability)}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Inputs */}
-        <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.tradeDetails')}</Text>
-
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.purchasePrice')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(purchasePrice)]}
-              value={purchasePrice}
-              onChangeText={setPurchasePrice}
-              keyboardType="decimal-pad"
-              placeholder="e.g. 1500"
-              placeholderTextColor={colors.textMuted}
-            />
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.salePrice')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(salePrice)]}
-              value={salePrice}
-              onChangeText={setSalePrice}
-              keyboardType="decimal-pad"
-              placeholder="e.g. 1850"
-              placeholderTextColor={colors.textMuted}
-            />
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.quantity')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(quantity)]}
-              value={quantity}
-              onChangeText={setQuantity}
-              keyboardType="numeric"
-              placeholder="e.g. 100"
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.presetRow}>
-              {[10, 50, 100, 500].map((q) => (
-                <TouchableOpacity
-                  key={q}
-                  style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: quantity === String(q) ? colors.primary : colors.border }]}
-                  onPress={() => setQuantity(String(q))}
-                >
-                  <Text style={[styles.presetChipText, { color: quantity === String(q) ? colors.primary : colors.textMuted }]}>{t('app.shares', { count: q })}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Summary */}
-        {grossProfit !== 0 && (
-          <View style={[styles.summaryCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.investmentSummary')}</Text>
-            <View style={styles.summaryRow}>
-              <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.totalInvestment')}</Text>
-                <Text style={[styles.summaryItemValue, { color: colors.text }]}>{formatCurrency(totalInvestment)}</Text>
-              </View>
-              <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.totalSaleValue')}</Text>
-                <Text style={[styles.summaryItemValue, { color: colors.text }]}>{formatCurrency(totalSaleValue)}</Text>
-              </View>
-            </View>
-            <View style={[styles.summaryRow]}>
-              <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.quantityLabel')}</Text>
-                <Text style={[styles.summaryItemValue, { color: colors.text }]}>{t('app.shares', { count: qty })}</Text>
-              </View>
-              <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.holding')}</Text>
-                <Text style={[styles.summaryItemValue, { color: isSTCG ? colors.danger : colors.accent }]}>
-                  {isSTCG ? t('calculators.shortTerm') : t('calculators.longTerm')}
+            {/* Net Proceeds */}
+            <View style={[styles.proceedsCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="cash-outline" size={18} color={colors.primary} />
+              <View style={styles.proceedsContent}>
+                <Text style={[styles.proceedsLabel, { color: colors.textMuted }]}>{t('calculators.netProceeds')}</Text>
+                <Text style={[styles.proceedsValue, { color: colors.text }]}>
+                  {formatCurrency(grossProfit - totalTaxLiability)}
                 </Text>
               </View>
             </View>
           </View>
-        )}
 
-        {/* Info */}
-        <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="information-circle-outline" size={16} color={colors.secondary} style={{ marginRight: 8 }} />
-          <Text style={[styles.infoText, { color: colors.textMuted }]}>
-            {t('calculators.taxInfo')}
-          </Text>
-        </View>
-      </ScrollView>
-    </View>
+          {/* Inputs */}
+          <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.tradeDetails')}</Text>
+
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.purchasePrice')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(purchasePrice)]}
+                value={purchasePrice}
+                onChangeText={setPurchasePrice}
+                keyboardType="decimal-pad"
+                placeholder="e.g. 1500"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.salePrice')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(salePrice)]}
+                value={salePrice}
+                onChangeText={setSalePrice}
+                keyboardType="decimal-pad"
+                placeholder="e.g. 1850"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.quantity')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(quantity)]}
+                value={quantity}
+                onChangeText={setQuantity}
+                keyboardType="numeric"
+                placeholder="e.g. 100"
+                placeholderTextColor={colors.textMuted}
+              />
+              <View style={styles.presetRow}>
+                {[10, 50, 100, 500].map((q) => (
+                  <TouchableOpacity
+                    key={q}
+                    style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: quantity === String(q) ? colors.primary : colors.border }]}
+                    onPress={() => setQuantity(String(q))}
+                  >
+                    <Text style={[styles.presetChipText, { color: quantity === String(q) ? colors.primary : colors.textMuted }]}>{t('app.shares', { count: q })}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Summary */}
+          {grossProfit !== 0 && (
+            <View style={[styles.summaryCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.investmentSummary')}</Text>
+              <View style={styles.summaryRow}>
+                <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.totalInvestment')}</Text>
+                  <Text style={[styles.summaryItemValue, { color: colors.text }]}>{formatCurrency(totalInvestment)}</Text>
+                </View>
+                <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.totalSaleValue')}</Text>
+                  <Text style={[styles.summaryItemValue, { color: colors.text }]}>{formatCurrency(totalSaleValue)}</Text>
+                </View>
+              </View>
+              <View style={[styles.summaryRow]}>
+                <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.quantityLabel')}</Text>
+                  <Text style={[styles.summaryItemValue, { color: colors.text }]}>{t('app.shares', { count: qty })}</Text>
+                </View>
+                <View style={[styles.summaryItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Text style={[styles.summaryItemLabel, { color: colors.textMuted }]}>{t('calculators.holding')}</Text>
+                  <Text style={[styles.summaryItemValue, { color: isSTCG ? colors.danger : colors.accent }]}>
+                    {isSTCG ? t('calculators.shortTerm') : t('calculators.longTerm')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* Info */}
+          <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="information-circle-outline" size={16} color={colors.secondary} style={{ marginRight: 8 }} />
+            <Text style={[styles.infoText, { color: colors.textMuted }]}>
+              {t('calculators.taxInfo')}
+            </Text>
+          </View>
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

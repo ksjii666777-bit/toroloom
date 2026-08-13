@@ -23,6 +23,7 @@ import { useEducationStore } from '../../store/educationStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 export default function LearningPathDetailScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'LearningPathDetail'>) {
@@ -93,213 +94,217 @@ export default function LearningPathDetailScreen({ navigation, route }: NativeSt
 
   if (!path) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('education.pathNotFound')}</Text>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={[styles.backBtnText, { color: colors.primary }]}>{t('education.goBack')}</Text>
-        </Pressable>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('education.pathNotFound')}</Text>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Text style={[styles.backBtnText, { color: colors.primary }]}>{t('education.goBack')}</Text>
+          </Pressable>
+        </View>
+      </AppScreen>
     );
   }
 
   const lvl = levelConfig[path.level] || { label: 'Beginner', color: '#00E676' };
 
   return (
-    <View style={styles.container}>
-      {/* Sticky Header */}
-      <View style={[styles.stickyHeader, { backgroundColor: colors.bg, borderBottomColor: colors.border }]}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </Pressable>
-        <Text style={styles.headerTitle} numberOfLines={1}>{path.title}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView
-        style={styles.scrollContent}
-        contentContainerStyle={styles.scrollInner}
-        showsVerticalScrollIndicator={false}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Hero Banner */}
-        <LinearGradient
-          colors={path.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.hero}
+  {/* Sticky Header */}
+        <View style={[styles.stickyHeader, { backgroundColor: colors.bg, borderBottomColor: colors.border }]}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </Pressable>
+          <Text style={styles.headerTitle} numberOfLines={1}>{path.title}</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        <ScrollView
+          style={styles.scrollContent}
+          contentContainerStyle={styles.scrollInner}
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.heroIcon}>{path.icon}</Text>
-          <Text style={styles.heroTitle}>{path.title}</Text>
-          <Text style={styles.heroDesc}>{path.description}</Text>
-
-          {/* Level badge */}
-          <View style={[styles.levelBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <Text style={styles.levelText}>{lvl.label}</Text>
-          </View>
-
-          {/* Stats */}
-          <View style={styles.heroStats}>
-            <View style={styles.heroStat}>
-              <Text style={styles.heroStatValue}>{path.totalLessons}</Text>
-              <Text style={styles.heroStatLabel}>{t('education.lessons')}</Text>
-            </View>
-            <View style={styles.heroStatDivider} />
-            <View style={styles.heroStat}>
-              <Text style={styles.heroStatValue}>{path.courseIds.length}</Text>
-              <Text style={styles.heroStatLabel}>{t('education.title')}</Text>
-            </View>
-            <View style={styles.heroStatDivider} />
-            <View style={styles.heroStat}>
-              <Text style={styles.heroStatValue}>{path.totalDuration}</Text>
-              <Text style={styles.heroStatLabel}>{t('education.duration')}</Text>
-            </View>
-          </View>
-
-          {/* Overall Progress */}
-          <View style={styles.heroProgressContainer}>
-            <View style={styles.heroProgressRow}>
-              <Text style={styles.heroProgressLabel}>{t('education.overallProgress')}</Text>
-              <Text style={styles.heroProgressPercent}>{pathProgress.percent}%</Text>
-            </View>
-            <View style={styles.heroProgressBarBg}>
-              <View style={[styles.heroProgressBarFill, { width: `${pathProgress.percent}%` }]} />
-            </View>
-            <Text style={styles.heroProgressDetail}>
-              {t('education.coursesCompleted', { completed: pathProgress.completedCourses, total: pathProgress.totalCourses })}
-            </Text>
-          </View>
-        </LinearGradient>
-
-        {/* Target Audience */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="people-outline" size={18} color={colors.primary} />
-            <Text style={styles.sectionTitle}>{t('education.whoIsThisFor')}</Text>
-          </View>
-          <Text style={styles.sectionText}>{path.targetAudience}</Text>
-        </View>
-
-        {/* Skills */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="trophy-outline" size={18} color={colors.warning} />
-            <Text style={styles.sectionTitle}>{t('education.skillsYouGain')}</Text>
-          </View>
-          <View style={styles.skillsGrid}>
-            {path.skillsGained.map((skill: string, i: number) => (
-              <View key={i} style={[styles.skillItem, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '20' }]}>
-                <Ionicons name="checkmark-circle" size={16} color={colors.primary} />
-                <Text style={styles.skillText}>{skill}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Courses */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="library-outline" size={18} color={colors.primary} />
-            <Text style={styles.sectionTitle}>{t('education.coursesInPath')}</Text>
-            <Text style={styles.sectionCount}>{pathCourses.length}</Text>
-          </View>
-
-          {pathCourses.map((course: any, index) => {
-            const completedCount = Object.keys(lessonProgress).filter(id => id.startsWith(course.id)).length;
-            const courseProgress = course.lessons > 0 ? Math.min(100, Math.round((completedCount / course.lessons) * 100)) : 0;
-            const isComplete = courseProgress >= 100 || course.completed;
-
-            return (
-              <Pressable
-                key={course.id}
-                style={[styles.courseCard, { borderColor: isComplete ? colors.primary + '30' : colors.border }]}
-                onPress={() => handleCoursePress(course.id)}
-                
-              >
-                <View style={styles.courseRow}>
-                  {/* Course number */}
-                  <View style={[styles.courseNum, {
-                    backgroundColor: isComplete ? colors.primary + '20' : colors.bgInput,
-                    borderColor: isComplete ? colors.primary : colors.border,
-                  }]}>
-                    {isComplete ? (
-                      <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-                    ) : (
-                      <Text style={[styles.courseNumText, { color: colors.text }]}>{index + 1}</Text>
-                    )}
-                  </View>
-
-                  {/* Info */}
-                  <View style={styles.courseInfo}>
-                    <View style={styles.courseTitleRow}>
-                      <Text style={styles.courseThumbnail}>{course.thumbnail}</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.courseTitle, isComplete && styles.courseTitleDone]} numberOfLines={2}>
-                          {course.title}
-                        </Text>
-                        <View style={styles.courseMetaRow}>
-                          <Text style={styles.courseMetaText}>{course.lessons} lessons</Text>
-                          <Text style={styles.courseMetaDot}>·</Text>
-                          <Text style={styles.courseMetaText}>{course.duration}</Text>
-                          <Text style={styles.courseMetaDot}>·</Text>
-                          <Text style={[styles.courseLevelText, { color: lvl.color }]}>
-                            {course.level}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* Mini progress bar */}
-                    <View style={styles.courseProgressBarBg}>
-                      <View style={[styles.courseProgressBarFill, {
-                        width: `${courseProgress}%`,
-                        backgroundColor: isComplete ? '#00C853' : colors.primary,
-                      }]} />
-                    </View>
-                    <Text style={styles.courseProgressText}>
-                      {completedCount}/{course.lessons} lessons · {courseProgress}%
-                    </Text>
-                  </View>
-
-                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <View style={{ height: 120 }} />
-      </ScrollView>
-
-      {/* Sticky Bottom CTA */}
-      <LinearGradient
-        colors={[colors.bg + '00', colors.bg, colors.bg]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 0.3 }}
-        style={styles.bottomCtaWrapper}
-      >
-        <Pressable
-          style={styles.startBtn}
-          onPress={handleStartPath}
-          
-        >
+          {/* Hero Banner */}
           <LinearGradient
             colors={path.gradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.startBtnGradient}
+            style={styles.hero}
           >
-            <Ionicons
-              name={pathProgress.percent > 0 ? 'play' : 'rocket-outline'}
-              size={20}
-              color={colors.white}
-            />
-            <Text style={styles.startBtnText}>
-              {pathProgress.percent > 0 ? t('education.continueLearning') : t('education.startThisPath')}
-            </Text>
+            <Text style={styles.heroIcon}>{path.icon}</Text>
+            <Text style={styles.heroTitle}>{path.title}</Text>
+            <Text style={styles.heroDesc}>{path.description}</Text>
+
+            {/* Level badge */}
+            <View style={[styles.levelBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+              <Text style={styles.levelText}>{lvl.label}</Text>
+            </View>
+
+            {/* Stats */}
+            <View style={styles.heroStats}>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>{path.totalLessons}</Text>
+                <Text style={styles.heroStatLabel}>{t('education.lessons')}</Text>
+              </View>
+              <View style={styles.heroStatDivider} />
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>{path.courseIds.length}</Text>
+                <Text style={styles.heroStatLabel}>{t('education.title')}</Text>
+              </View>
+              <View style={styles.heroStatDivider} />
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>{path.totalDuration}</Text>
+                <Text style={styles.heroStatLabel}>{t('education.duration')}</Text>
+              </View>
+            </View>
+
+            {/* Overall Progress */}
+            <View style={styles.heroProgressContainer}>
+              <View style={styles.heroProgressRow}>
+                <Text style={styles.heroProgressLabel}>{t('education.overallProgress')}</Text>
+                <Text style={styles.heroProgressPercent}>{pathProgress.percent}%</Text>
+              </View>
+              <View style={styles.heroProgressBarBg}>
+                <View style={[styles.heroProgressBarFill, { width: `${pathProgress.percent}%` }]} />
+              </View>
+              <Text style={styles.heroProgressDetail}>
+                {t('education.coursesCompleted', { completed: pathProgress.completedCourses, total: pathProgress.totalCourses })}
+              </Text>
+            </View>
           </LinearGradient>
-        </Pressable>
-      </LinearGradient>
-    </View>
+
+          {/* Target Audience */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="people-outline" size={18} color={colors.primary} />
+              <Text style={styles.sectionTitle}>{t('education.whoIsThisFor')}</Text>
+            </View>
+            <Text style={styles.sectionText}>{path.targetAudience}</Text>
+          </View>
+
+          {/* Skills */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="trophy-outline" size={18} color={colors.warning} />
+              <Text style={styles.sectionTitle}>{t('education.skillsYouGain')}</Text>
+            </View>
+            <View style={styles.skillsGrid}>
+              {path.skillsGained.map((skill: string, i: number) => (
+                <View key={i} style={[styles.skillItem, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '20' }]}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.primary} />
+                  <Text style={styles.skillText}>{skill}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Courses */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="library-outline" size={18} color={colors.primary} />
+              <Text style={styles.sectionTitle}>{t('education.coursesInPath')}</Text>
+              <Text style={styles.sectionCount}>{pathCourses.length}</Text>
+            </View>
+
+            {pathCourses.map((course: any, index) => {
+              const completedCount = Object.keys(lessonProgress).filter(id => id.startsWith(course.id)).length;
+              const courseProgress = course.lessons > 0 ? Math.min(100, Math.round((completedCount / course.lessons) * 100)) : 0;
+              const isComplete = courseProgress >= 100 || course.completed;
+
+              return (
+                <Pressable
+                  key={course.id}
+                  style={[styles.courseCard, { borderColor: isComplete ? colors.primary + '30' : colors.border }]}
+                  onPress={() => handleCoursePress(course.id)}
+                
+                >
+                  <View style={styles.courseRow}>
+                    {/* Course number */}
+                    <View style={[styles.courseNum, {
+                      backgroundColor: isComplete ? colors.primary + '20' : colors.bgInput,
+                      borderColor: isComplete ? colors.primary : colors.border,
+                    }]}>
+                      {isComplete ? (
+                        <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                      ) : (
+                        <Text style={[styles.courseNumText, { color: colors.text }]}>{index + 1}</Text>
+                      )}
+                    </View>
+
+                    {/* Info */}
+                    <View style={styles.courseInfo}>
+                      <View style={styles.courseTitleRow}>
+                        <Text style={styles.courseThumbnail}>{course.thumbnail}</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.courseTitle, isComplete && styles.courseTitleDone]} numberOfLines={2}>
+                            {course.title}
+                          </Text>
+                          <View style={styles.courseMetaRow}>
+                            <Text style={styles.courseMetaText}>{course.lessons} lessons</Text>
+                            <Text style={styles.courseMetaDot}>·</Text>
+                            <Text style={styles.courseMetaText}>{course.duration}</Text>
+                            <Text style={styles.courseMetaDot}>·</Text>
+                            <Text style={[styles.courseLevelText, { color: lvl.color }]}>
+                              {course.level}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+
+                      {/* Mini progress bar */}
+                      <View style={styles.courseProgressBarBg}>
+                        <View style={[styles.courseProgressBarFill, {
+                          width: `${courseProgress}%`,
+                          backgroundColor: isComplete ? '#00C853' : colors.primary,
+                        }]} />
+                      </View>
+                      <Text style={styles.courseProgressText}>
+                        {completedCount}/{course.lessons} lessons · {courseProgress}%
+                      </Text>
+                    </View>
+
+                    <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={{ height: 120 }} />
+        </ScrollView>
+
+        {/* Sticky Bottom CTA */}
+        <LinearGradient
+          colors={[colors.bg + '00', colors.bg, colors.bg]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 0.3 }}
+          style={styles.bottomCtaWrapper}
+        >
+          <Pressable
+            style={styles.startBtn}
+            onPress={handleStartPath}
+          
+          >
+            <LinearGradient
+              colors={path.gradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.startBtnGradient}
+            >
+              <Ionicons
+                name={pathProgress.percent > 0 ? 'play' : 'rocket-outline'}
+                size={20}
+                color={colors.white}
+              />
+              <Text style={styles.startBtnText}>
+                {pathProgress.percent > 0 ? t('education.continueLearning') : t('education.startThisPath')}
+              </Text>
+            </LinearGradient>
+          </Pressable>
+        </LinearGradient>
+      </AppScreen>
   );
 }
 
@@ -307,10 +312,6 @@ export default function LearningPathDetailScreen({ navigation, route }: NativeSt
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     scrollContent: { flex: 1 },
     scrollInner: { paddingBottom: 20 },
 

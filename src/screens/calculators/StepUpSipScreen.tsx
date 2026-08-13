@@ -19,6 +19,7 @@ import { FONTS, SPACING, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import { formatCurrency } from '../../utils/formatters';
 import type { StepUpConfig } from '../../types';
 import { LinearGradient } from 'expo-linear-gradient';
+import AppScreen from '../../components/ui/AppScreen';
 
 type StepUpFrequency = StepUpConfig['frequency'];
 
@@ -90,296 +91,294 @@ export default function StepUpSipScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name="arrow-back" size={20} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Ionicons name="trending-up" size={20} color={colors.accent} />
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('stepUpSip.title')}</Text>
-        </View>
-        <View style={{ width: 40 }} />
-      </View>
-
-      {/* Info Banner */}
-      <View style={[styles.infoBanner, { backgroundColor: colors.accent + '12', borderColor: colors.accent + '30' }]}>
-        <Ionicons name="information-circle" size={18} color={colors.accent} />
-        <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-          {t('stepUpSip.infoText')}
-        </Text>
-      </View>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
-        showsVerticalScrollIndicator={false}
+          <AppScreen scroll={false} padded={false}
       >
-        {activeSips.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="calendar-outline" size={64} color={colors.textMuted} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('stepUpSip.noActiveSips')}</Text>
-            <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              {t('stepUpSip.noActiveSipsSub')}
-            </Text>
+  {/* Header */}
+        <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="arrow-back" size={20} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Ionicons name="trending-up" size={20} color={colors.accent} />
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('stepUpSip.title')}</Text>
           </View>
-        ) : (
-          <>
-            {/* Projection Example */}
-            {activeSips.map(sip => {
-              const projection = computeProjection(sip.stepUp);
-              const maxProjection = projection ? Math.max(...projection.map(d => d.amount)) : 0;
+          <View style={{ width: 40 }} />
+        </View>
 
-              return (
-                <TouchableOpacity
-                  key={sip.id}
-                  style={[styles.sipCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}
-                  onPress={() => {
-                    setSelectedSip(sip.id);
-                    if (sip.stepUp?.enabled) {
-                      setPercent(sip.stepUp.percent.toString());
-                      setFrequency(sip.stepUp.frequency);
-                    } else {
-                      setPercent('10');
-                      setFrequency('yearly');
-                    }
-                    setShowModal(true);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  {/* Card Header */}
-                  <View style={styles.sipHeader}>
-                    <View style={[styles.sipIcon, { backgroundColor: colors.accent + '20' }]}>
-                      <Ionicons name="trending-up" size={20} color={colors.accent} />
+        {/* Info Banner */}
+        <View style={[styles.infoBanner, { backgroundColor: colors.accent + '12', borderColor: colors.accent + '30' }]}>
+          <Ionicons name="information-circle" size={18} color={colors.accent} />
+          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+            {t('stepUpSip.infoText')}
+          </Text>
+        </View>
+
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+          showsVerticalScrollIndicator={false}
+        >
+          {activeSips.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="calendar-outline" size={64} color={colors.textMuted} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('stepUpSip.noActiveSips')}</Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
+                {t('stepUpSip.noActiveSipsSub')}
+              </Text>
+            </View>
+          ) : (
+            <>
+              {/* Projection Example */}
+              {activeSips.map(sip => {
+                const projection = computeProjection(sip.stepUp);
+                const maxProjection = projection ? Math.max(...projection.map(d => d.amount)) : 0;
+
+                return (
+                  <TouchableOpacity
+                    key={sip.id}
+                    style={[styles.sipCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}
+                    onPress={() => {
+                      setSelectedSip(sip.id);
+                      if (sip.stepUp?.enabled) {
+                        setPercent(sip.stepUp.percent.toString());
+                        setFrequency(sip.stepUp.frequency);
+                      } else {
+                        setPercent('10');
+                        setFrequency('yearly');
+                      }
+                      setShowModal(true);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    {/* Card Header */}
+                    <View style={styles.sipHeader}>
+                      <View style={[styles.sipIcon, { backgroundColor: colors.accent + '20' }]}>
+                        <Ionicons name="trending-up" size={20} color={colors.accent} />
+                      </View>
+                      <View style={styles.sipInfo}>
+                        <Text style={[styles.sipFundName, { color: colors.text }]} numberOfLines={1}>{sip.fundName}</Text>
+                        <Text style={[styles.sipAmount, { color: colors.textSecondary }]}>
+                          {formatCurrency(sip.amount)}/{sip.frequency}
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
                     </View>
-                    <View style={styles.sipInfo}>
-                      <Text style={[styles.sipFundName, { color: colors.text }]} numberOfLines={1}>{sip.fundName}</Text>
-                      <Text style={[styles.sipAmount, { color: colors.textSecondary }]}>
-                        {formatCurrency(sip.amount)}/{sip.frequency}
-                      </Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+
+                    {/* Step-Up Status */}
+                    {sip.stepUp?.enabled ? (
+                      <View style={[styles.stepUpActive, { backgroundColor: colors.accent + '15', borderColor: colors.accent + '30' }]}>
+                        <View style={styles.stepUpActiveHeader}>
+                          <Ionicons name="checkmark-circle" size={16} color={colors.accent} />
+                          <Text style={[styles.stepUpActiveLabel, { color: colors.accent }]}>{t('stepUpSip.stepUpActive')}</Text>
+                        </View>
+                        <Text style={[styles.stepUpActiveDetail, { color: colors.textSecondary }]}>
+                          {getStepUpSummary(sip.stepUp)}
+                        </Text>
+                        {sip.stepUp.projectedAmount ? (
+                          <Text style={[styles.stepUpProjection, { color: colors.text }]}>
+                            {t('stepUpSip.after10Years')}: <Text style={{ color: colors.accent, fontFamily: FONTS.bold.fontFamily, fontWeight: FONTS.bold.fontWeight }}>
+                              {formatCurrency(sip.stepUp.projectedAmount)}</Text>{t('stepUpSip.perMonth')}
+                          </Text>
+                        ) : null}
+                        {/* Mini Projection Chart */}
+                        {projection && maxProjection > 0 && (
+                          <View style={styles.miniChart}>
+                            {projection.filter((_, i) => i % 2 === 0 || i === projection.length - 1).map((d) => (
+                              <View key={d.year} style={styles.miniBarGroup}>
+                                <View
+                                  style={[styles.miniBar, {
+                                    height: Math.max((d.amount / maxProjection) * 40, 3),
+                                    backgroundColor: d.year === 0 ? colors.textMuted : colors.accent,
+                                    opacity: d.year === 0 ? 0.5 : 0.7 + (d.year / projection.length) * 0.3,
+                                  }]}
+                                />
+                              </View>
+                            ))}
+                          </View>
+                        )}
+                        <TouchableOpacity
+                          style={[styles.disableBtn, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}
+                          onPress={() => handleDisable(sip.id)}
+                        >
+                          <Text style={[styles.disableBtnText, { color: colors.danger }]}>{t('stepUpSip.disableStepUp')}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <View style={[styles.stepUpInactive, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                        <Ionicons name="add-circle-outline" size={24} color={colors.textMuted} />
+                        <Text style={[styles.stepUpInactiveText, { color: colors.textMuted }]}>
+                          {t('stepUpSip.tapToSetup')}
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </>
+          )}
+
+          {/* Education Card */}
+          <View style={[styles.educationCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.eduTitle, { color: colors.text }]}>{t('stepUpSip.whyStepUp')}</Text>
+            <View style={styles.eduRow}>
+              <Ionicons name="rocket-outline" size={16} color={colors.accent} />
+              <Text style={[styles.eduText, { color: colors.textSecondary }]}>
+                {t('stepUpSip.edu1')}
+              </Text>
+            </View>
+            <View style={styles.eduRow}>
+              <Ionicons name="wallet-outline" size={16} color={colors.accent} />
+              <Text style={[styles.eduText, { color: colors.textSecondary }]}>
+                {t('stepUpSip.edu2')}
+              </Text>
+            </View>
+            <View style={styles.eduRow}>
+              <Ionicons name="flash-outline" size={16} color={colors.accent} />
+              <Text style={[styles.eduText, { color: colors.textSecondary }]}>
+                {t('stepUpSip.edu3')}
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Step-Up Configuration Modal */}
+        <Modal visible={showModal} transparent animationType="slide" onRequestClose={() => setShowModal(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  {sipPlans.find(s => s.id === selectedSip)?.stepUp?.enabled ? t('stepUpSip.modifyStepUp') : t('stepUpSip.enableStepUp')}
+                </Text>
+                <TouchableOpacity onPress={() => { setShowModal(false); setSelectedSip(null); }}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+
+              {selectedSip && (
+                <>
+                  {/* SIP Info */}
+                  <View style={[styles.modalSipInfo, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                    <Text style={[styles.modalSipName, { color: colors.text }]}>
+                      {sipPlans.find(s => s.id === selectedSip)?.fundName}
+                    </Text>
+                    <Text style={[styles.modalSipDetail, { color: colors.textSecondary }]}>
+                      {t('stepUpSip.currentLabel')}: {formatCurrency(sipPlans.find(s => s.id === selectedSip)?.amount || 0)}{t('stepUpSip.perMonth')}
+                    </Text>
                   </View>
 
-                  {/* Step-Up Status */}
-                  {sip.stepUp?.enabled ? (
-                    <View style={[styles.stepUpActive, { backgroundColor: colors.accent + '15', borderColor: colors.accent + '30' }]}>
-                      <View style={styles.stepUpActiveHeader}>
-                        <Ionicons name="checkmark-circle" size={16} color={colors.accent} />
-                        <Text style={[styles.stepUpActiveLabel, { color: colors.accent }]}>{t('stepUpSip.stepUpActive')}</Text>
-                      </View>
-                      <Text style={[styles.stepUpActiveDetail, { color: colors.textSecondary }]}>
-                        {getStepUpSummary(sip.stepUp)}
-                      </Text>
-                      {sip.stepUp.projectedAmount ? (
-                        <Text style={[styles.stepUpProjection, { color: colors.text }]}>
-                          {t('stepUpSip.after10Years')}: <Text style={{ color: colors.accent, fontFamily: FONTS.bold.fontFamily, fontWeight: FONTS.bold.fontWeight }}>
-                            {formatCurrency(sip.stepUp.projectedAmount)}</Text>{t('stepUpSip.perMonth')}
-                        </Text>
-                      ) : null}
-                      {/* Mini Projection Chart */}
-                      {projection && maxProjection > 0 && (
-                        <View style={styles.miniChart}>
-                          {projection.filter((_, i) => i % 2 === 0 || i === projection.length - 1).map((d) => (
-                            <View key={d.year} style={styles.miniBarGroup}>
-                              <View
-                                style={[styles.miniBar, {
-                                  height: Math.max((d.amount / maxProjection) * 40, 3),
-                                  backgroundColor: d.year === 0 ? colors.textMuted : colors.accent,
-                                  opacity: d.year === 0 ? 0.5 : 0.7 + (d.year / projection.length) * 0.3,
-                                }]}
-                              />
-                            </View>
-                          ))}
-                        </View>
-                      )}
+                  {/* Step-Up Percent */}
+                  <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>{t('stepUpSip.increaseBy')}</Text>
+                  <View style={styles.percentInputRow}>
+                    <Ionicons name="pricetag" size={20} color={colors.textMuted} />
+                    <TextInput
+                      style={[styles.percentInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
+                      value={percent}
+                      onChangeText={setPercent}
+                      keyboardType="decimal-pad"
+                      placeholder={t('stepUpSip.percentPlaceholder')}
+                      placeholderTextColor={colors.textMuted}
+                    />
+                  </View>
+                  <View style={styles.presetRow}>
+                    {percentPresets.map(p => (
                       <TouchableOpacity
-                        style={[styles.disableBtn, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}
-                        onPress={() => handleDisable(sip.id)}
+                        key={p}
+                        style={[styles.presetChip, {
+                          backgroundColor: percent === String(p) ? colors.accent + '20' : colors.bgCard,
+                          borderColor: percent === String(p) ? colors.accent : colors.border,
+                        }]}
+                        onPress={() => setPercent(String(p))}
                       >
-                        <Text style={[styles.disableBtnText, { color: colors.danger }]}>{t('stepUpSip.disableStepUp')}</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    <View style={[styles.stepUpInactive, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                      <Ionicons name="add-circle-outline" size={24} color={colors.textMuted} />
-                      <Text style={[styles.stepUpInactiveText, { color: colors.textMuted }]}>
-                        {t('stepUpSip.tapToSetup')}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </>
-        )}
-
-        {/* Education Card */}
-        <View style={[styles.educationCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.eduTitle, { color: colors.text }]}>{t('stepUpSip.whyStepUp')}</Text>
-          <View style={styles.eduRow}>
-            <Ionicons name="rocket-outline" size={16} color={colors.accent} />
-            <Text style={[styles.eduText, { color: colors.textSecondary }]}>
-              {t('stepUpSip.edu1')}
-            </Text>
-          </View>
-          <View style={styles.eduRow}>
-            <Ionicons name="wallet-outline" size={16} color={colors.accent} />
-            <Text style={[styles.eduText, { color: colors.textSecondary }]}>
-              {t('stepUpSip.edu2')}
-            </Text>
-          </View>
-          <View style={styles.eduRow}>
-            <Ionicons name="flash-outline" size={16} color={colors.accent} />
-            <Text style={[styles.eduText, { color: colors.textSecondary }]}>
-              {t('stepUpSip.edu3')}
-            </Text>
-          </View>
-        </View>
-      </ScrollView>
-
-      {/* Step-Up Configuration Modal */}
-      <Modal visible={showModal} transparent animationType="slide" onRequestClose={() => setShowModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.bgSecondary }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                {sipPlans.find(s => s.id === selectedSip)?.stepUp?.enabled ? t('stepUpSip.modifyStepUp') : t('stepUpSip.enableStepUp')}
-              </Text>
-              <TouchableOpacity onPress={() => { setShowModal(false); setSelectedSip(null); }}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-
-            {selectedSip && (
-              <>
-                {/* SIP Info */}
-                <View style={[styles.modalSipInfo, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                  <Text style={[styles.modalSipName, { color: colors.text }]}>
-                    {sipPlans.find(s => s.id === selectedSip)?.fundName}
-                  </Text>
-                  <Text style={[styles.modalSipDetail, { color: colors.textSecondary }]}>
-                    {t('stepUpSip.currentLabel')}: {formatCurrency(sipPlans.find(s => s.id === selectedSip)?.amount || 0)}{t('stepUpSip.perMonth')}
-                  </Text>
-                </View>
-
-                {/* Step-Up Percent */}
-                <Text style={[styles.modalLabel, { color: colors.textSecondary }]}>{t('stepUpSip.increaseBy')}</Text>
-                <View style={styles.percentInputRow}>
-                  <Ionicons name="pricetag" size={20} color={colors.textMuted} />
-                  <TextInput
-                    style={[styles.percentInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
-                    value={percent}
-                    onChangeText={setPercent}
-                    keyboardType="decimal-pad"
-                    placeholder={t('stepUpSip.percentPlaceholder')}
-                    placeholderTextColor={colors.textMuted}
-                  />
-                </View>
-                <View style={styles.presetRow}>
-                  {percentPresets.map(p => (
-                    <TouchableOpacity
-                      key={p}
-                      style={[styles.presetChip, {
-                        backgroundColor: percent === String(p) ? colors.accent + '20' : colors.bgCard,
-                        borderColor: percent === String(p) ? colors.accent : colors.border,
-                      }]}
-                      onPress={() => setPercent(String(p))}
-                    >
-                      <Text style={[styles.presetChipText, {
-                        color: percent === String(p) ? colors.accent : colors.textMuted,
-                      }]}>
-                        {p}%
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* Frequency */}
-                <Text style={[styles.modalLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('stepUpSip.frequency')}</Text>
-                <View style={styles.frequencyRow}>
-                  {frequencyOptions.map(opt => (
-                    <TouchableOpacity
-                      key={opt.value}
-                      style={[styles.freqBtn, {
-                        backgroundColor: frequency === opt.value ? colors.accent + '20' : colors.bgCard,
-                        borderColor: frequency === opt.value ? colors.accent : colors.border,
-                      }]}
-                      onPress={() => setFrequency(opt.value)}
-                    >
-                      <Text style={[styles.freqBtnText, {
-                        color: frequency === opt.value ? colors.accent : colors.textMuted,
-                      }]}>
-                        {t(opt.labelKey)}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* Projection Preview */}
-                {(() => {
-                  const pct = parseFloat(percent) || 10;
-                  const base = sipPlans.find(s => s.id === selectedSip)?.amount || 10000;
-                  const stepsPerYear = frequency === 'yearly' ? 1 : 2;
-                  let projected = base;
-                  for (let i = 0; i < 10 * stepsPerYear; i++) {
-                    projected = projected * (1 + pct / 100);
-                  }
-                  return (
-                    <View style={[styles.projectionPreview, { backgroundColor: colors.accent + '10', borderColor: colors.accent + '25' }]}>
-                      <View style={styles.projectionRow}>
-                        <Text style={[styles.projectionLabel, { color: colors.textMuted }]}>{t('stepUpSip.now')}</Text>
-                        <Text style={[styles.projectionValue, { color: colors.text }]}>{formatCurrency(base)}</Text>
-                      </View>
-                      <View style={[styles.projectionArrow, { borderBottomColor: colors.accent + '40' }]} />
-                      <View style={styles.projectionRow}>
-                        <Text style={[styles.projectionLabel, { color: colors.textMuted }]}>{t('stepUpSip.after10Yrs')}</Text>
-                        <Text style={[styles.projectionValue, { color: colors.accent, fontFamily: FONTS.bold.fontFamily, fontWeight: FONTS.bold.fontWeight }]}>
-                          {formatCurrency(Math.round(projected))}
+                        <Text style={[styles.presetChipText, {
+                          color: percent === String(p) ? colors.accent : colors.textMuted,
+                        }]}>
+                          {p}%
                         </Text>
-                      </View>
-                    </View>
-                  );
-                })()}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
 
-                {/* Action Buttons */}
-                <View style={styles.modalActions}>
-                  <TouchableOpacity
-                    style={[styles.cancelBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                    onPress={() => { setShowModal(false); setSelectedSip(null); }}
-                  >
-                    <Text style={[styles.cancelBtnText, { color: colors.text }]}>{t('stepUpSip.cancel')}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.confirmBtn}
-                    onPress={handleEnable}
-                  >
-                    <LinearGradient
-                      colors={GRADIENTS.primary}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.confirmBtnGradient}
+                  {/* Frequency */}
+                  <Text style={[styles.modalLabel, { color: colors.textSecondary, marginTop: SPACING.lg }]}>{t('stepUpSip.frequency')}</Text>
+                  <View style={styles.frequencyRow}>
+                    {frequencyOptions.map(opt => (
+                      <TouchableOpacity
+                        key={opt.value}
+                        style={[styles.freqBtn, {
+                          backgroundColor: frequency === opt.value ? colors.accent + '20' : colors.bgCard,
+                          borderColor: frequency === opt.value ? colors.accent : colors.border,
+                        }]}
+                        onPress={() => setFrequency(opt.value)}
+                      >
+                        <Text style={[styles.freqBtnText, {
+                          color: frequency === opt.value ? colors.accent : colors.textMuted,
+                        }]}>
+                          {t(opt.labelKey)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  {/* Projection Preview */}
+                  {(() => {
+                    const pct = parseFloat(percent) || 10;
+                    const base = sipPlans.find(s => s.id === selectedSip)?.amount || 10000;
+                    const stepsPerYear = frequency === 'yearly' ? 1 : 2;
+                    let projected = base;
+                    for (let i = 0; i < 10 * stepsPerYear; i++) {
+                      projected = projected * (1 + pct / 100);
+                    }
+                    return (
+                      <View style={[styles.projectionPreview, { backgroundColor: colors.accent + '10', borderColor: colors.accent + '25' }]}>
+                        <View style={styles.projectionRow}>
+                          <Text style={[styles.projectionLabel, { color: colors.textMuted }]}>{t('stepUpSip.now')}</Text>
+                          <Text style={[styles.projectionValue, { color: colors.text }]}>{formatCurrency(base)}</Text>
+                        </View>
+                        <View style={[styles.projectionArrow, { borderBottomColor: colors.accent + '40' }]} />
+                        <View style={styles.projectionRow}>
+                          <Text style={[styles.projectionLabel, { color: colors.textMuted }]}>{t('stepUpSip.after10Yrs')}</Text>
+                          <Text style={[styles.projectionValue, { color: colors.accent, fontFamily: FONTS.bold.fontFamily, fontWeight: FONTS.bold.fontWeight }]}>
+                            {formatCurrency(Math.round(projected))}
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })()}
+
+                  {/* Action Buttons */}
+                  <View style={styles.modalActions}>
+                    <TouchableOpacity
+                      style={[styles.cancelBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                      onPress={() => { setShowModal(false); setSelectedSip(null); }}
                     >
-                      <Text style={styles.confirmBtnText}>
-                        {sipPlans.find(s => s.id === selectedSip)?.stepUp?.enabled ? t('stepUpSip.update') : t('stepUpSip.enableStepUp')}
-                      </Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
+                      <Text style={[styles.cancelBtnText, { color: colors.text }]}>{t('stepUpSip.cancel')}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.confirmBtn}
+                      onPress={handleEnable}
+                    >
+                      <LinearGradient
+                        colors={GRADIENTS.primary}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.confirmBtnGradient}
+                      >
+                        <Text style={styles.confirmBtnText}>
+                          {sipPlans.find(s => s.id === selectedSip)?.stepUp?.enabled ? t('stepUpSip.update') : t('stepUpSip.enableStepUp')}
+                        </Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -40,6 +40,7 @@ import { toTradingViewSymbol, toTradingViewInterval } from '../../utils/tradingV
 import { openExitOrder } from '../../utils/orderExit';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const { width } = Dimensions.get('window');
@@ -283,368 +284,365 @@ export default function StockDetailScreen({ route, navigation }: NativeStackScre
   );
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.close')}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <View style={{ flexDirection: 'row', gap: SPACING.sm, alignItems: 'center' }}>
-            <View style={[styles.connectionBadge, { backgroundColor: isConnected ? colors.marketUp + '20' : colors.marketDown + '20' }]}>
-              <View style={[styles.connectionDot, { backgroundColor: isConnected ? colors.marketUp : colors.marketDown }]} />
-              <Text style={[styles.connectionText, { color: isConnected ? colors.marketUp : colors.marketDown }]}>
-{isConnected ? t('status.live') : t('status.offline')}
-              </Text>
-            </View>
-            <TouchableOpacity style={styles.watchlistBtn} onPress={handleWatchlistToggle}>
-              <Ionicons
-                name={inWatchlist ? 'heart' : 'heart-outline'}
-                size={24}
-                color={inWatchlist ? colors.secondary : colors.text}
-              />
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel={t('app.close')}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Stock Info */}
-        <View style={styles.stockInfo}>
-          <View style={styles.stockHeader}>
-            <View>
-              <Text style={styles.symbol}>{stock.symbol}</Text>
-              <Text style={styles.name}>{stock.name}</Text>
-            </View>
-            <Badge label={stock.sector} variant="info" />
-          </View>
-
-          <View style={styles.priceSection}>
-            <Text style={styles.price}>{formatCurrency(displayPrice)}</Text>
-            <View style={[styles.changeBadge, { backgroundColor: (isPositive ? colors.marketUp : colors.marketDown) + '20' }]}>
-              <Ionicons name={isPositive ? 'caret-up' : 'caret-down'} size={18} color={isPositive ? colors.marketUp : colors.marketDown} />
-              <Text style={[styles.changeText, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
-                {isPositive ? '+' : ''}{displayChange.toFixed(2)} ({isPositive ? '+' : ''}{displayChangePercent.toFixed(2)}%)
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.liveIndicator}>
-            <View style={styles.liveDot}>
-              <View style={[styles.liveDotInner, { backgroundColor: isConnected ? '#00C853' : '#888' }]} />
-              {isConnected && <View style={styles.livePulse} />}
-            </View>
-            <Text style={styles.liveText}>
-              {isConnected ? 'Streaming live prices' : 'Using simulated prices'}
-            </Text>
-          </View>
-        </View>          {/* ── Extracted: Chart Controls ── */}
-        <ChartControls
-          showMA={showMA}
-          activeIndicators={activeIndicators}
-          enableDrawing={enableDrawing}
-          showPatterns={showPatterns}
-          chartType={chartType}
-          isFullscreen={isFullscreen}
-          isLive={isLiveChart}
-          onToggleLive={handleToggleLive}
-          onToggleMA={() => setShowMA(prev => !prev)}
-          onToggleIndicator={handleIndicatorToggle}
-          onToggleDrawing={() => { setEnableDrawing(!enableDrawing); if (!enableDrawing) setActiveDrawTool('none'); }}
-          onTogglePatterns={() => setShowPatterns(!showPatterns)}
-          onChangeChartType={handleChartTypeCycle}
-          onToggleFullscreen={() => setIsFullscreen(prev => !prev)}
-        />
-
-        {/* ── Live chart options row (only affects the live TradingView widget) ── */}
-        {isLiveChart && (
-        <View style={styles.chartOptionsRow}>
-          <Text style={[styles.chartOptionsLabel, { color: colors.textMuted }]}>{t('stockDetail.chartOptions')}</Text>
-          {[
-            { key: 'hideSideToolbar' as const, label: t('stockDetail.showSideToolbar'), active: !chartOptions.hideSideToolbar },
-            { key: 'withDateRanges' as const, label: t('stockDetail.showDateRanges'), active: chartOptions.withDateRanges },
-            { key: 'saveImage' as const, label: t('stockDetail.saveImage'), active: chartOptions.saveImage },
-          ].map((opt) => (
-            <TouchableOpacity
-              key={opt.key}
-              style={[
-                styles.chartOptionChip,
-                {
-                  backgroundColor: opt.active ? colors.primary + '20' : colors.bgCard,
-                  borderColor: opt.active ? colors.primary + '40' : colors.border,
-                },
-              ]}
-              onPress={() => {
-                if (opt.key === 'hideSideToolbar') setChartOptions((p) => ({ ...p, hideSideToolbar: !p.hideSideToolbar }));
-                else if (opt.key === 'withDateRanges') setChartOptions((p) => ({ ...p, withDateRanges: !p.withDateRanges }));
-                else setChartOptions((p) => ({ ...p, saveImage: !p.saveImage }));
-              }}
-            >
-              <Text style={[styles.chartOptionText, { color: opt.active ? colors.primary : colors.textMuted }]}>{opt.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        )}
-
-        {/* Pattern Settings gear icon (visible when patterns are toggled on) */}
-        {showPatterns && (
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: SPACING.sm }}>
-            <TouchableOpacity
-              onPress={() => setShowPatternSettings(true)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-                paddingHorizontal: SPACING.sm,
-                paddingVertical: 4,
-                borderRadius: BORDER_RADIUS.sm,
-                borderWidth: 1,
-                borderColor: colors.border,
-                backgroundColor: colors.bgCard,
-              }}
-            >
-              <Ionicons name="settings-outline" size={14} color={colors.textSecondary} />
-              <Text style={[styles.advancedLabel, { color: colors.textSecondary }]}>{t('stockDetail.advanced')}</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <ChartCrosshairContext.Provider value={{ focusedIndex, setFocusedIndex }}>
-          {isLiveChart ? (
-            <>
-              {/* Live TradingView chart — real, live market data */}
-              <View style={styles.timeframes}>
-                {TIMEFRAMES.map((tf) => (
-                  <TouchableOpacity
-                    key={tf}
-                    style={[styles.timeframeBtn, activeTimeframe === tf && styles.timeframeActive]}
-                    onPress={() => handleTimeframeChange(tf)}
-                  >
-                    <Text style={[styles.timeframeText, activeTimeframe === tf && styles.timeframeTextActive]}>
-                      {tf}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.chartWrap}>
-                <TradingViewChart
-                  symbol={tvSymbol}
-                  interval={toTradingViewInterval(activeTimeframe)}
-                  height={280}
-                  onError={handleTvError}
-                  style={styles.liveChart}
-                  hideSideToolbar={chartOptions.hideSideToolbar}
-                  withDateRanges={chartOptions.withDateRanges}
-                  saveImage={chartOptions.saveImage}
-                />
-                <PositionLevelsOverlay
-                  symbol={stock.symbol}
-                  position={heldPosition}
-                  currency="INR"
-                  onApplyStop={(p) => openExit('SL', p)}
-                  onApplyTarget={(p) => openExit('LIMIT', p)}
-                />
-              </View>
-            </>
-          ) : (
-            <>
-              {/* Drawing Toolbar */}
-              {enableDrawing && (
-                <View style={{ marginBottom: SPACING.sm }}>
-                  <DrawingToolbar
-                    activeTool={activeDrawTool}
-                    onToolChange={setActiveDrawTool}
-                    colors={colors}
-                    drawingCount={drawings.length}
-                    onClearAll={() => setDrawings([])}
-                  />
-                </View>
-              )}
-
-              <View style={styles.chartWrap}>
-                <CandlestickChart
-                  data={candleHistory}
-                  height={280}
-                  width={width - 64}
-                  timeframes={TIMEFRAMES}
-                  activeTimeframe={activeTimeframe}
-                  onTimeframeChange={handleTimeframeChange}
-                  showVolume={true}
-                  showMA={showMA}
-                  loading={candleHistory.length === 0}
-                  chartType={chartType}
-                  onChartTypeChange={setChartType}
-                  enableDrawing={enableDrawing}
-                  drawings={drawings}
-                  onDrawingsChange={setDrawings}
-                  activeDrawTool={activeDrawTool}
-                  onDrawToolChange={setActiveDrawTool}
-                  showPatterns={showPatterns}
-                  patterns={detectedPatterns}
-                />
-                {/* Position tag + STOP/TARGET exit chips stay available even
-                    when the live widget fails — the user can still exit. */}
-                <PositionLevelsOverlay
-                  symbol={stock.symbol}
-                  position={heldPosition}
-                  currency="INR"
-                  onApplyStop={(p) => openExit('SL', p)}
-                  onApplyTarget={(p) => openExit('LIMIT', p)}
-                />
-              </View>
-
-              {/* ── Extracted: Pattern Summary ── */}
-              {showPatterns && detectedPatterns.length > 0 && (
-                <PatternSummary patterns={detectedPatterns} />
-              )}
-              {showPatterns && detectedPatterns.length === 0 && (
-                <View style={{
-                  padding: SPACING.md,
-                  borderRadius: BORDER_RADIUS.md,
-                  backgroundColor: colors.bg,
-                  marginBottom: SPACING.sm,
-                  alignItems: 'center',
-                }}>
-                  <Text style={[{
-                    ...FONTS.regular, fontSize: FONTS.size.sm, color: colors.textMuted,
-                  }]}>
-                    No patterns detected with current settings. Try lowering the confidence threshold or enabling more pattern types in{' '}
-                    <Text
-                      style={{ color: colors.primary, textDecorationLine: 'underline' }}
-                      onPress={() => setShowPatternSettings(true)}
-                    >
-                      Advanced settings
-                    </Text>.
-                  </Text>
-                </View>
-              )}
-
-              {/* ── Extracted: Technical Indicators ── */}
-              {activeIndicators.length > 0 && (
-                <TechnicalIndicators
-                  data={candleHistory}
-                  width={width - 64}
-                  indicators={activeIndicators}
-                  onIndicatorToggle={handleIndicatorToggle}
-                />
-              )}
-            </>
-          )}
-        </ChartCrosshairContext.Provider>
-
-        {/* ── Extracted: Key Stats Grid ── */}
-        <View style={{ marginTop: SPACING.lg }}>
-          <KeyStatsGrid stats={{ open: candleHistory[0]?.open || stock.price, dayHigh, dayLow, volume, marketCap: stock.marketCap, pe: stock.pe, high52: stock.high52, low52: stock.low52 }} />
-        </View>
-
-        {/* Fundamentals Button — Company Analysis */}
-        <AnimatedPressable onPress={() => navigation.navigate('CompanyFundamentals', { symbol: stock.symbol, stockId: stock.id })} haptic="medium" scaleTo={0.97}>
-          <View style={[styles.fundamentalsCard, { borderColor: colors.border, backgroundColor: `${colors.primary}08` }]}>
-            <View style={styles.fundamentalsRow}>
-              <View style={[styles.fundamentalsIcon, { backgroundColor: `${colors.primary}20` }]}>
-                <Ionicons name="analytics" size={22} color={colors.primary} />
-              </View>
-              <View style={styles.fundamentalsInfo}>
-                <Text style={[styles.fundamentalsTitle, { color: colors.text }]}>{t('stockDetail.companyFundamentals')}</Text>
-                <Text style={[styles.fundamentalsSub, { color: colors.textSecondary }]}>
-                  P/E {stock.pe.toFixed(1)}x · P/B {stock.pb.toFixed(1)}x · ROCE · Debt Ratios · Quarterly Results
+            <View style={{ flexDirection: 'row', gap: SPACING.sm, alignItems: 'center' }}>
+              <View style={[styles.connectionBadge, { backgroundColor: isConnected ? colors.marketUp + '20' : colors.marketDown + '20' }]}>
+                <View style={[styles.connectionDot, { backgroundColor: isConnected ? colors.marketUp : colors.marketDown }]} />
+                <Text style={[styles.connectionText, { color: isConnected ? colors.marketUp : colors.marketDown }]}>
+  {isConnected ? t('status.live') : t('status.offline')}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              <TouchableOpacity style={styles.watchlistBtn} onPress={handleWatchlistToggle}>
+                <Ionicons
+                  name={inWatchlist ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={inWatchlist ? colors.secondary : colors.text}
+                />
+              </TouchableOpacity>
             </View>
           </View>
-        </AnimatedPressable>
 
-        {/* About Company */}
-        <View testID="stock-about-company">
-        <Card title={t('stockDetail.aboutCompany')} style={styles.aboutCard}>
-          <Text style={styles.aboutText}>
-            {stock.name} is a leading company in the {stock.sector} sector with a market
-            capitalization of {stock.marketCap}. The company has a P/E ratio of {stock.pe.toFixed(1)}
-            {' '}and a dividend yield of {stock.dividend}%. With a 52-week range of {formatCurrency(stock.low52)}
-            {' '}to {formatCurrency(stock.high52)}, the stock shows strong market presence and
-            consistent performance in its sector.
-          </Text>
-        </Card>
-        </View>
+          {/* Stock Info */}
+          <View style={styles.stockInfo}>
+            <View style={styles.stockHeader}>
+              <View>
+                <Text style={styles.symbol}>{stock.symbol}</Text>
+                <Text style={styles.name}>{stock.name}</Text>
+              </View>
+              <Badge label={stock.sector} variant="info" />
+            </View>
 
-        {/* ── Extracted: Sector Context ── */}
-        {sectorData && <SectorContext data={sectorData} />}
+            <View style={styles.priceSection}>
+              <Text style={styles.price}>{formatCurrency(displayPrice)}</Text>
+              <View style={[styles.changeBadge, { backgroundColor: (isPositive ? colors.marketUp : colors.marketDown) + '20' }]}>
+                <Ionicons name={isPositive ? 'caret-up' : 'caret-down'} size={18} color={isPositive ? colors.marketUp : colors.marketDown} />
+                <Text style={[styles.changeText, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
+                  {isPositive ? '+' : ''}{displayChange.toFixed(2)} ({isPositive ? '+' : ''}{displayChangePercent.toFixed(2)}%)
+                </Text>
+              </View>
+            </View>
 
-        {/* ── Extracted: Peer Comparison ── */}
-        <PeerComparison
-          currentStock={stock}
-          peers={peers}
-          onPeerPress={(stockId, symbol) => navigation.navigate('StockDetail', { stockId, symbol })}
-          formatMarketCap={formatCompactMarketCap}
+            <View style={styles.liveIndicator}>
+              <View style={styles.liveDot}>
+                <View style={[styles.liveDotInner, { backgroundColor: isConnected ? '#00C853' : '#888' }]} />
+                {isConnected && <View style={styles.livePulse} />}
+              </View>
+              <Text style={styles.liveText}>
+                {isConnected ? 'Streaming live prices' : 'Using simulated prices'}
+              </Text>
+            </View>
+          </View>          {/* ── Extracted: Chart Controls ── */}
+          <ChartControls
+            showMA={showMA}
+            activeIndicators={activeIndicators}
+            enableDrawing={enableDrawing}
+            showPatterns={showPatterns}
+            chartType={chartType}
+            isFullscreen={isFullscreen}
+            isLive={isLiveChart}
+            onToggleLive={handleToggleLive}
+            onToggleMA={() => setShowMA(prev => !prev)}
+            onToggleIndicator={handleIndicatorToggle}
+            onToggleDrawing={() => { setEnableDrawing(!enableDrawing); if (!enableDrawing) setActiveDrawTool('none'); }}
+            onTogglePatterns={() => setShowPatterns(!showPatterns)}
+            onChangeChartType={handleChartTypeCycle}
+            onToggleFullscreen={() => setIsFullscreen(prev => !prev)}
+          />
+
+          {/* ── Live chart options row (only affects the live TradingView widget) ── */}
+          {isLiveChart && (
+          <View style={styles.chartOptionsRow}>
+            <Text style={[styles.chartOptionsLabel, { color: colors.textMuted }]}>{t('stockDetail.chartOptions')}</Text>
+            {[
+              { key: 'hideSideToolbar' as const, label: t('stockDetail.showSideToolbar'), active: !chartOptions.hideSideToolbar },
+              { key: 'withDateRanges' as const, label: t('stockDetail.showDateRanges'), active: chartOptions.withDateRanges },
+              { key: 'saveImage' as const, label: t('stockDetail.saveImage'), active: chartOptions.saveImage },
+            ].map((opt) => (
+              <TouchableOpacity
+                key={opt.key}
+                style={[
+                  styles.chartOptionChip,
+                  {
+                    backgroundColor: opt.active ? colors.primary + '20' : colors.bgCard,
+                    borderColor: opt.active ? colors.primary + '40' : colors.border,
+                  },
+                ]}
+                onPress={() => {
+                  if (opt.key === 'hideSideToolbar') setChartOptions((p) => ({ ...p, hideSideToolbar: !p.hideSideToolbar }));
+                  else if (opt.key === 'withDateRanges') setChartOptions((p) => ({ ...p, withDateRanges: !p.withDateRanges }));
+                  else setChartOptions((p) => ({ ...p, saveImage: !p.saveImage }));
+                }}
+              >
+                <Text style={[styles.chartOptionText, { color: opt.active ? colors.primary : colors.textMuted }]}>{opt.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          )}
+
+          {/* Pattern Settings gear icon (visible when patterns are toggled on) */}
+          {showPatterns && (
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: SPACING.sm }}>
+              <TouchableOpacity
+                onPress={() => setShowPatternSettings(true)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                  paddingHorizontal: SPACING.sm,
+                  paddingVertical: 4,
+                  borderRadius: BORDER_RADIUS.sm,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  backgroundColor: colors.bgCard,
+                }}
+              >
+                <Ionicons name="settings-outline" size={14} color={colors.textSecondary} />
+                <Text style={[styles.advancedLabel, { color: colors.textSecondary }]}>{t('stockDetail.advanced')}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <ChartCrosshairContext.Provider value={{ focusedIndex, setFocusedIndex }}>
+            {isLiveChart ? (
+              <>
+                {/* Live TradingView chart — real, live market data */}
+                <View style={styles.timeframes}>
+                  {TIMEFRAMES.map((tf) => (
+                    <TouchableOpacity
+                      key={tf}
+                      style={[styles.timeframeBtn, activeTimeframe === tf && styles.timeframeActive]}
+                      onPress={() => handleTimeframeChange(tf)}
+                    >
+                      <Text style={[styles.timeframeText, activeTimeframe === tf && styles.timeframeTextActive]}>
+                        {tf}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <View style={styles.chartWrap}>
+                  <TradingViewChart
+                    symbol={tvSymbol}
+                    interval={toTradingViewInterval(activeTimeframe)}
+                    height={280}
+                    onError={handleTvError}
+                    style={styles.liveChart}
+                    hideSideToolbar={chartOptions.hideSideToolbar}
+                    withDateRanges={chartOptions.withDateRanges}
+                    saveImage={chartOptions.saveImage}
+                  />
+                  <PositionLevelsOverlay
+                    symbol={stock.symbol}
+                    position={heldPosition}
+                    currency="INR"
+                    onApplyStop={(p) => openExit('SL', p)}
+                    onApplyTarget={(p) => openExit('LIMIT', p)}
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                {/* Drawing Toolbar */}
+                {enableDrawing && (
+                  <View style={{ marginBottom: SPACING.sm }}>
+                    <DrawingToolbar
+                      activeTool={activeDrawTool}
+                      onToolChange={setActiveDrawTool}
+                      colors={colors}
+                      drawingCount={drawings.length}
+                      onClearAll={() => setDrawings([])}
+                    />
+                  </View>
+                )}
+
+                <View style={styles.chartWrap}>
+                  <CandlestickChart
+                    data={candleHistory}
+                    height={280}
+                    width={width - 64}
+                    timeframes={TIMEFRAMES}
+                    activeTimeframe={activeTimeframe}
+                    onTimeframeChange={handleTimeframeChange}
+                    showVolume={true}
+                    showMA={showMA}
+                    loading={candleHistory.length === 0}
+                    chartType={chartType}
+                    onChartTypeChange={setChartType}
+                    enableDrawing={enableDrawing}
+                    drawings={drawings}
+                    onDrawingsChange={setDrawings}
+                    activeDrawTool={activeDrawTool}
+                    onDrawToolChange={setActiveDrawTool}
+                    showPatterns={showPatterns}
+                    patterns={detectedPatterns}
+                  />
+                  {/* Position tag + STOP/TARGET exit chips stay available even
+                      when the live widget fails — the user can still exit. */}
+                  <PositionLevelsOverlay
+                    symbol={stock.symbol}
+                    position={heldPosition}
+                    currency="INR"
+                    onApplyStop={(p) => openExit('SL', p)}
+                    onApplyTarget={(p) => openExit('LIMIT', p)}
+                  />
+                </View>
+
+                {/* ── Extracted: Pattern Summary ── */}
+                {showPatterns && detectedPatterns.length > 0 && (
+                  <PatternSummary patterns={detectedPatterns} />
+                )}
+                {showPatterns && detectedPatterns.length === 0 && (
+                  <View style={{
+                    padding: SPACING.md,
+                    borderRadius: BORDER_RADIUS.md,
+                    backgroundColor: colors.bg,
+                    marginBottom: SPACING.sm,
+                    alignItems: 'center',
+                  }}>
+                    <Text style={[{
+                      ...FONTS.regular, fontSize: FONTS.size.sm, color: colors.textMuted,
+                    }]}>
+                      No patterns detected with current settings. Try lowering the confidence threshold or enabling more pattern types in{' '}
+                      <Text
+                        style={{ color: colors.primary, textDecorationLine: 'underline' }}
+                        onPress={() => setShowPatternSettings(true)}
+                      >
+                        Advanced settings
+                      </Text>.
+                    </Text>
+                  </View>
+                )}
+
+                {/* ── Extracted: Technical Indicators ── */}
+                {activeIndicators.length > 0 && (
+                  <TechnicalIndicators
+                    data={candleHistory}
+                    width={width - 64}
+                    indicators={activeIndicators}
+                    onIndicatorToggle={handleIndicatorToggle}
+                  />
+                )}
+              </>
+            )}
+          </ChartCrosshairContext.Provider>
+
+          {/* ── Extracted: Key Stats Grid ── */}
+          <View style={{ marginTop: SPACING.lg }}>
+            <KeyStatsGrid stats={{ open: candleHistory[0]?.open || stock.price, dayHigh, dayLow, volume, marketCap: stock.marketCap, pe: stock.pe, high52: stock.high52, low52: stock.low52 }} />
+          </View>
+
+          {/* Fundamentals Button — Company Analysis */}
+          <AnimatedPressable onPress={() => navigation.navigate('CompanyFundamentals', { symbol: stock.symbol, stockId: stock.id })} haptic="medium" scaleTo={0.97}>
+            <View style={[styles.fundamentalsCard, { borderColor: colors.border, backgroundColor: `${colors.primary}08` }]}>
+              <View style={styles.fundamentalsRow}>
+                <View style={[styles.fundamentalsIcon, { backgroundColor: `${colors.primary}20` }]}>
+                  <Ionicons name="analytics" size={22} color={colors.primary} />
+                </View>
+                <View style={styles.fundamentalsInfo}>
+                  <Text style={[styles.fundamentalsTitle, { color: colors.text }]}>{t('stockDetail.companyFundamentals')}</Text>
+                  <Text style={[styles.fundamentalsSub, { color: colors.textSecondary }]}>
+                    P/E {stock.pe.toFixed(1)}x · P/B {stock.pb.toFixed(1)}x · ROCE · Debt Ratios · Quarterly Results
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </View>
+            </View>
+          </AnimatedPressable>
+
+          {/* About Company */}
+          <View testID="stock-about-company">
+          <Card title={t('stockDetail.aboutCompany')} style={styles.aboutCard}>
+            <Text style={styles.aboutText}>
+              {stock.name} is a leading company in the {stock.sector} sector with a market
+              capitalization of {stock.marketCap}. The company has a P/E ratio of {stock.pe.toFixed(1)}
+              {' '}and a dividend yield of {stock.dividend}%. With a 52-week range of {formatCurrency(stock.low52)}
+              {' '}to {formatCurrency(stock.high52)}, the stock shows strong market presence and
+              consistent performance in its sector.
+            </Text>
+          </Card>
+          </View>
+
+          {/* ── Extracted: Sector Context ── */}
+          {sectorData && <SectorContext data={sectorData} />}
+
+          {/* ── Extracted: Peer Comparison ── */}
+          <PeerComparison
+            currentStock={stock}
+            peers={peers}
+            onPeerPress={(stockId, symbol) => navigation.navigate('StockDetail', { stockId, symbol })}
+            formatMarketCap={formatCompactMarketCap}
+          />
+
+          {/* ── Extracted: AI Insight Card ── */}
+          {aiInsight && (
+            <AIInsightCard
+              insight={{
+                type: aiInsight.type,
+                confidence: aiInsight.confidence,
+                summary: aiInsight.summary,
+                analysis: aiInsight.analysis,
+                targets: aiInsight.targets,
+              }}
+              onViewFullAnalysis={() => navigation.navigate('AIInsights')}
+            />
+          )}
+
+          <View style={{ height: 120 }} />
+        </ScrollView>
+
+        {/* ── Extracted: Bottom Action Bar ── */}
+        <BottomActionBar
+          displayPrice={displayPrice}
+          onBuy={handleOpenBuy}
+          onSell={handleOpenSell}
         />
 
-        {/* ── Extracted: AI Insight Card ── */}
-        {aiInsight && (
-          <AIInsightCard
-            insight={{
-              type: aiInsight.type,
-              confidence: aiInsight.confidence,
-              summary: aiInsight.summary,
-              analysis: aiInsight.analysis,
-              targets: aiInsight.targets,
-            }}
-            onViewFullAnalysis={() => navigation.navigate('AIInsights')}
-          />
-        )}
+        {/* ── Fullscreen Chart Modal ── */}
+        <PatternSettingsModal
+          visible={showPatternSettings}
+          onClose={() => setShowPatternSettings(false)}
+        />
 
-        <View style={{ height: 120 }} />
-      </ScrollView>
-
-      {/* ── Extracted: Bottom Action Bar ── */}
-      <BottomActionBar
-        displayPrice={displayPrice}
-        onBuy={handleOpenBuy}
-        onSell={handleOpenSell}
-      />
-
-      {/* ── Fullscreen Chart Modal ── */}
-      <PatternSettingsModal
-        visible={showPatternSettings}
-        onClose={() => setShowPatternSettings(false)}
-      />
-
-      <FullscreenChartModal
-        visible={isFullscreen}
-        onClose={() => setIsFullscreen(false)}
-        candleHistory={candleHistory}
-        activeTimeframe={activeTimeframe}
-        onTimeframeChange={handleTimeframeChange}
-        showMA={showMA}
-        chartType={chartType}
-        onChartTypeChange={setChartType}
-        enableDrawing={enableDrawing}
-        drawings={drawings}
-        onDrawingsChange={setDrawings}
-        activeDrawTool={activeDrawTool}
-        onDrawToolChange={setActiveDrawTool}
-        showPatterns={showPatterns}
-        patterns={detectedPatterns}
-        symbol={stock.symbol}
-        name={stock.name}
-        currentPrice={displayPrice}
-        priceChange={displayChange}
-        priceChangePercent={displayChangePercent}
-        isPositive={isPositive}
-        isConnected={isConnected}
-        useLiveChart={isLiveChart}
-        tvSymbol={tvSymbol}
-        onTvError={handleTvError}
-        tvOptions={chartOptions}
-      />
-    </View>
+        <FullscreenChartModal
+          visible={isFullscreen}
+          onClose={() => setIsFullscreen(false)}
+          candleHistory={candleHistory}
+          activeTimeframe={activeTimeframe}
+          onTimeframeChange={handleTimeframeChange}
+          showMA={showMA}
+          chartType={chartType}
+          onChartTypeChange={setChartType}
+          enableDrawing={enableDrawing}
+          drawings={drawings}
+          onDrawingsChange={setDrawings}
+          activeDrawTool={activeDrawTool}
+          onDrawToolChange={setActiveDrawTool}
+          showPatterns={showPatterns}
+          patterns={detectedPatterns}
+          symbol={stock.symbol}
+          name={stock.name}
+          currentPrice={displayPrice}
+          priceChange={displayChange}
+          priceChangePercent={displayChangePercent}
+          isPositive={isPositive}
+          isConnected={isConnected}
+          useLiveChart={isLiveChart}
+          tvSymbol={tvSymbol}
+          onTvError={handleTvError}
+          tvOptions={chartOptions}
+        />
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     scrollContent: {
       paddingHorizontal: SPACING.xl,
       paddingBottom: 20,

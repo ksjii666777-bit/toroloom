@@ -28,6 +28,7 @@ import TradingViewChart from '../../components/TradingViewChart';
 import { toTradingViewSymbol } from '../../utils/tradingView';
 import type {InternationalStock, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - SPACING.xl * 2 - SPACING.lg * 2;
@@ -179,17 +180,20 @@ export default function GlobalStockDetailScreen({ route, navigation }: NativeSta
 
   if (detailLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg }]}>
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-            <Ionicons name="arrow-back" size={22} color={colors.text} />
-          </Pressable>
-        </View>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('stockDetail.loading')}</Text>
-        </View>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      header={
+  <View style={styles.header}>
+            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+              <Ionicons name="arrow-back" size={22} color={colors.text} />
+            </Pressable>
+          </View>
+      }
+      >
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('stockDetail.loading')}</Text>
+          </View>
+      </AppScreen>
     );
   }
 
@@ -204,133 +208,133 @@ export default function GlobalStockDetailScreen({ route, navigation }: NativeSta
   const currencySymbol = formatCurrencyPrefix(stock.currency);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <Animated.View entering={FadeInRight.duration(300)} style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-            <Ionicons name="arrow-back" size={22} color={colors.text} />
-          </Pressable>
-          <View style={styles.headerTags}>
-            <View style={[styles.exchangeBadge, { backgroundColor: exchangeColor + '20' }]}>
-              <Text style={[styles.exchangeText, { color: exchangeColor }]}>{stock.exchange}</Text>
-            </View>
-            {usingLiveData && (
-              <View style={[styles.liveBadge, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
-                <View style={styles.liveDot} />
-                <Text style={styles.liveBadgeText}>{t('stockDetail.live')}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <Animated.View entering={FadeInRight.duration(300)} style={styles.header}>
+            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+              <Ionicons name="arrow-back" size={22} color={colors.text} />
+            </Pressable>
+            <View style={styles.headerTags}>
+              <View style={[styles.exchangeBadge, { backgroundColor: exchangeColor + '20' }]}>
+                <Text style={[styles.exchangeText, { color: exchangeColor }]}>{stock.exchange}</Text>
               </View>
-            )}
-            <View style={[styles.regionBadge, {
-              backgroundColor: stock.region === 'europe' ? '#0052CC20' : '#FFC10720',
-            }]}>
-              <Text style={styles.regionFlag}>{countryFlag}</Text>
-              <Text style={[styles.regionText, {
-                color: stock.region === 'europe' ? '#0052CC' : '#FFC107',
-              }]}>{regionLabel}</Text>
+              {usingLiveData && (
+                <View style={[styles.liveBadge, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
+                  <View style={styles.liveDot} />
+                  <Text style={styles.liveBadgeText}>{t('stockDetail.live')}</Text>
+                </View>
+              )}
+              <View style={[styles.regionBadge, {
+                backgroundColor: stock.region === 'europe' ? '#0052CC20' : '#FFC10720',
+              }]}>
+                <Text style={styles.regionFlag}>{countryFlag}</Text>
+                <Text style={[styles.regionText, {
+                  color: stock.region === 'europe' ? '#0052CC' : '#FFC107',
+                }]}>{regionLabel}</Text>
+              </View>
             </View>
-          </View>
-        </Animated.View>
+          </Animated.View>
 
-        {/* Stock Info */}
-        <Animated.View entering={FadeInUp.duration(400)} style={styles.stockInfoSection}>
-          <Text style={[styles.symbol, { color: colors.text }]}>{stock.symbol}</Text>
-          <Text style={[styles.name, { color: colors.textSecondary }]}>{stock.name}</Text>
-          <View style={[styles.countryChip, { backgroundColor: exchangeColor + '15' }]}>
-            <Text style={styles.countryFlagEmoji}>{countryFlag}</Text>
-            <Text style={[styles.countryText, { color: exchangeColor }]}>{stock.country}</Text>
-          </View>
-
-          <View style={styles.priceRow}>
-            <Text style={[styles.price, { color: colors.text }]}>{fmtPrice}</Text>
-            <View style={[styles.changeBadge, { backgroundColor: (isPositive ? colors.marketUp : colors.marketDown) + '20' }]}>
-              <Ionicons name={isPositive ? 'caret-up' : 'caret-down'} size={16} color={isPositive ? colors.marketUp : colors.marketDown} />
-              <Text style={[styles.changeText, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
-                {isPositive ? '+' : ''}{stock.change.toFixed(2)} ({isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%)
-              </Text>
+          {/* Stock Info */}
+          <Animated.View entering={FadeInUp.duration(400)} style={styles.stockInfoSection}>
+            <Text style={[styles.symbol, { color: colors.text }]}>{stock.symbol}</Text>
+            <Text style={[styles.name, { color: colors.textSecondary }]}>{stock.name}</Text>
+            <View style={[styles.countryChip, { backgroundColor: exchangeColor + '15' }]}>
+              <Text style={styles.countryFlagEmoji}>{countryFlag}</Text>
+              <Text style={[styles.countryText, { color: exchangeColor }]}>{stock.country}</Text>
             </View>
-          </View>
 
-          {/* Live Chart — TradingView widget with real market data */}
-          <View style={[styles.chartContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            {chartFailed ? (
-              <MiniPriceChart isPositive={isPositive} />
-            ) : (
-              <TradingViewChart
-                symbol={tvSymbol}
-                height={CHART_HEIGHT}
-                onError={() => setChartFailed(true)}
-              />
-            )}
-          </View>
-        </Animated.View>
+            <View style={styles.priceRow}>
+              <Text style={[styles.price, { color: colors.text }]}>{fmtPrice}</Text>
+              <View style={[styles.changeBadge, { backgroundColor: (isPositive ? colors.marketUp : colors.marketDown) + '20' }]}>
+                <Ionicons name={isPositive ? 'caret-up' : 'caret-down'} size={16} color={isPositive ? colors.marketUp : colors.marketDown} />
+                <Text style={[styles.changeText, { color: isPositive ? colors.marketUp : colors.marketDown }]}>
+                  {isPositive ? '+' : ''}{stock.change.toFixed(2)} ({isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%)
+                </Text>
+              </View>
+            </View>
 
-        {/* Key Stats */}
-        <Animated.View entering={FadeInUp.duration(500)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.statistics')}</Text>
-          <StatRow label={t('stockDetail.marketCap')} value={formattedMarketCap} />
-          <StatRow label={t('stockDetail.peRatio')} value={stock.pe.toFixed(1)} />
-          <StatRow label={t('stockDetail.pbRatio')} value={stock.pb.toFixed(1)} />
-          <StatRow label={t('stockDetail.dividendYield')} value={stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%` : 'N/A'} />
-          <StatRow label={t('stockDetail.volume')} value={stock.volume} />
-          <StatRow label={t('stockDetail.exchange')} value={stock.exchange} highlightColor={exchangeColor} />
-          <StatRow label={t('stockDetail.week52High')} value={stock.high52.toLocaleString('en-US')} highlightColor={colors.marketUp} />
-          <StatRow label={t('stockDetail.week52Low')} value={stock.low52.toLocaleString('en-US')} highlightColor={colors.marketDown} />
-        </Animated.View>
+            {/* Live Chart — TradingView widget with real market data */}
+            <View style={[styles.chartContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              {chartFailed ? (
+                <MiniPriceChart isPositive={isPositive} />
+              ) : (
+                <TradingViewChart
+                  symbol={tvSymbol}
+                  height={CHART_HEIGHT}
+                  onError={() => setChartFailed(true)}
+                />
+              )}
+            </View>
+          </Animated.View>
 
-        {/* About Company */}
-        <Animated.View entering={FadeInUp.duration(600)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.about')} {stock.symbol}</Text>
-          <Text style={[styles.aboutText, { color: colors.textSecondary }]}>
-            {stock.name} is a {stock.sector.toLowerCase()} company headquartered in {stock.country} and listed on the {stock.exchange} exchange. 
-            With a market capitalization of {formattedMarketCap}, the company is one of the most actively traded stocks on the {stock.exchange}. 
-            {'\n\n'}The stock trades in {stock.currency} (Min lot size varies by exchange). P/E ratio stands at {stock.pe.toFixed(1)} with a dividend yield of {stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%.` : 'N/A.'}
-            {'\n\n'}The 52-week trading range is between {currencySymbol}{stock.low52.toLocaleString('en-US')} (low) and {currencySymbol}{stock.high52.toLocaleString('en-US')} (high), with an average daily volume of {t('app.shares', { count: stock.volume })} across the {stock.exchange} order book.
-          </Text>
-        </Animated.View>
+          {/* Key Stats */}
+          <Animated.View entering={FadeInUp.duration(500)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.statistics')}</Text>
+            <StatRow label={t('stockDetail.marketCap')} value={formattedMarketCap} />
+            <StatRow label={t('stockDetail.peRatio')} value={stock.pe.toFixed(1)} />
+            <StatRow label={t('stockDetail.pbRatio')} value={stock.pb.toFixed(1)} />
+            <StatRow label={t('stockDetail.dividendYield')} value={stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%` : 'N/A'} />
+            <StatRow label={t('stockDetail.volume')} value={stock.volume} />
+            <StatRow label={t('stockDetail.exchange')} value={stock.exchange} highlightColor={exchangeColor} />
+            <StatRow label={t('stockDetail.week52High')} value={stock.high52.toLocaleString('en-US')} highlightColor={colors.marketUp} />
+            <StatRow label={t('stockDetail.week52Low')} value={stock.low52.toLocaleString('en-US')} highlightColor={colors.marketDown} />
+          </Animated.View>
 
-        {/* Related Stocks */}
-        {relatedStocks.length > 0 && (
-          <Animated.View entering={FadeInUp.duration(700)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.relatedStocks', { sector: stock.sector })}</Text>
-            {relatedStocks.map(s => (
-              <Pressable
-                key={s.id}
-                onPress={() => navigation.replace('GlobalStockDetail', {
-                  stockId: s.id, symbol: s.symbol, region: s.region,
-                })}
-              >
-                <View style={[styles.relatedRow, { borderBottomColor: colors.divider }]}>
-                  <View style={styles.relatedLeft}>
-                    <Text style={[styles.relatedFlag, { fontSize: 14 }]}>{COUNTRY_FLAGS[s.country] || '🌍'}</Text>
-                    <View>
-                      <Text style={[styles.relatedSymbol, { color: colors.text }]}>{s.symbol}</Text>
-                      <Text style={[styles.relatedName, { color: colors.textMuted }]}>{s.name}</Text>
+          {/* About Company */}
+          <Animated.View entering={FadeInUp.duration(600)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.about')} {stock.symbol}</Text>
+            <Text style={[styles.aboutText, { color: colors.textSecondary }]}>
+              {stock.name} is a {stock.sector.toLowerCase()} company headquartered in {stock.country} and listed on the {stock.exchange} exchange. 
+              With a market capitalization of {formattedMarketCap}, the company is one of the most actively traded stocks on the {stock.exchange}. 
+              {'\n\n'}The stock trades in {stock.currency} (Min lot size varies by exchange). P/E ratio stands at {stock.pe.toFixed(1)} with a dividend yield of {stock.dividend > 0 ? `${stock.dividend.toFixed(2)}%.` : 'N/A.'}
+              {'\n\n'}The 52-week trading range is between {currencySymbol}{stock.low52.toLocaleString('en-US')} (low) and {currencySymbol}{stock.high52.toLocaleString('en-US')} (high), with an average daily volume of {t('app.shares', { count: stock.volume })} across the {stock.exchange} order book.
+            </Text>
+          </Animated.View>
+
+          {/* Related Stocks */}
+          {relatedStocks.length > 0 && (
+            <Animated.View entering={FadeInUp.duration(700)} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('stockDetail.relatedStocks', { sector: stock.sector })}</Text>
+              {relatedStocks.map(s => (
+                <Pressable
+                  key={s.id}
+                  onPress={() => navigation.replace('GlobalStockDetail', {
+                    stockId: s.id, symbol: s.symbol, region: s.region,
+                  })}
+                >
+                  <View style={[styles.relatedRow, { borderBottomColor: colors.divider }]}>
+                    <View style={styles.relatedLeft}>
+                      <Text style={[styles.relatedFlag, { fontSize: 14 }]}>{COUNTRY_FLAGS[s.country] || '🌍'}</Text>
+                      <View>
+                        <Text style={[styles.relatedSymbol, { color: colors.text }]}>{s.symbol}</Text>
+                        <Text style={[styles.relatedName, { color: colors.textMuted }]}>{s.name}</Text>
+                      </View>
+                    </View>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={[styles.relatedPrice, { color: colors.text }]}>
+                        {formatPrice(s)}
+                      </Text>
+                      <Text style={[styles.relatedChange, { color: s.isPositive ? colors.marketUp : colors.marketDown }]}>
+                        {s.isPositive ? '+' : ''}{s.changePercent.toFixed(2)}%
+                      </Text>
                     </View>
                   </View>
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={[styles.relatedPrice, { color: colors.text }]}>
-                      {formatPrice(s)}
-                    </Text>
-                    <Text style={[styles.relatedChange, { color: s.isPositive ? colors.marketUp : colors.marketDown }]}>
-                      {s.isPositive ? '+' : ''}{s.changePercent.toFixed(2)}%
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            ))}
-          </Animated.View>
-        )}
+                </Pressable>
+              ))}
+            </Animated.View>
+          )}
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ──── Styles ─────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   scrollContent: { paddingHorizontal: SPACING.xl, paddingBottom: 20 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',

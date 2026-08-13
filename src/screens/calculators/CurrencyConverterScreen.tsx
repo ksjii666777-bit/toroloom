@@ -30,6 +30,7 @@ import {
 } from '../../utils/currencyConverter';
 import { useLiveConversion } from '../../hooks/useLiveConversion';
 import { useT } from '../../hooks/useT';
+import AppScreen from '../../components/ui/AppScreen';
 
 export default function CurrencyConverterScreen() {
   const { colors } = useTheme();
@@ -82,265 +83,264 @@ export default function CurrencyConverterScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, {
-        paddingTop: insets.top + 12,
-        backgroundColor: colors.bgSecondary,
-        borderBottomColor: colors.border,
-      }]}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-            <Ionicons name="arrow-back" size={20} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={[styles.headerTitle, { color: colors.text }]}>{t('currencyConverter.title')}</Text>
-              {/* Live / Mock badge */}
-              <View style={[styles.liveBadge, {
-                backgroundColor: isLive ? '#00E67620' : '#FF525220',
-                borderColor: isLive ? '#00E67640' : '#FF525240',
-              }]}>
-                <View style={[styles.liveDot, {
-                  backgroundColor: isLive ? '#00E676' : '#FF5252',
-                }]} />
-                <Text style={[styles.liveBadgeText, {
-                  color: isLive ? '#00E676' : '#FF5252',
-                }]}>
-                  {ratesLoading
-                    ? t('currencyConverter.loading')
-                    : isLive
-                      ? t('currencyConverter.live')
-                      : t('currencyConverter.mock')}
-                </Text>
-              </View>
-            </View>
-            <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>{t('currencyConverter.subtitle')}</Text>
-            {lastUpdated && (
-              <Text style={[styles.updatedText, { color: colors.textMuted }]}>
-                {t('currencyConverter.updatedAt', {
-                  time: new Intl.DateTimeFormat('en-IN', { hour: '2-digit', minute: '2-digit' }).format(lastUpdated),
-                })}
-              </Text>
-            )}
-          </View>
-          {/* Refresh button */}
-          <Pressable onPress={refresh} style={[styles.refreshBtn, { backgroundColor: colors.bgCard }]}>
-            <Ionicons name="refresh" size={18} color={colors.primary} />
-          </Pressable>
-        </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
-        keyboardShouldPersistTaps="handled"
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Amount Input */}
-        <View style={[styles.convAmountRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-          <Text style={[styles.convAmountSymbol, { color: fromCurrency.color }]}>{fromCurrency.symbol}</Text>
-          <TextInput
-            style={[styles.convAmountInput, { color: colors.text }]}
-            value={amountStr}
-            onChangeText={setAmountStr}
-            keyboardType="decimal-pad"
-            placeholderTextColor={colors.textMuted}
-            selectTextOnFocus
-          />
-          <Text style={[styles.convAmountCode, { color: colors.textMuted }]}>{fromCode}</Text>
-        </View>
-
-        {/* From Currency Picker */}
-        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyConverter.from')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
-          {CURRENCIES.map(cur => {
-            const selected = fromCode === cur.code;
-            return (
-              <Pressable
-                key={cur.code}
-                onPress={() => { setFromCode(cur.code); }}
-                style={[
-                  styles.convChip,
-                  {
-                    backgroundColor: selected ? cur.color + '25' : colors.bgInput,
-                    borderColor: selected ? cur.color + '50' : colors.border,
-                  },
-                ]}
-              >
-                <Text style={{ fontSize: 16 }}>{cur.icon}</Text>
-                <Text style={[
-                  styles.convChipText,
-                  { color: selected ? cur.color : colors.textMuted, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-                ]}>
-                  {cur.code}
-                </Text>
-                {selected && (
-                  <View style={[styles.convSelectedDot, { backgroundColor: cur.color }]} />
-                )}
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        {/* Swap + Rate Display */}
-        <View style={styles.convRateRow}>
-          <View style={[styles.convRateBox, { backgroundColor: colors.bgInput }]}>
-            <Text style={[styles.convRateLabel, { color: colors.textMuted }]}>{t('currencyConverter.rateEquals', { from: fromCode })}</Text>
-            <Text style={[styles.convRateValue, { color: colors.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
-              {rate.toFixed(6)} {toCode}
-            </Text>
-          </View>
-          <Pressable onPress={handleSwap} style={[styles.convSwapBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}>
-            <Ionicons name="swap-vertical" size={22} color={colors.primary} />
-          </Pressable>
-        </View>
-
-        {/* To Currency Picker */}
-        <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyConverter.to')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
-          {selectableCurrencies.map(cur => {
-            const selected = toCode === cur.code;
-            return (
-              <Pressable
-                key={cur.code}
-                onPress={() => { setToCode(cur.code); }}
-                style={[
-                  styles.convChip,
-                  {
-                    backgroundColor: selected ? cur.color + '25' : colors.bgInput,
-                    borderColor: selected ? cur.color + '50' : colors.border,
-                  },
-                ]}
-              >
-                <Text style={{ fontSize: 16 }}>{cur.icon}</Text>
-                <Text style={[
-                  styles.convChipText,
-                  { color: selected ? cur.color : colors.textMuted, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-                ]}>
-                  {cur.code}
-                </Text>
-                {selected && (
-                  <View style={[styles.convSelectedDot, { backgroundColor: cur.color }]} />
-                )}
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        {/* Result Display */}
-        <View style={[styles.convResultCard, { backgroundColor: toCurrency.color + '12', borderColor: toCurrency.color + '30' }]}>
-          <View style={styles.convResultHeader}>
-            <Text style={{ fontSize: 28 }}>{toCurrency.icon}</Text>
+  {/* Header */}
+        <View style={[styles.header, {backgroundColor: colors.bgSecondary,
+          borderBottomColor: colors.border,
+        }]}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+              <Ionicons name="arrow-back" size={20} color={colors.text} />
+            </Pressable>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.convResultLabel, { color: colors.textMuted }]}>{t('currencyConverter.convertedAmount')}</Text>
-              <Text style={[styles.convResultValue, { color: toCurrency.color }]}>
-                {toCurrency.symbol}{result.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>{t('currencyConverter.title')}</Text>
+                {/* Live / Mock badge */}
+                <View style={[styles.liveBadge, {
+                  backgroundColor: isLive ? '#00E67620' : '#FF525220',
+                  borderColor: isLive ? '#00E67640' : '#FF525240',
+                }]}>
+                  <View style={[styles.liveDot, {
+                    backgroundColor: isLive ? '#00E676' : '#FF5252',
+                  }]} />
+                  <Text style={[styles.liveBadgeText, {
+                    color: isLive ? '#00E676' : '#FF5252',
+                  }]}>
+                    {ratesLoading
+                      ? t('currencyConverter.loading')
+                      : isLive
+                        ? t('currencyConverter.live')
+                        : t('currencyConverter.mock')}
+                  </Text>
+                </View>
+              </View>
+              <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>{t('currencyConverter.subtitle')}</Text>
+              {lastUpdated && (
+                <Text style={[styles.updatedText, { color: colors.textMuted }]}>
+                  {t('currencyConverter.updatedAt', {
+                    time: new Intl.DateTimeFormat('en-IN', { hour: '2-digit', minute: '2-digit' }).format(lastUpdated),
+                  })}
+                </Text>
+              )}
             </View>
-            <Text style={[styles.convResultCode, { color: toCurrency.color }]}>{toCode}</Text>
-          </View>
-          <View style={[styles.convResultDivider, { backgroundColor: toCurrency.color + '20' }]} />
-          <View style={styles.convResultFooter}>
-            <Text style={[styles.convResultMeta, { color: colors.textMuted }]}>
-              {t('currencyConverter.inverseRate', { to: toCode, rate: inverseRate.toFixed(6), from: fromCode })}
-            </Text>
-            <Text style={[styles.convResultMeta, { color: colors.textMuted }]}>
-              {t('currencyConverter.via', { symbol: fromCurrency.symbol, rate: convertWithLive(1, 'INR', fromCode).toFixed(4) })}
-            </Text>
+            {/* Refresh button */}
+            <Pressable onPress={refresh} style={[styles.refreshBtn, { backgroundColor: colors.bgCard }]}>
+              <Ionicons name="refresh" size={18} color={colors.primary} />
+            </Pressable>
           </View>
         </View>
 
-        {/* Convert Button */}
-        <Pressable
-          onPress={handleConvert}
-          disabled={amount <= 0}
-          style={[styles.convConvertBtn, { backgroundColor: amount <= 0 ? colors.textMuted + '60' : colors.primary, opacity: amount <= 0 ? 0.5 : 1 }]}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+          keyboardShouldPersistTaps="handled"
         >
-          <Ionicons name="bookmark" size={16} color="#fff" />
-          <Text style={styles.convConvertText}>{t('currencyConverter.saveConversion')}</Text>
-        </Pressable>
+          {/* Amount Input */}
+          <View style={[styles.convAmountRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+            <Text style={[styles.convAmountSymbol, { color: fromCurrency.color }]}>{fromCurrency.symbol}</Text>
+            <TextInput
+              style={[styles.convAmountInput, { color: colors.text }]}
+              value={amountStr}
+              onChangeText={setAmountStr}
+              keyboardType="decimal-pad"
+              placeholderTextColor={colors.textMuted}
+              selectTextOnFocus
+            />
+            <Text style={[styles.convAmountCode, { color: colors.textMuted }]}>{fromCode}</Text>
+          </View>
 
-        {/* Recent Conversions */}
-        {recentConversions.length > 0 && (
-          <View style={styles.convRecentSection}>
-            <Text style={[styles.convRecentTitle, { color: colors.text }]}>{t('currencyConverter.recent')}</Text>
-            {recentConversions.map((conv, _i) => {
-              const fC = getCurrency(conv.from);
-              const tC = getCurrency(conv.to);
+          {/* From Currency Picker */}
+          <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyConverter.from')}</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
+            {CURRENCIES.map(cur => {
+              const selected = fromCode === cur.code;
               return (
                 <Pressable
-                  key={conv.timestamp}
-                  onPress={() => {
-                    setFromCode(conv.from);
-                    setToCode(conv.to);
-                    setAmountStr(conv.amount.toString());
-                  }}
-                  style={[styles.convRecentRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                  key={cur.code}
+                  onPress={() => { setFromCode(cur.code); }}
+                  style={[
+                    styles.convChip,
+                    {
+                      backgroundColor: selected ? cur.color + '25' : colors.bgInput,
+                      borderColor: selected ? cur.color + '50' : colors.border,
+                    },
+                  ]}
                 >
-                  <View style={styles.convRecentLeft}>
-                    <Text style={{ fontSize: 14 }}>{fC.icon}</Text>
-                    <Text style={[styles.convRecentPair, { color: colors.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
-                      {conv.from} → {conv.to}
-                    </Text>
-                  </View>
-                  <View style={styles.convRecentRight}>
-                    <Text style={[styles.convRecentAmount, { color: colors.text }]}>
-                      {formatCurrencyAmount(conv.amount, conv.from)}
-                    </Text>
-                    <Text style={[styles.convRecentResult, { color: tC.color, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
-                      {formatCurrencyAmount(conv.result, conv.to)}
-                    </Text>
-                  </View>
+                  <Text style={{ fontSize: 16 }}>{cur.icon}</Text>
+                  <Text style={[
+                    styles.convChipText,
+                    { color: selected ? cur.color : colors.textMuted, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+                  ]}>
+                    {cur.code}
+                  </Text>
+                  {selected && (
+                    <View style={[styles.convSelectedDot, { backgroundColor: cur.color }]} />
+                  )}
                 </Pressable>
               );
             })}
-          </View>
-        )}
+          </ScrollView>
 
-        {/* Favourite Pairs Quick Reference */}
-        <Animated.View entering={FadeInUp.duration(400).delay(300)}>
-          <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="information-circle" size={18} color={colors.primary} />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.infoTitle, { color: colors.text }]}>{t('currencyConverter.quickReference')}</Text>
-              <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                {t('currencyConverter.majorInrRates', {
-                  usd: getLiveCurrencyRate('USD').toFixed(2),
-                  eur: getLiveCurrencyRate('EUR').toFixed(2),
-                  gbp: getLiveCurrencyRate('GBP').toFixed(2),
-                  jpy: getLiveCurrencyRate('JPY').toFixed(4),
-                  sgd: getLiveCurrencyRate('SGD').toFixed(2),
-                })}
+          {/* Swap + Rate Display */}
+          <View style={styles.convRateRow}>
+            <View style={[styles.convRateBox, { backgroundColor: colors.bgInput }]}>
+              <Text style={[styles.convRateLabel, { color: colors.textMuted }]}>{t('currencyConverter.rateEquals', { from: fromCode })}</Text>
+              <Text style={[styles.convRateValue, { color: colors.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
+                {rate.toFixed(6)} {toCode}
               </Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-                {[
-                  { from: 'USD', to: 'INR' },
-                  { from: 'EUR', to: 'INR' },
-                  { from: 'GBP', to: 'INR' },
-                  { from: 'JPY', to: 'INR' },
-                  { from: 'SGD', to: 'INR' },
-                  { from: 'EUR', to: 'USD' },
-                  { from: 'GBP', to: 'USD' },
-                ].map(pair => (
-                  <Pressable
-                    key={`${pair.from}-${pair.to}`}
-                    onPress={() => {
-                      setFromCode(pair.from);
-                      setToCode(pair.to);
-                    }}
-                    style={[styles.favChip, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
-                  >
-                    <Text style={[styles.favChipText, { color: colors.textMuted }]}>
-                      {pair.from}/{pair.to}
-                    </Text>
-                  </Pressable>
-                ))}
+            </View>
+            <Pressable onPress={handleSwap} style={[styles.convSwapBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}>
+              <Ionicons name="swap-vertical" size={22} color={colors.primary} />
+            </Pressable>
+          </View>
+
+          {/* To Currency Picker */}
+          <Text style={[styles.convPickerLabel, { color: colors.textMuted }]}>{t('currencyConverter.to')}</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.convPickerScroll}>
+            {selectableCurrencies.map(cur => {
+              const selected = toCode === cur.code;
+              return (
+                <Pressable
+                  key={cur.code}
+                  onPress={() => { setToCode(cur.code); }}
+                  style={[
+                    styles.convChip,
+                    {
+                      backgroundColor: selected ? cur.color + '25' : colors.bgInput,
+                      borderColor: selected ? cur.color + '50' : colors.border,
+                    },
+                  ]}
+                >
+                  <Text style={{ fontSize: 16 }}>{cur.icon}</Text>
+                  <Text style={[
+                    styles.convChipText,
+                    { color: selected ? cur.color : colors.textMuted, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+                  ]}>
+                    {cur.code}
+                  </Text>
+                  {selected && (
+                    <View style={[styles.convSelectedDot, { backgroundColor: cur.color }]} />
+                  )}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* Result Display */}
+          <View style={[styles.convResultCard, { backgroundColor: toCurrency.color + '12', borderColor: toCurrency.color + '30' }]}>
+            <View style={styles.convResultHeader}>
+              <Text style={{ fontSize: 28 }}>{toCurrency.icon}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.convResultLabel, { color: colors.textMuted }]}>{t('currencyConverter.convertedAmount')}</Text>
+                <Text style={[styles.convResultValue, { color: toCurrency.color }]}>
+                  {toCurrency.symbol}{result.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                </Text>
               </View>
+              <Text style={[styles.convResultCode, { color: toCurrency.color }]}>{toCode}</Text>
+            </View>
+            <View style={[styles.convResultDivider, { backgroundColor: toCurrency.color + '20' }]} />
+            <View style={styles.convResultFooter}>
+              <Text style={[styles.convResultMeta, { color: colors.textMuted }]}>
+                {t('currencyConverter.inverseRate', { to: toCode, rate: inverseRate.toFixed(6), from: fromCode })}
+              </Text>
+              <Text style={[styles.convResultMeta, { color: colors.textMuted }]}>
+                {t('currencyConverter.via', { symbol: fromCurrency.symbol, rate: convertWithLive(1, 'INR', fromCode).toFixed(4) })}
+              </Text>
             </View>
           </View>
-        </Animated.View>
-      </ScrollView>
-    </View>
+
+          {/* Convert Button */}
+          <Pressable
+            onPress={handleConvert}
+            disabled={amount <= 0}
+            style={[styles.convConvertBtn, { backgroundColor: amount <= 0 ? colors.textMuted + '60' : colors.primary, opacity: amount <= 0 ? 0.5 : 1 }]}
+          >
+            <Ionicons name="bookmark" size={16} color="#fff" />
+            <Text style={styles.convConvertText}>{t('currencyConverter.saveConversion')}</Text>
+          </Pressable>
+
+          {/* Recent Conversions */}
+          {recentConversions.length > 0 && (
+            <View style={styles.convRecentSection}>
+              <Text style={[styles.convRecentTitle, { color: colors.text }]}>{t('currencyConverter.recent')}</Text>
+              {recentConversions.map((conv, _i) => {
+                const fC = getCurrency(conv.from);
+                const tC = getCurrency(conv.to);
+                return (
+                  <Pressable
+                    key={conv.timestamp}
+                    onPress={() => {
+                      setFromCode(conv.from);
+                      setToCode(conv.to);
+                      setAmountStr(conv.amount.toString());
+                    }}
+                    style={[styles.convRecentRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                  >
+                    <View style={styles.convRecentLeft}>
+                      <Text style={{ fontSize: 14 }}>{fC.icon}</Text>
+                      <Text style={[styles.convRecentPair, { color: colors.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
+                        {conv.from} → {conv.to}
+                      </Text>
+                    </View>
+                    <View style={styles.convRecentRight}>
+                      <Text style={[styles.convRecentAmount, { color: colors.text }]}>
+                        {formatCurrencyAmount(conv.amount, conv.from)}
+                      </Text>
+                      <Text style={[styles.convRecentResult, { color: tC.color, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }]}>
+                        {formatCurrencyAmount(conv.result, conv.to)}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+
+          {/* Favourite Pairs Quick Reference */}
+          <Animated.View entering={FadeInUp.duration(400).delay(300)}>
+            <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="information-circle" size={18} color={colors.primary} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('currencyConverter.quickReference')}</Text>
+                <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                  {t('currencyConverter.majorInrRates', {
+                    usd: getLiveCurrencyRate('USD').toFixed(2),
+                    eur: getLiveCurrencyRate('EUR').toFixed(2),
+                    gbp: getLiveCurrencyRate('GBP').toFixed(2),
+                    jpy: getLiveCurrencyRate('JPY').toFixed(4),
+                    sgd: getLiveCurrencyRate('SGD').toFixed(2),
+                  })}
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                  {[
+                    { from: 'USD', to: 'INR' },
+                    { from: 'EUR', to: 'INR' },
+                    { from: 'GBP', to: 'INR' },
+                    { from: 'JPY', to: 'INR' },
+                    { from: 'SGD', to: 'INR' },
+                    { from: 'EUR', to: 'USD' },
+                    { from: 'GBP', to: 'USD' },
+                  ].map(pair => (
+                    <Pressable
+                      key={`${pair.from}-${pair.to}`}
+                      onPress={() => {
+                        setFromCode(pair.from);
+                        setToCode(pair.to);
+                      }}
+                      style={[styles.favChip, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                    >
+                      <Text style={[styles.favChipText, { color: colors.textMuted }]}>
+                        {pair.from}/{pair.to}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            </View>
+          </Animated.View>
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -349,7 +349,6 @@ export default function CurrencyConverterScreen() {
 // ══════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: 12,

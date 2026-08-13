@@ -33,6 +33,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import type { AIInsight } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 const GRID_GAP = SPACING.sm;
@@ -162,271 +163,269 @@ export default function BatchAnalysisScreen({ navigation }: any) {
   // ── Render ─────────────────────────────────────────────────────────
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </AnimatedPressable>
-            <View style={{ flex: 1, marginLeft: SPACING.md }}>
-              <Text style={[styles.title, { color: colors.text }]}>{t('ai.batchTitle')}</Text>
-              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                AI analysis for multiple stocks at once
-              </Text>
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+                <Ionicons name="arrow-back" size={24} color={colors.text} />
+              </AnimatedPressable>
+              <View style={{ flex: 1, marginLeft: SPACING.md }}>
+                <Text style={[styles.title, { color: colors.text }]}>{t('ai.batchTitle')}</Text>
+                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                  AI analysis for multiple stocks at once
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* ── Input Section ── */}
-        <Card title={t('ai.enterSymbols')} style={styles.inputCard}>
-          <TextInput
-            style={[styles.textInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
-            value={symbolInput}
-            onChangeText={setSymbolInput}
-            placeholder={t('ai.symbolsExample')}
-            placeholderTextColor={colors.textMuted}
-            multiline
-            numberOfLines={2}
-            autoCapitalize="characters"
-          />
-          {parsedSymbols.length > 0 && (
-            <View style={styles.chipRow}>
-              {parsedSymbols.map(s => (
-                <View key={s} style={[styles.chip, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
-                  <Text style={[styles.chipText, { color: colors.primary }]}>{s}</Text>
-                </View>
-              ))}
+          {/* ── Input Section ── */}
+          <Card title={t('ai.enterSymbols')} style={styles.inputCard}>
+            <TextInput
+              style={[styles.textInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
+              value={symbolInput}
+              onChangeText={setSymbolInput}
+              placeholder={t('ai.symbolsExample')}
+              placeholderTextColor={colors.textMuted}
+              multiline
+              numberOfLines={2}
+              autoCapitalize="characters"
+            />
+            {parsedSymbols.length > 0 && (
+              <View style={styles.chipRow}>
+                {parsedSymbols.map(s => (
+                  <View key={s} style={[styles.chip, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
+                    <Text style={[styles.chipText, { color: colors.primary }]}>{s}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Popular Stocks */}
+            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Quick add:</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.popularRow}>
+                {POPULAR_STOCKS.slice(0, 8).map(s => (
+                  <Pressable
+                    key={s}
+                    onPress={() => addSymbol(s)}
+                    style={[styles.popularChip, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                  >
+                    <Text style={[styles.popularChipText, { color: colors.text }]}>{s}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </ScrollView>
+
+            {/* Analyze Button */}
+            <AnimatedPressable
+              onPress={handleAnalyze}
+              disabled={loading}
+              haptic="medium"
+              scaleTo={0.97}
+              style={[styles.analyzeBtn, { backgroundColor: colors.primary, opacity: loading ? 0.6 : 1 }]}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="flash" size={18} color="#fff" />
+              )}
+              <Text style={styles.analyzeBtnText}>
+                {loading
+                  ? `Analyzing ${progress.current}/${progress.total}...`
+                  : `Analyze ${parsedSymbols.length > 0 ? parsedSymbols.length : '3 Popular'} Stocks`}
+              </Text>
+            </AnimatedPressable>
+          </Card>
+
+          {/* ── Progress Bar ── */}
+          {loading && progress.total > 0 && (
+            <View style={[styles.progressCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <View style={styles.progressHeader}>
+                <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>
+                  Analyzing {progress.current}/{progress.total}
+                </Text>
+                <Text style={[styles.progressPct, { color: colors.primary }]}>
+                  {Math.round((progress.current / progress.total) * 100)}%
+                </Text>
+              </View>
+              <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      width: `${(progress.current / progress.total) * 100}%`,
+                      backgroundColor: colors.primary,
+                    },
+                  ]}
+                />
+              </View>
             </View>
           )}
 
-          {/* Popular Stocks */}
-          <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Quick add:</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.popularRow}>
-              {POPULAR_STOCKS.slice(0, 8).map(s => (
+          {/* ── Error ── */}
+          {error && (
+            <View style={[styles.errorCard, { backgroundColor: colors.danger + '10', borderColor: colors.danger + '25' }]}>
+              <Ionicons name="alert-circle" size={18} color={colors.danger} />
+              <Text style={[styles.errorText, { color: colors.text }]}>{error}</Text>
+            </View>
+          )}
+
+          {/* ── Results ── */}
+          {results.length > 0 && (
+            <>
+              {/* Summary */}
+              <View style={[styles.summaryRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={styles.summaryItem}>
+                  <Text style={[styles.summaryCount, { color: '#10B981' }]}>{analysisCounts.bullish}</Text>
+                  <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.bullish')}</Text>
+                </View>
+                <View style={styles.summaryItem}>
+                  <Text style={[styles.summaryCount, { color: '#EF4444' }]}>{analysisCounts.bearish}</Text>
+                  <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.bearish')}</Text>
+                </View>
+                <View style={styles.summaryItem}>
+                  <Text style={[styles.summaryCount, { color: '#F59E0B' }]}>{analysisCounts.neutral}</Text>
+                  <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.neutral')}</Text>
+                </View>
+                <View style={styles.summaryItem}>
+                  <Text style={[styles.summaryCount, { color: colors.text }]}>{analysisCounts.total}</Text>
+                  <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.total')}</Text>
+                </View>
+              </View>
+
+              {/* Filters & Sort */}
+              <View style={styles.filterRow}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+                  {(['all', 'bullish', 'bearish', 'neutral'] as const).map(f => (
+                    <Pressable
+                      key={f}
+                      onPress={() => setFilterType(f)}
+                      style={[
+                        styles.filterChip,
+                        {
+                          backgroundColor: filterType === f ? colors.primary + '20' : colors.bgInput,
+                          borderColor: filterType === f ? colors.primary + '40' : colors.border,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.filterChipText, { color: filterType === f ? colors.primary : colors.textMuted }]}>
+                        {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
                 <Pressable
-                  key={s}
-                  onPress={() => addSymbol(s)}
-                  style={[styles.popularChip, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                  onPress={() => setSortBy(sortBy === 'confidence' ? 'symbol' : 'confidence')}
+                  style={[styles.sortBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
                 >
-                  <Text style={[styles.popularChipText, { color: colors.text }]}>{s}</Text>
+                  <Ionicons name="funnel" size={14} color={colors.textMuted} />
+                  <Text style={[styles.sortBtnText, { color: colors.textMuted }]}>
+                    {sortBy === 'confidence' ? 'Confidence' : 'Symbol'}
+                  </Text>
                 </Pressable>
-              ))}
-            </View>
-          </ScrollView>
-
-          {/* Analyze Button */}
-          <AnimatedPressable
-            onPress={handleAnalyze}
-            disabled={loading}
-            haptic="medium"
-            scaleTo={0.97}
-            style={[styles.analyzeBtn, { backgroundColor: colors.primary, opacity: loading ? 0.6 : 1 }]}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Ionicons name="flash" size={18} color="#fff" />
-            )}
-            <Text style={styles.analyzeBtnText}>
-              {loading
-                ? `Analyzing ${progress.current}/${progress.total}...`
-                : `Analyze ${parsedSymbols.length > 0 ? parsedSymbols.length : '3 Popular'} Stocks`}
-            </Text>
-          </AnimatedPressable>
-        </Card>
-
-        {/* ── Progress Bar ── */}
-        {loading && progress.total > 0 && (
-          <View style={[styles.progressCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <View style={styles.progressHeader}>
-              <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>
-                Analyzing {progress.current}/{progress.total}
-              </Text>
-              <Text style={[styles.progressPct, { color: colors.primary }]}>
-                {Math.round((progress.current / progress.total) * 100)}%
-              </Text>
-            </View>
-            <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
-              <View
-                style={[
-                  styles.progressFill,
-                  {
-                    width: `${(progress.current / progress.total) * 100}%`,
-                    backgroundColor: colors.primary,
-                  },
-                ]}
-              />
-            </View>
-          </View>
-        )}
-
-        {/* ── Error ── */}
-        {error && (
-          <View style={[styles.errorCard, { backgroundColor: colors.danger + '10', borderColor: colors.danger + '25' }]}>
-            <Ionicons name="alert-circle" size={18} color={colors.danger} />
-            <Text style={[styles.errorText, { color: colors.text }]}>{error}</Text>
-          </View>
-        )}
-
-        {/* ── Results ── */}
-        {results.length > 0 && (
-          <>
-            {/* Summary */}
-            <View style={[styles.summaryRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <View style={styles.summaryItem}>
-                <Text style={[styles.summaryCount, { color: '#10B981' }]}>{analysisCounts.bullish}</Text>
-                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.bullish')}</Text>
               </View>
-              <View style={styles.summaryItem}>
-                <Text style={[styles.summaryCount, { color: '#EF4444' }]}>{analysisCounts.bearish}</Text>
-                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.bearish')}</Text>
-              </View>
-              <View style={styles.summaryItem}>
-                <Text style={[styles.summaryCount, { color: '#F59E0B' }]}>{analysisCounts.neutral}</Text>
-                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.neutral')}</Text>
-              </View>
-              <View style={styles.summaryItem}>
-                <Text style={[styles.summaryCount, { color: colors.text }]}>{analysisCounts.total}</Text>
-                <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('ai.total')}</Text>
-              </View>
-            </View>
 
-            {/* Filters & Sort */}
-            <View style={styles.filterRow}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-                {(['all', 'bullish', 'bearish', 'neutral'] as const).map(f => (
-                  <Pressable
-                    key={f}
-                    onPress={() => setFilterType(f)}
-                    style={[
-                      styles.filterChip,
-                      {
-                        backgroundColor: filterType === f ? colors.primary + '20' : colors.bgInput,
-                        borderColor: filterType === f ? colors.primary + '40' : colors.border,
-                      },
-                    ]}
-                  >
-                    <Text style={[styles.filterChipText, { color: filterType === f ? colors.primary : colors.textMuted }]}>
-                      {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-              <Pressable
-                onPress={() => setSortBy(sortBy === 'confidence' ? 'symbol' : 'confidence')}
-                style={[styles.sortBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              >
-                <Ionicons name="funnel" size={14} color={colors.textMuted} />
-                <Text style={[styles.sortBtnText, { color: colors.textMuted }]}>
-                  {sortBy === 'confidence' ? 'Confidence' : 'Symbol'}
-                </Text>
-              </Pressable>
-            </View>
-
-            {/* Results Grid */}
-            <View style={styles.grid}>
-              {displayResults.map((insight, index) => {
-                const color = signalColor(insight.type);
-                return (
-                  <Animated.View
-                    key={insight.id}
-                    entering={FadeInDown.delay(index * 80).springify()}
-                    style={[styles.resultCard, { backgroundColor: colors.bgCard, borderColor: colors.border, borderLeftColor: color, borderLeftWidth: 3 }]}
-                  >
-                    {/* Header */}
-                    <View style={styles.resultHeader}>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.resultSymbol, { color: colors.text }]}>{insight.symbol}</Text>
-                        <Text style={[styles.resultName, { color: colors.textMuted }]} numberOfLines={1}>
-                          {insight.name}
-                        </Text>
+              {/* Results Grid */}
+              <View style={styles.grid}>
+                {displayResults.map((insight, index) => {
+                  const color = signalColor(insight.type);
+                  return (
+                    <Animated.View
+                      key={insight.id}
+                      entering={FadeInDown.delay(index * 80).springify()}
+                      style={[styles.resultCard, { backgroundColor: colors.bgCard, borderColor: colors.border, borderLeftColor: color, borderLeftWidth: 3 }]}
+                    >
+                      {/* Header */}
+                      <View style={styles.resultHeader}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.resultSymbol, { color: colors.text }]}>{insight.symbol}</Text>
+                          <Text style={[styles.resultName, { color: colors.textMuted }]} numberOfLines={1}>
+                            {insight.name}
+                          </Text>
+                        </View>
+                        <View style={[styles.signalBadge, { backgroundColor: color + '18' }]}>
+                          <Ionicons name={signalIcon(insight.type) as any} size={12} color={color} />
+                          <Text style={[styles.signalText, { color }]}>
+                            {insight.type === 'bullish' ? 'Bull' : insight.type === 'bearish' ? 'Bear' : 'Neut'}
+                          </Text>
+                        </View>
                       </View>
-                      <View style={[styles.signalBadge, { backgroundColor: color + '18' }]}>
-                        <Ionicons name={signalIcon(insight.type) as any} size={12} color={color} />
-                        <Text style={[styles.signalText, { color }]}>
-                          {insight.type === 'bullish' ? 'Bull' : insight.type === 'bearish' ? 'Bear' : 'Neut'}
-                        </Text>
+
+                      {/* Confidence */}
+                      <View style={styles.confidenceRow}>
+                        <View style={[styles.confidenceBar, { backgroundColor: colors.border }]}>
+                          <View style={[styles.confidenceFill, { width: `${insight.confidence}%`, backgroundColor: color }]} />
+                        </View>
+                        <Text style={[styles.confidenceValue, { color }]}>{insight.confidence}%</Text>
                       </View>
-                    </View>
 
-                    {/* Confidence */}
-                    <View style={styles.confidenceRow}>
-                      <View style={[styles.confidenceBar, { backgroundColor: colors.border }]}>
-                        <View style={[styles.confidenceFill, { width: `${insight.confidence}%`, backgroundColor: color }]} />
-                      </View>
-                      <Text style={[styles.confidenceValue, { color }]}>{insight.confidence}%</Text>
-                    </View>
+                      {/* Summary */}
+                      <Text style={[styles.resultSummary, { color: colors.textSecondary }]} numberOfLines={2}>
+                        {insight.summary}
+                      </Text>
 
-                    {/* Summary */}
-                    <Text style={[styles.resultSummary, { color: colors.textSecondary }]} numberOfLines={2}>
-                      {insight.summary}
-                    </Text>
-
-                    {/* Targets */}
-                    {insight.targets.length > 0 && (
-                      <View style={styles.targetRow}>
-                        {insight.targets.slice(0, 2).map((t, i) => (
-                          <View key={i} style={[styles.targetItem, { backgroundColor: colors.bgInput }]}>
-                            <Text style={[styles.targetLabel, { color: colors.textMuted }]}>
-                              T{i + 1}
-                            </Text>
-                            <Text style={[styles.targetValue, { color: colors.text }]}>
-                              ₹{t.target.toLocaleString()}
-                            </Text>
-                            <View style={[styles.targetBar, { backgroundColor: colors.border }]}>
-                              <View
-                                style={[
-                                  styles.targetFill,
-                                  { width: `${t.probability}%`, backgroundColor: color },
-                                ]}
-                              />
+                      {/* Targets */}
+                      {insight.targets.length > 0 && (
+                        <View style={styles.targetRow}>
+                          {insight.targets.slice(0, 2).map((t, i) => (
+                            <View key={i} style={[styles.targetItem, { backgroundColor: colors.bgInput }]}>
+                              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>
+                                T{i + 1}
+                              </Text>
+                              <Text style={[styles.targetValue, { color: colors.text }]}>
+                                ₹{t.target.toLocaleString()}
+                              </Text>
+                              <View style={[styles.targetBar, { backgroundColor: colors.border }]}>
+                                <View
+                                  style={[
+                                    styles.targetFill,
+                                    { width: `${t.probability}%`, backgroundColor: color },
+                                  ]}
+                                />
+                              </View>
                             </View>
-                          </View>
-                        ))}
-                      </View>
-                    )}
-                  </Animated.View>
-                );
-              })}
-            </View>
-
-            {displayResults.length === 0 && (
-              <View style={styles.emptyState}>
-                <Ionicons name="search" size={36} color={colors.textMuted} />
-                <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                  No {filterType !== 'all' ? filterType : ''} results found
-                </Text>
+                          ))}
+                        </View>
+                      )}
+                    </Animated.View>
+                  );
+                })}
               </View>
-            )}
-          </>
-        )}
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+              {displayResults.length === 0 && (
+                <View style={styles.emptyState}>
+                  <Ionicons name="search" size={36} color={colors.textMuted} />
+                  <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                    No {filterType !== 'all' ? filterType : ''} results found
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ──── Styles ──────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.md,
   },
   headerRow: {

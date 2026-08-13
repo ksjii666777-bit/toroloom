@@ -34,6 +34,7 @@ import type { WebhookConfig, WebhookEvent, WebhookDeliveryLog, WebhookEventMeta 
 import { WEBHOOK_EVENTS } from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -434,142 +435,143 @@ export default function WebhookManagementScreen({ navigation }: NativeStackScree
   }, [newName, newUrl, newSecret, newDesc, selectedEvents, t]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('webhookManagement.title')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('webhookManagement.subtitle')}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('webhookManagement.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('webhookManagement.subtitle')}</Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <StatCard icon="link" value={stats.total.toString()} label={t('webhookManagement.total')} color="#3B82F6" />
-          <StatCard icon="checkmark-circle" value={stats.active.toString()} label={t('webhookManagement.active')} color="#00C853" />
-          <StatCard icon="pulse" value={stats.totalDeliveries.toString()} label={t('webhookManagement.delivered')} color="#8B5CF6" />
-          <StatCard icon="trending-up" value={`${stats.successRate}%`} label={t('webhookManagement.success')} color="#00E676" />
-        </View>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Stats */}
+          <View style={styles.statsRow}>
+            <StatCard icon="link" value={stats.total.toString()} label={t('webhookManagement.total')} color="#3B82F6" />
+            <StatCard icon="checkmark-circle" value={stats.active.toString()} label={t('webhookManagement.active')} color="#00C853" />
+            <StatCard icon="pulse" value={stats.totalDeliveries.toString()} label={t('webhookManagement.delivered')} color="#8B5CF6" />
+            <StatCard icon="trending-up" value={`${stats.successRate}%`} label={t('webhookManagement.success')} color="#00E676" />
+          </View>
 
-        {/* Create Button */}
-        {!showCreateForm ? (
-          <AnimatedPressable onPress={() => setShowCreateForm(true)} haptic="medium" scaleTo={0.97}>
-            <View style={[styles.createBtn, { borderColor: colors.primary + '40' }]}>
-              <Ionicons name="add-circle" size={20} color={colors.primary} />
-              <Text style={[styles.createBtnText, { color: colors.primary }]}>{t('webhookManagement.addWebhook')}</Text>
-            </View>
-          </AnimatedPressable>
-        ) : (
-          <Animated.View entering={FadeInDown} style={[styles.createForm, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <View style={styles.formHeader}>
-              <Text style={[styles.formTitle, { color: colors.text }]}>{t('webhookManagement.newWebhook')}</Text>
-              <Pressable onPress={() => setShowCreateForm(false)}>
-                <Ionicons name="close" size={22} color={colors.textMuted} />
-              </Pressable>
-            </View>
-
-            <Text style={[styles.formLabel, { color: colors.textMuted }]}>{t('webhookManagement.name')}</Text>
-            <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              placeholder={t('webhookManagement.namePlaceholder')} placeholderTextColor={colors.textMuted} value={newName} onChangeText={setNewName} autoFocus />
-
-            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.targetUrl')}</Text>
-            <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              placeholder={t('webhookManagement.urlPlaceholder')} placeholderTextColor={colors.textMuted} value={newUrl} onChangeText={setNewUrl} autoCapitalize="none" autoCorrect={false} />
-
-            <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.secret')}</Text>
-                <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-                  placeholder={t('webhookManagement.secretPlaceholder')} placeholderTextColor={colors.textMuted} value={newSecret} onChangeText={setNewSecret} autoCapitalize="none" />
-              </View>
-            </View>
-
-            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.description')}</Text>
-            <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              placeholder={t('webhookManagement.descPlaceholder')} placeholderTextColor={colors.textMuted} value={newDesc} onChangeText={setNewDesc} />
-
-            {/* Event selector */}
-            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>
-              {t('webhookManagement.events', { count: selectedEvents.length })}
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll}>
-              {EVENT_CATEGORIES.map(cat => (
-                <EventCategoryChip key={cat.key} label={t(cat.labelKey)} icon={cat.icon} active={eventCategoryFilter === cat.key} onPress={() => setEventCategoryFilter(cat.key)} color={colors.primary} />
-              ))}
-            </ScrollView>
-            <View style={styles.eventsGrid}>
-              {(() => {
-                const selectedEventsSet = new Set(selectedEvents);
-                return filteredEvents.map(meta => {
-                  const isSelected = selectedEventsSet.has(meta.event);
-                  return (
-                  <Pressable key={meta.event} onPress={() => toggleCreateEvent(meta.event)}
-                    style={[styles.eventOption, {
-                      backgroundColor: isSelected ? meta.color + '20' : 'rgba(255,255,255,0.04)',
-                      borderColor: isSelected ? meta.color + '40' : 'rgba(255,255,255,0.1)',
-                    }]}>
-                    <Ionicons name={meta.icon as any} size={14} color={isSelected ? meta.color : colors.textMuted} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.eventOptionLabel, { color: isSelected ? meta.color : colors.text }]}>{meta.label}</Text>
-                      <Text style={[styles.eventOptionDesc, { color: colors.textMuted }]}>{meta.description}</Text>
-                    </View>
-                    <Ionicons name={isSelected ? 'checkmark-circle' : 'add-circle-outline'} size={18} color={isSelected ? meta.color : colors.textMuted} />
-                  </Pressable>
-                );
-                });
-              })()}
-            </View>
-
-            <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.97}>
-              <View style={[styles.submitBtn, { backgroundColor: colors.primary }]}>
-                <Ionicons name="link" size={18} color="#FFF" />
-                <Text style={styles.submitBtnText}>{t('webhookManagement.createWebhook')}</Text>
+          {/* Create Button */}
+          {!showCreateForm ? (
+            <AnimatedPressable onPress={() => setShowCreateForm(true)} haptic="medium" scaleTo={0.97}>
+              <View style={[styles.createBtn, { borderColor: colors.primary + '40' }]}>
+                <Ionicons name="add-circle" size={20} color={colors.primary} />
+                <Text style={[styles.createBtnText, { color: colors.primary }]}>{t('webhookManagement.addWebhook')}</Text>
               </View>
             </AnimatedPressable>
-          </Animated.View>
-        )}
+          ) : (
+            <Animated.View entering={FadeInDown} style={[styles.createForm, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <View style={styles.formHeader}>
+                <Text style={[styles.formTitle, { color: colors.text }]}>{t('webhookManagement.newWebhook')}</Text>
+                <Pressable onPress={() => setShowCreateForm(false)}>
+                  <Ionicons name="close" size={22} color={colors.textMuted} />
+                </Pressable>
+              </View>
 
-        {/* Webhook List */}
-        <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
-          {t('webhookManagement.configuredWebhooks')}
-        </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          {t('webhookManagement.webhookCount', { active: webhooks.filter(w => w.isActive).length, total: webhooks.length })}
-        </Text>
+              <Text style={[styles.formLabel, { color: colors.textMuted }]}>{t('webhookManagement.name')}</Text>
+              <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                placeholder={t('webhookManagement.namePlaceholder')} placeholderTextColor={colors.textMuted} value={newName} onChangeText={setNewName} autoFocus />
 
-        {webhooks.map(wh => (
-          <WebhookCard
-            key={wh.id}
-            wh={wh}
-            logs={MOCK_DELIVERY_LOGS[wh.id] || []}
-            onToggle={toggleWebhook}
-            onDelete={deleteWebhook}
-            onTestPing={testPing}
-            expanded={expandedWhId === wh.id}
-            onToggleExpand={() => toggleExpand(wh.id)}
-            colors={colors}
-          t={t}
-          />
-        ))}
+              <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.targetUrl')}</Text>
+              <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                placeholder={t('webhookManagement.urlPlaceholder')} placeholderTextColor={colors.textMuted} value={newUrl} onChangeText={setNewUrl} autoCapitalize="none" autoCorrect={false} />
 
-        {/* Info */}
-        <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="information-circle" size={18} color={colors.primary} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.infoTitle, { color: colors.text }]}>{t('webhookManagement.aboutTitle')}</Text>
-            <Text style={[styles.infoText, { color: colors.textMuted }]}>{t('webhookManagement.aboutDesc')}</Text>
+              <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.secret')}</Text>
+                  <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                    placeholder={t('webhookManagement.secretPlaceholder')} placeholderTextColor={colors.textMuted} value={newSecret} onChangeText={setNewSecret} autoCapitalize="none" />
+                </View>
+              </View>
+
+              <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>{t('webhookManagement.description')}</Text>
+              <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                placeholder={t('webhookManagement.descPlaceholder')} placeholderTextColor={colors.textMuted} value={newDesc} onChangeText={setNewDesc} />
+
+              {/* Event selector */}
+              <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.sm }]}>
+                {t('webhookManagement.events', { count: selectedEvents.length })}
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll}>
+                {EVENT_CATEGORIES.map(cat => (
+                  <EventCategoryChip key={cat.key} label={t(cat.labelKey)} icon={cat.icon} active={eventCategoryFilter === cat.key} onPress={() => setEventCategoryFilter(cat.key)} color={colors.primary} />
+                ))}
+              </ScrollView>
+              <View style={styles.eventsGrid}>
+                {(() => {
+                  const selectedEventsSet = new Set(selectedEvents);
+                  return filteredEvents.map(meta => {
+                    const isSelected = selectedEventsSet.has(meta.event);
+                    return (
+                    <Pressable key={meta.event} onPress={() => toggleCreateEvent(meta.event)}
+                      style={[styles.eventOption, {
+                        backgroundColor: isSelected ? meta.color + '20' : 'rgba(255,255,255,0.04)',
+                        borderColor: isSelected ? meta.color + '40' : 'rgba(255,255,255,0.1)',
+                      }]}>
+                      <Ionicons name={meta.icon as any} size={14} color={isSelected ? meta.color : colors.textMuted} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.eventOptionLabel, { color: isSelected ? meta.color : colors.text }]}>{meta.label}</Text>
+                        <Text style={[styles.eventOptionDesc, { color: colors.textMuted }]}>{meta.description}</Text>
+                      </View>
+                      <Ionicons name={isSelected ? 'checkmark-circle' : 'add-circle-outline'} size={18} color={isSelected ? meta.color : colors.textMuted} />
+                    </Pressable>
+                  );
+                  });
+                })()}
+              </View>
+
+              <AnimatedPressable onPress={handleCreate} haptic="medium" scaleTo={0.97}>
+                <View style={[styles.submitBtn, { backgroundColor: colors.primary }]}>
+                  <Ionicons name="link" size={18} color="#FFF" />
+                  <Text style={styles.submitBtnText}>{t('webhookManagement.createWebhook')}</Text>
+                </View>
+              </AnimatedPressable>
+            </Animated.View>
+          )}
+
+          {/* Webhook List */}
+          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
+            {t('webhookManagement.configuredWebhooks')}
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+            {t('webhookManagement.webhookCount', { active: webhooks.filter(w => w.isActive).length, total: webhooks.length })}
+          </Text>
+
+          {webhooks.map(wh => (
+            <WebhookCard
+              key={wh.id}
+              wh={wh}
+              logs={MOCK_DELIVERY_LOGS[wh.id] || []}
+              onToggle={toggleWebhook}
+              onDelete={deleteWebhook}
+              onTestPing={testPing}
+              expanded={expandedWhId === wh.id}
+              onToggleExpand={() => toggleExpand(wh.id)}
+              colors={colors}
+            t={t}
+            />
+          ))}
+
+          {/* Info */}
+          <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="information-circle" size={18} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.infoTitle, { color: colors.text }]}>{t('webhookManagement.aboutTitle')}</Text>
+              <Text style={[styles.infoText, { color: colors.textMuted }]}>{t('webhookManagement.aboutDesc')}</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -578,7 +580,6 @@ export default function WebhookManagementScreen({ navigation }: NativeStackScree
 // ═════════════════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { padding: SPACING.xl, paddingTop: 60, borderBottomLeftRadius: BORDER_RADIUS.xl, borderBottomRightRadius: BORDER_RADIUS.xl },
   headerTop: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   backBtn: { padding: 4 },

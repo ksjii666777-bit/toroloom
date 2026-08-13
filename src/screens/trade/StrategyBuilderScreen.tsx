@@ -35,6 +35,7 @@ import { tickerProvider } from '../../services/tickerProvider';
 import type {StrategyLeg, RootStackParamList} from '../../types';
 import { fnoApi, PrebuiltStrategy } from '../../services/api/fno';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_HEIGHT = 200;
@@ -387,166 +388,163 @@ export default function StrategyBuilderScreen({ navigation }: NativeStackScreenP
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.title, { color: colors.text }]}>{t('trading.strategyBuilder')}</Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            {selectedStrategyName}
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={[styles.switchViewBtn, { borderColor: colors.primary + '40' }]}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="options" size={20} color={colors.primary} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Spot Price */}
-        <View style={[styles.spotPriceBar, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.spotPriceLabel, { color: colors.textMuted }]}>{t('trading.underlyingPrice')}</Text>
-          <TextInput
-            style={[styles.spotPriceInput, { color: colors.text }]}
-            value={String(Math.round(spotPrice))}
-            onChangeText={(v) => setSpotPrice(parseFloat(v) || 0)}
-            keyboardType="numeric"
-          />
-          <TouchableOpacity
-            style={[styles.analyzeBtn, { backgroundColor: colors.primary }]}
-            onPress={handleAnalyze}
-            disabled={strategyLegs.length === 0 || strategyLoading}
-          >
-            <Ionicons name="flash" size={16} color={colors.white} />
-            <Text style={[styles.analyzeBtnText, { color: colors.white }]}>
-              {strategyLoading ? t('status.loading') : t('trading.analyze')}
+  {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.title, { color: colors.text }]}>{t('trading.strategyBuilder')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+              {selectedStrategyName}
             </Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.switchViewBtn, { borderColor: colors.primary + '40' }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="options" size={20} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
-        {/* Pre-built Strategy Templates */}
-        {showPrebuilt && prebuiltStrategies.length > 0 && (
-          <View style={styles.prebuiltSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('trading.strategyTemplates')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.prebuiltScroll}>
-              {prebuiltStrategies.map(s => {
-                const isSelected = selectedPrebuilt?.id === s.id;
-                const riskColor = s.riskCategory === 'low' ? '#00C853'
-                  : s.riskCategory === 'moderate' ? '#FFC107' : '#FF5252';
-                return (
-                  <TouchableOpacity
-                    key={s.id}
-                    style={[
-                      styles.prebuiltCard,
-                      {
-                        backgroundColor: colors.bgCard,
-                        borderColor: isSelected ? riskColor : colors.border,
-                        borderWidth: isSelected ? 2 : 1,
-                      },
-                    ]}
-                    onPress={() => handleSelectPrebuilt(s)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.prebuiltHeader, { borderBottomColor: colors.divider }]}>
-                      <Text style={[styles.prebuiltName, { color: colors.text }]}>{s.name}</Text>
-                      <View style={[styles.prebuiltRiskBadge, { backgroundColor: (riskColor + '30') }]}>
-                        <Text style={[styles.prebuiltRiskText, { color: riskColor }]}>
-                          {s.riskCategory}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={[styles.prebuiltDesc, { color: colors.textSecondary }]} numberOfLines={2}>
-                      {s.description}
-                    </Text>
-                    <View style={styles.prebuiltMeta}>
-                      <Text style={[styles.prebuiltLegs, { color: colors.textMuted }]}>
-                        {t('trading.oneLeg', { count: s.legs.length })}
-                      </Text>
-                      {s.isBullish && <Text style={[styles.prebuiltBias, { color: colors.marketUp }]}>📈</Text>}
-                      {s.isBearish && <Text style={[styles.prebuiltBias, { color: colors.marketDown }]}>📉</Text>}
-                      {s.isNeutral && <Text style={[styles.prebuiltBias, { color: colors.warning }]}>↔️</Text>}
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
-        )}
-
-        {/* Toggle prebuilt view */}
-        <TouchableOpacity
-          style={[styles.togglePrebuilt, { borderColor: colors.border }]}
-          onPress={() => setShowPrebuilt(!showPrebuilt)}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <Ionicons
-            name={showPrebuilt ? 'chevron-up' : 'chevron-down'}
-            size={16}
-            color={colors.textMuted}
-          />
-          <Text style={[styles.togglePrebuiltText, { color: colors.textMuted }]}>
-            {showPrebuilt ? t('trading.hideTemplates') : t('trading.showTemplates')}
-          </Text>
-        </TouchableOpacity>
+          {/* Spot Price */}
+          <View style={[styles.spotPriceBar, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.spotPriceLabel, { color: colors.textMuted }]}>{t('trading.underlyingPrice')}</Text>
+            <TextInput
+              style={[styles.spotPriceInput, { color: colors.text }]}
+              value={String(Math.round(spotPrice))}
+              onChangeText={(v) => setSpotPrice(parseFloat(v) || 0)}
+              keyboardType="numeric"
+            />
+            <TouchableOpacity
+              style={[styles.analyzeBtn, { backgroundColor: colors.primary }]}
+              onPress={handleAnalyze}
+              disabled={strategyLegs.length === 0 || strategyLoading}
+            >
+              <Ionicons name="flash" size={16} color={colors.white} />
+              <Text style={[styles.analyzeBtnText, { color: colors.white }]}>
+                {strategyLoading ? t('status.loading') : t('trading.analyze')}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* Strategy Legs */}
-        {strategyLegs.length > 0 && (
-          <View style={styles.legsSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t('trading.strategyLegs', { count: strategyLegs.length })}
+          {/* Pre-built Strategy Templates */}
+          {showPrebuilt && prebuiltStrategies.length > 0 && (
+            <View style={styles.prebuiltSection}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('trading.strategyTemplates')}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.prebuiltScroll}>
+                {prebuiltStrategies.map(s => {
+                  const isSelected = selectedPrebuilt?.id === s.id;
+                  const riskColor = s.riskCategory === 'low' ? '#00C853'
+                    : s.riskCategory === 'moderate' ? '#FFC107' : '#FF5252';
+                  return (
+                    <TouchableOpacity
+                      key={s.id}
+                      style={[
+                        styles.prebuiltCard,
+                        {
+                          backgroundColor: colors.bgCard,
+                          borderColor: isSelected ? riskColor : colors.border,
+                          borderWidth: isSelected ? 2 : 1,
+                        },
+                      ]}
+                      onPress={() => handleSelectPrebuilt(s)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.prebuiltHeader, { borderBottomColor: colors.divider }]}>
+                        <Text style={[styles.prebuiltName, { color: colors.text }]}>{s.name}</Text>
+                        <View style={[styles.prebuiltRiskBadge, { backgroundColor: (riskColor + '30') }]}>
+                          <Text style={[styles.prebuiltRiskText, { color: riskColor }]}>
+                            {s.riskCategory}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={[styles.prebuiltDesc, { color: colors.textSecondary }]} numberOfLines={2}>
+                        {s.description}
+                      </Text>
+                      <View style={styles.prebuiltMeta}>
+                        <Text style={[styles.prebuiltLegs, { color: colors.textMuted }]}>
+                          {t('trading.oneLeg', { count: s.legs.length })}
+                        </Text>
+                        {s.isBullish && <Text style={[styles.prebuiltBias, { color: colors.marketUp }]}>📈</Text>}
+                        {s.isBearish && <Text style={[styles.prebuiltBias, { color: colors.marketDown }]}>📉</Text>}
+                        {s.isNeutral && <Text style={[styles.prebuiltBias, { color: colors.warning }]}>↔️</Text>}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* Toggle prebuilt view */}
+          <TouchableOpacity
+            style={[styles.togglePrebuilt, { borderColor: colors.border }]}
+            onPress={() => setShowPrebuilt(!showPrebuilt)}
+          >
+            <Ionicons
+              name={showPrebuilt ? 'chevron-up' : 'chevron-down'}
+              size={16}
+              color={colors.textMuted}
+            />
+            <Text style={[styles.togglePrebuiltText, { color: colors.textMuted }]}>
+              {showPrebuilt ? t('trading.hideTemplates') : t('trading.showTemplates')}
             </Text>
-            {strategyLegs.map(renderLegEditor)}
-          </View>
-        )}
-
-        {/* Add Leg Button */}
-        <AnimatedPressable onPress={handleAddCustomLeg} haptic="light" scaleTo={0.97}>
-          <View style={[styles.addLegBtn, { borderColor: colors.primary, backgroundColor: colors.primary + '10' }]}>
-            <Ionicons name="add-circle" size={20} color={colors.primary} />
-            <Text style={[styles.addLegBtnText, { color: colors.primary }]}>{t('trading.addLeg')}</Text>
-          </View>
-        </AnimatedPressable>
-
-        {/* Clear All */}
-        {strategyLegs.length > 0 && (
-          <TouchableOpacity style={styles.clearBtn} onPress={clearStrategyLegs}>
-            <Ionicons name="trash-outline" size={16} color={colors.danger} />
-            <Text style={[styles.clearBtnText, { color: colors.danger }]}>{t('trading.clearAll')}</Text>
           </TouchableOpacity>
-        )}
 
-        {/* Strategy Result */}
-        {strategyResult && renderStrategyResult()}
+          {/* Strategy Legs */}
+          {strategyLegs.length > 0 && (
+            <View style={styles.legsSection}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                {t('trading.strategyLegs', { count: strategyLegs.length })}
+              </Text>
+              {strategyLegs.map(renderLegEditor)}
+            </View>
+          )}
 
-        {/* Strategy Info */}
-        {!strategyResult && strategyLegs.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="shuffle-outline" size={64} color={colors.textMuted} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('trading.noStrategyDefined')}</Text>
-            <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              {t('trading.noStrategyDesc')}
-            </Text>
-          </View>
-        )}
+          {/* Add Leg Button */}
+          <AnimatedPressable onPress={handleAddCustomLeg} haptic="light" scaleTo={0.97}>
+            <View style={[styles.addLegBtn, { borderColor: colors.primary, backgroundColor: colors.primary + '10' }]}>
+              <Ionicons name="add-circle" size={20} color={colors.primary} />
+              <Text style={[styles.addLegBtnText, { color: colors.primary }]}>{t('trading.addLeg')}</Text>
+            </View>
+          </AnimatedPressable>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+          {/* Clear All */}
+          {strategyLegs.length > 0 && (
+            <TouchableOpacity style={styles.clearBtn} onPress={clearStrategyLegs}>
+              <Ionicons name="trash-outline" size={16} color={colors.danger} />
+              <Text style={[styles.clearBtnText, { color: colors.danger }]}>{t('trading.clearAll')}</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Strategy Result */}
+          {strategyResult && renderStrategyResult()}
+
+          {/* Strategy Info */}
+          {!strategyResult && strategyLegs.length === 0 && (
+            <View style={styles.emptyState}>
+              <Ionicons name="shuffle-outline" size={64} color={colors.textMuted} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('trading.noStrategyDefined')}</Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
+                {t('trading.noStrategyDesc')}
+              </Text>
+            </View>
+          )}
+
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

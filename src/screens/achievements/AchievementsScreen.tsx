@@ -10,6 +10,7 @@ import { formatDate } from '../../utils/formatters';
 import { Badge } from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const { width } = Dimensions.get('window');
@@ -50,189 +51,187 @@ export default function AchievementsScreen({ navigation }: NativeStackScreenProp
   const levelGradient = titleColors[userLevel.title] || GRADIENTS.primary;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </Pressable>
-        <View style={styles.headerContent}>
-          <Text style={styles.title}>{t('achievements.title')}</Text>
-          <Text style={styles.subtitle}>{t('achievements.subtitle', { unlocked: unlockedBadges.length, total: badges.length })}</Text>
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Level Card */}
-        <LinearGradient colors={levelGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.levelCard}>
-          <View style={styles.levelTopRow}>
-            <View style={styles.levelBadge}>
-              <Text style={styles.levelNumber}>{userLevel.level}</Text>
-            </View>
-            <View style={styles.levelInfo}>
-              <Text style={styles.levelTitle}>{userLevel.title}</Text>
-              <Text style={styles.levelXp}>{t('achievements.totalXp', { xp: userLevel.totalXp.toLocaleString() })}</Text>
-            </View>
-          </View>
-
-          {/* XP Progress */}
-          <View style={styles.xpSection}>
-            <View style={styles.xpRow}>
-              <Text style={styles.xpLabel}>{t('achievements.levelLabel', { current: userLevel.level, next: userLevel.level + 1 })}</Text>
-              <Text style={styles.xpValue}>{t('achievements.xpProgress', { current: userLevel.xp.toLocaleString(), next: userLevel.xpToNext.toLocaleString() })}</Text>
-            </View>
-            <View style={styles.xpBarBg}>
-              <View style={[styles.xpBarFill, { width: `${xpProgress}%` }]} />
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* Stats Grid */}
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{badges.length}</Text>
-            <Text style={styles.statLabel}>{t('achievements.statTotalBadges')}</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: colors.marketUp }]}>{unlockedBadges.length}</Text>
-            <Text style={styles.statLabel}>{t('achievements.statUnlocked')}</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: colors.textMuted }]}>{lockedBadges.length}</Text>
-            <Text style={styles.statLabel}>{t('achievements.statLocked')}</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: colors.accent }]}>{Math.round((unlockedBadges.length / badges.length) * 100)}%</Text>
-            <Text style={styles.statLabel}>{t('achievements.statCompletion')}</Text>
-          </View>
-        </View>
-
-        {/* Tab Toggle */}
-        <View style={styles.tabRow}>
-          <Pressable
-            style={[styles.tabBtn, showTab === 'all' && styles.tabBtnActive]}
-            onPress={() => setShowTab('all')}
-          >
-            <Text style={[styles.tabText, showTab === 'all' && styles.tabTextActive]}>{t('achievements.tabAllBadges')}</Text>
+          <AppScreen scroll={false} padded={false}
+      header={
+  <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
-          <Pressable
-            style={[styles.tabBtn, showTab === 'unlocked' && styles.tabBtnActive]}
-            onPress={() => setShowTab('unlocked')}
-          >
-            <Text style={[styles.tabText, showTab === 'unlocked' && styles.tabTextActive]}>
-              {t('achievements.tabUnlocked', { count: unlockedBadges.length })}
-            </Text>
-          </Pressable>
+          <View style={styles.headerContent}>
+            <Text style={styles.title}>{t('achievements.title')}</Text>
+            <Text style={styles.subtitle}>{t('achievements.subtitle', { unlocked: unlockedBadges.length, total: badges.length })}</Text>
+          </View>
         </View>
-
-        {/* Badges Grid */}
-        <View style={styles.badgesGrid}>
-          {displayBadges.map(badge => (
-            <Pressable
-              key={badge.id}
-              style={[styles.badgeCard, !badge.unlocked && styles.badgeCardLocked]}
-              onPress={() => setSelectedBadge(badge)}
-              
-            >
-              <View style={[styles.badgeIconWrap, !badge.unlocked && styles.badgeIconLocked]}>
-                <Text style={styles.badgeIcon}>{badge.icon}</Text>
-                {!badge.unlocked && (
-                  <View style={styles.lockOverlay}>
-                    <Ionicons name="lock-closed" size={14} color={colors.textMuted} />
-                  </View>
-                )}
-              </View>
-              <Text style={[styles.badgeName, !badge.unlocked && styles.badgeNameLocked]}>{badge.name}</Text>
-              {badge.unlocked && badge.unlockedAt && (
-                <Text style={styles.badgeDate}>{formatDate(badge.unlockedAt, 'dd MMM')}</Text>
-              )}
-            </Pressable>
-          ))}
-        </View>
-
-        {/* Next Rewards Preview */}
-        <Text style={styles.sectionTitle}>{t('achievements.upcomingChallenges')}</Text>
-        <View style={styles.rewardsRow}>
-          {nextRewards.map((reward) => (
-            <View key={reward.key} style={styles.rewardCard}>
-              <Text style={styles.rewardIcon}>{reward.icon}</Text>
-              <Text style={styles.rewardLabel}>{t('achievements.' + reward.key)}</Text>
-              <Text style={styles.rewardXp}>{t('achievements.rewardXp', { xp: reward.xp })}</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={{ height: 60 }} />
-      </ScrollView>
-
-      {/* Badge Detail Modal */}
-      <Modal
-        visible={selectedBadge !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedBadge(null)}
+      }
       >
-        <Pressable style={styles.modalOverlay}  onPress={() => setSelectedBadge(null)}>
-          <Pressable style={styles.modalContent}  onPress={() => {}}>
-            {selectedBadge && (
-              <>
-                <View style={[styles.modalIconWrap, !selectedBadge.unlocked && styles.modalIconLocked]}>
-                  <Text style={styles.modalIcon}>{selectedBadge.icon}</Text>
-                  {!selectedBadge.unlocked && (
-                    <View style={styles.modalLockOverlay}>
-                      <Ionicons name="lock-closed" size={20} color={colors.textMuted} />
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Level Card */}
+          <LinearGradient colors={levelGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.levelCard}>
+            <View style={styles.levelTopRow}>
+              <View style={styles.levelBadge}>
+                <Text style={styles.levelNumber}>{userLevel.level}</Text>
+              </View>
+              <View style={styles.levelInfo}>
+                <Text style={styles.levelTitle}>{userLevel.title}</Text>
+                <Text style={styles.levelXp}>{t('achievements.totalXp', { xp: userLevel.totalXp.toLocaleString() })}</Text>
+              </View>
+            </View>
+
+            {/* XP Progress */}
+            <View style={styles.xpSection}>
+              <View style={styles.xpRow}>
+                <Text style={styles.xpLabel}>{t('achievements.levelLabel', { current: userLevel.level, next: userLevel.level + 1 })}</Text>
+                <Text style={styles.xpValue}>{t('achievements.xpProgress', { current: userLevel.xp.toLocaleString(), next: userLevel.xpToNext.toLocaleString() })}</Text>
+              </View>
+              <View style={styles.xpBarBg}>
+                <View style={[styles.xpBarFill, { width: `${xpProgress}%` }]} />
+              </View>
+            </View>
+          </LinearGradient>
+
+          {/* Stats Grid */}
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{badges.length}</Text>
+              <Text style={styles.statLabel}>{t('achievements.statTotalBadges')}</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statCard}>
+              <Text style={[styles.statValue, { color: colors.marketUp }]}>{unlockedBadges.length}</Text>
+              <Text style={styles.statLabel}>{t('achievements.statUnlocked')}</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statCard}>
+              <Text style={[styles.statValue, { color: colors.textMuted }]}>{lockedBadges.length}</Text>
+              <Text style={styles.statLabel}>{t('achievements.statLocked')}</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statCard}>
+              <Text style={[styles.statValue, { color: colors.accent }]}>{Math.round((unlockedBadges.length / badges.length) * 100)}%</Text>
+              <Text style={styles.statLabel}>{t('achievements.statCompletion')}</Text>
+            </View>
+          </View>
+
+          {/* Tab Toggle */}
+          <View style={styles.tabRow}>
+            <Pressable
+              style={[styles.tabBtn, showTab === 'all' && styles.tabBtnActive]}
+              onPress={() => setShowTab('all')}
+            >
+              <Text style={[styles.tabText, showTab === 'all' && styles.tabTextActive]}>{t('achievements.tabAllBadges')}</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.tabBtn, showTab === 'unlocked' && styles.tabBtnActive]}
+              onPress={() => setShowTab('unlocked')}
+            >
+              <Text style={[styles.tabText, showTab === 'unlocked' && styles.tabTextActive]}>
+                {t('achievements.tabUnlocked', { count: unlockedBadges.length })}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Badges Grid */}
+          <View style={styles.badgesGrid}>
+            {displayBadges.map(badge => (
+              <Pressable
+                key={badge.id}
+                style={[styles.badgeCard, !badge.unlocked && styles.badgeCardLocked]}
+                onPress={() => setSelectedBadge(badge)}
+              
+              >
+                <View style={[styles.badgeIconWrap, !badge.unlocked && styles.badgeIconLocked]}>
+                  <Text style={styles.badgeIcon}>{badge.icon}</Text>
+                  {!badge.unlocked && (
+                    <View style={styles.lockOverlay}>
+                      <Ionicons name="lock-closed" size={14} color={colors.textMuted} />
                     </View>
                   )}
                 </View>
+                <Text style={[styles.badgeName, !badge.unlocked && styles.badgeNameLocked]}>{badge.name}</Text>
+                {badge.unlocked && badge.unlockedAt && (
+                  <Text style={styles.badgeDate}>{formatDate(badge.unlockedAt, 'dd MMM')}</Text>
+                )}
+              </Pressable>
+            ))}
+          </View>
 
-                <Text style={styles.modalName}>{selectedBadge.name}</Text>
-                <Text style={styles.modalDesc}>{selectedBadge.description}</Text>
+          {/* Next Rewards Preview */}
+          <Text style={styles.sectionTitle}>{t('achievements.upcomingChallenges')}</Text>
+          <View style={styles.rewardsRow}>
+            {nextRewards.map((reward) => (
+              <View key={reward.key} style={styles.rewardCard}>
+                <Text style={styles.rewardIcon}>{reward.icon}</Text>
+                <Text style={styles.rewardLabel}>{t('achievements.' + reward.key)}</Text>
+                <Text style={styles.rewardXp}>{t('achievements.rewardXp', { xp: reward.xp })}</Text>
+              </View>
+            ))}
+          </View>
 
-                <View style={styles.modalDivider} />
+          <View style={{ height: 60 }} />
+        </ScrollView>
 
-                <View style={styles.modalRow}>
-                  <Text style={styles.modalRowLabel}>{t('achievements.modalRequirement')}</Text>
-                  <Text style={styles.modalRowValue}>{selectedBadge.requirement}</Text>
-                </View>
-                <View style={styles.modalRow}>
-                  <Text style={styles.modalRowLabel}>{t('achievements.modalStatus')}</Text>
-                  <Text style={[styles.modalRowValue, {
-                    color: selectedBadge.unlocked ? colors.marketUp : colors.textMuted,
-                  }]}>
-                    {selectedBadge.unlocked ? t('achievements.unlocked') : t('achievements.locked')}
-                  </Text>
-                </View>
-                {selectedBadge.unlocked && selectedBadge.unlockedAt && (
+        {/* Badge Detail Modal */}
+        <Modal
+          visible={selectedBadge !== null}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedBadge(null)}
+        >
+          <Pressable style={styles.modalOverlay}  onPress={() => setSelectedBadge(null)}>
+            <Pressable style={styles.modalContent}  onPress={() => {}}>
+              {selectedBadge && (
+                <>
+                  <View style={[styles.modalIconWrap, !selectedBadge.unlocked && styles.modalIconLocked]}>
+                    <Text style={styles.modalIcon}>{selectedBadge.icon}</Text>
+                    {!selectedBadge.unlocked && (
+                      <View style={styles.modalLockOverlay}>
+                        <Ionicons name="lock-closed" size={20} color={colors.textMuted} />
+                      </View>
+                    )}
+                  </View>
+
+                  <Text style={styles.modalName}>{selectedBadge.name}</Text>
+                  <Text style={styles.modalDesc}>{selectedBadge.description}</Text>
+
+                  <View style={styles.modalDivider} />
+
                   <View style={styles.modalRow}>
-                    <Text style={styles.modalRowLabel}>{t('achievements.modalDateEarned')}</Text>
-                    <Text style={styles.modalRowValue}>
-                      {formatDate(selectedBadge.unlockedAt, 'dd MMM yyyy')}
+                    <Text style={styles.modalRowLabel}>{t('achievements.modalRequirement')}</Text>
+                    <Text style={styles.modalRowValue}>{selectedBadge.requirement}</Text>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalRowLabel}>{t('achievements.modalStatus')}</Text>
+                    <Text style={[styles.modalRowValue, {
+                      color: selectedBadge.unlocked ? colors.marketUp : colors.textMuted,
+                    }]}>
+                      {selectedBadge.unlocked ? t('achievements.unlocked') : t('achievements.locked')}
                     </Text>
                   </View>
-                )}
+                  {selectedBadge.unlocked && selectedBadge.unlockedAt && (
+                    <View style={styles.modalRow}>
+                      <Text style={styles.modalRowLabel}>{t('achievements.modalDateEarned')}</Text>
+                      <Text style={styles.modalRowValue}>
+                        {formatDate(selectedBadge.unlockedAt, 'dd MMM yyyy')}
+                      </Text>
+                    </View>
+                  )}
 
-                <Pressable
-                  style={styles.modalCloseBtn}
-                  onPress={() => setSelectedBadge(null)}
-                >
-                  <Text style={styles.modalCloseText}>{t('achievements.gotIt')}</Text>
-                </Pressable>
-              </>
-            )}
+                  <Pressable
+                    style={styles.modalCloseBtn}
+                    onPress={() => setSelectedBadge(null)}
+                  >
+                    <Text style={styles.modalCloseText}>{t('achievements.gotIt')}</Text>
+                  </Pressable>
+                </>
+              )}
+            </Pressable>
           </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </Modal>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

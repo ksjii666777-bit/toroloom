@@ -12,6 +12,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import { formatCurrency, formatTimestamp } from '../../utils/formatters';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 Dimensions.get('window');
@@ -21,7 +22,6 @@ type TxFilter = 'all' | 'add' | 'withdraw';
 export default function TransactionHistoryScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'TransactionHistory'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const { transactions } = useFundStore();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -63,211 +63,208 @@ export default function TransactionHistoryScreen({ navigation }: NativeStackScre
   }, [transactions]);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('funds.txHistoryTitle')}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Summary Card */}
-        <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summaryCard}>
-          <View style={styles.summaryTopRow}>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>{t('funds.txTotalAdded')}</Text>
-              <Text style={[styles.summaryValue, { color: colors.marketUp }]}>
-                {formatCurrency(summary.totalAdd, true)}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>{t('funds.txTotalWithdrawn')}</Text>
-              <Text style={[styles.summaryValue, { color: colors.marketDown }]}>
-                {formatCurrency(summary.totalWithdraw, true)}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryNetRow}>
-            <Text style={styles.summaryLabel}>{t('funds.txNetAddition')}</Text>
-            <Text style={[styles.summaryNetValue, {
-              color: summary.net >= 0 ? colors.marketUp : colors.marketDown,
-            }]}>
-              {summary.net >= 0 ? '+' : ''}{formatCurrency(summary.net, true)}
-            </Text>
-          </View>
-        </LinearGradient>
-
-        {/* Stats Row */}
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Ionicons name="swap-horizontal" size={16} color={colors.textMuted} />
-            <Text style={styles.statValue}>{transactions.length}</Text>
-            <Text style={styles.statLabel}>{t('funds.txTransactions')}</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Ionicons name="add-circle" size={16} color={colors.marketUp} />
-            <Text style={[styles.statValue, { color: colors.marketUp }]}>
-              {transactions.filter(t => t.type === 'add').length}
-            </Text>
-            <Text style={styles.statLabel}>{t('funds.txAdds')}</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Ionicons name="arrow-up-circle" size={16} color={colors.marketDown} />
-            <Text style={[styles.statValue, { color: colors.marketDown }]}>
-              {transactions.filter(t => t.type === 'withdraw').length}
-            </Text>
-            <Text style={styles.statLabel}>{t('funds.txWithdrawals')}</Text>
-          </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header]}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{t('funds.txHistoryTitle')}</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        {/* Filter Tabs */}
-        <View style={styles.tabRow}>
-          {(['all', 'add', 'withdraw'] as TxFilter[]).map(tab => (
-            <TouchableOpacity
-              key={tab}
-              style={[styles.tab, filter === tab && styles.tabActive]}
-              onPress={() => setFilter(tab)}
-            >
-              <Text style={[styles.tabText, filter === tab && styles.tabTextActive]}>
-                {tab === 'all' ? t('funds.txAll') : tab === 'add' ? t('funds.txAddFunds') : t('funds.txWithdrawals')}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Transaction Groups */}
-        {grouped.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>{t('funds.txEmptyTitle')}</Text>
-            <Text style={styles.emptySubtitle}>
-              {filter === 'all'
-                ? t('funds.txEmptyAll')
-                : t('funds.txEmptyFilter', { filter })}
-            </Text>
-          </View>
-        ) : (
-          grouped.map(group => (
-            <View key={group.label} style={styles.groupWrap}>
-              <Text style={styles.groupLabel}>{group.label}</Text>
-              <View style={styles.txList}>
-                {group.txs.map(tx => {
-                  const isExpanded = expandedId === tx.id;
-                  return (
-                    <TouchableOpacity
-                      key={tx.id}
-                      style={[styles.txItem, isExpanded && styles.txItemExpanded]}
-                      onPress={() => toggleExpand(tx.id)}
-                      activeOpacity={0.7}
-                    >
-                      {/* Main Row */}
-                      <View style={styles.txRow}>
-                        <View style={[styles.txIconWrap, {
-                          backgroundColor: tx.type === 'add' ? '#00C85320' : '#FF174420',
-                        }]}>
-                          <Ionicons
-                            name={tx.type === 'add' ? 'add-circle' : 'arrow-up-circle'}
-                            size={22}
-                            color={tx.type === 'add' ? colors.marketUp : colors.marketDown}
-                          />
-                        </View>
-                        <View style={styles.txInfo}>
-                          <Text style={styles.txTypeLabel}>
-                            {tx.type === 'add' ? t('funds.txFundsAdded') : t('funds.txFundsWithdrawn')}
-                          </Text>
-                          <Text style={styles.txMethod}>
-                            {tx.type === 'add' ? t('funds.txVia', { method: tx.method }) : t('funds.txTo', { method: tx.method })}
-                          </Text>
-                        </View>
-                        <View style={styles.txRight}>
-                          <Text style={[styles.txAmount, {
-                            color: tx.type === 'add' ? colors.marketUp : colors.marketDown,
-                          }]}>
-                            {tx.type === 'add' ? '+' : '-'}{formatCurrency(tx.amount, true)}
-                          </Text>
-                          <View style={styles.txStatusRow}>
-                            <Text style={styles.txTime}>{formatTimestamp(tx.timestamp)}</Text>
-                            <View style={[styles.statusDot, {
-                              backgroundColor: tx.status === 'completed' ? colors.marketUp
-                                : tx.status === 'pending' ? colors.warning
-                                : colors.marketDown,
-                            }]} />
-                            <Text style={styles.txStatus}>{tx.status}</Text>
-                          </View>
-                        </View>
-                        <Ionicons
-                          name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                          size={16}
-                          color={colors.textMuted}
-                          style={styles.chevron}
-                        />
-                      </View>
-
-                      {/* Expanded Details */}
-                      {isExpanded && (
-                        <View style={styles.detailSection}>
-                          <View style={styles.detailDivider} />
-                          <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>{t('funds.txTransactionId')}</Text>
-                            <Text style={styles.detailValue}>{tx.transactionId}</Text>
-                          </View>
-                          <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>{t('funds.txAmount')}</Text>
-                            <Text style={styles.detailValue}>{formatCurrency(tx.amount)}</Text>
-                          </View>
-                          <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>{t('funds.txMethod')}</Text>
-                            <Text style={styles.detailValue}>{tx.method}</Text>
-                          </View>
-                          {tx.account && (
-                            <View style={styles.detailRow}>
-                              <Text style={styles.detailLabel}>{t('funds.txAccount')}</Text>
-                              <Text style={styles.detailValue}>{tx.account}</Text>
-                            </View>
-                          )}
-                          <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>{t('funds.txStatus')}</Text>
-                            <Text style={[styles.detailValue, {
-                              color: tx.status === 'completed' ? colors.marketUp
-                                : tx.status === 'pending' ? colors.warning
-                                : colors.marketDown,
-                            }]}>
-                              {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
-                            </Text>
-                          </View>
-                          <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>{t('funds.txDateTime')}</Text>
-                            <Text style={styles.detailValue}>
-                              {new Date(tx.timestamp).toLocaleString('en-IN')}
-                            </Text>
-                          </View>
-                        </View>
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Summary Card */}
+          <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summaryCard}>
+            <View style={styles.summaryTopRow}>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>{t('funds.txTotalAdded')}</Text>
+                <Text style={[styles.summaryValue, { color: colors.marketUp }]}>
+                  {formatCurrency(summary.totalAdd, true)}
+                </Text>
+              </View>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>{t('funds.txTotalWithdrawn')}</Text>
+                <Text style={[styles.summaryValue, { color: colors.marketDown }]}>
+                  {formatCurrency(summary.totalWithdraw, true)}
+                </Text>
               </View>
             </View>
-          ))
-        )}
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryNetRow}>
+              <Text style={styles.summaryLabel}>{t('funds.txNetAddition')}</Text>
+              <Text style={[styles.summaryNetValue, {
+                color: summary.net >= 0 ? colors.marketUp : colors.marketDown,
+              }]}>
+                {summary.net >= 0 ? '+' : ''}{formatCurrency(summary.net, true)}
+              </Text>
+            </View>
+          </LinearGradient>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+          {/* Stats Row */}
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Ionicons name="swap-horizontal" size={16} color={colors.textMuted} />
+              <Text style={styles.statValue}>{transactions.length}</Text>
+              <Text style={styles.statLabel}>{t('funds.txTransactions')}</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Ionicons name="add-circle" size={16} color={colors.marketUp} />
+              <Text style={[styles.statValue, { color: colors.marketUp }]}>
+                {transactions.filter(t => t.type === 'add').length}
+              </Text>
+              <Text style={styles.statLabel}>{t('funds.txAdds')}</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Ionicons name="arrow-up-circle" size={16} color={colors.marketDown} />
+              <Text style={[styles.statValue, { color: colors.marketDown }]}>
+                {transactions.filter(t => t.type === 'withdraw').length}
+              </Text>
+              <Text style={styles.statLabel}>{t('funds.txWithdrawals')}</Text>
+            </View>
+          </View>
+
+          {/* Filter Tabs */}
+          <View style={styles.tabRow}>
+            {(['all', 'add', 'withdraw'] as TxFilter[]).map(tab => (
+              <TouchableOpacity
+                key={tab}
+                style={[styles.tab, filter === tab && styles.tabActive]}
+                onPress={() => setFilter(tab)}
+              >
+                <Text style={[styles.tabText, filter === tab && styles.tabTextActive]}>
+                  {tab === 'all' ? t('funds.txAll') : tab === 'add' ? t('funds.txAddFunds') : t('funds.txWithdrawals')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Transaction Groups */}
+          {grouped.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
+              <Text style={styles.emptyTitle}>{t('funds.txEmptyTitle')}</Text>
+              <Text style={styles.emptySubtitle}>
+                {filter === 'all'
+                  ? t('funds.txEmptyAll')
+                  : t('funds.txEmptyFilter', { filter })}
+              </Text>
+            </View>
+          ) : (
+            grouped.map(group => (
+              <View key={group.label} style={styles.groupWrap}>
+                <Text style={styles.groupLabel}>{group.label}</Text>
+                <View style={styles.txList}>
+                  {group.txs.map(tx => {
+                    const isExpanded = expandedId === tx.id;
+                    return (
+                      <TouchableOpacity
+                        key={tx.id}
+                        style={[styles.txItem, isExpanded && styles.txItemExpanded]}
+                        onPress={() => toggleExpand(tx.id)}
+                        activeOpacity={0.7}
+                      >
+                        {/* Main Row */}
+                        <View style={styles.txRow}>
+                          <View style={[styles.txIconWrap, {
+                            backgroundColor: tx.type === 'add' ? '#00C85320' : '#FF174420',
+                          }]}>
+                            <Ionicons
+                              name={tx.type === 'add' ? 'add-circle' : 'arrow-up-circle'}
+                              size={22}
+                              color={tx.type === 'add' ? colors.marketUp : colors.marketDown}
+                            />
+                          </View>
+                          <View style={styles.txInfo}>
+                            <Text style={styles.txTypeLabel}>
+                              {tx.type === 'add' ? t('funds.txFundsAdded') : t('funds.txFundsWithdrawn')}
+                            </Text>
+                            <Text style={styles.txMethod}>
+                              {tx.type === 'add' ? t('funds.txVia', { method: tx.method }) : t('funds.txTo', { method: tx.method })}
+                            </Text>
+                          </View>
+                          <View style={styles.txRight}>
+                            <Text style={[styles.txAmount, {
+                              color: tx.type === 'add' ? colors.marketUp : colors.marketDown,
+                            }]}>
+                              {tx.type === 'add' ? '+' : '-'}{formatCurrency(tx.amount, true)}
+                            </Text>
+                            <View style={styles.txStatusRow}>
+                              <Text style={styles.txTime}>{formatTimestamp(tx.timestamp)}</Text>
+                              <View style={[styles.statusDot, {
+                                backgroundColor: tx.status === 'completed' ? colors.marketUp
+                                  : tx.status === 'pending' ? colors.warning
+                                  : colors.marketDown,
+                              }]} />
+                              <Text style={styles.txStatus}>{tx.status}</Text>
+                            </View>
+                          </View>
+                          <Ionicons
+                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                            size={16}
+                            color={colors.textMuted}
+                            style={styles.chevron}
+                          />
+                        </View>
+
+                        {/* Expanded Details */}
+                        {isExpanded && (
+                          <View style={styles.detailSection}>
+                            <View style={styles.detailDivider} />
+                            <View style={styles.detailRow}>
+                              <Text style={styles.detailLabel}>{t('funds.txTransactionId')}</Text>
+                              <Text style={styles.detailValue}>{tx.transactionId}</Text>
+                            </View>
+                            <View style={styles.detailRow}>
+                              <Text style={styles.detailLabel}>{t('funds.txAmount')}</Text>
+                              <Text style={styles.detailValue}>{formatCurrency(tx.amount)}</Text>
+                            </View>
+                            <View style={styles.detailRow}>
+                              <Text style={styles.detailLabel}>{t('funds.txMethod')}</Text>
+                              <Text style={styles.detailValue}>{tx.method}</Text>
+                            </View>
+                            {tx.account && (
+                              <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>{t('funds.txAccount')}</Text>
+                                <Text style={styles.detailValue}>{tx.account}</Text>
+                              </View>
+                            )}
+                            <View style={styles.detailRow}>
+                              <Text style={styles.detailLabel}>{t('funds.txStatus')}</Text>
+                              <Text style={[styles.detailValue, {
+                                color: tx.status === 'completed' ? colors.marketUp
+                                  : tx.status === 'pending' ? colors.warning
+                                  : colors.marketDown,
+                              }]}>
+                                {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
+                              </Text>
+                            </View>
+                            <View style={styles.detailRow}>
+                              <Text style={styles.detailLabel}>{t('funds.txDateTime')}</Text>
+                              <Text style={styles.detailValue}>
+                                {new Date(tx.timestamp).toLocaleString('en-IN')}
+                              </Text>
+                            </View>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            ))
+          )}
+
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,

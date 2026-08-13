@@ -40,6 +40,7 @@ import Card from '../../components/ui/Card';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const TIERS: SubscriptionTier[] = ['free', 'pro', 'elite'];
@@ -189,308 +190,306 @@ export default function TenantConfigScreen({ navigation }: NativeStackScreenProp
 
   // ── Render ───────────────────────────────────────────────
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
-          </View>
-        </AnimatedPressable>
-        <Text style={styles.title}>{t('tenantConfig.title')}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* ── Tenant Identity ──────────────────────────────── */}
-        <Card title={t('tenantConfig.tenantIdentity')} style={styles.sectionCard}>
-          <Text style={styles.fieldLabel}>{t('tenantConfig.tenantId')}</Text>
-          <TextInput
-            style={styles.input}
-            value={id}
-            onChangeText={setId}
-            placeholder={t('tenantConfig.tenantIdPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            {...({ id: 'tenant-id', name: 'tenantId' } as { id: string; name: string })}
-          />
+  {/* Header */}
+        <View style={styles.header}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <View style={styles.backBtn}>
+              <Ionicons name="chevron-back" size={24} color={colors.text} />
+            </View>
+          </AnimatedPressable>
+          <Text style={styles.title}>{t('tenantConfig.title')}</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-          <Text style={styles.fieldLabel}>{t('tenantConfig.tenantName')}</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder={t('tenantConfig.tenantNamePlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            {...({ id: 'tenant-name', name: 'tenantName' } as { id: string; name: string })}
-          />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ── Tenant Identity ──────────────────────────────── */}
+          <Card title={t('tenantConfig.tenantIdentity')} style={styles.sectionCard}>
+            <Text style={styles.fieldLabel}>{t('tenantConfig.tenantId')}</Text>
+            <TextInput
+              style={styles.input}
+              value={id}
+              onChangeText={setId}
+              placeholder={t('tenantConfig.tenantIdPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              {...({ id: 'tenant-id', name: 'tenantId' } as { id: string; name: string })}
+            />
 
-          <Text style={styles.fieldLabel}>{t('tenantConfig.domain')}</Text>
-          <TextInput
-            style={styles.input}
-            value={domain}
-            onChangeText={setDomain}
-            placeholder={t('tenantConfig.domainPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            {...({ id: 'tenant-domain', name: 'domain' } as { id: string; name: string })}
-          />
+            <Text style={styles.fieldLabel}>{t('tenantConfig.tenantName')}</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder={t('tenantConfig.tenantNamePlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              {...({ id: 'tenant-name', name: 'tenantName' } as { id: string; name: string })}
+            />
 
-          <Text style={styles.fieldLabel}>{t('tenantConfig.primaryColor')}</Text>
-          <TextInput
-            style={styles.input}
-            value={primaryColor}
-            onChangeText={setPrimaryColor}
-            placeholder={t('tenantConfig.primaryColorPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-            {...({ id: 'tenant-primary-color', name: 'primaryColor' } as { id: string; name: string })}
-          />
-        </Card>
+            <Text style={styles.fieldLabel}>{t('tenantConfig.domain')}</Text>
+            <TextInput
+              style={styles.input}
+              value={domain}
+              onChangeText={setDomain}
+              placeholder={t('tenantConfig.domainPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              {...({ id: 'tenant-domain', name: 'domain' } as { id: string; name: string })}
+            />
 
-        {/* ── Feature Overrides ────────────────────────────── */}
-        <Card title={t('tenantConfig.featureOverrides')} style={styles.sectionCard}>
-          <Text style={styles.helpText}>
-            {t('tenantConfig.featureOverridesDesc')}
-          </Text>
-          <View style={styles.overrideList}>
-            {(Object.keys(DEFAULT_FEATURE_MATRIX) as SubscriptionFeature[]).map((feature) => {
-              const meta = DEFAULT_FEATURE_MATRIX[feature];
-              const currentOverride = featureOverrides[feature];
-              return (
-                <View key={feature} style={styles.overrideRow}>
-                  <View style={styles.overrideInfo}>
-                    <Text style={styles.overrideLabel}>{meta.label}</Text>
-                    <Text style={styles.overrideDefault}>
-                      {t('tenantConfig.default')}: <Text style={{ color: colors.primary }}>{meta.minTier}</Text>
-                      {currentOverride && currentOverride !== 'default' && (
-                        <Text style={{ color: colors.marketUp }}>
-                          {' → '}{currentOverride}
-                        </Text>
-                      )}
-                    </Text>
-                  </View>
-                  <View style={styles.overrideControls}>
-                    {(['default', ...TIERS] as const).map((tier) => {
-                      const isActive =
-                        tier === 'default'
-                          ? !currentOverride || currentOverride === 'default'
-                          : currentOverride === tier;
-                      return (
-                        <AnimatedPressable
-                          key={tier}
-                          onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            setFeatureOverrides((prev) => {
-                              if (tier === 'default') {
-                                const next = { ...prev };
-                                delete next[feature];
-                                return next;
-                              }
-                              return { ...prev, [feature]: tier };
-                            });
-                          }}
-                          haptic="none"
-                          scaleTo={0.95}
-                        >
-                          <View
-                            style={[
-                              styles.tierChip,
-                              isActive && styles.tierChipActive,
-                              tier === 'free' && isActive && { backgroundColor: colors.marketUp + '30', borderColor: colors.marketUp },
-                              tier === 'pro' && isActive && { backgroundColor: colors.primary + '30', borderColor: colors.primary },
-                              tier === 'elite' && isActive && { backgroundColor: colors.warning + '30', borderColor: colors.warning },
-                            ]}
+            <Text style={styles.fieldLabel}>{t('tenantConfig.primaryColor')}</Text>
+            <TextInput
+              style={styles.input}
+              value={primaryColor}
+              onChangeText={setPrimaryColor}
+              placeholder={t('tenantConfig.primaryColorPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              {...({ id: 'tenant-primary-color', name: 'primaryColor' } as { id: string; name: string })}
+            />
+          </Card>
+
+          {/* ── Feature Overrides ────────────────────────────── */}
+          <Card title={t('tenantConfig.featureOverrides')} style={styles.sectionCard}>
+            <Text style={styles.helpText}>
+              {t('tenantConfig.featureOverridesDesc')}
+            </Text>
+            <View style={styles.overrideList}>
+              {(Object.keys(DEFAULT_FEATURE_MATRIX) as SubscriptionFeature[]).map((feature) => {
+                const meta = DEFAULT_FEATURE_MATRIX[feature];
+                const currentOverride = featureOverrides[feature];
+                return (
+                  <View key={feature} style={styles.overrideRow}>
+                    <View style={styles.overrideInfo}>
+                      <Text style={styles.overrideLabel}>{meta.label}</Text>
+                      <Text style={styles.overrideDefault}>
+                        {t('tenantConfig.default')}: <Text style={{ color: colors.primary }}>{meta.minTier}</Text>
+                        {currentOverride && currentOverride !== 'default' && (
+                          <Text style={{ color: colors.marketUp }}>
+                            {' → '}{currentOverride}
+                          </Text>
+                        )}
+                      </Text>
+                    </View>
+                    <View style={styles.overrideControls}>
+                      {(['default', ...TIERS] as const).map((tier) => {
+                        const isActive =
+                          tier === 'default'
+                            ? !currentOverride || currentOverride === 'default'
+                            : currentOverride === tier;
+                        return (
+                          <AnimatedPressable
+                            key={tier}
+                            onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              setFeatureOverrides((prev) => {
+                                if (tier === 'default') {
+                                  const next = { ...prev };
+                                  delete next[feature];
+                                  return next;
+                                }
+                                return { ...prev, [feature]: tier };
+                              });
+                            }}
+                            haptic="none"
+                            scaleTo={0.95}
                           >
-                            <Text
+                            <View
                               style={[
-                                styles.tierChipText,
-                                isActive && styles.tierChipTextActive,
+                                styles.tierChip,
+                                isActive && styles.tierChipActive,
+                                tier === 'free' && isActive && { backgroundColor: colors.marketUp + '30', borderColor: colors.marketUp },
+                                tier === 'pro' && isActive && { backgroundColor: colors.primary + '30', borderColor: colors.primary },
+                                tier === 'elite' && isActive && { backgroundColor: colors.warning + '30', borderColor: colors.warning },
                               ]}
                             >
-                              {tier === 'default' ? '—' : tier.charAt(0).toUpperCase() + tier.slice(1)}
-                            </Text>
-                          </View>
-                        </AnimatedPressable>
-                      );
-                    })}
+                              <Text
+                                style={[
+                                  styles.tierChipText,
+                                  isActive && styles.tierChipTextActive,
+                                ]}
+                              >
+                                {tier === 'default' ? '—' : tier.charAt(0).toUpperCase() + tier.slice(1)}
+                              </Text>
+                            </View>
+                          </AnimatedPressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </Card>
+
+          {/* ── Plan Pricing Overrides ───────────────────────── */}
+          <Card title={t('tenantConfig.planPricingOverrides')} style={styles.sectionCard}>
+            <Text style={styles.helpText}>
+              {t('tenantConfig.planPricingOverridesDesc')}
+            </Text>
+            {SUBSCRIPTION_PLANS.filter((p) => p.tier !== 'free').map((plan) => {
+              const values = pricingOverrides[plan.id] ?? { monthly: '', yearly: '' };
+              return (
+                <View key={plan.id} style={styles.pricingSection}>
+                  <View style={styles.pricingHeader}>
+                    <Ionicons name={plan.icon as keyof typeof Ionicons.glyphMap} size={18} color={colors.primary} />
+                    <Text style={styles.pricingPlanName}>{plan.name}</Text>
+                  </View>
+                  <View style={styles.pricingRow}>
+                    <View style={styles.pricingField}>
+                      <Text style={styles.pricingLabel}>{t('tenantConfig.monthly')}</Text>
+                      <TextInput
+                        style={styles.pricingInput}
+                        value={values.monthly}
+                        onChangeText={(v) =>
+                          setPricingOverrides((prev) => ({
+                            ...prev,
+                            [plan.id]: { ...prev[plan.id], monthly: v },
+                          }))
+                        }
+                        placeholder={String(plan.price)}
+                        placeholderTextColor={colors.textMuted}
+                        keyboardType="numeric"
+                        {...({ id: `pricing-${plan.id}-monthly`, name: `${plan.id}_monthly` } as { id: string; name: string })}
+                      />
+                    </View>
+                    <View style={styles.pricingField}>
+                      <Text style={styles.pricingLabel}>{t('tenantConfig.yearly')}</Text>
+                      <TextInput
+                        style={styles.pricingInput}
+                        value={values.yearly}
+                        onChangeText={(v) =>
+                          setPricingOverrides((prev) => ({
+                            ...prev,
+                            [plan.id]: { ...prev[plan.id], yearly: v },
+                          }))
+                        }
+                        placeholder={String(plan.priceYearly)}
+                        placeholderTextColor={colors.textMuted}
+                        keyboardType="numeric"
+                        {...({ id: `pricing-${plan.id}-yearly`, name: `${plan.id}_yearly` } as { id: string; name: string })}
+                      />
+                    </View>
                   </View>
                 </View>
               );
             })}
-          </View>
-        </Card>
+          </Card>
 
-        {/* ── Plan Pricing Overrides ───────────────────────── */}
-        <Card title={t('tenantConfig.planPricingOverrides')} style={styles.sectionCard}>
-          <Text style={styles.helpText}>
-            {t('tenantConfig.planPricingOverridesDesc')}
-          </Text>
-          {SUBSCRIPTION_PLANS.filter((p) => p.tier !== 'free').map((plan) => {
-            const values = pricingOverrides[plan.id] ?? { monthly: '', yearly: '' };
-            return (
-              <View key={plan.id} style={styles.pricingSection}>
-                <View style={styles.pricingHeader}>
-                  <Ionicons name={plan.icon as keyof typeof Ionicons.glyphMap} size={18} color={colors.primary} />
-                  <Text style={styles.pricingPlanName}>{plan.name}</Text>
-                </View>
-                <View style={styles.pricingRow}>
-                  <View style={styles.pricingField}>
-                    <Text style={styles.pricingLabel}>{t('tenantConfig.monthly')}</Text>
-                    <TextInput
-                      style={styles.pricingInput}
-                      value={values.monthly}
-                      onChangeText={(v) =>
-                        setPricingOverrides((prev) => ({
-                          ...prev,
-                          [plan.id]: { ...prev[plan.id], monthly: v },
-                        }))
-                      }
-                      placeholder={String(plan.price)}
-                      placeholderTextColor={colors.textMuted}
-                      keyboardType="numeric"
-                      {...({ id: `pricing-${plan.id}-monthly`, name: `${plan.id}_monthly` } as { id: string; name: string })}
-                    />
-                  </View>
-                  <View style={styles.pricingField}>
-                    <Text style={styles.pricingLabel}>{t('tenantConfig.yearly')}</Text>
-                    <TextInput
-                      style={styles.pricingInput}
-                      value={values.yearly}
-                      onChangeText={(v) =>
-                        setPricingOverrides((prev) => ({
-                          ...prev,
-                          [plan.id]: { ...prev[plan.id], yearly: v },
-                        }))
-                      }
-                      placeholder={String(plan.priceYearly)}
-                      placeholderTextColor={colors.textMuted}
-                      keyboardType="numeric"
-                      {...({ id: `pricing-${plan.id}-yearly`, name: `${plan.id}_yearly` } as { id: string; name: string })}
-                    />
-                  </View>
-                </View>
-              </View>
-            );
-          })}
-        </Card>
+          {/* ── Razorpay Keys ────────────────────────────────── */}
+          <Card title={t('tenantConfig.razorpayConfig')} style={styles.sectionCard}>
+            <Text style={styles.helpText}>
+              {t('tenantConfig.razorpayConfigDesc')}
+            </Text>
 
-        {/* ── Razorpay Keys ────────────────────────────────── */}
-        <Card title={t('tenantConfig.razorpayConfig')} style={styles.sectionCard}>
-          <Text style={styles.helpText}>
-            {t('tenantConfig.razorpayConfigDesc')}
-          </Text>
+            <Text style={styles.fieldLabel}>{t('tenantConfig.keyId')}</Text>
+            <TextInput
+              style={styles.input}
+              value={razorpayKeyId}
+              onChangeText={setRazorpayKeyId}
+              placeholder={t('tenantConfig.keyIdPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              {...({ id: 'tenant-razorpay-key-id', name: 'razorpayKeyId' } as { id: string; name: string })}
+            />
 
-          <Text style={styles.fieldLabel}>{t('tenantConfig.keyId')}</Text>
-          <TextInput
-            style={styles.input}
-            value={razorpayKeyId}
-            onChangeText={setRazorpayKeyId}
-            placeholder={t('tenantConfig.keyIdPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            {...({ id: 'tenant-razorpay-key-id', name: 'razorpayKeyId' } as { id: string; name: string })}
-          />
+            <Text style={styles.fieldLabel}>{t('tenantConfig.keySecret')}</Text>
+            <TextInput
+              style={styles.input}
+              value={razorpayKeySecret}
+              onChangeText={setRazorpayKeySecret}
+              placeholder={t('tenantConfig.keySecretPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              secureTextEntry
+              {...({ id: 'tenant-razorpay-key-secret', name: 'razorpayKeySecret' } as { id: string; name: string })}
+            />
+          </Card>
 
-          <Text style={styles.fieldLabel}>{t('tenantConfig.keySecret')}</Text>
-          <TextInput
-            style={styles.input}
-            value={razorpayKeySecret}
-            onChangeText={setRazorpayKeySecret}
-            placeholder={t('tenantConfig.keySecretPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            secureTextEntry
-            {...({ id: 'tenant-razorpay-key-secret', name: 'razorpayKeySecret' } as { id: string; name: string })}
-          />
-        </Card>
-
-        {/* ── Actions ──────────────────────────────────────── */}
-        <View style={styles.actions}>
-          <AnimatedPressable onPress={handleSave} haptic="medium" scaleTo={0.97}>
-            <View style={styles.saveBtn}>
-              <Ionicons name="checkmark-circle" size={20} color={colors.white} />
-              <Text style={styles.saveBtnText}>{t('tenantConfig.saveBtn')}</Text>
-            </View>
-          </AnimatedPressable>
-
-          {existingConfig && existingConfig.id !== 'default' && (
-            <AnimatedPressable onPress={handleReset} haptic="warning" scaleTo={0.97}>
-              <View style={styles.resetBtn}>
-                <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                <Text style={styles.resetBtnText}>{t('tenantConfig.resetToDefault')}</Text>
+          {/* ── Actions ──────────────────────────────────────── */}
+          <View style={styles.actions}>
+            <AnimatedPressable onPress={handleSave} haptic="medium" scaleTo={0.97}>
+              <View style={styles.saveBtn}>
+                <Ionicons name="checkmark-circle" size={20} color={colors.white} />
+                <Text style={styles.saveBtnText}>{t('tenantConfig.saveBtn')}</Text>
               </View>
             </AnimatedPressable>
-          )}
-        </View>
 
-        {/* ── Preview: Current Config Summary ──────────────── */}
-        {existingConfig && existingConfig.id !== 'default' && (
-          <Card title={t('tenantConfig.activeConfig')} style={styles.sectionCard}>
-            <Text style={styles.configLine}>
-              <Text style={styles.configLabel}>{t('tenantConfig.id')}: </Text>
-              {existingConfig.id}
-            </Text>
-            <Text style={styles.configLine}>
-              <Text style={styles.configLabel}>{t('tenantConfig.name')}: </Text>
-              {existingConfig.name}
-            </Text>
-            <Text style={styles.configLine}>
-              <Text style={styles.configLabel}>{t('tenantConfig.domain')}: </Text>
-              {existingConfig.domain}
-            </Text>
-            {existingConfig.primaryColor && (
-              <View style={styles.configRow}>
-                <Text style={styles.configLabel}>{t('tenantConfig.primaryColor')}: </Text>
-                <View
-                  style={[styles.colorSwatch, { backgroundColor: existingConfig.primaryColor }]}
-                />
-                <Text style={{ color: colors.textMuted, fontSize: 12 }}>
-                  {' '}{existingConfig.primaryColor}
+            {existingConfig && existingConfig.id !== 'default' && (
+              <AnimatedPressable onPress={handleReset} haptic="warning" scaleTo={0.97}>
+                <View style={styles.resetBtn}>
+                  <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                  <Text style={styles.resetBtnText}>{t('tenantConfig.resetToDefault')}</Text>
+                </View>
+              </AnimatedPressable>
+            )}
+          </View>
+
+          {/* ── Preview: Current Config Summary ──────────────── */}
+          {existingConfig && existingConfig.id !== 'default' && (
+            <Card title={t('tenantConfig.activeConfig')} style={styles.sectionCard}>
+              <Text style={styles.configLine}>
+                <Text style={styles.configLabel}>{t('tenantConfig.id')}: </Text>
+                {existingConfig.id}
+              </Text>
+              <Text style={styles.configLine}>
+                <Text style={styles.configLabel}>{t('tenantConfig.name')}: </Text>
+                {existingConfig.name}
+              </Text>
+              <Text style={styles.configLine}>
+                <Text style={styles.configLabel}>{t('tenantConfig.domain')}: </Text>
+                {existingConfig.domain}
+              </Text>
+              {existingConfig.primaryColor && (
+                <View style={styles.configRow}>
+                  <Text style={styles.configLabel}>{t('tenantConfig.primaryColor')}: </Text>
+                  <View
+                    style={[styles.colorSwatch, { backgroundColor: existingConfig.primaryColor }]}
+                  />
+                  <Text style={{ color: colors.textMuted, fontSize: 12 }}>
+                    {' '}{existingConfig.primaryColor}
+                  </Text>
+                </View>
+              )}
+              {existingConfig.featureOverrides && (
+                <Text style={styles.configLine}>
+                  <Text style={styles.configLabel}>{t('tenantConfig.featureOverrides')}: </Text>
+                  {Object.keys(existingConfig.featureOverrides).length} feature(s)
                 </Text>
-              </View>
-            )}
-            {existingConfig.featureOverrides && (
-              <Text style={styles.configLine}>
-                <Text style={styles.configLabel}>{t('tenantConfig.featureOverrides')}: </Text>
-                {Object.keys(existingConfig.featureOverrides).length} feature(s)
-              </Text>
-            )}
-            {existingConfig.razorpay?.keyId && (
-              <Text style={styles.configLine}>
-                <Text style={styles.configLabel}>{t('tenantConfig.razorpay')}: </Text>
-                Configured ({existingConfig.razorpay.keyId.slice(0, 12)}...)
-              </Text>
-            )}
-            {existingConfig.razorpay?.pricing && (
-              <Text style={styles.configLine}>
-                <Text style={styles.configLabel}>{t('tenantConfig.pricingOverrides')}: </Text>
-                {Object.keys(existingConfig.razorpay.pricing).length} plan(s)
-              </Text>
-            )}
-          </Card>
-        )}
+              )}
+              {existingConfig.razorpay?.keyId && (
+                <Text style={styles.configLine}>
+                  <Text style={styles.configLabel}>{t('tenantConfig.razorpay')}: </Text>
+                  Configured ({existingConfig.razorpay.keyId.slice(0, 12)}...)
+                </Text>
+              )}
+              {existingConfig.razorpay?.pricing && (
+                <Text style={styles.configLine}>
+                  <Text style={styles.configLabel}>{t('tenantConfig.pricingOverrides')}: </Text>
+                  {Object.keys(existingConfig.razorpay.pricing).length} plan(s)
+                </Text>
+              )}
+            </Card>
+          )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     flexDirection: 'row',
     alignItems: 'center',

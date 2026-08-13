@@ -36,6 +36,7 @@ import type {CommodityAsset, RootStackParamList} from '../../types';
 import { useCommodityPrices } from '../../hooks/useCommodityPrices';
 import TradingViewChart from '../../components/TradingViewChart';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -530,212 +531,213 @@ export default function CommodityMarketsScreen({ navigation }: NativeStackScreen
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('commodityMarkets.title')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('commodityMarkets.subtitle')}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('commodityMarkets.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('commodityMarkets.subtitle')}</Text>
+            </View>
+            {/* Calculator button */}
+            <Pressable
+              onPress={() => setCalculatorVisible(true)}
+              style={[styles.calculatorBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
+            >
+              <Ionicons name="calculator" size={18} color={colors.primary} />
+            </Pressable>
+            {/* Live connection / data source indicator */}
+            <SourceBadge source={wsSource} isDetecting={isDetecting} connected={connected} />
           </View>
-          {/* Calculator button */}
-          <Pressable
-            onPress={() => setCalculatorVisible(true)}
-            style={[styles.calculatorBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
-          >
-            <Ionicons name="calculator" size={18} color={colors.primary} />
-          </Pressable>
-          {/* Live connection / data source indicator */}
-          <SourceBadge source={wsSource} isDetecting={isDetecting} connected={connected} />
-        </View>
 
-        {/* Tabs */}
-        <View style={styles.tabRow}>
-          {[
-            { key: 'all' as TabKey, label: t('commodityMarkets.tabAll'), icon: 'apps' },
-            { key: 'metals' as TabKey, label: t('commodityMarkets.tabMetals'), icon: 'diamond' },
-            { key: 'energy' as TabKey, label: t('commodityMarkets.tabEnergy'), icon: 'flame' },
-            { key: 'agriculture' as TabKey, label: t('commodityMarkets.tabAgri'), icon: 'leaf' },
-            { key: 'summary' as TabKey, label: t('commodityMarkets.tabSummary'), icon: 'stats-chart' },
-          ].map(tab => {
-            const isActive = activeTab === tab.key;
-            return (
-              <Pressable
-                key={tab.key}
-                onPress={() => { setActiveTab(tab.key); setExpandedId(null); setSearchQuery(''); }}
-                style={[styles.tabBtn, { backgroundColor: isActive ? colors.primary + '20' : 'transparent', borderColor: isActive ? colors.primary + '40' : 'transparent' }]}
-              >
-                <Ionicons name={tab.icon as any} size={13} color={isActive ? colors.primary : colors.textMuted} />
-                <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Search */}
-        {activeTab !== 'summary' && (
-          <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-            <Ionicons name="search" size={16} color={colors.textMuted} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.text }]}
-              placeholder={t('commodityMarkets.searchPlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <Pressable onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={16} color={colors.textMuted} />
-              </Pressable>
-            )}
-          </View>
-        )}
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Live Chart (real TradingView data) ── */}
-        <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.liveChartHeader}>
-            <Text style={[styles.liveChartTitle, { color: colors.text }]}>{t('commodityMarkets.liveChart')}</Text>
-            <Text style={[styles.liveChartSymbol, { color: colors.primary }]}>{tvSymbol}</Text>
-          </View>
-          <View style={styles.liveChartChips}>
-            {TV_COMMODITY_SYMBOLS.map((c) => {
-              const active = c.symbol === tvSymbol;
+          {/* Tabs */}
+          <View style={styles.tabRow}>
+            {[
+              { key: 'all' as TabKey, label: t('commodityMarkets.tabAll'), icon: 'apps' },
+              { key: 'metals' as TabKey, label: t('commodityMarkets.tabMetals'), icon: 'diamond' },
+              { key: 'energy' as TabKey, label: t('commodityMarkets.tabEnergy'), icon: 'flame' },
+              { key: 'agriculture' as TabKey, label: t('commodityMarkets.tabAgri'), icon: 'leaf' },
+              { key: 'summary' as TabKey, label: t('commodityMarkets.tabSummary'), icon: 'stats-chart' },
+            ].map(tab => {
+              const isActive = activeTab === tab.key;
               return (
                 <Pressable
-                  key={c.symbol}
-                  onPress={() => setTvSymbol(c.symbol)}
-                  style={[styles.liveChartChip, { backgroundColor: active ? colors.primary + '20' : colors.bgInput, borderColor: active ? colors.primary + '40' : colors.border }]}
+                  key={tab.key}
+                  onPress={() => { setActiveTab(tab.key); setExpandedId(null); setSearchQuery(''); }}
+                  style={[styles.tabBtn, { backgroundColor: isActive ? colors.primary + '20' : 'transparent', borderColor: isActive ? colors.primary + '40' : 'transparent' }]}
                 >
-                  <Text style={[styles.liveChartChipText, { color: active ? colors.primary : colors.textMuted }]}>{c.label}</Text>
+                  <Ionicons name={tab.icon as any} size={13} color={isActive ? colors.primary : colors.textMuted} />
+                  <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
                 </Pressable>
               );
             })}
           </View>
-          <TradingViewChart symbol={tvSymbol} interval="D" height={240} allowSymbolChange={false} />
+
+          {/* Search */}
+          {activeTab !== 'summary' && (
+            <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+              <Ionicons name="search" size={16} color={colors.textMuted} />
+              <TextInput
+                style={[styles.searchInput, { color: colors.text }]}
+                placeholder={t('commodityMarkets.searchPlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={16} color={colors.textMuted} />
+                </Pressable>
+              )}
+            </View>
+          )}
         </View>
 
-        {/* ── List View ── */}
-        {(activeTab !== 'summary') && (
-          <View>
-            <Text style={[styles.resultCount, { color: colors.textMuted }]}>
-              {t('commodityMarkets.commodityCount', { count: filteredItems.length })}
-            </Text>
-            {filteredItems.length > 0 ? (
-              filteredItems.map((item, _i) => (
-                <CommodityCard key={item.id} item={item} isExpanded={expandedId === item.id} onPress={() => handlePress(item.id)} colors={colors} />
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('commodityMarkets.noCommoditiesFound')}</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('commodityMarkets.adjustSearch')}</Text>
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* ── Summary ── */}
-        {activeTab === 'summary' && (
-          <View>
-            {/* Overview Cards */}
-            <View style={styles.summaryGrid}>
-              {[
-                { label: t('commodityMarkets.total'), value: summaryStats.total.toString(), icon: '📊', color: '#6C63FF' },
-                { label: t('commodityMarkets.gainers'), value: summaryStats.gainers.toString(), icon: '📈', color: '#00E676' },
-                { label: t('commodityMarkets.losers'), value: summaryStats.losers.toString(), icon: '📉', color: '#FF5252' },
-                { label: t('commodityMarkets.metalsShort'), value: summaryStats.metalsCount.toString(), icon: '💎', color: '#FFC107' },
-              ].map((stat) => (
-                <View key={stat.label} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
-                  <Text style={{ fontSize: 20 }}>{stat.icon}</Text>
-                  <Text style={[styles.summaryValue, { color: stat.color }]}>{stat.value}</Text>
-                  <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{stat.label}</Text>
-                </View>
-              ))}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* ── Live Chart (real TradingView data) ── */}
+          <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.liveChartHeader}>
+              <Text style={[styles.liveChartTitle, { color: colors.text }]}>{t('commodityMarkets.liveChart')}</Text>
+              <Text style={[styles.liveChartSymbol, { color: colors.primary }]}>{tvSymbol}</Text>
             </View>
-
-            {/* Category Performance */}
-            <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('commodityMarkets.categoryPerformance')}</Text>
-              {[
-                { label: t('commodityMarkets.preciousMetals'), value: summaryStats.metalsAvgChg, icon: '💎' },
-                { label: t('commodityMarkets.energyLabel'), value: summaryStats.energyAvgChg, icon: '🛢️' },
-                { label: t('commodityMarkets.agricultureLabel'), value: summaryStats.agriAvgChg, icon: '🌾' },
-              ].map((cat) => (
-                <React.Fragment key={cat.label}>
-                  <View style={styles.catRow}>
-                    <Text style={[styles.catLabel, { color: colors.text }]}>{cat.label}</Text>
-                    <Text style={[styles.catValue, { color: cat.value >= 0 ? '#00E676' : '#FF5252' }]}>
-                      {(cat.value >= 0 ? '+' : '') + cat.value.toFixed(2)}%
-                    </Text>
-                  </View>
-                  <View style={[styles.catBar, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
-                    <View style={[styles.catBarFill, {
-                      width: `${Math.min(Math.abs(cat.value) * 5, 100)}%`,
-                      backgroundColor: cat.value >= 0 ? '#00E676' : '#FF5252',
-                      alignSelf: cat.value >= 0 ? 'flex-start' : 'flex-end',
-                    }]} />
-                  </View>
-                </React.Fragment>
-              ))}
-            </View>
-
-            {/* All Commodities List in Summary */}
-            <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('commodityMarkets.allCommodities')}</Text>
-              {COMMODITIES.map((c, i) => {
-                const isUp = c.changePercent >= 0;
+            <View style={styles.liveChartChips}>
+              {TV_COMMODITY_SYMBOLS.map((c) => {
+                const active = c.symbol === tvSymbol;
                 return (
-                  <View key={c.id} style={[styles.commodityRow, i < COMMODITIES.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                    <View style={styles.commodityRowLeft}>
-                      <Text style={{ fontSize: 18 }}>{c.icon}</Text>
-                      <View>
-                        <Text style={[styles.commodityRowName, { color: colors.text }]}>{c.name}</Text>
-                        <Text style={[styles.commodityRowSymbol, { color: colors.textMuted }]}>{c.symbol}</Text>
-                      </View>
-                    </View>
-                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                      <Text style={[styles.commodityRowPrice, { color: colors.text }]}>${c.price.toFixed(c.price < 10 ? 2 : 1)}</Text>
-                      <View style={[styles.miniChange, { backgroundColor: isUp ? '#00E67620' : '#FF525220' }]}>
-                        <Ionicons name={isUp ? 'caret-up' : 'caret-down'} size={10} color={isUp ? '#00E676' : '#FF5252'} />
-                        <Text style={[styles.miniChangeText, { color: isUp ? '#00E676' : '#FF5252' }]}>
-                          {isUp ? '+' : ''}{c.changePercent.toFixed(2)}%
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
+                  <Pressable
+                    key={c.symbol}
+                    onPress={() => setTvSymbol(c.symbol)}
+                    style={[styles.liveChartChip, { backgroundColor: active ? colors.primary + '20' : colors.bgInput, borderColor: active ? colors.primary + '40' : colors.border }]}
+                  >
+                    <Text style={[styles.liveChartChipText, { color: active ? colors.primary : colors.textMuted }]}>{c.label}</Text>
+                  </Pressable>
                 );
               })}
             </View>
+            <TradingViewChart symbol={tvSymbol} interval="D" height={240} allowSymbolChange={false} />
+          </View>
 
-            {/* Info */}
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Ionicons name="information-circle" size={18} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('commodityMarkets.commodityTradingIndia')}</Text>
-                <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  {t('commodityMarkets.commodityTradingIndiaDesc')}
-                </Text>
+          {/* ── List View ── */}
+          {(activeTab !== 'summary') && (
+            <View>
+              <Text style={[styles.resultCount, { color: colors.textMuted }]}>
+                {t('commodityMarkets.commodityCount', { count: filteredItems.length })}
+              </Text>
+              {filteredItems.length > 0 ? (
+                filteredItems.map((item, _i) => (
+                  <CommodityCard key={item.id} item={item} isExpanded={expandedId === item.id} onPress={() => handlePress(item.id)} colors={colors} />
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Ionicons name="search-outline" size={48} color={colors.textMuted} />
+                  <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('commodityMarkets.noCommoditiesFound')}</Text>
+                  <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('commodityMarkets.adjustSearch')}</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ── Summary ── */}
+          {activeTab === 'summary' && (
+            <View>
+              {/* Overview Cards */}
+              <View style={styles.summaryGrid}>
+                {[
+                  { label: t('commodityMarkets.total'), value: summaryStats.total.toString(), icon: '📊', color: '#6C63FF' },
+                  { label: t('commodityMarkets.gainers'), value: summaryStats.gainers.toString(), icon: '📈', color: '#00E676' },
+                  { label: t('commodityMarkets.losers'), value: summaryStats.losers.toString(), icon: '📉', color: '#FF5252' },
+                  { label: t('commodityMarkets.metalsShort'), value: summaryStats.metalsCount.toString(), icon: '💎', color: '#FFC107' },
+                ].map((stat) => (
+                  <View key={stat.label} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
+                    <Text style={{ fontSize: 20 }}>{stat.icon}</Text>
+                    <Text style={[styles.summaryValue, { color: stat.color }]}>{stat.value}</Text>
+                    <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{stat.label}</Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Category Performance */}
+              <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('commodityMarkets.categoryPerformance')}</Text>
+                {[
+                  { label: t('commodityMarkets.preciousMetals'), value: summaryStats.metalsAvgChg, icon: '💎' },
+                  { label: t('commodityMarkets.energyLabel'), value: summaryStats.energyAvgChg, icon: '🛢️' },
+                  { label: t('commodityMarkets.agricultureLabel'), value: summaryStats.agriAvgChg, icon: '🌾' },
+                ].map((cat) => (
+                  <React.Fragment key={cat.label}>
+                    <View style={styles.catRow}>
+                      <Text style={[styles.catLabel, { color: colors.text }]}>{cat.label}</Text>
+                      <Text style={[styles.catValue, { color: cat.value >= 0 ? '#00E676' : '#FF5252' }]}>
+                        {(cat.value >= 0 ? '+' : '') + cat.value.toFixed(2)}%
+                      </Text>
+                    </View>
+                    <View style={[styles.catBar, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
+                      <View style={[styles.catBarFill, {
+                        width: `${Math.min(Math.abs(cat.value) * 5, 100)}%`,
+                        backgroundColor: cat.value >= 0 ? '#00E676' : '#FF5252',
+                        alignSelf: cat.value >= 0 ? 'flex-start' : 'flex-end',
+                      }]} />
+                    </View>
+                  </React.Fragment>
+                ))}
+              </View>
+
+              {/* All Commodities List in Summary */}
+              <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('commodityMarkets.allCommodities')}</Text>
+                {COMMODITIES.map((c, i) => {
+                  const isUp = c.changePercent >= 0;
+                  return (
+                    <View key={c.id} style={[styles.commodityRow, i < COMMODITIES.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                      <View style={styles.commodityRowLeft}>
+                        <Text style={{ fontSize: 18 }}>{c.icon}</Text>
+                        <View>
+                          <Text style={[styles.commodityRowName, { color: colors.text }]}>{c.name}</Text>
+                          <Text style={[styles.commodityRowSymbol, { color: colors.textMuted }]}>{c.symbol}</Text>
+                        </View>
+                      </View>
+                      <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                        <Text style={[styles.commodityRowPrice, { color: colors.text }]}>${c.price.toFixed(c.price < 10 ? 2 : 1)}</Text>
+                        <View style={[styles.miniChange, { backgroundColor: isUp ? '#00E67620' : '#FF525220' }]}>
+                          <Ionicons name={isUp ? 'caret-up' : 'caret-down'} size={10} color={isUp ? '#00E676' : '#FF5252'} />
+                          <Text style={[styles.miniChangeText, { color: isUp ? '#00E676' : '#FF5252' }]}>
+                            {isUp ? '+' : ''}{c.changePercent.toFixed(2)}%
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+
+              {/* Info */}
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="information-circle" size={18} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>{t('commodityMarkets.commodityTradingIndia')}</Text>
+                  <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                    {t('commodityMarkets.commodityTradingIndiaDesc')}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        )}
+          )}
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
+          <View style={{ height: 80 }} />
+        </ScrollView>
 
-      {/* Commodity Price Calculator Modal */}
-      <CommodityPriceCalculatorModal
-        visible={calculatorVisible}
-        onClose={() => setCalculatorVisible(false)}
-        commodities={COMMODITIES}
-        colors={colors}
-      />
-    </View>
+        {/* Commodity Price Calculator Modal */}
+        <CommodityPriceCalculatorModal
+          visible={calculatorVisible}
+          onClose={() => setCalculatorVisible(false)}
+          commodities={COMMODITIES}
+          colors={colors}
+        />
+      </AppScreen>
   );
 }
 
@@ -744,7 +746,6 @@ export default function CommodityMarketsScreen({ navigation }: NativeStackScreen
 // ══════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { padding: SPACING.xl, paddingTop: 60, borderBottomLeftRadius: BORDER_RADIUS.xl, borderBottomRightRadius: BORDER_RADIUS.xl },
   headerTop: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   title: { ...FONTS.bold, fontSize: FONTS.size.title },

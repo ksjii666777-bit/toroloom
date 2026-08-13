@@ -12,6 +12,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency, formatTimestamp } from '../../utils/formatters';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const { width } = Dimensions.get('window');
@@ -21,7 +22,6 @@ const { width } = Dimensions.get('window');
 export default function FundsDashboardScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'FundsDashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
   const { transactions } = useFundStore();
   const quickActions = [
@@ -79,225 +79,222 @@ export default function FundsDashboardScreen({ navigation }: NativeStackScreenPr
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('funds.dashboardTitle')}</Text>
-        <TouchableOpacity
-          style={styles.historyBtn}
-          onPress={() => navigation.navigate('TransactionHistory')}
-        >
-          <Ionicons name="time-outline" size={20} color={colors.white} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Balance Card — Glassmorphic */}
-        <View style={styles.balanceCard}>
-          <View style={[StyleSheet.absoluteFill, styles.balanceGlow]} />
-          <Text style={styles.balanceLabel}>{t('funds.dashboardBalance')}</Text>
-          <Text style={styles.balanceValue}>{formatLargeCurrency(balance)}</Text>
-          <View style={styles.balanceSubRow}>
-            <Ionicons name="wallet-outline" size={14} color="rgba(255,255,255,0.5)" />
-            <Text style={styles.balanceSub}>{formatCurrency(balance)}</Text>
-          </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header]}>          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{t('funds.dashboardTitle')}</Text>
+          <TouchableOpacity
+            style={styles.historyBtn}
+            onPress={() => navigation.navigate('TransactionHistory')}
+          >
+            <Ionicons name="time-outline" size={20} color={colors.white} />
+          </TouchableOpacity>
         </View>
 
-        {/* Quick Actions */}
-        <View style={styles.quickActionsRow}>
-          {quickActions.map((action) => (
-            <TouchableOpacity
-              key={action.screen}
-              style={styles.quickAction}
-              onPress={() => handleQuickAction(action.screen)}
-            >
-              <View style={styles.qaIcon}>
-                <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={22} color={colors.primary} />
-              </View>
-              <Text style={styles.qaLabel}>{action.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Stats Grid */}
-        <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { borderColor: colors.border }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: colors.accent + '20' }]}>
-              <Ionicons name="add-circle" size={20} color={colors.accent} />
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Balance Card — Glassmorphic */}
+          <View style={styles.balanceCard}>
+            <View style={[StyleSheet.absoluteFill, styles.balanceGlow]} />
+            <Text style={styles.balanceLabel}>{t('funds.dashboardBalance')}</Text>
+            <Text style={styles.balanceValue}>{formatLargeCurrency(balance)}</Text>
+            <View style={styles.balanceSubRow}>
+              <Ionicons name="wallet-outline" size={14} color="rgba(255,255,255,0.5)" />
+              <Text style={styles.balanceSub}>{formatCurrency(balance)}</Text>
             </View>
-            <Text style={styles.statValue}>{formatLargeCurrency(stats.totalAdd)}</Text>
-            <Text style={styles.statLabel}>{t('funds.dashboardTotalAdded')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: colors.border }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: colors.danger + '20' }]}>
-              <Ionicons name="arrow-up-circle" size={20} color={colors.danger} />
-            </View>
-            <Text style={styles.statValue}>{formatLargeCurrency(stats.totalWithdraw)}</Text>
-            <Text style={styles.statLabel}>{t('funds.dashboardWithdrawn')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: colors.border }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="trending-up" size={20} color={colors.primary} />
-            </View>
-            <Text style={[styles.statValue, { color: stats.net >= 0 ? colors.accent : colors.danger }]}>
-              {stats.net >= 0 ? '+' : ''}{formatLargeCurrency(Math.abs(stats.net))}
-            </Text>
-            <Text style={styles.statLabel}>{t('funds.dashboardNetAddition')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: colors.border }]}>
-            <View style={[styles.statIconWrap, { backgroundColor: colors.warning + '20' }]}>
-              <Ionicons name="swap-horizontal" size={20} color={colors.warning} />
-            </View>
-            <Text style={styles.statValue}>{stats.count}</Text>
-            <Text style={styles.statLabel}>{t('funds.dashboardTransactions')}</Text>
-          </View>
-        </View>
-
-        {/* Monthly Activity */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('funds.dashboardThisMonth')}</Text>
-            <Text style={styles.sectionSubtitle}>{monthlyActivity.label} 2025</Text>
-          </View>
-          <View style={styles.monthlyBars}>
-            <View style={styles.monthlyBarItem}>
-              <View style={styles.monthlyBarLabel}>
-                <Ionicons name="add-circle" size={14} color={colors.accent} />
-                <Text style={styles.monthlyBarLabelText}>{t('funds.dashboardAdded')}</Text>
-              </View>
-              <View style={styles.monthlyBarTrack}>
-                <View style={[styles.monthlyBarFill, {
-                  width: `${Math.min((monthlyActivity.add / Math.max(monthlyActivity.add + monthlyActivity.withdraw, 1)) * 100, 100)}%`,
-                  backgroundColor: colors.accent,
-                }]} />
-              </View>
-              <Text style={[styles.monthlyBarValue, { color: colors.accent }]}>
-                {formatCurrency(monthlyActivity.add, true)}
-              </Text>
-            </View>
-            <View style={styles.monthlyBarItem}>
-              <View style={styles.monthlyBarLabel}>
-                <Ionicons name="arrow-up-circle" size={14} color={colors.danger} />
-                <Text style={styles.monthlyBarLabelText}>{t('funds.dashboardWithdrawnLabel')}</Text>
-              </View>
-              <View style={styles.monthlyBarTrack}>
-                <View style={[styles.monthlyBarFill, {
-                  width: `${Math.min((monthlyActivity.withdraw / Math.max(monthlyActivity.add + monthlyActivity.withdraw, 1)) * 100, 100)}%`,
-                  backgroundColor: colors.danger,
-                }]} />
-              </View>
-              <Text style={[styles.monthlyBarValue, { color: colors.danger }]}>
-                {formatCurrency(monthlyActivity.withdraw, true)}
-              </Text>
-            </View>
-          </View>
-          {(monthlyActivity.add > 0 || monthlyActivity.withdraw > 0) && (
-            <View style={styles.monthlyNet}>
-              <Text style={styles.monthlyNetLabel}>{t('funds.dashboardNetThisMonth')}</Text>
-              <Text style={[styles.monthlyNetValue, {
-                color: (monthlyActivity.add - monthlyActivity.withdraw) >= 0 ? colors.accent : colors.danger,
-              }]}>
-                {monthlyActivity.add - monthlyActivity.withdraw >= 0 ? '+' : ''}
-                {formatCurrency(monthlyActivity.add - monthlyActivity.withdraw, true)}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Recent Transactions */}
-        <View style={styles.sectionWrap}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>{t('funds.dashboardRecentTx')}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory')}>
-              <Text style={styles.seeAllText}>{t('funds.dashboardSeeAll')}</Text>
-            </TouchableOpacity>
           </View>
 
-          {recentTx.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="receipt-outline" size={48} color={colors.textMuted} />
-              <Text style={styles.emptyText}>{t('funds.dashboardNoTx')}</Text>
+          {/* Quick Actions */}
+          <View style={styles.quickActionsRow}>
+            {quickActions.map((action) => (
               <TouchableOpacity
-                style={styles.emptyBtn}
-                onPress={() => navigation.navigate('AddFunds')}
+                key={action.screen}
+                style={styles.quickAction}
+                onPress={() => handleQuickAction(action.screen)}
               >
-                <Text style={styles.emptyBtnText}>{t('funds.addFunds')}</Text>
+                <View style={styles.qaIcon}>
+                  <Ionicons name={action.icon as keyof typeof Ionicons.glyphMap} size={22} color={colors.primary} />
+                </View>
+                <Text style={styles.qaLabel}>{action.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Stats Grid */}
+          <View style={styles.statsGrid}>
+            <View style={[styles.statCard, { borderColor: colors.border }]}>
+              <View style={[styles.statIconWrap, { backgroundColor: colors.accent + '20' }]}>
+                <Ionicons name="add-circle" size={20} color={colors.accent} />
+              </View>
+              <Text style={styles.statValue}>{formatLargeCurrency(stats.totalAdd)}</Text>
+              <Text style={styles.statLabel}>{t('funds.dashboardTotalAdded')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderColor: colors.border }]}>
+              <View style={[styles.statIconWrap, { backgroundColor: colors.danger + '20' }]}>
+                <Ionicons name="arrow-up-circle" size={20} color={colors.danger} />
+              </View>
+              <Text style={styles.statValue}>{formatLargeCurrency(stats.totalWithdraw)}</Text>
+              <Text style={styles.statLabel}>{t('funds.dashboardWithdrawn')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderColor: colors.border }]}>
+              <View style={[styles.statIconWrap, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="trending-up" size={20} color={colors.primary} />
+              </View>
+              <Text style={[styles.statValue, { color: stats.net >= 0 ? colors.accent : colors.danger }]}>
+                {stats.net >= 0 ? '+' : ''}{formatLargeCurrency(Math.abs(stats.net))}
+              </Text>
+              <Text style={styles.statLabel}>{t('funds.dashboardNetAddition')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderColor: colors.border }]}>
+              <View style={[styles.statIconWrap, { backgroundColor: colors.warning + '20' }]}>
+                <Ionicons name="swap-horizontal" size={20} color={colors.warning} />
+              </View>
+              <Text style={styles.statValue}>{stats.count}</Text>
+              <Text style={styles.statLabel}>{t('funds.dashboardTransactions')}</Text>
+            </View>
+          </View>
+
+          {/* Monthly Activity */}
+          <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('funds.dashboardThisMonth')}</Text>
+              <Text style={styles.sectionSubtitle}>{monthlyActivity.label} 2025</Text>
+            </View>
+            <View style={styles.monthlyBars}>
+              <View style={styles.monthlyBarItem}>
+                <View style={styles.monthlyBarLabel}>
+                  <Ionicons name="add-circle" size={14} color={colors.accent} />
+                  <Text style={styles.monthlyBarLabelText}>{t('funds.dashboardAdded')}</Text>
+                </View>
+                <View style={styles.monthlyBarTrack}>
+                  <View style={[styles.monthlyBarFill, {
+                    width: `${Math.min((monthlyActivity.add / Math.max(monthlyActivity.add + monthlyActivity.withdraw, 1)) * 100, 100)}%`,
+                    backgroundColor: colors.accent,
+                  }]} />
+                </View>
+                <Text style={[styles.monthlyBarValue, { color: colors.accent }]}>
+                  {formatCurrency(monthlyActivity.add, true)}
+                </Text>
+              </View>
+              <View style={styles.monthlyBarItem}>
+                <View style={styles.monthlyBarLabel}>
+                  <Ionicons name="arrow-up-circle" size={14} color={colors.danger} />
+                  <Text style={styles.monthlyBarLabelText}>{t('funds.dashboardWithdrawnLabel')}</Text>
+                </View>
+                <View style={styles.monthlyBarTrack}>
+                  <View style={[styles.monthlyBarFill, {
+                    width: `${Math.min((monthlyActivity.withdraw / Math.max(monthlyActivity.add + monthlyActivity.withdraw, 1)) * 100, 100)}%`,
+                    backgroundColor: colors.danger,
+                  }]} />
+                </View>
+                <Text style={[styles.monthlyBarValue, { color: colors.danger }]}>
+                  {formatCurrency(monthlyActivity.withdraw, true)}
+                </Text>
+              </View>
+            </View>
+            {(monthlyActivity.add > 0 || monthlyActivity.withdraw > 0) && (
+              <View style={styles.monthlyNet}>
+                <Text style={styles.monthlyNetLabel}>{t('funds.dashboardNetThisMonth')}</Text>
+                <Text style={[styles.monthlyNetValue, {
+                  color: (monthlyActivity.add - monthlyActivity.withdraw) >= 0 ? colors.accent : colors.danger,
+                }]}>
+                  {monthlyActivity.add - monthlyActivity.withdraw >= 0 ? '+' : ''}
+                  {formatCurrency(monthlyActivity.add - monthlyActivity.withdraw, true)}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Recent Transactions */}
+          <View style={styles.sectionWrap}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>{t('funds.dashboardRecentTx')}</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory')}>
+                <Text style={styles.seeAllText}>{t('funds.dashboardSeeAll')}</Text>
               </TouchableOpacity>
             </View>
-          ) : (
-            <View style={styles.txList}>
-              {recentTx.map((tx: FundTransaction) => (
+
+            {recentTx.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="receipt-outline" size={48} color={colors.textMuted} />
+                <Text style={styles.emptyText}>{t('funds.dashboardNoTx')}</Text>
                 <TouchableOpacity
-                  key={tx.id}
-                  style={[styles.txItem, { borderColor: colors.border }]}
-                  onPress={() => navigation.navigate('TransactionHistory')}
-                  activeOpacity={0.7}
+                  style={styles.emptyBtn}
+                  onPress={() => navigation.navigate('AddFunds')}
                 >
-                  <View style={[styles.txIcon, {
-                    backgroundColor: tx.type === 'add' ? '#00C85320' : '#FF174420',
-                  }]}>
-                    <Ionicons
-                      name={tx.type === 'add' ? 'add-circle' : 'arrow-up-circle'}
-                      size={20}
-                      color={tx.type === 'add' ? colors.accent : colors.danger}
-                    />
-                  </View>
-                  <View style={styles.txInfo}>
-                    <Text style={styles.txType}>
-                      {tx.type === 'add' ? t('funds.dashboardFundsAdded') : t('funds.dashboardFundsWithdrawn')}
-                    </Text>
-                    <Text style={styles.txMeta}>
-                      {tx.method} • {formatTimestamp(tx.timestamp)}
-                    </Text>
-                  </View>
-                  <Text style={[styles.txAmount, {
-                    color: tx.type === 'add' ? colors.accent : colors.danger,
-                  }]}>
-                    {tx.type === 'add' ? '+' : '-'}{formatCurrency(tx.amount, true)}
-                  </Text>
+                  <Text style={styles.emptyBtnText}>{t('funds.addFunds')}</Text>
                 </TouchableOpacity>
-              ))}
+              </View>
+            ) : (
+              <View style={styles.txList}>
+                {recentTx.map((tx: FundTransaction) => (
+                  <TouchableOpacity
+                    key={tx.id}
+                    style={[styles.txItem, { borderColor: colors.border }]}
+                    onPress={() => navigation.navigate('TransactionHistory')}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.txIcon, {
+                      backgroundColor: tx.type === 'add' ? '#00C85320' : '#FF174420',
+                    }]}>
+                      <Ionicons
+                        name={tx.type === 'add' ? 'add-circle' : 'arrow-up-circle'}
+                        size={20}
+                        color={tx.type === 'add' ? colors.accent : colors.danger}
+                      />
+                    </View>
+                    <View style={styles.txInfo}>
+                      <Text style={styles.txType}>
+                        {tx.type === 'add' ? t('funds.dashboardFundsAdded') : t('funds.dashboardFundsWithdrawn')}
+                      </Text>
+                      <Text style={styles.txMeta}>
+                        {tx.method} • {formatTimestamp(tx.timestamp)}
+                      </Text>
+                    </View>
+                    <Text style={[styles.txAmount, {
+                      color: tx.type === 'add' ? colors.accent : colors.danger,
+                    }]}>
+                      {tx.type === 'add' ? '+' : '-'}{formatCurrency(tx.amount, true)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Summary Footer Card */}
+          <View style={[styles.footerCard, { borderColor: colors.border }]}>
+            <View style={styles.footerRow}>
+              <Text style={styles.footerLabel}>{t('funds.dashboardTotalDeposits')}</Text>
+              <Text style={[styles.footerValue, { color: colors.accent }]}>
+                {formatCurrency(stats.totalAdd, true)}
+              </Text>
             </View>
-          )}
-        </View>
+            <View style={[styles.footerDivider, { backgroundColor: colors.divider }]} />
+            <View style={styles.footerRow}>
+              <Text style={styles.footerLabel}>{t('funds.dashboardTotalWithdrawals')}</Text>
+              <Text style={[styles.footerValue, { color: colors.danger }]}>
+                {formatCurrency(stats.totalWithdraw, true)}
+              </Text>
+            </View>
+            <View style={[styles.footerDivider, { backgroundColor: colors.divider }]} />
+            <View style={styles.footerRow}>
+              <Text style={styles.footerLabel}>{t('funds.dashboardCurrentBalance')}</Text>
+              <Text style={[styles.footerValue, { color: colors.primary }]}>
+                {formatCurrency(balance, true)}
+              </Text>
+            </View>
+          </View>
 
-        {/* Summary Footer Card */}
-        <View style={[styles.footerCard, { borderColor: colors.border }]}>
-          <View style={styles.footerRow}>
-            <Text style={styles.footerLabel}>{t('funds.dashboardTotalDeposits')}</Text>
-            <Text style={[styles.footerValue, { color: colors.accent }]}>
-              {formatCurrency(stats.totalAdd, true)}
-            </Text>
-          </View>
-          <View style={[styles.footerDivider, { backgroundColor: colors.divider }]} />
-          <View style={styles.footerRow}>
-            <Text style={styles.footerLabel}>{t('funds.dashboardTotalWithdrawals')}</Text>
-            <Text style={[styles.footerValue, { color: colors.danger }]}>
-              {formatCurrency(stats.totalWithdraw, true)}
-            </Text>
-          </View>
-          <View style={[styles.footerDivider, { backgroundColor: colors.divider }]} />
-          <View style={styles.footerRow}>
-            <Text style={styles.footerLabel}>{t('funds.dashboardCurrentBalance')}</Text>
-            <Text style={[styles.footerValue, { color: colors.primary }]}>
-              {formatCurrency(balance, true)}
-            </Text>
-          </View>
-        </View>
-
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,

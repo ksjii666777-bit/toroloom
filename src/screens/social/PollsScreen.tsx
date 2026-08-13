@@ -13,6 +13,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {Poll, PollCategory, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 /** Format a relative time string */
 function formatRelativeTime(t: any, dateStr: string): string {
@@ -134,141 +135,142 @@ export default function PollsScreen({ navigation }: NativeStackScreenProps<RootS
   ];
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('polls.title')}</Text>
-          <Text style={styles.subtitle}>{t('polls.subtitle')}</Text>
-        </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('polls.title')}</Text>
+            <Text style={styles.subtitle}>{t('polls.subtitle')}</Text>
+          </View>
 
-        {/* Stats Bar */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderLeftColor: colors.primary }]}>
-            <Text style={styles.statValue}>{stats.total}</Text>
-            <Text style={styles.statLabel}>{t('polls.total')}</Text>
+          {/* Stats Bar */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { borderLeftColor: colors.primary }]}>
+              <Text style={styles.statValue}>{stats.total}</Text>
+              <Text style={styles.statLabel}>{t('polls.total')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderLeftColor: '#00C853' }]}>
+              <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.active}</Text>
+              <Text style={styles.statLabel}>{t('polls.active')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderLeftColor: colors.textMuted }]}>
+              <Text style={[styles.statValue, { color: colors.textMuted }]}>{stats.closed}</Text>
+              <Text style={styles.statLabel}>{t('polls.closed')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderLeftColor: '#8B5CF6' }]}>
+              <Text style={[styles.statValue, { color: '#8B5CF6' }]}>{stats.myVotes}</Text>
+              <Text style={styles.statLabel}>{t('polls.myVotes')}</Text>
+            </View>
           </View>
-          <View style={[styles.statCard, { borderLeftColor: '#00C853' }]}>
-            <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.active}</Text>
-            <Text style={styles.statLabel}>{t('polls.active')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderLeftColor: colors.textMuted }]}>
-            <Text style={[styles.statValue, { color: colors.textMuted }]}>{stats.closed}</Text>
-            <Text style={styles.statLabel}>{t('polls.closed')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderLeftColor: '#8B5CF6' }]}>
-            <Text style={[styles.statValue, { color: '#8B5CF6' }]}>{stats.myVotes}</Text>
-            <Text style={styles.statLabel}>{t('polls.myVotes')}</Text>
-          </View>
-        </View>
 
-        {/* Create Poll Button */}
-        <AnimatedPressable
-          onPress={() => navigation.navigate('CreatePoll')}
-          haptic="medium"
-          scaleTo={0.97}
-        >
-          <View style={styles.createBtn}>
-            <Ionicons name="add-circle" size={22} color="#fff" />
-            <Text style={styles.createBtnText}>{t('polls.createPoll')}</Text>
-          </View>
-        </AnimatedPressable>
+          {/* Create Poll Button */}
+          <AnimatedPressable
+            onPress={() => navigation.navigate('CreatePoll')}
+            haptic="medium"
+            scaleTo={0.97}
+          >
+            <View style={styles.createBtn}>
+              <Ionicons name="add-circle" size={22} color="#fff" />
+              <Text style={styles.createBtnText}>{t('polls.createPoll')}</Text>
+            </View>
+          </AnimatedPressable>
 
-        {/* Status Filter */}
-        <View style={styles.filterRow}>
-          {(['all', 'active', 'closed'] as const).map(status => {
-            const isActive = activeStatus === status;
-            const count = status === 'all'
-              ? polls.length
-              : polls.filter(p => p.status === status).length;
-            return (
-              <AnimatedPressable
-                key={status}
-                onPress={() => setActiveStatus(status)}
-                haptic="selection"
-                scaleTo={0.94}
-              >
-                <View style={[
-                  styles.filterChip,
-                  isActive && { backgroundColor: colors.primary + '25', borderColor: colors.primary },
-                ]}>
-                  <Text style={[
-                    styles.filterChipText,
-                    isActive && { color: colors.primary },
+          {/* Status Filter */}
+          <View style={styles.filterRow}>
+            {(['all', 'active', 'closed'] as const).map(status => {
+              const isActive = activeStatus === status;
+              const count = status === 'all'
+                ? polls.length
+                : polls.filter(p => p.status === status).length;
+              return (
+                <AnimatedPressable
+                  key={status}
+                  onPress={() => setActiveStatus(status)}
+                  haptic="selection"
+                  scaleTo={0.94}
+                >
+                  <View style={[
+                    styles.filterChip,
+                    isActive && { backgroundColor: colors.primary + '25', borderColor: colors.primary },
                   ]}>
-                    {status === 'all' ? t('polls.filterAll') : status === 'active' ? t('polls.active') : t('polls.closed')}
-                  </Text>
-                  <View style={[styles.filterCount, isActive && { backgroundColor: colors.primary }]}>
-                    <Text style={styles.filterCountText}>{count}</Text>
+                    <Text style={[
+                      styles.filterChipText,
+                      isActive && { color: colors.primary },
+                    ]}>
+                      {status === 'all' ? t('polls.filterAll') : status === 'active' ? t('polls.active') : t('polls.closed')}
+                    </Text>
+                    <View style={[styles.filterCount, isActive && { backgroundColor: colors.primary }]}>
+                      <Text style={styles.filterCountText}>{count}</Text>
+                    </View>
                   </View>
-                </View>
-              </AnimatedPressable>
-            );
-          })}
-        </View>
-
-        {/* Category Filter Row */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryScroll}
-          contentContainerStyle={styles.categoryScrollContent}
-        >
-          {ALL_CATEGORIES.map(cat => {
-            const isActive = (cat.key === 'all' && !activeCategory) || cat.key === activeCategory;
-            return (
-              <AnimatedPressable
-                key={cat.key}
-                onPress={() => setActiveCategory(cat.key === 'all' ? null : cat.key)}
-                haptic="selection"
-                scaleTo={0.94}
-              >
-                <View style={[
-                  styles.categoryChip,
-                  isActive && { backgroundColor: cat.color + '20', borderColor: cat.color },
-                ]}>
-                  <Ionicons name={cat.icon as any} size={14} color={isActive ? cat.color : colors.textMuted} />
-                  <Text style={[
-                    styles.categoryChipText,
-                    isActive && { color: cat.color },
-                  ]}>{cat.label}</Text>
-                </View>
-              </AnimatedPressable>
-            );
-          })}
-        </ScrollView>
-
-        {/* Poll Cards */}
-        {filteredPolls.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="chatbubbles-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>{t('polls.noPollsTitle')}</Text>
-            <Text style={styles.emptySubtitle}>
-              {t('polls.noPollsSubtitle')}
-            </Text>
+                </AnimatedPressable>
+              );
+            })}
           </View>
-        ) : (
-          filteredPolls.map((poll, idx) => (
-            <Animated.View
-              key={poll.id}
-              entering={FadeInDown.delay(idx * 50).springify()}
-              layout={Layout.springify()}
-            >
-              <PollCard
-                poll={poll}
-                onVote={handleVote}
-                onLike={handleLike}
-                onMore={handleMoreOptions}
-                colors={colors}
-                styles={styles}
-              />
-            </Animated.View>
-          ))
-        )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          {/* Category Filter Row */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryScroll}
+            contentContainerStyle={styles.categoryScrollContent}
+          >
+            {ALL_CATEGORIES.map(cat => {
+              const isActive = (cat.key === 'all' && !activeCategory) || cat.key === activeCategory;
+              return (
+                <AnimatedPressable
+                  key={cat.key}
+                  onPress={() => setActiveCategory(cat.key === 'all' ? null : cat.key)}
+                  haptic="selection"
+                  scaleTo={0.94}
+                >
+                  <View style={[
+                    styles.categoryChip,
+                    isActive && { backgroundColor: cat.color + '20', borderColor: cat.color },
+                  ]}>
+                    <Ionicons name={cat.icon as any} size={14} color={isActive ? cat.color : colors.textMuted} />
+                    <Text style={[
+                      styles.categoryChipText,
+                      isActive && { color: cat.color },
+                    ]}>{cat.label}</Text>
+                  </View>
+                </AnimatedPressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* Poll Cards */}
+          {filteredPolls.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="chatbubbles-outline" size={64} color={colors.textMuted} />
+              <Text style={styles.emptyTitle}>{t('polls.noPollsTitle')}</Text>
+              <Text style={styles.emptySubtitle}>
+                {t('polls.noPollsSubtitle')}
+              </Text>
+            </View>
+          ) : (
+            filteredPolls.map((poll, idx) => (
+              <Animated.View
+                key={poll.id}
+                entering={FadeInDown.delay(idx * 50).springify()}
+                layout={Layout.springify()}
+              >
+                <PollCard
+                  poll={poll}
+                  onVote={handleVote}
+                  onLike={handleLike}
+                  onMore={handleMoreOptions}
+                  colors={colors}
+                  styles={styles}
+                />
+              </Animated.View>
+            ))
+          )}
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -428,16 +430,13 @@ function PollCard({
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   title: {

@@ -36,6 +36,7 @@ import {
 } from '../../services/taxHarvestingService';
 import type {TaxHarvestOpportunity, RealizedLoss, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -147,345 +148,346 @@ export default function TaxHarvestingCalendarScreen({ navigation }: NativeStackS
   ], []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('taxHarvesting.title')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('taxHarvesting.subtitle')}</Text>
-          </View>
-          <View style={[styles.fyBadge, { backgroundColor: colors.primary + '20' }]}>
-            <Text style={[styles.fyText, { color: colors.primary }]}>{summary.fiscalYear}</Text>
-          </View>
-        </View>
-
-        {/* Summary Cards */}
-        <View style={styles.summaryGrid}>
-          <View style={[styles.summaryCard, { borderColor: '#00E67630' }]}>
-            <Text style={styles.summaryIcon}>💰</Text>
-            <Text style={[styles.summaryValue, { color: '#00E676' }]}>
-              ₹{(summary.estimatedTaxSavings / 1000).toFixed(1)}K
-            </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.taxSaved')}</Text>
-          </View>
-          <View style={[styles.summaryCard, { borderColor: summary.estimatedTaxLiability > 0 ? '#FF525230' : '#00E67630' }]}>
-            <Text style={styles.summaryIcon}>📋</Text>
-            <Text style={[styles.summaryValue, { color: summary.estimatedTaxLiability > 0 ? '#FF5252' : '#00E676' }]}>
-              ₹{(summary.estimatedTaxLiability / 1000).toFixed(1)}K
-            </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.estTaxDue')}</Text>
-          </View>
-          <View style={[styles.summaryCard, { borderColor: '#8B5CF630' }]}>
-            <Text style={styles.summaryIcon}>📊</Text>
-            <Text style={[styles.summaryValue, { color: '#8B5CF6' }]}>
-              ₹{(summary.totalRealizedLosses / 1000).toFixed(1)}K
-            </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.realizedLosses')}</Text>
-          </View>
-          <View style={[styles.summaryCard, { borderColor: '#3B82F630' }]}>
-            <Text style={styles.summaryIcon}>🎯</Text>
-            <Text style={[styles.summaryValue, { color: '#3B82F6' }]}>
-              {opportunities.length}
-            </Text>
-            <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.opportunities')}</Text>
-          </View>
-        </View>
-
-        {/* Tabs */}
-        <View style={styles.tabRow}>
-          {[
-            { key: 'opportunities' as TabKey, label: t('taxHarvesting.tabOpportunities'), icon: 'leaf' },
-            { key: 'losses' as TabKey, label: t('taxHarvesting.tabLosses'), icon: 'trending-down' },
-            { key: 'simulator' as TabKey, label: t('taxHarvesting.tabSimulator'), icon: 'flask' },
-          ].map(tab => {
-            const isActive = activeTab === tab.key;
-            return (
-              <Pressable
-                key={tab.key}
-                onPress={() => { setActiveTab(tab.key); setExpandedId(null); }}
-                style={[styles.tabBtn, { backgroundColor: isActive ? colors.primary + '20' : 'transparent', borderColor: isActive ? colors.primary + '40' : 'transparent' }]}
-              >
-                <Ionicons name={tab.icon as any} size={14} color={isActive ? colors.primary : colors.textMuted} />
-                <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Use Sample Button ── */}
-        {!useSample && realHoldings.length === 0 && (
-          <Pressable onPress={handleUseSample} style={[styles.sampleBtn, { backgroundColor: colors.primary + '15' }]}>
-            <Ionicons name="flask" size={16} color={colors.primary} />
-            <Text style={[styles.sampleBtnText, { color: colors.primary }]}>{t('taxHarvesting.useSample')}</Text>
-          </Pressable>
-        )}
-
-        {/* ════════════════════════════════════
-            TAB: Opportunities
-            ════════════════════════════════════ */}
-        {activeTab === 'opportunities' && (
-          <View>
-            {/* Insights */}
-            {summary.insights.length > 0 && (
-              <View style={[styles.insightsCard, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '25' }]}>
-                <View style={styles.insightsHeader}>
-                  <Ionicons name="bulb" size={18} color={colors.primary} />
-                  <Text style={[styles.insightsTitle, { color: colors.text }]}>{t('taxHarvesting.keyInsights')}</Text>
-                </View>
-                {summary.insights.map((insight, i) => (
-                  <View key={i} style={[styles.insightRow, i < summary.insights.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                    <View style={[styles.insightDot, { backgroundColor: colors.primary }]} />
-                    <Text style={[styles.insightText, { color: colors.textSecondary }]}>{insight}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* Harvest Now */}
-            {harvestNow.length > 0 && (
-              <View>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  <Text style={{ color: '#00E676' }}>●</Text> {t('taxHarvesting.harvestNow', { count: harvestNow.length })}
-                </Text>
-                <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-                  {t('taxHarvesting.harvestNowSub')}
-                </Text>
-                {harvestNow.map((opp, i) => (
-                  <OpportunityCard key={opp.id} opp={opp} index={i} isExpanded={expandedId === opp.id} onPress={() => handleToggleExpand(opp.id)} colors={colors} />
-                ))}
-              </View>
-            )}
-
-            {/* Wait for Long-Term */}
-            {waitLongTerm.length > 0 && (
-              <View style={{ marginTop: SPACING.lg }}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  <Text style={{ color: '#FFC107' }}>●</Text> {t('taxHarvesting.waitLong', { count: waitLongTerm.length })}
-                </Text>
-                <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-                  {t('taxHarvesting.waitLongSub')}
-                </Text>
-                {waitLongTerm.slice(0, 5).map((opp, i) => (
-                  <OpportunityCard key={opp.id} opp={opp} index={i} isExpanded={expandedId === opp.id} onPress={() => handleToggleExpand(opp.id)} colors={colors} />
-                ))}
-              </View>
-            )}
-
-            {/* Tax Calendar */}
-            <View style={{ marginTop: SPACING.lg }}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('taxHarvesting.taxCalendar')}</Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('taxHarvesting.taxCalendarSub')}</Text>
-              <View style={[styles.calendarCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                {taxCalendar.map((event, i) => (
-                  <View key={i} style={[styles.calRow, i < taxCalendar.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                    <View style={[styles.calDateBox, { backgroundColor: event.color + '15' }]}>
-                      <Text style={[styles.calDate, { color: event.color }]}>{event.date}</Text>
-                    </View>
-                    <Text style={[styles.calLabel, { color: colors.text }]}>{event.label}</Text>
-                    <Ionicons name={event.icon as any} size={16} color={event.color} />
-                  </View>
-                ))}
-              </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('taxHarvesting.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('taxHarvesting.subtitle')}</Text>
+            </View>
+            <View style={[styles.fyBadge, { backgroundColor: colors.primary + '20' }]}>
+              <Text style={[styles.fyText, { color: colors.primary }]}>{summary.fiscalYear}</Text>
             </View>
           </View>
-        )}
 
-        {/* ════════════════════════════════════
-            TAB: Realized Losses
-            ════════════════════════════════════ */}
-        {activeTab === 'losses' && (
-          <View>
-            {/* Filter chips */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-              {[
-                { key: 'all' as const, label: t('taxHarvesting.allLosses') },
-                { key: 'short_term' as const, label: t('taxHarvesting.shortTerm') },
-                { key: 'long_term' as const, label: t('taxHarvesting.longTerm') },
-              ].map(f => {
-                const isActive = selectedLossType === f.key;
-                return (
-                  <Pressable
-                    key={f.key}
-                    onPress={() => setSelectedLossType(f.key)}
-                    style={[styles.filterChip, { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary + '40' : colors.border }]}
-                  >
-                    <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textMuted }]}>{f.label}</Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-
-            <Text style={[styles.resultCount, { color: colors.textMuted }]}>
-              {t('taxHarvesting.resultCount', { count: filteredLosses.length, value: (filteredLosses.reduce((s, r) => s + r.loss, 0) / 1000).toFixed(1) })}
-            </Text>
-
-            {filteredLosses.length > 0 ? (
-              filteredLosses.map((loss, i) => (
-                <LossCard key={loss.tradeId} loss={loss} index={i} isExpanded={expandedId === loss.tradeId} onPress={() => handleToggleExpand(loss.tradeId)} colors={colors} />
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Ionicons name="checkmark-circle" size={48} color="#00E676" />
-                <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('taxHarvesting.noLosses')}</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('taxHarvesting.noLossesDesc')}</Text>
-              </View>
-            )}
-
-            {/* Loss carry forward info */}
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Ionicons name="information-circle" size={18} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('taxHarvesting.lossCarryForward')}</Text>
-                <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  {t('taxHarvesting.lossCarryForwardDesc')}
-                </Text>
-              </View>
+          {/* Summary Cards */}
+          <View style={styles.summaryGrid}>
+            <View style={[styles.summaryCard, { borderColor: '#00E67630' }]}>
+              <Text style={styles.summaryIcon}>💰</Text>
+              <Text style={[styles.summaryValue, { color: '#00E676' }]}>
+                ₹{(summary.estimatedTaxSavings / 1000).toFixed(1)}K
+              </Text>
+              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.taxSaved')}</Text>
             </View>
-
-            {/* STCG vs LTCL rules */}
-            <View style={[styles.rulesCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.rulesTitle, { color: colors.text }]}>{t('taxHarvesting.taxRules')}</Text>
-              {[
-                { label: t('taxHarvesting.ruleSTCL'), desc: t('taxHarvesting.ruleSTCLDesc'), color: '#00E676' },
-                { label: t('taxHarvesting.ruleLTCL'), desc: t('taxHarvesting.ruleLTCLDesc'), color: '#FFC107' },
-                { label: t('taxHarvesting.ruleCarryForward'), desc: t('taxHarvesting.ruleCarryForwardDesc'), color: '#3B82F6' },
-                { label: t('taxHarvesting.ruleWashSale'), desc: t('taxHarvesting.ruleWashSaleDesc'), color: '#FF5252' },
-              ].map((rule, i) => (
-                <View key={i} style={styles.ruleRow}>
-                  <View style={[styles.ruleDot, { backgroundColor: rule.color }]} />
-                  <Text style={[styles.ruleLabel, { color: colors.text }]}>{rule.label}</Text>
-                  <Text style={[styles.ruleDesc, { color: colors.textMuted }]}>{rule.desc}</Text>
-                </View>
-              ))}
+            <View style={[styles.summaryCard, { borderColor: summary.estimatedTaxLiability > 0 ? '#FF525230' : '#00E67630' }]}>
+              <Text style={styles.summaryIcon}>📋</Text>
+              <Text style={[styles.summaryValue, { color: summary.estimatedTaxLiability > 0 ? '#FF5252' : '#00E676' }]}>
+                ₹{(summary.estimatedTaxLiability / 1000).toFixed(1)}K
+              </Text>
+              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.estTaxDue')}</Text>
+            </View>
+            <View style={[styles.summaryCard, { borderColor: '#8B5CF630' }]}>
+              <Text style={styles.summaryIcon}>📊</Text>
+              <Text style={[styles.summaryValue, { color: '#8B5CF6' }]}>
+                ₹{(summary.totalRealizedLosses / 1000).toFixed(1)}K
+              </Text>
+              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.realizedLosses')}</Text>
+            </View>
+            <View style={[styles.summaryCard, { borderColor: '#3B82F630' }]}>
+              <Text style={styles.summaryIcon}>🎯</Text>
+              <Text style={[styles.summaryValue, { color: '#3B82F6' }]}>
+                {opportunities.length}
+              </Text>
+              <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{t('taxHarvesting.opportunities')}</Text>
             </View>
           </View>
-        )}
 
-        {/* ════════════════════════════════════
-            TAB: Simulator
-            ════════════════════════════════════ */}
-        {activeTab === 'simulator' && (
-          <View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('taxHarvesting.simTitle')}</Text>
-            <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-              {t('taxHarvesting.simSub')}
-            </Text>
-
-            {harvestNow.length > 0 ? (
-              <View>
-                {harvestNow.map((opp, _i) => (
-                  <View key={opp.id} style={[styles.simCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                    <View style={styles.simHeader}>
-                      <Text style={[styles.simSymbol, { color: colors.text }]}>{opp.symbol}</Text>
-                      <Text style={[styles.simLoss, { color: '#FF5252' }]}>-₹{(opp.unrealizedLoss / 1000).toFixed(1)}K</Text>
-                    </View>
-                    <View style={styles.simRow}>
-                      <Text style={[styles.simLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simQtyLabel', { count: opp.quantity })}</Text>
-                      <TextInput
-                        style={[styles.simInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.bgInput }]}
-                        keyboardType="number-pad"
-                        placeholder={`0-${opp.quantity}`}
-                        placeholderTextColor={colors.textMuted}
-                        value={harvestQty[opp.id]?.toString() || ''}
-                        onChangeText={(val) => {
-                          const num = parseInt(val, 10);
-                          if (val === '') {
-                            const newQty = { ...harvestQty };
-                            delete newQty[opp.id];
-                            setHarvestQty(newQty);
-                          } else if (!isNaN(num) && num >= 0 && num <= opp.quantity) {
-                            setHarvestQty({ ...harvestQty, [opp.id]: num });
-                          }
-                        }}
-                      />
-                    </View>
-                    {harvestQty[opp.id] > 0 && (
-                      <Text style={[styles.simSubtext, { color: colors.textSecondary }]}>
-                        {t('taxHarvesting.simSavings', { value: ((harvestQty[opp.id] / opp.quantity) * opp.potentialTaxSaved / 1000).toFixed(2) })}
-                      </Text>
-                    )}
-                  </View>
-                ))}
-
+          {/* Tabs */}
+          <View style={styles.tabRow}>
+            {[
+              { key: 'opportunities' as TabKey, label: t('taxHarvesting.tabOpportunities'), icon: 'leaf' },
+              { key: 'losses' as TabKey, label: t('taxHarvesting.tabLosses'), icon: 'trending-down' },
+              { key: 'simulator' as TabKey, label: t('taxHarvesting.tabSimulator'), icon: 'flask' },
+            ].map(tab => {
+              const isActive = activeTab === tab.key;
+              return (
                 <Pressable
-                  onPress={() => setShowResults(true)}
-                  style={[styles.simulateBtn, { backgroundColor: colors.primary }]}
+                  key={tab.key}
+                  onPress={() => { setActiveTab(tab.key); setExpandedId(null); }}
+                  style={[styles.tabBtn, { backgroundColor: isActive ? colors.primary + '20' : 'transparent', borderColor: isActive ? colors.primary + '40' : 'transparent' }]}
                 >
-                  <Ionicons name="flask" size={18} color={colors.white} />
-                  <Text style={styles.simulateBtnText}>{t('taxHarvesting.simRunBtn')}</Text>
+                  <Ionicons name={tab.icon as any} size={14} color={isActive ? colors.primary : colors.textMuted} />
+                  <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
                 </Pressable>
-
-                {showResults && simulatorResult && (
-                  <View style={[styles.simResultsCard, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '25' }]}>
-                    <Text style={[styles.simResultsTitle, { color: colors.text }]}>{t('taxHarvesting.simResults')}</Text>
-                    <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simLossHarvested')}</Text>
-                      <Text style={[styles.simResultsValue, { color: '#FF5252' }]}>-₹{(simulatorResult.totalLossHarvested / 1000).toFixed(1)}K</Text>
-                    </View>
-                    <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simTaxSaved')}</Text>
-                      <Text style={[styles.simResultsValue, { color: '#00E676' }]}>₹{(simulatorResult.totalTaxSaved / 1000).toFixed(1)}K</Text>
-                    </View>
-                    <View style={styles.simDivider} />
-                    <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simOriginalTax')}</Text>
-                      <Text style={[styles.simResultsValue, { color: '#FF5252' }]}>₹{(simulatorResult.originalTax / 1000).toFixed(1)}K</Text>
-                    </View>
-                    <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simNewTax')}</Text>
-                      <Text style={[styles.simResultsValue, { color: simulatorResult.newTax <= 0 ? '#00E676' : '#FFC107' }]}>
-                        {simulatorResult.newTax <= 0 ? t('taxHarvesting.simFullyOffset') : `₹${(simulatorResult.newTax / 1000).toFixed(1)}K`}
-                      </Text>
-                    </View>
-                    <View style={styles.simResultsRow}>
-                      <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simSavingsPct')}</Text>
-                      <Text style={[styles.simResultsValue, { color: '#00E676' }]}>
-                        {simulatorResult.originalTax > 0
-                          ? `${((simulatorResult.totalTaxSaved / simulatorResult.originalTax) * 100).toFixed(0)}%`
-                          : 'N/A'}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              </View>
-            ) : (
-              <View style={styles.emptyState}>
-                <Ionicons name="checkmark-circle" size={48} color="#00E676" />
-                <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('taxHarvesting.simNoHarvest')}</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('taxHarvesting.simNoHarvestDesc')}</Text>
-              </View>
-            )}
-
-            {/* Methodology */}
-            <View style={[styles.methodCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.methodTitle, { color: colors.text }]}>{t('taxHarvesting.methodTitle')}</Text>
-              {[
-                { icon: '🔍', step: t('taxHarvesting.methodScan'), desc: t('taxHarvesting.methodScanDesc') },
-                { icon: '📊', step: t('taxHarvesting.methodCalculate'), desc: t('taxHarvesting.methodCalculateDesc') },
-                { icon: '💰', step: t('taxHarvesting.methodOptimize'), desc: t('taxHarvesting.methodOptimizeDesc') },
-                { icon: '📅', step: t('taxHarvesting.methodCarryForward'), desc: t('taxHarvesting.methodCarryForwardDesc') },
-              ].map((item, i) => (
-                <View key={i} style={[styles.methodRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                  <Text style={{ fontSize: 24 }}>{item.icon}</Text>
-                  <View style={{ flex: 1, marginLeft: SPACING.md }}>
-                    <Text style={[styles.methodStep, { color: colors.text }]}>{item.step}</Text>
-                    <Text style={[styles.methodDesc, { color: colors.textMuted }]}>{item.desc}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
+              );
+            })}
           </View>
-        )}
+        </View>
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* ── Use Sample Button ── */}
+          {!useSample && realHoldings.length === 0 && (
+            <Pressable onPress={handleUseSample} style={[styles.sampleBtn, { backgroundColor: colors.primary + '15' }]}>
+              <Ionicons name="flask" size={16} color={colors.primary} />
+              <Text style={[styles.sampleBtnText, { color: colors.primary }]}>{t('taxHarvesting.useSample')}</Text>
+            </Pressable>
+          )}
+
+          {/* ════════════════════════════════════
+              TAB: Opportunities
+              ════════════════════════════════════ */}
+          {activeTab === 'opportunities' && (
+            <View>
+              {/* Insights */}
+              {summary.insights.length > 0 && (
+                <View style={[styles.insightsCard, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '25' }]}>
+                  <View style={styles.insightsHeader}>
+                    <Ionicons name="bulb" size={18} color={colors.primary} />
+                    <Text style={[styles.insightsTitle, { color: colors.text }]}>{t('taxHarvesting.keyInsights')}</Text>
+                  </View>
+                  {summary.insights.map((insight, i) => (
+                    <View key={i} style={[styles.insightRow, i < summary.insights.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                      <View style={[styles.insightDot, { backgroundColor: colors.primary }]} />
+                      <Text style={[styles.insightText, { color: colors.textSecondary }]}>{insight}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Harvest Now */}
+              {harvestNow.length > 0 && (
+                <View>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                    <Text style={{ color: '#00E676' }}>●</Text> {t('taxHarvesting.harvestNow', { count: harvestNow.length })}
+                  </Text>
+                  <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+                    {t('taxHarvesting.harvestNowSub')}
+                  </Text>
+                  {harvestNow.map((opp, i) => (
+                    <OpportunityCard key={opp.id} opp={opp} index={i} isExpanded={expandedId === opp.id} onPress={() => handleToggleExpand(opp.id)} colors={colors} />
+                  ))}
+                </View>
+              )}
+
+              {/* Wait for Long-Term */}
+              {waitLongTerm.length > 0 && (
+                <View style={{ marginTop: SPACING.lg }}>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                    <Text style={{ color: '#FFC107' }}>●</Text> {t('taxHarvesting.waitLong', { count: waitLongTerm.length })}
+                  </Text>
+                  <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+                    {t('taxHarvesting.waitLongSub')}
+                  </Text>
+                  {waitLongTerm.slice(0, 5).map((opp, i) => (
+                    <OpportunityCard key={opp.id} opp={opp} index={i} isExpanded={expandedId === opp.id} onPress={() => handleToggleExpand(opp.id)} colors={colors} />
+                  ))}
+                </View>
+              )}
+
+              {/* Tax Calendar */}
+              <View style={{ marginTop: SPACING.lg }}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('taxHarvesting.taxCalendar')}</Text>
+                <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('taxHarvesting.taxCalendarSub')}</Text>
+                <View style={[styles.calendarCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  {taxCalendar.map((event, i) => (
+                    <View key={i} style={[styles.calRow, i < taxCalendar.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                      <View style={[styles.calDateBox, { backgroundColor: event.color + '15' }]}>
+                        <Text style={[styles.calDate, { color: event.color }]}>{event.date}</Text>
+                      </View>
+                      <Text style={[styles.calLabel, { color: colors.text }]}>{event.label}</Text>
+                      <Ionicons name={event.icon as any} size={16} color={event.color} />
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* ════════════════════════════════════
+              TAB: Realized Losses
+              ════════════════════════════════════ */}
+          {activeTab === 'losses' && (
+            <View>
+              {/* Filter chips */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+                {[
+                  { key: 'all' as const, label: t('taxHarvesting.allLosses') },
+                  { key: 'short_term' as const, label: t('taxHarvesting.shortTerm') },
+                  { key: 'long_term' as const, label: t('taxHarvesting.longTerm') },
+                ].map(f => {
+                  const isActive = selectedLossType === f.key;
+                  return (
+                    <Pressable
+                      key={f.key}
+                      onPress={() => setSelectedLossType(f.key)}
+                      style={[styles.filterChip, { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary + '40' : colors.border }]}
+                    >
+                      <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textMuted }]}>{f.label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+
+              <Text style={[styles.resultCount, { color: colors.textMuted }]}>
+                {t('taxHarvesting.resultCount', { count: filteredLosses.length, value: (filteredLosses.reduce((s, r) => s + r.loss, 0) / 1000).toFixed(1) })}
+              </Text>
+
+              {filteredLosses.length > 0 ? (
+                filteredLosses.map((loss, i) => (
+                  <LossCard key={loss.tradeId} loss={loss} index={i} isExpanded={expandedId === loss.tradeId} onPress={() => handleToggleExpand(loss.tradeId)} colors={colors} />
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Ionicons name="checkmark-circle" size={48} color="#00E676" />
+                  <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('taxHarvesting.noLosses')}</Text>
+                  <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('taxHarvesting.noLossesDesc')}</Text>
+                </View>
+              )}
+
+              {/* Loss carry forward info */}
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="information-circle" size={18} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>{t('taxHarvesting.lossCarryForward')}</Text>
+                  <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                    {t('taxHarvesting.lossCarryForwardDesc')}
+                  </Text>
+                </View>
+              </View>
+
+              {/* STCG vs LTCL rules */}
+              <View style={[styles.rulesCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.rulesTitle, { color: colors.text }]}>{t('taxHarvesting.taxRules')}</Text>
+                {[
+                  { label: t('taxHarvesting.ruleSTCL'), desc: t('taxHarvesting.ruleSTCLDesc'), color: '#00E676' },
+                  { label: t('taxHarvesting.ruleLTCL'), desc: t('taxHarvesting.ruleLTCLDesc'), color: '#FFC107' },
+                  { label: t('taxHarvesting.ruleCarryForward'), desc: t('taxHarvesting.ruleCarryForwardDesc'), color: '#3B82F6' },
+                  { label: t('taxHarvesting.ruleWashSale'), desc: t('taxHarvesting.ruleWashSaleDesc'), color: '#FF5252' },
+                ].map((rule, i) => (
+                  <View key={i} style={styles.ruleRow}>
+                    <View style={[styles.ruleDot, { backgroundColor: rule.color }]} />
+                    <Text style={[styles.ruleLabel, { color: colors.text }]}>{rule.label}</Text>
+                    <Text style={[styles.ruleDesc, { color: colors.textMuted }]}>{rule.desc}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* ════════════════════════════════════
+              TAB: Simulator
+              ════════════════════════════════════ */}
+          {activeTab === 'simulator' && (
+            <View>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('taxHarvesting.simTitle')}</Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+                {t('taxHarvesting.simSub')}
+              </Text>
+
+              {harvestNow.length > 0 ? (
+                <View>
+                  {harvestNow.map((opp, _i) => (
+                    <View key={opp.id} style={[styles.simCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                      <View style={styles.simHeader}>
+                        <Text style={[styles.simSymbol, { color: colors.text }]}>{opp.symbol}</Text>
+                        <Text style={[styles.simLoss, { color: '#FF5252' }]}>-₹{(opp.unrealizedLoss / 1000).toFixed(1)}K</Text>
+                      </View>
+                      <View style={styles.simRow}>
+                        <Text style={[styles.simLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simQtyLabel', { count: opp.quantity })}</Text>
+                        <TextInput
+                          style={[styles.simInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.bgInput }]}
+                          keyboardType="number-pad"
+                          placeholder={`0-${opp.quantity}`}
+                          placeholderTextColor={colors.textMuted}
+                          value={harvestQty[opp.id]?.toString() || ''}
+                          onChangeText={(val) => {
+                            const num = parseInt(val, 10);
+                            if (val === '') {
+                              const newQty = { ...harvestQty };
+                              delete newQty[opp.id];
+                              setHarvestQty(newQty);
+                            } else if (!isNaN(num) && num >= 0 && num <= opp.quantity) {
+                              setHarvestQty({ ...harvestQty, [opp.id]: num });
+                            }
+                          }}
+                        />
+                      </View>
+                      {harvestQty[opp.id] > 0 && (
+                        <Text style={[styles.simSubtext, { color: colors.textSecondary }]}>
+                          {t('taxHarvesting.simSavings', { value: ((harvestQty[opp.id] / opp.quantity) * opp.potentialTaxSaved / 1000).toFixed(2) })}
+                        </Text>
+                      )}
+                    </View>
+                  ))}
+
+                  <Pressable
+                    onPress={() => setShowResults(true)}
+                    style={[styles.simulateBtn, { backgroundColor: colors.primary }]}
+                  >
+                    <Ionicons name="flask" size={18} color={colors.white} />
+                    <Text style={styles.simulateBtnText}>{t('taxHarvesting.simRunBtn')}</Text>
+                  </Pressable>
+
+                  {showResults && simulatorResult && (
+                    <View style={[styles.simResultsCard, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '25' }]}>
+                      <Text style={[styles.simResultsTitle, { color: colors.text }]}>{t('taxHarvesting.simResults')}</Text>
+                      <View style={styles.simResultsRow}>
+                        <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simLossHarvested')}</Text>
+                        <Text style={[styles.simResultsValue, { color: '#FF5252' }]}>-₹{(simulatorResult.totalLossHarvested / 1000).toFixed(1)}K</Text>
+                      </View>
+                      <View style={styles.simResultsRow}>
+                        <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simTaxSaved')}</Text>
+                        <Text style={[styles.simResultsValue, { color: '#00E676' }]}>₹{(simulatorResult.totalTaxSaved / 1000).toFixed(1)}K</Text>
+                      </View>
+                      <View style={styles.simDivider} />
+                      <View style={styles.simResultsRow}>
+                        <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simOriginalTax')}</Text>
+                        <Text style={[styles.simResultsValue, { color: '#FF5252' }]}>₹{(simulatorResult.originalTax / 1000).toFixed(1)}K</Text>
+                      </View>
+                      <View style={styles.simResultsRow}>
+                        <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simNewTax')}</Text>
+                        <Text style={[styles.simResultsValue, { color: simulatorResult.newTax <= 0 ? '#00E676' : '#FFC107' }]}>
+                          {simulatorResult.newTax <= 0 ? t('taxHarvesting.simFullyOffset') : `₹${(simulatorResult.newTax / 1000).toFixed(1)}K`}
+                        </Text>
+                      </View>
+                      <View style={styles.simResultsRow}>
+                        <Text style={[styles.simResultsLabel, { color: colors.textMuted }]}>{t('taxHarvesting.simSavingsPct')}</Text>
+                        <Text style={[styles.simResultsValue, { color: '#00E676' }]}>
+                          {simulatorResult.originalTax > 0
+                            ? `${((simulatorResult.totalTaxSaved / simulatorResult.originalTax) * 100).toFixed(0)}%`
+                            : 'N/A'}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              ) : (
+                <View style={styles.emptyState}>
+                  <Ionicons name="checkmark-circle" size={48} color="#00E676" />
+                  <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('taxHarvesting.simNoHarvest')}</Text>
+                  <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('taxHarvesting.simNoHarvestDesc')}</Text>
+                </View>
+              )}
+
+              {/* Methodology */}
+              <View style={[styles.methodCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.methodTitle, { color: colors.text }]}>{t('taxHarvesting.methodTitle')}</Text>
+                {[
+                  { icon: '🔍', step: t('taxHarvesting.methodScan'), desc: t('taxHarvesting.methodScanDesc') },
+                  { icon: '📊', step: t('taxHarvesting.methodCalculate'), desc: t('taxHarvesting.methodCalculateDesc') },
+                  { icon: '💰', step: t('taxHarvesting.methodOptimize'), desc: t('taxHarvesting.methodOptimizeDesc') },
+                  { icon: '📅', step: t('taxHarvesting.methodCarryForward'), desc: t('taxHarvesting.methodCarryForwardDesc') },
+                ].map((item, i) => (
+                  <View key={i} style={[styles.methodRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                    <Text style={{ fontSize: 24 }}>{item.icon}</Text>
+                    <View style={{ flex: 1, marginLeft: SPACING.md }}>
+                      <Text style={[styles.methodStep, { color: colors.text }]}>{item.step}</Text>
+                      <Text style={[styles.methodDesc, { color: colors.textMuted }]}>{item.desc}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          <View style={{ height: 80 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -635,7 +637,6 @@ function LossCard({ loss, index, isExpanded, onPress, colors }: {
 // ══════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { padding: SPACING.xl, paddingTop: 60, borderBottomLeftRadius: BORDER_RADIUS.xl, borderBottomRightRadius: BORDER_RADIUS.xl },
   headerTop: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   backBtn: { padding: 4 },

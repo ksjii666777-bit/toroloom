@@ -14,6 +14,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 const CARD_GAP = SPACING.md;
@@ -217,544 +218,542 @@ export default function SubscriptionScreen({ navigation }: NativeStackScreenProp
   const isPaidUser = subscription.tier !== 'free';
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
-          </View>
-        </AnimatedPressable>
-        <Text style={styles.title}>{t('subscription.title')}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Hero Section */}
-        <View style={styles.heroSection}>
-          <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroGradient}>
-            <Ionicons name="diamond" size={48} color={colors.white} />
-            <Text style={styles.heroTitle}>
-              {tenantConfig && tenantConfig.id !== 'default'
-                ? t('subscription.unlockTenantPremium').replace('{name}', tenantConfig.name)
-                : t('subscription.unlockPremium')}
-            </Text>
-            <Text style={styles.heroSubtitle}>
-              {isPaidUser
-                ? t('subscription.onPlan').replace('{plan}', currentPlan?.name || '')
-                : t('subscription.getPremium')}
-            </Text>
-            {tenantConfig && tenantConfig.id !== 'default' && (
-              <Text style={styles.tenantBranding}>{t('subscription.poweredBy')} {tenantConfig.name}</Text>
-            )}
-            {isPaidUser && (
-              <Badge label={currentPlan?.name || t('subscription.premium')} variant="primary" />
-            )}
-          </LinearGradient>
+  {/* Header */}
+        <View style={styles.header}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <View style={styles.backBtn}>
+              <Ionicons name="chevron-back" size={24} color={colors.text} />
+            </View>
+          </AnimatedPressable>
+          <Text style={styles.title}>{t('subscription.title')}</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        {/* Trial Banner */}
-        {trialActive && trialDaysRemaining !== null && (
-          <View style={styles.trialBanner}>
-            <LinearGradient colors={['rgba(255,171,64,0.15)', 'rgba(255,143,0,0.08)']} style={styles.trialBannerGradient}>
-              <View style={styles.trialRow}>
-                <View style={styles.trialIconWrap}>
-                  <Ionicons name="timer-outline" size={24} color={colors.warning} />
-                </View>
-                <View style={styles.trialInfo}>
-                  <Text style={styles.trialTitle}>
-                    {trialDaysRemaining > 0                          ? `${trialDaysRemaining} ${t('subscription.day')}${trialDaysRemaining !== 1 ? 's' : ''} ${t('subscription.leftInTrial')}`
-                      : t('subscription.trialEnded')}
-                  </Text>
-                  <Text style={styles.trialSubtitle}>
-                    {trialDaysRemaining > 0
-                      ? `${t('subscription.yourTrialEnds')} ${currentPlan?.name} ${subscription.trialEndDate ? new Date(subscription.trialEndDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}`
-                      : t('subscription.subscribeToKeep')}
-                  </Text>
-                </View>
-                {trialDaysRemaining <= 3 && trialDaysRemaining > 0 && (
-                  <View style={styles.trialBadgeUrgent}>
-                    <Text style={styles.trialBadgeUrgentText}>{t('subscription.endingSoon')}</Text>
-                  </View>
-                )}
-              </View>
-              <View style={styles.trialProgressBar}>
-                <View style={[styles.trialProgressFill, { width: `${Math.min(100, Math.max(5, (trialDaysRemaining / 7) * 100))}%` }]} />
-              </View>
-            </LinearGradient>
-          </View>
-        )}
-
-        {/* Billing Toggle */}
-        {!isPaidUser && !trialActive && (
-          <View style={styles.billingToggle}>
-            <AnimatedPressable
-              onPress={() => { setIsYearly(false); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
-              haptic="light"
-              scaleTo={0.95}
-            >
-              <View style={[styles.billingOption, !isYearly && styles.billingOptionActive]}>
-                <Text style={[styles.billingText, !isYearly && styles.billingTextActive]}>{t('subscription.monthly')}</Text>
-              </View>
-            </AnimatedPressable>
-            <AnimatedPressable
-              onPress={() => { setIsYearly(true); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
-              haptic="light"
-              scaleTo={0.95}
-            >
-              <View style={[styles.billingOption, isYearly && styles.billingOptionActive]}>
-                <Text style={[styles.billingText, isYearly && styles.billingTextActive]}>{t('subscription.yearly')}</Text>
-              </View>
-            </AnimatedPressable>
-          </View>
-        )}
-
-        {/* Coupon Section */}
-        {!isPaidUser && !trialActive && selectedPlanId !== 'plan_free' && (
-          <View style={styles.couponSection}>
-            {!showCouponInput && !couponResult ? (
-              <>
-                <AnimatedPressable onPress={() => setShowCouponInput(true)} haptic="light" scaleTo={0.97}>
-                  <View style={styles.couponToggle}>
-                    <Ionicons name="pricetag-outline" size={16} color={colors.primary} />
-                    <Text style={styles.couponToggleText}>{t('subscription.haveCoupon')}</Text>
-                    <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-                  </View>
-                </AnimatedPressable>
-                <AnimatedPressable onPress={() => navigation.navigate('AvailableCoupons')} haptic="light" scaleTo={0.97}>
-                  <View style={[styles.couponToggle, { marginTop: 8, borderStyle: 'solid', borderColor: colors.primary + '30' }]}>
-                    <Ionicons name="pricetag" size={16} color={colors.primary} />
-                    <Text style={styles.couponToggleText}>{t('subscription.viewCoupons')}</Text>
-                    <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-                  </View>
-                </AnimatedPressable>
-                <AnimatedPressable onPress={() => navigation.navigate('CouponHistory')} haptic="light" scaleTo={0.97}>
-                  <View style={[styles.couponToggle, { marginTop: 8, borderColor: colors.textMuted + '20' }]}>
-                    <Ionicons name="receipt-outline" size={16} color={colors.textSecondary} />
-                    <Text style={[styles.couponToggleText, { color: colors.textSecondary }]}>{t('subscription.myCoupons')}</Text>
-                    <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-                  </View>
-                </AnimatedPressable>
-              </>
-            ) : couponResult && couponResult.valid ? (
-              <Animated.View style={styles.couponApplied}>
-                <View style={styles.couponAppliedRow}>
-                  <View style={styles.couponAppliedLeft}>
-                    <Ionicons name="checkmark-circle" size={20} color={colors.marketUp} />
-                    <View>
-                      <Text style={styles.couponAppliedCode}>{couponResult.code}</Text>
-                      <Text style={styles.couponAppliedDesc}>
-                        {couponResult.type === 'free_trial'
-                          ?                    `${couponResult.trialDays}${t('subscription.dayFreeTrial')}`
-                      : `${t('subscription.rupeeOff')} ${couponResult.discountAmount.toLocaleString('en-IN')}`}
-                      </Text>
-                    </View>
-                  </View>
-                  <Pressable onPress={handleRemoveCoupon} style={styles.couponRemoveBtn}>
-                    <Ionicons name="close-circle" size={22} color={colors.textMuted} />
-                  </Pressable>
-                </View>
-              </Animated.View>
-            ) : (
-              <Animated.View style={[styles.couponInputRow, couponShakeStyle]}>
-                <TextInput
-                  style={styles.couponInput}
-                  value={couponCode}
-                  onChangeText={(v) => { setCouponCode(v.toUpperCase()); setCouponInput(v); }}
-                  placeholder={t('subscription.enterCoupon')}
-                  placeholderTextColor={colors.textMuted}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                />
-                <AnimatedPressable
-                  onPress={handleApplyCoupon}
-                  haptic="medium"
-                  scaleTo={0.95}
-                  disabled={isApplyingCoupon || !couponCode}
-                >
-                  <LinearGradient
-                    colors={GRADIENTS.primary}
-                    style={[styles.couponApplyBtn, isApplyingCoupon && { opacity: 0.7 }]}
-                  >
-                    <Text style={styles.couponApplyText}>
-                      {isApplyingCoupon ? '...' : t('subscription.apply')}
-                    </Text>
-                  </LinearGradient>
-                </AnimatedPressable>
-              </Animated.View>
-            )}
-            {couponResult && !couponResult.valid && couponResult.code && (
-              <Text style={styles.couponError}>{couponResult.message}</Text>
-            )}
-          </View>
-        )}
-
-        {/* Plan Cards — Horizontal Scroll */}
         <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.plansContainer}
-          snapToInterval={CARD_WIDTH + CARD_GAP}
-          decelerationRate="fast"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          {SUBSCRIPTION_PLANS.map((plan, i) => {
-            const isSelected = selectedPlanId === plan.id;
-            const isCurrent = subscription.planId === plan.id;
-            const effectivePrice = getPlanPrice(plan.id);
-            const price = isYearly ? effectivePrice.yearly : effectivePrice.monthly;
-
-            return (
-              <AnimatedPressable
-                key={plan.id}
-                onPress={() => handleSelectPlan(plan.id)}
-                haptic="light"
-                scaleTo={0.97}
-                disabled={isCurrent}
-              >
-                <Animated.View
-                  style={[
-                    styles.planCard,
-                    isSelected && styles.planCardSelected,
-                    isCurrent && styles.planCardCurrent,
-                    cardStyles[i],
-                  ]}
-                >
-                  {/* Card Header Gradient */}
-                  <LinearGradient
-                    colors={plan.gradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.planHeader}
-                  >
-                    <Ionicons name={plan.icon as keyof typeof Ionicons.glyphMap} size={32} color={colors.white} />
-                    {plan.popular && (
-                      <View style={styles.popularBadge}>
-                        <Text style={styles.popularBadgeText}>{plan.badge}</Text>
-                      </View>
-                    )}
-                  </LinearGradient>
-
-                  {/* Plan Info */}
-                  <View style={styles.planBody}>
-                    <Text style={styles.planName}>{plan.name}</Text>
-                    <Text style={styles.planTagline}>{plan.tagline}</Text>
-
-                    {plan.tier !== 'free' ? (
-                      <View style={styles.priceContainer}>
-                        <Text style={styles.priceAmount}>₹{price.toLocaleString('en-IN')}</Text>
-                        <Text style={styles.pricePeriod}>/{isYearly ? 'yr' : 'mo'}</Text>
-                      </View>
-                    ) : (
-                      <Text style={styles.freePrice}>₹0</Text>
-                    )}
-
-                    {isYearly && plan.tier !== 'free' && (
-                      <View style={styles.discountBadge}>
-                        <Text style={styles.discountText}>
-                          Save ₹{(effectivePrice.monthly * 12 - effectivePrice.yearly).toLocaleString('en-IN')}/yr
-                        </Text>
-                      </View>
-                    )}
-
-                    {/* Feature List */}
-                    <View style={styles.featureList}>
-                      {getFeaturesForTier(plan.tier).map((featureKey) => {
-                        const meta = effectiveMatrix[featureKey];
-                        return (
-                          <View key={featureKey} style={styles.featureRow}>
-                            <Ionicons
-                              name="checkmark-circle"
-                              size={16}
-                              color={plan.tier === 'elite' ? colors.marketUp : colors.primary}
-                            />
-                            <Text style={styles.featureText}>{meta?.label || featureKey}</Text>
-                          </View>
-                        );
-                      })}
-                    </View>
-                  </View>
-
-                  {/* Selection indicator */}
-                  {isSelected && (
-                    <View style={styles.selectedIndicator}>
-                      <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-                    </View>
-                  )}
-
-                  {isCurrent && (
-                    <View style={styles.currentLabel}>
-                      <Text style={styles.currentLabelText}>{t('subscription.currentPlan')}</Text>
-                    </View>
-                  )}
-                </Animated.View>
-              </AnimatedPressable>
-            );
-          })}
-        </ScrollView>
-
-        {/* Current Plan Status */}
-        {isPaidUser && (
-          <Card style={styles.statusCard}>
-            <View style={styles.statusRow}>
-              <View style={styles.statusIcon}>
-                <Ionicons
-                  name={subscription.autoRenew ? 'shield-checkmark' : 'shield-outline'}
-                  size={28}
-                  color={subscription.autoRenew ? colors.marketUp : colors.textMuted}
-                />
-              </View>
-              <View style={styles.statusInfo}>
-                <Text style={styles.statusTitle}>
-                  {subscription.autoRenew ? t('subscription.activeAutoRenew') : t('subscription.cancelled')}
-                </Text>
-                <Text style={styles.statusSubtitle}>
-                  {subscription.autoRenew
-                    ? `Renews on ${new Date(subscription.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                    : `Expires on ${new Date(subscription.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.statusActions}>
-              {subscription.autoRenew ? (
-                <AnimatedPressable onPress={handleCancel} haptic="warning" scaleTo={0.97}>
-                  <View style={styles.cancelBtn}>
-                    <Text style={styles.cancelBtnText}>{t('subscription.cancelAutoRenew')}</Text>
-                  </View>
-                </AnimatedPressable>
-              ) : (
-                <AnimatedPressable onPress={() => initiateUpgrade(SUBSCRIPTION_PLANS.find(p => p.id === subscription.planId)!)} haptic="medium" scaleTo={0.97}>
-                  <View style={styles.renewBtn}>
-                    <Text style={styles.renewBtnText}>{t('subscription.renew')}</Text>
-                  </View>
-                </AnimatedPressable>
+          {/* Hero Section */}
+          <View style={styles.heroSection}>
+            <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroGradient}>
+              <Ionicons name="diamond" size={48} color={colors.white} />
+              <Text style={styles.heroTitle}>
+                {tenantConfig && tenantConfig.id !== 'default'
+                  ? t('subscription.unlockTenantPremium').replace('{name}', tenantConfig.name)
+                  : t('subscription.unlockPremium')}
+              </Text>
+              <Text style={styles.heroSubtitle}>
+                {isPaidUser
+                  ? t('subscription.onPlan').replace('{plan}', currentPlan?.name || '')
+                  : t('subscription.getPremium')}
+              </Text>
+              {tenantConfig && tenantConfig.id !== 'default' && (
+                <Text style={styles.tenantBranding}>{t('subscription.poweredBy')} {tenantConfig.name}</Text>
               )}
-            </View>
-          </Card>
-        )}
-
-        {/* Trial CTA Button */}
-        {!isPaidUser && hasTrialAvailable(SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId)?.tier || 'pro') && selectedPlanId !== 'plan_free' && (
-          <View style={styles.trialCtaSection}>
-            <AnimatedPressable
-              onPress={handleStartTrial}
-              haptic="medium"
-              scaleTo={0.97}
-            >
-              <LinearGradient
-                colors={['rgba(255,171,64,0.2)', 'rgba(255,143,0,0.1)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.trialCtaBtn}
-              >
-                <Ionicons name="timer-outline" size={20} color={colors.warning} />
-                <Text style={styles.trialCtaBtnText}>                  {t('subscription.startFreeTrial')}
-                </Text>
+              {isPaidUser && (
+                <Badge label={currentPlan?.name || t('subscription.premium')} variant="primary" />
+              )}
             </LinearGradient>
-          </AnimatedPressable>
-            <Text style={styles.trialCtaSubtext}>{t('subscription.noCharges')}</Text>
           </View>
-        )}
 
-        {/* CTA Button */}
-        {!isPaidUser && !trialActive && (
-          <View style={styles.ctaSection}>
-            <AnimatedPressable
-              onPress={handleUpgrade}
-              haptic="medium"
-              scaleTo={0.97}
-              disabled={isLoading || selectedPlanId === 'plan_free'}
-            >
-              <LinearGradient
-                colors={selectedPlanId === 'plan_elite' ? GRADIENTS.success : GRADIENTS.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={[styles.ctaBtn, isLoading && styles.ctaBtnLoading]}
-              >
-                {isLoading ? (
-                  <Text style={styles.ctaBtnText}>{t('subscription.processing')}</Text>
-                ) : (
-                  <>
-                    <Ionicons
-                      name={selectedPlanId === 'plan_elite' ? 'diamond' : selectedPlanId === 'plan_pro' ? 'flash' : 'rocket-outline'}
-                      size={20}
-                      color={colors.white}
-                    />
-                    <Text style={styles.ctaBtnText}>
-                      {selectedPlanId === 'plan_free'
-                        ? t('subscription.selectPlan')
-                        : `${t('subscription.upgradeTo')} ${SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId)?.name}`}
+          {/* Trial Banner */}
+          {trialActive && trialDaysRemaining !== null && (
+            <View style={styles.trialBanner}>
+              <LinearGradient colors={['rgba(255,171,64,0.15)', 'rgba(255,143,0,0.08)']} style={styles.trialBannerGradient}>
+                <View style={styles.trialRow}>
+                  <View style={styles.trialIconWrap}>
+                    <Ionicons name="timer-outline" size={24} color={colors.warning} />
+                  </View>
+                  <View style={styles.trialInfo}>
+                    <Text style={styles.trialTitle}>
+                      {trialDaysRemaining > 0                          ? `${trialDaysRemaining} ${t('subscription.day')}${trialDaysRemaining !== 1 ? 's' : ''} ${t('subscription.leftInTrial')}`
+                        : t('subscription.trialEnded')}
                     </Text>
-                  </>
-                )}
-              </LinearGradient>
-            </AnimatedPressable>
-
-            <Text style={styles.secureText}>
-              <Ionicons name="lock-closed" size={12} color={colors.textMuted} /> {t('subscription.securePayment')}
-            </Text>
-          </View>
-        )}
-
-        {/* UPI AutoPay Section (paid users) */}
-        {isPaidUser && (
-          <Card style={styles.autopayCard}>
-            <View style={styles.autopayHeader}>
-              <Ionicons name="qr-code" size={22} color={colors.primary} />
-              <Text style={styles.autopayTitle}>{t('subscription.upiAutopay')}</Text>
-            </View>
-            <Text style={styles.autopayDesc}>{t('subscription.upiAutopayDesc')}</Text>
-            <View style={styles.autopayStatus}>
-              {subscription.isAutoPayEnabled && subscription.upiMandate ? (
-                <>
-                  <View style={styles.autopayStatusRow}>
-                    <Ionicons name="checkmark-circle" size={18} color={colors.marketUp} />
-                    <Text style={styles.autopayStatusText}>
-                      {t('subscription.autopayActive')} — {subscription.upiMandate.upiId}
+                    <Text style={styles.trialSubtitle}>
+                      {trialDaysRemaining > 0
+                        ? `${t('subscription.yourTrialEnds')} ${currentPlan?.name} ${subscription.trialEndDate ? new Date(subscription.trialEndDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}`
+                        : t('subscription.subscribeToKeep')}
                     </Text>
                   </View>
-                  {subscription.upiMandate.nextChargeDate && (
-                    <Text style={styles.autopayNextDate}>
-                      {t('subscription.nextCharge')}: {new Date(subscription.upiMandate.nextChargeDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </Text>
+                  {trialDaysRemaining <= 3 && trialDaysRemaining > 0 && (
+                    <View style={styles.trialBadgeUrgent}>
+                      <Text style={styles.trialBadgeUrgentText}>{t('subscription.endingSoon')}</Text>
+                    </View>
                   )}
-                </>
-              ) : (
-                <View style={styles.autopayStatusRow}>
-                  <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-                  <Text style={[styles.autopayStatusText, { color: colors.textMuted }]}>{t('subscription.autopayNotSet')}</Text>
                 </View>
-              )}
-            </View>
-            <AnimatedPressable
-              onPress={handleAutopayToggle}
-              haptic="light"
-              scaleTo={0.97}
-            >                <View style={[styles.autopayBtn, subscription.isAutoPayEnabled && styles.autopayBtnDanger]}>
-                <Ionicons
-                  name={subscription.isAutoPayEnabled ? 'pause-circle' : 'qr-code'}
-                  size={18}
-                  color={subscription.isAutoPayEnabled ? colors.danger : colors.primary}
-                />
-                <Text style={[styles.autopayBtnText, subscription.isAutoPayEnabled && { color: colors.danger }]}>
-                  {subscription.isAutoPayEnabled ? t('subscription.disableAutopay') : t('subscription.setUpAutopay')}
-                </Text>
-              </View>
-            </AnimatedPressable>
-          </Card>
-        )}
-
-        {/* Payment History Link */}
-        <AnimatedPressable
-          onPress={() => navigation.navigate('PaymentHistory')}
-          haptic="light"
-          scaleTo={0.97}
-        >
-          <Card style={styles.paymentHistoryCard}>
-            <View style={styles.paymentHistoryRow}>
-              <View style={styles.paymentHistoryLeft}>
-                <Ionicons name="receipt-outline" size={22} color={colors.primary} />
-                <View>
-                  <Text style={styles.paymentHistoryTitle}>{t('subscription.paymentHistory')}</Text>
-                  <Text style={styles.paymentHistorySubtitle}>
-                    {(subscription.payments?.length || 0) > 0
-                      ? `${subscription.payments?.length} ${t('subscription.payment')}${subscription.payments?.length !== 1 ? 's' : ''} ${t('subscription.recorded')}`
-                      : t('subscription.viewTransactions')}
-                  </Text>
+                <View style={styles.trialProgressBar}>
+                  <View style={[styles.trialProgressFill, { width: `${Math.min(100, Math.max(5, (trialDaysRemaining / 7) * 100))}%` }]} />
                 </View>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </LinearGradient>
             </View>
-          </Card>
-        </AnimatedPressable>
+          )}
 
-        {/* UPI AutoPay Setup Modal */}
-        {showAutopayModal && (
-          <View style={styles.autopayModalOverlay}>
-            <View style={[styles.autopayModal, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-              <Text style={styles.autopayModalTitle}>{t('subscription.setUpUpiAutopay')}</Text>
-              <Text style={styles.autopayModalDesc}>{t('subscription.setUpUpiAutopayDesc')}</Text>
-              <View style={styles.autopayModalOptions}>
-                {[{ id: 'rahul@hdfc', label: 'HDFC Bank' }, { id: 'rahul@paytm', label: 'Paytm' }, { id: 'rahul@icici', label: 'ICICI Bank' }].map((opt) => (
-                  <AnimatedPressable
-                    key={opt.id}
-                    onPress={() => handleSetupAutopay(opt.id)}
-                    haptic="light"
-                    scaleTo={0.97}
-                  >
-                    <View style={[styles.autopayOption, { borderColor: colors.border }]}>
-                      <View style={styles.autopayOptionLeft}>
-                        <View style={[styles.autopayOptionIcon, { backgroundColor: colors.primary + '20' }]}>
-                          <Ionicons name="qr-code" size={20} color={colors.primary} />
-                        </View>
-                        <View>
-                          <Text style={styles.autopayOptionLabel}>{opt.id}</Text>
-                          <Text style={styles.autopayOptionSub}>{opt.label}</Text>
-                        </View>
-                      </View>
+          {/* Billing Toggle */}
+          {!isPaidUser && !trialActive && (
+            <View style={styles.billingToggle}>
+              <AnimatedPressable
+                onPress={() => { setIsYearly(false); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                haptic="light"
+                scaleTo={0.95}
+              >
+                <View style={[styles.billingOption, !isYearly && styles.billingOptionActive]}>
+                  <Text style={[styles.billingText, !isYearly && styles.billingTextActive]}>{t('subscription.monthly')}</Text>
+                </View>
+              </AnimatedPressable>
+              <AnimatedPressable
+                onPress={() => { setIsYearly(true); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                haptic="light"
+                scaleTo={0.95}
+              >
+                <View style={[styles.billingOption, isYearly && styles.billingOptionActive]}>
+                  <Text style={[styles.billingText, isYearly && styles.billingTextActive]}>{t('subscription.yearly')}</Text>
+                </View>
+              </AnimatedPressable>
+            </View>
+          )}
+
+          {/* Coupon Section */}
+          {!isPaidUser && !trialActive && selectedPlanId !== 'plan_free' && (
+            <View style={styles.couponSection}>
+              {!showCouponInput && !couponResult ? (
+                <>
+                  <AnimatedPressable onPress={() => setShowCouponInput(true)} haptic="light" scaleTo={0.97}>
+                    <View style={styles.couponToggle}>
+                      <Ionicons name="pricetag-outline" size={16} color={colors.primary} />
+                      <Text style={styles.couponToggleText}>{t('subscription.haveCoupon')}</Text>
                       <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                     </View>
                   </AnimatedPressable>
-                ))}
+                  <AnimatedPressable onPress={() => navigation.navigate('AvailableCoupons')} haptic="light" scaleTo={0.97}>
+                    <View style={[styles.couponToggle, { marginTop: 8, borderStyle: 'solid', borderColor: colors.primary + '30' }]}>
+                      <Ionicons name="pricetag" size={16} color={colors.primary} />
+                      <Text style={styles.couponToggleText}>{t('subscription.viewCoupons')}</Text>
+                      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                    </View>
+                  </AnimatedPressable>
+                  <AnimatedPressable onPress={() => navigation.navigate('CouponHistory')} haptic="light" scaleTo={0.97}>
+                    <View style={[styles.couponToggle, { marginTop: 8, borderColor: colors.textMuted + '20' }]}>
+                      <Ionicons name="receipt-outline" size={16} color={colors.textSecondary} />
+                      <Text style={[styles.couponToggleText, { color: colors.textSecondary }]}>{t('subscription.myCoupons')}</Text>
+                      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                    </View>
+                  </AnimatedPressable>
+                </>
+              ) : couponResult && couponResult.valid ? (
+                <Animated.View style={styles.couponApplied}>
+                  <View style={styles.couponAppliedRow}>
+                    <View style={styles.couponAppliedLeft}>
+                      <Ionicons name="checkmark-circle" size={20} color={colors.marketUp} />
+                      <View>
+                        <Text style={styles.couponAppliedCode}>{couponResult.code}</Text>
+                        <Text style={styles.couponAppliedDesc}>
+                          {couponResult.type === 'free_trial'
+                            ?                    `${couponResult.trialDays}${t('subscription.dayFreeTrial')}`
+                        : `${t('subscription.rupeeOff')} ${couponResult.discountAmount.toLocaleString('en-IN')}`}
+                        </Text>
+                      </View>
+                    </View>
+                    <Pressable onPress={handleRemoveCoupon} style={styles.couponRemoveBtn}>
+                      <Ionicons name="close-circle" size={22} color={colors.textMuted} />
+                    </Pressable>
+                  </View>
+                </Animated.View>
+              ) : (
+                <Animated.View style={[styles.couponInputRow, couponShakeStyle]}>
+                  <TextInput
+                    style={styles.couponInput}
+                    value={couponCode}
+                    onChangeText={(v) => { setCouponCode(v.toUpperCase()); setCouponInput(v); }}
+                    placeholder={t('subscription.enterCoupon')}
+                    placeholderTextColor={colors.textMuted}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                  />
+                  <AnimatedPressable
+                    onPress={handleApplyCoupon}
+                    haptic="medium"
+                    scaleTo={0.95}
+                    disabled={isApplyingCoupon || !couponCode}
+                  >
+                    <LinearGradient
+                      colors={GRADIENTS.primary}
+                      style={[styles.couponApplyBtn, isApplyingCoupon && { opacity: 0.7 }]}
+                    >
+                      <Text style={styles.couponApplyText}>
+                        {isApplyingCoupon ? '...' : t('subscription.apply')}
+                      </Text>
+                    </LinearGradient>
+                  </AnimatedPressable>
+                </Animated.View>
+              )}
+              {couponResult && !couponResult.valid && couponResult.code && (
+                <Text style={styles.couponError}>{couponResult.message}</Text>
+              )}
+            </View>
+          )}
+
+          {/* Plan Cards — Horizontal Scroll */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.plansContainer}
+            snapToInterval={CARD_WIDTH + CARD_GAP}
+            decelerationRate="fast"
+          >
+            {SUBSCRIPTION_PLANS.map((plan, i) => {
+              const isSelected = selectedPlanId === plan.id;
+              const isCurrent = subscription.planId === plan.id;
+              const effectivePrice = getPlanPrice(plan.id);
+              const price = isYearly ? effectivePrice.yearly : effectivePrice.monthly;
+
+              return (
+                <AnimatedPressable
+                  key={plan.id}
+                  onPress={() => handleSelectPlan(plan.id)}
+                  haptic="light"
+                  scaleTo={0.97}
+                  disabled={isCurrent}
+                >
+                  <Animated.View
+                    style={[
+                      styles.planCard,
+                      isSelected && styles.planCardSelected,
+                      isCurrent && styles.planCardCurrent,
+                      cardStyles[i],
+                    ]}
+                  >
+                    {/* Card Header Gradient */}
+                    <LinearGradient
+                      colors={plan.gradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.planHeader}
+                    >
+                      <Ionicons name={plan.icon as keyof typeof Ionicons.glyphMap} size={32} color={colors.white} />
+                      {plan.popular && (
+                        <View style={styles.popularBadge}>
+                          <Text style={styles.popularBadgeText}>{plan.badge}</Text>
+                        </View>
+                      )}
+                    </LinearGradient>
+
+                    {/* Plan Info */}
+                    <View style={styles.planBody}>
+                      <Text style={styles.planName}>{plan.name}</Text>
+                      <Text style={styles.planTagline}>{plan.tagline}</Text>
+
+                      {plan.tier !== 'free' ? (
+                        <View style={styles.priceContainer}>
+                          <Text style={styles.priceAmount}>₹{price.toLocaleString('en-IN')}</Text>
+                          <Text style={styles.pricePeriod}>/{isYearly ? 'yr' : 'mo'}</Text>
+                        </View>
+                      ) : (
+                        <Text style={styles.freePrice}>₹0</Text>
+                      )}
+
+                      {isYearly && plan.tier !== 'free' && (
+                        <View style={styles.discountBadge}>
+                          <Text style={styles.discountText}>
+                            Save ₹{(effectivePrice.monthly * 12 - effectivePrice.yearly).toLocaleString('en-IN')}/yr
+                          </Text>
+                        </View>
+                      )}
+
+                      {/* Feature List */}
+                      <View style={styles.featureList}>
+                        {getFeaturesForTier(plan.tier).map((featureKey) => {
+                          const meta = effectiveMatrix[featureKey];
+                          return (
+                            <View key={featureKey} style={styles.featureRow}>
+                              <Ionicons
+                                name="checkmark-circle"
+                                size={16}
+                                color={plan.tier === 'elite' ? colors.marketUp : colors.primary}
+                              />
+                              <Text style={styles.featureText}>{meta?.label || featureKey}</Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    </View>
+
+                    {/* Selection indicator */}
+                    {isSelected && (
+                      <View style={styles.selectedIndicator}>
+                        <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                      </View>
+                    )}
+
+                    {isCurrent && (
+                      <View style={styles.currentLabel}>
+                        <Text style={styles.currentLabelText}>{t('subscription.currentPlan')}</Text>
+                      </View>
+                    )}
+                  </Animated.View>
+                </AnimatedPressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* Current Plan Status */}
+          {isPaidUser && (
+            <Card style={styles.statusCard}>
+              <View style={styles.statusRow}>
+                <View style={styles.statusIcon}>
+                  <Ionicons
+                    name={subscription.autoRenew ? 'shield-checkmark' : 'shield-outline'}
+                    size={28}
+                    color={subscription.autoRenew ? colors.marketUp : colors.textMuted}
+                  />
+                </View>
+                <View style={styles.statusInfo}>
+                  <Text style={styles.statusTitle}>
+                    {subscription.autoRenew ? t('subscription.activeAutoRenew') : t('subscription.cancelled')}
+                  </Text>
+                  <Text style={styles.statusSubtitle}>
+                    {subscription.autoRenew
+                      ? `Renews on ${new Date(subscription.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                      : `Expires on ${new Date(subscription.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+                  </Text>
+                </View>
               </View>
+              <View style={styles.statusActions}>
+                {subscription.autoRenew ? (
+                  <AnimatedPressable onPress={handleCancel} haptic="warning" scaleTo={0.97}>
+                    <View style={styles.cancelBtn}>
+                      <Text style={styles.cancelBtnText}>{t('subscription.cancelAutoRenew')}</Text>
+                    </View>
+                  </AnimatedPressable>
+                ) : (
+                  <AnimatedPressable onPress={() => initiateUpgrade(SUBSCRIPTION_PLANS.find(p => p.id === subscription.planId)!)} haptic="medium" scaleTo={0.97}>
+                    <View style={styles.renewBtn}>
+                      <Text style={styles.renewBtnText}>{t('subscription.renew')}</Text>
+                    </View>
+                  </AnimatedPressable>
+                )}
+              </View>
+            </Card>
+          )}
+
+          {/* Trial CTA Button */}
+          {!isPaidUser && hasTrialAvailable(SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId)?.tier || 'pro') && selectedPlanId !== 'plan_free' && (
+            <View style={styles.trialCtaSection}>
               <AnimatedPressable
-                onPress={() => setShowAutopayModal(false)}
-                haptic="light"
+                onPress={handleStartTrial}
+                haptic="medium"
                 scaleTo={0.97}
               >
-                <Text style={styles.autopayModalCancel}>{t('app.cancel')}</Text>
-              </AnimatedPressable>
+                <LinearGradient
+                  colors={['rgba(255,171,64,0.2)', 'rgba(255,143,0,0.1)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.trialCtaBtn}
+                >
+                  <Ionicons name="timer-outline" size={20} color={colors.warning} />
+                  <Text style={styles.trialCtaBtnText}>                  {t('subscription.startFreeTrial')}
+                  </Text>
+              </LinearGradient>
+            </AnimatedPressable>
+              <Text style={styles.trialCtaSubtext}>{t('subscription.noCharges')}</Text>
             </View>
-          </View>
-        )}
+          )}
 
-        {/* Feature Comparison Table */}
-        <Card title={t('subscription.comparePlans')} style={styles.comparisonCard}>
-          {(Object.keys(effectiveMatrix) as SubscriptionFeature[]).map((featureKey, i) => {
-            const meta = effectiveMatrix[featureKey];
-            const tiers: SubscriptionTier[] = ['free', 'pro', 'elite'];
-            const TIER_RANK: Record<SubscriptionTier, number> = { free: 0, pro: 1, elite: 2 };
-            return (
-              <View key={featureKey} style={[styles.compareRow, i % 2 === 0 && styles.compareRowAlt]}>
-                <Text style={styles.compareFeature}>{meta.label}</Text>
-                {tiers.map(tier => {
-                  const isAvailable = TIER_RANK[tier] >= TIER_RANK[meta.minTier];
-                  return (
-                    <Ionicons
-                      key={tier}
-                      name={isAvailable ? 'checkmark' : 'close'}
-                      size={16}
-                      color={isAvailable ? colors.marketUp : colors.textMuted}
-                      style={styles.compareIcon}
-                    />
-                  );
-                })}
+          {/* CTA Button */}
+          {!isPaidUser && !trialActive && (
+            <View style={styles.ctaSection}>
+              <AnimatedPressable
+                onPress={handleUpgrade}
+                haptic="medium"
+                scaleTo={0.97}
+                disabled={isLoading || selectedPlanId === 'plan_free'}
+              >
+                <LinearGradient
+                  colors={selectedPlanId === 'plan_elite' ? GRADIENTS.success : GRADIENTS.primary}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={[styles.ctaBtn, isLoading && styles.ctaBtnLoading]}
+                >
+                  {isLoading ? (
+                    <Text style={styles.ctaBtnText}>{t('subscription.processing')}</Text>
+                  ) : (
+                    <>
+                      <Ionicons
+                        name={selectedPlanId === 'plan_elite' ? 'diamond' : selectedPlanId === 'plan_pro' ? 'flash' : 'rocket-outline'}
+                        size={20}
+                        color={colors.white}
+                      />
+                      <Text style={styles.ctaBtnText}>
+                        {selectedPlanId === 'plan_free'
+                          ? t('subscription.selectPlan')
+                          : `${t('subscription.upgradeTo')} ${SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId)?.name}`}
+                      </Text>
+                    </>
+                  )}
+                </LinearGradient>
+              </AnimatedPressable>
+
+              <Text style={styles.secureText}>
+                <Ionicons name="lock-closed" size={12} color={colors.textMuted} /> {t('subscription.securePayment')}
+              </Text>
+            </View>
+          )}
+
+          {/* UPI AutoPay Section (paid users) */}
+          {isPaidUser && (
+            <Card style={styles.autopayCard}>
+              <View style={styles.autopayHeader}>
+                <Ionicons name="qr-code" size={22} color={colors.primary} />
+                <Text style={styles.autopayTitle}>{t('subscription.upiAutopay')}</Text>
               </View>
-            );
-          })}
-        </Card>
+              <Text style={styles.autopayDesc}>{t('subscription.upiAutopayDesc')}</Text>
+              <View style={styles.autopayStatus}>
+                {subscription.isAutoPayEnabled && subscription.upiMandate ? (
+                  <>
+                    <View style={styles.autopayStatusRow}>
+                      <Ionicons name="checkmark-circle" size={18} color={colors.marketUp} />
+                      <Text style={styles.autopayStatusText}>
+                        {t('subscription.autopayActive')} — {subscription.upiMandate.upiId}
+                      </Text>
+                    </View>
+                    {subscription.upiMandate.nextChargeDate && (
+                      <Text style={styles.autopayNextDate}>
+                        {t('subscription.nextCharge')}: {new Date(subscription.upiMandate.nextChargeDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </Text>
+                    )}
+                  </>
+                ) : (
+                  <View style={styles.autopayStatusRow}>
+                    <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+                    <Text style={[styles.autopayStatusText, { color: colors.textMuted }]}>{t('subscription.autopayNotSet')}</Text>
+                  </View>
+                )}
+              </View>
+              <AnimatedPressable
+                onPress={handleAutopayToggle}
+                haptic="light"
+                scaleTo={0.97}
+              >                <View style={[styles.autopayBtn, subscription.isAutoPayEnabled && styles.autopayBtnDanger]}>
+                  <Ionicons
+                    name={subscription.isAutoPayEnabled ? 'pause-circle' : 'qr-code'}
+                    size={18}
+                    color={subscription.isAutoPayEnabled ? colors.danger : colors.primary}
+                  />
+                  <Text style={[styles.autopayBtnText, subscription.isAutoPayEnabled && { color: colors.danger }]}>
+                    {subscription.isAutoPayEnabled ? t('subscription.disableAutopay') : t('subscription.setUpAutopay')}
+                  </Text>
+                </View>
+              </AnimatedPressable>
+            </Card>
+          )}
 
-        {/* Payment Info */}
-        <View style={styles.paymentInfo}>
-          <Text style={styles.paymentInfoText}>{t('subscription.paymentInfo1')}</Text>
-          <Text style={styles.paymentInfoText}>{t('subscription.paymentInfo2')}</Text>
-        </View>
+          {/* Payment History Link */}
+          <AnimatedPressable
+            onPress={() => navigation.navigate('PaymentHistory')}
+            haptic="light"
+            scaleTo={0.97}
+          >
+            <Card style={styles.paymentHistoryCard}>
+              <View style={styles.paymentHistoryRow}>
+                <View style={styles.paymentHistoryLeft}>
+                  <Ionicons name="receipt-outline" size={22} color={colors.primary} />
+                  <View>
+                    <Text style={styles.paymentHistoryTitle}>{t('subscription.paymentHistory')}</Text>
+                    <Text style={styles.paymentHistorySubtitle}>
+                      {(subscription.payments?.length || 0) > 0
+                        ? `${subscription.payments?.length} ${t('subscription.payment')}${subscription.payments?.length !== 1 ? 's' : ''} ${t('subscription.recorded')}`
+                        : t('subscription.viewTransactions')}
+                    </Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </View>
+            </Card>
+          </AnimatedPressable>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          {/* UPI AutoPay Setup Modal */}
+          {showAutopayModal && (
+            <View style={styles.autopayModalOverlay}>
+              <View style={[styles.autopayModal, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+                <Text style={styles.autopayModalTitle}>{t('subscription.setUpUpiAutopay')}</Text>
+                <Text style={styles.autopayModalDesc}>{t('subscription.setUpUpiAutopayDesc')}</Text>
+                <View style={styles.autopayModalOptions}>
+                  {[{ id: 'rahul@hdfc', label: 'HDFC Bank' }, { id: 'rahul@paytm', label: 'Paytm' }, { id: 'rahul@icici', label: 'ICICI Bank' }].map((opt) => (
+                    <AnimatedPressable
+                      key={opt.id}
+                      onPress={() => handleSetupAutopay(opt.id)}
+                      haptic="light"
+                      scaleTo={0.97}
+                    >
+                      <View style={[styles.autopayOption, { borderColor: colors.border }]}>
+                        <View style={styles.autopayOptionLeft}>
+                          <View style={[styles.autopayOptionIcon, { backgroundColor: colors.primary + '20' }]}>
+                            <Ionicons name="qr-code" size={20} color={colors.primary} />
+                          </View>
+                          <View>
+                            <Text style={styles.autopayOptionLabel}>{opt.id}</Text>
+                            <Text style={styles.autopayOptionSub}>{opt.label}</Text>
+                          </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                      </View>
+                    </AnimatedPressable>
+                  ))}
+                </View>
+                <AnimatedPressable
+                  onPress={() => setShowAutopayModal(false)}
+                  haptic="light"
+                  scaleTo={0.97}
+                >
+                  <Text style={styles.autopayModalCancel}>{t('app.cancel')}</Text>
+                </AnimatedPressable>
+              </View>
+            </View>
+          )}
+
+          {/* Feature Comparison Table */}
+          <Card title={t('subscription.comparePlans')} style={styles.comparisonCard}>
+            {(Object.keys(effectiveMatrix) as SubscriptionFeature[]).map((featureKey, i) => {
+              const meta = effectiveMatrix[featureKey];
+              const tiers: SubscriptionTier[] = ['free', 'pro', 'elite'];
+              const TIER_RANK: Record<SubscriptionTier, number> = { free: 0, pro: 1, elite: 2 };
+              return (
+                <View key={featureKey} style={[styles.compareRow, i % 2 === 0 && styles.compareRowAlt]}>
+                  <Text style={styles.compareFeature}>{meta.label}</Text>
+                  {tiers.map(tier => {
+                    const isAvailable = TIER_RANK[tier] >= TIER_RANK[meta.minTier];
+                    return (
+                      <Ionicons
+                        key={tier}
+                        name={isAvailable ? 'checkmark' : 'close'}
+                        size={16}
+                        color={isAvailable ? colors.marketUp : colors.textMuted}
+                        style={styles.compareIcon}
+                      />
+                    );
+                  })}
+                </View>
+              );
+            })}
+          </Card>
+
+          {/* Payment Info */}
+          <View style={styles.paymentInfo}>
+            <Text style={styles.paymentInfoText}>{t('subscription.paymentInfo1')}</Text>
+            <Text style={styles.paymentInfoText}>{t('subscription.paymentInfo2')}</Text>
+          </View>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     flexDirection: 'row',
     alignItems: 'center',

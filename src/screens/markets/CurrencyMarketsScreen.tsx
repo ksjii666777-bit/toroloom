@@ -36,6 +36,7 @@ import {
 import { useLiveConversion, type UseLiveConversionResult } from '../../hooks/useLiveConversion';
 import { forexApi } from '../../services/api';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -544,192 +545,194 @@ export default function CurrencyMarketsScreen({ navigation }: NativeStackScreenP
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={[styles.title, { color: colors.text }]}>{t('currencyMarkets.title')}</Text>
-              {/* Live / Mock badge */}
-              <View style={[styles.liveBadge, {
-                backgroundColor: liveConversion.isLive ? '#00E67620' : '#FF525220',
-                borderColor: liveConversion.isLive ? '#00E67640' : '#FF525240',
-              }]}>
-                <View style={[styles.liveDot, {
-                  backgroundColor: liveConversion.isLive ? '#00E676' : '#FF5252',
-                }]} />
-                <Text style={[styles.liveBadgeText, {
-                  color: liveConversion.isLive ? '#00E676' : '#FF5252',
+          <AppScreen scroll={false} padded={false}
+      header={
+  <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={[styles.title, { color: colors.text }]}>{t('currencyMarkets.title')}</Text>
+              
+                <View style={[styles.liveBadge, {
+                  backgroundColor: liveConversion.isLive ? '#00E67620' : '#FF525220',
+                  borderColor: liveConversion.isLive ? '#00E67640' : '#FF525240',
                 }]}>
-                  {liveConversion.isLoading ? t('currencyMarkets.loading') : liveConversion.isLive ? t('currencyMarkets.live') : t('currencyMarkets.mock')}
-                </Text>
+                  <View style={[styles.liveDot, {
+                    backgroundColor: liveConversion.isLive ? '#00E676' : '#FF5252',
+                  }]} />
+                  <Text style={[styles.liveBadgeText, {
+                    color: liveConversion.isLive ? '#00E676' : '#FF5252',
+                  }]}>
+                    {liveConversion.isLoading ? t('currencyMarkets.loading') : liveConversion.isLive ? t('currencyMarkets.live') : t('currencyMarkets.mock')}
+                  </Text>
+                </View>
               </View>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('currencyMarkets.subtitle')}</Text>
             </View>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('currencyMarkets.subtitle')}</Text>
+            <Pressable
+              onPress={() => setConverterVisible(true)}
+              style={[styles.converterBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
+            >
+              <Ionicons name="calculator" size={18} color={colors.primary} />
+            </Pressable>
           </View>
-          <Pressable
-            onPress={() => setConverterVisible(true)}
-            style={[styles.converterBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}
-          >
-            <Ionicons name="calculator" size={18} color={colors.primary} />
-          </Pressable>
-        </View>
 
-        {/* Tabs */}
-        <View style={styles.tabRow}>
-          {[
-            { key: 'inr' as TabKey, label: t('currencyMarkets.tabInrPairs'), icon: 'cash' },
-            { key: 'crosses' as TabKey, label: t('currencyMarkets.tabCrosses'), icon: 'swap-horizontal' },
-            { key: 'summary' as TabKey, label: t('currencyMarkets.tabSummary'), icon: 'stats-chart' },
-          ].map(tab => {
-            const isActive = activeTab === tab.key;
-            return (
-              <Pressable
-                key={tab.key}
-                onPress={() => { setActiveTab(tab.key); setExpandedId(null); setRegionFilter(null); setSearchQuery(''); }}
-                style={[styles.tabBtn, { backgroundColor: isActive ? colors.primary + '20' : 'transparent', borderColor: isActive ? colors.primary + '40' : 'transparent' }]}
-              >
-                <Ionicons name={tab.icon as any} size={14} color={isActive ? colors.primary : colors.textMuted} />
-                <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Search */}
-        {activeTab !== 'summary' && (
-          <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-            <Ionicons name="search" size={16} color={colors.textMuted} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.text }]}
-              placeholder={t('currencyMarkets.searchPlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <Pressable onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={16} color={colors.textMuted} />
-              </Pressable>
-            )}
-          </View>
-        )}
-
-        {/* Region filter */}
-        {activeTab !== 'summary' && (
-          <FlashList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={[
-              { key: null as string | null, label: t('currencyMarkets.filterAll') },
-              { key: 'major', label: t('currencyMarkets.filterMajor') },
-              { key: 'asian', label: t('currencyMarkets.filterAsian') },
-              { key: 'other', label: t('currencyMarkets.filterOther') },
-            ]}
-            keyExtractor={(f) => f.label}
-            style={styles.filterScroll}
-            renderItem={({ item: f }) => {
-              const isActive = regionFilter === f.key;
+          {/* Tabs */}
+          <View style={styles.tabRow}>
+            {[
+              { key: 'inr' as TabKey, label: t('currencyMarkets.tabInrPairs'), icon: 'cash' },
+              { key: 'crosses' as TabKey, label: t('currencyMarkets.tabCrosses'), icon: 'swap-horizontal' },
+              { key: 'summary' as TabKey, label: t('currencyMarkets.tabSummary'), icon: 'stats-chart' },
+            ].map(tab => {
+              const isActive = activeTab === tab.key;
               return (
                 <Pressable
-                  onPress={() => setRegionFilter(f.key)}
-                  style={[styles.filterChip, { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary + '40' : colors.border }]}
+                  key={tab.key}
+                  onPress={() => { setActiveTab(tab.key); setExpandedId(null); setRegionFilter(null); setSearchQuery(''); }}
+                  style={[styles.tabBtn, { backgroundColor: isActive ? colors.primary + '20' : 'transparent', borderColor: isActive ? colors.primary + '40' : 'transparent' }]}
                 >
-                  <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textMuted }]}>{f.label}</Text>
+                  <Ionicons name={tab.icon as any} size={14} color={isActive ? colors.primary : colors.textMuted} />
+                  <Text style={[styles.tabLabel, { color: isActive ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
                 </Pressable>
               );
-            }}
-          />
-        )}
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Pairs Tabs ── */}
-        {(activeTab === 'inr' || activeTab === 'crosses') && (
-          <View>
-            <Text style={[styles.resultCount, { color: colors.textMuted }]}>
-              {t('currencyMarkets.pairCount', { count: filteredPairs.length })}
-            </Text>
-            {filteredPairs.length > 0 ? (
-              filteredPairs.map(pair => (
-                <CurrencyCard key={pair.id} currency={pair} isExpanded={expandedId === pair.id} onPress={() => handlePress(pair.id)} colors={colors} />
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('currencyMarkets.noPairsFound')}</Text>
-                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('currencyMarkets.adjustSearch')}</Text>
-              </View>
-            )}
+            })}
           </View>
-        )}
 
-        {/* ── Summary ── */}
-        {activeTab === 'summary' && (
-          <View>
-            <View style={styles.summaryGrid}>
-              {[
-                { label: t('currencyMarkets.totalPairs'), value: summaryStats.total.toString(), icon: '🔄', color: '#6C63FF' },
-                { label: t('currencyMarkets.inrPairs'), value: summaryStats.inr.toString(), icon: '🇮🇳', color: '#3B82F6' },
-                { label: t('currencyMarkets.avgInrChg'), value: `${(summaryStats.avgInrChange >= 0 ? '+' : '') + summaryStats.avgInrChange.toFixed(2)}%`, icon: '📈', color: summaryStats.avgInrChange >= 0 ? '#00E676' : '#FF5252' },
-                { label: t('currencyMarkets.avgVolatility'), value: `${summaryStats.avgInrVol.toFixed(1)}%`, icon: '🌊', color: '#FFC107' },
-              ].map((stat, _i) => (
-                <View key={stat.label} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
-                  <Text style={styles.summaryIcon}>{stat.icon}</Text>
-                  <Text style={[styles.summaryValue, { color: stat.color }]}>{stat.value}</Text>
-                  <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{stat.label}</Text>
-                </View>
-              ))}
+          {/* Search */}
+          {activeTab !== 'summary' && (
+            <View style={[styles.searchBar, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+              <Ionicons name="search" size={16} color={colors.textMuted} />
+              <TextInput
+                style={[styles.searchInput, { color: colors.text }]}
+                placeholder={t('currencyMarkets.searchPlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={16} color={colors.textMuted} />
+                </Pressable>
+              )}
             </View>
+          )}
 
-            {/* INR Overview */}
-            <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('currencyMarkets.inrOverview')}</Text>
-              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('currencyMarkets.inrOverviewSub')}</Text>
-              {displayPairs.filter(p => p.quoteCurrency === 'INR').map((pair, i) => {
-                const isUp = pair.changePercent >= 0;
+          {/* Region filter */}
+          {activeTab !== 'summary' && (
+            <FlashList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={[
+                { key: null as string | null, label: t('currencyMarkets.filterAll') },
+                { key: 'major', label: t('currencyMarkets.filterMajor') },
+                { key: 'asian', label: t('currencyMarkets.filterAsian') },
+                { key: 'other', label: t('currencyMarkets.filterOther') },
+              ]}
+              keyExtractor={(f) => f.label}
+              style={styles.filterScroll}
+              renderItem={({ item: f }) => {
+                const isActive = regionFilter === f.key;
                 return (
-                  <View key={pair.id} style={[styles.inrRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                    <View style={styles.inrRowLeft}>
-                      <Text style={{ fontSize: 20 }}>{pair.icon}</Text>
-                      <View>
-                        <Text style={[styles.inrPairText, { color: colors.text }]}>{pair.pair}</Text>
-                        <Text style={[styles.inrRateText, { color: colors.textMuted }]}>{pair.rate.toFixed(2)}</Text>
+                  <Pressable
+                    onPress={() => setRegionFilter(f.key)}
+                    style={[styles.filterChip, { backgroundColor: isActive ? colors.primary + '20' : colors.bgInput, borderColor: isActive ? colors.primary + '40' : colors.border }]}
+                  >
+                    <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textMuted }]}>{f.label}</Text>
+                  </Pressable>
+                );
+              }}
+            />
+          )}
+        </View>
+      }
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* ── Pairs Tabs ── */}
+          {(activeTab === 'inr' || activeTab === 'crosses') && (
+            <View>
+              <Text style={[styles.resultCount, { color: colors.textMuted }]}>
+                {t('currencyMarkets.pairCount', { count: filteredPairs.length })}
+              </Text>
+              {filteredPairs.length > 0 ? (
+                filteredPairs.map(pair => (
+                  <CurrencyCard key={pair.id} currency={pair} isExpanded={expandedId === pair.id} onPress={() => handlePress(pair.id)} colors={colors} />
+                ))
+              ) : (
+                <View style={styles.emptyState}>
+                  <Ionicons name="search-outline" size={48} color={colors.textMuted} />
+                  <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('currencyMarkets.noPairsFound')}</Text>
+                  <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>{t('currencyMarkets.adjustSearch')}</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ── Summary ── */}
+          {activeTab === 'summary' && (
+            <View>
+              <View style={styles.summaryGrid}>
+                {[
+                  { label: t('currencyMarkets.totalPairs'), value: summaryStats.total.toString(), icon: '🔄', color: '#6C63FF' },
+                  { label: t('currencyMarkets.inrPairs'), value: summaryStats.inr.toString(), icon: '🇮🇳', color: '#3B82F6' },
+                  { label: t('currencyMarkets.avgInrChg'), value: `${(summaryStats.avgInrChange >= 0 ? '+' : '') + summaryStats.avgInrChange.toFixed(2)}%`, icon: '📈', color: summaryStats.avgInrChange >= 0 ? '#00E676' : '#FF5252' },
+                  { label: t('currencyMarkets.avgVolatility'), value: `${summaryStats.avgInrVol.toFixed(1)}%`, icon: '🌊', color: '#FFC107' },
+                ].map((stat, _i) => (
+                  <View key={stat.label} style={[styles.summaryCard, { borderColor: stat.color + '30' }]}>
+                    <Text style={styles.summaryIcon}>{stat.icon}</Text>
+                    <Text style={[styles.summaryValue, { color: stat.color }]}>{stat.value}</Text>
+                    <Text style={[styles.summaryLabel, { color: colors.textMuted }]}>{stat.label}</Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* INR Overview */}
+              <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('currencyMarkets.inrOverview')}</Text>
+                <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>{t('currencyMarkets.inrOverviewSub')}</Text>
+                {displayPairs.filter(p => p.quoteCurrency === 'INR').map((pair, i) => {
+                  const isUp = pair.changePercent >= 0;
+                  return (
+                    <View key={pair.id} style={[styles.inrRow, i < 3 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                      <View style={styles.inrRowLeft}>
+                        <Text style={{ fontSize: 20 }}>{pair.icon}</Text>
+                        <View>
+                          <Text style={[styles.inrPairText, { color: colors.text }]}>{pair.pair}</Text>
+                          <Text style={[styles.inrRateText, { color: colors.textMuted }]}>{pair.rate.toFixed(2)}</Text>
+                        </View>
+                      </View>
+                      <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                        <Text style={[styles.inrChange, { color: isUp ? '#00E676' : '#FF5252' }]}>
+                          {isUp ? '+' : ''}{pair.changePercent.toFixed(2)}%
+                        </Text>
+                        <Text style={[styles.inrVol, { color: colors.textMuted }]}>{t('currencyMarkets.volLabel', { vol: (pair.volatility ?? 0).toFixed(1) })}</Text>
                       </View>
                     </View>
-                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                      <Text style={[styles.inrChange, { color: isUp ? '#00E676' : '#FF5252' }]}>
-                        {isUp ? '+' : ''}{pair.changePercent.toFixed(2)}%
-                      </Text>
-                      <Text style={[styles.inrVol, { color: colors.textMuted }]}>{t('currencyMarkets.volLabel', { vol: (pair.volatility ?? 0).toFixed(1) })}</Text>
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
+                  );
+                })}
+              </View>
 
-            {/* Info */}
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Ionicons name="information-circle" size={18} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('currencyMarkets.forexInfo')}</Text>
-                <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  {t('currencyMarkets.forexInfoDesc')}
-                </Text>
+              {/* Info */}
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="information-circle" size={18} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>{t('currencyMarkets.forexInfo')}</Text>
+                  <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                    {t('currencyMarkets.forexInfoDesc')}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        )}
+          )}
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
+          <View style={{ height: 80 }} />
+        </ScrollView>
 
-      {/* Currency Converter Modal */}
-      <CurrencyConverterModal visible={converterVisible} onClose={() => setConverterVisible(false)} colors={colors} liveConversion={liveConversion} />
-    </View>
+        {/* Currency Converter Modal */}
+        <CurrencyConverterModal visible={converterVisible} onClose={() => setConverterVisible(false)} colors={colors} liveConversion={liveConversion} />
+      </AppScreen>
   );
 }
 
@@ -738,7 +741,6 @@ export default function CurrencyMarketsScreen({ navigation }: NativeStackScreenP
 // ══════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { padding: SPACING.xl, paddingTop: 60, borderBottomLeftRadius: BORDER_RADIUS.xl, borderBottomRightRadius: BORDER_RADIUS.xl },
   headerTop: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   title: { ...FONTS.bold, fontSize: FONTS.size.title },

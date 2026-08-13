@@ -21,6 +21,7 @@ import { useIPOStore } from '../../store/ipoStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type {IPOItem, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -98,297 +99,298 @@ export default function IPOCalendarScreen({ navigation: _navigation  }: NativeSt
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name="arrow-back" size={20} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>{t('ipos.calendarTitle')}</Text>
-        <TouchableOpacity
-          style={[styles.dashBtn, { backgroundColor: colors.primary + '20' }]}
-          onPress={() => nav.navigate('IPODashboard' as never)}
-        >
-          <Ionicons name="grid-outline" size={16} color={colors.primary} />
-          <Text style={[styles.dashBtnText, { color: colors.primary }]}>{t('ipos.dashboard')}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Tab Toggle */}
-      <View style={[styles.tabRow, { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm }]}>
-        <TouchableOpacity
-          style={[styles.tabBtn, activeTab === 'timeline' && { backgroundColor: colors.primary }]}
-          onPress={() => setActiveTab('timeline')}
-        >
-          <Ionicons name="calendar" size={14} color={activeTab === 'timeline' ? '#FFF' : colors.textMuted} />
-          <Text style={[styles.tabText, { color: activeTab === 'timeline' ? '#FFF' : colors.textMuted }]}>{t('ipos.calendarTabTimeline')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabBtn, activeTab === 'stats' && { backgroundColor: colors.primary }]}
-          onPress={() => setActiveTab('stats')}
-        >
-          <Ionicons name="analytics" size={14} color={activeTab === 'stats' ? '#FFF' : colors.textMuted} />
-          <Text style={[styles.tabText, { color: activeTab === 'stats' ? '#FFF' : colors.textMuted }]}>{t('ipos.calendarTabStats')}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+          <AppScreen scroll={false} padded={false}
       >
-        {activeTab === 'timeline' ? (
-          /* ══ TIMELINE VIEW ══ */
-          <>
-            {/* Quick overview bar */}
-            <View style={[styles.overviewBar, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <View style={styles.overviewItem}>
-                <Text style={[styles.overviewValue, { color: colors.primary }]}>{ipos.length}</Text>
-                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.totalIpos')}</Text>
-              </View>
-              <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
-              <View style={styles.overviewItem}>
-                <Text style={[styles.overviewValue, { color: '#00E676' }]}>
-                  {grouped.open.length + grouped.listing_today.length}
-                </Text>
-                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.filterActive')}</Text>
-              </View>
-              <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
-              <View style={styles.overviewItem}>
-                <Text style={[styles.overviewValue, { color: '#3B82F6' }]}>{grouped.upcoming.length}</Text>
-                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.statusUpcoming')}</Text>
-              </View>
-              <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
-              <View style={styles.overviewItem}>
-                <Text style={[styles.overviewValue, { color: colors.text }]}>{grouped.listed.length}</Text>
-                <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.statusListed')}</Text>
-              </View>
-            </View>
+  {/* Header */}
+        <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
+          <TouchableOpacity onPress={() => nav.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="arrow-back" size={20} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('ipos.calendarTitle')}</Text>
+          <TouchableOpacity
+            style={[styles.dashBtn, { backgroundColor: colors.primary + '20' }]}
+            onPress={() => nav.navigate('IPODashboard' as never)}
+          >
+            <Ionicons name="grid-outline" size={16} color={colors.primary} />
+            <Text style={[styles.dashBtnText, { color: colors.primary }]}>{t('ipos.dashboard')}</Text>
+          </TouchableOpacity>
+        </View>
 
-            {/* Timeline sections */}
-            {timelineSections.map(section => {
-              const items = grouped[section.key];
-              if (!items || items.length === 0) return null;
+        {/* Tab Toggle */}
+        <View style={[styles.tabRow, { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm }]}>
+          <TouchableOpacity
+            style={[styles.tabBtn, activeTab === 'timeline' && { backgroundColor: colors.primary }]}
+            onPress={() => setActiveTab('timeline')}
+          >
+            <Ionicons name="calendar" size={14} color={activeTab === 'timeline' ? '#FFF' : colors.textMuted} />
+            <Text style={[styles.tabText, { color: activeTab === 'timeline' ? '#FFF' : colors.textMuted }]}>{t('ipos.calendarTabTimeline')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabBtn, activeTab === 'stats' && { backgroundColor: colors.primary }]}
+            onPress={() => setActiveTab('stats')}
+          >
+            <Ionicons name="analytics" size={14} color={activeTab === 'stats' ? '#FFF' : colors.textMuted} />
+            <Text style={[styles.tabText, { color: activeTab === 'stats' ? '#FFF' : colors.textMuted }]}>{t('ipos.calendarTabStats')}</Text>
+          </TouchableOpacity>
+        </View>
 
-              return (
-                <View key={section.key} style={styles.timelineSection}>
-                  {/* Section Header */}
-                  <View style={styles.sectionHeader}>
-                    <View style={[styles.sectionIcon, { backgroundColor: section.bgColor }]}>
-                      <Ionicons name={section.icon as any} size={16} color={section.color} />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+        >
+          {activeTab === 'timeline' ? (
+            /* ══ TIMELINE VIEW ══ */
+            <>
+              {/* Quick overview bar */}
+              <View style={[styles.overviewBar, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={styles.overviewItem}>
+                  <Text style={[styles.overviewValue, { color: colors.primary }]}>{ipos.length}</Text>
+                  <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.totalIpos')}</Text>
+                </View>
+                <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
+                <View style={styles.overviewItem}>
+                  <Text style={[styles.overviewValue, { color: '#00E676' }]}>
+                    {grouped.open.length + grouped.listing_today.length}
+                  </Text>
+                  <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.filterActive')}</Text>
+                </View>
+                <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
+                <View style={styles.overviewItem}>
+                  <Text style={[styles.overviewValue, { color: '#3B82F6' }]}>{grouped.upcoming.length}</Text>
+                  <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.statusUpcoming')}</Text>
+                </View>
+                <View style={[styles.overviewDivider, { backgroundColor: colors.divider }]} />
+                <View style={styles.overviewItem}>
+                  <Text style={[styles.overviewValue, { color: colors.text }]}>{grouped.listed.length}</Text>
+                  <Text style={[styles.overviewLabel, { color: colors.textMuted }]}>{t('ipos.statusListed')}</Text>
+                </View>
+              </View>
+
+              {/* Timeline sections */}
+              {timelineSections.map(section => {
+                const items = grouped[section.key];
+                if (!items || items.length === 0) return null;
+
+                return (
+                  <View key={section.key} style={styles.timelineSection}>
+                    {/* Section Header */}
+                    <View style={styles.sectionHeader}>
+                      <View style={[styles.sectionIcon, { backgroundColor: section.bgColor }]}>
+                        <Ionicons name={section.icon as any} size={16} color={section.color} />
+                      </View>
+                      <Text style={[styles.sectionTitle, { color: colors.text }]}>{section.label}</Text>
+                      <View style={[styles.sectionCount, { backgroundColor: section.bgColor }]}>
+                        <Text style={[styles.sectionCountText, { color: section.color }]}>{items.length}</Text>
+                      </View>
                     </View>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{section.label}</Text>
-                    <View style={[styles.sectionCount, { backgroundColor: section.bgColor }]}>
-                      <Text style={[styles.sectionCountText, { color: section.color }]}>{items.length}</Text>
-                    </View>
-                  </View>
 
-                  {/* Timeline items */}
-                  <View style={styles.timelineList}>
-                    {items.map((ipo, idx) => {
-                      const daysLeft = ipo.subscriptionStatus === 'upcoming'
-                        ? daysUntil(ipo.openDate)
-                        : ipo.subscriptionStatus === 'open'
-                          ? daysUntil(ipo.closeDate)
-                          : 0;
-                      const _isLast = idx === items.length - 1;
+                    {/* Timeline items */}
+                    <View style={styles.timelineList}>
+                      {items.map((ipo, idx) => {
+                        const daysLeft = ipo.subscriptionStatus === 'upcoming'
+                          ? daysUntil(ipo.openDate)
+                          : ipo.subscriptionStatus === 'open'
+                            ? daysUntil(ipo.closeDate)
+                            : 0;
+                        const _isLast = idx === items.length - 1;
 
-                      return (
-                        <TouchableOpacity
-                          key={ipo.id}
-                          style={[styles.timelineItem, { borderLeftColor: section.color }]}
-                          onPress={() => nav.navigate('IPODashboard' as never)}
-                          activeOpacity={0.7}
-                        >
-                          {/* Timeline dot */}
-                          <View style={[styles.timelineDot, { backgroundColor: section.color }]} />
+                        return (
+                          <TouchableOpacity
+                            key={ipo.id}
+                            style={[styles.timelineItem, { borderLeftColor: section.color }]}
+                            onPress={() => nav.navigate('IPODashboard' as never)}
+                            activeOpacity={0.7}
+                          >
+                            {/* Timeline dot */}
+                            <View style={[styles.timelineDot, { backgroundColor: section.color }]} />
 
-                          {/* Date badge */}
-                          <View style={[styles.dateBadge, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                            <Text style={[styles.dateDay, { color: colors.text }]}>
-                              {new Date(ipo.openDate).getDate()}
-                            </Text>
-                            <Text style={[styles.dateMonth, { color: colors.textMuted }]}>
-                              {new Date(ipo.openDate).toLocaleDateString('en-IN', { month: 'short' })}
-                            </Text>
-                          </View>
-
-                          {/* Content */}
-                          <View style={[styles.timelineContent, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                            <View style={styles.timelineTop}>
-                              <View style={[styles.timelineLogo, { backgroundColor: section.bgColor }]}>
-                                <Text style={[styles.timelineLogoText, { color: section.color }]}>{ipo.logo}</Text>
-                              </View>
-                              <View style={{ flex: 1 }}>
-                                <Text style={[styles.timelineName, { color: colors.text }]} numberOfLines={1}>{ipo.companyName}</Text>
-                                <Text style={[styles.timelineSector, { color: colors.textMuted }]}>{ipo.sector}</Text>
-                              </View>
+                            {/* Date badge */}
+                            <View style={[styles.dateBadge, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                              <Text style={[styles.dateDay, { color: colors.text }]}>
+                                {new Date(ipo.openDate).getDate()}
+                              </Text>
+                              <Text style={[styles.dateMonth, { color: colors.textMuted }]}>
+                                {new Date(ipo.openDate).toLocaleDateString('en-IN', { month: 'short' })}
+                              </Text>
                             </View>
 
-                            <View style={styles.timelineInfo}>
-                              <View style={styles.timelineInfoRow}>
-                                <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.priceBand')}</Text>
-                                <Text style={[styles.timelineInfoValue, { color: colors.text }]}>
-                                  ₹{ipo.priceBand.min}–{ipo.priceBand.max}
-                                </Text>
+                            {/* Content */}
+                            <View style={[styles.timelineContent, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                              <View style={styles.timelineTop}>
+                                <View style={[styles.timelineLogo, { backgroundColor: section.bgColor }]}>
+                                  <Text style={[styles.timelineLogoText, { color: section.color }]}>{ipo.logo}</Text>
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                  <Text style={[styles.timelineName, { color: colors.text }]} numberOfLines={1}>{ipo.companyName}</Text>
+                                  <Text style={[styles.timelineSector, { color: colors.textMuted }]}>{ipo.sector}</Text>
+                                </View>
                               </View>
-                              {ipo.gmp > 0 && (
+
+                              <View style={styles.timelineInfo}>
                                 <View style={styles.timelineInfoRow}>
-                                  <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.gmp')}</Text>
-                                  <Text style={[styles.timelineInfoValue, { color: '#00E676' }]}>
-                                    +₹{ipo.gmp} ({ipo.gmpPercent.toFixed(1)}%)
+                                  <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.priceBand')}</Text>
+                                  <Text style={[styles.timelineInfoValue, { color: colors.text }]}>
+                                    ₹{ipo.priceBand.min}–{ipo.priceBand.max}
+                                  </Text>
+                                </View>
+                                {ipo.gmp > 0 && (
+                                  <View style={styles.timelineInfoRow}>
+                                    <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.gmp')}</Text>
+                                    <Text style={[styles.timelineInfoValue, { color: '#00E676' }]}>
+                                      +₹{ipo.gmp} ({ipo.gmpPercent.toFixed(1)}%)
+                                    </Text>
+                                  </View>
+                                )}
+                                <View style={styles.timelineInfoRow}>
+                                  <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.issueSize')}</Text>
+                                  <Text style={[styles.timelineInfoValue, { color: colors.text }]}>
+                                    ₹{ipo.issueSize.toLocaleString('en-IN')} Cr
+                                  </Text>
+                                </View>
+                              </View>
+
+                              {/* Days countdown */}
+                              {daysLeft > 0 && (
+                                <View style={[styles.countdownBadge, { backgroundColor: section.bgColor }]}>
+                                  <Ionicons name="time-outline" size={11} color={section.color} />
+                                  <Text style={[styles.countdownText, { color: section.color }]}>
+                                    {ipo.subscriptionStatus === 'open'
+                                      ? t('ipos.daysLeft', { count: daysLeft })
+                                      : t('ipos.opensIn', { count: daysLeft })}
                                   </Text>
                                 </View>
                               )}
-                              <View style={styles.timelineInfoRow}>
-                                <Text style={[styles.timelineInfoLabel, { color: colors.textMuted }]}>{t('ipos.issueSize')}</Text>
-                                <Text style={[styles.timelineInfoValue, { color: colors.text }]}>
-                                  ₹{ipo.issueSize.toLocaleString('en-IN')} Cr
-                                </Text>
-                              </View>
                             </View>
-
-                            {/* Days countdown */}
-                            {daysLeft > 0 && (
-                              <View style={[styles.countdownBadge, { backgroundColor: section.bgColor }]}>
-                                <Ionicons name="time-outline" size={11} color={section.color} />
-                                <Text style={[styles.countdownText, { color: section.color }]}>
-                                  {ipo.subscriptionStatus === 'open'
-                                    ? t('ipos.daysLeft', { count: daysLeft })
-                                    : t('ipos.opensIn', { count: daysLeft })}
-                                </Text>
-                              </View>
-                            )}
-                          </View>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </View>
-              );
-            })}
-
-            {/* Monthly overview */}
-            <View style={[styles.seasonCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.seasonTitle, { color: colors.text }]}>{t('ipos.monthlyActivity')}</Text>
-              {seasonData.map((m, i) => (
-                <View key={m.month} style={[styles.seasonRow, i < seasonData.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                  <Text style={[styles.seasonMonth, { color: colors.text }]}>{m.month}</Text>
-                  <View style={styles.seasonBar}>
-                    <View style={[styles.seasonBarFill, {
-                      width: `${(m.count / seasonData[0].count) * 100}%`,
-                      backgroundColor: colors.primary,
-                    }]} />
-                  </View>
-                  <Text style={[styles.seasonCount, { color: colors.text }]}>{m.count}</Text>
-                  <Text style={[styles.seasonRaised, { color: colors.textMuted }]}>{m.totalRaised}</Text>
-                </View>
-              ))}
-            </View>
-          </>
-        ) : (
-          /* ══ MARKET STATS VIEW ══ */
-          <>
-            {/* Key stats grid */}
-            <View style={styles.statsGrid}>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <View style={[styles.statIcon, { backgroundColor: colors.primary + '20' }]}>
-                  <Ionicons name="rocket" size={20} color={colors.primary} />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>{stats.totalIpos}</Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.totalIpos')}</Text>
-              </View>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <View style={[styles.statIcon, { backgroundColor: '#00E67620' }]}>
-                  <Ionicons name="calendar" size={20} color="#00E676" />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>{stats.thisMonth}</Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.thisMonth')}</Text>
-              </View>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <View style={[styles.statIcon, { backgroundColor: '#FFC10720' }]}>
-                  <Ionicons name="cash" size={20} color="#FFC107" />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>
-                  ₹{(stats.totalRaised / 1000).toFixed(1)}K Cr
-                </Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.totalRaised')}</Text>
-              </View>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <View style={[styles.statIcon, { backgroundColor: '#00E67620' }]}>
-                  <Ionicons name="trending-up" size={20} color="#00E676" />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>
-                  {stats.avgGmp.toFixed(1)}%
-                </Text>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.avgGmp')}</Text>
-              </View>
-            </View>
-
-            {/* Performance by status */}
-            {['open', 'upcoming', 'listed'].map(status => {
-              const items = grouped[status];
-              if (!items || items.length === 0) return null;
-              const avgSub = items.reduce((s, i) => s + i.subscriptionTotal, 0) / items.length;
-              const avgGmp = items.filter(i => i.gmp > 0).reduce((s, i) => s + i.gmpPercent, 0) / Math.max(items.filter(i => i.gmp > 0).length, 1);
-
-              return (
-                <View key={status} style={[styles.statusCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                  <View style={styles.statusHeader}>
-                    <StatusDot status={status} />
-                    <Text style={[styles.statusTitle, { color: colors.text }]}>
-                      {status === 'open' ? t('ipos.openIpos') : status === 'upcoming' ? t('ipos.upcomingIpos') : t('ipos.listedIpos')}
-                    </Text>
-                    <Text style={[styles.statusCount, { color: colors.textMuted }]}>{items.length}</Text>
-                  </View>
-                  <View style={styles.statusRow}>
-                    <View style={styles.statusStat}>
-                      <Text style={[styles.statusStatValue, { color: colors.text }]}>{avgSub.toFixed(1)}x</Text>
-                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgSub')}</Text>
-                    </View>
-                    <View style={[styles.statusDivider, { backgroundColor: colors.divider }]} />
-                    <View style={styles.statusStat}>
-                      <Text style={[styles.statusStatValue, { color: '#00E676' }]}>
-                        {avgGmp > 0 ? `+${avgGmp.toFixed(1)}%` : '—'}
-                      </Text>
-                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgGmp')}</Text>
-                    </View>
-                    <View style={[styles.statusDivider, { backgroundColor: colors.divider }]} />
-                    <View style={styles.statusStat}>
-                      <Text style={[styles.statusStatValue, { color: colors.text }]}>
-                        ₹{(items.reduce((s, i) => s + i.issueSize, 0) / items.length / 1000).toFixed(1)}K Cr
-                      </Text>
-                      <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgSize')}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
                     </View>
                   </View>
-                </View>
-              );
-            })}
+                );
+              })}
 
-            {/* Monthly seasonality chart */}
-            <View style={[styles.seasonCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.seasonTitle, { color: colors.text }]}>{t('ipos.raisedByMonth')}</Text>
-              {seasonData.map((m, i) => (
-                <View key={m.month} style={[styles.seasonRow, i < seasonData.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                  <Text style={[styles.seasonMonth, { color: colors.text }]}>{m.month}</Text>
-                  <View style={styles.seasonBar}>
-                    <LinearGradient
-                      colors={[colors.primary, colors.accent]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={[styles.seasonFillGradient, {
+              {/* Monthly overview */}
+              <View style={[styles.seasonCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.seasonTitle, { color: colors.text }]}>{t('ipos.monthlyActivity')}</Text>
+                {seasonData.map((m, i) => (
+                  <View key={m.month} style={[styles.seasonRow, i < seasonData.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                    <Text style={[styles.seasonMonth, { color: colors.text }]}>{m.month}</Text>
+                    <View style={styles.seasonBar}>
+                      <View style={[styles.seasonBarFill, {
                         width: `${(m.count / seasonData[0].count) * 100}%`,
-                      }]}
-                    />
+                        backgroundColor: colors.primary,
+                      }]} />
+                    </View>
+                    <Text style={[styles.seasonCount, { color: colors.text }]}>{m.count}</Text>
+                    <Text style={[styles.seasonRaised, { color: colors.textMuted }]}>{m.totalRaised}</Text>
                   </View>
-                  <Text style={[styles.seasonCount, { color: colors.text }]}>{m.count}</Text>
-                  <Text style={[styles.seasonRaised, { color: colors.textMuted }]}>{m.totalRaised}</Text>
+                ))}
+              </View>
+            </>
+          ) : (
+            /* ══ MARKET STATS VIEW ══ */
+            <>
+              {/* Key stats grid */}
+              <View style={styles.statsGrid}>
+                <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <View style={[styles.statIcon, { backgroundColor: colors.primary + '20' }]}>
+                    <Ionicons name="rocket" size={20} color={colors.primary} />
+                  </View>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{stats.totalIpos}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.totalIpos')}</Text>
                 </View>
-              ))}
-            </View>
-          </>
-        )}
-      </ScrollView>
-    </View>
+                <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <View style={[styles.statIcon, { backgroundColor: '#00E67620' }]}>
+                    <Ionicons name="calendar" size={20} color="#00E676" />
+                  </View>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{stats.thisMonth}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.thisMonth')}</Text>
+                </View>
+                <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <View style={[styles.statIcon, { backgroundColor: '#FFC10720' }]}>
+                    <Ionicons name="cash" size={20} color="#FFC107" />
+                  </View>
+                  <Text style={[styles.statValue, { color: colors.text }]}>
+                    ₹{(stats.totalRaised / 1000).toFixed(1)}K Cr
+                  </Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.totalRaised')}</Text>
+                </View>
+                <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <View style={[styles.statIcon, { backgroundColor: '#00E67620' }]}>
+                    <Ionicons name="trending-up" size={20} color="#00E676" />
+                  </View>
+                  <Text style={[styles.statValue, { color: colors.text }]}>
+                    {stats.avgGmp.toFixed(1)}%
+                  </Text>
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('ipos.avgGmp')}</Text>
+                </View>
+              </View>
+
+              {/* Performance by status */}
+              {['open', 'upcoming', 'listed'].map(status => {
+                const items = grouped[status];
+                if (!items || items.length === 0) return null;
+                const avgSub = items.reduce((s, i) => s + i.subscriptionTotal, 0) / items.length;
+                const avgGmp = items.filter(i => i.gmp > 0).reduce((s, i) => s + i.gmpPercent, 0) / Math.max(items.filter(i => i.gmp > 0).length, 1);
+
+                return (
+                  <View key={status} style={[styles.statusCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                    <View style={styles.statusHeader}>
+                      <StatusDot status={status} />
+                      <Text style={[styles.statusTitle, { color: colors.text }]}>
+                        {status === 'open' ? t('ipos.openIpos') : status === 'upcoming' ? t('ipos.upcomingIpos') : t('ipos.listedIpos')}
+                      </Text>
+                      <Text style={[styles.statusCount, { color: colors.textMuted }]}>{items.length}</Text>
+                    </View>
+                    <View style={styles.statusRow}>
+                      <View style={styles.statusStat}>
+                        <Text style={[styles.statusStatValue, { color: colors.text }]}>{avgSub.toFixed(1)}x</Text>
+                        <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgSub')}</Text>
+                      </View>
+                      <View style={[styles.statusDivider, { backgroundColor: colors.divider }]} />
+                      <View style={styles.statusStat}>
+                        <Text style={[styles.statusStatValue, { color: '#00E676' }]}>
+                          {avgGmp > 0 ? `+${avgGmp.toFixed(1)}%` : '—'}
+                        </Text>
+                        <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgGmp')}</Text>
+                      </View>
+                      <View style={[styles.statusDivider, { backgroundColor: colors.divider }]} />
+                      <View style={styles.statusStat}>
+                        <Text style={[styles.statusStatValue, { color: colors.text }]}>
+                          ₹{(items.reduce((s, i) => s + i.issueSize, 0) / items.length / 1000).toFixed(1)}K Cr
+                        </Text>
+                        <Text style={[styles.statusStatLabel, { color: colors.textMuted }]}>{t('ipos.avgSize')}</Text>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+
+              {/* Monthly seasonality chart */}
+              <View style={[styles.seasonCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.seasonTitle, { color: colors.text }]}>{t('ipos.raisedByMonth')}</Text>
+                {seasonData.map((m, i) => (
+                  <View key={m.month} style={[styles.seasonRow, i < seasonData.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                    <Text style={[styles.seasonMonth, { color: colors.text }]}>{m.month}</Text>
+                    <View style={styles.seasonBar}>
+                      <LinearGradient
+                        colors={[colors.primary, colors.accent]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={[styles.seasonFillGradient, {
+                          width: `${(m.count / seasonData[0].count) * 100}%`,
+                        }]}
+                      />
+                    </View>
+                    <Text style={[styles.seasonCount, { color: colors.text }]}>{m.count}</Text>
+                    <Text style={[styles.seasonRaised, { color: colors.textMuted }]}>{m.totalRaised}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -404,7 +406,6 @@ function StatusDot({ status }: { status: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

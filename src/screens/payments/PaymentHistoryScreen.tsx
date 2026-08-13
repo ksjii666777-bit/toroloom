@@ -26,6 +26,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import * as _Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 // ─── Mock Payment History (fallback if store is empty) ───────────────────────
@@ -233,7 +234,6 @@ export default function PaymentHistoryScreen({ navigation }: NativeStackScreenPr
   const { colors } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const insets = useSafeAreaInsets();
   const { subscription } = useSubscriptionStore();
 
   // Use store history if available, otherwise use mock data
@@ -272,112 +272,109 @@ export default function PaymentHistoryScreen({ navigation }: NativeStackScreenPr
   }, [payments, filter]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-          <View style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
-          </View>
-        </AnimatedPressable>
-        <Text style={styles.title}>{t('paymentHistory.title')}</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Summary Card */}
-        <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summaryCard}>
-          <View style={styles.summaryTop}>
-            <Text style={styles.summaryTopLabel}>{t('paymentHistory.totalSpent')}</Text>
-            <Text style={styles.summaryTopValue}>
-              ₹{stats.totalSpent.toLocaleString('en-IN')}
-            </Text>
-          </View>
-          <View style={styles.summaryBottom}>
-            <View style={styles.summaryStat}>
-              <Ionicons name="checkmark-circle" size={14} color="#00E676" />
-              <Text style={[styles.summaryStatValue, { color: '#00E676' }]}>{stats.completed}</Text>
-              <Text style={styles.summaryStatLabel}>{t('paymentHistory.paid')}</Text>
+  {/* Header */}
+        <View style={styles.header}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+            <View style={styles.backBtn}>
+              <Ionicons name="chevron-back" size={24} color={colors.text} />
             </View>
-            <View style={styles.summaryStat}>
-              <Ionicons name="time-outline" size={14} color="#FFAB40" />
-              <Text style={[styles.summaryStatValue, { color: '#FFAB40' }]}>{stats.pending}</Text>
-              <Text style={styles.summaryStatLabel}>{t('paymentHistory.pending')}</Text>
-            </View>
-            <View style={styles.summaryStat}>
-              <Ionicons name="close-circle" size={14} color="#FF5252" />
-              <Text style={[styles.summaryStatValue, { color: '#FF5252' }]}>{stats.failed}</Text>
-              <Text style={styles.summaryStatLabel}>{t('paymentHistory.failed')}</Text>
-            </View>
-            {stats.totalDiscounts > 0 && (
-              <View style={styles.summaryStat}>
-                <Ionicons name="pricetag" size={14} color="#00E676" />
-                <Text style={[styles.summaryStatValue, { color: '#00E676' }]}>₹{stats.totalDiscounts.toLocaleString('en-IN')}</Text>
-                <Text style={styles.summaryStatLabel}>{t('paymentHistory.saved')}</Text>
-              </View>
-            )}
-          </View>
-        </LinearGradient>
-
-        {/* Filter Tabs */}
-        <View style={styles.filterRow}>
-          {(['all', 'completed', 'pending', 'failed'] as const).map(tab => (
-            <TouchableOpacity
-              key={tab}
-              style={[styles.filterTab, filter === tab && styles.filterTabActive]}
-              onPress={() => setFilter(tab)}
-            >
-              <Text style={[styles.filterTabText, filter === tab && styles.filterTabTextActive]}>
-                {tab === 'all' ? t('paymentHistory.all') : tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          </AnimatedPressable>
+          <Text style={styles.title}>{t('paymentHistory.title')}</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        {/* Payment List */}
-        {filteredPayments.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>{t('paymentHistory.noPayments')}</Text>
-            <Text style={styles.emptySubtitle}>
-              {filter === 'all' ? t('paymentHistory.noPaymentsDesc') : `${t('paymentHistory.noFilteredPayments')} ${filter} ${t('paymentHistory.paymentsYet')}`}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.paymentList}>
-            {filteredPayments.map(payment => (
-              <PaymentRow key={payment.id} payment={payment} colors={colors} styles={styles} />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Summary Card */}
+          <LinearGradient colors={GRADIENTS.midnight} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summaryCard}>
+            <View style={styles.summaryTop}>
+              <Text style={styles.summaryTopLabel}>{t('paymentHistory.totalSpent')}</Text>
+              <Text style={styles.summaryTopValue}>
+                ₹{stats.totalSpent.toLocaleString('en-IN')}
+              </Text>
+            </View>
+            <View style={styles.summaryBottom}>
+              <View style={styles.summaryStat}>
+                <Ionicons name="checkmark-circle" size={14} color="#00E676" />
+                <Text style={[styles.summaryStatValue, { color: '#00E676' }]}>{stats.completed}</Text>
+                <Text style={styles.summaryStatLabel}>{t('paymentHistory.paid')}</Text>
+              </View>
+              <View style={styles.summaryStat}>
+                <Ionicons name="time-outline" size={14} color="#FFAB40" />
+                <Text style={[styles.summaryStatValue, { color: '#FFAB40' }]}>{stats.pending}</Text>
+                <Text style={styles.summaryStatLabel}>{t('paymentHistory.pending')}</Text>
+              </View>
+              <View style={styles.summaryStat}>
+                <Ionicons name="close-circle" size={14} color="#FF5252" />
+                <Text style={[styles.summaryStatValue, { color: '#FF5252' }]}>{stats.failed}</Text>
+                <Text style={styles.summaryStatLabel}>{t('paymentHistory.failed')}</Text>
+              </View>
+              {stats.totalDiscounts > 0 && (
+                <View style={styles.summaryStat}>
+                  <Ionicons name="pricetag" size={14} color="#00E676" />
+                  <Text style={[styles.summaryStatValue, { color: '#00E676' }]}>₹{stats.totalDiscounts.toLocaleString('en-IN')}</Text>
+                  <Text style={styles.summaryStatLabel}>{t('paymentHistory.saved')}</Text>
+                </View>
+              )}
+            </View>
+          </LinearGradient>
+
+          {/* Filter Tabs */}
+          <View style={styles.filterRow}>
+            {(['all', 'completed', 'pending', 'failed'] as const).map(tab => (
+              <TouchableOpacity
+                key={tab}
+                style={[styles.filterTab, filter === tab && styles.filterTabActive]}
+                onPress={() => setFilter(tab)}
+              >
+                <Text style={[styles.filterTabText, filter === tab && styles.filterTabTextActive]}>
+                  {tab === 'all' ? t('paymentHistory.all') : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
 
-        {/* Info Footer */}
-        <Card style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Ionicons name="shield-checkmark" size={18} color={colors.primary} />
-            <View style={styles.infoContent}>
-              <Text style={styles.infoTitle}>{t('paymentHistory.securePayments')}</Text>
-              <Text style={styles.infoText}>{t('paymentHistory.securePaymentsDesc')}</Text>
+          {/* Payment List */}
+          {filteredPayments.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
+              <Text style={styles.emptyTitle}>{t('paymentHistory.noPayments')}</Text>
+              <Text style={styles.emptySubtitle}>
+                {filter === 'all' ? t('paymentHistory.noPaymentsDesc') : `${t('paymentHistory.noFilteredPayments')} ${filter} ${t('paymentHistory.paymentsYet')}`}
+              </Text>
             </View>
-          </View>
-        </Card>
+          ) : (
+            <View style={styles.paymentList}>
+              {filteredPayments.map(payment => (
+                <PaymentRow key={payment.id} payment={payment} colors={colors} styles={styles} />
+              ))}
+            </View>
+          )}
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          {/* Info Footer */}
+          <Card style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Ionicons name="shield-checkmark" size={18} color={colors.primary} />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoTitle}>{t('paymentHistory.securePayments')}</Text>
+                <Text style={styles.infoText}>{t('paymentHistory.securePaymentsDesc')}</Text>
+              </View>
+            </View>
+          </Card>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

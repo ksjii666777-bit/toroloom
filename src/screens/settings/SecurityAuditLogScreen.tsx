@@ -31,6 +31,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useT } from '../../hooks/useT';
 import type {LoginEvent, ActiveSession, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -638,143 +639,144 @@ export default function SecurityAuditLogScreen({ navigation }: NativeStackScreen
   }, [t]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('securityAudit.screenTitle')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              {t('securityAudit.screenSubtitle')}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Summary Stats ── */}
-        <View style={styles.statsRow}>
-          <StatCard icon="log-in" label={t('securityAudit.totalLogins')} value={stats.total.toString()} color="#3B82F6" />
-          <StatCard icon="checkmark-circle" label={t('securityAudit.successful')} value={stats.successful.toString()} color="#00C853" />
-          <StatCard icon="alert-circle" label={t('securityAudit.failed')} value={stats.failed.toString()} color="#FF5252" />
-        </View>
-        <View style={styles.statsRow}>
-          <StatCard icon="phone-portrait" label={t('securityAudit.activeDevices')} value={stats.activeSessions.toString()} color="#8B5CF6" isLast />
-          <View style={[statCardStyles.card, { borderColor: '#FFC10730', marginLeft: SPACING.sm, flex: 1 }]}>
-            <Ionicons name="time" size={20} color="#FFC107" />
-            <Text style={[statCardStyles.value, { color: '#FFC107', fontSize: FONTS.size.sm }]}>
-              {formatRelativeTime(stats.lastLogin, t)}
-            </Text>
-            <Text style={statCardStyles.label}>{t('securityAudit.lastLogin')}</Text>
-          </View>
-        </View>
-
-        {/* ── Active Sessions ── */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {t('securityAudit.activeSessions')}
-        </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          {t('securityAudit.sessionsSubtitle')}
-        </Text>
-
-        {MOCK_ACTIVE_SESSIONS.map((session) => (
-          <SessionCard
-            key={session.id}
-            session={session}
-            onLogout={handleRemoteLogout}
-            colors={colors}
-          />
-        ))}
-
-        {/* Logout All Button */}
-        {MOCK_ACTIVE_SESSIONS.filter(s => !s.isCurrentDevice).length > 0 && (
-          <AnimatedPressable
-            onPress={handleLogoutAll}
-            haptic="warning"
-            scaleTo={0.97}
-          >
-            <View style={[styles.logoutAllBtn, { borderColor: '#FF525240' }]}>
-              <Ionicons name="log-out-outline" size={18} color="#FF5252" />
-              <Text style={styles.logoutAllBtnText}>
-                {t('securityAudit.logOutOther', { count: MOCK_ACTIVE_SESSIONS.filter(s => !s.isCurrentDevice).length })}
-              </Text>
-            </View>
-          </AnimatedPressable>
-        )}
-
-        {/* ── Login History ── */}
-        <View style={styles.sectionRow}>
-          <View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t('securityAudit.loginHistory')}
-            </Text>
-            <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-              {t('securityAudit.loginHistorySub')}
-            </Text>
-          </View>
-        </View>
-
-        {/* Filter chips */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-          <FilterChip label={t('securityAudit.all')} active={activeFilter === 'all'} onPress={() => setActiveFilter('all')} color={colors.primary} />
-          <FilterChip label={t('securityAudit.filterSuccessful')} active={activeFilter === 'success'} onPress={() => setActiveFilter('success')} color="#00C853" />
-          <FilterChip label={t('securityAudit.filterFailed')} active={activeFilter === 'failed'} onPress={() => setActiveFilter('failed')} color="#FF5252" />
-        </ScrollView>
-
-        {/* Login event list */}
-        <View style={[styles.historyCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          {displayedHistory.length > 0 ? (
-            displayedHistory.map((event, i) => (
-              <Animated.View key={event.id} entering={FadeInDown.delay(i * 40).springify()}>
-                <LoginEventRow event={event} colors={colors} />
-              </Animated.View>
-            ))
-          ) : (
-            <View style={styles.emptyState}>
-              <Ionicons name="search-outline" size={36} color={colors.textMuted} />
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                {t('securityAudit.noLoginsFound', {
-                  type: activeFilter === 'success' ? t('securityAudit.noLoginsTypeFailed') : t('securityAudit.noLoginsTypeSuccess'),
-                })}
-              </Text>
-            </View>
-          )}
-
-          {/* Show more / less */}
-          {filteredHistory.length > 5 && (
-            <Pressable
-              onPress={() => setShowAllHistory(prev => !prev)}
-              style={[styles.showMoreBtn, { borderTopColor: colors.divider }]}
-            >
-              <Text style={[styles.showMoreText, { color: colors.primary }]}>
-                {showAllHistory ? t('securityAudit.showLess') : t('securityAudit.showAll', { count: filteredHistory.length })}
-              </Text>
-              <Ionicons
-                name={showAllHistory ? 'chevron-up' : 'chevron-down'}
-                size={14}
-                color={colors.primary}
-              />
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
-          )}
-        </View>
-
-        {/* ── Info Card ── */}
-        <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="shield-checkmark" size={18} color={colors.primary} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.infoTitle, { color: colors.text }]}>{t('securityAudit.staySecure')}</Text>
-            <Text style={[styles.infoText, { color: colors.textMuted }]}>
-              {t('securityAudit.staySecureDesc')}
-            </Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('securityAudit.screenTitle')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                {t('securityAudit.screenSubtitle')}
+              </Text>
+            </View>
           </View>
         </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* ── Summary Stats ── */}
+          <View style={styles.statsRow}>
+            <StatCard icon="log-in" label={t('securityAudit.totalLogins')} value={stats.total.toString()} color="#3B82F6" />
+            <StatCard icon="checkmark-circle" label={t('securityAudit.successful')} value={stats.successful.toString()} color="#00C853" />
+            <StatCard icon="alert-circle" label={t('securityAudit.failed')} value={stats.failed.toString()} color="#FF5252" />
+          </View>
+          <View style={styles.statsRow}>
+            <StatCard icon="phone-portrait" label={t('securityAudit.activeDevices')} value={stats.activeSessions.toString()} color="#8B5CF6" isLast />
+            <View style={[statCardStyles.card, { borderColor: '#FFC10730', marginLeft: SPACING.sm, flex: 1 }]}>
+              <Ionicons name="time" size={20} color="#FFC107" />
+              <Text style={[statCardStyles.value, { color: '#FFC107', fontSize: FONTS.size.sm }]}>
+                {formatRelativeTime(stats.lastLogin, t)}
+              </Text>
+              <Text style={statCardStyles.label}>{t('securityAudit.lastLogin')}</Text>
+            </View>
+          </View>
+
+          {/* ── Active Sessions ── */}
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            {t('securityAudit.activeSessions')}
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+            {t('securityAudit.sessionsSubtitle')}
+          </Text>
+
+          {MOCK_ACTIVE_SESSIONS.map((session) => (
+            <SessionCard
+              key={session.id}
+              session={session}
+              onLogout={handleRemoteLogout}
+              colors={colors}
+            />
+          ))}
+
+          {/* Logout All Button */}
+          {MOCK_ACTIVE_SESSIONS.filter(s => !s.isCurrentDevice).length > 0 && (
+            <AnimatedPressable
+              onPress={handleLogoutAll}
+              haptic="warning"
+              scaleTo={0.97}
+            >
+              <View style={[styles.logoutAllBtn, { borderColor: '#FF525240' }]}>
+                <Ionicons name="log-out-outline" size={18} color="#FF5252" />
+                <Text style={styles.logoutAllBtnText}>
+                  {t('securityAudit.logOutOther', { count: MOCK_ACTIVE_SESSIONS.filter(s => !s.isCurrentDevice).length })}
+                </Text>
+              </View>
+            </AnimatedPressable>
+          )}
+
+          {/* ── Login History ── */}
+          <View style={styles.sectionRow}>
+            <View>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                {t('securityAudit.loginHistory')}
+              </Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+                {t('securityAudit.loginHistorySub')}
+              </Text>
+            </View>
+          </View>
+
+          {/* Filter chips */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+            <FilterChip label={t('securityAudit.all')} active={activeFilter === 'all'} onPress={() => setActiveFilter('all')} color={colors.primary} />
+            <FilterChip label={t('securityAudit.filterSuccessful')} active={activeFilter === 'success'} onPress={() => setActiveFilter('success')} color="#00C853" />
+            <FilterChip label={t('securityAudit.filterFailed')} active={activeFilter === 'failed'} onPress={() => setActiveFilter('failed')} color="#FF5252" />
+          </ScrollView>
+
+          {/* Login event list */}
+          <View style={[styles.historyCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            {displayedHistory.length > 0 ? (
+              displayedHistory.map((event, i) => (
+                <Animated.View key={event.id} entering={FadeInDown.delay(i * 40).springify()}>
+                  <LoginEventRow event={event} colors={colors} />
+                </Animated.View>
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="search-outline" size={36} color={colors.textMuted} />
+                <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                  {t('securityAudit.noLoginsFound', {
+                    type: activeFilter === 'success' ? t('securityAudit.noLoginsTypeFailed') : t('securityAudit.noLoginsTypeSuccess'),
+                  })}
+                </Text>
+              </View>
+            )}
+
+            {/* Show more / less */}
+            {filteredHistory.length > 5 && (
+              <Pressable
+                onPress={() => setShowAllHistory(prev => !prev)}
+                style={[styles.showMoreBtn, { borderTopColor: colors.divider }]}
+              >
+                <Text style={[styles.showMoreText, { color: colors.primary }]}>
+                  {showAllHistory ? t('securityAudit.showLess') : t('securityAudit.showAll', { count: filteredHistory.length })}
+                </Text>
+                <Ionicons
+                  name={showAllHistory ? 'chevron-up' : 'chevron-down'}
+                  size={14}
+                  color={colors.primary}
+                />
+              </Pressable>
+            )}
+          </View>
+
+          {/* ── Info Card ── */}
+          <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="shield-checkmark" size={18} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.infoTitle, { color: colors.text }]}>{t('securityAudit.staySecure')}</Text>
+              <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                {t('securityAudit.staySecureDesc')}
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -783,7 +785,6 @@ export default function SecurityAuditLogScreen({ navigation }: NativeStackScreen
 // ═════════════════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     padding: SPACING.xl,
     paddingTop: 60,

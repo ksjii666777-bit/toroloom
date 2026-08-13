@@ -29,6 +29,7 @@ import { computeDividendState } from '../../services/dividendService';
 import { fetchDividendDataSafe } from '../../services/api/dividends';
 import type {DividendEvent, MonthlyDividend, DividendTrackerState, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -254,213 +255,214 @@ export default function DividendTrackerScreen({ navigation }: NativeStackScreenP
   }, [stocks, navigation]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('dividendTracker.title')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              {t('dividendTracker.annualIncome', { amount: dividendState.currentYearProjection.totalEstimated.toFixed(0) })}
-            </Text>
-          </View>
-          <SourceBadge source={dataSource} isLoading={isLoading} />
-        </View>
-
-        {/* Tabs */}
-        <View style={styles.tabRow}>
-          {TAB_KEYS.map(tab => {
-            const isActive = activeTab === tab.key;
-            const tabLabel = tab.key === 'upcoming' ? t('dividendTracker.tabUpcoming') : tab.key === 'history' ? t('dividendTracker.tabHistory') : t('dividendTracker.tabSummary');
-            return (
-              <Pressable
-                key={tab.key}
-                onPress={() => setActiveTab(tab.key)}
-                style={[styles.tabBtn, {
-                  backgroundColor: isActive ? '#00E67620' : 'transparent',
-                  borderColor: isActive ? '#00E67640' : 'transparent',
-                }]}
-              >
-                <Ionicons name={tab.icon as any} size={13} color={isActive ? '#00E676' : colors.textMuted} />
-                <Text style={[styles.tabLabel, { color: isActive ? '#00E676' : colors.textMuted }]}>{tabLabel}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Loading State */}
-        {isLoading && (
-          <View style={styles.loadingState}>
-            <ActivityIndicator size="large" color="#00E676" />
-            <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('dividendTracker.fetchingData')}</Text>
-          </View>
-        )}
-
-        {/* ── Upcoming Tab ── */}
-        {!isLoading && activeTab === 'upcoming' && (
-          dividendState.upcoming.length > 0 ? (
-            <View>
-              <Text style={[styles.sectionHint, { color: colors.textMuted }]}>
-                {t('dividendTracker.upcomingEvents', { count: dividendState.upcoming.length })}
-                {dataSource === 'api' ? t('dividendTracker.sourceLive') : t('dividendTracker.sourceEstimated')}
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('dividendTracker.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                {t('dividendTracker.annualIncome', { amount: dividendState.currentYearProjection.totalEstimated.toFixed(0) })}
               </Text>
-              {dividendState.upcoming.map(event => (
-                <Pressable key={event.id} onPress={() => handlePress(event.symbol)}>
-                  <EventCard event={event} colors={colors} />
+            </View>
+            <SourceBadge source={dataSource} isLoading={isLoading} />
+          </View>
+
+          {/* Tabs */}
+          <View style={styles.tabRow}>
+            {TAB_KEYS.map(tab => {
+              const isActive = activeTab === tab.key;
+              const tabLabel = tab.key === 'upcoming' ? t('dividendTracker.tabUpcoming') : tab.key === 'history' ? t('dividendTracker.tabHistory') : t('dividendTracker.tabSummary');
+              return (
+                <Pressable
+                  key={tab.key}
+                  onPress={() => setActiveTab(tab.key)}
+                  style={[styles.tabBtn, {
+                    backgroundColor: isActive ? '#00E67620' : 'transparent',
+                    borderColor: isActive ? '#00E67640' : 'transparent',
+                  }]}
+                >
+                  <Ionicons name={tab.icon as any} size={13} color={isActive ? '#00E676' : colors.textMuted} />
+                  <Text style={[styles.tabLabel, { color: isActive ? '#00E676' : colors.textMuted }]}>{tabLabel}</Text>
                 </Pressable>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyState}>
-              <Ionicons name="calendar-outline" size={56} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('dividendTracker.noUpcomingTitle')}</Text>
-              <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
-                {t('dividendTracker.noUpcomingDesc')}
-              </Text>
-            </View>
-          )
-        )}
+              );
+            })}
+          </View>
+        </View>
 
-        {/* ── History Tab ── */}
-        {!isLoading && activeTab === 'history' && (
-          dividendState.monthlyHistory.length > 0 ? (
-            <View>
-              <Text style={[styles.sectionHint, { color: colors.textMuted }]}>
-                {t('dividendTracker.historyPayments', { count: dividendState.totalPayments })}
-                {dataSource === 'api' ? t('dividendTracker.sourceLive') : t('dividendTracker.sourceEstimated')}
-              </Text>
-              {dividendState.monthlyHistory.map(month => (
-                <MonthChip key={month.month} month={month} maxAmount={maxMonthlyAmount} colors={colors} />
-              ))}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Loading State */}
+          {isLoading && (
+            <View style={styles.loadingState}>
+              <ActivityIndicator size="large" color="#00E676" />
+              <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('dividendTracker.fetchingData')}</Text>
             </View>
-          ) : (
-            <View style={styles.emptyState}>
-              <Ionicons name="time-outline" size={56} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('dividendTracker.noHistoryTitle')}</Text>
-              <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
-                {t('dividendTracker.noHistoryDesc')}
-              </Text>
-            </View>
-          )
-        )}
+          )}
 
-        {/* ── Summary Tab ── */}
-        {!isLoading && activeTab === 'summary' && (
-          <View>
-            {/* Data source info */}
-            <View style={[styles.sourceNote, {
-              backgroundColor: dataSource === 'api' ? '#00E67610' : '#6C63FF10',
-              borderColor: dataSource === 'api' ? '#00E67630' : '#6C63FF30',
-            }]}>
-              <Ionicons
-                name={dataSource === 'api' ? 'cloud-done' : 'code-slash'}
-                size={16}
-                color={dataSource === 'api' ? '#00E676' : '#6C63FF'}
-              />
-              <Text style={[styles.sourceNoteText, {
-                color: dataSource === 'api' ? '#00E676' : '#6C63FF',
-              }]}>
-                {dataSource === 'api'
-                  ? t('dividendTracker.dataLive')
-                  : t('dividendTracker.dataEstimated')}
-              </Text>
-            </View>
-
-            {/* Overview Stats */}
-            <View style={styles.summaryGrid}>
-              <SummaryStatCard
-                icon="💰"
-                label={t('dividendTracker.annualIncomeLabel')}
-                value={formatCurrency(dividendState.currentYearProjection.totalEstimated, true).replace('₹', '')}
-                color="#00E676"
-                subtitle={t('dividendTracker.estimatedThisYear')}
-                textMuted={colors.textMuted}
-              />
-              <SummaryStatCard
-                icon="📊"
-                label={t('dividendTracker.portfolioYieldLabel')}
-                value={`${dividendState.currentYearProjection.portfolioYield.toFixed(2)}%`}
-                color="#3B82F6"
-                subtitle={t('dividendTracker.divVsPortfolio')}
-                textMuted={colors.textMuted}
-              />
-              <SummaryStatCard
-                icon="🌱"
-                label={t('dividendTracker.yieldOnCostLabel')}
-                value={`${dividendState.currentYearProjection.yieldOnCost.toFixed(2)}%`}
-                color="#6C63FF"
-                subtitle={t('dividendTracker.divVsCost')}
-                textMuted={colors.textMuted}
-              />
-              <SummaryStatCard
-                icon="📅"
-                label={t('dividendTracker.monthlyAvgLabel')}
-                value={formatCurrency(dividendState.currentYearProjection.monthlyAverage, true).replace('₹', '')}
-                color="#FFC107"
-                subtitle={t('dividendTracker.perMonth')}
-                textMuted={colors.textMuted}
-              />
-            </View>
-
-            {/* Top Payers */}
-            {dividendState.currentYearProjection.topPayers.length > 0 && (
-              <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dividendTracker.topPayersTitle')}</Text>
-                {dividendState.currentYearProjection.topPayers.map((payer, i) => (
-                  <TopPayerRow
-                    key={payer.symbol}
-                    symbol={payer.symbol}
-                    name={payer.name}
-                    totalAmount={payer.totalAmount}
-                    yieldPercent={payer.yieldPercent}
-                    isLast={i === dividendState.currentYearProjection.topPayers.length - 1}
-                    colors={colors}
-                  />
+          {/* ── Upcoming Tab ── */}
+          {!isLoading && activeTab === 'upcoming' && (
+            dividendState.upcoming.length > 0 ? (
+              <View>
+                <Text style={[styles.sectionHint, { color: colors.textMuted }]}>
+                  {t('dividendTracker.upcomingEvents', { count: dividendState.upcoming.length })}
+                  {dataSource === 'api' ? t('dividendTracker.sourceLive') : t('dividendTracker.sourceEstimated')}
+                </Text>
+                {dividendState.upcoming.map(event => (
+                  <Pressable key={event.id} onPress={() => handlePress(event.symbol)}>
+                    <EventCard event={event} colors={colors} />
+                  </Pressable>
                 ))}
               </View>
-            )}
-
-            {/* Annual Breakdown */}
-            {dividendState.annualSummaries.length > 0 && (
-              <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dividendTracker.annualBreakdownTitle')}</Text>
-                {dividendState.annualSummaries.map((year, i) => (
-                  <View key={year.year} style={[styles.yearRow, i < dividendState.annualSummaries.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
-                      <Text style={[styles.yearValue, { color: colors.text }]}>{year.year}</Text>
-                      <Text style={[styles.yearTotal, { color: '#00E676' }]}>₹{year.totalIncome.toFixed(0)}</Text>
-                    </View>
-                    <Text style={[styles.yearAvg, { color: colors.textMuted }]}>
-                      ₹{year.monthlyAverage.toFixed(0)}{t('dividendTracker.mo')} · {year.months.reduce((s, m) => s + m.count, 0)} {t('dividendTracker.paymentsLabel')}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* Info */}
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Ionicons name="information-circle" size={18} color="#00E676" />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('dividendTracker.dividendNotesTitle')}</Text>
-                <Text style={[styles.infoText, { color: colors.textMuted }]}>
-                  {dataSource === 'api'
-                    ? t('dividendTracker.dividendNotesLive')
-                    : t('dividendTracker.dividendNotesEstimated')}
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="calendar-outline" size={56} color={colors.textMuted} />
+                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('dividendTracker.noUpcomingTitle')}</Text>
+                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
+                  {t('dividendTracker.noUpcomingDesc')}
                 </Text>
               </View>
-            </View>
-          </View>
-        )}
+            )
+          )}
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+          {/* ── History Tab ── */}
+          {!isLoading && activeTab === 'history' && (
+            dividendState.monthlyHistory.length > 0 ? (
+              <View>
+                <Text style={[styles.sectionHint, { color: colors.textMuted }]}>
+                  {t('dividendTracker.historyPayments', { count: dividendState.totalPayments })}
+                  {dataSource === 'api' ? t('dividendTracker.sourceLive') : t('dividendTracker.sourceEstimated')}
+                </Text>
+                {dividendState.monthlyHistory.map(month => (
+                  <MonthChip key={month.month} month={month} maxAmount={maxMonthlyAmount} colors={colors} />
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="time-outline" size={56} color={colors.textMuted} />
+                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('dividendTracker.noHistoryTitle')}</Text>
+                <Text style={[styles.emptyDesc, { color: colors.textMuted }]}>
+                  {t('dividendTracker.noHistoryDesc')}
+                </Text>
+              </View>
+            )
+          )}
+
+          {/* ── Summary Tab ── */}
+          {!isLoading && activeTab === 'summary' && (
+            <View>
+              {/* Data source info */}
+              <View style={[styles.sourceNote, {
+                backgroundColor: dataSource === 'api' ? '#00E67610' : '#6C63FF10',
+                borderColor: dataSource === 'api' ? '#00E67630' : '#6C63FF30',
+              }]}>
+                <Ionicons
+                  name={dataSource === 'api' ? 'cloud-done' : 'code-slash'}
+                  size={16}
+                  color={dataSource === 'api' ? '#00E676' : '#6C63FF'}
+                />
+                <Text style={[styles.sourceNoteText, {
+                  color: dataSource === 'api' ? '#00E676' : '#6C63FF',
+                }]}>
+                  {dataSource === 'api'
+                    ? t('dividendTracker.dataLive')
+                    : t('dividendTracker.dataEstimated')}
+                </Text>
+              </View>
+
+              {/* Overview Stats */}
+              <View style={styles.summaryGrid}>
+                <SummaryStatCard
+                  icon="💰"
+                  label={t('dividendTracker.annualIncomeLabel')}
+                  value={formatCurrency(dividendState.currentYearProjection.totalEstimated, true).replace('₹', '')}
+                  color="#00E676"
+                  subtitle={t('dividendTracker.estimatedThisYear')}
+                  textMuted={colors.textMuted}
+                />
+                <SummaryStatCard
+                  icon="📊"
+                  label={t('dividendTracker.portfolioYieldLabel')}
+                  value={`${dividendState.currentYearProjection.portfolioYield.toFixed(2)}%`}
+                  color="#3B82F6"
+                  subtitle={t('dividendTracker.divVsPortfolio')}
+                  textMuted={colors.textMuted}
+                />
+                <SummaryStatCard
+                  icon="🌱"
+                  label={t('dividendTracker.yieldOnCostLabel')}
+                  value={`${dividendState.currentYearProjection.yieldOnCost.toFixed(2)}%`}
+                  color="#6C63FF"
+                  subtitle={t('dividendTracker.divVsCost')}
+                  textMuted={colors.textMuted}
+                />
+                <SummaryStatCard
+                  icon="📅"
+                  label={t('dividendTracker.monthlyAvgLabel')}
+                  value={formatCurrency(dividendState.currentYearProjection.monthlyAverage, true).replace('₹', '')}
+                  color="#FFC107"
+                  subtitle={t('dividendTracker.perMonth')}
+                  textMuted={colors.textMuted}
+                />
+              </View>
+
+              {/* Top Payers */}
+              {dividendState.currentYearProjection.topPayers.length > 0 && (
+                <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dividendTracker.topPayersTitle')}</Text>
+                  {dividendState.currentYearProjection.topPayers.map((payer, i) => (
+                    <TopPayerRow
+                      key={payer.symbol}
+                      symbol={payer.symbol}
+                      name={payer.name}
+                      totalAmount={payer.totalAmount}
+                      yieldPercent={payer.yieldPercent}
+                      isLast={i === dividendState.currentYearProjection.topPayers.length - 1}
+                      colors={colors}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {/* Annual Breakdown */}
+              {dividendState.annualSummaries.length > 0 && (
+                <View style={[styles.sectionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('dividendTracker.annualBreakdownTitle')}</Text>
+                  {dividendState.annualSummaries.map((year, i) => (
+                    <View key={year.year} style={[styles.yearRow, i < dividendState.annualSummaries.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.divider }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>
+                        <Text style={[styles.yearValue, { color: colors.text }]}>{year.year}</Text>
+                        <Text style={[styles.yearTotal, { color: '#00E676' }]}>₹{year.totalIncome.toFixed(0)}</Text>
+                      </View>
+                      <Text style={[styles.yearAvg, { color: colors.textMuted }]}>
+                        ₹{year.monthlyAverage.toFixed(0)}{t('dividendTracker.mo')} · {year.months.reduce((s, m) => s + m.count, 0)} {t('dividendTracker.paymentsLabel')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Info */}
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="information-circle" size={18} color="#00E676" />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.infoTitle, { color: colors.text }]}>{t('dividendTracker.dividendNotesTitle')}</Text>
+                  <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                    {dataSource === 'api'
+                      ? t('dividendTracker.dividendNotesLive')
+                      : t('dividendTracker.dividendNotesEstimated')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          <View style={{ height: 80 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -469,7 +471,6 @@ export default function DividendTrackerScreen({ navigation }: NativeStackScreenP
 // ══════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { padding: SPACING.xl, paddingTop: 60, borderBottomLeftRadius: BORDER_RADIUS.xl, borderBottomRightRadius: BORDER_RADIUS.xl },
   headerTop: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   title: { ...FONTS.bold, fontSize: FONTS.size.title },

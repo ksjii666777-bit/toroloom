@@ -25,6 +25,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 // ──── Provider Meta ─────────────────────────────────────────────────────
@@ -60,7 +61,6 @@ const PROVIDER_META: Record<string, {
 export default function AISettingsScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'AISettings'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [status, setStatus] = useState<AIStatusResponse | null>(null);
@@ -110,244 +110,242 @@ export default function AISettingsScreen({ navigation }: NativeStackScreenProps<
 
   if (loading) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 60 }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textMuted }]}>
-          Loading AI provider status...
-        </Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+  <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+            Loading AI provider status...
+          </Text>
+      </AppScreen>
     );
   }
 
   const configuredCount = status?.availableProviders.filter(p => p.configured).length || 0;
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Header */}
-        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="arrow-back" size={22} color={colors.text} />
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <View style={[styles.headerIcon, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="bulb" size={22} color={colors.primary} />
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
+        >
+          {/* Header */}
+          <View style={[styles.header]}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="arrow-back" size={22} color={colors.text} />
+            </TouchableOpacity>
+            <View style={styles.headerCenter}>
+              <View style={[styles.headerIcon, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="bulb" size={22} color={colors.primary} />
+              </View>
+              <View>
+                <Text style={[styles.title, { color: colors.text }]}>{t('aiSettings.title')}</Text>
+                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                  {status?.configured
+                    ? `Connected via ${status.activeProvider}`
+                    : 'No AI provider configured'}
+                </Text>
+              </View>
             </View>
-            <View>
-              <Text style={[styles.title, { color: colors.text }]}>{t('aiSettings.title')}</Text>
-              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                {status?.configured
-                  ? `Connected via ${status.activeProvider}`
-                  : 'No AI provider configured'}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity onPress={loadStatus} style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="refresh" size={20} color={colors.textMuted} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Error banner */}
-        {error && (
-          <View style={[styles.errorBanner, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}>
-            <Ionicons name="alert-circle" size={18} color={colors.danger} />
-            <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
-            <TouchableOpacity onPress={loadStatus}>
-              <Text style={[styles.retryLink, { color: colors.primary }]}>{t('aiSettings.retry')}</Text>
+            <TouchableOpacity onPress={loadStatus} style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="refresh" size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
-        )}
 
-        {/* Status Summary Card */}
-        <View style={[styles.summaryCard, { backgroundColor: status?.configured ? '#00E676' : colors.danger + '20', borderColor: status?.configured ? '#00E67640' : colors.danger + '30' }]}>
-          <View style={[styles.summaryIcon, { backgroundColor: status?.configured ? '#00E67620' : colors.danger + '20' }]}>
-            <Ionicons
-              name={status?.configured ? 'checkmark-circle' : 'close-circle'}
-              size={32}
-              color={status?.configured ? '#00E676' : colors.danger}
-            />
+          {/* Error banner */}
+          {error && (
+            <View style={[styles.errorBanner, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}>
+              <Ionicons name="alert-circle" size={18} color={colors.danger} />
+              <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
+              <TouchableOpacity onPress={loadStatus}>
+                <Text style={[styles.retryLink, { color: colors.primary }]}>{t('aiSettings.retry')}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Status Summary Card */}
+          <View style={[styles.summaryCard, { backgroundColor: status?.configured ? '#00E676' : colors.danger + '20', borderColor: status?.configured ? '#00E67640' : colors.danger + '30' }]}>
+            <View style={[styles.summaryIcon, { backgroundColor: status?.configured ? '#00E67620' : colors.danger + '20' }]}>
+              <Ionicons
+                name={status?.configured ? 'checkmark-circle' : 'close-circle'}
+                size={32}
+                color={status?.configured ? '#00E676' : colors.danger}
+              />
+            </View>
+            <View style={styles.summaryInfo}>
+              <Text style={[styles.summaryTitle, { color: colors.text }]}>
+                {status?.configured ? 'AI Provider Active' : 'No AI Provider Configured'}
+              </Text>
+              <Text style={[styles.summaryDesc, { color: colors.textSecondary }]}>
+                {status?.configured
+                  ? `${configuredCount} provider(s) configured · Active: ${status.activeProvider}`
+                  : 'Add an API key in the backend env vars to enable AI features'}
+              </Text>
+            </View>
           </View>
-          <View style={styles.summaryInfo}>
-            <Text style={[styles.summaryTitle, { color: colors.text }]}>
-              {status?.configured ? 'AI Provider Active' : 'No AI Provider Configured'}
-            </Text>
-            <Text style={[styles.summaryDesc, { color: colors.textSecondary }]}>
-              {status?.configured
-                ? `${configuredCount} provider(s) configured · Active: ${status.activeProvider}`
-                : 'Add an API key in the backend env vars to enable AI features'}
-            </Text>
-          </View>
-        </View>
 
-        {/* Provider Cards */}
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('aiSettings.availableProviders')}</Text>
+          {/* Provider Cards */}
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('aiSettings.availableProviders')}</Text>
 
-        {status?.availableProviders.map((provider) => {
-          const meta = PROVIDER_META[provider.id] || {
-            icon: 'cloud' as keyof typeof Ionicons.glyphMap,
-            color: colors.textMuted,
-            description: 'AI provider',
-            docsUrl: '',
-          };
+          {status?.availableProviders.map((provider) => {
+            const meta = PROVIDER_META[provider.id] || {
+              icon: 'cloud' as keyof typeof Ionicons.glyphMap,
+              color: colors.textMuted,
+              description: 'AI provider',
+              docsUrl: '',
+            };
 
-          return (
-            <View
-              key={provider.id}
-              style={[
-                styles.providerCard,
-                { backgroundColor: colors.bgCard, borderColor: provider.active ? meta.color + '50' : colors.border },
-                provider.active && { borderWidth: 1.5 },
-              ]}
-            >
-              {/* Provider Header */}
-              <View style={styles.providerHeader}>
-                <View style={[styles.providerIcon, { backgroundColor: meta.color + '20' }]}>
-                  <Ionicons name={meta.icon} size={22} color={meta.color} />
-                </View>
-                <View style={styles.providerInfo}>
-                  <View style={styles.providerNameRow}>
-                    <Text style={[styles.providerName, { color: colors.text }]}>{provider.name}</Text>
-                    {provider.active && (
-                      <View style={[styles.activeBadge, { backgroundColor: '#00E67620' }]}>
-                        <Text style={styles.activeBadgeText}>{t('aiSettings.aiProviderActive')}</Text>
-                      </View>
-                    )}
-                    <View style={[styles.statusDot, {
-                      backgroundColor: provider.configured ? '#00E676' : colors.textMuted,
-                    }]} />
+            return (
+              <View
+                key={provider.id}
+                style={[
+                  styles.providerCard,
+                  { backgroundColor: colors.bgCard, borderColor: provider.active ? meta.color + '50' : colors.border },
+                  provider.active && { borderWidth: 1.5 },
+                ]}
+              >
+                {/* Provider Header */}
+                <View style={styles.providerHeader}>
+                  <View style={[styles.providerIcon, { backgroundColor: meta.color + '20' }]}>
+                    <Ionicons name={meta.icon} size={22} color={meta.color} />
                   </View>
-                  <Text style={[styles.providerDesc, { color: colors.textSecondary }]}>
-                    {meta.description}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Provider Details */}
-              <View style={[styles.providerDetails, { borderTopColor: colors.divider }]}>
-                <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.statusLabel')}</Text>
-                  <View style={styles.detailValue}>
-                    <View style={[styles.statusDotSm, {
-                      backgroundColor: provider.configured ? '#00E676' : colors.textMuted,
-                    }]} />
-                    <Text style={[styles.detailText, {
-                      color: provider.configured ? '#00E676' : colors.textMuted,
-                    }]}>
-                      {provider.configured ? 'Configured' : 'Not configured'}
+                  <View style={styles.providerInfo}>
+                    <View style={styles.providerNameRow}>
+                      <Text style={[styles.providerName, { color: colors.text }]}>{provider.name}</Text>
+                      {provider.active && (
+                        <View style={[styles.activeBadge, { backgroundColor: '#00E67620' }]}>
+                          <Text style={styles.activeBadgeText}>{t('aiSettings.aiProviderActive')}</Text>
+                        </View>
+                      )}
+                      <View style={[styles.statusDot, {
+                        backgroundColor: provider.configured ? '#00E676' : colors.textMuted,
+                      }]} />
+                    </View>
+                    <Text style={[styles.providerDesc, { color: colors.textSecondary }]}>
+                      {meta.description}
                     </Text>
                   </View>
                 </View>
-                <View style={styles.detailRow}>
-                  <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.modelLabel')}</Text>
-                  <Text style={[styles.detailText, { color: colors.text }]} numberOfLines={1}>
-                    {provider.model || 'Default'}
-                  </Text>
-                </View>
-                {provider.endpoint && (
+
+                {/* Provider Details */}
+                <View style={[styles.providerDetails, { borderTopColor: colors.divider }]}>
                   <View style={styles.detailRow}>
-                    <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.endpointLabel')}</Text>
-                    <Text style={[styles.detailText, { color: colors.text, fontSize: FONTS.size.xs }]} numberOfLines={2}>
-                      {provider.endpoint}
+                    <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.statusLabel')}</Text>
+                    <View style={styles.detailValue}>
+                      <View style={[styles.statusDotSm, {
+                        backgroundColor: provider.configured ? '#00E676' : colors.textMuted,
+                      }]} />
+                      <Text style={[styles.detailText, {
+                        color: provider.configured ? '#00E676' : colors.textMuted,
+                      }]}>
+                        {provider.configured ? 'Configured' : 'Not configured'}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.modelLabel')}</Text>
+                    <Text style={[styles.detailText, { color: colors.text }]} numberOfLines={1}>
+                      {provider.model || 'Default'}
                     </Text>
                   </View>
+                  {provider.endpoint && (
+                    <View style={styles.detailRow}>
+                      <Text style={[styles.detailLabel, { color: colors.textMuted }]}>{t('aiSettings.endpointLabel')}</Text>
+                      <Text style={[styles.detailText, { color: colors.text, fontSize: FONTS.size.xs }]} numberOfLines={2}>
+                        {provider.endpoint}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Setup Link */}
+                {!provider.configured && meta.docsUrl && (
+                  <AnimatedPressable
+                    onPress={() => Linking.openURL(meta.docsUrl)}
+                    scaleTo={0.97}
+                    style={[styles.setupBtn, { borderColor: meta.color + '30' }]}
+                  >
+                    <Ionicons name="key" size={16} color={meta.color} />
+                    <Text style={[styles.setupBtnText, { color: meta.color }]}>
+                      Get API Key
+                    </Text>
+                    <Ionicons name="open-outline" size={14} color={meta.color} />
+                  </AnimatedPressable>
                 )}
               </View>
+            );
+          })}
 
-              {/* Setup Link */}
-              {!provider.configured && meta.docsUrl && (
-                <AnimatedPressable
-                  onPress={() => Linking.openURL(meta.docsUrl)}
-                  scaleTo={0.97}
-                  style={[styles.setupBtn, { borderColor: meta.color + '30' }]}
-                >
-                  <Ionicons name="key" size={16} color={meta.color} />
-                  <Text style={[styles.setupBtnText, { color: meta.color }]}>
-                    Get API Key
-                  </Text>
-                  <Ionicons name="open-outline" size={14} color={meta.color} />
-                </AnimatedPressable>
-              )}
-            </View>
-          );
-        })}
-
-        {/* Test Connection */}
-        <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
-          Test Connection
-        </Text>
-        <Card
-          title={t('aiSettings.testTitle')}
-          subtitle={t('aiSettings.testSubtitle')}
-          style={{ marginBottom: SPACING.md }}
-        >
-          <AnimatedPressable
-            onPress={handleTestConnection}
-            disabled={testing || !status?.configured}
-            scaleTo={0.96}
-            style={[
-              styles.testBtn,
-              { backgroundColor: colors.primary, opacity: testing || !status?.configured ? 0.5 : 1 },
-            ]}
-          >
-            {testing ? (
-              <ActivityIndicator size="small" color={colors.white} />
-            ) : (
-              <Ionicons name="flash" size={20} color={colors.white} />
-            )}
-            <Text style={styles.testBtnText}>
-              {testing ? 'Testing...' : 'Test AI Connection'}
-            </Text>
-          </AnimatedPressable>
-          {!status?.configured && (
-            <Text style={[styles.testHint, { color: colors.textMuted }]}>
-              Configure an AI provider first by setting API keys in the backend environment variables.
-            </Text>
-          )}
-        </Card>
-
-        {/* Info Card */}
-        <Card title={t('aiSettings.aboutTitle')} subtitle={t('aiSettings.aboutSubtitle')}>
-          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-            Toroloom supports multiple AI providers. The active provider is determined by the backend
-            configuration. AI insights are generated using a sophisticated multi-factor model that
-            analyzes technical indicators, fundamental data, and market sentiment.
+          {/* Test Connection */}
+          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
+            Test Connection
           </Text>
-          <View style={styles.infoList}>
-            <View style={styles.infoItem}>
-              <Ionicons name="checkmark-circle" size={16} color="#00E676" />
-              <Text style={[styles.infoItemText, { color: colors.textSecondary }]}>
-                All insights are cached for fast retrieval
+          <Card
+            title={t('aiSettings.testTitle')}
+            subtitle={t('aiSettings.testSubtitle')}
+            style={{ marginBottom: SPACING.md }}
+          >
+            <AnimatedPressable
+              onPress={handleTestConnection}
+              disabled={testing || !status?.configured}
+              scaleTo={0.96}
+              style={[
+                styles.testBtn,
+                { backgroundColor: colors.primary, opacity: testing || !status?.configured ? 0.5 : 1 },
+              ]}
+            >
+              {testing ? (
+                <ActivityIndicator size="small" color={colors.white} />
+              ) : (
+                <Ionicons name="flash" size={20} color={colors.white} />
+              )}
+              <Text style={styles.testBtnText}>
+                {testing ? 'Testing...' : 'Test AI Connection'}
               </Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Ionicons name="checkmark-circle" size={16} color="#00E676" />
-              <Text style={[styles.infoItemText, { color: colors.textSecondary }]}>
-                Provider switching requires backend env var change
+            </AnimatedPressable>
+            {!status?.configured && (
+              <Text style={[styles.testHint, { color: colors.textMuted }]}>
+                Configure an AI provider first by setting API keys in the backend environment variables.
               </Text>
+            )}
+          </Card>
+
+          {/* Info Card */}
+          <Card title={t('aiSettings.aboutTitle')} subtitle={t('aiSettings.aboutSubtitle')}>
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+              Toroloom supports multiple AI providers. The active provider is determined by the backend
+              configuration. AI insights are generated using a sophisticated multi-factor model that
+              analyzes technical indicators, fundamental data, and market sentiment.
+            </Text>
+            <View style={styles.infoList}>
+              <View style={styles.infoItem}>
+                <Ionicons name="checkmark-circle" size={16} color="#00E676" />
+                <Text style={[styles.infoItemText, { color: colors.textSecondary }]}>
+                  All insights are cached for fast retrieval
+                </Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Ionicons name="checkmark-circle" size={16} color="#00E676" />
+                <Text style={[styles.infoItemText, { color: colors.textSecondary }]}>
+                  Provider switching requires backend env var change
+                </Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Ionicons name="checkmark-circle" size={16} color="#00E676" />
+                <Text style={[styles.infoItemText, { color: colors.textSecondary }]}>
+                  AI features require a Pro subscription
+                </Text>
+              </View>
             </View>
-            <View style={styles.infoItem}>
-              <Ionicons name="checkmark-circle" size={16} color="#00E676" />
-              <Text style={[styles.infoItemText, { color: colors.textSecondary }]}>
-                AI features require a Pro subscription
-              </Text>
-            </View>
-          </View>
-        </Card>
-      </ScrollView>
-    </View>
+          </Card>
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ──── Styles ───────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
   },

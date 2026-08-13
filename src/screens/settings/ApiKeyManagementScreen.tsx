@@ -34,6 +34,7 @@ import type { ApiKey, ApiKeyScope, ApiKeyScopeMeta } from '../../types';
 import { API_KEY_SCOPES } from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const { width: _SCREEN_WIDTH } = Dimensions.get('window');
@@ -446,183 +447,184 @@ export default function ApiKeyManagementScreen({ navigation }: NativeStackScreen
   }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('apiKeyManagement.title')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              {t('apiKeyManagement.subtitle')}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Created Key Reveal ── */}
-        {createdKey && (
-          <Animated.View entering={FadeInDown} exiting={FadeOutUp} style={[styles.keyReveal, { borderColor: colors.primary + '40' }]}>
-            <View style={styles.keyRevealHeader}>
-              <Ionicons name="key" size={20} color={colors.primary} />
-              <Text style={[styles.keyRevealTitle, { color: colors.text }]}>{t('apiKeyManagement.keyCreated')}</Text>
-              <Pressable onPress={dismissCreatedKey}>
-                <Ionicons name="close" size={20} color={colors.textMuted} />
-              </Pressable>
-            </View>
-            <Text style={[styles.keyRevealDesc, { color: colors.textSecondary }]}>
-              {t('apiKeyManagement.keyCreatedDesc')}
-            </Text>
-            <View style={[styles.keyDisplay, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-              <Text style={[styles.keyDisplayText, { color: colors.text }]} selectable>
-                {createdKey}
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('apiKeyManagement.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                {t('apiKeyManagement.subtitle')}
               </Text>
             </View>
-            <Text style={[styles.keyRevealNote, { color: colors.textMuted }]}>
-              {t('apiKeyManagement.keyCreatedNote')}
-            </Text>
-          </Animated.View>
-        )}
-
-        {/* ── Summary Stats ── */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: '#3B82F630' }]}>
-            <Ionicons name="key" size={18} color="#3B82F6" />
-            <Text style={[styles.statValue, { color: '#3B82F6' }]}>{stats.total}</Text>
-            <Text style={styles.statLabel}>{t('apiKeyManagement.statTotal')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: '#00C85330' }]}>
-            <Ionicons name="checkmark-circle" size={18} color="#00C853" />
-            <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.active}</Text>
-            <Text style={styles.statLabel}>{t('apiKeyManagement.statActive')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: '#FFAB4030' }]}>
-            <Ionicons name="moon" size={18} color="#FFAB40" />
-            <Text style={[styles.statValue, { color: '#FFAB40' }]}>{stats.unused}</Text>
-            <Text style={styles.statLabel}>{t('apiKeyManagement.statUnused')}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: '#8B5CF630' }]}>
-            <Ionicons name="layers" size={18} color="#8B5CF6" />
-            <Text style={[styles.statValue, { color: '#8B5CF6' }]}>{stats.usedScopes}</Text>
-            <Text style={styles.statLabel}>{t('apiKeyManagement.statScopes')}</Text>
           </View>
         </View>
 
-        {/* ── Create New Key ── */}
-        {!showCreateForm ? (
-          <AnimatedPressable onPress={() => setShowCreateForm(true)} haptic="medium" scaleTo={0.97}>
-            <View style={[styles.createBtn, { borderColor: colors.primary + '40' }]}>
-              <Ionicons name="add-circle" size={20} color={colors.primary} />
-              <Text style={[styles.createBtnText, { color: colors.primary }]}>{t('apiKeyManagement.createNewKey')}</Text>
-            </View>
-          </AnimatedPressable>
-        ) : (
-          <Animated.View entering={FadeInDown} layout={LinearTransition} style={[styles.createForm, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            {/* Form Header */}
-            <View style={styles.formHeader}>
-              <Text style={[styles.formTitle, { color: colors.text }]}>{t('apiKeyManagement.newKeyTitle')}</Text>
-              <Pressable onPress={() => setShowCreateForm(false)}>
-                <Ionicons name="close" size={22} color={colors.textMuted} />
-              </Pressable>
-            </View>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* ── Created Key Reveal ── */}
+          {createdKey && (
+            <Animated.View entering={FadeInDown} exiting={FadeOutUp} style={[styles.keyReveal, { borderColor: colors.primary + '40' }]}>
+              <View style={styles.keyRevealHeader}>
+                <Ionicons name="key" size={20} color={colors.primary} />
+                <Text style={[styles.keyRevealTitle, { color: colors.text }]}>{t('apiKeyManagement.keyCreated')}</Text>
+                <Pressable onPress={dismissCreatedKey}>
+                  <Ionicons name="close" size={20} color={colors.textMuted} />
+                </Pressable>
+              </View>
+              <Text style={[styles.keyRevealDesc, { color: colors.textSecondary }]}>
+                {t('apiKeyManagement.keyCreatedDesc')}
+              </Text>
+              <View style={[styles.keyDisplay, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+                <Text style={[styles.keyDisplayText, { color: colors.text }]} selectable>
+                  {createdKey}
+                </Text>
+              </View>
+              <Text style={[styles.keyRevealNote, { color: colors.textMuted }]}>
+                {t('apiKeyManagement.keyCreatedNote')}
+              </Text>
+            </Animated.View>
+          )}
 
-            {/* Name */}
-            <Text style={[styles.formLabel, { color: colors.textMuted }]}>{t('apiKeyManagement.keyName')}</Text>
-            <TextInput
-              style={[styles.textInput, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              placeholder={t('apiKeyManagement.keyNamePlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              value={newKeyName}
-              onChangeText={setNewKeyName}
-              autoFocus
-            />
-
-            {/* Scopes */}
-            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.md }]}>
-              {t('apiKeyManagement.permissions', { count: selectedScopes.length })}
-            </Text>
-            <View style={styles.scopesGrid}>
-              {(Object.values(API_KEY_SCOPES) as ApiKeyScopeMeta[]).map(meta => (
-                <ScopeChip
-                  key={meta.scope}
-                  scope={meta}
-                  selected={new Set(selectedScopes).has(meta.scope)}
-                  onToggle={() => toggleScope(meta.scope)}
-                  colors={colors}
-                />
-              ))}
+          {/* ── Summary Stats ── */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { borderColor: '#3B82F630' }]}>
+              <Ionicons name="key" size={18} color="#3B82F6" />
+              <Text style={[styles.statValue, { color: '#3B82F6' }]}>{stats.total}</Text>
+              <Text style={styles.statLabel}>{t('apiKeyManagement.statTotal')}</Text>
             </View>
-
-            {/* Expiry */}
-            <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.md }]}>{t('apiKeyManagement.expiry')}</Text>
-            <View style={styles.expiryRow}>
-              {EXPIRY_OPTIONS.map(opt => {
-                const isActive = selectedExpiry === opt.value;
-                return (
-                  <Pressable
-                    key={opt.labelKey}
-                    onPress={() => setSelectedExpiry(opt.value)}
-                    style={[
-                      styles.expiryChip,
-                      {
-                        backgroundColor: isActive ? colors.primary + '20' : 'rgba(255,255,255,0.05)',
-                        borderColor: isActive ? colors.primary + '40' : 'rgba(255,255,255,0.1)',
-                      },
-                    ]}
-                  >
-                    <Text style={[styles.expiryChipText, { color: isActive ? colors.primary : colors.textMuted }]}>
-                      {t(opt.labelKey)}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+            <View style={[styles.statCard, { borderColor: '#00C85330' }]}>
+              <Ionicons name="checkmark-circle" size={18} color="#00C853" />
+              <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.active}</Text>
+              <Text style={styles.statLabel}>{t('apiKeyManagement.statActive')}</Text>
             </View>
+            <View style={[styles.statCard, { borderColor: '#FFAB4030' }]}>
+              <Ionicons name="moon" size={18} color="#FFAB40" />
+              <Text style={[styles.statValue, { color: '#FFAB40' }]}>{stats.unused}</Text>
+              <Text style={styles.statLabel}>{t('apiKeyManagement.statUnused')}</Text>
+            </View>
+            <View style={[styles.statCard, { borderColor: '#8B5CF630' }]}>
+              <Ionicons name="layers" size={18} color="#8B5CF6" />
+              <Text style={[styles.statValue, { color: '#8B5CF6' }]}>{stats.usedScopes}</Text>
+              <Text style={styles.statLabel}>{t('apiKeyManagement.statScopes')}</Text>
+            </View>
+          </View>
 
-            {/* Create Button */}
-            <AnimatedPressable onPress={handleCreateKey} haptic="medium" scaleTo={0.97}>
-              <View style={[styles.submitBtn, { backgroundColor: colors.primary }]}>
-                <Ionicons name="key" size={18} color="#FFFFFF" />
-                <Text style={styles.submitBtnText}>{t('apiKeyManagement.generateKey')}</Text>
+          {/* ── Create New Key ── */}
+          {!showCreateForm ? (
+            <AnimatedPressable onPress={() => setShowCreateForm(true)} haptic="medium" scaleTo={0.97}>
+              <View style={[styles.createBtn, { borderColor: colors.primary + '40' }]}>
+                <Ionicons name="add-circle" size={20} color={colors.primary} />
+                <Text style={[styles.createBtnText, { color: colors.primary }]}>{t('apiKeyManagement.createNewKey')}</Text>
               </View>
             </AnimatedPressable>
-          </Animated.View>
-        )}
+          ) : (
+            <Animated.View entering={FadeInDown} layout={LinearTransition} style={[styles.createForm, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              {/* Form Header */}
+              <View style={styles.formHeader}>
+                <Text style={[styles.formTitle, { color: colors.text }]}>{t('apiKeyManagement.newKeyTitle')}</Text>
+                <Pressable onPress={() => setShowCreateForm(false)}>
+                  <Ionicons name="close" size={22} color={colors.textMuted} />
+                </Pressable>
+              </View>
 
-        {/* ── Existing Keys ── */}
-        <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
-          {t('apiKeyManagement.yourApiKeys')}
-        </Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
-          {t('apiKeyManagement.activeCount', { active: keys.filter(k => k.isActive).length, revoked: keys.filter(k => !k.isActive).length })}
-        </Text>
+              {/* Name */}
+              <Text style={[styles.formLabel, { color: colors.textMuted }]}>{t('apiKeyManagement.keyName')}</Text>
+              <TextInput
+                style={[styles.textInput, { color: colors.text, backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                placeholder={t('apiKeyManagement.keyNamePlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                value={newKeyName}
+                onChangeText={setNewKeyName}
+                autoFocus
+              />
 
-        {keys.map((key) => (
-          <ApiKeyCard
-            key={key.id}
-            apiKey={key}
-            onRevoke={handleRevoke}
-            onToggleActive={handleToggleActive}
-            colors={colors}
-          />
-        ))}
+              {/* Scopes */}
+              <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.md }]}>
+                {t('apiKeyManagement.permissions', { count: selectedScopes.length })}
+              </Text>
+              <View style={styles.scopesGrid}>
+                {(Object.values(API_KEY_SCOPES) as ApiKeyScopeMeta[]).map(meta => (
+                  <ScopeChip
+                    key={meta.scope}
+                    scope={meta}
+                    selected={new Set(selectedScopes).has(meta.scope)}
+                    onToggle={() => toggleScope(meta.scope)}
+                    colors={colors}
+                  />
+                ))}
+              </View>
 
-        {/* ── Info Card ── */}
-        <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="information-circle" size={18} color={colors.primary} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.infoTitle, { color: colors.text }]}>{t('apiKeyManagement.aboutTitle')}</Text>
-            <Text style={[styles.infoText, { color: colors.textMuted }]}>
-              {t('apiKeyManagement.aboutDesc')}
-            </Text>
+              {/* Expiry */}
+              <Text style={[styles.formLabel, { color: colors.textMuted, marginTop: SPACING.md }]}>{t('apiKeyManagement.expiry')}</Text>
+              <View style={styles.expiryRow}>
+                {EXPIRY_OPTIONS.map(opt => {
+                  const isActive = selectedExpiry === opt.value;
+                  return (
+                    <Pressable
+                      key={opt.labelKey}
+                      onPress={() => setSelectedExpiry(opt.value)}
+                      style={[
+                        styles.expiryChip,
+                        {
+                          backgroundColor: isActive ? colors.primary + '20' : 'rgba(255,255,255,0.05)',
+                          borderColor: isActive ? colors.primary + '40' : 'rgba(255,255,255,0.1)',
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.expiryChipText, { color: isActive ? colors.primary : colors.textMuted }]}>
+                        {t(opt.labelKey)}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Create Button */}
+              <AnimatedPressable onPress={handleCreateKey} haptic="medium" scaleTo={0.97}>
+                <View style={[styles.submitBtn, { backgroundColor: colors.primary }]}>
+                  <Ionicons name="key" size={18} color="#FFFFFF" />
+                  <Text style={styles.submitBtnText}>{t('apiKeyManagement.generateKey')}</Text>
+                </View>
+              </AnimatedPressable>
+            </Animated.View>
+          )}
+
+          {/* ── Existing Keys ── */}
+          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: SPACING.lg }]}>
+            {t('apiKeyManagement.yourApiKeys')}
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+            {t('apiKeyManagement.activeCount', { active: keys.filter(k => k.isActive).length, revoked: keys.filter(k => !k.isActive).length })}
+          </Text>
+
+          {keys.map((key) => (
+            <ApiKeyCard
+              key={key.id}
+              apiKey={key}
+              onRevoke={handleRevoke}
+              onToggleActive={handleToggleActive}
+              colors={colors}
+            />
+          ))}
+
+          {/* ── Info Card ── */}
+          <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="information-circle" size={18} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.infoTitle, { color: colors.text }]}>{t('apiKeyManagement.aboutTitle')}</Text>
+              <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                {t('apiKeyManagement.aboutDesc')}
+              </Text>
+            </View>
           </View>
-        </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -631,7 +633,6 @@ export default function ApiKeyManagementScreen({ navigation }: NativeStackScreen
 // ═════════════════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     padding: SPACING.xl,
     paddingTop: 60,

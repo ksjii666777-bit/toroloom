@@ -20,6 +20,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { runMonteCarloSimulation, formatRupees } from '../../services/monteCarloSimulation';
 import type {MonteCarloParams, MonteCarloResult, MonteCarloYearResult, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CHART_WIDTH = SCREEN_WIDTH - SPACING.xl * 2 - SPACING.xl * 2;
@@ -126,333 +127,334 @@ export default function MonteCarloSimulationScreen({ navigation }: NativeStackSc
   const formatCurrency = (v: number) => `₹${Math.round(v).toLocaleString('en-IN')}`;
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* ── Header ───────────────────────────────────────── */}
-        <View style={styles.header}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-            <View style={styles.backBtn}>
-              <Ionicons name="arrow-back" size={22} color={colors.text} />
-            </View>
-          </AnimatedPressable>
-          <View style={styles.headerContent}>
-            <Text style={styles.title}>{t('monteCarlo.title')}</Text>
-            <Text style={styles.subtitle}>{t('monteCarlo.subtitle', { count: '10,000' })}</Text>
-          </View>
-        </View>
-
-        {/* ── Info Banner ──────────────────────────────────── */}
-        <Animated.View entering={FadeInUp.springify()}>
-          <LinearGradient
-            colors={['rgba(108,99,255,0.15)', 'rgba(59,130,246,0.05)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.infoBanner}
-          >
-            <Ionicons name="information-circle" size={18} color="#6C63FF" />
-            <Text style={styles.infoText}>
-              Simulates {params.simulations.toLocaleString()} possible futures for your portfolio using Geometric Brownian Motion. Results show percentile ranges.
-            </Text>
-          </LinearGradient>
-        </Animated.View>
-
-        {/* ── Input Section ────────────────────────────────── */}
-        <Card title={t('monteCarlo.portfolioParams')} style={styles.sectionCard}>
-          <View style={styles.inputFields}>
-            {INPUT_FIELDS.map((field, i) => {
-              const displayValue = (() => {
-                const val = params[field.key];
-                if (typeof val === 'number') {
-                  if (field.key === 'annualReturn' || field.key === 'annualVolatility') {
-                    return (val * 100).toString();
-                  }
-                  return val.toLocaleString('en-IN');
-                }
-                return '';
-              })();
-
-              return (
-                <Animated.View
-                  key={field.key}
-                  entering={FadeInDown.delay(100 + i * 60).springify()}
-                  style={styles.inputRow}
-                >
-                  <View style={styles.inputLabelRow}>
-                    <Ionicons
-                      name={field.icon as keyof typeof Ionicons.glyphMap}
-                      size={16}
-                      color={colors.primary}
-                    />
-                    <Text style={styles.inputLabel}>{t(field.tKey)}</Text>
-                    <View style={styles.inputInfoTooltip}>
-                      <Text style={styles.inputInfoIcon}>?</Text>
-                    </View>
-                  </View>
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.inputSuffix}>{field.suffix}</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={displayValue}
-                      onChangeText={(t) => handleParamChange(field.key, t)}
-                      keyboardType="numeric"
-                      placeholderTextColor={colors.textMuted}
-                      placeholder={t(field.placeholderTKey)}
-                    />
-                    <Text style={styles.inputUnit}>{field.key === 'years' ? t('monteCarlo.years') : ''}</Text>
-                  </View>
-                </Animated.View>
-              );
-            })}
-          </View>
-
-          {/* ── Quick Presets ──────────────────────────────── */}
-          <View style={styles.presetsRow}>
-            <Text style={styles.presetsLabel}>Quick Presets:</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetsScroll}>
-              {[
-                { label: t('monteCarlo.conservative'), icon: '🛡️', params: { annualReturn: 0.10, annualVolatility: 0.12 } as Partial<MonteCarloParams> },
-                { label: t('monteCarlo.moderate'), icon: '📊', params: { annualReturn: 0.12, annualVolatility: 0.18 } as Partial<MonteCarloParams> },
-                { label: t('monteCarlo.aggressive'), icon: '🚀', params: { annualReturn: 0.16, annualVolatility: 0.25 } as Partial<MonteCarloParams> },
-                { label: t('monteCarlo.sipOnly'), icon: '💪', params: { initialInvestment: 0, monthlyContribution: 25000 } as Partial<MonteCarloParams> },
-              ].map((preset, i) => (
-                <AnimatedPressable
-                  key={i}
-                  onPress={() => applyPreset(preset.params)}
-                  haptic="light"
-                  scaleTo={0.95}
-                  style={styles.presetChip}
-                >
-                  <Text style={styles.presetIcon}>{preset.icon}</Text>
-                  <Text style={styles.presetLabel}>{preset.label}</Text>
-                </AnimatedPressable>
-              ))}
-            </ScrollView>
-          </View>
-        </Card>
-
-        {/* ── Run Button ───────────────────────────────────── */}
-        <AnimatedPressable
-          onPress={handleRun}
-          haptic="medium"
-          scaleTo={0.97}
-          disabled={isRunning}
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <LinearGradient
-            colors={GRADIENTS.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.runBtn}
-          >
-            {isRunning ? (
-              <>
-                <Text style={styles.runBtnIcon}>⚡</Text>
-                <Text style={styles.runBtnText}>Running {params.simulations.toLocaleString()} Simulations...</Text>
-              </>
-            ) : (
-              <>
-                <Ionicons name="flash" size={22} color="#fff" />
-                <Text style={styles.runBtnText}>
-                  {hasRun ? 'Re-run Simulation' : 'Run Simulation'}
-                </Text>
-              </>
-            )}
-          </LinearGradient>
-        </AnimatedPressable>
+          {/* ── Header ───────────────────────────────────────── */}
+          <View style={styles.header}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <View style={styles.backBtn}>
+                <Ionicons name="arrow-back" size={22} color={colors.text} />
+              </View>
+            </AnimatedPressable>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>{t('monteCarlo.title')}</Text>
+              <Text style={styles.subtitle}>{t('monteCarlo.subtitle', { count: '10,000' })}</Text>
+            </View>
+          </View>
 
-        {/* ── Results ──────────────────────────────────────── */}
-        {result && (
-          <Animated.View entering={FadeInUp.delay(100).springify()}>
-            {/* ── Key Metrics Grid ──────────────────────────── */}
-            <View style={styles.metricsGrid}>
-              {[
-                { label: 'Median Value', value: formatRupees(result.medianEndValue), icon: '📈', color: '#6C63FF', tKey: 'monteCarlo.medianValue' },
-                { label: 'Best Case (95th)', value: formatRupees(result.bestCaseValue), icon: '🚀', color: '#00C853', tKey: 'monteCarlo.bestCase' },
-                { label: 'Worst Case (5th)', value: formatRupees(result.worstCaseValue), icon: '📉', color: '#FF1744', tKey: 'monteCarlo.worstCase' },
-                { label: 'Profit Probability', value: `${result.probabilityOfProfit}%`, icon: '🎯', color: '#FFC107', tKey: 'monteCarlo.profitProbability' },
-              ].map((metric, i) => (
-                <Animated.View
-                  key={metric.label}
-                  entering={FadeInDown.delay(200 + i * 80).springify()}
-                  style={[styles.metricCard, { borderColor: metric.color + '30' }]}
-                >
-                  <Text style={styles.metricIcon}>{metric.icon}</Text>
-                  <Text style={[styles.metricValue, { color: metric.color }]}>{metric.value}</Text>
-                  <Text style={styles.metricLabel}>{t(metric.tKey)}</Text>
-                </Animated.View>
-              ))}
+          {/* ── Info Banner ──────────────────────────────────── */}
+          <Animated.View entering={FadeInUp.springify()}>
+            <LinearGradient
+              colors={['rgba(108,99,255,0.15)', 'rgba(59,130,246,0.05)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.infoBanner}
+            >
+              <Ionicons name="information-circle" size={18} color="#6C63FF" />
+              <Text style={styles.infoText}>
+                Simulates {params.simulations.toLocaleString()} possible futures for your portfolio using Geometric Brownian Motion. Results show percentile ranges.
+              </Text>
+            </LinearGradient>
+          </Animated.View>
+
+          {/* ── Input Section ────────────────────────────────── */}
+          <Card title={t('monteCarlo.portfolioParams')} style={styles.sectionCard}>
+            <View style={styles.inputFields}>
+              {INPUT_FIELDS.map((field, i) => {
+                const displayValue = (() => {
+                  const val = params[field.key];
+                  if (typeof val === 'number') {
+                    if (field.key === 'annualReturn' || field.key === 'annualVolatility') {
+                      return (val * 100).toString();
+                    }
+                    return val.toLocaleString('en-IN');
+                  }
+                  return '';
+                })();
+
+                return (
+                  <Animated.View
+                    key={field.key}
+                    entering={FadeInDown.delay(100 + i * 60).springify()}
+                    style={styles.inputRow}
+                  >
+                    <View style={styles.inputLabelRow}>
+                      <Ionicons
+                        name={field.icon as keyof typeof Ionicons.glyphMap}
+                        size={16}
+                        color={colors.primary}
+                      />
+                      <Text style={styles.inputLabel}>{t(field.tKey)}</Text>
+                      <View style={styles.inputInfoTooltip}>
+                        <Text style={styles.inputInfoIcon}>?</Text>
+                      </View>
+                    </View>
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.inputSuffix}>{field.suffix}</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={displayValue}
+                        onChangeText={(t) => handleParamChange(field.key, t)}
+                        keyboardType="numeric"
+                        placeholderTextColor={colors.textMuted}
+                        placeholder={t(field.placeholderTKey)}
+                      />
+                      <Text style={styles.inputUnit}>{field.key === 'years' ? t('monteCarlo.years') : ''}</Text>
+                    </View>
+                  </Animated.View>
+                );
+              })}
             </View>
 
-            {/* ── Investment Summary ─────────────────────────── */}
-            <Card title={t('monteCarlo.investmentSummary')} style={styles.sectionCard}>
-              {(() => {
-                const totalContributed = result.params.initialInvestment + result.params.monthlyContribution * result.params.years * 12;
-                const medianReturn = result.medianEndValue - totalContributed;
-                const medianReturnPct = (medianReturn / totalContributed) * 100;
-                return (
-                  <View style={styles.summaryContent}>
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>{t('monteCarlo.totalInvested')}</Text>
-                      <Text style={styles.summaryValue}>{formatCurrency(totalContributed)}</Text>
+            {/* ── Quick Presets ──────────────────────────────── */}
+            <View style={styles.presetsRow}>
+              <Text style={styles.presetsLabel}>Quick Presets:</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetsScroll}>
+                {[
+                  { label: t('monteCarlo.conservative'), icon: '🛡️', params: { annualReturn: 0.10, annualVolatility: 0.12 } as Partial<MonteCarloParams> },
+                  { label: t('monteCarlo.moderate'), icon: '📊', params: { annualReturn: 0.12, annualVolatility: 0.18 } as Partial<MonteCarloParams> },
+                  { label: t('monteCarlo.aggressive'), icon: '🚀', params: { annualReturn: 0.16, annualVolatility: 0.25 } as Partial<MonteCarloParams> },
+                  { label: t('monteCarlo.sipOnly'), icon: '💪', params: { initialInvestment: 0, monthlyContribution: 25000 } as Partial<MonteCarloParams> },
+                ].map((preset, i) => (
+                  <AnimatedPressable
+                    key={i}
+                    onPress={() => applyPreset(preset.params)}
+                    haptic="light"
+                    scaleTo={0.95}
+                    style={styles.presetChip}
+                  >
+                    <Text style={styles.presetIcon}>{preset.icon}</Text>
+                    <Text style={styles.presetLabel}>{preset.label}</Text>
+                  </AnimatedPressable>
+                ))}
+              </ScrollView>
+            </View>
+          </Card>
+
+          {/* ── Run Button ───────────────────────────────────── */}
+          <AnimatedPressable
+            onPress={handleRun}
+            haptic="medium"
+            scaleTo={0.97}
+            disabled={isRunning}
+          >
+            <LinearGradient
+              colors={GRADIENTS.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.runBtn}
+            >
+              {isRunning ? (
+                <>
+                  <Text style={styles.runBtnIcon}>⚡</Text>
+                  <Text style={styles.runBtnText}>Running {params.simulations.toLocaleString()} Simulations...</Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons name="flash" size={22} color="#fff" />
+                  <Text style={styles.runBtnText}>
+                    {hasRun ? 'Re-run Simulation' : 'Run Simulation'}
+                  </Text>
+                </>
+              )}
+            </LinearGradient>
+          </AnimatedPressable>
+
+          {/* ── Results ──────────────────────────────────────── */}
+          {result && (
+            <Animated.View entering={FadeInUp.delay(100).springify()}>
+              {/* ── Key Metrics Grid ──────────────────────────── */}
+              <View style={styles.metricsGrid}>
+                {[
+                  { label: 'Median Value', value: formatRupees(result.medianEndValue), icon: '📈', color: '#6C63FF', tKey: 'monteCarlo.medianValue' },
+                  { label: 'Best Case (95th)', value: formatRupees(result.bestCaseValue), icon: '🚀', color: '#00C853', tKey: 'monteCarlo.bestCase' },
+                  { label: 'Worst Case (5th)', value: formatRupees(result.worstCaseValue), icon: '📉', color: '#FF1744', tKey: 'monteCarlo.worstCase' },
+                  { label: 'Profit Probability', value: `${result.probabilityOfProfit}%`, icon: '🎯', color: '#FFC107', tKey: 'monteCarlo.profitProbability' },
+                ].map((metric, i) => (
+                  <Animated.View
+                    key={metric.label}
+                    entering={FadeInDown.delay(200 + i * 80).springify()}
+                    style={[styles.metricCard, { borderColor: metric.color + '30' }]}
+                  >
+                    <Text style={styles.metricIcon}>{metric.icon}</Text>
+                    <Text style={[styles.metricValue, { color: metric.color }]}>{metric.value}</Text>
+                    <Text style={styles.metricLabel}>{t(metric.tKey)}</Text>
+                  </Animated.View>
+                ))}
+              </View>
+
+              {/* ── Investment Summary ─────────────────────────── */}
+              <Card title={t('monteCarlo.investmentSummary')} style={styles.sectionCard}>
+                {(() => {
+                  const totalContributed = result.params.initialInvestment + result.params.monthlyContribution * result.params.years * 12;
+                  const medianReturn = result.medianEndValue - totalContributed;
+                  const medianReturnPct = (medianReturn / totalContributed) * 100;
+                  return (
+                    <View style={styles.summaryContent}>
+                      <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>{t('monteCarlo.totalInvested')}</Text>
+                        <Text style={styles.summaryValue}>{formatCurrency(totalContributed)}</Text>
+                      </View>
+                      <View style={styles.summaryDivider} />
+                      <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>{t('monteCarlo.medianFinalValue')}</Text>
+                        <Text style={styles.summaryValue}>{formatRupees(result.medianEndValue)}</Text>
+                      </View>
+                      <View style={styles.summaryDivider} />
+                      <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>{t('monteCarlo.medianReturn')}</Text>
+                        <Text style={[styles.summaryValue, { color: medianReturn >= 0 ? '#00C853' : '#FF1744' }]}>
+                          {formatCurrency(medianReturn)} ({medianReturnPct.toFixed(1)}%)
+                        </Text>
+                      </View>
+                      <View style={styles.summaryDivider} />
+                      <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>{t('monteCarlo.range5th95th')}</Text>
+                        <Text style={styles.summaryValue}>
+                          {formatRupees(result.worstCaseValue)} – {formatRupees(result.bestCaseValue)}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.summaryDivider} />
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>{t('monteCarlo.medianFinalValue')}</Text>
-                      <Text style={styles.summaryValue}>{formatRupees(result.medianEndValue)}</Text>
-                    </View>
-                    <View style={styles.summaryDivider} />
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>{t('monteCarlo.medianReturn')}</Text>
-                      <Text style={[styles.summaryValue, { color: medianReturn >= 0 ? '#00C853' : '#FF1744' }]}>
-                        {formatCurrency(medianReturn)} ({medianReturnPct.toFixed(1)}%)
-                      </Text>
-                    </View>
-                    <View style={styles.summaryDivider} />
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>{t('monteCarlo.range5th95th')}</Text>
-                      <Text style={styles.summaryValue}>
-                        {formatRupees(result.worstCaseValue)} – {formatRupees(result.bestCaseValue)}
-                      </Text>
-                    </View>
+                  );
+                })()}
+              </Card>
+
+              {/* ── Percentile Fan Chart (SVG) ─────────────────── */}
+              <Card title={t('monteCarlo.growthProjection')} subtitle={t('monteCarlo.growthProjectionSub')} style={styles.sectionCard}>
+                <View style={styles.chartContainer}>
+                  {result.yearResults.length > 0 && (
+                    <MonteCarloChart
+                      yearResults={result.yearResults}
+                      allPaths={result.allPaths}
+                      width={CHART_WIDTH}
+                      height={CHART_HEIGHT}
+                    />
+                  )}
+                </View>
+
+                {/* Chart Legend */}
+                <View style={styles.chartLegend}>
+                  <View style={styles.legendRow}>
+                    <View style={[styles.legendLine, { backgroundColor: '#6C63FF', width: 20, height: 2.5 }]} />
+                    <Text style={styles.legendText}>{t('monteCarlo.legendMedian')}</Text>
                   </View>
-                );
-              })()}
-            </Card>
-
-            {/* ── Percentile Fan Chart (SVG) ─────────────────── */}
-            <Card title={t('monteCarlo.growthProjection')} subtitle={t('monteCarlo.growthProjectionSub')} style={styles.sectionCard}>
-              <View style={styles.chartContainer}>
-                {result.yearResults.length > 0 && (
-                  <MonteCarloChart
-                    yearResults={result.yearResults}
-                    allPaths={result.allPaths}
-                    width={CHART_WIDTH}
-                    height={CHART_HEIGHT}
-                  />
-                )}
-              </View>
-
-              {/* Chart Legend */}
-              <View style={styles.chartLegend}>
-                <View style={styles.legendRow}>
-                  <View style={[styles.legendLine, { backgroundColor: '#6C63FF', width: 20, height: 2.5 }]} />
-                  <Text style={styles.legendText}>{t('monteCarlo.legendMedian')}</Text>
-                </View>
-                <View style={styles.legendRow}>
-                  <View style={[styles.legendLine, { backgroundColor: '#6C63FF80', borderStyle: 'dashed', height: 1.5 }]} />
-                  <Text style={styles.legendText}>{t('monteCarlo.legend25th75th')}</Text>
-                </View>
-                <View style={styles.legendRow}>
-                  <View style={[styles.legendLine, { backgroundColor: '#3B82F660', borderStyle: 'dashed', height: 1 }]} />
-                  <Text style={styles.legendText}>{t('monteCarlo.legend5th95th')}</Text>
-                </View>
-              </View>
-            </Card>
-
-            {/* ── Distribution Summary ───────────────────────── */}
-            <Card title={t('monteCarlo.distributionAnalysis')} style={styles.sectionCard}>
-              {(() => {
-                const sorted = result.finalValues;
-                const _median = result.medianEndValue;
-                const totalInvested = params.initialInvestment + params.monthlyContribution * params.years * 12;
-
-                // Count how many are above certain thresholds
-                const doubleCount = sorted.filter(v => v >= totalInvested * 2).length;
-                const tripleCount = sorted.filter(v => v >= totalInvested * 3).length;
-                const loseMoneyCount = sorted.filter(v => v < totalInvested).length;
-                const total = sorted.length;
-
-                return (
-                  <View style={styles.distContent}>
-                    <View style={styles.distRow}>
-                      <View style={styles.distItem}>
-                        <Text style={styles.distValue}>{result.probabilityOfProfit}%</Text>
-                        <Text style={styles.distLabel}>{t('monteCarlo.probabilityOfProfit')}</Text>
-                      </View>
-                      <View style={styles.distItem}>
-                        <Text style={[styles.distValue, { color: '#FF1744' }]}>
-                          {((loseMoneyCount / total) * 100).toFixed(0)}%
-                        </Text>
-                        <Text style={styles.distLabel}>{t('monteCarlo.chanceOfLoss')}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.distRow}>
-                      <View style={styles.distItem}>
-                        <Text style={[styles.distValue, { color: '#00C853' }]}>
-                          {((doubleCount / total) * 100).toFixed(0)}%
-                        </Text>
-                        <Text style={styles.distLabel}>{t('monteCarlo.chanceTo2x')}</Text>
-                      </View>
-                      <View style={styles.distItem}>
-                        <Text style={[styles.distValue, { color: '#6C63FF' }]}>
-                          {((tripleCount / total) * 100).toFixed(0)}%
-                        </Text>
-                        <Text style={styles.distLabel}>{t('monteCarlo.chanceTo3x')}</Text>
-                      </View>
-                    </View>
+                  <View style={styles.legendRow}>
+                    <View style={[styles.legendLine, { backgroundColor: '#6C63FF80', borderStyle: 'dashed', height: 1.5 }]} />
+                    <Text style={styles.legendText}>{t('monteCarlo.legend25th75th')}</Text>
                   </View>
-                );
-              })()}
-            </Card>
+                  <View style={styles.legendRow}>
+                    <View style={[styles.legendLine, { backgroundColor: '#3B82F660', borderStyle: 'dashed', height: 1 }]} />
+                    <Text style={styles.legendText}>{t('monteCarlo.legend5th95th')}</Text>
+                  </View>
+                </View>
+              </Card>
 
-            {/* ── Interpretations ──────────────────────────── */}
-            <Card title={t('monteCarlo.whatThisMeans')} style={styles.sectionCard}>
-              <View style={styles.interpretContent}>
-                <View style={styles.interpretRow}>
-                  <Text style={styles.interpretIcon}>📊</Text>
-                  <Text style={styles.interpretText}>
-                    The median (50th percentile) outcome is <Text style={styles.interpretBold}>{formatRupees(result.medianEndValue)}</Text> — half of all scenarios end above this, half below.
-                  </Text>
-                </View>
-                <View style={styles.interpretDivider} />
-                <View style={styles.interpretRow}>
-                  <Text style={styles.interpretIcon}>🟢</Text>
-                  <Text style={styles.interpretText}>
-                    In <Text style={styles.interpretBold}>{result.probabilityOfProfit}%</Text> of scenarios, your portfolio ends with positive returns.
-                  </Text>
-                </View>
-                <View style={styles.interpretDivider} />
-                <View style={styles.interpretRow}>
-                  <Text style={styles.interpretIcon}>⚠️</Text>
-                  <Text style={styles.interpretText}>
-                    The 5th percentile outcome ({formatRupees(result.worstCaseValue)}) represents a worst-case scenario that only occurs 5% of the time.
-                  </Text>
-                </View>
-              </View>
-            </Card>
+              {/* ── Distribution Summary ───────────────────────── */}
+              <Card title={t('monteCarlo.distributionAnalysis')} style={styles.sectionCard}>
+                {(() => {
+                  const sorted = result.finalValues;
+                  const _median = result.medianEndValue;
+                  const totalInvested = params.initialInvestment + params.monthlyContribution * params.years * 12;
 
-            {/* ── Parameters Used ─────────────────────────── */}
-            <Card title={t('monteCarlo.parametersUsed')} style={styles.sectionCard}>
-              <View style={styles.paramsContent}>
-                <View style={styles.paramRow}>
-                  <Text style={styles.paramLabel}>{t('monteCarlo.initialInvestment')}</Text>
-                  <Text style={styles.paramValue}>{formatCurrency(result.params.initialInvestment)}</Text>
-                </View>
-                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.monthlySip')}</Text>
-                  <Text style={styles.paramValue}>{formatCurrency(result.params.monthlyContribution)}</Text>
-                </View>
-                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.expectedReturn')}</Text>
-                  <Text style={styles.paramValue}>{formatPercent(result.params.annualReturn)}</Text>
-                </View>
-                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.volatility')}</Text>
-                  <Text style={styles.paramValue}>{formatPercent(result.params.annualVolatility)}</Text>
-                </View>
-                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.timeHorizon')}</Text>
-                  <Text style={styles.paramValue}>{t('app.years', { count: result.params.years })}</Text>
-                </View>
-                <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.simulations')}</Text>
-                  <Text style={styles.paramValue}>{result.params.simulations.toLocaleString()}</Text>
-                </View>
-              </View>
-            </Card>
-          </Animated.View>
-        )}
+                  // Count how many are above certain thresholds
+                  const doubleCount = sorted.filter(v => v >= totalInvested * 2).length;
+                  const tripleCount = sorted.filter(v => v >= totalInvested * 3).length;
+                  const loseMoneyCount = sorted.filter(v => v < totalInvested).length;
+                  const total = sorted.length;
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+                  return (
+                    <View style={styles.distContent}>
+                      <View style={styles.distRow}>
+                        <View style={styles.distItem}>
+                          <Text style={styles.distValue}>{result.probabilityOfProfit}%</Text>
+                          <Text style={styles.distLabel}>{t('monteCarlo.probabilityOfProfit')}</Text>
+                        </View>
+                        <View style={styles.distItem}>
+                          <Text style={[styles.distValue, { color: '#FF1744' }]}>
+                            {((loseMoneyCount / total) * 100).toFixed(0)}%
+                          </Text>
+                          <Text style={styles.distLabel}>{t('monteCarlo.chanceOfLoss')}</Text>
+                        </View>
+                      </View>
+                      <View style={styles.distRow}>
+                        <View style={styles.distItem}>
+                          <Text style={[styles.distValue, { color: '#00C853' }]}>
+                            {((doubleCount / total) * 100).toFixed(0)}%
+                          </Text>
+                          <Text style={styles.distLabel}>{t('monteCarlo.chanceTo2x')}</Text>
+                        </View>
+                        <View style={styles.distItem}>
+                          <Text style={[styles.distValue, { color: '#6C63FF' }]}>
+                            {((tripleCount / total) * 100).toFixed(0)}%
+                          </Text>
+                          <Text style={styles.distLabel}>{t('monteCarlo.chanceTo3x')}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })()}
+              </Card>
+
+              {/* ── Interpretations ──────────────────────────── */}
+              <Card title={t('monteCarlo.whatThisMeans')} style={styles.sectionCard}>
+                <View style={styles.interpretContent}>
+                  <View style={styles.interpretRow}>
+                    <Text style={styles.interpretIcon}>📊</Text>
+                    <Text style={styles.interpretText}>
+                      The median (50th percentile) outcome is <Text style={styles.interpretBold}>{formatRupees(result.medianEndValue)}</Text> — half of all scenarios end above this, half below.
+                    </Text>
+                  </View>
+                  <View style={styles.interpretDivider} />
+                  <View style={styles.interpretRow}>
+                    <Text style={styles.interpretIcon}>🟢</Text>
+                    <Text style={styles.interpretText}>
+                      In <Text style={styles.interpretBold}>{result.probabilityOfProfit}%</Text> of scenarios, your portfolio ends with positive returns.
+                    </Text>
+                  </View>
+                  <View style={styles.interpretDivider} />
+                  <View style={styles.interpretRow}>
+                    <Text style={styles.interpretIcon}>⚠️</Text>
+                    <Text style={styles.interpretText}>
+                      The 5th percentile outcome ({formatRupees(result.worstCaseValue)}) represents a worst-case scenario that only occurs 5% of the time.
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+
+              {/* ── Parameters Used ─────────────────────────── */}
+              <Card title={t('monteCarlo.parametersUsed')} style={styles.sectionCard}>
+                <View style={styles.paramsContent}>
+                  <View style={styles.paramRow}>
+                    <Text style={styles.paramLabel}>{t('monteCarlo.initialInvestment')}</Text>
+                    <Text style={styles.paramValue}>{formatCurrency(result.params.initialInvestment)}</Text>
+                  </View>
+                  <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.monthlySip')}</Text>
+                    <Text style={styles.paramValue}>{formatCurrency(result.params.monthlyContribution)}</Text>
+                  </View>
+                  <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.expectedReturn')}</Text>
+                    <Text style={styles.paramValue}>{formatPercent(result.params.annualReturn)}</Text>
+                  </View>
+                  <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.volatility')}</Text>
+                    <Text style={styles.paramValue}>{formatPercent(result.params.annualVolatility)}</Text>
+                  </View>
+                  <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.timeHorizon')}</Text>
+                    <Text style={styles.paramValue}>{t('app.years', { count: result.params.years })}</Text>
+                  </View>
+                  <View style={styles.paramRow}>                      <Text style={styles.paramLabel}>{t('monteCarlo.simulations')}</Text>
+                    <Text style={styles.paramValue}>{result.params.simulations.toLocaleString()}</Text>
+                  </View>
+                </View>
+              </Card>
+            </Animated.View>
+          )}
+
+          <View style={{ height: 80 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -642,10 +644,6 @@ function formatYLabel(value: number): string {
 // ══════════════════════════════════════════════════════════════
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 100,
     paddingHorizontal: SPACING.xl,

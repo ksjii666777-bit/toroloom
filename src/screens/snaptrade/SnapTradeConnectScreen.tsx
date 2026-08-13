@@ -30,6 +30,7 @@ import _Button from '../../components/ui/Button';
 import { useT } from '../../hooks/useT';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const { width } = Dimensions.get('window');
@@ -49,7 +50,6 @@ const SUPPORTED_BROKERS = [
 export default function SnapTradeConnectScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'SnapTradeConnect'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
 
   const [status, setStatus] = useState<ConnectionStatus>('checking');
   const [brokerName, setBrokerName] = useState<string | null>(null);
@@ -137,202 +137,205 @@ export default function SnapTradeConnectScreen({ navigation }: NativeStackScreen
   // ── Loading ────────────────────────────────────────────────
   if (status === 'checking') {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.statusText, { color: colors.textMuted, marginTop: SPACING.md }]}>
-          {t('snaptrade.checkingConnection')}
-        </Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.statusText, { color: colors.textMuted, marginTop: SPACING.md }]}>
+            {t('snaptrade.checkingConnection')}
+          </Text>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary, paddingTop: 60 + insets.top }]}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </AnimatedPressable>
-        <View style={{ marginLeft: SPACING.md }}>
-          <Text style={[styles.title, { color: colors.text }]}>{t('snaptrade.title')}</Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            {status === 'connected' ? t('snaptrade.subtitleConnected') : t('snaptrade.subtitleDisconnected')}
-          </Text>
-        </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* ── Connected State ── */}
-        {status === 'connected' && (
-          <Animated.View entering={FadeInDown.duration(400)}>
-            <LinearGradient
-              colors={GRADIENTS.success}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.connectedBanner}
-            >
-              <View style={styles.connectedBannerContent}>
-                <View style={styles.connectedIconCircle}>
-                  <Ionicons name="checkmark" size={28} color="#fff" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.connectedTitle}>{t('snaptrade.connected')}</Text>
-                  <Text style={styles.connectedBroker}>{brokerName || t('snaptrade.broker')}</Text>
-                  {formattedDate && (
-                    <Text style={styles.connectedDate}>{t('snaptrade.connectedOn', { date: formattedDate })}</Text>
-                  )}
-                </View>
-              </View>
-            </LinearGradient>
+  {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary, }]}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </AnimatedPressable>
+          <View style={{ marginLeft: SPACING.md }}>
+            <Text style={[styles.title, { color: colors.text }]}>{t('snaptrade.title')}</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+              {status === 'connected' ? t('snaptrade.subtitleConnected') : t('snaptrade.subtitleDisconnected')}
+            </Text>
+          </View>
+        </View>
 
-            {/* Quick Actions */}
-            <View style={styles.actionRow}>
-              <AnimatedPressable
-                onPress={() => navigation.navigate('SnapTradePortfolio')}
-                haptic="medium"
-                scaleTo={0.95}
-                style={[styles.actionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ── Connected State ── */}
+          {status === 'connected' && (
+            <Animated.View entering={FadeInDown.duration(400)}>
+              <LinearGradient
+                colors={GRADIENTS.success}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.connectedBanner}
               >
-                <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
-                  <Ionicons name="briefcase" size={24} color={colors.primary} />
-                </View>
-                <Text style={[styles.actionTitle, { color: colors.text }]}>{t('snaptrade.portfolio')}</Text>
-                <Text style={[styles.actionDesc, { color: colors.textMuted }]}>
-                  {t('snaptrade.portfolioDesc')}
-                </Text>
-              </AnimatedPressable>
-
-              <AnimatedPressable
-                onPress={() => navigation.navigate('SnapTradeOrder')}
-                haptic="medium"
-                scaleTo={0.95}
-                style={[styles.actionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-              >
-                <View style={[styles.actionIcon, { backgroundColor: '#00E67620' }]}>
-                  <Ionicons name="swap-horizontal" size={24} color="#00E676" />
-                </View>
-                <Text style={[styles.actionTitle, { color: colors.text }]}>{t('snaptrade.trade')}</Text>
-                <Text style={[styles.actionDesc, { color: colors.textMuted }]}>
-                  {t('snaptrade.tradeDesc')}
-                </Text>
-              </AnimatedPressable>
-            </View>
-
-            {/* Disconnect */}
-            <AnimatedPressable
-              onPress={disconnect}
-              haptic="warning"
-              scaleTo={0.97}
-              style={[styles.disconnectBtn, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}
-            >
-              <Ionicons name="link-outline" size={18} color={colors.danger} />
-              <Text style={[styles.disconnectText, { color: colors.danger }]}>{t('snaptrade.disconnectBroker')}</Text>
-            </AnimatedPressable>
-          </Animated.View>
-        )}
-
-        {/* ── Disconnected State ── */}
-        {status === 'disconnected' && (
-          <Animated.View entering={FadeInUp.duration(400)}>
-            {/* Info Card */}
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <View style={[styles.infoIconCircle, { backgroundColor: colors.primary + '15' }]}>
-                <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
-              </View>
-              <Text style={[styles.infoTitle, { color: colors.text }]}>{t('snaptrade.oauthGateway')}</Text>
-              <Text style={[styles.infoDesc, { color: colors.textMuted }]}>
-                {t('snaptrade.oauthDesc')}
-              </Text>
-              <View style={styles.featureRow}>
-                {[
-                  { icon: 'lock-closed', text: t('snaptrade.featureEncrypted') },
-                  { icon: 'flash', text: t('snaptrade.featureInstant') },
-                  { icon: 'globe', text: t('snaptrade.featureBrokers') },
-                ].map((f, i) => (
-                  <View key={i} style={styles.featureChip}>
-                    <Ionicons name={f.icon as any} size={12} color={colors.primary} />
-                    <Text style={[styles.featureChipText, { color: colors.primary }]}>{f.text}</Text>
+                <View style={styles.connectedBannerContent}>
+                  <View style={styles.connectedIconCircle}>
+                    <Ionicons name="checkmark" size={28} color="#fff" />
                   </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.connectedTitle}>{t('snaptrade.connected')}</Text>
+                    <Text style={styles.connectedBroker}>{brokerName || t('snaptrade.broker')}</Text>
+                    {formattedDate && (
+                      <Text style={styles.connectedDate}>{t('snaptrade.connectedOn', { date: formattedDate })}</Text>
+                    )}
+                  </View>
+                </View>
+              </LinearGradient>
+
+              {/* Quick Actions */}
+              <View style={styles.actionRow}>
+                <AnimatedPressable
+                  onPress={() => navigation.navigate('SnapTradePortfolio')}
+                  haptic="medium"
+                  scaleTo={0.95}
+                  style={[styles.actionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                >
+                  <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
+                    <Ionicons name="briefcase" size={24} color={colors.primary} />
+                  </View>
+                  <Text style={[styles.actionTitle, { color: colors.text }]}>{t('snaptrade.portfolio')}</Text>
+                  <Text style={[styles.actionDesc, { color: colors.textMuted }]}>
+                    {t('snaptrade.portfolioDesc')}
+                  </Text>
+                </AnimatedPressable>
+
+                <AnimatedPressable
+                  onPress={() => navigation.navigate('SnapTradeOrder')}
+                  haptic="medium"
+                  scaleTo={0.95}
+                  style={[styles.actionCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                >
+                  <View style={[styles.actionIcon, { backgroundColor: '#00E67620' }]}>
+                    <Ionicons name="swap-horizontal" size={24} color="#00E676" />
+                  </View>
+                  <Text style={[styles.actionTitle, { color: colors.text }]}>{t('snaptrade.trade')}</Text>
+                  <Text style={[styles.actionDesc, { color: colors.textMuted }]}>
+                    {t('snaptrade.tradeDesc')}
+                  </Text>
+                </AnimatedPressable>
+              </View>
+
+              {/* Disconnect */}
+              <AnimatedPressable
+                onPress={disconnect}
+                haptic="warning"
+                scaleTo={0.97}
+                style={[styles.disconnectBtn, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}
+              >
+                <Ionicons name="link-outline" size={18} color={colors.danger} />
+                <Text style={[styles.disconnectText, { color: colors.danger }]}>{t('snaptrade.disconnectBroker')}</Text>
+              </AnimatedPressable>
+            </Animated.View>
+          )}
+
+          {/* ── Disconnected State ── */}
+          {status === 'disconnected' && (
+            <Animated.View entering={FadeInUp.duration(400)}>
+              {/* Info Card */}
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={[styles.infoIconCircle, { backgroundColor: colors.primary + '15' }]}>
+                  <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
+                </View>
+                <Text style={[styles.infoTitle, { color: colors.text }]}>{t('snaptrade.oauthGateway')}</Text>
+                <Text style={[styles.infoDesc, { color: colors.textMuted }]}>
+                  {t('snaptrade.oauthDesc')}
+                </Text>
+                <View style={styles.featureRow}>
+                  {[
+                    { icon: 'lock-closed', text: t('snaptrade.featureEncrypted') },
+                    { icon: 'flash', text: t('snaptrade.featureInstant') },
+                    { icon: 'globe', text: t('snaptrade.featureBrokers') },
+                  ].map((f, i) => (
+                    <View key={i} style={styles.featureChip}>
+                      <Ionicons name={f.icon as any} size={12} color={colors.primary} />
+                      <Text style={[styles.featureChipText, { color: colors.primary }]}>{f.text}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {/* Broker Grid */}
+              <Text style={[styles.sectionLabel, { color: colors.text }]}>{t('snaptrade.selectBroker')}</Text>
+              <View style={styles.brokerGrid}>
+                {SUPPORTED_BROKERS.map((broker, i) => (
+                  <Animated.View
+                    key={broker.id}
+                    entering={FadeInUp.duration(350).delay(i * 60)}
+                    style={styles.brokerCardWrap}
+                  >
+                    <AnimatedPressable
+                      onPress={() => connectBroker(broker.id)}
+                      disabled={isConnecting}
+                      haptic="medium"
+                      scaleTo={0.95}
+                      style={[styles.brokerCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                    >
+                      <LinearGradient
+                        colors={[broker.color + '20', broker.color + '05']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={StyleSheet.absoluteFill}
+                      />
+                      <View style={[styles.brokerIconCircle, { backgroundColor: broker.color + '20' }]}>
+                        <Text style={[styles.brokerIconText, { color: broker.color }]}>{broker.icon}</Text>
+                      </View>
+                      <Text style={[styles.brokerName, { color: colors.text }]}>{broker.name}</Text>
+                      <Text style={[styles.brokerDesc, { color: colors.textMuted }]} numberOfLines={2}>
+                        {broker.desc}
+                      </Text>
+                      <View style={[styles.connectChip, { backgroundColor: broker.color + '20' }]}>
+                        <Text style={[styles.connectChipText, { color: broker.color }]}>{t('snaptrade.connect')}</Text>
+                      </View>
+                    </AnimatedPressable>
+                  </Animated.View>
                 ))}
               </View>
-            </View>
+            </Animated.View>
+          )}
 
-            {/* Broker Grid */}
-            <Text style={[styles.sectionLabel, { color: colors.text }]}>{t('snaptrade.selectBroker')}</Text>
-            <View style={styles.brokerGrid}>
-              {SUPPORTED_BROKERS.map((broker, i) => (
-                <Animated.View
-                  key={broker.id}
-                  entering={FadeInUp.duration(350).delay(i * 60)}
-                  style={styles.brokerCardWrap}
-                >
-                  <AnimatedPressable
-                    onPress={() => connectBroker(broker.id)}
-                    disabled={isConnecting}
-                    haptic="medium"
-                    scaleTo={0.95}
-                    style={[styles.brokerCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                  >
-                    <LinearGradient
-                      colors={[broker.color + '20', broker.color + '05']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={StyleSheet.absoluteFill}
-                    />
-                    <View style={[styles.brokerIconCircle, { backgroundColor: broker.color + '20' }]}>
-                      <Text style={[styles.brokerIconText, { color: broker.color }]}>{broker.icon}</Text>
-                    </View>
-                    <Text style={[styles.brokerName, { color: colors.text }]}>{broker.name}</Text>
-                    <Text style={[styles.brokerDesc, { color: colors.textMuted }]} numberOfLines={2}>
-                      {broker.desc}
-                    </Text>
-                    <View style={[styles.connectChip, { backgroundColor: broker.color + '20' }]}>
-                      <Text style={[styles.connectChipText, { color: broker.color }]}>{t('snaptrade.connect')}</Text>
-                    </View>
-                  </AnimatedPressable>
-                </Animated.View>
-              ))}
+          {/* Error Display */}
+          {connectError && (
+            <View style={[styles.errorCard, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}>
+              <Ionicons name="alert-circle" size={18} color={colors.danger} />
+              <Text style={[styles.errorText, { color: colors.danger }]}>{connectError}</Text>
             </View>
-          </Animated.View>
-        )}
+          )}
 
-        {/* Error Display */}
-        {connectError && (
-          <View style={[styles.errorCard, { backgroundColor: colors.danger + '15', borderColor: colors.danger + '30' }]}>
-            <Ionicons name="alert-circle" size={18} color={colors.danger} />
-            <Text style={[styles.errorText, { color: colors.danger }]}>{connectError}</Text>
+          <View style={{ height: 80 }} />
+        </ScrollView>
+
+        {/* Connecting Overlay */}
+        {isConnecting && (
+          <View style={styles.connectingOverlay}>
+            <LinearGradient
+              colors={[colors.bg + 'F0', colors.bg + 'F0']}
+              style={StyleSheet.absoluteFill}
+            />
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.connectingTitle, { color: colors.text }]}>{t('snaptrade.connecting')}</Text>
+            <Text style={[styles.connectingSub, { color: colors.textMuted }]}>
+              {t('snaptrade.completeLoginBrowser')}
+            </Text>
+            <Text style={[styles.connectingBroker, { color: colors.primary }]}>
+              {selectedBroker ? SUPPORTED_BROKERS.find(b => b.id === selectedBroker)?.name : ''}
+            </Text>
           </View>
         )}
-
-        <View style={{ height: 80 }} />
-      </ScrollView>
-
-      {/* Connecting Overlay */}
-      {isConnecting && (
-        <View style={styles.connectingOverlay}>
-          <LinearGradient
-            colors={[colors.bg + 'F0', colors.bg + 'F0']}
-            style={StyleSheet.absoluteFill}
-          />
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={[styles.connectingTitle, { color: colors.text }]}>{t('snaptrade.connecting')}</Text>
-          <Text style={[styles.connectingSub, { color: colors.textMuted }]}>
-            {t('snaptrade.completeLoginBrowser')}
-          </Text>
-          <Text style={[styles.connectingBroker, { color: colors.primary }]}>
-            {selectedBroker ? SUPPORTED_BROKERS.find(b => b.id === selectedBroker)?.name : ''}
-          </Text>
-        </View>
-      )}
-    </View>
+      </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -17,6 +17,7 @@ import { SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { useIPOStore } from '../../store/ipoStore';
 import type { IPOItem, RootStackParamList } from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 // ──── Helpers ──────────────────────────────────────────────────────────────
 
@@ -184,13 +185,16 @@ export default function IPODetailScreen({ route, navigation }: NativeStackScreen
 
   if (!ipo) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }]}>
-        <Ionicons name="alert-circle" size={48} color={colors.textMuted} />
-        <Text style={[styles.notFoundText, { color: colors.textMuted }]}>{t('ipos.ipoNotFound')}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.notFoundLink, { color: colors.primary }]}>{t('ipos.goBack')}</Text>
-        </TouchableOpacity>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Ionicons name="alert-circle" size={48} color={colors.textMuted} />
+          <Text style={[styles.notFoundText, { color: colors.textMuted }]}>{t('ipos.ipoNotFound')}</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={[styles.notFoundLink, { color: colors.primary }]}>{t('ipos.goBack')}</Text>
+          </TouchableOpacity>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -221,360 +225,360 @@ export default function IPODetailScreen({ route, navigation }: NativeStackScreen
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* ── Hero Header ── */}
-        <LinearGradient
-          colors={[ipo.subscriptionStatus === 'listed' ? '#64748B30' : '#3B82F620', colors.bg]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={[styles.hero, { paddingTop: insets.top + 12 }]}
-        >
-          {/* Back + Bookmark */}
-          <View style={styles.heroTop}>
-            <TouchableOpacity
-              style={[styles.heroBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-              onPress={() => navigation.goBack()}
-            >
-              <Ionicons name="arrow-back" size={20} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.heroBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-              onPress={() => toggleBookmark(ipo.id)}
-            >
-              <Ionicons
-                name={ipo.isBookmarked ? 'bookmark' : 'bookmark-outline'}
-                size={18}
-                color={ipo.isBookmarked ? colors.warning : colors.textMuted}
-              />
-            </TouchableOpacity>
-          </View>
-
-          {/* Company Info */}
-          <View style={styles.heroInfo}>
-            <View style={[styles.heroLogo, { backgroundColor: 'rgba(59,130,246,0.15)' }]}>
-              <Text style={[styles.heroLogoText, { color: colors.primary }]}>{ipo.logo}</Text>
-            </View>
-            <View style={styles.heroDetails}>
-              <Text style={[styles.heroName, { color: colors.text }]}>{ipo.companyName}</Text>
-              <Text style={[styles.heroSector, { color: colors.textMuted }]}>{ipo.sector}</Text>
-              <StatusBadge status={ipo.subscriptionStatus} />
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* ── Price & Stats Row ── */}
-        <View style={styles.statsRow}>
-          <StatCard label={t('ipos.priceBand')} value={`₹${ipo.priceBand.min} – ₹${ipo.priceBand.max}`} icon="pricetag" />
-          <StatCard label={t('ipos.lotSize')} value={`${ipo.lotSize} ${t('ipos.shares')}`} icon="cube" />
-          <StatCard label={t('ipos.minInvest')} value={`₹${ipo.minInvestment.toLocaleString('en-IN')}`} icon="wallet" />
-        </View>
-
-        {/* ── Issue Details ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('ipos.issueDetails')} icon="stats-chart" />
-          <View style={styles.issueGrid}>
-            <View style={styles.issueItem}>
-              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.issueSize')}</Text>
-              <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.issueSize.toLocaleString('en-IN')} Cr</Text>
-            </View>
-            <View style={styles.issueItem}>
-              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.freshIssue')}</Text>
-              <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.freshIssue.toLocaleString('en-IN')} Cr</Text>
-            </View>
-            <View style={styles.issueItem}>
-              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.ofs')}</Text>
-              <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.offerForSale.toLocaleString('en-IN')} Cr</Text>
-            </View>
-            <View style={styles.issueItem}>
-              <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.totalShares')}</Text>
-              <Text style={[styles.issueValue, { color: colors.text }]}>{(ipo.totalShares / 10000000).toFixed(2)} Cr</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Subscription Breakdown ── */}
-        {ipo.subscriptionTotal > 0 && (
-          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <SectionHeader title={t('ipos.subscription')} icon="trending-up" color="#00E676" />
-            <Text style={[styles.subTotalText, { color: '#00E676' }]}>
-              {t('ipos.overall', { value: ipo.subscriptionTotal.toFixed(2) })}
-            </Text>
-            <View style={styles.subBars}>
-              <SubscriptionBar label={t('ipos.subQIB')} value={ipo.subscriptionQIB} maxValue={ipo.subscriptionTotal} color="#3B82F6" />
-              <SubscriptionBar label={t('ipos.subHNI')} value={ipo.subscriptionHNI} maxValue={ipo.subscriptionTotal} color="#8B5CF6" />
-              <SubscriptionBar label={t('ipos.retail')} value={ipo.subscriptionRetail} maxValue={ipo.subscriptionTotal} color="#00E676" />
-            </View>
-            <View style={[styles.subMeta, { borderTopColor: colors.border }]}>
-              <Text style={[styles.subMetaText, { color: colors.textMuted }]}>
-                {t('ipos.applicationsApplied', {
-                  count: ipo.applications.toLocaleString('en-IN'),
-                  value: (ipo.sharesApplied / 10000000).toFixed(2),
-                })}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* ── GMP & Expected Listing ── */}
-        {ipo.gmp > 0 && (
-          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <SectionHeader title={t('ipos.gmpTitle')} icon="pulse" color="#FFC107" />
-            <View style={styles.gmpHeader}>
-              <View>
-                <Text style={[styles.gmpValue, { color: gmpPositive ? '#00E676' : '#FF5252' }]}>
-                  {gmpPositive ? '+' : ''}₹{ipo.gmp}
-                </Text>
-                <Text style={[styles.gmpPct, { color: gmpPositive ? '#00E676' : '#FF5252' }]}>
-                  {gmpPositive ? '+' : ''}{ipo.gmpPercent.toFixed(1)}%
-                </Text>
-              </View>
-              <View style={styles.gmpListing}>
-                <Text style={[styles.gmpListingLabel, { color: colors.textMuted }]}>{t('ipos.expectedListing')}</Text>
-                <Text style={[styles.gmpListingValue, { color: colors.text }]}>₹{ipo.expectedListingPrice}</Text>
-                <Text style={[styles.gmpListingGain, { color: ipo.expectedListingGain >= 0 ? '#00E676' : '#FF5252' }]}>
-                  {ipo.expectedListingGain >= 0 ? '+' : ''}{ipo.expectedListingGain.toFixed(1)}%
-                </Text>
-              </View>
-            </View>
-
-            {/* GMP Trend Mini Chart */}
-            <View style={styles.gmpChart}>
-              <View style={styles.gmpChartBars}>
-                {gmpTrend.map((g, i) => (
-                  <View key={i} style={styles.gmpBarCol}>
-                    <View
-                      style={[
-                        styles.gmpBar,
-                        {
-                          height: Math.max(4, Math.round((g.value / maxGmp) * 56)),
-                          backgroundColor: g.value >= gmpTrend[Math.max(0, i - 1)]?.value ? '#00E676' : '#FF5252',
-                        },
-                      ]}
-                    />
-                  </View>
-                ))}
-              </View>
-              <View style={styles.gmpChartLabels}>
-                {gmpTrend.map((g, i) => (
-                  <Text key={i} style={[styles.gmpChartLabel, { color: colors.textMuted }]}>{g.day}</Text>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* ── Financials ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('ipos.financials')} icon="analytics" />
-          <View style={styles.finGrid}>
-            <FinMetric label={t('ipos.revenue')} value={`₹${ipo.revenue.toLocaleString('en-IN')}`} positive={ipo.revenue > 0} />
-            <FinMetric label={t('ipos.netProfit')} value={`₹${Math.abs(ipo.netProfit).toLocaleString('en-IN')}`} positive={isProfitable} negative={!isProfitable} />
-            <FinMetric label={t('ipos.peRatio')} value={ipo.peRatio > 0 ? ipo.peRatio.toFixed(1) : 'N/A'} />
-            <FinMetric label={t('ipos.roe')} value={`${ipo.roe.toFixed(1)}%`} positive={ipo.roe > 10} negative={ipo.roe < 0} />
-          </View>
-        </View>
-
-        {/* ── Key Dates Timeline ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('ipos.keyDates')} icon="calendar" />
-          <View style={styles.timeline}>
-            <TimelineItem
-              label={t('ipos.openDate')}
-              date={ipo.openDate}
-              isActive={ipo.subscriptionStatus === 'open' || ipo.subscriptionStatus === 'closed' || ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
-              color="#3B82F6"
-            />
-            <TimelineItem
-              label={t('ipos.closeDate')}
-              date={ipo.closeDate}
-              isActive={ipo.subscriptionStatus === 'closed' || ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
-              color="#00E676"
-            />
-            <TimelineItem
-              label={t('ipos.allotment')}
-              date={ipo.allotmentDate || 'TBD'}
-              isActive={ipo.subscriptionStatus === 'listed'}
-              color="#8B5CF6"
-            />
-            <TimelineItem
-              label={t('ipos.listingDate')}
-              date={ipo.listingDate}
-              isActive={ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
-              isLast
-              color="#FFC107"
-            />
-          </View>
-        </View>
-
-        {/* ── About ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('ipos.about')} icon="information-circle" />
-          <Text style={[styles.aboutText, { color: colors.textSecondary }]}>{ipo.about}</Text>
-        </View>
-
-        {/* ── Strengths ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('ipos.strengths')} icon="shield-checkmark" color="#00E676" />
-          <BulletList items={ipo.strengths} color="#00E676" />
-        </View>
-
-        {/* ── Risks ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('ipos.risks')} icon="warning" color="#FF5252" />
-          <BulletList items={ipo.risks} color="#FF5252" />
-        </View>
-
-        {/* ── Lead Managers & Registrar ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <SectionHeader title={t('ipos.leadManagers')} icon="people" />
-          <View style={styles.managerList}>
-            {ipo.leadManagers.map((m, i) => (
-              <View key={i} style={[styles.managerChip, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-                <Ionicons name="business" size={12} color={colors.primary} />
-                <Text style={[styles.managerName, { color: colors.text }]}>{m}</Text>
-              </View>
-            ))}
-          </View>
-          <View style={[styles.registrarRow, { borderTopColor: colors.border }]}>
-            <Text style={[styles.registrarLabel, { color: colors.textMuted }]}>{t('ipos.registrar')}</Text>
-            <Text style={[styles.registrarValue, { color: colors.text }]}>{ipo.registrar}</Text>
-          </View>
-          <View style={styles.ratingRow}>
-            <Text style={[styles.ratingLabel, { color: colors.textMuted }]}>{t('ipos.rating')}</Text>
-            <View style={styles.stars}>
-              {[1, 2, 3, 4, 5].map(s => (
-                <Ionicons
-                  key={s}
-                  name={s <= ipo.rating ? 'star' : 'star-outline'}
-                  size={14}
-                  color={s <= ipo.rating ? '#FFC107' : colors.textMuted}
-                />
-              ))}
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-
-      {/* ── Bottom Action Bar ── */}
-      <View style={[styles.bottomBar, { backgroundColor: colors.bgSecondary, borderTopColor: colors.border }]}>
-        <View style={styles.bottomLeft}>
-          <Text style={[styles.bottomGMP, { color: gmpPositive ? '#00E676' : colors.textMuted }]}>
-            GMP: {gmpPositive ? '+' : ''}₹{ipo.gmp}
-          </Text>
-          <Text style={[styles.bottomGMPPct, { color: gmpPositive ? '#00E676' : colors.textMuted }]}>
-            ({gmpPositive ? '+' : ''}{ipo.gmpPercent.toFixed(1)}%)
-          </Text>
-        </View>
-        {canApply ? (
-          <TouchableOpacity
-            style={styles.bottomApplyBtn}
-            onPress={() => setShowApply(true)}
-            activeOpacity={0.8}
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+          {/* ── Hero Header ── */}
+          <LinearGradient
+            colors={[ipo.subscriptionStatus === 'listed' ? '#64748B30' : '#3B82F620', colors.bg]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={[styles.hero, { paddingTop: insets.top + 12 }]}
           >
-            <LinearGradient
-              colors={['#00E676', '#00C853']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.bottomApplyGradient}
-            >
-              <Ionicons name="phone-portrait-outline" size={16} color="#0A0D14" />
-              <Text style={styles.bottomApplyText}>{t('ipos.applyViaUPI')}</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        ) : ipo.subscriptionStatus === 'upcoming' ? (
-          <View style={[styles.bottomStatus, { backgroundColor: '#3B82F620' }]}>
-            <Ionicons name="time-outline" size={16} color="#3B82F6" />
-            <Text style={[styles.bottomStatusText, { color: '#3B82F6' }]}>
-              Opens in {daysBetween(new Date().toISOString().split('T')[0], ipo.openDate)}d
-            </Text>
-          </View>
-        ) : (
-          <View style={[styles.bottomStatus, { backgroundColor: '#64748B20' }]}>
-            <Ionicons name="lock-closed" size={16} color="#64748B" />
-            <Text style={[styles.bottomStatusText, { color: '#64748B' }]}>{t('ipos.closed')}</Text>
-          </View>
-        )}
-      </View>
-
-      {/* ── Apply Modal (compact inline) ── */}
-      {showApply && (
-        <View style={styles.applyOverlay}>
-          <View style={[styles.applySheet, { backgroundColor: colors.bgSecondary }]}>
-            <View style={styles.applyHeader}>
-              <Text style={[styles.applyTitle, { color: colors.text }]}>{t('ipos.applyTitle')}</Text>
-              <TouchableOpacity onPress={() => setShowApply(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
+            {/* Back + Bookmark */}
+            <View style={styles.heroTop}>
+              <TouchableOpacity
+                style={[styles.heroBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons name="arrow-back" size={20} color={colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.heroBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                onPress={() => toggleBookmark(ipo.id)}
+              >
+                <Ionicons
+                  name={ipo.isBookmarked ? 'bookmark' : 'bookmark-outline'}
+                  size={18}
+                  color={ipo.isBookmarked ? colors.warning : colors.textMuted}
+                />
               </TouchableOpacity>
             </View>
-            <Text style={[styles.applyCompanyName, { color: colors.textSecondary }]}>{ipo.companyName}</Text>
-            <Text style={[styles.applyRange, { color: colors.textMuted }]}>
-              ₹{ipo.priceBand.min} – ₹{ipo.priceBand.max} · {t('ipos.lot')}: {t('app.shares', { count: ipo.lotSize })}
-            </Text>
 
-            {/* Lot Selector */}
-            <Text style={[styles.applyLabel, { color: colors.textSecondary }]}>{t('ipos.numberOfLots')}</Text>
-            <View style={styles.applyLotsRow}>
-              {[1, 2, 3, 5, 10].map(n => (
-                <TouchableOpacity
-                  key={n}
-                  style={[styles.applyLotBtn, {
-                    backgroundColor: bidLots === n ? colors.primary : colors.bgCard,
-                    borderColor: bidLots === n ? colors.primary : colors.border,
-                  }]}
-                  onPress={() => setBidLots(n)}
-                >
-                  <Text style={[styles.applyLotText, { color: bidLots === n ? '#FFF' : colors.text }]}>{n}</Text>
-                </TouchableOpacity>
+            {/* Company Info */}
+            <View style={styles.heroInfo}>
+              <View style={[styles.heroLogo, { backgroundColor: 'rgba(59,130,246,0.15)' }]}>
+                <Text style={[styles.heroLogoText, { color: colors.primary }]}>{ipo.logo}</Text>
+              </View>
+              <View style={styles.heroDetails}>
+                <Text style={[styles.heroName, { color: colors.text }]}>{ipo.companyName}</Text>
+                <Text style={[styles.heroSector, { color: colors.textMuted }]}>{ipo.sector}</Text>
+                <StatusBadge status={ipo.subscriptionStatus} />
+              </View>
+            </View>
+          </LinearGradient>
+
+          {/* ── Price & Stats Row ── */}
+          <View style={styles.statsRow}>
+            <StatCard label={t('ipos.priceBand')} value={`₹${ipo.priceBand.min} – ₹${ipo.priceBand.max}`} icon="pricetag" />
+            <StatCard label={t('ipos.lotSize')} value={`${ipo.lotSize} ${t('ipos.shares')}`} icon="cube" />
+            <StatCard label={t('ipos.minInvest')} value={`₹${ipo.minInvestment.toLocaleString('en-IN')}`} icon="wallet" />
+          </View>
+
+          {/* ── Issue Details ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('ipos.issueDetails')} icon="stats-chart" />
+            <View style={styles.issueGrid}>
+              <View style={styles.issueItem}>
+                <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.issueSize')}</Text>
+                <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.issueSize.toLocaleString('en-IN')} Cr</Text>
+              </View>
+              <View style={styles.issueItem}>
+                <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.freshIssue')}</Text>
+                <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.freshIssue.toLocaleString('en-IN')} Cr</Text>
+              </View>
+              <View style={styles.issueItem}>
+                <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.ofs')}</Text>
+                <Text style={[styles.issueValue, { color: colors.text }]}>₹{ipo.offerForSale.toLocaleString('en-IN')} Cr</Text>
+              </View>
+              <View style={styles.issueItem}>
+                <Text style={[styles.issueLabel, { color: colors.textMuted }]}>{t('ipos.totalShares')}</Text>
+                <Text style={[styles.issueValue, { color: colors.text }]}>{(ipo.totalShares / 10000000).toFixed(2)} Cr</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* ── Subscription Breakdown ── */}
+          {ipo.subscriptionTotal > 0 && (
+            <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <SectionHeader title={t('ipos.subscription')} icon="trending-up" color="#00E676" />
+              <Text style={[styles.subTotalText, { color: '#00E676' }]}>
+                {t('ipos.overall', { value: ipo.subscriptionTotal.toFixed(2) })}
+              </Text>
+              <View style={styles.subBars}>
+                <SubscriptionBar label={t('ipos.subQIB')} value={ipo.subscriptionQIB} maxValue={ipo.subscriptionTotal} color="#3B82F6" />
+                <SubscriptionBar label={t('ipos.subHNI')} value={ipo.subscriptionHNI} maxValue={ipo.subscriptionTotal} color="#8B5CF6" />
+                <SubscriptionBar label={t('ipos.retail')} value={ipo.subscriptionRetail} maxValue={ipo.subscriptionTotal} color="#00E676" />
+              </View>
+              <View style={[styles.subMeta, { borderTopColor: colors.border }]}>
+                <Text style={[styles.subMetaText, { color: colors.textMuted }]}>
+                  {t('ipos.applicationsApplied', {
+                    count: ipo.applications.toLocaleString('en-IN'),
+                    value: (ipo.sharesApplied / 10000000).toFixed(2),
+                  })}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* ── GMP & Expected Listing ── */}
+          {ipo.gmp > 0 && (
+            <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <SectionHeader title={t('ipos.gmpTitle')} icon="pulse" color="#FFC107" />
+              <View style={styles.gmpHeader}>
+                <View>
+                  <Text style={[styles.gmpValue, { color: gmpPositive ? '#00E676' : '#FF5252' }]}>
+                    {gmpPositive ? '+' : ''}₹{ipo.gmp}
+                  </Text>
+                  <Text style={[styles.gmpPct, { color: gmpPositive ? '#00E676' : '#FF5252' }]}>
+                    {gmpPositive ? '+' : ''}{ipo.gmpPercent.toFixed(1)}%
+                  </Text>
+                </View>
+                <View style={styles.gmpListing}>
+                  <Text style={[styles.gmpListingLabel, { color: colors.textMuted }]}>{t('ipos.expectedListing')}</Text>
+                  <Text style={[styles.gmpListingValue, { color: colors.text }]}>₹{ipo.expectedListingPrice}</Text>
+                  <Text style={[styles.gmpListingGain, { color: ipo.expectedListingGain >= 0 ? '#00E676' : '#FF5252' }]}>
+                    {ipo.expectedListingGain >= 0 ? '+' : ''}{ipo.expectedListingGain.toFixed(1)}%
+                  </Text>
+                </View>
+              </View>
+
+              {/* GMP Trend Mini Chart */}
+              <View style={styles.gmpChart}>
+                <View style={styles.gmpChartBars}>
+                  {gmpTrend.map((g, i) => (
+                    <View key={i} style={styles.gmpBarCol}>
+                      <View
+                        style={[
+                          styles.gmpBar,
+                          {
+                            height: Math.max(4, Math.round((g.value / maxGmp) * 56)),
+                            backgroundColor: g.value >= gmpTrend[Math.max(0, i - 1)]?.value ? '#00E676' : '#FF5252',
+                          },
+                        ]}
+                      />
+                    </View>
+                  ))}
+                </View>
+                <View style={styles.gmpChartLabels}>
+                  {gmpTrend.map((g, i) => (
+                    <Text key={i} style={[styles.gmpChartLabel, { color: colors.textMuted }]}>{g.day}</Text>
+                  ))}
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* ── Financials ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('ipos.financials')} icon="analytics" />
+            <View style={styles.finGrid}>
+              <FinMetric label={t('ipos.revenue')} value={`₹${ipo.revenue.toLocaleString('en-IN')}`} positive={ipo.revenue > 0} />
+              <FinMetric label={t('ipos.netProfit')} value={`₹${Math.abs(ipo.netProfit).toLocaleString('en-IN')}`} positive={isProfitable} negative={!isProfitable} />
+              <FinMetric label={t('ipos.peRatio')} value={ipo.peRatio > 0 ? ipo.peRatio.toFixed(1) : 'N/A'} />
+              <FinMetric label={t('ipos.roe')} value={`${ipo.roe.toFixed(1)}%`} positive={ipo.roe > 10} negative={ipo.roe < 0} />
+            </View>
+          </View>
+
+          {/* ── Key Dates Timeline ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('ipos.keyDates')} icon="calendar" />
+            <View style={styles.timeline}>
+              <TimelineItem
+                label={t('ipos.openDate')}
+                date={ipo.openDate}
+                isActive={ipo.subscriptionStatus === 'open' || ipo.subscriptionStatus === 'closed' || ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
+                color="#3B82F6"
+              />
+              <TimelineItem
+                label={t('ipos.closeDate')}
+                date={ipo.closeDate}
+                isActive={ipo.subscriptionStatus === 'closed' || ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
+                color="#00E676"
+              />
+              <TimelineItem
+                label={t('ipos.allotment')}
+                date={ipo.allotmentDate || 'TBD'}
+                isActive={ipo.subscriptionStatus === 'listed'}
+                color="#8B5CF6"
+              />
+              <TimelineItem
+                label={t('ipos.listingDate')}
+                date={ipo.listingDate}
+                isActive={ipo.subscriptionStatus === 'listing_today' || ipo.subscriptionStatus === 'listed'}
+                isLast
+                color="#FFC107"
+              />
+            </View>
+          </View>
+
+          {/* ── About ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('ipos.about')} icon="information-circle" />
+            <Text style={[styles.aboutText, { color: colors.textSecondary }]}>{ipo.about}</Text>
+          </View>
+
+          {/* ── Strengths ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('ipos.strengths')} icon="shield-checkmark" color="#00E676" />
+            <BulletList items={ipo.strengths} color="#00E676" />
+          </View>
+
+          {/* ── Risks ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('ipos.risks')} icon="warning" color="#FF5252" />
+            <BulletList items={ipo.risks} color="#FF5252" />
+          </View>
+
+          {/* ── Lead Managers & Registrar ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <SectionHeader title={t('ipos.leadManagers')} icon="people" />
+            <View style={styles.managerList}>
+              {ipo.leadManagers.map((m, i) => (
+                <View key={i} style={[styles.managerChip, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+                  <Ionicons name="business" size={12} color={colors.primary} />
+                  <Text style={[styles.managerName, { color: colors.text }]}>{m}</Text>
+                </View>
               ))}
             </View>
-
-            {/* Summary */}
-            <View style={[styles.applySummary, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <View style={styles.applySummaryRow}>
-                <Text style={[styles.applySummaryLabel, { color: colors.textMuted }]}>{t('ipos.shares')}</Text>
-                <Text style={[styles.applySummaryValue, { color: colors.text }]}>
-                  {(bidLots * ipo.lotSize).toLocaleString('en-IN')}
-                </Text>
-              </View>
-              <View style={[styles.applySummaryDivider, { backgroundColor: colors.divider }]} />
-              <View style={styles.applySummaryRow}>
-                <Text style={[styles.applySummaryLabel, { color: colors.textMuted }]}>{t('ipos.amount')}</Text>
-                <Text style={[styles.applySummaryValue, { color: colors.primary, fontSize: 18 }]}>
-                  ₹{(bidLots * ipo.lotSize * ipo.priceBand.min).toLocaleString('en-IN')}
-                </Text>
+            <View style={[styles.registrarRow, { borderTopColor: colors.border }]}>
+              <Text style={[styles.registrarLabel, { color: colors.textMuted }]}>{t('ipos.registrar')}</Text>
+              <Text style={[styles.registrarValue, { color: colors.text }]}>{ipo.registrar}</Text>
+            </View>
+            <View style={styles.ratingRow}>
+              <Text style={[styles.ratingLabel, { color: colors.textMuted }]}>{t('ipos.rating')}</Text>
+              <View style={styles.stars}>
+                {[1, 2, 3, 4, 5].map(s => (
+                  <Ionicons
+                    key={s}
+                    name={s <= ipo.rating ? 'star' : 'star-outline'}
+                    size={14}
+                    color={s <= ipo.rating ? '#FFC107' : colors.textMuted}
+                  />
+                ))}
               </View>
             </View>
+          </View>
+        </ScrollView>
 
+        {/* ── Bottom Action Bar ── */}
+        <View style={[styles.bottomBar, { backgroundColor: colors.bgSecondary, borderTopColor: colors.border }]}>
+          <View style={styles.bottomLeft}>
+            <Text style={[styles.bottomGMP, { color: gmpPositive ? '#00E676' : colors.textMuted }]}>
+              GMP: {gmpPositive ? '+' : ''}₹{ipo.gmp}
+            </Text>
+            <Text style={[styles.bottomGMPPct, { color: gmpPositive ? '#00E676' : colors.textMuted }]}>
+              ({gmpPositive ? '+' : ''}{ipo.gmpPercent.toFixed(1)}%)
+            </Text>
+          </View>
+          {canApply ? (
             <TouchableOpacity
-              style={styles.applySubmitBtn}
-              onPress={handleApply}
-              disabled={submitting}
+              style={styles.bottomApplyBtn}
+              onPress={() => setShowApply(true)}
               activeOpacity={0.8}
             >
               <LinearGradient
                 colors={['#00E676', '#00C853']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.applySubmitGradient}
+                style={styles.bottomApplyGradient}
               >
-                <Ionicons name="checkmark-circle" size={20} color="#0A0D14" />
-                <Text style={styles.applySubmitText}>
-                  {submitting ? 'Submitting...' : 'Confirm Application'}
-                </Text>
+                <Ionicons name="phone-portrait-outline" size={16} color="#0A0D14" />
+                <Text style={styles.bottomApplyText}>{t('ipos.applyViaUPI')}</Text>
               </LinearGradient>
             </TouchableOpacity>
-          </View>
+          ) : ipo.subscriptionStatus === 'upcoming' ? (
+            <View style={[styles.bottomStatus, { backgroundColor: '#3B82F620' }]}>
+              <Ionicons name="time-outline" size={16} color="#3B82F6" />
+              <Text style={[styles.bottomStatusText, { color: '#3B82F6' }]}>
+                Opens in {daysBetween(new Date().toISOString().split('T')[0], ipo.openDate)}d
+              </Text>
+            </View>
+          ) : (
+            <View style={[styles.bottomStatus, { backgroundColor: '#64748B20' }]}>
+              <Ionicons name="lock-closed" size={16} color="#64748B" />
+              <Text style={[styles.bottomStatusText, { color: '#64748B' }]}>{t('ipos.closed')}</Text>
+            </View>
+          )}
         </View>
-      )}
-    </View>
+
+        {/* ── Apply Modal (compact inline) ── */}
+        {showApply && (
+          <View style={styles.applyOverlay}>
+            <View style={[styles.applySheet, { backgroundColor: colors.bgSecondary }]}>
+              <View style={styles.applyHeader}>
+                <Text style={[styles.applyTitle, { color: colors.text }]}>{t('ipos.applyTitle')}</Text>
+                <TouchableOpacity onPress={() => setShowApply(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+              <Text style={[styles.applyCompanyName, { color: colors.textSecondary }]}>{ipo.companyName}</Text>
+              <Text style={[styles.applyRange, { color: colors.textMuted }]}>
+                ₹{ipo.priceBand.min} – ₹{ipo.priceBand.max} · {t('ipos.lot')}: {t('app.shares', { count: ipo.lotSize })}
+              </Text>
+
+              {/* Lot Selector */}
+              <Text style={[styles.applyLabel, { color: colors.textSecondary }]}>{t('ipos.numberOfLots')}</Text>
+              <View style={styles.applyLotsRow}>
+                {[1, 2, 3, 5, 10].map(n => (
+                  <TouchableOpacity
+                    key={n}
+                    style={[styles.applyLotBtn, {
+                      backgroundColor: bidLots === n ? colors.primary : colors.bgCard,
+                      borderColor: bidLots === n ? colors.primary : colors.border,
+                    }]}
+                    onPress={() => setBidLots(n)}
+                  >
+                    <Text style={[styles.applyLotText, { color: bidLots === n ? '#FFF' : colors.text }]}>{n}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Summary */}
+              <View style={[styles.applySummary, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <View style={styles.applySummaryRow}>
+                  <Text style={[styles.applySummaryLabel, { color: colors.textMuted }]}>{t('ipos.shares')}</Text>
+                  <Text style={[styles.applySummaryValue, { color: colors.text }]}>
+                    {(bidLots * ipo.lotSize).toLocaleString('en-IN')}
+                  </Text>
+                </View>
+                <View style={[styles.applySummaryDivider, { backgroundColor: colors.divider }]} />
+                <View style={styles.applySummaryRow}>
+                  <Text style={[styles.applySummaryLabel, { color: colors.textMuted }]}>{t('ipos.amount')}</Text>
+                  <Text style={[styles.applySummaryValue, { color: colors.primary, fontSize: 18 }]}>
+                    ₹{(bidLots * ipo.lotSize * ipo.priceBand.min).toLocaleString('en-IN')}
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={styles.applySubmitBtn}
+                onPress={handleApply}
+                disabled={submitting}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={['#00E676', '#00C853']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.applySubmitGradient}
+                >
+                  <Ionicons name="checkmark-circle" size={20} color="#0A0D14" />
+                  <Text style={styles.applySubmitText}>
+                    {submitting ? 'Submitting...' : 'Confirm Application'}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </AppScreen>
   );
 }
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
 
   // Hero
   hero: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.xxl },

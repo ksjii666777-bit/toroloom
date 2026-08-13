@@ -12,6 +12,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 Dimensions.get('window');
@@ -49,167 +50,167 @@ export default function VoiceSettingsScreen({ navigation }: NativeStackScreenPro
   const testMessages = getTestMessages(t);
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <View>
-            <Text style={styles.title}>{t('voiceSettings.title')}</Text>
-            <Text style={styles.subtitle}>{t('voiceSettings.subtitle')}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <View>
+              <Text style={styles.title}>{t('voiceSettings.title')}</Text>
+              <Text style={styles.subtitle}>{t('voiceSettings.subtitle')}</Text>
+            </View>
           </View>
-        </View>
 
-        {/* Voice Toggle */}
-        <Card title={t('voiceSettings.announcementsTitle')} subtitle={t('voiceSettings.announcementsDesc')}>
-          <View style={styles.toggleRow}>
-            <View style={styles.toggleInfo}>
-              <Ionicons
-                name={enabled ? 'volume-high' : 'volume-mute'}
-                size={24}
-                color={enabled ? colors.primary : colors.textMuted}
+          {/* Voice Toggle */}
+          <Card title={t('voiceSettings.announcementsTitle')} subtitle={t('voiceSettings.announcementsDesc')}>
+            <View style={styles.toggleRow}>
+              <View style={styles.toggleInfo}>
+                <Ionicons
+                  name={enabled ? 'volume-high' : 'volume-mute'}
+                  size={24}
+                  color={enabled ? colors.primary : colors.textMuted}
+                />
+                <View>
+                  <Text style={[styles.toggleLabel, { color: colors.text }]}>
+                    {enabled ? t('voiceSettings.voiceOn') : t('voiceSettings.voiceOff')}
+                  </Text>
+                  <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
+                    {enabled
+                      ? t('voiceSettings.voiceOnDesc')
+                      : t('voiceSettings.voiceOffDesc')}
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={enabled}
+                onValueChange={toggleVoice}
+                trackColor={{ false: colors.border, true: colors.primary + '60' }}
+                thumbColor={enabled ? colors.primary : colors.textMuted}
               />
-              <View>
-                <Text style={[styles.toggleLabel, { color: colors.text }]}>
-                  {enabled ? t('voiceSettings.voiceOn') : t('voiceSettings.voiceOff')}
-                </Text>
-                <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
-                  {enabled
-                    ? t('voiceSettings.voiceOnDesc')
-                    : t('voiceSettings.voiceOffDesc')}
-                </Text>
-              </View>
             </View>
-            <Switch
-              value={enabled}
-              onValueChange={toggleVoice}
-              trackColor={{ false: colors.border, true: colors.primary + '60' }}
-              thumbColor={enabled ? colors.primary : colors.textMuted}
-            />
-          </View>
-        </Card>
+          </Card>
 
-        {/* Speech Rate */}
-        <Card title={t('voiceSettings.speechRate')} subtitle={t('voiceSettings.speechRateDesc')} style={{ marginTop: SPACING.md }}>
-          <View style={styles.presetsRow}>
-            {ratePresets.map(p => (
-              <TouchableOpacity
-                key={p.value}
-                onPress={() => setRate(p.value)}
-                style={[
-                  styles.presetBtn,
-                  { borderColor: colors.border },
-                  Math.abs(rate - p.value) < 0.01 && { backgroundColor: colors.primary + '20', borderColor: colors.primary },
-                ]}
-              >
-                <Ionicons
-                  name={p.icon as keyof typeof Ionicons.glyphMap}
-                  size={20}
-                  color={Math.abs(rate - p.value) < 0.01 ? colors.primary : colors.textMuted}
-                />
-                <Text style={[styles.presetLabel, { color: Math.abs(rate - p.value) < 0.01 ? colors.primary : colors.textMuted }]}>
-                  {p.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <View style={styles.valueBadge}>
-            <Text style={[styles.valueText, { color: colors.text }]}>{rate.toFixed(2)}x</Text>
-          </View>
-        </Card>
-
-        {/* Pitch */}
-        <Card title={t('voiceSettings.voicePitch')} subtitle={t('voiceSettings.voicePitchDesc')} style={{ marginTop: SPACING.md }}>
-          <View style={styles.presetsRow}>
-            {pitchPresets.map(p => (
-              <TouchableOpacity
-                key={p.value}
-                onPress={() => setPitch(p.value)}
-                style={[
-                  styles.presetBtn,
-                  { borderColor: colors.border },
-                  Math.abs(pitch - p.value) < 0.01 && { backgroundColor: colors.primary + '20', borderColor: colors.primary },
-                ]}
-              >
-                <Ionicons
-                  name={p.icon as keyof typeof Ionicons.glyphMap}
-                  size={20}
-                  color={Math.abs(pitch - p.value) < 0.01 ? colors.primary : colors.textMuted}
-                />
-                <Text style={[styles.presetLabel, { color: Math.abs(pitch - p.value) < 0.01 ? colors.primary : colors.textMuted }]}>
-                  {p.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <View style={styles.valueBadge}>
-            <Text style={[styles.valueText, { color: colors.text }]}>{pitch.toFixed(2)}x</Text>
-          </View>
-        </Card>
-
-        {/* Test Voice */}
-        <Card title={t('voiceSettings.testVoice')} subtitle={t('voiceSettings.testVoiceDesc2')} style={{ marginTop: SPACING.md }}>
-          <View style={styles.testGrid}>
-            {testMessages.map(test => (
-              <AnimatedPressable
-                key={test.label}
-                onPress={() => speak(test.message)}
-                scaleTo={0.95}
-                style={[styles.testBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              >
-                <Ionicons
-                  name="play-circle"
-                  size={20}
-                  color={test.message.category === 'alert' ? '#FF3366' :
-                    test.message.category === 'celebration' ? '#FFD700' :
-                    test.message.category === 'warning' ? '#F59E0B' : colors.primary}
-                />
-                <Text style={[styles.testLabel, { color: colors.text }]}>{test.label}</Text>
-              </AnimatedPressable>
-            ))}
-          </View>
-        </Card>
-
-        {/* Voice Events List */}
-        <Card title={t('voiceSettings.voiceEvents')} subtitle={t('voiceSettings.voiceEventsDesc')} style={{ marginTop: SPACING.md }}>
-          {Object.entries(VOICE_MESSAGES).map(([key, msg], i, arr) => (
-            <View key={key}>
-              <View style={styles.eventRow}>
-                <View style={styles.eventInfo}>
-                  <Text style={[styles.eventName, { color: colors.text }]}>
-                    {key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+          {/* Speech Rate */}
+          <Card title={t('voiceSettings.speechRate')} subtitle={t('voiceSettings.speechRateDesc')} style={{ marginTop: SPACING.md }}>
+            <View style={styles.presetsRow}>
+              {ratePresets.map(p => (
+                <TouchableOpacity
+                  key={p.value}
+                  onPress={() => setRate(p.value)}
+                  style={[
+                    styles.presetBtn,
+                    { borderColor: colors.border },
+                    Math.abs(rate - p.value) < 0.01 && { backgroundColor: colors.primary + '20', borderColor: colors.primary },
+                  ]}
+                >
+                  <Ionicons
+                    name={p.icon as keyof typeof Ionicons.glyphMap}
+                    size={20}
+                    color={Math.abs(rate - p.value) < 0.01 ? colors.primary : colors.textMuted}
+                  />
+                  <Text style={[styles.presetLabel, { color: Math.abs(rate - p.value) < 0.01 ? colors.primary : colors.textMuted }]}>
+                    {p.label}
                   </Text>
-                  <Text style={[styles.eventCategory, { color: colors.textMuted }]} numberOfLines={1}>
-                    {msg.category} · {t('voiceSettings.prioritySuffix', { value: msg.priority })}
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.valueBadge}>
+              <Text style={[styles.valueText, { color: colors.text }]}>{rate.toFixed(2)}x</Text>
+            </View>
+          </Card>
+
+          {/* Pitch */}
+          <Card title={t('voiceSettings.voicePitch')} subtitle={t('voiceSettings.voicePitchDesc')} style={{ marginTop: SPACING.md }}>
+            <View style={styles.presetsRow}>
+              {pitchPresets.map(p => (
+                <TouchableOpacity
+                  key={p.value}
+                  onPress={() => setPitch(p.value)}
+                  style={[
+                    styles.presetBtn,
+                    { borderColor: colors.border },
+                    Math.abs(pitch - p.value) < 0.01 && { backgroundColor: colors.primary + '20', borderColor: colors.primary },
+                  ]}
+                >
+                  <Ionicons
+                    name={p.icon as keyof typeof Ionicons.glyphMap}
+                    size={20}
+                    color={Math.abs(pitch - p.value) < 0.01 ? colors.primary : colors.textMuted}
+                  />
+                  <Text style={[styles.presetLabel, { color: Math.abs(pitch - p.value) < 0.01 ? colors.primary : colors.textMuted }]}>
+                    {p.label}
                   </Text>
-                </View>
-                <View style={[styles.priorityBadge, {
-                  backgroundColor: msg.priority === 'high' ? '#FF336615' :
-                    msg.priority === 'normal' ? '#F59E0B15' : '#6B728015',
-                }]}>
-                  <Text style={[styles.priorityText, {
-                    color: msg.priority === 'high' ? '#FF3366' :
-                      msg.priority === 'normal' ? '#F59E0B' : '#6B7280',
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.valueBadge}>
+              <Text style={[styles.valueText, { color: colors.text }]}>{pitch.toFixed(2)}x</Text>
+            </View>
+          </Card>
+
+          {/* Test Voice */}
+          <Card title={t('voiceSettings.testVoice')} subtitle={t('voiceSettings.testVoiceDesc2')} style={{ marginTop: SPACING.md }}>
+            <View style={styles.testGrid}>
+              {testMessages.map(test => (
+                <AnimatedPressable
+                  key={test.label}
+                  onPress={() => speak(test.message)}
+                  scaleTo={0.95}
+                  style={[styles.testBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                >
+                  <Ionicons
+                    name="play-circle"
+                    size={20}
+                    color={test.message.category === 'alert' ? '#FF3366' :
+                      test.message.category === 'celebration' ? '#FFD700' :
+                      test.message.category === 'warning' ? '#F59E0B' : colors.primary}
+                  />
+                  <Text style={[styles.testLabel, { color: colors.text }]}>{test.label}</Text>
+                </AnimatedPressable>
+              ))}
+            </View>
+          </Card>
+
+          {/* Voice Events List */}
+          <Card title={t('voiceSettings.voiceEvents')} subtitle={t('voiceSettings.voiceEventsDesc')} style={{ marginTop: SPACING.md }}>
+            {Object.entries(VOICE_MESSAGES).map(([key, msg], i, arr) => (
+              <View key={key}>
+                <View style={styles.eventRow}>
+                  <View style={styles.eventInfo}>
+                    <Text style={[styles.eventName, { color: colors.text }]}>
+                      {key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                    </Text>
+                    <Text style={[styles.eventCategory, { color: colors.textMuted }]} numberOfLines={1}>
+                      {msg.category} · {t('voiceSettings.prioritySuffix', { value: msg.priority })}
+                    </Text>
+                  </View>
+                  <View style={[styles.priorityBadge, {
+                    backgroundColor: msg.priority === 'high' ? '#FF336615' :
+                      msg.priority === 'normal' ? '#F59E0B15' : '#6B728015',
                   }]}>
-                    {msg.priority}
-                  </Text>
+                    <Text style={[styles.priorityText, {
+                      color: msg.priority === 'high' ? '#FF3366' :
+                        msg.priority === 'normal' ? '#F59E0B' : '#6B7280',
+                    }]}>
+                      {msg.priority}
+                    </Text>
+                  </View>
                 </View>
+                {i < arr.length - 1 && <View style={[styles.eventDivider, { backgroundColor: colors.divider }]} />}
               </View>
-              {i < arr.length - 1 && <View style={[styles.eventDivider, { backgroundColor: colors.divider }]} />}
-            </View>
-          ))}
-        </Card>
+            ))}
+          </Card>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
   scrollContent: { paddingHorizontal: SPACING.xl, paddingBottom: 20 },
   header: { flexDirection: 'row', alignItems: 'center', paddingTop: 60, marginBottom: SPACING.xl, gap: SPACING.md },
   backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.bgCard, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: colors.border },

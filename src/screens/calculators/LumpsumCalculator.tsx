@@ -14,6 +14,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
+import AppScreen from '../../components/ui/AppScreen';
 
 const CHART_HEIGHT = 160;
 
@@ -70,201 +71,201 @@ export default function LumpsumCalculator() {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name="arrow-back" size={20} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Ionicons name="briefcase" size={20} color={colors.accent} />
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.lumpsum')}</Text>
-        </View>
-        <TouchableOpacity onPress={handleClear} style={[styles.clearBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name="refresh" size={18} color={colors.textMuted} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Result Card */}
-        <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.maturityLabel, { color: colors.textMuted }]}>{t('calculators.maturityValue')}</Text>
-          <Text style={[styles.maturityAmount, { color: colors.text }]}>{formatCurrency(maturityAmount)}</Text>
-
-          <View style={[styles.resultRow, { borderTopColor: colors.divider }]}>
-            <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
-              <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
-            </View>
-            <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.totalReturns')}</Text>
-              <Text style={[styles.resultValue, { color: colors.accent }]}>{formatCurrency(estimatedReturns)}</Text>
-            </View>
+  {/* Header */}
+        <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="arrow-back" size={20} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Ionicons name="briefcase" size={20} color={colors.accent} />
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.lumpsum')}</Text>
           </View>
+          <TouchableOpacity onPress={handleClear} style={[styles.clearBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="refresh" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
         </View>
 
-        {/* Growth Chart */}
-        {yearlyData.length > 0 && (
-          <View style={[styles.chartCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.yearlyGrowth')}</Text>
-            <View style={styles.chartContainer}>
-              <View style={styles.chartBars}>
-                {yearlyData.map((d) => {
-                  const height = (d.value / maxValue) * CHART_HEIGHT;
-                  const principalRatio = principal / maxValue;
-                  const principalH = principalRatio * CHART_HEIGHT;
-                  return (
-                    <View key={d.year} style={styles.barGroup}>
-                      <View
-                        style={[
-                          styles.barPrincipal,
-                          { height: Math.max(principalH, 2), backgroundColor: colors.textMuted, opacity: 0.3 },
-                        ]}
-                      />
-                      <View
-                        style={[
-                          styles.bar,
-                          { height: Math.max(height, 2), backgroundColor: colors.primary, opacity: 0.8 },
-                        ]}
-                      />
-                      <Text style={[styles.barLabel, { color: colors.textMuted }]}>{d.year}Y</Text>
-                    </View>
-                  );
-                })}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Result Card */}
+          <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+            <Text style={[styles.maturityLabel, { color: colors.textMuted }]}>{t('calculators.maturityValue')}</Text>
+            <Text style={[styles.maturityAmount, { color: colors.text }]}>{formatCurrency(maturityAmount)}</Text>
+
+            <View style={[styles.resultRow, { borderTopColor: colors.divider }]}>
+              <View style={styles.resultItem}>
+                <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
+                <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
               </View>
-              <View style={[styles.legendRow, { borderTopColor: colors.divider }]}>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: colors.primary, opacity: 0.8 }]} />
-                  <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('calculators.portfolioValue')}</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: colors.textMuted, opacity: 0.3 }]} />
-                  <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
-                </View>
+              <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.resultItem}>
+                <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.totalReturns')}</Text>
+                <Text style={[styles.resultValue, { color: colors.accent }]}>{formatCurrency(estimatedReturns)}</Text>
               </View>
             </View>
           </View>
-        )}
 
-        {/* Inputs */}
-        <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.investmentDetails')}</Text>
+          {/* Growth Chart */}
+          {yearlyData.length > 0 && (
+            <View style={[styles.chartCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.yearlyGrowth')}</Text>
+              <View style={styles.chartContainer}>
+                <View style={styles.chartBars}>
+                  {yearlyData.map((d) => {
+                    const height = (d.value / maxValue) * CHART_HEIGHT;
+                    const principalRatio = principal / maxValue;
+                    const principalH = principalRatio * CHART_HEIGHT;
+                    return (
+                      <View key={d.year} style={styles.barGroup}>
+                        <View
+                          style={[
+                            styles.barPrincipal,
+                            { height: Math.max(principalH, 2), backgroundColor: colors.textMuted, opacity: 0.3 },
+                          ]}
+                        />
+                        <View
+                          style={[
+                            styles.bar,
+                            { height: Math.max(height, 2), backgroundColor: colors.primary, opacity: 0.8 },
+                          ]}
+                        />
+                        <Text style={[styles.barLabel, { color: colors.textMuted }]}>{d.year}Y</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+                <View style={[styles.legendRow, { borderTopColor: colors.divider }]}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: colors.primary, opacity: 0.8 }]} />
+                    <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('calculators.portfolioValue')}</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: colors.textMuted, opacity: 0.3 }]} />
+                    <Text style={[styles.legendText, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
 
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.lumpsumAmount')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(investment)]}
-              value={investment}
-              onChangeText={setInvestment}
-              keyboardType="numeric"
-              placeholder="e.g. 500000"
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.presetRow}>
-              {[100000, 500000, 1000000, 5000000].map((amt) => (
-                <TouchableOpacity
-                  key={amt}
-                  style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: investment === String(amt) ? colors.primary : colors.border }]}
-                  onPress={() => setInvestment(String(amt))}
-                >
-                  <Text style={[styles.presetChipText, { color: investment === String(amt) ? colors.primary : colors.textMuted }]}>
-                    {amt >= 10000000 ? `₹${amt/10000000}Cr` : amt >= 100000 ? `₹${amt/100000}L` : `₹${amt/1000}K`}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          {/* Inputs */}
+          <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.investmentDetails')}</Text>
+
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.lumpsumAmount')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(investment)]}
+                value={investment}
+                onChangeText={setInvestment}
+                keyboardType="numeric"
+                placeholder="e.g. 500000"
+                placeholderTextColor={colors.textMuted}
+              />
+              <View style={styles.presetRow}>
+                {[100000, 500000, 1000000, 5000000].map((amt) => (
+                  <TouchableOpacity
+                    key={amt}
+                    style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: investment === String(amt) ? colors.primary : colors.border }]}
+                    onPress={() => setInvestment(String(amt))}
+                  >
+                    <Text style={[styles.presetChipText, { color: investment === String(amt) ? colors.primary : colors.textMuted }]}>
+                      {amt >= 10000000 ? `₹${amt/10000000}Cr` : amt >= 100000 ? `₹${amt/100000}L` : `₹${amt/1000}K`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.expectedReturnLabel')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(expectedReturn)]}
+                value={expectedReturn}
+                onChangeText={setExpectedReturn}
+                keyboardType="decimal-pad"
+                placeholder="e.g. 12"
+                placeholderTextColor={colors.textMuted}
+              />
+              <View style={styles.presetRow}>
+                {[8, 10, 12, 15].map((r) => (
+                  <TouchableOpacity
+                    key={r}
+                    style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: expectedReturn === String(r) ? colors.primary : colors.border }]}
+                    onPress={() => setExpectedReturn(String(r))}
+                  >
+                    <Text style={[styles.presetChipText, { color: expectedReturn === String(r) ? colors.primary : colors.textMuted }]}>{r}%</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.investmentPeriod')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(tenureYears)]}
+                value={tenureYears}
+                onChangeText={setTenureYears}
+                keyboardType="numeric"
+                placeholder="e.g. 5"
+                placeholderTextColor={colors.textMuted}
+              />
+              <View style={styles.presetRow}>
+                {[1, 3, 5, 10].map((y) => (
+                  <TouchableOpacity
+                    key={y}
+                    style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: tenureYears === String(y) ? colors.primary : colors.border }]}
+                    onPress={() => setTenureYears(String(y))}
+                  >
+                    <Text style={[styles.presetChipText, { color: tenureYears === String(y) ? colors.primary : colors.textMuted }]}>{y}Y</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           </View>
 
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.expectedReturnLabel')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(expectedReturn)]}
-              value={expectedReturn}
-              onChangeText={setExpectedReturn}
-              keyboardType="decimal-pad"
-              placeholder="e.g. 12"
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.presetRow}>
-              {[8, 10, 12, 15].map((r) => (
-                <TouchableOpacity
-                  key={r}
-                  style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: expectedReturn === String(r) ? colors.primary : colors.border }]}
-                  onPress={() => setExpectedReturn(String(r))}
-                >
-                  <Text style={[styles.presetChipText, { color: expectedReturn === String(r) ? colors.primary : colors.textMuted }]}>{r}%</Text>
-                </TouchableOpacity>
-              ))}
+          {/* Summary */}
+          {maturityAmount > 0 && (
+            <View style={[styles.summaryCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.quickSummary')}</Text>
+              <View style={styles.summaryRow}>
+                <Ionicons name="analytics-outline" size={18} color={colors.textMuted} />
+                <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
+                  A one-time investment of{' '}
+                  <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{formatCurrency(principal)}</Text> growing at{' '}
+                  <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{rate}%</Text> p.a. for{' '}
+                  <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{t('app.years', { count: years })}</Text>{' '}
+                  would be worth <Text style={{ color: colors.accent, fontFamily: FONTS.semiBold.fontFamily }}>{formatCurrency(maturityAmount)}</Text>.
+                </Text>
+              </View>
+              <View style={[styles.summaryRatio, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.ratioLabel, { color: colors.textMuted }]}>{t('calculators.wealthGrowthFactor')}</Text>
+                <Text style={[styles.ratioValue, { color: colors.accent }]}>
+                  {principal > 0 ? `${(maturityAmount / principal).toFixed(2)}x` : '—'}
+                </Text>
+              </View>
             </View>
-          </View>
+          )}
 
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.investmentPeriod')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(tenureYears)]}
-              value={tenureYears}
-              onChangeText={setTenureYears}
-              keyboardType="numeric"
-              placeholder="e.g. 5"
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.presetRow}>
-              {[1, 3, 5, 10].map((y) => (
-                <TouchableOpacity
-                  key={y}
-                  style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: tenureYears === String(y) ? colors.primary : colors.border }]}
-                  onPress={() => setTenureYears(String(y))}
-                >
-                  <Text style={[styles.presetChipText, { color: tenureYears === String(y) ? colors.primary : colors.textMuted }]}>{y}Y</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+          {/* Info */}
+          <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="information-circle-outline" size={16} color={colors.primary} style={{ marginRight: 8 }} />
+            <Text style={[styles.infoText, { color: colors.textMuted }]}>
+              {t('calculators.sipInfo')}
+            </Text>
           </View>
-        </View>
-
-        {/* Summary */}
-        {maturityAmount > 0 && (
-          <View style={[styles.summaryCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.quickSummary')}</Text>
-            <View style={styles.summaryRow}>
-              <Ionicons name="analytics-outline" size={18} color={colors.textMuted} />
-              <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
-                A one-time investment of{' '}
-                <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{formatCurrency(principal)}</Text> growing at{' '}
-                <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{rate}%</Text> p.a. for{' '}
-                <Text style={{ color: colors.text, fontFamily: FONTS.semiBold.fontFamily }}>{t('app.years', { count: years })}</Text>{' '}
-                would be worth <Text style={{ color: colors.accent, fontFamily: FONTS.semiBold.fontFamily }}>{formatCurrency(maturityAmount)}</Text>.
-              </Text>
-            </View>
-            <View style={[styles.summaryRatio, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.ratioLabel, { color: colors.textMuted }]}>{t('calculators.wealthGrowthFactor')}</Text>
-              <Text style={[styles.ratioValue, { color: colors.accent }]}>
-                {principal > 0 ? `${(maturityAmount / principal).toFixed(2)}x` : '—'}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Info */}
-        <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="information-circle-outline" size={16} color={colors.primary} style={{ marginRight: 8 }} />
-          <Text style={[styles.infoText, { color: colors.textMuted }]}>
-            {t('calculators.sipInfo')}
-          </Text>
-        </View>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

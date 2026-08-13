@@ -31,6 +31,7 @@ import { SPACING, BORDER_RADIUS, FONTS } from '../../constants/theme';
 import { mockEarningsData } from '../../constants/mockData';
 import type {EarningsSummary, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -224,7 +225,6 @@ const consensusStyles = StyleSheet.create({
 export default function EarningsCallScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'EarningsCall'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [selectedSymbol, setSelectedSymbol] = useState<string>('RELIANCE');
@@ -269,20 +269,26 @@ export default function EarningsCallScreen({ navigation }: NativeStackScreenProp
   // Loading state
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.centerContent, { gap: SPACING.md }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('earningsCall.loading')}</Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={[styles.centerContent, { flex: 1 }]}>
+  <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('earningsCall.loading')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
   // Empty state
   if (!selectedEarnings || earningsData.length === 0) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
-        <Ionicons name="analytics-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('earningsCall.noData')}</Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={[styles.centerContent, { flex: 1 }]}>
+  <Ionicons name="analytics-outline" size={48} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t('earningsCall.noData')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -290,431 +296,428 @@ export default function EarningsCallScreen({ navigation }: NativeStackScreenProp
   const m = selectedEarnings.metrics;
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>{t('earningsCall.title')}</Text>
-            <Text style={styles.headerSubtitle}>{t('earningsCall.subtitle')}</Text>
-          </View>
-          <Pressable onPress={handleShare} style={styles.shareBtn}>
-            <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
-          </Pressable>
-        </View>
-
-        {/* Company Picker */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.pickerRow}
-        >
-          {companies.map(c => {
-            const isActive = c.symbol === selectedSymbol;
-            return (
-              <Pressable
-                key={c.symbol}
-                onPress={() => setSelectedSymbol(c.symbol)}
-                style={({pressed}) => [[
-                  styles.pickerChip,
-                  {
-                    backgroundColor: isActive ? colors.primary : colors.bgCardLight,
-                    borderColor: isActive ? colors.primary : colors.border,
-                  },
-                ], {opacity: pressed ? 0.7 : 1}]}
-              >
-                <Text style={[
-                  styles.pickerChipText,
-                  { color: isActive ? '#FFFFFF' : colors.textSecondary },
-                ]}>{c.symbol}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Company Hero */}
-        <LinearGradient
-          colors={[sc.color + '20', colors.bgCard]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.heroCard, { borderColor: sc.color + '30' }]}
+  {/* Header */}
+        <View style={[styles.header]}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.headerTitle}>{t('earningsCall.title')}</Text>
+              <Text style={styles.headerSubtitle}>{t('earningsCall.subtitle')}</Text>
+            </View>
+            <Pressable onPress={handleShare} style={styles.shareBtn}>
+              <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
+            </Pressable>
+          </View>
+
+          {/* Company Picker */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.pickerRow}
+          >
+            {companies.map(c => {
+              const isActive = c.symbol === selectedSymbol;
+              return (
+                <Pressable
+                  key={c.symbol}
+                  onPress={() => setSelectedSymbol(c.symbol)}
+                  style={({pressed}) => [[
+                    styles.pickerChip,
+                    {
+                      backgroundColor: isActive ? colors.primary : colors.bgCardLight,
+                      borderColor: isActive ? colors.primary : colors.border,
+                    },
+                  ], {opacity: pressed ? 0.7 : 1}]}
+                >
+                  <Text style={[
+                    styles.pickerChipText,
+                    { color: isActive ? '#FFFFFF' : colors.textSecondary },
+                  ]}>{c.symbol}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.heroTop}>
-            <View>
-              <Text style={styles.heroCompany}>{selectedEarnings.companyName}</Text>
-              <Text style={styles.heroQuarter}>
-                {selectedEarnings.quarter} Results · {formatDate(selectedEarnings.date)}
+          {/* Company Hero */}
+          <LinearGradient
+            colors={[sc.color + '20', colors.bgCard]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.heroCard, { borderColor: sc.color + '30' }]}
+          >
+            <View style={styles.heroTop}>
+              <View>
+                <Text style={styles.heroCompany}>{selectedEarnings.companyName}</Text>
+                <Text style={styles.heroQuarter}>
+                  {selectedEarnings.quarter} Results · {formatDate(selectedEarnings.date)}
+                </Text>
+              </View>
+              <SentimentBadge label={selectedEarnings.sentimentLabel} score={selectedEarnings.sentimentScore} />
+            </View>
+
+            {/* Executive Summary */}
+            <View style={[styles.summaryBox, { backgroundColor: colors.bgCardLight, borderLeftColor: sc.color }]}>
+              <Text style={styles.summaryText}>{selectedEarnings.executiveSummary}</Text>
+            </View>
+
+            {/* Confidence bar */}
+            <View style={styles.confidenceRow}>
+              <Text style={styles.confidenceLabel}>{t('earningsCall.aiConfidence')}</Text>
+              <View style={[styles.confidenceBar, { backgroundColor: colors.bgInput }]}>
+                <View style={[styles.confidenceFill, {
+                  width: `${selectedEarnings.confidence}%`,
+                  backgroundColor: sc.color,
+                }]} />
+              </View>
+              <Text style={[styles.confidenceValue, { color: sc.color }]}>
+                {selectedEarnings.confidence}%
               </Text>
             </View>
-            <SentimentBadge label={selectedEarnings.sentimentLabel} score={selectedEarnings.sentimentScore} />
-          </View>
 
-          {/* Executive Summary */}
-          <View style={[styles.summaryBox, { backgroundColor: colors.bgCardLight, borderLeftColor: sc.color }]}>
-            <Text style={styles.summaryText}>{selectedEarnings.executiveSummary}</Text>
-          </View>
-
-          {/* Confidence bar */}
-          <View style={styles.confidenceRow}>
-            <Text style={styles.confidenceLabel}>{t('earningsCall.aiConfidence')}</Text>
-            <View style={[styles.confidenceBar, { backgroundColor: colors.bgInput }]}>
-              <View style={[styles.confidenceFill, {
-                width: `${selectedEarnings.confidence}%`,
-                backgroundColor: sc.color,
-              }]} />
-            </View>
-            <Text style={[styles.confidenceValue, { color: sc.color }]}>
-              {selectedEarnings.confidence}%
-            </Text>
-          </View>
-
-          {/* Market Reaction */}
-          <View style={[styles.reactionRow, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
-            <View style={styles.reactionItem}>
-              <Text style={styles.reactionLabel}>{t('earningsCall.preMarket')}</Text>
-              <Text style={[styles.reactionValue, {
-                color: selectedEarnings.marketReaction.preMarketChange >= 0 ? colors.marketUp : colors.marketDown,
-              }]}>
-                {formatPct(selectedEarnings.marketReaction.preMarketChange)}
-              </Text>
-            </View>
-            <View style={styles.reactionDivider} />
-            <View style={styles.reactionItem}>
-              <Text style={styles.reactionLabel}>{t('earningsCall.dayChange')}</Text>
-              <Text style={[styles.reactionValue, {
-                color: selectedEarnings.marketReaction.dayChange >= 0 ? colors.marketUp : colors.marketDown,
-              }]}>
-                {formatPct(selectedEarnings.marketReaction.dayChange)}
-              </Text>
-            </View>
-            <View style={styles.reactionDivider} />
-            <View style={styles.reactionItem}>
-              <Text style={styles.reactionLabel}>{t('earningsCall.volumeSurge')}</Text>
-              <Text style={[styles.reactionValue, { color: colors.marketUp }]}>
-                +{selectedEarnings.marketReaction.volumeSurge}%
-              </Text>
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* Key Metrics Grid */}
-        <Text style={styles.sectionTitle}>{t('earningsCall.keyMetrics')}</Text>
-        <View style={styles.metricsGrid}>
-          <MetricCard
-            label={t('earningsCall.metricRevenue')}
-            value={`₹${formatCr(m.revenue)}`}
-            change={m.revenueGrowth}
-            sublabel={`Beat: ${m.revenueBeat !== null ? formatPct(m.revenueBeat) : 'N/A'}`}
-          />
-          <MetricCard
-            label={t('earningsCall.metricNetProfit')}
-            value={`₹${formatCr(m.netProfit)}`}
-            change={m.profitGrowth}
-            sublabel={`Beat: ${m.profitBeat !== null ? formatPct(m.profitBeat) : 'N/A'}`}
-          />
-          <MetricCard
-            label={t('earningsCall.metricEps')}
-            value={`₹${m.eps.toFixed(2)}`}
-            change={m.epsGrowth}
-          />
-          <MetricCard
-            label={t('earningsCall.metricEbitda')}
-            value={`₹${formatCr(m.ebitda)}`}
-            change={m.ebitdaMargin}
-            sublabel={`Margin: ${m.ebitdaMargin.toFixed(1)}%`}
-          />
-          <MetricCard
-            label={t('earningsCall.metricOpMargin')}
-            value={`${m.operatingMargin.toFixed(1)}%`}
-          />
-          <MetricCard
-            label={t('earningsCall.metricNetMargin')}
-            value={`${m.netMargin.toFixed(1)}%`}
-          />
-        </View>
-
-        {/* Key Takeaways */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <Pressable
-            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
-            onPress={() => toggleSection('takeaways')}
-          >
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIcon, { backgroundColor: colors.primary + '20' }]}>
-                <Ionicons name="bulb" size={16} color={colors.primary} />
+            {/* Market Reaction */}
+            <View style={[styles.reactionRow, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
+              <View style={styles.reactionItem}>
+                <Text style={styles.reactionLabel}>{t('earningsCall.preMarket')}</Text>
+                <Text style={[styles.reactionValue, {
+                  color: selectedEarnings.marketReaction.preMarketChange >= 0 ? colors.marketUp : colors.marketDown,
+                }]}>
+                  {formatPct(selectedEarnings.marketReaction.preMarketChange)}
+                </Text>
               </View>
-              <Text style={styles.sectionCardTitle}>{t('earningsCall.keyTakeaways')}</Text>
-            </View>
-            <Ionicons
-              name={expandedSections.takeaways ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={colors.textMuted}
-            />
-          </Pressable>
-          {expandedSections.takeaways && (
-            <View style={styles.sectionBody}>
-              {selectedEarnings.keyTakeaways.map((takeaway, i) => (
-                <View key={`${takeaway}-${i}`} style={[styles.takeawayRow, { borderBottomColor: colors.divider }]}>
-                  <View style={[styles.takeawayDot, { backgroundColor: sc.color }]} />
-                  <Text style={styles.takeawayText}>{takeaway}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Management Highlights */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <Pressable
-            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
-            onPress={() => toggleSection('highlights')}
-          >
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIcon, { backgroundColor: '#8B5CF620' }]}>
-                <Ionicons name="megaphone" size={16} color="#8B5CF6" />
+              <View style={styles.reactionDivider} />
+              <View style={styles.reactionItem}>
+                <Text style={styles.reactionLabel}>{t('earningsCall.dayChange')}</Text>
+                <Text style={[styles.reactionValue, {
+                  color: selectedEarnings.marketReaction.dayChange >= 0 ? colors.marketUp : colors.marketDown,
+                }]}>
+                  {formatPct(selectedEarnings.marketReaction.dayChange)}
+                </Text>
               </View>
-              <Text style={styles.sectionCardTitle}>{t('earningsCall.managementHighlights')}</Text>
-            </View>
-            <Ionicons
-              name={expandedSections.highlights ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={colors.textMuted}
-            />
-          </Pressable>
-          {expandedSections.highlights && (
-            <View style={styles.sectionBody}>
-              {selectedEarnings.managementHighlights.map((h, i) => (
-                <View key={`${h}-${i}`} style={[styles.highlightRow, { borderBottomColor: colors.divider }]}>
-                  <View style={[styles.highlightBadge, { backgroundColor: '#8B5CF615' }]}>
-                    <Text style={[styles.highlightIndex, { color: '#8B5CF6' }]}>{i + 1}</Text>
-                  </View>
-                  <Text style={styles.highlightText}>{h}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Analyst Consensus */}
-        <View style={[styles.analystCard, { borderColor: colors.border }]}>
-          <Text style={styles.sectionTitle}>{t('earningsCall.analystOutlook')}</Text>
-          <View style={styles.analystRow}>
-            <View style={styles.analystLeft}>
-              <ConsensusBadge consensus={selectedEarnings.analystConsensus} />
-              <Text style={styles.analystFirms}>{t('earningsCall.basedOnAnalysts', { count: 28 })}</Text>
-            </View>
-            <View style={styles.analystRight}>
-              <Text style={styles.analystPriceLabel}>{t('earningsCall.targetPrice')}</Text>
-              <Text style={[styles.analystPrice, { color: colors.text }]}>
-                ₹{selectedEarnings.analystTargetPrice.toLocaleString('en-IN')}
-              </Text>
-              <Text style={styles.analystRange}>
-                Range: ₹{selectedEarnings.analystTargetLow.toLocaleString('en-IN')} – ₹{selectedEarnings.analystTargetHigh.toLocaleString('en-IN')}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Growth Drivers */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <Pressable
-            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
-            onPress={() => toggleSection('drivers')}
-          >
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIcon, { backgroundColor: colors.marketUp + '20' }]}>
-                <Ionicons name="rocket" size={16} color={colors.marketUp} />
-              </View>
-              <Text style={styles.sectionCardTitle}>{t('earningsCall.growthDrivers')}</Text>
-            </View>
-            <Ionicons
-              name={expandedSections.drivers ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={colors.textMuted}
-            />
-          </Pressable>
-          {expandedSections.drivers && (
-            <View style={styles.sectionBody}>
-              {selectedEarnings.growthDrivers.map((d, i) => (
-                <View key={`${d}-${i}`} style={[styles.bulletRow, { borderBottomColor: colors.divider }]}>
-                  <Text style={[styles.bulletIcon, { color: colors.marketUp }]}>✓</Text>
-                  <Text style={styles.bulletText}>{d}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Risk Factors */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <Pressable
-            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
-            onPress={() => toggleSection('risks')}
-          >
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIcon, { backgroundColor: colors.marketDown + '20' }]}>
-                <Ionicons name="warning" size={16} color={colors.marketDown} />
-              </View>
-              <Text style={styles.sectionCardTitle}>{t('earningsCall.riskFactors')}</Text>
-            </View>
-            <Ionicons
-              name={expandedSections.risks ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={colors.textMuted}
-            />
-          </Pressable>
-          {expandedSections.risks && (
-            <View style={styles.sectionBody}>
-              {selectedEarnings.riskFactors.map((r, i) => (
-                <View key={`${r}-${i}`} style={[styles.bulletRow, { borderBottomColor: colors.divider }]}>
-                  <Text style={[styles.bulletIcon, { color: colors.marketDown }]}>⚠</Text>
-                  <Text style={styles.bulletText}>{r}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Peer Comparison */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <Pressable
-            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
-            onPress={() => toggleSection('peerComparison')}
-          >
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIcon, { backgroundColor: '#06B6D420' }]}>
-                <Ionicons name="people" size={16} color="#06B6D4" />
-              </View>
-              <Text style={styles.sectionCardTitle}>{t('earningsCall.peerComparison')}</Text>
-            </View>
-            <Ionicons
-              name={expandedSections.peerComparison ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={colors.textMuted}
-            />
-          </Pressable>
-          {expandedSections.peerComparison && selectedEarnings.peerComparison.length > 0 && (
-            <View style={styles.sectionBody}>
-              {/* Table Header */}
-              <View style={[styles.peerHeader, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.peerCell, styles.peerSymbolCol, { color: colors.textMuted }]}>{t('earningsCall.peerCompany')}</Text>
-                <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerRevenue')}</Text>
-                <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerProfit')}</Text>
-                <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerRevGr')}</Text>
-              </View>
-
-              {selectedEarnings.peerComparison.map((p, _i) => {
-                const isCurrent = p.symbol === selectedEarnings.symbol;
-                return (
-                  <View
-                    key={p.symbol}
-                    style={[
-                      styles.peerRow,
-                      { borderBottomColor: colors.divider },
-                      isCurrent && { backgroundColor: colors.primary + '10' },
-                    ]}
-                  >
-                    <View style={styles.peerSymbolCol}>
-                      <Text style={[styles.peerSymbol, { color: isCurrent ? colors.primary : colors.text }]}>
-                        {p.symbol}
-                      </Text>
-                      {isCurrent && (
-                        <View style={[styles.youBadge, { backgroundColor: colors.primary + '20' }]}>
-                          <Text style={[styles.youBadgeText, { color: colors.primary }]}>{t('earningsCall.youLabel')}</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={[styles.peerValue, { color: colors.text }]}>₹{formatCr(p.revenue)}</Text>
-                    <Text style={[styles.peerValue, { color: colors.text }]}>₹{formatCr(p.profit)}</Text>
-                    <Text style={[styles.peerValue, {
-                      color: p.revenueGrowth >= 0 ? colors.marketUp : colors.marketDown,
-                    }]}>
-                      {formatPct(p.revenueGrowth)}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </View>
-
-        {/* Historical Quarterly Trends */}
-        <View style={[styles.sectionCard, { borderColor: colors.border }]}>
-          <Pressable
-            style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
-            onPress={() => toggleSection('history')}
-          >
-            <View style={styles.sectionHeaderLeft}>
-              <View style={[styles.sectionIcon, { backgroundColor: colors.warning + '20' }]}>
-                <Ionicons name="bar-chart" size={16} color={colors.warning} />
-              </View>
-              <Text style={styles.sectionCardTitle}>{t('earningsCall.historicalTrend', { count: 4 })}</Text>
-            </View>
-            <Ionicons
-              name={expandedSections.history ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={colors.textMuted}
-            />
-          </Pressable>
-          {expandedSections.history && selectedEarnings.historicalQuarters.length > 0 && (
-            <View style={styles.sectionBody}>
-              {/* Header */}
-              <View style={[styles.histHeader, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.histCell, styles.histQuarterCol, { color: colors.textMuted }]}>{t('earningsCall.historyQuarter')}</Text>
-                <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyRevenue')}</Text>
-                <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyProfit')}</Text>
-                <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyEps')}</Text>
-              </View>
-
-              {selectedEarnings.historicalQuarters.map((q, i) => (
-                <View key={q.quarter} style={[styles.histRow, { borderBottomColor: colors.divider }]}>
-                  <Text style={[styles.histQuarterCol, { color: colors.text }]}>{q.quarter}</Text>
-                  <Text style={[styles.histValue, { color: colors.text }]}>₹{formatCr(q.revenue)}</Text>
-                  <Text style={[styles.histValue, { color: i > 0 && q.netProfit < selectedEarnings.historicalQuarters[i - 1].netProfit ? colors.marketDown : colors.marketUp }]}>
-                    ₹{formatCr(q.netProfit)}
-                  </Text>
-                  <Text style={[styles.histValue, { color: colors.text }]}>₹{q.eps.toFixed(1)}</Text>
-                </View>
-              ))}
-
-              {/* Trend indicator */}
-              <View style={styles.trendFooter}>
-                <Ionicons name="trending-up" size={14} color={colors.primary} />
-                <Text style={[styles.trendText, { color: colors.textMuted }]}>
-                  Revenue CAGR: {m.revenueGrowth > 0 ? '+' : ''}{m.revenueGrowth.toFixed(1)}% · 
-                  Profit CAGR: {m.profitGrowth > 0 ? '+' : ''}{m.profitGrowth.toFixed(1)}%
+              <View style={styles.reactionDivider} />
+              <View style={styles.reactionItem}>
+                <Text style={styles.reactionLabel}>{t('earningsCall.volumeSurge')}</Text>
+                <Text style={[styles.reactionValue, { color: colors.marketUp }]}>
+                  +{selectedEarnings.marketReaction.volumeSurge}%
                 </Text>
               </View>
             </View>
-          )}
-        </View>
+          </LinearGradient>
 
-        {/* Source */}
-        <Text style={[styles.sourceText, { color: colors.textMuted }]}>
-          {t('earningsCall.sourceText', { source: selectedEarnings.source, date: formatDate(selectedEarnings.date) })}
-        </Text>
+          {/* Key Metrics Grid */}
+          <Text style={styles.sectionTitle}>{t('earningsCall.keyMetrics')}</Text>
+          <View style={styles.metricsGrid}>
+            <MetricCard
+              label={t('earningsCall.metricRevenue')}
+              value={`₹${formatCr(m.revenue)}`}
+              change={m.revenueGrowth}
+              sublabel={`Beat: ${m.revenueBeat !== null ? formatPct(m.revenueBeat) : 'N/A'}`}
+            />
+            <MetricCard
+              label={t('earningsCall.metricNetProfit')}
+              value={`₹${formatCr(m.netProfit)}`}
+              change={m.profitGrowth}
+              sublabel={`Beat: ${m.profitBeat !== null ? formatPct(m.profitBeat) : 'N/A'}`}
+            />
+            <MetricCard
+              label={t('earningsCall.metricEps')}
+              value={`₹${m.eps.toFixed(2)}`}
+              change={m.epsGrowth}
+            />
+            <MetricCard
+              label={t('earningsCall.metricEbitda')}
+              value={`₹${formatCr(m.ebitda)}`}
+              change={m.ebitdaMargin}
+              sublabel={`Margin: ${m.ebitdaMargin.toFixed(1)}%`}
+            />
+            <MetricCard
+              label={t('earningsCall.metricOpMargin')}
+              value={`${m.operatingMargin.toFixed(1)}%`}
+            />
+            <MetricCard
+              label={t('earningsCall.metricNetMargin')}
+              value={`${m.netMargin.toFixed(1)}%`}
+            />
+          </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          {/* Key Takeaways */}
+          <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+            <Pressable
+              style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
+              onPress={() => toggleSection('takeaways')}
+            >
+              <View style={styles.sectionHeaderLeft}>
+                <View style={[styles.sectionIcon, { backgroundColor: colors.primary + '20' }]}>
+                  <Ionicons name="bulb" size={16} color={colors.primary} />
+                </View>
+                <Text style={styles.sectionCardTitle}>{t('earningsCall.keyTakeaways')}</Text>
+              </View>
+              <Ionicons
+                name={expandedSections.takeaways ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={colors.textMuted}
+              />
+            </Pressable>
+            {expandedSections.takeaways && (
+              <View style={styles.sectionBody}>
+                {selectedEarnings.keyTakeaways.map((takeaway, i) => (
+                  <View key={`${takeaway}-${i}`} style={[styles.takeawayRow, { borderBottomColor: colors.divider }]}>
+                    <View style={[styles.takeawayDot, { backgroundColor: sc.color }]} />
+                    <Text style={styles.takeawayText}>{takeaway}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Management Highlights */}
+          <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+            <Pressable
+              style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
+              onPress={() => toggleSection('highlights')}
+            >
+              <View style={styles.sectionHeaderLeft}>
+                <View style={[styles.sectionIcon, { backgroundColor: '#8B5CF620' }]}>
+                  <Ionicons name="megaphone" size={16} color="#8B5CF6" />
+                </View>
+                <Text style={styles.sectionCardTitle}>{t('earningsCall.managementHighlights')}</Text>
+              </View>
+              <Ionicons
+                name={expandedSections.highlights ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={colors.textMuted}
+              />
+            </Pressable>
+            {expandedSections.highlights && (
+              <View style={styles.sectionBody}>
+                {selectedEarnings.managementHighlights.map((h, i) => (
+                  <View key={`${h}-${i}`} style={[styles.highlightRow, { borderBottomColor: colors.divider }]}>
+                    <View style={[styles.highlightBadge, { backgroundColor: '#8B5CF615' }]}>
+                      <Text style={[styles.highlightIndex, { color: '#8B5CF6' }]}>{i + 1}</Text>
+                    </View>
+                    <Text style={styles.highlightText}>{h}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Analyst Consensus */}
+          <View style={[styles.analystCard, { borderColor: colors.border }]}>
+            <Text style={styles.sectionTitle}>{t('earningsCall.analystOutlook')}</Text>
+            <View style={styles.analystRow}>
+              <View style={styles.analystLeft}>
+                <ConsensusBadge consensus={selectedEarnings.analystConsensus} />
+                <Text style={styles.analystFirms}>{t('earningsCall.basedOnAnalysts', { count: 28 })}</Text>
+              </View>
+              <View style={styles.analystRight}>
+                <Text style={styles.analystPriceLabel}>{t('earningsCall.targetPrice')}</Text>
+                <Text style={[styles.analystPrice, { color: colors.text }]}>
+                  ₹{selectedEarnings.analystTargetPrice.toLocaleString('en-IN')}
+                </Text>
+                <Text style={styles.analystRange}>
+                  Range: ₹{selectedEarnings.analystTargetLow.toLocaleString('en-IN')} – ₹{selectedEarnings.analystTargetHigh.toLocaleString('en-IN')}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Growth Drivers */}
+          <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+            <Pressable
+              style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
+              onPress={() => toggleSection('drivers')}
+            >
+              <View style={styles.sectionHeaderLeft}>
+                <View style={[styles.sectionIcon, { backgroundColor: colors.marketUp + '20' }]}>
+                  <Ionicons name="rocket" size={16} color={colors.marketUp} />
+                </View>
+                <Text style={styles.sectionCardTitle}>{t('earningsCall.growthDrivers')}</Text>
+              </View>
+              <Ionicons
+                name={expandedSections.drivers ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={colors.textMuted}
+              />
+            </Pressable>
+            {expandedSections.drivers && (
+              <View style={styles.sectionBody}>
+                {selectedEarnings.growthDrivers.map((d, i) => (
+                  <View key={`${d}-${i}`} style={[styles.bulletRow, { borderBottomColor: colors.divider }]}>
+                    <Text style={[styles.bulletIcon, { color: colors.marketUp }]}>✓</Text>
+                    <Text style={styles.bulletText}>{d}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Risk Factors */}
+          <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+            <Pressable
+              style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
+              onPress={() => toggleSection('risks')}
+            >
+              <View style={styles.sectionHeaderLeft}>
+                <View style={[styles.sectionIcon, { backgroundColor: colors.marketDown + '20' }]}>
+                  <Ionicons name="warning" size={16} color={colors.marketDown} />
+                </View>
+                <Text style={styles.sectionCardTitle}>{t('earningsCall.riskFactors')}</Text>
+              </View>
+              <Ionicons
+                name={expandedSections.risks ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={colors.textMuted}
+              />
+            </Pressable>
+            {expandedSections.risks && (
+              <View style={styles.sectionBody}>
+                {selectedEarnings.riskFactors.map((r, i) => (
+                  <View key={`${r}-${i}`} style={[styles.bulletRow, { borderBottomColor: colors.divider }]}>
+                    <Text style={[styles.bulletIcon, { color: colors.marketDown }]}>⚠</Text>
+                    <Text style={styles.bulletText}>{r}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Peer Comparison */}
+          <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+            <Pressable
+              style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
+              onPress={() => toggleSection('peerComparison')}
+            >
+              <View style={styles.sectionHeaderLeft}>
+                <View style={[styles.sectionIcon, { backgroundColor: '#06B6D420' }]}>
+                  <Ionicons name="people" size={16} color="#06B6D4" />
+                </View>
+                <Text style={styles.sectionCardTitle}>{t('earningsCall.peerComparison')}</Text>
+              </View>
+              <Ionicons
+                name={expandedSections.peerComparison ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={colors.textMuted}
+              />
+            </Pressable>
+            {expandedSections.peerComparison && selectedEarnings.peerComparison.length > 0 && (
+              <View style={styles.sectionBody}>
+                {/* Table Header */}
+                <View style={[styles.peerHeader, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.peerCell, styles.peerSymbolCol, { color: colors.textMuted }]}>{t('earningsCall.peerCompany')}</Text>
+                  <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerRevenue')}</Text>
+                  <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerProfit')}</Text>
+                  <Text style={[styles.peerCell, { color: colors.textMuted }]}>{t('earningsCall.peerRevGr')}</Text>
+                </View>
+
+                {selectedEarnings.peerComparison.map((p, _i) => {
+                  const isCurrent = p.symbol === selectedEarnings.symbol;
+                  return (
+                    <View
+                      key={p.symbol}
+                      style={[
+                        styles.peerRow,
+                        { borderBottomColor: colors.divider },
+                        isCurrent && { backgroundColor: colors.primary + '10' },
+                      ]}
+                    >
+                      <View style={styles.peerSymbolCol}>
+                        <Text style={[styles.peerSymbol, { color: isCurrent ? colors.primary : colors.text }]}>
+                          {p.symbol}
+                        </Text>
+                        {isCurrent && (
+                          <View style={[styles.youBadge, { backgroundColor: colors.primary + '20' }]}>
+                            <Text style={[styles.youBadgeText, { color: colors.primary }]}>{t('earningsCall.youLabel')}</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={[styles.peerValue, { color: colors.text }]}>₹{formatCr(p.revenue)}</Text>
+                      <Text style={[styles.peerValue, { color: colors.text }]}>₹{formatCr(p.profit)}</Text>
+                      <Text style={[styles.peerValue, {
+                        color: p.revenueGrowth >= 0 ? colors.marketUp : colors.marketDown,
+                      }]}>
+                        {formatPct(p.revenueGrowth)}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+
+          {/* Historical Quarterly Trends */}
+          <View style={[styles.sectionCard, { borderColor: colors.border }]}>
+            <Pressable
+              style={({pressed}) => [styles.sectionHeader, {opacity: pressed ? 0.7 : 1}]}
+              onPress={() => toggleSection('history')}
+            >
+              <View style={styles.sectionHeaderLeft}>
+                <View style={[styles.sectionIcon, { backgroundColor: colors.warning + '20' }]}>
+                  <Ionicons name="bar-chart" size={16} color={colors.warning} />
+                </View>
+                <Text style={styles.sectionCardTitle}>{t('earningsCall.historicalTrend', { count: 4 })}</Text>
+              </View>
+              <Ionicons
+                name={expandedSections.history ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={colors.textMuted}
+              />
+            </Pressable>
+            {expandedSections.history && selectedEarnings.historicalQuarters.length > 0 && (
+              <View style={styles.sectionBody}>
+                {/* Header */}
+                <View style={[styles.histHeader, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.histCell, styles.histQuarterCol, { color: colors.textMuted }]}>{t('earningsCall.historyQuarter')}</Text>
+                  <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyRevenue')}</Text>
+                  <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyProfit')}</Text>
+                  <Text style={[styles.histCell, { color: colors.textMuted }]}>{t('earningsCall.historyEps')}</Text>
+                </View>
+
+                {selectedEarnings.historicalQuarters.map((q, i) => (
+                  <View key={q.quarter} style={[styles.histRow, { borderBottomColor: colors.divider }]}>
+                    <Text style={[styles.histQuarterCol, { color: colors.text }]}>{q.quarter}</Text>
+                    <Text style={[styles.histValue, { color: colors.text }]}>₹{formatCr(q.revenue)}</Text>
+                    <Text style={[styles.histValue, { color: i > 0 && q.netProfit < selectedEarnings.historicalQuarters[i - 1].netProfit ? colors.marketDown : colors.marketUp }]}>
+                      ₹{formatCr(q.netProfit)}
+                    </Text>
+                    <Text style={[styles.histValue, { color: colors.text }]}>₹{q.eps.toFixed(1)}</Text>
+                  </View>
+                ))}
+
+                {/* Trend indicator */}
+                <View style={styles.trendFooter}>
+                  <Ionicons name="trending-up" size={14} color={colors.primary} />
+                  <Text style={[styles.trendText, { color: colors.textMuted }]}>
+                    Revenue CAGR: {m.revenueGrowth > 0 ? '+' : ''}{m.revenueGrowth.toFixed(1)}% · 
+                    Profit CAGR: {m.profitGrowth > 0 ? '+' : ''}{m.profitGrowth.toFixed(1)}%
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* Source */}
+          <Text style={[styles.sourceText, { color: colors.textMuted }]}>
+            {t('earningsCall.sourceText', { source: selectedEarnings.source, date: formatDate(selectedEarnings.date) })}
+          </Text>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',

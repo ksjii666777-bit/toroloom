@@ -11,6 +11,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 // ─── Default landscape preferences (stored in-memory / AsyncStorage) ──────
@@ -55,169 +56,170 @@ export default function LandscapeSettingsScreen({ navigation: _navigation  }: Na
   }, [t]);
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('landscapeSettings.title')}</Text>
-          <Text style={styles.subtitle}>{t('landscapeSettings.subtitle')}</Text>
-        </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('landscapeSettings.title')}</Text>
+            <Text style={styles.subtitle}>{t('landscapeSettings.subtitle')}</Text>
+          </View>
 
-        {/* ── Current Status Card ── */}
-        <Animated.View entering={FadeInDown.springify()} style={[styles.statusCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.statusRow}>
-            <View style={styles.statusItem}>
-              <Text style={styles.statusLabel}>{t('landscapeSettings.orientation')}</Text>
-              <View style={styles.statusValueRow}>
-                <Ionicons
-                  name={isLandscape ? 'phone-landscape' : 'phone-portrait'}
-                  size={18}
-                  color={isLandscape ? '#00C853' : colors.primary}
-                />
-                <Text style={[styles.statusValue, { color: isLandscape ? '#00C853' : colors.primary }]}>
-                  {isLandscape ? t('landscapeSettings.landscape') : t('landscapeSettings.portrait')}
+          {/* ── Current Status Card ── */}
+          <Animated.View entering={FadeInDown.springify()} style={[styles.statusCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.statusRow}>
+              <View style={styles.statusItem}>
+                <Text style={styles.statusLabel}>{t('landscapeSettings.orientation')}</Text>
+                <View style={styles.statusValueRow}>
+                  <Ionicons
+                    name={isLandscape ? 'phone-landscape' : 'phone-portrait'}
+                    size={18}
+                    color={isLandscape ? '#00C853' : colors.primary}
+                  />
+                  <Text style={[styles.statusValue, { color: isLandscape ? '#00C853' : colors.primary }]}>
+                    {isLandscape ? t('landscapeSettings.landscape') : t('landscapeSettings.portrait')}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.statusDivider} />
+              <View style={styles.statusItem}>
+                <Text style={styles.statusLabel}>{t('landscapeSettings.device')}</Text>
+                <View style={styles.statusValueRow}>
+                  <Ionicons
+                    name={isTablet ? 'tablet-landscape' : 'phone-portrait'}
+                    size={18}
+                    color={isTablet ? '#8B5CF6' : colors.textMuted}
+                  />
+                  <Text style={[styles.statusValue, { color: isTablet ? '#8B5CF6' : colors.textMuted }]}>
+                    {isTablet ? t('landscapeSettings.tablet') : t('landscapeSettings.phone')}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.statusDivider} />
+              <View style={styles.statusItem}>
+                <Text style={styles.statusLabel}>{t('landscapeSettings.screen')}</Text>
+                <Text style={[styles.statusValue, { color: colors.text, fontSize: FONTS.size.sm }]}>
+                  {width < 600 ? `${Math.round(width)}×${Math.round(height)}` : `${Math.round(width)}×${Math.round(height)}`}
                 </Text>
               </View>
             </View>
-            <View style={styles.statusDivider} />
-            <View style={styles.statusItem}>
-              <Text style={styles.statusLabel}>{t('landscapeSettings.device')}</Text>
-              <View style={styles.statusValueRow}>
-                <Ionicons
-                  name={isTablet ? 'tablet-landscape' : 'phone-portrait'}
-                  size={18}
-                  color={isTablet ? '#8B5CF6' : colors.textMuted}
-                />
-                <Text style={[styles.statusValue, { color: isTablet ? '#8B5CF6' : colors.textMuted }]}>
-                  {isTablet ? t('landscapeSettings.tablet') : t('landscapeSettings.phone')}
-                </Text>
+          </Animated.View>
+
+          {/* ── Breakpoint Info ── */}
+          <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('landscapeSettings.layoutInfo')}</Text>
+            <View style={styles.infoGrid}>
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
+                <Text style={styles.infoLabel}>{t('landscapeSettings.columns')}</Text>
+                <Text style={styles.infoValue}>{columns}</Text>
+                <Text style={styles.infoDesc}>{t('landscapeSettings.gridColumns')}</Text>
+              </View>
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
+                <Text style={styles.infoLabel}>{t('landscapeSettings.spacing')}</Text>
+                <Text style={styles.infoValue}>{(spacingScale * 100).toFixed(0)}%</Text>
+                <Text style={styles.infoDesc}>{t('landscapeSettings.spacingScale')}</Text>
+              </View>
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
+                <Text style={styles.infoLabel}>{t('landscapeSettings.font')}</Text>
+                <Text style={styles.infoValue}>{(fontSizeScale * 100).toFixed(0)}%</Text>
+                <Text style={styles.infoDesc}>{t('landscapeSettings.fontScale')}</Text>
+              </View>
+              <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
+                <Text style={styles.infoLabel}>{t('landscapeSettings.compact')}</Text>
+                <Text style={styles.infoValue}>{prefs.compactMode ? t('status.on') : t('status.off')}</Text>
+                <Text style={styles.infoDesc}>{t('landscapeSettings.headers')}</Text>
               </View>
             </View>
-            <View style={styles.statusDivider} />
-            <View style={styles.statusItem}>
-              <Text style={styles.statusLabel}>{t('landscapeSettings.screen')}</Text>
-              <Text style={[styles.statusValue, { color: colors.text, fontSize: FONTS.size.sm }]}>
-                {width < 600 ? `${Math.round(width)}×${Math.round(height)}` : `${Math.round(width)}×${Math.round(height)}`}
-              </Text>
+          </Animated.View>
+
+          {/* ── Toggles ── */}
+          <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('landscapeSettings.preferences')}</Text>
+
+            {/* Allow Landscape */}
+            <SettingRow
+              icon="phone-landscape"
+              label={t('landscapeSettings.allowLandscape')}
+              description={t('landscapeSettings.allowLandscapeDesc')}
+              value={prefs.allowLandscape}
+              onToggle={() => togglePref('allowLandscape')}
+              colors={colors}
+              styles={styles}
+            />
+
+            {/* Auto-rotate Charts */}
+            <SettingRow
+              icon="pie-chart"
+              label={t('landscapeSettings.autoRotateCharts')}
+              description={t('landscapeSettings.autoRotateChartsDesc')}
+              value={prefs.autoRotateCharts}
+              onToggle={() => togglePref('autoRotateCharts')}
+              colors={colors}
+              styles={styles}
+            />
+
+            {/* Split Pane */}
+            <SettingRow
+              icon="grid"
+              label={t('landscapeSettings.splitPane')}
+              description={t('landscapeSettings.splitPaneDesc')}
+              value={prefs.splitPaneEnabled}
+              onToggle={() => togglePref('splitPaneEnabled')}
+              disabled={!isTablet}
+              colors={colors}
+              styles={styles}
+            />
+
+            {/* Compact Mode */}
+            <SettingRow
+              icon="remove-circle"
+              label={t('landscapeSettings.compactHeaders')}
+              description={t('landscapeSettings.compactHeadersDesc')}
+              value={prefs.compactMode}
+              onToggle={() => togglePref('compactMode')}
+              colors={colors}
+              styles={styles}
+            />
+
+            {/* Side Navigation */}
+            <SettingRow
+              icon="menu"
+              label={t('landscapeSettings.sideNav')}
+              description={t('landscapeSettings.sideNavDesc')}
+              value={prefs.showSideNav}
+              onToggle={() => togglePref('showSideNav')}
+              disabled={!isTablet}
+              colors={colors}
+              styles={styles}
+            />
+          </Animated.View>
+
+          {/* ── Device Info ── */}
+          <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('landscapeSettings.deviceInfo')}</Text>
+            <View style={[styles.deviceInfoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <DeviceInfoRow label={t('landscapeSettings.screenWidth')} value={`${Math.round(width)}px`} color={colors.primary} styles={styles} />
+              <DeviceInfoRow label={t('landscapeSettings.screenHeight')} value={`${Math.round(height)}px`} color={colors.primary} styles={styles} />
+              <DeviceInfoRow label={t('landscapeSettings.orientation')} value={isLandscape ? t('landscapeSettings.landscape') : t('landscapeSettings.portrait')} color={isLandscape ? '#00C853' : colors.primary} styles={styles} />
+              <DeviceInfoRow label={t('landscapeSettings.formFactor')} value={isTablet ? t('landscapeSettings.tablet') : t('landscapeSettings.phone')} color={isTablet ? '#8B5CF6' : colors.textMuted} styles={styles} />
+              <DeviceInfoRow label={t('landscapeSettings.gridColumns')} value={`${columns}`} color={colors.primary} styles={styles} />
+              <DeviceInfoRow label={t('landscapeSettings.font')} value={`${(fontSizeScale * 100).toFixed(0)}%`} color={colors.text} styles={styles} />
+              <DeviceInfoRow label={t('landscapeSettings.spacing')} value={`${(spacingScale * 100).toFixed(0)}%`} color={colors.text} styles={styles} />
+              <DeviceInfoRow label={t('landscapeSettings.breakpoint')} value={getBreakpointLabel(width)} color="#6C63FF" styles={styles} />
             </View>
-          </View>
-        </Animated.View>
+          </Animated.View>
 
-        {/* ── Breakpoint Info ── */}
-        <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('landscapeSettings.layoutInfo')}</Text>
-          <View style={styles.infoGrid}>
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
-              <Text style={styles.infoLabel}>{t('landscapeSettings.columns')}</Text>
-              <Text style={styles.infoValue}>{columns}</Text>
-              <Text style={styles.infoDesc}>{t('landscapeSettings.gridColumns')}</Text>
+          {/* ── Reset Button ── */}
+          <AnimatedPressable onPress={resetDefaults} haptic="medium" scaleTo={0.97}>
+            <View style={styles.resetBtn}>
+              <Ionicons name="refresh" size={18} color={colors.textMuted} />
+              <Text style={styles.resetBtnText}>{t('landscapeSettings.resetDefaults')}</Text>
             </View>
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
-              <Text style={styles.infoLabel}>{t('landscapeSettings.spacing')}</Text>
-              <Text style={styles.infoValue}>{(spacingScale * 100).toFixed(0)}%</Text>
-              <Text style={styles.infoDesc}>{t('landscapeSettings.spacingScale')}</Text>
-            </View>
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
-              <Text style={styles.infoLabel}>{t('landscapeSettings.font')}</Text>
-              <Text style={styles.infoValue}>{(fontSizeScale * 100).toFixed(0)}%</Text>
-              <Text style={styles.infoDesc}>{t('landscapeSettings.fontScale')}</Text>
-            </View>
-            <View style={[styles.infoCard, { backgroundColor: colors.bgCard }]}>
-              <Text style={styles.infoLabel}>{t('landscapeSettings.compact')}</Text>
-              <Text style={styles.infoValue}>{prefs.compactMode ? t('status.on') : t('status.off')}</Text>
-              <Text style={styles.infoDesc}>{t('landscapeSettings.headers')}</Text>
-            </View>
-          </View>
-        </Animated.View>
+          </AnimatedPressable>
 
-        {/* ── Toggles ── */}
-        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('landscapeSettings.preferences')}</Text>
-
-          {/* Allow Landscape */}
-          <SettingRow
-            icon="phone-landscape"
-            label={t('landscapeSettings.allowLandscape')}
-            description={t('landscapeSettings.allowLandscapeDesc')}
-            value={prefs.allowLandscape}
-            onToggle={() => togglePref('allowLandscape')}
-            colors={colors}
-            styles={styles}
-          />
-
-          {/* Auto-rotate Charts */}
-          <SettingRow
-            icon="pie-chart"
-            label={t('landscapeSettings.autoRotateCharts')}
-            description={t('landscapeSettings.autoRotateChartsDesc')}
-            value={prefs.autoRotateCharts}
-            onToggle={() => togglePref('autoRotateCharts')}
-            colors={colors}
-            styles={styles}
-          />
-
-          {/* Split Pane */}
-          <SettingRow
-            icon="grid"
-            label={t('landscapeSettings.splitPane')}
-            description={t('landscapeSettings.splitPaneDesc')}
-            value={prefs.splitPaneEnabled}
-            onToggle={() => togglePref('splitPaneEnabled')}
-            disabled={!isTablet}
-            colors={colors}
-            styles={styles}
-          />
-
-          {/* Compact Mode */}
-          <SettingRow
-            icon="remove-circle"
-            label={t('landscapeSettings.compactHeaders')}
-            description={t('landscapeSettings.compactHeadersDesc')}
-            value={prefs.compactMode}
-            onToggle={() => togglePref('compactMode')}
-            colors={colors}
-            styles={styles}
-          />
-
-          {/* Side Navigation */}
-          <SettingRow
-            icon="menu"
-            label={t('landscapeSettings.sideNav')}
-            description={t('landscapeSettings.sideNavDesc')}
-            value={prefs.showSideNav}
-            onToggle={() => togglePref('showSideNav')}
-            disabled={!isTablet}
-            colors={colors}
-            styles={styles}
-          />
-        </Animated.View>
-
-        {/* ── Device Info ── */}
-        <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('landscapeSettings.deviceInfo')}</Text>
-          <View style={[styles.deviceInfoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <DeviceInfoRow label={t('landscapeSettings.screenWidth')} value={`${Math.round(width)}px`} color={colors.primary} styles={styles} />
-            <DeviceInfoRow label={t('landscapeSettings.screenHeight')} value={`${Math.round(height)}px`} color={colors.primary} styles={styles} />
-            <DeviceInfoRow label={t('landscapeSettings.orientation')} value={isLandscape ? t('landscapeSettings.landscape') : t('landscapeSettings.portrait')} color={isLandscape ? '#00C853' : colors.primary} styles={styles} />
-            <DeviceInfoRow label={t('landscapeSettings.formFactor')} value={isTablet ? t('landscapeSettings.tablet') : t('landscapeSettings.phone')} color={isTablet ? '#8B5CF6' : colors.textMuted} styles={styles} />
-            <DeviceInfoRow label={t('landscapeSettings.gridColumns')} value={`${columns}`} color={colors.primary} styles={styles} />
-            <DeviceInfoRow label={t('landscapeSettings.font')} value={`${(fontSizeScale * 100).toFixed(0)}%`} color={colors.text} styles={styles} />
-            <DeviceInfoRow label={t('landscapeSettings.spacing')} value={`${(spacingScale * 100).toFixed(0)}%`} color={colors.text} styles={styles} />
-            <DeviceInfoRow label={t('landscapeSettings.breakpoint')} value={getBreakpointLabel(width)} color="#6C63FF" styles={styles} />
-          </View>
-        </Animated.View>
-
-        {/* ── Reset Button ── */}
-        <AnimatedPressable onPress={resetDefaults} haptic="medium" scaleTo={0.97}>
-          <View style={styles.resetBtn}>
-            <Ionicons name="refresh" size={18} color={colors.textMuted} />
-            <Text style={styles.resetBtnText}>{t('landscapeSettings.resetDefaults')}</Text>
-          </View>
-        </AnimatedPressable>
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -279,16 +281,13 @@ function getBreakpointLabel(width: number): string {
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   title: {

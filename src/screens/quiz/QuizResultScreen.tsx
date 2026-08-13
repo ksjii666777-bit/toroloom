@@ -16,6 +16,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { RootStackParamList } from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 type QuizResultScreenProps = NativeStackScreenProps<RootStackParamList, 'QuizResult'>;
 
@@ -81,258 +82,258 @@ export default function QuizResultScreen({ route, navigation }: QuizResultScreen
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
-            <Ionicons name="close" size={22} color={colors.text} />
-          </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('quizResult.headerTitle')}</Text>
-          <View style={{ width: 40 }} />
-        </View>
-
-        {/* Result Hero */}
-        <LinearGradient
-          colors={result.passed ? ['#00C853', '#009624'] : ['#FF5252', '#D50000']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.hero}
-        >
-          <View style={styles.heroIconWrap}>
-            <Ionicons
-              name={result.passed ? 'checkmark-circle' : 'close-circle'}
-              size={56}
-              color="#FFF"
-            />
-          </View>
-          <Text style={styles.heroTitle}>
-            {result.passed ? t('quizResult.heroPassed') : t('quizResult.heroFailed')}
-          </Text>
-          <Text style={styles.heroSubtitle}>{result.quizTitle}</Text>
-          <Text style={styles.heroDesc}>
-            {result.passed
-              ? t('quizResult.passedDesc', { percent: result.percentage, best: isBest ? t('quizResult.bestScore') : '' })
-              : t('quizResult.failedDesc', { percent: result.percentage })}
-          </Text>
-        </LinearGradient>
-
-        {/* Score Card */}
-        <View style={[styles.scoreCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          {/* Big Score */}
-          <View style={styles.scoreRow}>
-            <View style={styles.scoreMain}>
-              <View style={[styles.scoreCircle, { borderColor: gradeColor + '40' }]}>
-                <Text style={[styles.scoreValue, { color: gradeColor }]}>{result.percentage}%</Text>
-              </View>
-              <View style={styles.scoreInfo}>
-                <Text style={[styles.gradeLabel, { color: gradeColor }]}>{gradeLabel}</Text>
-                {result.passed && (
-                  <View style={styles.passBadge}>
-                    <Ionicons name="checkmark" size={14} color="#FFF" />
-                    <Text style={styles.passBadgeText}>{t('quizResult.passedBadge')}</Text>
-                  </View>
-                )}
-              </View>
-            </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
+              <Ionicons name="close" size={22} color={colors.text} />
+            </Pressable>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('quizResult.headerTitle')}</Text>
+            <View style={{ width: 40 }} />
           </View>
 
-          {/* Stats Grid */}
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Ionicons name="checkmark-circle" size={18} color="#00C853" />
-              <Text style={[styles.statValue, { color: colors.text }]}>{result.correctAnswers}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statCorrect')}</Text>
-            </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.statItem}>
-              <Ionicons name="close-circle" size={18} color="#FF5252" />
-              <Text style={[styles.statValue, { color: colors.text }]}>{result.wrongAnswers}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statWrong')}</Text>
-            </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.statItem}>
-              <Ionicons name="help-circle" size={18} color="#FFC107" />
-              <Text style={[styles.statValue, { color: colors.text }]}>{result.unanswered}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statSkipped')}</Text>
-            </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.statItem}>
-              <Ionicons name="time-outline" size={18} color="#6C63FF" />
-              <Text style={[styles.statValue, { color: colors.text }]}>{formatTime(result.timeTaken)}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statTime')}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* XP Earned */}
-        <View style={[styles.xpCard, {
-          backgroundColor: result.passed ? '#00C85315' : '#FFC10715',
-          borderColor: result.passed ? '#00C85340' : '#FFC10740',
-        }]}>
-          <Ionicons name="flash" size={24} color={result.passed ? '#00C853' : '#FFC107'} />
-          <View style={styles.xpInfo}>
-            <Text style={[styles.xpTitle, { color: result.passed ? '#00C853' : '#FFC107' }]}>
-              {result.passed ? t('quizResult.xpEarned', { xp: passXp }) : t('quizResult.xpAttempt', { xp: attemptXp })}
-            </Text>
-            <Text style={[styles.xpDesc, { color: colors.textSecondary }]}>
-              {result.passed
-                ? t('quizResult.xpDescPassed')
-                : t('quizResult.xpDescFailed')}
-            </Text>
-          </View>
-        </View>
-
-        {/* Attempt Info */}
-        {allAttempts.length > 1 && (
-          <View style={[styles.attemptCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Ionicons name="repeat" size={18} color={colors.textMuted} />
-            <Text style={[styles.attemptText, { color: colors.textSecondary }]}>
-              {t('quizResult.attemptInfo', { num: allAttempts.length, best: bestAttempt.percentage })}
-            </Text>
-          </View>
-        )}
-
-        {/* Certificate Option */}
-        {result.passed && course && (
-          <AnimatedPressable
-            onPress={handleViewCertificate}
-            scaleTo={0.97}
-            haptic="medium"
-            style={{ marginBottom: SPACING.lg }}
+          {/* Result Hero */}
+          <LinearGradient
+            colors={result.passed ? ['#00C853', '#009624'] : ['#FF5252', '#D50000']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.hero}
           >
-            <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.certBtn}>
-              <Ionicons name="ribbon" size={22} color="#FFF" />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.certBtnTitle}>{t('quizResult.certTitle')}</Text>
-                <Text style={styles.certBtnSub}>{t('quizResult.certSub')}</Text>
+            <View style={styles.heroIconWrap}>
+              <Ionicons
+                name={result.passed ? 'checkmark-circle' : 'close-circle'}
+                size={56}
+                color="#FFF"
+              />
+            </View>
+            <Text style={styles.heroTitle}>
+              {result.passed ? t('quizResult.heroPassed') : t('quizResult.heroFailed')}
+            </Text>
+            <Text style={styles.heroSubtitle}>{result.quizTitle}</Text>
+            <Text style={styles.heroDesc}>
+              {result.passed
+                ? t('quizResult.passedDesc', { percent: result.percentage, best: isBest ? t('quizResult.bestScore') : '' })
+                : t('quizResult.failedDesc', { percent: result.percentage })}
+            </Text>
+          </LinearGradient>
+
+          {/* Score Card */}
+          <View style={[styles.scoreCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            {/* Big Score */}
+            <View style={styles.scoreRow}>
+              <View style={styles.scoreMain}>
+                <View style={[styles.scoreCircle, { borderColor: gradeColor + '40' }]}>
+                  <Text style={[styles.scoreValue, { color: gradeColor }]}>{result.percentage}%</Text>
+                </View>
+                <View style={styles.scoreInfo}>
+                  <Text style={[styles.gradeLabel, { color: gradeColor }]}>{gradeLabel}</Text>
+                  {result.passed && (
+                    <View style={styles.passBadge}>
+                      <Ionicons name="checkmark" size={14} color="#FFF" />
+                      <Text style={styles.passBadgeText}>{t('quizResult.passedBadge')}</Text>
+                    </View>
+                  )}
+                </View>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
-            </LinearGradient>
-          </AnimatedPressable>
-        )}
+            </View>
 
-        {/* Review Toggle */}
-        <Pressable
-          style={[styles.reviewToggle, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-          onPress={() => setShowReview(prev => !prev)}
-        >
-          <Ionicons name="list-outline" size={18} color={colors.text} />
-          <Text style={[styles.reviewToggleText, { color: colors.text }]}>
-            {t(showReview ? 'quizResult.hideAnswers' : 'quizResult.reviewAnswers')}
-          </Text>
-          <Ionicons
-            name={showReview ? 'chevron-up' : 'chevron-down'}
-            size={18}
-            color={colors.textMuted}
-          />
-        </Pressable>
+            {/* Stats Grid */}
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Ionicons name="checkmark-circle" size={18} color="#00C853" />
+                <Text style={[styles.statValue, { color: colors.text }]}>{result.correctAnswers}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statCorrect')}</Text>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.statItem}>
+                <Ionicons name="close-circle" size={18} color="#FF5252" />
+                <Text style={[styles.statValue, { color: colors.text }]}>{result.wrongAnswers}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statWrong')}</Text>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.statItem}>
+                <Ionicons name="help-circle" size={18} color="#FFC107" />
+                <Text style={[styles.statValue, { color: colors.text }]}>{result.unanswered}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statSkipped')}</Text>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.statItem}>
+                <Ionicons name="time-outline" size={18} color="#6C63FF" />
+                <Text style={[styles.statValue, { color: colors.text }]}>{formatTime(result.timeTaken)}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('quizResult.statTime')}</Text>
+              </View>
+            </View>
+          </View>
 
-        {/* Answer Review */}
-        {showReview && result.correctAnswerMap && (
-          <View style={styles.reviewContainer}>
-            {lessonQuizQuestions.map((q, idx) => {
-              const userAns = result.answers[q.id];
-              const isCorrect = userAns === q.correctAnswer;
-              const isSkipped = userAns === undefined;
+          {/* XP Earned */}
+          <View style={[styles.xpCard, {
+            backgroundColor: result.passed ? '#00C85315' : '#FFC10715',
+            borderColor: result.passed ? '#00C85340' : '#FFC10740',
+          }]}>
+            <Ionicons name="flash" size={24} color={result.passed ? '#00C853' : '#FFC107'} />
+            <View style={styles.xpInfo}>
+              <Text style={[styles.xpTitle, { color: result.passed ? '#00C853' : '#FFC107' }]}>
+                {result.passed ? t('quizResult.xpEarned', { xp: passXp }) : t('quizResult.xpAttempt', { xp: attemptXp })}
+              </Text>
+              <Text style={[styles.xpDesc, { color: colors.textSecondary }]}>
+                {result.passed
+                  ? t('quizResult.xpDescPassed')
+                  : t('quizResult.xpDescFailed')}
+              </Text>
+            </View>
+          </View>
 
-              return (
-                <View
-                  key={q.id}
-                  style={[styles.reviewCard, {
-                    backgroundColor: colors.bgCard,
-                    borderColor: isCorrect ? '#00C85340' : isSkipped ? '#FFC10740' : '#FF525240',
-                  }]}
-                >
-                  <View style={styles.reviewHeader}>
-                    <Text style={[styles.reviewQNum, { color: colors.textMuted }]}>Q{idx + 1}</Text>
-                    <View style={[styles.reviewBadge, {
-                      backgroundColor: isCorrect ? '#00C85320' : isSkipped ? '#FFC10720' : '#FF525220',
-                    }]}>
-                      <Ionicons
-                        name={isCorrect ? 'checkmark-circle' : isSkipped ? 'help-circle' : 'close-circle'}
-                        size={14}
-                        color={isCorrect ? '#00C853' : isSkipped ? '#FFC107' : '#FF5252'}
-                      />
-                      <Text style={[styles.reviewBadgeText, {
-                        color: isCorrect ? '#00C853' : isSkipped ? '#FFC107' : '#FF5252',
+          {/* Attempt Info */}
+          {allAttempts.length > 1 && (
+            <View style={[styles.attemptCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Ionicons name="repeat" size={18} color={colors.textMuted} />
+              <Text style={[styles.attemptText, { color: colors.textSecondary }]}>
+                {t('quizResult.attemptInfo', { num: allAttempts.length, best: bestAttempt.percentage })}
+              </Text>
+            </View>
+          )}
+
+          {/* Certificate Option */}
+          {result.passed && course && (
+            <AnimatedPressable
+              onPress={handleViewCertificate}
+              scaleTo={0.97}
+              haptic="medium"
+              style={{ marginBottom: SPACING.lg }}
+            >
+              <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.certBtn}>
+                <Ionicons name="ribbon" size={22} color="#FFF" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.certBtnTitle}>{t('quizResult.certTitle')}</Text>
+                  <Text style={styles.certBtnSub}>{t('quizResult.certSub')}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
+              </LinearGradient>
+            </AnimatedPressable>
+          )}
+
+          {/* Review Toggle */}
+          <Pressable
+            style={[styles.reviewToggle, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+            onPress={() => setShowReview(prev => !prev)}
+          >
+            <Ionicons name="list-outline" size={18} color={colors.text} />
+            <Text style={[styles.reviewToggleText, { color: colors.text }]}>
+              {t(showReview ? 'quizResult.hideAnswers' : 'quizResult.reviewAnswers')}
+            </Text>
+            <Ionicons
+              name={showReview ? 'chevron-up' : 'chevron-down'}
+              size={18}
+              color={colors.textMuted}
+            />
+          </Pressable>
+
+          {/* Answer Review */}
+          {showReview && result.correctAnswerMap && (
+            <View style={styles.reviewContainer}>
+              {lessonQuizQuestions.map((q, idx) => {
+                const userAns = result.answers[q.id];
+                const isCorrect = userAns === q.correctAnswer;
+                const isSkipped = userAns === undefined;
+
+                return (
+                  <View
+                    key={q.id}
+                    style={[styles.reviewCard, {
+                      backgroundColor: colors.bgCard,
+                      borderColor: isCorrect ? '#00C85340' : isSkipped ? '#FFC10740' : '#FF525240',
+                    }]}
+                  >
+                    <View style={styles.reviewHeader}>
+                      <Text style={[styles.reviewQNum, { color: colors.textMuted }]}>Q{idx + 1}</Text>
+                      <View style={[styles.reviewBadge, {
+                        backgroundColor: isCorrect ? '#00C85320' : isSkipped ? '#FFC10720' : '#FF525220',
                       }]}>
-                        {isCorrect ? t('quizResult.badgeCorrect') : isSkipped ? t('quizResult.badgeSkipped') : t('quizResult.badgeWrong')}
+                        <Ionicons
+                          name={isCorrect ? 'checkmark-circle' : isSkipped ? 'help-circle' : 'close-circle'}
+                          size={14}
+                          color={isCorrect ? '#00C853' : isSkipped ? '#FFC107' : '#FF5252'}
+                        />
+                        <Text style={[styles.reviewBadgeText, {
+                          color: isCorrect ? '#00C853' : isSkipped ? '#FFC107' : '#FF5252',
+                        }]}>
+                          {isCorrect ? t('quizResult.badgeCorrect') : isSkipped ? t('quizResult.badgeSkipped') : t('quizResult.badgeWrong')}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={[styles.reviewQuestion, { color: colors.text }]}>{q.question}</Text>
+
+                    {q.options.map((opt, oIdx) => {
+                      const isSelected = userAns === oIdx;
+                      const isRightAns = oIdx === q.correctAnswer;
+                      let optStyle = { backgroundColor: 'transparent', borderColor: colors.border };
+                      let optTextStyle = { color: colors.textMuted };
+
+                      if (isRightAns) {
+                        optStyle = { backgroundColor: '#00C85315', borderColor: '#00C853' };
+                        optTextStyle = { color: '#00C853' };
+                      } else if (isSelected && !isRightAns) {
+                        optStyle = { backgroundColor: '#FF525215', borderColor: '#FF5252' };
+                        optTextStyle = { color: '#FF5252' };
+                      }
+
+                      return (
+                        <View key={oIdx} style={[styles.reviewOption, optStyle, { borderColor: optStyle.borderColor }]}>
+                          <Text style={[styles.reviewOptionText, optTextStyle]}>{opt}</Text>
+                          {isRightAns && <Ionicons name="checkmark-circle" size={16} color="#00C853" />}
+                          {isSelected && !isRightAns && <Ionicons name="close-circle" size={16} color="#FF5252" />}
+                        </View>
+                      );
+                    })}
+
+                    <View style={[styles.explanationBox, { backgroundColor: '#6C63FF12' }]}>
+                      <Ionicons name="information-circle" size={16} color="#6C63FF" />
+                      <Text style={[styles.explanationText, { color: colors.textSecondary }]}>
+                        {q.explanation}
                       </Text>
                     </View>
                   </View>
-
-                  <Text style={[styles.reviewQuestion, { color: colors.text }]}>{q.question}</Text>
-
-                  {q.options.map((opt, oIdx) => {
-                    const isSelected = userAns === oIdx;
-                    const isRightAns = oIdx === q.correctAnswer;
-                    let optStyle = { backgroundColor: 'transparent', borderColor: colors.border };
-                    let optTextStyle = { color: colors.textMuted };
-
-                    if (isRightAns) {
-                      optStyle = { backgroundColor: '#00C85315', borderColor: '#00C853' };
-                      optTextStyle = { color: '#00C853' };
-                    } else if (isSelected && !isRightAns) {
-                      optStyle = { backgroundColor: '#FF525215', borderColor: '#FF5252' };
-                      optTextStyle = { color: '#FF5252' };
-                    }
-
-                    return (
-                      <View key={oIdx} style={[styles.reviewOption, optStyle, { borderColor: optStyle.borderColor }]}>
-                        <Text style={[styles.reviewOptionText, optTextStyle]}>{opt}</Text>
-                        {isRightAns && <Ionicons name="checkmark-circle" size={16} color="#00C853" />}
-                        {isSelected && !isRightAns && <Ionicons name="close-circle" size={16} color="#FF5252" />}
-                      </View>
-                    );
-                  })}
-
-                  <View style={[styles.explanationBox, { backgroundColor: '#6C63FF12' }]}>
-                    <Ionicons name="information-circle" size={16} color="#6C63FF" />
-                    <Text style={[styles.explanationText, { color: colors.textSecondary }]}>
-                      {q.explanation}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        )}
-
-        {/* Action Buttons */}
-        <View style={styles.actions}>
-          {!result.passed && (
-            <AnimatedPressable
-              onPress={handleRetry}
-              scaleTo={0.97}
-              haptic="medium"
-              style={[styles.actionBtn, { backgroundColor: colors.primary }]}
-            >
-              <Ionicons name="refresh" size={20} color="#FFF" />
-              <Text style={styles.actionBtnText}>{t('quizResult.tryAgain')}</Text>
-            </AnimatedPressable>
+                );
+              })}
+            </View>
           )}
-          <AnimatedPressable
-            onPress={() => navigation.goBack()}
-            scaleTo={0.97}
-            haptic="light"
-            style={[styles.actionBtn, { backgroundColor: colors.bgCard, borderColor: colors.border, borderWidth: 1 }]}
-          >
-            <Ionicons name="arrow-back" size={20} color={colors.text} />
-            <Text style={[styles.actionBtnText, { color: colors.text }]}>{t('quizResult.backToLesson')}</Text>
-          </AnimatedPressable>
-        </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          {/* Action Buttons */}
+          <View style={styles.actions}>
+            {!result.passed && (
+              <AnimatedPressable
+                onPress={handleRetry}
+                scaleTo={0.97}
+                haptic="medium"
+                style={[styles.actionBtn, { backgroundColor: colors.primary }]}
+              >
+                <Ionicons name="refresh" size={20} color="#FFF" />
+                <Text style={styles.actionBtnText}>{t('quizResult.tryAgain')}</Text>
+              </AnimatedPressable>
+            )}
+            <AnimatedPressable
+              onPress={() => navigation.goBack()}
+              scaleTo={0.97}
+              haptic="light"
+              style={[styles.actionBtn, { backgroundColor: colors.bgCard, borderColor: colors.border, borderWidth: 1 }]}
+            >
+              <Ionicons name="arrow-back" size={20} color={colors.text} />
+              <Text style={[styles.actionBtnText, { color: colors.text }]}>{t('quizResult.backToLesson')}</Text>
+            </AnimatedPressable>
+          </View>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1 },
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: 20,

@@ -28,6 +28,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {UserGeneratedCourse, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 type LevelFilter = 'all' | 'beginner' | 'intermediate' | 'advanced';
 
@@ -129,144 +130,118 @@ export default function CommunityCoursesScreen({ navigation }: NativeStackScreen
   const enrolledSet = useMemo(() => new Set(enrolledCommunityCourseIds), [enrolledCommunityCourseIds]);
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </AnimatedPressable>
-            <Text style={styles.title}>{t('education.communityCourses')}</Text>
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
+                <Ionicons name="arrow-back" size={24} color={colors.text} />
+              </AnimatedPressable>
+              <Text style={styles.title}>{t('education.communityCourses')}</Text>
+            </View>
+            <Text style={styles.subtitle}>
+              {t('education.communitySubtitle')}
+            </Text>
           </View>
-          <Text style={styles.subtitle}>
-            {t('education.communitySubtitle')}
-          </Text>
-        </View>
 
-        {/* Search Bar */}
-        <View style={[styles.searchBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="search" size={18} color={colors.textMuted} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('education.searchCoursesCreators')}
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-          {searchQuery.length > 0 && (
-            <AnimatedPressable onPress={() => setSearchQuery('')} haptic="light" scaleTo={0.88}>
-              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-            </AnimatedPressable>
-          )}
-          <AnimatedPressable onPress={() => setShowFilters(!showFilters)} haptic="selection" scaleTo={0.88}>
-            <Ionicons
-              name={showFilters ? 'options' : 'options-outline'}
-              size={20}
-              color={showFilters ? colors.primary : colors.textMuted}
+          {/* Search Bar */}
+          <View style={[styles.searchBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="search" size={18} color={colors.textMuted} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder={t('education.searchCoursesCreators')}
+              placeholderTextColor={colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
             />
-          </AnimatedPressable>
-        </View>
+            {searchQuery.length > 0 && (
+              <AnimatedPressable onPress={() => setSearchQuery('')} haptic="light" scaleTo={0.88}>
+                <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+              </AnimatedPressable>
+            )}
+            <AnimatedPressable onPress={() => setShowFilters(!showFilters)} haptic="selection" scaleTo={0.88}>
+              <Ionicons
+                name={showFilters ? 'options' : 'options-outline'}
+                size={20}
+                color={showFilters ? colors.primary : colors.textMuted}
+              />
+            </AnimatedPressable>
+          </View>
 
-        {/* Stats Row */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
-            <Text style={[styles.statValue, { color: colors.primary }]}>{allCommunityCourses.length}</Text>
-            <Text style={styles.statLabel}>{t('education.title')}</Text>
+          {/* Stats Row */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
+              <Text style={[styles.statValue, { color: colors.primary }]}>{allCommunityCourses.length}</Text>
+              <Text style={styles.statLabel}>{t('education.title')}</Text>
+            </View>
+            <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
+              <Text style={[styles.statValue, { color: colors.success }]}>{featured.length}</Text>
+              <Text style={styles.statLabel}>{t('education.featuredCourses')}</Text>
+            </View>
+            <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
+              <Text style={[styles.statValue, { color: colors.warning }]}>
+                {enrolledCommunityCourseIds.length}
+              </Text>
+              <Text style={styles.statLabel}>{t('education.enrolled')}</Text>
+            </View>
+            <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
+              <Text style={[styles.statValue, { color: colors.text }]}>
+                {allCommunityCourses.reduce((s, c) => s + c.enrolledCount, 0)}
+              </Text>
+              <Text style={styles.statLabel}>{t('education.students')}</Text>
+            </View>
           </View>
-          <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
-            <Text style={[styles.statValue, { color: colors.success }]}>{featured.length}</Text>
-            <Text style={styles.statLabel}>{t('education.featuredCourses')}</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
-            <Text style={[styles.statValue, { color: colors.warning }]}>
-              {enrolledCommunityCourseIds.length}
-            </Text>
-            <Text style={styles.statLabel}>{t('education.enrolled')}</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: colors.bgCard }]}>
-            <Text style={[styles.statValue, { color: colors.text }]}>
-              {allCommunityCourses.reduce((s, c) => s + c.enrolledCount, 0)}
-            </Text>
-            <Text style={styles.statLabel}>{t('education.students')}</Text>
-          </View>
-        </View>
 
-        {/* Expandable Filters */}
-        {showFilters && (
-          <Animated.View entering={FadeInDown.springify()} style={styles.filtersSection}>
-            {/* Level Filter */}
-            <Text style={styles.filterLabel}>{t('education.level')}</Text>
-            <View style={styles.chipRow}>
-              {(['all', 'beginner', 'intermediate', 'advanced'] as const).map(level => {
-                const isActive = activeLevel === level;
-                return (
-                  <AnimatedPressable
-                    key={level}
-                    onPress={() => setActiveLevel(level)}
-                    haptic="selection"
-                    scaleTo={0.94}
-                  >
-                    <View style={[
-                      styles.filterChip,
-                      isActive && {
-                        backgroundColor: level === 'all' ? colors.primary + '30'
-                          : (LEVEL_COLORS[level]?.[0] ?? colors.primary) + '30',
-                        borderColor: level === 'all' ? colors.primary
-                          : (LEVEL_COLORS[level]?.[0] ?? colors.primary),
-                      },
-                    ]}>
-                      <Text style={[
-                        styles.filterChipText,
+          {/* Expandable Filters */}
+          {showFilters && (
+            <Animated.View entering={FadeInDown.springify()} style={styles.filtersSection}>
+              {/* Level Filter */}
+              <Text style={styles.filterLabel}>{t('education.level')}</Text>
+              <View style={styles.chipRow}>
+                {(['all', 'beginner', 'intermediate', 'advanced'] as const).map(level => {
+                  const isActive = activeLevel === level;
+                  return (
+                    <AnimatedPressable
+                      key={level}
+                      onPress={() => setActiveLevel(level)}
+                      haptic="selection"
+                      scaleTo={0.94}
+                    >
+                      <View style={[
+                        styles.filterChip,
                         isActive && {
-                          color: level === 'all' ? colors.primary
+                          backgroundColor: level === 'all' ? colors.primary + '30'
+                            : (LEVEL_COLORS[level]?.[0] ?? colors.primary) + '30',
+                          borderColor: level === 'all' ? colors.primary
                             : (LEVEL_COLORS[level]?.[0] ?? colors.primary),
                         },
                       ]}>
-                        {level === 'all' ? t('education.allLevels') : level === 'beginner' ? t('education.beginner') : level === 'intermediate' ? t('education.intermediate') : t('education.advanced')}
-                      </Text>
-                    </View>
-                  </AnimatedPressable>
-                );
-              })}
-            </View>
+                        <Text style={[
+                          styles.filterChipText,
+                          isActive && {
+                            color: level === 'all' ? colors.primary
+                              : (LEVEL_COLORS[level]?.[0] ?? colors.primary),
+                          },
+                        ]}>
+                          {level === 'all' ? t('education.allLevels') : level === 'beginner' ? t('education.beginner') : level === 'intermediate' ? t('education.intermediate') : t('education.advanced')}
+                        </Text>
+                      </View>
+                    </AnimatedPressable>
+                  );
+                })}
+              </View>
 
-            {/* Category Filter */}
-            <Text style={styles.filterLabel}>{t('education.sortCategory')}</Text>
-            <View style={styles.chipRow}>
-              {CATEGORIES.slice(0, 6).map(cat => {
-                const isActive = activeCategory === cat;
-                return (
-                  <AnimatedPressable
-                    key={cat}
-                    onPress={() => setActiveCategory(cat)}
-                    haptic="selection"
-                    scaleTo={0.94}
-                  >
-                    <View style={[
-                      styles.categoryChip,
-                      isActive && {
-                        backgroundColor: colors.primary + '30',
-                        borderColor: colors.primary,
-                      },
-                    ]}>
-                      <Text style={[
-                        styles.categoryChipText,
-                        isActive && { color: colors.primary },
-                      ]}>{cat}</Text>
-                    </View>
-                  </AnimatedPressable>
-                );
-              })}
-            </View>
-            {CATEGORIES.length > 6 && (
+              {/* Category Filter */}
+              <Text style={styles.filterLabel}>{t('education.sortCategory')}</Text>
               <View style={styles.chipRow}>
-                {CATEGORIES.slice(6).map(cat => {
+                {CATEGORIES.slice(0, 6).map(cat => {
                   const isActive = activeCategory === cat;
                   return (
                     <AnimatedPressable
@@ -291,90 +266,117 @@ export default function CommunityCoursesScreen({ navigation }: NativeStackScreen
                   );
                 })}
               </View>
-            )}
-          </Animated.View>
-        )}
+              {CATEGORIES.length > 6 && (
+                <View style={styles.chipRow}>
+                  {CATEGORIES.slice(6).map(cat => {
+                    const isActive = activeCategory === cat;
+                    return (
+                      <AnimatedPressable
+                        key={cat}
+                        onPress={() => setActiveCategory(cat)}
+                        haptic="selection"
+                        scaleTo={0.94}
+                      >
+                        <View style={[
+                          styles.categoryChip,
+                          isActive && {
+                            backgroundColor: colors.primary + '30',
+                            borderColor: colors.primary,
+                          },
+                        ]}>
+                          <Text style={[
+                            styles.categoryChipText,
+                            isActive && { color: colors.primary },
+                          ]}>{cat}</Text>
+                        </View>
+                      </AnimatedPressable>
+                    );
+                  })}
+                </View>
+              )}
+            </Animated.View>
+          )}
 
-        {/* Featured Courses Carousel */}
-        {featured.length > 0 && searchQuery === '' && activeLevel === 'all' && activeCategory === 'All' && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="star" size={18} color={colors.warning} />
-              <Text style={styles.sectionTitle}>{t('education.featuredCourses')}</Text>
-              <Text style={styles.sectionCount}>{featured.length}</Text>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {featured.map((course, idx) => (
-                <Animated.View
-                  key={course.id}
-                  entering={FadeInDown.delay(idx * 80).springify()}
-                >
-                  <FeaturedCourseCard
-                    course={course}
-                    isEnrolled={enrolledSet.has(course.id)}
-                    onEnrollToggle={() => handleEnrollToggle(course)}
-                    colors={colors}
-                    styles={styles}
-                  />
-                </Animated.View>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
-        {/* All / Filtered Courses */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              {searchQuery ? `Results (${filteredCourses.length})` :
-               activeLevel !== 'all' || activeCategory !== 'All' ?                t('education.filteredResults', { count: filteredCourses.length }) :
-               t('education.allCommunityCourses')}
-            </Text>
-            {filteredCourses.length > 0 && (
-              <Text style={styles.sectionCount}>{filteredCourses.length}</Text>
-            )}
-          </View>
-
-          {filteredCourses.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons
-                name={searchQuery ? 'search-outline' : 'school-outline'}
-                size={56}
-                color={colors.textMuted}
-              />
-              <Text style={styles.emptyTitle}>
-                {searchQuery ? t('education.noCoursesFound') : t('education.noCoursesYet')}
-              </Text>
-              <Text style={styles.emptySubtitle}>
-                {searchQuery
-                  ? t('education.noCoursesMatch', { query: searchQuery })
-                  : t('education.noCommunityCourses')}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.courseGrid}>
-              {filteredCourses.map((course, idx) => (
-                <Animated.View
-                  key={course.id}
-                  entering={FadeInDown.delay(idx * 40).springify()}
-                  layout={Layout.springify()}
-                >
-                  <CommunityCourseCard
-                    course={course}
-                    isEnrolled={enrolledSet.has(course.id)}
-                    onEnrollToggle={() => handleEnrollToggle(course)}
-                    colors={colors}
-                    styles={styles}
-                  />
-                </Animated.View>
-              ))}
+          {/* Featured Courses Carousel */}
+          {featured.length > 0 && searchQuery === '' && activeLevel === 'all' && activeCategory === 'All' && (
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="star" size={18} color={colors.warning} />
+                <Text style={styles.sectionTitle}>{t('education.featuredCourses')}</Text>
+                <Text style={styles.sectionCount}>{featured.length}</Text>
+              </View>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {featured.map((course, idx) => (
+                  <Animated.View
+                    key={course.id}
+                    entering={FadeInDown.delay(idx * 80).springify()}
+                  >
+                    <FeaturedCourseCard
+                      course={course}
+                      isEnrolled={enrolledSet.has(course.id)}
+                      onEnrollToggle={() => handleEnrollToggle(course)}
+                      colors={colors}
+                      styles={styles}
+                    />
+                  </Animated.View>
+                ))}
+              </ScrollView>
             </View>
           )}
-        </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          {/* All / Filtered Courses */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>
+                {searchQuery ? `Results (${filteredCourses.length})` :
+                 activeLevel !== 'all' || activeCategory !== 'All' ?                t('education.filteredResults', { count: filteredCourses.length }) :
+                 t('education.allCommunityCourses')}
+              </Text>
+              {filteredCourses.length > 0 && (
+                <Text style={styles.sectionCount}>{filteredCourses.length}</Text>
+              )}
+            </View>
+
+            {filteredCourses.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons
+                  name={searchQuery ? 'search-outline' : 'school-outline'}
+                  size={56}
+                  color={colors.textMuted}
+                />
+                <Text style={styles.emptyTitle}>
+                  {searchQuery ? t('education.noCoursesFound') : t('education.noCoursesYet')}
+                </Text>
+                <Text style={styles.emptySubtitle}>
+                  {searchQuery
+                    ? t('education.noCoursesMatch', { query: searchQuery })
+                    : t('education.noCommunityCourses')}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.courseGrid}>
+                {filteredCourses.map((course, idx) => (
+                  <Animated.View
+                    key={course.id}
+                    entering={FadeInDown.delay(idx * 40).springify()}
+                    layout={Layout.springify()}
+                  >
+                    <CommunityCourseCard
+                      course={course}
+                      isEnrolled={enrolledSet.has(course.id)}
+                      onEnrollToggle={() => handleEnrollToggle(course)}
+                      colors={colors}
+                      styles={styles}
+                    />
+                  </Animated.View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -509,16 +511,13 @@ function CommunityCourseCard({
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   headerRow: {

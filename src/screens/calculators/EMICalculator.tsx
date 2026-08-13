@@ -14,6 +14,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
+import AppScreen from '../../components/ui/AppScreen';
 
 const PIE_SIZE = 100;
 
@@ -94,225 +95,225 @@ export default function EMICalculator() {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
-        <Pressable onPress={() => navigation.goBack()} style={({ pressed: _pressed }) => [styles.backBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name="arrow-back" size={20} color={colors.text} />
-        </Pressable>
-        <View style={styles.headerCenter}>
-          <Ionicons name="trending-up" size={20} color={colors.warning} />
-          <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.emi')}</Text>
-        </View>
-        <Pressable onPress={handleClear} style={({ pressed: _pressed }) => [styles.clearBtn, { backgroundColor: colors.bgCard }]}>
-          <Ionicons name="refresh" size={18} color={colors.textMuted} />
-        </Pressable>
-      </View>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+          <AppScreen scroll={false} padded={false}
       >
-        {/* EMI Result */}
-        <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.monthlyEmi')}</Text>
-          <Text style={[styles.emiAmount, { color: colors.text }]}>{formatCurrency(emi)}</Text>
-
-          <View style={[styles.resultRow, { borderTopColor: colors.divider }]}>
-            <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
-              <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
-            </View>
-            <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.interestPayable')}</Text>
-              <Text style={[styles.resultValue, { color: colors.danger }]}>{formatCurrency(totalInterest)}</Text>
-            </View>
-            <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
-            <View style={styles.resultItem}>
-              <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.totalPayment')}</Text>
-              <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(totalPayment)}</Text>
-            </View>
+  {/* Header */}
+        <View style={[styles.header, {backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
+          <Pressable onPress={() => navigation.goBack()} style={({ pressed: _pressed }) => [styles.backBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="arrow-back" size={20} color={colors.text} />
+          </Pressable>
+          <View style={styles.headerCenter}>
+            <Ionicons name="trending-up" size={20} color={colors.warning} />
+            <Text style={[styles.headerTitle, { color: colors.text }]}>{t('calculators.emi')}</Text>
           </View>
+          <Pressable onPress={handleClear} style={({ pressed: _pressed }) => [styles.clearBtn, { backgroundColor: colors.bgCard }]}>
+            <Ionicons name="refresh" size={18} color={colors.textMuted} />
+          </Pressable>
         </View>
 
-        {/* Breakdown Visual */}
-        {totalPayment > 0 && (
-          <View style={[styles.pieCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.breakdown')}</Text>
-            <View style={styles.pieContainer}>
-              {/* Principal vs Interest bar representation */}
-              <View style={styles.breakdownVisual}>
-                <View style={[styles.breakdownCircle, { borderColor: colors.border }]}>
-                  <Text style={[styles.breakdownEmi, { color: colors.text }]}>{formatCurrency(emi)}</Text>
-                  <Text style={[styles.breakdownLabel, { color: colors.textMuted }]}>{t('calculators.perMonth')}</Text>
-                </View>
-                <View style={styles.breakdownBars}>
-                  <View style={styles.breakdownBarRow}>
-                    <View style={[styles.breakdownBarBg, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                      <View style={[styles.breakdownBarFill, { width: `${principalRatio * 100}%`, backgroundColor: colors.accent }]} />
-                    </View>
-                    <Text style={[styles.breakdownBarLabel, { color: colors.textMuted, fontSize: 10 }]}>
-                      {Math.round(principalRatio * 100)}%
-                    </Text>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* EMI Result */}
+          <View style={[styles.resultCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+            <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.monthlyEmi')}</Text>
+            <Text style={[styles.emiAmount, { color: colors.text }]}>{formatCurrency(emi)}</Text>
+
+            <View style={[styles.resultRow, { borderTopColor: colors.divider }]}>
+              <View style={styles.resultItem}>
+                <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.principal')}</Text>
+                <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
+              </View>
+              <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.resultItem}>
+                <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.interestPayable')}</Text>
+                <Text style={[styles.resultValue, { color: colors.danger }]}>{formatCurrency(totalInterest)}</Text>
+              </View>
+              <View style={[styles.resultDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.resultItem}>
+                <Text style={[styles.resultLabel, { color: colors.textMuted }]}>{t('calculators.totalPayment')}</Text>
+                <Text style={[styles.resultValue, { color: colors.text }]}>{formatCurrency(totalPayment)}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Breakdown Visual */}
+          {totalPayment > 0 && (
+            <View style={[styles.pieCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.breakdown')}</Text>
+              <View style={styles.pieContainer}>
+                {/* Principal vs Interest bar representation */}
+                <View style={styles.breakdownVisual}>
+                  <View style={[styles.breakdownCircle, { borderColor: colors.border }]}>
+                    <Text style={[styles.breakdownEmi, { color: colors.text }]}>{formatCurrency(emi)}</Text>
+                    <Text style={[styles.breakdownLabel, { color: colors.textMuted }]}>{t('calculators.perMonth')}</Text>
                   </View>
-                  <View style={styles.breakdownBarRow}>
-                    <View style={[styles.breakdownBarBg, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                      <View style={[styles.breakdownBarFill, { width: `${interestRatio * 100}%`, backgroundColor: colors.danger }]} />
+                  <View style={styles.breakdownBars}>
+                    <View style={styles.breakdownBarRow}>
+                      <View style={[styles.breakdownBarBg, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                        <View style={[styles.breakdownBarFill, { width: `${principalRatio * 100}%`, backgroundColor: colors.accent }]} />
+                      </View>
+                      <Text style={[styles.breakdownBarLabel, { color: colors.textMuted, fontSize: 10 }]}>
+                        {Math.round(principalRatio * 100)}%
+                      </Text>
                     </View>
-                    <Text style={[styles.breakdownBarLabel, { color: colors.textMuted, fontSize: 10 }]}>
-                      {Math.round(interestRatio * 100)}%
-                    </Text>
+                    <View style={styles.breakdownBarRow}>
+                      <View style={[styles.breakdownBarBg, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                        <View style={[styles.breakdownBarFill, { width: `${interestRatio * 100}%`, backgroundColor: colors.danger }]} />
+                      </View>
+                      <Text style={[styles.breakdownBarLabel, { color: colors.textMuted, fontSize: 10 }]}>
+                        {Math.round(interestRatio * 100)}%
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.pieLegend}>
+                  <View style={styles.pieLegendItem}>
+                    <View style={[styles.pieDot, { backgroundColor: colors.accent }]} />
+                    <Text style={[styles.pieLegendText, { color: colors.textSecondary }]}>{t('calculators.principal')}</Text>
+                    <Text style={[styles.pieLegendValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
+                  </View>
+                  <View style={styles.pieLegendItem}>
+                    <View style={[styles.pieDot, { backgroundColor: colors.danger }]} />
+                    <Text style={[styles.pieLegendText, { color: colors.textSecondary }]}>{t('calculators.interest')}</Text>
+                    <Text style={[styles.pieLegendValue, { color: colors.text }]}>{formatCurrency(totalInterest)}</Text>
                   </View>
                 </View>
               </View>
-              <View style={styles.pieLegend}>
-                <View style={styles.pieLegendItem}>
-                  <View style={[styles.pieDot, { backgroundColor: colors.accent }]} />
-                  <Text style={[styles.pieLegendText, { color: colors.textSecondary }]}>{t('calculators.principal')}</Text>
-                  <Text style={[styles.pieLegendValue, { color: colors.text }]}>{formatCurrency(principal)}</Text>
-                </View>
-                <View style={styles.pieLegendItem}>
-                  <View style={[styles.pieDot, { backgroundColor: colors.danger }]} />
-                  <Text style={[styles.pieLegendText, { color: colors.textSecondary }]}>{t('calculators.interest')}</Text>
-                  <Text style={[styles.pieLegendValue, { color: colors.text }]}>{formatCurrency(totalInterest)}</Text>
-                </View>
+              <View style={[styles.tenureInfo, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
+                <Text style={[styles.tenureText, { color: colors.textMuted }]}>
+                  {t('app.months', { count: months })} ({t('app.years', { count: Math.floor(months / 12) })}{months % 12 > 0 ? ` ${t('app.months', { count: months % 12 })}` : ''})
+                </Text>
               </View>
             </View>
-            <View style={[styles.tenureInfo, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
-              <Text style={[styles.tenureText, { color: colors.textMuted }]}>
-                {t('app.months', { count: months })} ({t('app.years', { count: Math.floor(months / 12) })}{months % 12 > 0 ? ` ${t('app.months', { count: months % 12 })}` : ''})
-              </Text>
-            </View>
-          </View>
-        )}
+          )}
 
-        {/* Inputs */}
-        <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.loanDetails')}</Text>
+          {/* Inputs */}
+          <View style={[styles.formCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.loanDetails')}</Text>
 
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.loanAmount')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(loanAmount)]}
-              value={loanAmount}
-              onChangeText={setLoanAmount}
-              keyboardType="numeric"
-              placeholder="e.g. 5000000"
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.presetRow}>
-              {[1000000, 3000000, 5000000, 10000000].map((amt) => (
-                <Pressable
-                  key={amt}
-                  style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: loanAmount === String(amt) ? colors.primary : colors.border }]}
-                  onPress={() => setLoanAmount(String(amt))}
-                >
-                  <Text style={[styles.presetChipText, { color: loanAmount === String(amt) ? colors.primary : colors.textMuted }]}>
-                    {amt >= 10000000 ? `₹${amt/10000000}Cr` : `₹${amt/100000}L`}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.interestRate')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(interestRate)]}
-              value={interestRate}
-              onChangeText={setInterestRate}
-              keyboardType="decimal-pad"
-              placeholder="e.g. 9"
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.presetRow}>
-              {[7, 8.5, 9, 10.5].map((r) => (
-                <Pressable
-                  key={r}
-                  style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: interestRate === String(r) ? colors.primary : colors.border }]}
-                  onPress={() => setInterestRate(String(r))}
-                >
-                  <Text style={[styles.presetChipText, { color: interestRate === String(r) ? colors.primary : colors.textMuted }]}>{r}%</Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.loanTenure')}</Text>
-            <TextInput
-              style={[styles.input, inputStyle(tenureMonths)]}
-              value={tenureMonths}
-              onChangeText={setTenureMonths}
-              keyboardType="numeric"
-              placeholder="e.g. 60"
-              placeholderTextColor={colors.textMuted}
-            />
-            <View style={styles.presetRow}>
-              {[12, 24, 60, 120].map((m) => (
-                <Pressable
-                  key={m}
-                  style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: tenureMonths === String(m) ? colors.primary : colors.border }]}
-                  onPress={() => setTenureMonths(String(m))}
-                >
-                  <Text style={[styles.presetChipText, { color: tenureMonths === String(m) ? colors.primary : colors.textMuted }]}>
-                    {m >= 12 ? `${m / 12}Y` : `${m}M`}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Amortization Schedule */}
-        {yearlySchedule.length > 0 && (
-          <View style={[styles.scheduleCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.yearlyAmortization')}</Text>
-            {yearlySchedule.map((row) => {
-              const totalYearly = row.principalPaid + row.interestPaid;
-              const principalPct = totalYearly > 0 ? (row.principalPaid / totalYearly) * 100 : 0;
-              return (
-                <View key={row.year} style={[styles.scheduleRow, { borderBottomColor: row.year === yearlySchedule.length ? 'transparent' : colors.divider }]}>
-                  <View style={styles.scheduleYearCol}>
-                    <Text style={[styles.scheduleYear, { color: colors.text }]}>Year {row.year}</Text>
-                    <Text style={[styles.scheduleBalance, { color: colors.textMuted }]}>
-                      Bal: {formatCurrency(row.remaining)}
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.loanAmount')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(loanAmount)]}
+                value={loanAmount}
+                onChangeText={setLoanAmount}
+                keyboardType="numeric"
+                placeholder="e.g. 5000000"
+                placeholderTextColor={colors.textMuted}
+              />
+              <View style={styles.presetRow}>
+                {[1000000, 3000000, 5000000, 10000000].map((amt) => (
+                  <Pressable
+                    key={amt}
+                    style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: loanAmount === String(amt) ? colors.primary : colors.border }]}
+                    onPress={() => setLoanAmount(String(amt))}
+                  >
+                    <Text style={[styles.presetChipText, { color: loanAmount === String(amt) ? colors.primary : colors.textMuted }]}>
+                      {amt >= 10000000 ? `₹${amt/10000000}Cr` : `₹${amt/100000}L`}
                     </Text>
-                  </View>
-                  <View style={styles.scheduleAmountCol}>
-                    <View style={[styles.scheduleBar, { backgroundColor: colors.bgCard }]}>
-                      <View style={[styles.scheduleBarFill, { width: `${principalPct}%`, backgroundColor: colors.accent, opacity: 0.8 }]} />
-                      <View style={[styles.scheduleBarInterest, { width: `${100 - principalPct}%`, backgroundColor: colors.danger, opacity: 0.6 }]} />
-                    </View>
-                    <View style={styles.scheduleValues}>
-                      <Text style={[styles.schedulePrincipalText, { color: colors.accent }]}>P: {formatCurrency(row.principalPaid)}</Text>
-                      <Text style={[styles.scheduleInterestText, { color: colors.danger }]}>I: {formatCurrency(row.interestPaid)}</Text>
-                    </View>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        )}
+                  </Pressable>
+                ))}
+              </View>
+            </View>
 
-        {/* Info */}
-        <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="information-circle-outline" size={16} color={colors.warning} style={{ marginRight: 8 }} />
-          <Text style={[styles.infoText, { color: colors.textMuted }]}>
-            {t('calculators.emiInfo')}
-          </Text>
-        </View>
-      </ScrollView>
-    </View>
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.interestRate')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(interestRate)]}
+                value={interestRate}
+                onChangeText={setInterestRate}
+                keyboardType="decimal-pad"
+                placeholder="e.g. 9"
+                placeholderTextColor={colors.textMuted}
+              />
+              <View style={styles.presetRow}>
+                {[7, 8.5, 9, 10.5].map((r) => (
+                  <Pressable
+                    key={r}
+                    style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: interestRate === String(r) ? colors.primary : colors.border }]}
+                    onPress={() => setInterestRate(String(r))}
+                  >
+                    <Text style={[styles.presetChipText, { color: interestRate === String(r) ? colors.primary : colors.textMuted }]}>{r}%</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{t('calculators.loanTenure')}</Text>
+              <TextInput
+                style={[styles.input, inputStyle(tenureMonths)]}
+                value={tenureMonths}
+                onChangeText={setTenureMonths}
+                keyboardType="numeric"
+                placeholder="e.g. 60"
+                placeholderTextColor={colors.textMuted}
+              />
+              <View style={styles.presetRow}>
+                {[12, 24, 60, 120].map((m) => (
+                  <Pressable
+                    key={m}
+                    style={[styles.presetChip, { backgroundColor: colors.bgCard, borderColor: tenureMonths === String(m) ? colors.primary : colors.border }]}
+                    onPress={() => setTenureMonths(String(m))}
+                  >
+                    <Text style={[styles.presetChipText, { color: tenureMonths === String(m) ? colors.primary : colors.textMuted }]}>
+                      {m >= 12 ? `${m / 12}Y` : `${m}M`}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Amortization Schedule */}
+          {yearlySchedule.length > 0 && (
+            <View style={[styles.scheduleCard, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('calculators.yearlyAmortization')}</Text>
+              {yearlySchedule.map((row) => {
+                const totalYearly = row.principalPaid + row.interestPaid;
+                const principalPct = totalYearly > 0 ? (row.principalPaid / totalYearly) * 100 : 0;
+                return (
+                  <View key={row.year} style={[styles.scheduleRow, { borderBottomColor: row.year === yearlySchedule.length ? 'transparent' : colors.divider }]}>
+                    <View style={styles.scheduleYearCol}>
+                      <Text style={[styles.scheduleYear, { color: colors.text }]}>Year {row.year}</Text>
+                      <Text style={[styles.scheduleBalance, { color: colors.textMuted }]}>
+                        Bal: {formatCurrency(row.remaining)}
+                      </Text>
+                    </View>
+                    <View style={styles.scheduleAmountCol}>
+                      <View style={[styles.scheduleBar, { backgroundColor: colors.bgCard }]}>
+                        <View style={[styles.scheduleBarFill, { width: `${principalPct}%`, backgroundColor: colors.accent, opacity: 0.8 }]} />
+                        <View style={[styles.scheduleBarInterest, { width: `${100 - principalPct}%`, backgroundColor: colors.danger, opacity: 0.6 }]} />
+                      </View>
+                      <View style={styles.scheduleValues}>
+                        <Text style={[styles.schedulePrincipalText, { color: colors.accent }]}>P: {formatCurrency(row.principalPaid)}</Text>
+                        <Text style={[styles.scheduleInterestText, { color: colors.danger }]}>I: {formatCurrency(row.interestPaid)}</Text>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
+          {/* Info */}
+          <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="information-circle-outline" size={16} color={colors.warning} style={{ marginRight: 8 }} />
+            <Text style={[styles.infoText, { color: colors.textMuted }]}>
+              {t('calculators.emiInfo')}
+            </Text>
+          </View>
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

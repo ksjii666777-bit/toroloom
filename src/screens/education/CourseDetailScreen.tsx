@@ -13,6 +13,7 @@ import Badge from '../../components/ui/Badge';
 import { educationApi } from '../../services/api/education';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const levelGradients: Record<string, readonly [string, string]> = {
@@ -58,9 +59,12 @@ export default function CourseDetailScreen({ route, navigation }: NativeStackScr
 
   if (!course) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }}>{t('education.courseNotFound')}</Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Text style={{ ...FONTS.bold, fontSize: FONTS.size.xl, color: colors.text }}>{t('education.courseNotFound')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -82,178 +86,175 @@ export default function CourseDetailScreen({ route, navigation }: NativeStackScr
   const certificate = certificates.find(c => c.courseId === courseId);
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Back Button */}
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-        </View>
-
-        {/* Course Hero */}
-        <LinearGradient colors={levelGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-          <Text style={styles.heroIcon}>{course.thumbnail}</Text>
-          <Text style={styles.heroTitle}>{course.title}</Text>
-          <Text style={styles.heroDesc}>{course.description}</Text>
-          <View style={styles.heroMeta}>
-            <Badge label={course.level} variant={course.level === 'beginner' ? 'success' : course.level === 'intermediate' ? 'warning' : 'danger'} size="medium" />
-            <Badge label={course.category} variant="info" size="medium" />
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Back Button */}
+          <View style={styles.header}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
           </View>
-        </LinearGradient>
 
-        {/* Progress Section */}
-        <Card style={styles.progressCard}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.progressTitle}>{t('education.courseProgress')}</Text>
-            <Text style={styles.progressPercent}>{progress}%</Text>
-          </View>
-          <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: `${progress}%`, backgroundColor: colors.primary }]} />
-          </View>
-          <View style={styles.progressStats}>
-            <View style={styles.progressStat}>
-              <Text style={styles.progressStatValue}>{completedCount}</Text>
-              <Text style={styles.progressStatLabel}>{t('education.completed')}</Text>
+          {/* Course Hero */}
+          <LinearGradient colors={levelGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+            <Text style={styles.heroIcon}>{course.thumbnail}</Text>
+            <Text style={styles.heroTitle}>{course.title}</Text>
+            <Text style={styles.heroDesc}>{course.description}</Text>
+            <View style={styles.heroMeta}>
+              <Badge label={course.level} variant={course.level === 'beginner' ? 'success' : course.level === 'intermediate' ? 'warning' : 'danger'} size="medium" />
+              <Badge label={course.category} variant="info" size="medium" />
             </View>
-            <View style={styles.progressStatDivider} />
-            <View style={styles.progressStat}>
-              <Text style={styles.progressStatValue}>{course.lessons - completedCount}</Text>
-              <Text style={styles.progressStatLabel}>{t('education.remainingCount')}</Text>
+          </LinearGradient>
+
+          {/* Progress Section */}
+          <Card style={styles.progressCard}>
+            <View style={styles.progressHeader}>
+              <Text style={styles.progressTitle}>{t('education.courseProgress')}</Text>
+              <Text style={styles.progressPercent}>{progress}%</Text>
             </View>
-            <View style={styles.progressStatDivider} />
-            <View style={styles.progressStat}>
-              <Text style={styles.progressStatValue}>{course.duration}</Text>
-              <Text style={styles.progressStatLabel}>{t('education.duration')}</Text>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${progress}%`, backgroundColor: colors.primary }]} />
             </View>
-          </View>
-        </Card>
-
-        {/* Course Info */}
-        <Card title={t('education.aboutThisCourse')} style={styles.infoCard}>
-          <Text style={styles.infoText}>{course.description}</Text>
-          <View style={styles.infoStats}>
-            <View style={styles.infoStat}>
-              <Ionicons name="people-outline" size={16} color={colors.textMuted} />
-              <Text style={styles.infoStatText}>{course.enrolledCount.toLocaleString()} {t('education.enrolled')}</Text>
+            <View style={styles.progressStats}>
+              <View style={styles.progressStat}>
+                <Text style={styles.progressStatValue}>{completedCount}</Text>
+                <Text style={styles.progressStatLabel}>{t('education.completed')}</Text>
+              </View>
+              <View style={styles.progressStatDivider} />
+              <View style={styles.progressStat}>
+                <Text style={styles.progressStatValue}>{course.lessons - completedCount}</Text>
+                <Text style={styles.progressStatLabel}>{t('education.remainingCount')}</Text>
+              </View>
+              <View style={styles.progressStatDivider} />
+              <View style={styles.progressStat}>
+                <Text style={styles.progressStatValue}>{course.duration}</Text>
+                <Text style={styles.progressStatLabel}>{t('education.duration')}</Text>
+              </View>
             </View>
-            <View style={styles.infoStat}>
-              <Ionicons name="star" size={16} color="#FFC107" />
-              <Text style={styles.infoStatText}>{course.rating} {t('education.rating')}</Text>
+          </Card>
+
+          {/* Course Info */}
+          <Card title={t('education.aboutThisCourse')} style={styles.infoCard}>
+            <Text style={styles.infoText}>{course.description}</Text>
+            <View style={styles.infoStats}>
+              <View style={styles.infoStat}>
+                <Ionicons name="people-outline" size={16} color={colors.textMuted} />
+                <Text style={styles.infoStatText}>{course.enrolledCount.toLocaleString()} {t('education.enrolled')}</Text>
+              </View>
+              <View style={styles.infoStat}>
+                <Ionicons name="star" size={16} color="#FFC107" />
+                <Text style={styles.infoStatText}>{course.rating} {t('education.rating')}</Text>
+              </View>
             </View>
-          </View>
-        </Card>
+          </Card>
 
-        {/* Lessons List */}
-        <View style={styles.lessonsSection}>
-          <Text style={styles.lessonsSectionTitle}>
-            {t('education.lessonsProgress', { completed: completedCount, total: course.lessons })}
-          </Text>
+          {/* Lessons List */}
+          <View style={styles.lessonsSection}>
+            <Text style={styles.lessonsSectionTitle}>
+              {t('education.lessonsProgress', { completed: completedCount, total: course.lessons })}
+            </Text>
 
-          {courseLessons.map((lesson: any, index) => {
-            const isCompleted = lessonProgress[lesson.id] || lesson.completed;
-            const isNext = nextIncomplete?.id === lesson.id;
+            {courseLessons.map((lesson: any, index) => {
+              const isCompleted = lessonProgress[lesson.id] || lesson.completed;
+              const isNext = nextIncomplete?.id === lesson.id;
 
-            return (
-              <Pressable
-                key={lesson.id}
-                style={({pressed}) => [[styles.lessonCard, isNext && styles.lessonCardNext], {opacity: pressed ? 0.7 : 1}]}
-                onPress={() => handleLessonPress(lesson.id)}
-              >
-                <View style={styles.lessonRow}>
-                  {/* Status indicator */}
-                  <View style={[
-                    styles.lessonStatus,
-                    isCompleted && styles.lessonStatusDone,
-                    isNext && !isCompleted && styles.lessonStatusNext,
-                  ]}>
-                    {isCompleted ? (
-                      <Ionicons name="checkmark-circle" size={22} color="#00C853" />
-                    ) : (
-                      <Text style={[
-                        styles.lessonNumber,
-                        isNext && { color: colors.primary },
-                      ]}>
-                        {String(index + 1).padStart(2, '0')}
-                      </Text>
-                    )}
-                  </View>
-
-                  <View style={styles.lessonInfo}>
-                    <Text style={[styles.lessonTitle, isCompleted && styles.lessonTitleDone]}>{lesson.title}</Text>
-                    <View style={styles.lessonMeta}>
-                      <Ionicons name="time-outline" size={12} color={colors.textMuted} />
-                      <Text style={styles.lessonDuration}>{lesson.duration}</Text>
-                      {isCompleted && (
-                        <View style={styles.completedTag}>
-                          <Ionicons name="checkmark" size={10} color="#00C853" />
-                          <Text style={styles.completedText}>{t('education.lessonDone')}</Text>
-                        </View>
-                      )}
-                      {lesson.quiz && (
-                        <View style={styles.quizTag}>
-                          <Ionicons name="help-circle" size={10} color="#6C63FF" />
-                          <Text style={styles.quizTagText}>{t('education.lessonQuiz')}</Text>
-                        </View>
+              return (
+                <Pressable
+                  key={lesson.id}
+                  style={({pressed}) => [[styles.lessonCard, isNext && styles.lessonCardNext], {opacity: pressed ? 0.7 : 1}]}
+                  onPress={() => handleLessonPress(lesson.id)}
+                >
+                  <View style={styles.lessonRow}>
+                    {/* Status indicator */}
+                    <View style={[
+                      styles.lessonStatus,
+                      isCompleted && styles.lessonStatusDone,
+                      isNext && !isCompleted && styles.lessonStatusNext,
+                    ]}>
+                      {isCompleted ? (
+                        <Ionicons name="checkmark-circle" size={22} color="#00C853" />
+                      ) : (
+                        <Text style={[
+                          styles.lessonNumber,
+                          isNext && { color: colors.primary },
+                        ]}>
+                          {String(index + 1).padStart(2, '0')}
+                        </Text>
                       )}
                     </View>
+
+                    <View style={styles.lessonInfo}>
+                      <Text style={[styles.lessonTitle, isCompleted && styles.lessonTitleDone]}>{lesson.title}</Text>
+                      <View style={styles.lessonMeta}>
+                        <Ionicons name="time-outline" size={12} color={colors.textMuted} />
+                        <Text style={styles.lessonDuration}>{lesson.duration}</Text>
+                        {isCompleted && (
+                          <View style={styles.completedTag}>
+                            <Ionicons name="checkmark" size={10} color="#00C853" />
+                            <Text style={styles.completedText}>{t('education.lessonDone')}</Text>
+                          </View>
+                        )}
+                        {lesson.quiz && (
+                          <View style={styles.quizTag}>
+                            <Ionicons name="help-circle" size={10} color="#6C63FF" />
+                            <Text style={styles.quizTagText}>{t('education.lessonQuiz')}</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+
+                    <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
                   </View>
 
-                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-                </View>
+                  {/* "Resume" badge on next incomplete lesson */}
+                  {isNext && !isCompleted && (
+                    <View style={styles.nextBadge}>
+                      <Text style={styles.nextBadgeText}>{t('education.nextLesson')}</Text>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
 
-                {/* "Resume" badge on next incomplete lesson */}
-                {isNext && !isCompleted && (
-                  <View style={styles.nextBadge}>
-                    <Text style={styles.nextBadgeText}>{t('education.nextLesson')}</Text>
-                  </View>
-                )}
-              </Pressable>
-            );
-          })}
-        </View>
+          {/* Continue / Next Button */}
+          {nextIncomplete && (
+            <Pressable
+              style={styles.continueBtn}
+              onPress={() => handleLessonPress(nextIncomplete.id)}
+            >
+              <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
+                <Ionicons name="play" size={20} color={colors.white} />
+                <Text style={styles.continueText}>
+                  {completedCount === 0 ? t('education.startCourse') : t('education.continueLearning')}
+                </Text>
+              </LinearGradient>
+            </Pressable>
+          )}
 
-        {/* Continue / Next Button */}
-        {nextIncomplete && (
-          <Pressable
-            style={styles.continueBtn}
-            onPress={() => handleLessonPress(nextIncomplete.id)}
-          >
-            <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
-              <Ionicons name="play" size={20} color={colors.white} />
-              <Text style={styles.continueText}>
-                {completedCount === 0 ? t('education.startCourse') : t('education.continueLearning')}
-              </Text>
-            </LinearGradient>
-          </Pressable>
-        )}
+          {/* Certificate Button — shown when all lessons complete */}
+          {allLessonsComplete && (
+            <Pressable
+              style={[styles.continueBtn, { marginTop: SPACING.sm }]}
+              onPress={() => navigation.navigate('Certificate', { courseId })}
+            >
+              <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
+                <Ionicons name={certificate ? 'ribbon' : 'ribbon-outline'} size={20} color={colors.white} />
+                <Text style={styles.continueText}>
+                  {certificate ? t('education.viewCertificate') : t('education.getCertificate')}
+                </Text>
+              </LinearGradient>
+            </Pressable>
+          )}
 
-        {/* Certificate Button — shown when all lessons complete */}
-        {allLessonsComplete && (
-          <Pressable
-            style={[styles.continueBtn, { marginTop: SPACING.sm }]}
-            onPress={() => navigation.navigate('Certificate', { courseId })}
-          >
-            <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueGradient}>
-              <Ionicons name={certificate ? 'ribbon' : 'ribbon-outline'} size={20} color={colors.white} />
-              <Text style={styles.continueText}>
-                {certificate ? t('education.viewCertificate') : t('education.getCertificate')}
-              </Text>
-            </LinearGradient>
-          </Pressable>
-        )}
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 20,
     paddingHorizontal: SPACING.xl,

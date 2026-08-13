@@ -44,6 +44,7 @@ import {
 } from '../../services/smartAlertEngine';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { useT } from '../../hooks/useT';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -489,399 +490,400 @@ export default function SmartPriceAlertsScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
-        <View style={styles.headerRow}>
-          <Text style={styles.headerTitle}>{t('smartAlerts.title')}</Text>
-          <View style={styles.headerActions}>
-            <Pressable onPress={() => setShowTemplatesModal(true)} style={styles.headerBtn}>
-              <Ionicons name="copy-outline" size={22} color={colors.primary} />
-            </Pressable>
-            <Pressable onPress={() => setShowHistoryModal(true)} style={styles.headerBtn}>
-              <View style={styles.historyBtnWrap}>
-                <Ionicons name="time-outline" size={22} color={colors.primary} />
-                {triggerHistory.length > 0 && (
-                  <View style={styles.historyBadge}>
-                    <Text style={styles.historyBadgeText}>{Math.min(triggerHistory.length, 9)}</Text>
-                  </View>
-                )}
-              </View>
-            </Pressable>
-            <Pressable onPress={() => openCreateAlert()} style={styles.addBtn}>
-              <Ionicons name="add" size={22} color="#fff" />
-            </Pressable>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
+          <View style={styles.headerRow}>
+            <Text style={styles.headerTitle}>{t('smartAlerts.title')}</Text>
+            <View style={styles.headerActions}>
+              <Pressable onPress={() => setShowTemplatesModal(true)} style={styles.headerBtn}>
+                <Ionicons name="copy-outline" size={22} color={colors.primary} />
+              </Pressable>
+              <Pressable onPress={() => setShowHistoryModal(true)} style={styles.headerBtn}>
+                <View style={styles.historyBtnWrap}>
+                  <Ionicons name="time-outline" size={22} color={colors.primary} />
+                  {triggerHistory.length > 0 && (
+                    <View style={styles.historyBadge}>
+                      <Text style={styles.historyBadgeText}>{Math.min(triggerHistory.length, 9)}</Text>
+                    </View>
+                  )}
+                </View>
+              </Pressable>
+              <Pressable onPress={() => openCreateAlert()} style={styles.addBtn}>
+                <Ionicons name="add" size={22} color="#fff" />
+              </Pressable>
+            </View>
           </View>
-        </View>
-        <Text style={styles.headerSub}>
-          {t('smartAlerts.activeAlerts', { count: enabledAlerts.length })} · {t('smartAlerts.pausedAlerts', { count: disabledAlerts.length })}{alertBadgeCount > 0 && ` · ${t('smartAlerts.newTriggers', { count: alertBadgeCount })}`}
-        </Text>
-      </LinearGradient>
+          <Text style={styles.headerSub}>
+            {t('smartAlerts.activeAlerts', { count: enabledAlerts.length })} · {t('smartAlerts.pausedAlerts', { count: disabledAlerts.length })}{alertBadgeCount > 0 && ` · ${t('smartAlerts.newTriggers', { count: alertBadgeCount })}`}
+          </Text>
+        </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Active Alerts */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('smartAlerts.sectionActive')}</Text>
-          {enabledAlerts.length > 0 ? (
-            enabledAlerts.map(renderAlertCard)
-          ) : (
-            <View style={styles.emptyCard}>
-              <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
-              <Text style={styles.emptyCardTitle}>{t('smartAlerts.noAlerts')}</Text>
-              <Text style={styles.emptyCardSub}>{t('smartAlerts.noAlertsSub')}</Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Active Alerts */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('smartAlerts.sectionActive')}</Text>
+            {enabledAlerts.length > 0 ? (
+              enabledAlerts.map(renderAlertCard)
+            ) : (
+              <View style={styles.emptyCard}>
+                <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
+                <Text style={styles.emptyCardTitle}>{t('smartAlerts.noAlerts')}</Text>
+                <Text style={styles.emptyCardSub}>{t('smartAlerts.noAlertsSub')}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Paused Alerts */}
+          {disabledAlerts.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('smartAlerts.sectionPaused', { count: disabledAlerts.length })}</Text>
+              {disabledAlerts.map(renderAlertCard)}
             </View>
           )}
-        </View>
 
-        {/* Paused Alerts */}
-        {disabledAlerts.length > 0 && (
+          {/* Quick-Add Condition Kinds */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('smartAlerts.sectionPaused', { count: disabledAlerts.length })}</Text>
-            {disabledAlerts.map(renderAlertCard)}
-          </View>
-        )}
+            <Text style={styles.sectionTitle}>{t('smartAlerts.quickCreate')}</Text>
+            <Text style={styles.sectionSub}>{t('smartAlerts.quickCreateSub')}</Text>
 
-        {/* Quick-Add Condition Kinds */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('smartAlerts.quickCreate')}</Text>
-          <Text style={styles.sectionSub}>{t('smartAlerts.quickCreateSub')}</Text>
-
-          <View style={styles.quickAddGrid}>
-            {CONDITION_KINDS.map((info) => {
-              const _exists = formConditions.some(c => c.kind === info.kind);
-              return (
-                <Pressable
-                  key={info.kind}
-                  style={({ pressed }) => [
-                    styles.quickAddCard,
-                    pressed && { opacity: 0.7 },
-                  ]}
-                  onPress={() => {
-                    // Create an alert with just this condition
-                    const cond: SmartAlertCondition = {
-                      id: `c_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-                      kind: info.kind,
-                      params: { ...info.defaultParams },
-                    };
-                    addAlert({
-                      name: `${info.label} — ${info.defaultParams.threshold || info.defaultParams.multiplier || info.defaultParams.period || ''}`,
-                      symbol: 'RELIANCE',
-                      stockName: 'Reliance Industries',
-                      conditions: [cond],
-                      logic: 'AND',
-                      cooldownMinutes: 30,
-                      enabled: true,
-                      badge: true,
-                      notificationType: 'local',
-                    });
-                  }}
-                >
-                  <View style={[styles.quickAddIcon, { backgroundColor: (info.color || colors.primary) + '20' }]}>
-                    <Text style={{ fontSize: 18 }}>{info.icon}</Text>
-                  </View>
-                  <Text style={styles.quickAddLabel} numberOfLines={2}>{info.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Info Card */}
-        <View style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Ionicons name="information-circle" size={20} color="#6C63FF" />
-            <Text style={styles.infoText}>
-              {t('smartAlerts.infoText')}
-            </Text>
-          </View>
-          <View style={styles.infoDivider} />
-          <View style={styles.infoRow}>
-            <Ionicons name="flask-outline" size={20} color="#FFC107" />
-            <Text style={styles.infoText}>
-              {t('smartAlerts.infoLongPress')}
-            </Text>
-          </View>
-        </View>
-
-        <View style={{ height: 80 }} />
-      </ScrollView>
-
-      {/* ── Create/Edit Modal ─────────────────────────────────────── */}
-      <Modal visible={showCreateModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, { paddingTop: insets.top + SPACING.md }]}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <Pressable onPress={() => setShowCreateModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </Pressable>
-              <Text style={styles.modalTitle}>{editingAlertId ? t('smartAlerts.editAlert') : t('smartAlerts.newAlert')}</Text>
-              <Pressable onPress={handleSave}>
-                <Text style={styles.saveBtn}>{t('smartAlerts.save')}</Text>
-              </Pressable>
+            <View style={styles.quickAddGrid}>
+              {CONDITION_KINDS.map((info) => {
+                const _exists = formConditions.some(c => c.kind === info.kind);
+                return (
+                  <Pressable
+                    key={info.kind}
+                    style={({ pressed }) => [
+                      styles.quickAddCard,
+                      pressed && { opacity: 0.7 },
+                    ]}
+                    onPress={() => {
+                      // Create an alert with just this condition
+                      const cond: SmartAlertCondition = {
+                        id: `c_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                        kind: info.kind,
+                        params: { ...info.defaultParams },
+                      };
+                      addAlert({
+                        name: `${info.label} — ${info.defaultParams.threshold || info.defaultParams.multiplier || info.defaultParams.period || ''}`,
+                        symbol: 'RELIANCE',
+                        stockName: 'Reliance Industries',
+                        conditions: [cond],
+                        logic: 'AND',
+                        cooldownMinutes: 30,
+                        enabled: true,
+                        badge: true,
+                        notificationType: 'local',
+                      });
+                    }}
+                  >
+                    <View style={[styles.quickAddIcon, { backgroundColor: (info.color || colors.primary) + '20' }]}>
+                      <Text style={{ fontSize: 18 }}>{info.icon}</Text>
+                    </View>
+                    <Text style={styles.quickAddLabel} numberOfLines={2}>{info.label}</Text>
+                  </Pressable>
+                );
+              })}
             </View>
+          </View>
 
-            {formError ? (
-              <View style={styles.errorBar}>
-                <Ionicons name="alert-circle" size={16} color="#FF1744" />
-                <Text style={styles.errorText}>{formError}</Text>
+          {/* Info Card */}
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Ionicons name="information-circle" size={20} color="#6C63FF" />
+              <Text style={styles.infoText}>
+                {t('smartAlerts.infoText')}
+              </Text>
+            </View>
+            <View style={styles.infoDivider} />
+            <View style={styles.infoRow}>
+              <Ionicons name="flask-outline" size={20} color="#FFC107" />
+              <Text style={styles.infoText}>
+                {t('smartAlerts.infoLongPress')}
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ height: 80 }} />
+        </ScrollView>
+
+        {/* ── Create/Edit Modal ─────────────────────────────────────── */}
+        <Modal visible={showCreateModal} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContainer, { paddingTop: insets.top + SPACING.md }]}>
+              {/* Modal Header */}
+              <View style={styles.modalHeader}>
+                <Pressable onPress={() => setShowCreateModal(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </Pressable>
+                <Text style={styles.modalTitle}>{editingAlertId ? t('smartAlerts.editAlert') : t('smartAlerts.newAlert')}</Text>
+                <Pressable onPress={handleSave}>
+                  <Text style={styles.saveBtn}>{t('smartAlerts.save')}</Text>
+                </Pressable>
               </View>
-            ) : null}
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.formContent}>
-              {/* Name */}
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>{t('smartAlerts.alertName')}</Text>
-                <TextInput
-                  style={[styles.formInput, { color: colors.text, borderColor: colors.border }]}
-                  value={formName}
-                  onChangeText={setFormName}
-                  placeholder={t('smartAlerts.alertNamePlaceholder')}
-                  placeholderTextColor={colors.textMuted}
-                />
-              </View>
+              {formError ? (
+                <View style={styles.errorBar}>
+                  <Ionicons name="alert-circle" size={16} color="#FF1744" />
+                  <Text style={styles.errorText}>{formError}</Text>
+                </View>
+              ) : null}
 
-              {/* Symbol & Stock Name */}
-              <View style={styles.formRow}>
-                <View style={[styles.formGroup, { flex: 1 }]}>
-                  <Text style={styles.formLabel}>{t('smartAlerts.symbol')}</Text>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.formContent}>
+                {/* Name */}
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>{t('smartAlerts.alertName')}</Text>
                   <TextInput
                     style={[styles.formInput, { color: colors.text, borderColor: colors.border }]}
-                    value={formSymbol}
-                    onChangeText={setFormSymbol}
-                    placeholder={t('smartAlerts.symbolPlaceholder')}
-                    placeholderTextColor={colors.textMuted}
-                    autoCapitalize="characters"
-                  />
-                </View>
-                <View style={[styles.formGroup, { flex: 2, marginLeft: SPACING.sm }]}>
-                  <Text style={styles.formLabel}>{t('smartAlerts.stockName')}</Text>
-                  <TextInput
-                    style={[styles.formInput, { color: colors.text, borderColor: colors.border }]}
-                    value={formStockName}
-                    onChangeText={setFormStockName}
-                    placeholder={t('smartAlerts.stockNamePlaceholder')}
+                    value={formName}
+                    onChangeText={setFormName}
+                    placeholder={t('smartAlerts.alertNamePlaceholder')}
                     placeholderTextColor={colors.textMuted}
                   />
                 </View>
-              </View>
 
-              {/* Logic & Cooldown */}
-              <View style={styles.formRow}>
-                <View style={[styles.formGroup, { flex: 1 }]}>
-                  <Text style={styles.formLabel}>{t('smartAlerts.conditionLogic')}</Text>
-                  <View style={styles.logicToggle}>
-                    <Pressable
-                      style={[styles.logicBtn, formLogic === 'AND' && styles.logicBtnActive]}
-                      onPress={() => setFormLogic('AND')}
-                    >
-                      <Text style={[styles.logicBtnText, formLogic === 'AND' && styles.logicBtnTextActive]}>AND</Text>
-                    </Pressable>
-                    <Pressable
-                      style={[styles.logicBtn, formLogic === 'OR' && styles.logicBtnActive]}
-                      onPress={() => setFormLogic('OR')}
-                    >
-                      <Text style={[styles.logicBtnText, formLogic === 'OR' && styles.logicBtnTextActive]}>OR</Text>
-                    </Pressable>
+                {/* Symbol & Stock Name */}
+                <View style={styles.formRow}>
+                  <View style={[styles.formGroup, { flex: 1 }]}>
+                    <Text style={styles.formLabel}>{t('smartAlerts.symbol')}</Text>
+                    <TextInput
+                      style={[styles.formInput, { color: colors.text, borderColor: colors.border }]}
+                      value={formSymbol}
+                      onChangeText={setFormSymbol}
+                      placeholder={t('smartAlerts.symbolPlaceholder')}
+                      placeholderTextColor={colors.textMuted}
+                      autoCapitalize="characters"
+                    />
                   </View>
-                </View>
-                <View style={[styles.formGroup, { flex: 1, marginLeft: SPACING.sm }]}>
-                  <Text style={styles.formLabel}>{t('smartAlerts.cooldownMin')}</Text>
-                  <View style={styles.cooldownRow}>
-                    <Pressable
-                      onPress={() => setFormCooldown(p => Math.max(5, p - 5))}
-                      style={styles.cooldownBtn}
-                    >
-                      <Ionicons name="remove" size={16} color={colors.primary} />
-                    </Pressable>
-                    <Text style={styles.cooldownValue}>{formCooldown}</Text>
-                    <Pressable
-                      onPress={() => setFormCooldown(p => Math.min(1440, p + 5))}
-                      style={styles.cooldownBtn}
-                    >
-                      <Ionicons name="add" size={16} color={colors.primary} />
-                    </Pressable>
-                  </View>
-                </View>
-              </View>
-
-              {/* Badge toggle */}
-              <View style={styles.formRow}>
-                <View style={[styles.formGroup, { flex: 1 }]}>
-                  <View style={styles.switchRow}>
-                    <Text style={styles.formLabel}>{t('smartAlerts.badgeCount')}</Text>
-                    <Switch
-                      value={formBadge}
-                      onValueChange={setFormBadge}
-                      trackColor={{ false: colors.border, true: colors.primary + '60' }}
-                      thumbColor={formBadge ? colors.primary : colors.textMuted}
+                  <View style={[styles.formGroup, { flex: 2, marginLeft: SPACING.sm }]}>
+                    <Text style={styles.formLabel}>{t('smartAlerts.stockName')}</Text>
+                    <TextInput
+                      style={[styles.formInput, { color: colors.text, borderColor: colors.border }]}
+                      value={formStockName}
+                      onChangeText={setFormStockName}
+                      placeholder={t('smartAlerts.stockNamePlaceholder')}
+                      placeholderTextColor={colors.textMuted}
                     />
                   </View>
                 </View>
-              </View>
 
-              {/* ── Conditions Section ───────────────────────── */}
-              <View style={styles.formGroup}>
-                <View style={styles.conditionsHeader}>
-                  <Text style={styles.formLabel}>{t('smartAlerts.conditions', { count: formConditions.length })}</Text>
-                  <Pressable onPress={() => setShowConditionModal(true)} style={styles.addConditionBtn}>
-                    <Ionicons name="add-circle" size={20} color={colors.primary} />
-                    <Text style={styles.addConditionText}>{t('smartAlerts.addCondition')}</Text>
-                  </Pressable>
-                </View>
-
-                {formConditions.length === 0 ? (
-                  <View style={styles.noConditions}>
-                    <Text style={styles.noConditionsText}>
-                      {t('smartAlerts.noConditions')}
-                    </Text>
-                  </View>
-                ) : (
-                  formConditions.map((c, i) => renderFormCondition(c, i))
-                )}
-              </View>
-
-              {/* Test button */}
-              <Pressable
-                style={styles.testBtn}
-                onPress={() => {
-                  if (formConditions.length === 0) return;
-                  const mockAlert: SmartAlert = {
-                    id: 'test',
-                    name: formName || 'Test',
-                    symbol: formSymbol || 'RELIANCE',
-                    stockName: formStockName || 'Reliance',
-                    conditions: formConditions,
-                    logic: formLogic,
-                    cooldownMinutes: formCooldown,
-                    enabled: true,
-                    triggered: false,
-                    lastTriggeredAt: null,
-                    createdAt: new Date().toISOString(),
-                    notificationType: 'local',
-                    badge: true,
-                  };
-                  handleTestAlert(mockAlert);
-                }}
-              >
-                <Ionicons name="flask-outline" size={18} color={colors.primary} />
-                <Text style={styles.testBtnText}>{t('smartAlerts.testAlert')}</Text>
-              </Pressable>
-
-              <View style={{ height: 40 }} />
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* ── Condition Picker Modal ─────────────────────────────── */}
-      <Modal visible={showConditionModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, { paddingTop: insets.top + SPACING.md }]}>
-            <View style={styles.modalHeader}>
-              <Pressable onPress={() => setShowConditionModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </Pressable>
-              <Text style={styles.modalTitle}>{t('smartAlerts.addConditionTitle')}</Text>
-              <View style={{ width: 24 }} />
-            </View>
-
-            {/* Category tabs */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryTabs}>
-              {CONDITION_CATEGORIES.map(cat => (
-                <Pressable
-                  key={cat.key}
-                  style={[styles.categoryTab, selectedCategory === cat.key && styles.categoryTabActive]}
-                  onPress={() => setSelectedCategory(cat.key)}
-                >
-                  <Text style={[styles.categoryTabText, selectedCategory === cat.key && styles.categoryTabTextActive]}>
-                    {cat.icon} {t(`smartAlerts.cat${cat.key}`)}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-
-            <ScrollView contentContainerStyle={styles.conditionPickerList}>
-              {CONDITION_KINDS
-                .filter(c => c.category === selectedCategory)
-                .map(info => {
-                  const alreadyAdded = formConditions.some(c => c.kind === info.kind);
-                  return (
-                    <Pressable
-                      key={info.kind}
-                      style={({ pressed }) => [
-                        styles.conditionPickerItem,
-                        pressed && { opacity: 0.7 },
-                        alreadyAdded && styles.conditionPickerItemAdded,
-                      ]}
-                      onPress={() => openAddCondition(info.kind)}
-                    >
-                      <View style={[styles.conditionPickerIcon, { backgroundColor: (info.color || colors.primary) + '20' }]}>
-                        <Text style={{ fontSize: 22 }}>{info.icon}</Text>
-                      </View>
-                      <View style={styles.conditionPickerInfo}>
-                        <Text style={styles.conditionPickerLabel}>{info.label}</Text>
-                        <Text style={styles.conditionPickerDesc}>
-                          {describeConditionParams(info)}
-                        </Text>
-                      </View>
-                      {alreadyAdded && (
-                        <Ionicons name="checkmark-circle" size={20} color={colors.marketUp} />
-                      )}
-                    </Pressable>
-                  );
-                })}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* ── Templates Modal ────────────────────────────────────── */}
-      <Modal visible={showTemplatesModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, { paddingTop: insets.top + SPACING.md }]}>
-            <View style={styles.modalHeader}>
-              <Pressable onPress={() => setShowTemplatesModal(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </Pressable>
-              <Text style={styles.modalTitle}>{t('smartAlerts.alertTemplates')}</Text>
-              <View style={{ width: 24 }} />
-            </View>
-
-            <ScrollView contentContainerStyle={styles.templateList}>
-              {SMART_ALERT_TEMPLATES.map((template, i) => (
-                <Pressable
-                  key={i}
-                  style={({ pressed }) => [
-                    styles.templateCard,
-                    pressed && { opacity: 0.85 },
-                  ]}
-                  onPress={() => {
-                    setShowTemplatesModal(false);
-                    openCreateAlert(template);
-                  }}
-                >
-                  <View style={styles.templateIconWrap}>
-                    <Text style={{ fontSize: 28 }}>{template.icon}</Text>
-                  </View>
-                  <View style={styles.templateInfo}>
-                    <Text style={styles.templateName}>{template.name}</Text>
-                    <Text style={styles.templateSymbol}>{template.symbol}</Text>
-                    <Text style={styles.templateDesc} numberOfLines={2}>{template.description}</Text>
-                    <View style={styles.templateMeta}>
-                      <Text style={styles.templateMetaText}>
-                        {t('smartAlerts.condition', { count: template.conditions.length })} · {template.logic}
-                      </Text>
+                {/* Logic & Cooldown */}
+                <View style={styles.formRow}>
+                  <View style={[styles.formGroup, { flex: 1 }]}>
+                    <Text style={styles.formLabel}>{t('smartAlerts.conditionLogic')}</Text>
+                    <View style={styles.logicToggle}>
+                      <Pressable
+                        style={[styles.logicBtn, formLogic === 'AND' && styles.logicBtnActive]}
+                        onPress={() => setFormLogic('AND')}
+                      >
+                        <Text style={[styles.logicBtnText, formLogic === 'AND' && styles.logicBtnTextActive]}>AND</Text>
+                      </Pressable>
+                      <Pressable
+                        style={[styles.logicBtn, formLogic === 'OR' && styles.logicBtnActive]}
+                        onPress={() => setFormLogic('OR')}
+                      >
+                        <Text style={[styles.logicBtnText, formLogic === 'OR' && styles.logicBtnTextActive]}>OR</Text>
+                      </Pressable>
                     </View>
                   </View>
-                  <Ionicons name="add-circle" size={24} color={colors.primary} />
+                  <View style={[styles.formGroup, { flex: 1, marginLeft: SPACING.sm }]}>
+                    <Text style={styles.formLabel}>{t('smartAlerts.cooldownMin')}</Text>
+                    <View style={styles.cooldownRow}>
+                      <Pressable
+                        onPress={() => setFormCooldown(p => Math.max(5, p - 5))}
+                        style={styles.cooldownBtn}
+                      >
+                        <Ionicons name="remove" size={16} color={colors.primary} />
+                      </Pressable>
+                      <Text style={styles.cooldownValue}>{formCooldown}</Text>
+                      <Pressable
+                        onPress={() => setFormCooldown(p => Math.min(1440, p + 5))}
+                        style={styles.cooldownBtn}
+                      >
+                        <Ionicons name="add" size={16} color={colors.primary} />
+                      </Pressable>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Badge toggle */}
+                <View style={styles.formRow}>
+                  <View style={[styles.formGroup, { flex: 1 }]}>
+                    <View style={styles.switchRow}>
+                      <Text style={styles.formLabel}>{t('smartAlerts.badgeCount')}</Text>
+                      <Switch
+                        value={formBadge}
+                        onValueChange={setFormBadge}
+                        trackColor={{ false: colors.border, true: colors.primary + '60' }}
+                        thumbColor={formBadge ? colors.primary : colors.textMuted}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                {/* ── Conditions Section ───────────────────────── */}
+                <View style={styles.formGroup}>
+                  <View style={styles.conditionsHeader}>
+                    <Text style={styles.formLabel}>{t('smartAlerts.conditions', { count: formConditions.length })}</Text>
+                    <Pressable onPress={() => setShowConditionModal(true)} style={styles.addConditionBtn}>
+                      <Ionicons name="add-circle" size={20} color={colors.primary} />
+                      <Text style={styles.addConditionText}>{t('smartAlerts.addCondition')}</Text>
+                    </Pressable>
+                  </View>
+
+                  {formConditions.length === 0 ? (
+                    <View style={styles.noConditions}>
+                      <Text style={styles.noConditionsText}>
+                        {t('smartAlerts.noConditions')}
+                      </Text>
+                    </View>
+                  ) : (
+                    formConditions.map((c, i) => renderFormCondition(c, i))
+                  )}
+                </View>
+
+                {/* Test button */}
+                <Pressable
+                  style={styles.testBtn}
+                  onPress={() => {
+                    if (formConditions.length === 0) return;
+                    const mockAlert: SmartAlert = {
+                      id: 'test',
+                      name: formName || 'Test',
+                      symbol: formSymbol || 'RELIANCE',
+                      stockName: formStockName || 'Reliance',
+                      conditions: formConditions,
+                      logic: formLogic,
+                      cooldownMinutes: formCooldown,
+                      enabled: true,
+                      triggered: false,
+                      lastTriggeredAt: null,
+                      createdAt: new Date().toISOString(),
+                      notificationType: 'local',
+                      badge: true,
+                    };
+                    handleTestAlert(mockAlert);
+                  }}
+                >
+                  <Ionicons name="flask-outline" size={18} color={colors.primary} />
+                  <Text style={styles.testBtnText}>{t('smartAlerts.testAlert')}</Text>
                 </Pressable>
-              ))}
-            </ScrollView>
+
+                <View style={{ height: 40 }} />
+              </ScrollView>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+
+        {/* ── Condition Picker Modal ─────────────────────────────── */}
+        <Modal visible={showConditionModal} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContainer, { paddingTop: insets.top + SPACING.md }]}>
+              <View style={styles.modalHeader}>
+                <Pressable onPress={() => setShowConditionModal(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </Pressable>
+                <Text style={styles.modalTitle}>{t('smartAlerts.addConditionTitle')}</Text>
+                <View style={{ width: 24 }} />
+              </View>
+
+              {/* Category tabs */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryTabs}>
+                {CONDITION_CATEGORIES.map(cat => (
+                  <Pressable
+                    key={cat.key}
+                    style={[styles.categoryTab, selectedCategory === cat.key && styles.categoryTabActive]}
+                    onPress={() => setSelectedCategory(cat.key)}
+                  >
+                    <Text style={[styles.categoryTabText, selectedCategory === cat.key && styles.categoryTabTextActive]}>
+                      {cat.icon} {t(`smartAlerts.cat${cat.key}`)}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+
+              <ScrollView contentContainerStyle={styles.conditionPickerList}>
+                {CONDITION_KINDS
+                  .filter(c => c.category === selectedCategory)
+                  .map(info => {
+                    const alreadyAdded = formConditions.some(c => c.kind === info.kind);
+                    return (
+                      <Pressable
+                        key={info.kind}
+                        style={({ pressed }) => [
+                          styles.conditionPickerItem,
+                          pressed && { opacity: 0.7 },
+                          alreadyAdded && styles.conditionPickerItemAdded,
+                        ]}
+                        onPress={() => openAddCondition(info.kind)}
+                      >
+                        <View style={[styles.conditionPickerIcon, { backgroundColor: (info.color || colors.primary) + '20' }]}>
+                          <Text style={{ fontSize: 22 }}>{info.icon}</Text>
+                        </View>
+                        <View style={styles.conditionPickerInfo}>
+                          <Text style={styles.conditionPickerLabel}>{info.label}</Text>
+                          <Text style={styles.conditionPickerDesc}>
+                            {describeConditionParams(info)}
+                          </Text>
+                        </View>
+                        {alreadyAdded && (
+                          <Ionicons name="checkmark-circle" size={20} color={colors.marketUp} />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
+        {/* ── Templates Modal ────────────────────────────────────── */}
+        <Modal visible={showTemplatesModal} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContainer, { paddingTop: insets.top + SPACING.md }]}>
+              <View style={styles.modalHeader}>
+                <Pressable onPress={() => setShowTemplatesModal(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </Pressable>
+                <Text style={styles.modalTitle}>{t('smartAlerts.alertTemplates')}</Text>
+                <View style={{ width: 24 }} />
+              </View>
+
+              <ScrollView contentContainerStyle={styles.templateList}>
+                {SMART_ALERT_TEMPLATES.map((template, i) => (
+                  <Pressable
+                    key={i}
+                    style={({ pressed }) => [
+                      styles.templateCard,
+                      pressed && { opacity: 0.85 },
+                    ]}
+                    onPress={() => {
+                      setShowTemplatesModal(false);
+                      openCreateAlert(template);
+                    }}
+                  >
+                    <View style={styles.templateIconWrap}>
+                      <Text style={{ fontSize: 28 }}>{template.icon}</Text>
+                    </View>
+                    <View style={styles.templateInfo}>
+                      <Text style={styles.templateName}>{template.name}</Text>
+                      <Text style={styles.templateSymbol}>{template.symbol}</Text>
+                      <Text style={styles.templateDesc} numberOfLines={2}>{template.description}</Text>
+                      <View style={styles.templateMeta}>
+                        <Text style={styles.templateMetaText}>
+                          {t('smartAlerts.condition', { count: template.conditions.length })} · {template.logic}
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons name="add-circle" size={24} color={colors.primary} />
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      </AppScreen>
   );
 }
 
@@ -909,11 +911,9 @@ function formatTimeAgo(isoString: string, t: (key: string, params?: any) => stri
 
 function createStyles(colors: any) {
   return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     header: {
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       paddingHorizontal: SPACING.lg,
       paddingVertical: SPACING.md,
       borderBottomWidth: 1,

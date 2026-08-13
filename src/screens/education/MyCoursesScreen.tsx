@@ -12,6 +12,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {UserGeneratedCourse, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 /** Format a relative time string */
 function formatRelativeTime(dateStr: string, t: any): string {
@@ -149,115 +150,116 @@ export default function MyCoursesScreen({ navigation }: NativeStackScreenProps<R
   }, [submitForReview, archiveCourse, unarchiveCourse, duplicateCourse, deleteCourse, t]);
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('education.myCourses')}</Text>
-          <Text style={styles.subtitle}>{t('education.createManageSubtitle')}</Text>
-        </View>
+          <AppScreen scroll={false} padded={false}
+      >
+  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('education.myCourses')}</Text>
+            <Text style={styles.subtitle}>{t('education.createManageSubtitle')}</Text>
+          </View>
 
-        {/* Stats Bar */}
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{stats.totalCourses}</Text>
-            <Text style={styles.statLabel}>{t('education.total')}</Text>
+          {/* Stats Bar */}
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{stats.totalCourses}</Text>
+              <Text style={styles.statLabel}>{t('education.total')}</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.publishedCourses}</Text>
+              <Text style={styles.statLabel}>{t('education.published')}</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValue, { color: '#6C63FF' }]}>{stats.draftCourses}</Text>
+              <Text style={styles.statLabel}>{t('education.drafts')}</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValue, { color: '#3B82F6' }]}>{stats.totalEnrollments}</Text>
+              <Text style={styles.statLabel}>{t('education.students')}</Text>
+            </View>
           </View>
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: '#00C853' }]}>{stats.publishedCourses}</Text>
-            <Text style={styles.statLabel}>{t('education.published')}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: '#6C63FF' }]}>{stats.draftCourses}</Text>
-            <Text style={styles.statLabel}>{t('education.drafts')}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: '#3B82F6' }]}>{stats.totalEnrollments}</Text>
-            <Text style={styles.statLabel}>{t('education.students')}</Text>
-          </View>
-        </View>
 
-        {/* Create Button */}
-        <AnimatedPressable onPress={handleCreateCourse} haptic="medium" scaleTo={0.97}>
-          <View style={styles.createBtn}>
-            <Ionicons name="add-circle" size={24} color="#fff" />
-            <Text style={styles.createBtnText}>{t('education.createNewCourse')}</Text>
-          </View>
-        </AnimatedPressable>
+          {/* Create Button */}
+          <AnimatedPressable onPress={handleCreateCourse} haptic="medium" scaleTo={0.97}>
+            <View style={styles.createBtn}>
+              <Ionicons name="add-circle" size={24} color="#fff" />
+              <Text style={styles.createBtnText}>{t('education.createNewCourse')}</Text>
+            </View>
+          </AnimatedPressable>
 
-        {/* ── Review Status Section ── */}
-        <ReviewStatusSection
-          courses={myCourses}
-          colors={colors}
-          styles={styles}
-          navigation={navigation}
-        />
+          {/* ── Review Status Section ── */}
+          <ReviewStatusSection
+            courses={myCourses}
+            colors={colors}
+            styles={styles}
+            navigation={navigation}
+          />
 
-        {/* Filter Chips */}
-        <View style={styles.filterRow}>
-          {(['all', 'published', 'draft', 'archived'] as const).map(filter => {
-            const isActive = activeFilter === filter;
-            const count = filter === 'all'
-              ? myCourses.length
-              : myCourses.filter(c => c.publishStatus === filter).length;
-            return (
-              <AnimatedPressable
-                key={filter}
-                onPress={() => setActiveFilter(filter)}
-                haptic="selection"
-                scaleTo={0.94}
-              >
-                <View style={[
-                  styles.filterChip,
-                  isActive && { backgroundColor: colors.primary + '30', borderColor: colors.primary },
-                ]}>
-                  <Text style={[
-                    styles.filterChipText,
-                    isActive && { color: colors.primary },
+          {/* Filter Chips */}
+          <View style={styles.filterRow}>
+            {(['all', 'published', 'draft', 'archived'] as const).map(filter => {
+              const isActive = activeFilter === filter;
+              const count = filter === 'all'
+                ? myCourses.length
+                : myCourses.filter(c => c.publishStatus === filter).length;
+              return (
+                <AnimatedPressable
+                  key={filter}
+                  onPress={() => setActiveFilter(filter)}
+                  haptic="selection"
+                  scaleTo={0.94}
+                >
+                  <View style={[
+                    styles.filterChip,
+                    isActive && { backgroundColor: colors.primary + '30', borderColor: colors.primary },
                   ]}>
-                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                  </Text>
-                  {count > 0 && (
-                    <View style={[styles.filterCount, isActive && { backgroundColor: colors.primary }]}>
-                      <Text style={styles.filterCountText}>{count}</Text>
-                    </View>
-                  )}
-                </View>
-              </AnimatedPressable>
-            );
-          })}
-        </View>
-
-        {/* Course Cards */}
-        {sortedCourses.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="school-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>{t('education.noCoursesYet')}</Text>
-            <Text style={styles.emptySubtitle}>
-              {t('education.noCoursesSubtitle')}
-            </Text>
+                    <Text style={[
+                      styles.filterChipText,
+                      isActive && { color: colors.primary },
+                    ]}>
+                      {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                    </Text>
+                    {count > 0 && (
+                      <View style={[styles.filterCount, isActive && { backgroundColor: colors.primary }]}>
+                        <Text style={styles.filterCountText}>{count}</Text>
+                      </View>
+                    )}
+                  </View>
+                </AnimatedPressable>
+              );
+            })}
           </View>
-        ) : (
-          sortedCourses.map((course, idx) => (
-            <Animated.View
-              key={course.id}
-              entering={FadeInDown.delay(idx * 50).springify()}
-              layout={Layout.springify()}
-            >
-              <CourseCard
-                course={course}
-                onEdit={() => handleEditCourse(course)}
-                onMore={() => handleMoreOptions(course)}
-                colors={colors}
-                styles={styles}
-              />
-            </Animated.View>
-          ))
-        )}
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+          {/* Course Cards */}
+          {sortedCourses.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="school-outline" size={64} color={colors.textMuted} />
+              <Text style={styles.emptyTitle}>{t('education.noCoursesYet')}</Text>
+              <Text style={styles.emptySubtitle}>
+                {t('education.noCoursesSubtitle')}
+              </Text>
+            </View>
+          ) : (
+            sortedCourses.map((course, idx) => (
+              <Animated.View
+                key={course.id}
+                entering={FadeInDown.delay(idx * 50).springify()}
+                layout={Layout.springify()}
+              >
+                <CourseCard
+                  course={course}
+                  onEdit={() => handleEditCourse(course)}
+                  onMore={() => handleMoreOptions(course)}
+                  colors={colors}
+                  styles={styles}
+                />
+              </Animated.View>
+            ))
+          )}
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -471,16 +473,13 @@ function ReviewStatusSection({
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   title: {

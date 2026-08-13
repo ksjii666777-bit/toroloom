@@ -35,6 +35,7 @@ import { usePortfolioStore } from '../../store/portfolioStore';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import type {CorrelationMatrix, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -126,292 +127,293 @@ export default function CorrelationMatrixScreen({ navigation }: NativeStackScree
   const hasHoldings = holdings && holdings.length > 0;
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* ── Header ───────────────────────────────────────── */}
-        <View style={styles.header}>
-          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
-            <View style={styles.backBtn}>
-              <Ionicons name="arrow-back" size={22} color={colors.text} />
+  <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ── Header ───────────────────────────────────────── */}
+          <View style={styles.header}>
+            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.9}>
+              <View style={styles.backBtn}>
+                <Ionicons name="arrow-back" size={22} color={colors.text} />
+              </View>
+            </AnimatedPressable>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>{t('correlationMatrix.title')}</Text>
+              <Text style={styles.subtitle}>{t('correlationMatrix.subtitle')}</Text>
             </View>
-          </AnimatedPressable>
-          <View style={styles.headerContent}>
-            <Text style={styles.title}>{t('correlationMatrix.title')}</Text>
-            <Text style={styles.subtitle}>{t('correlationMatrix.subtitle')}</Text>
           </View>
-        </View>
 
-        {/* ── Info Banner ──────────────────────────────────── */}
-        <Animated.View entering={FadeInUp.springify()}>
-          <LinearGradient
-            colors={['rgba(108,99,255,0.15)', 'rgba(59,130,246,0.05)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.infoBanner}
-          >
-            <Ionicons name="information-circle" size={18} color="#6C63FF" />
-            <Text style={styles.infoText}>
-              {t('correlationMatrix.infoBanner')}
-            </Text>
-          </LinearGradient>
-        </Animated.View>
-
-        {/* ── Analyze Button ───────────────────────────────── */}
-        {hasHoldings && (
-          <AnimatedPressable
-            onPress={handleAnalyze}
-            haptic="medium"
-            scaleTo={0.97}
-          >
+          {/* ── Info Banner ──────────────────────────────────── */}
+          <Animated.View entering={FadeInUp.springify()}>
             <LinearGradient
-              colors={GRADIENTS.primary}
+              colors={['rgba(108,99,255,0.15)', 'rgba(59,130,246,0.05)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.runBtn}
+              style={styles.infoBanner}
             >
-              <Ionicons name="grid" size={22} color="#fff" />
-              <Text style={styles.runBtnText}>
-                {result ? t('correlationMatrix.reanalyze') : t('correlationMatrix.analyze')}
+              <Ionicons name="information-circle" size={18} color="#6C63FF" />
+              <Text style={styles.infoText}>
+                {t('correlationMatrix.infoBanner')}
               </Text>
             </LinearGradient>
-          </AnimatedPressable>
-        )}
-
-        {/* ── No Holdings State ────────────────────────────── */}
-        {!hasHoldings && (
-          <Animated.View entering={FadeInUp.delay(100).springify()}>
-            <Card title={t('correlationMatrix.noHoldingsTitle')} style={styles.sectionCard}>
-              <View style={styles.emptyContent}>
-                <Ionicons name="pie-chart-outline" size={64} color={colors.textMuted} />
-                <Text style={styles.emptyTitle}>{t('correlationMatrix.noHoldingsCardTitle')}</Text>
-                <Text style={styles.emptyDesc}>
-                  {t('correlationMatrix.noHoldingsDesc')}
-                </Text>
-                <AnimatedPressable
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    // Use mock holdings for demo
-                    const mockHoldings = [
-                      { id: '1', stockId: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries Ltd', quantity: 10, buyPrice: 2800, currentPrice: 2915, totalInvested: 28000, currentValue: 29150, pnl: 1150, pnlPercent: 4.1, dayChange: 15, dayChangePercent: 0.52 },
-                      { id: '2', stockId: 'TCS', symbol: 'TCS', name: 'Tata Consultancy Services', quantity: 5, buyPrice: 3900, currentPrice: 4120, totalInvested: 19500, currentValue: 20600, pnl: 1100, pnlPercent: 5.64, dayChange: 25, dayChangePercent: 0.61 },
-                      { id: '3', stockId: 'HDFCBANK', symbol: 'HDFCBANK', name: 'HDFC Bank Ltd', quantity: 15, buyPrice: 1650, currentPrice: 1780, totalInvested: 24750, currentValue: 26700, pnl: 1950, pnlPercent: 7.88, dayChange: 12, dayChangePercent: 0.68 },
-                      { id: '4', stockId: 'ITC', symbol: 'ITC', name: 'ITC Ltd', quantity: 20, buyPrice: 430, currentPrice: 468, totalInvested: 8600, currentValue: 9360, pnl: 760, pnlPercent: 8.84, dayChange: 3.5, dayChangePercent: 0.75 },
-                      { id: '5', stockId: 'BHARTIARTL', symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd', quantity: 8, buyPrice: 1250, currentPrice: 1385, totalInvested: 10000, currentValue: 11080, pnl: 1080, pnlPercent: 10.8, dayChange: 8.5, dayChangePercent: 0.62 },
-                    ] as any;
-                    const matrix = computeCorrelationMatrix(mockHoldings);
-                    setResult(matrix);
-                  }}
-                  haptic="light"
-                  scaleTo={0.95}
-                  style={styles.mockBtn}
-                >
-                  <Text style={styles.mockBtnText}>{t('correlationMatrix.useSample')}</Text>
-                </AnimatedPressable>
-              </View>
-            </Card>
           </Animated.View>
-        )}
 
-        {/* ── Results ──────────────────────────────────────── */}
-        {result && (
-          <Animated.View entering={FadeInUp.delay(100).springify()}>
-            {/* ── Key Metrics ──────────────────────────────── */}
-            <View style={styles.metricsGrid}>
-              {[
-                { label: t('correlationMatrix.diversificationScore'), value: formatScore(result.diversificationScore), icon: '🎯', color: result.diversificationScore >= 60 ? '#00C853' : result.diversificationScore >= 40 ? '#FFC107' : '#FF1744' },
-                { label: t('correlationMatrix.avgCorrelation'), value: result.averageCorrelation.toFixed(2), icon: '📊', color: '#6C63FF' },
-                { label: t('correlationMatrix.highCorrPairs'), value: result.highCorrelationPairs.length.toString(), icon: '⚠️', color: result.highCorrelationPairs.length > 0 ? '#FFC107' : '#00C853' },
-                { label: t('correlationMatrix.assetsAnalyzed'), value: result.symbols.length.toString(), icon: '📈', color: '#3B82F6' },
-              ].map((metric, i) => (
-                <Animated.View
-                  key={metric.label}
-                  entering={FadeInDown.delay(200 + i * 80).springify()}
-                  style={[styles.metricCard, { borderColor: metric.color + '30' }]}
-                >
-                  <Text style={styles.metricIcon}>{metric.icon}</Text>
-                  <Text style={[styles.metricValue, { color: metric.color }]}>{metric.value}</Text>
-                  <Text style={styles.metricLabel}>{metric.label}</Text>
-                </Animated.View>
-              ))}
-            </View>
+          {/* ── Analyze Button ───────────────────────────────── */}
+          {hasHoldings && (
+            <AnimatedPressable
+              onPress={handleAnalyze}
+              haptic="medium"
+              scaleTo={0.97}
+            >
+              <LinearGradient
+                colors={GRADIENTS.primary}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.runBtn}
+              >
+                <Ionicons name="grid" size={22} color="#fff" />
+                <Text style={styles.runBtnText}>
+                  {result ? t('correlationMatrix.reanalyze') : t('correlationMatrix.analyze')}
+                </Text>
+              </LinearGradient>
+            </AnimatedPressable>
+          )}
 
-            {/* ── Correlation Heatmap ──────────────────────── */}
-            <Card title={t('correlationMatrix.heatmapTitle')} subtitle={t('correlationMatrix.heatmapSubtitle')} style={styles.sectionCard}>
-              <View style={styles.heatmapContainer}>
-                <CorrelationHeatmap
-                  symbols={result.symbols}
-                  matrix={result.matrix}
-                  onCellTap={handleCellTap}
-                />
-              </View>
-
-              {/* ── Color Legend ───────────────────────────── */}
-              <View style={styles.legendContainer}>
-                <View style={styles.legendRow}>
-                  <LinearGradient
-                    colors={['#004DE6', '#3B82F6', '#93C5FD', '#E2E8F0', '#FEE2E2', '#FCA5A5', '#EF4444', '#DC2626']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.legendGradient}
-                  />
-                </View>
-                <View style={styles.legendLabels}>
-                  <Text style={styles.legendLabel}>{t('correlationMatrix.legendNeg1')}</Text>
-                  <Text style={styles.legendLabel}>{t('correlationMatrix.legend0')}</Text>
-                  <Text style={styles.legendLabel}>{t('correlationMatrix.legendPos1')}</Text>
-                </View>
-              </View>
-
-              {/* ── Selected Pair Detail ───────────────────── */}
-              {selectedPair && (
-                <Animated.View entering={FadeInDown.springify()} style={styles.selectedPairCard}>
-                  <View style={styles.selectedPairHeader}>
-                    <Text style={styles.selectedPairTitle}>
-                      {selectedPair.asset1} ↔ {selectedPair.asset2}
-                    </Text>
-                    <Text style={[
-                      styles.selectedPairValue,
-                      { color: getHeatColor(selectedPair.correlation) },
-                    ]}>
-                      {formatCorr(selectedPair.correlation)}
-                    </Text>
-                  </View>
-                  <Text style={styles.selectedPairLabel}>                      {t(getCorrelationLabel(selectedPair.correlation))}{' '}
-                    {selectedPair.correlation > 0 ? t('correlationMatrix.positiveCorrelation') : t('correlationMatrix.negativeCorrelation')}
+          {/* ── No Holdings State ────────────────────────────── */}
+          {!hasHoldings && (
+            <Animated.View entering={FadeInUp.delay(100).springify()}>
+              <Card title={t('correlationMatrix.noHoldingsTitle')} style={styles.sectionCard}>
+                <View style={styles.emptyContent}>
+                  <Ionicons name="pie-chart-outline" size={64} color={colors.textMuted} />
+                  <Text style={styles.emptyTitle}>{t('correlationMatrix.noHoldingsCardTitle')}</Text>
+                  <Text style={styles.emptyDesc}>
+                    {t('correlationMatrix.noHoldingsDesc')}
                   </Text>
-                  <Text style={styles.selectedPairDesc}>
-                    {selectedPair.correlation > 0.7
-                      ? t('correlationMatrix.pairDescVeryHigh')
-                      : selectedPair.correlation > 0.4
-                      ? t('correlationMatrix.pairDescHigh')
-                      : selectedPair.correlation > 0
-                      ? t('correlationMatrix.pairDescModerate')
-                      : selectedPair.correlation > -0.4
-                      ? t('correlationMatrix.pairDescLow')
-                      : t('correlationMatrix.pairDescNegative')}
-                  </Text>
-                </Animated.View>
-              )}
-            </Card>
-
-            {/* ── Diversification Assessment ───────────────── */}
-            <Card title={t('correlationMatrix.assessmentTitle')} style={styles.sectionCard}>
-              <View style={styles.assessmentContent}>
-                <View style={styles.assessmentRow}>
-                  <Text style={styles.assessmentLabel}>{t('correlationMatrix.diversificationScoreLabel')}</Text>
-                  <View style={styles.scoreBarContainer}>
-                    <View style={styles.scoreBarBg}>
-                      <View
-                        style={[
-                          styles.scoreBarFill,
-                          {
-                            width: `${result.diversificationScore}%`,
-                            backgroundColor: result.diversificationScore >= 60 ? '#00C853' : result.diversificationScore >= 40 ? '#FFC107' : '#FF1744',
-                          },
-                        ]}
-                      />
-                    </View>
-                    <Text style={[styles.scoreBarText, {
-                      color: result.diversificationScore >= 60 ? '#00C853' : result.diversificationScore >= 40 ? '#FFC107' : '#FF1744',
-                    }]}>
-                      {result.diversificationScore}/100
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.assessmentDivider} />
-                <View style={styles.assessmentRow}>
-                  <Text style={styles.assessmentLabel}>{t('correlationMatrix.avgCrossCorrelation')}</Text>
-                  <Text style={styles.assessmentValue}>{result.averageCorrelation.toFixed(3)}</Text>
-                </View>
-                <View style={styles.assessmentDivider} />
-                <View style={styles.assessmentRow}>
-                  <Text style={styles.assessmentLabel}>{t('correlationMatrix.highlyCorrelatedPairs')}</Text>
-                  <Text style={[styles.assessmentValue, {
-                    color: result.highCorrelationPairs.length > 0 ? '#FFC107' : '#00C853',
-                  }]}>
-                    {result.highCorrelationPairs.length}
-                  </Text>
-                </View>
-              </View>
-            </Card>
-
-            {/* ── High Correlation Pairs ────────────────────── */}
-            {result.highCorrelationPairs.length > 0 && (
-              <Card title={t('correlationMatrix.highCorrPairsTitle')} subtitle={t('correlationMatrix.highCorrPairsSubtitle')} style={styles.sectionCard}>
-                <View style={styles.pairsContent}>
-                  {result.highCorrelationPairs.map((pair, i) => (
-                    <Animated.View
-                      key={`pair-${i}`}
-                      entering={FadeInDown.delay(100 + i * 60).springify()}
-                      style={styles.pairRow}
-                    >
-                      <View style={styles.pairIcon}>
-                        <Ionicons name="warning" size={18} color="#FFC107" />
-                      </View>
-                      <View style={styles.pairInfo}>
-                        <Text style={styles.pairName}>{pair.asset1} ↔ {pair.asset2}</Text>
-                        <Text style={styles.pairLabel}>{t('correlationMatrix.correlationLabel')}: {(pair.correlation * 100).toFixed(0)}%</Text>
-                      </View>
-                      <Text style={[styles.pairValue, { color: getHeatColor(pair.correlation) }]}>
-                        {formatCorr(pair.correlation)}
-                      </Text>
-                    </Animated.View>
-                  ))}
+                  <AnimatedPressable
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      // Use mock holdings for demo
+                      const mockHoldings = [
+                        { id: '1', stockId: 'RELIANCE', symbol: 'RELIANCE', name: 'Reliance Industries Ltd', quantity: 10, buyPrice: 2800, currentPrice: 2915, totalInvested: 28000, currentValue: 29150, pnl: 1150, pnlPercent: 4.1, dayChange: 15, dayChangePercent: 0.52 },
+                        { id: '2', stockId: 'TCS', symbol: 'TCS', name: 'Tata Consultancy Services', quantity: 5, buyPrice: 3900, currentPrice: 4120, totalInvested: 19500, currentValue: 20600, pnl: 1100, pnlPercent: 5.64, dayChange: 25, dayChangePercent: 0.61 },
+                        { id: '3', stockId: 'HDFCBANK', symbol: 'HDFCBANK', name: 'HDFC Bank Ltd', quantity: 15, buyPrice: 1650, currentPrice: 1780, totalInvested: 24750, currentValue: 26700, pnl: 1950, pnlPercent: 7.88, dayChange: 12, dayChangePercent: 0.68 },
+                        { id: '4', stockId: 'ITC', symbol: 'ITC', name: 'ITC Ltd', quantity: 20, buyPrice: 430, currentPrice: 468, totalInvested: 8600, currentValue: 9360, pnl: 760, pnlPercent: 8.84, dayChange: 3.5, dayChangePercent: 0.75 },
+                        { id: '5', stockId: 'BHARTIARTL', symbol: 'BHARTIARTL', name: 'Bharti Airtel Ltd', quantity: 8, buyPrice: 1250, currentPrice: 1385, totalInvested: 10000, currentValue: 11080, pnl: 1080, pnlPercent: 10.8, dayChange: 8.5, dayChangePercent: 0.62 },
+                      ] as any;
+                      const matrix = computeCorrelationMatrix(mockHoldings);
+                      setResult(matrix);
+                    }}
+                    haptic="light"
+                    scaleTo={0.95}
+                    style={styles.mockBtn}
+                  >
+                    <Text style={styles.mockBtnText}>{t('correlationMatrix.useSample')}</Text>
+                  </AnimatedPressable>
                 </View>
               </Card>
-            )}
+            </Animated.View>
+          )}
 
-            {/* ── Recommendations ──────────────────────────── */}
-            <Card title={t('correlationMatrix.recommendationsTitle')} style={styles.sectionCard}>
-              <View style={styles.recommendationsContent}>
-                {result.recommendations.map((rec, i) => (
+          {/* ── Results ──────────────────────────────────────── */}
+          {result && (
+            <Animated.View entering={FadeInUp.delay(100).springify()}>
+              {/* ── Key Metrics ──────────────────────────────── */}
+              <View style={styles.metricsGrid}>
+                {[
+                  { label: t('correlationMatrix.diversificationScore'), value: formatScore(result.diversificationScore), icon: '🎯', color: result.diversificationScore >= 60 ? '#00C853' : result.diversificationScore >= 40 ? '#FFC107' : '#FF1744' },
+                  { label: t('correlationMatrix.avgCorrelation'), value: result.averageCorrelation.toFixed(2), icon: '📊', color: '#6C63FF' },
+                  { label: t('correlationMatrix.highCorrPairs'), value: result.highCorrelationPairs.length.toString(), icon: '⚠️', color: result.highCorrelationPairs.length > 0 ? '#FFC107' : '#00C853' },
+                  { label: t('correlationMatrix.assetsAnalyzed'), value: result.symbols.length.toString(), icon: '📈', color: '#3B82F6' },
+                ].map((metric, i) => (
                   <Animated.View
-                    key={`rec-${i}`}
-                    entering={FadeInDown.delay(100 + i * 80).springify()}
-                    style={styles.recRow}
+                    key={metric.label}
+                    entering={FadeInDown.delay(200 + i * 80).springify()}
+                    style={[styles.metricCard, { borderColor: metric.color + '30' }]}
                   >
-                    <View style={styles.recBullet}>
-                      <View style={styles.recDot} />
-                    </View>
-                    <Text style={styles.recText}>{rec}</Text>
+                    <Text style={styles.metricIcon}>{metric.icon}</Text>
+                    <Text style={[styles.metricValue, { color: metric.color }]}>{metric.value}</Text>
+                    <Text style={styles.metricLabel}>{metric.label}</Text>
                   </Animated.View>
                 ))}
               </View>
-            </Card>
 
-            {/* ── All Pairs Table ──────────────────────────── */}
-            {result.pairs.length > 0 && (
-              <Card title={t('correlationMatrix.allPairsTitle')} style={styles.sectionCard}>
-                <View style={styles.pairsContent}>
-                  {result.pairs.map((pair, i) => (
-                    <Animated.View
-                      key={`allpair-${i}`}
-                      entering={FadeInDown.delay(100 + i * 40).springify()}
-                      style={styles.pairRow}
-                    >
-                      <View style={styles.pairInfo}>
-                        <Text style={styles.pairName}>{pair.asset1} ↔ {pair.asset2}</Text>
-                        <Text style={styles.pairLabel}>{t(getCorrelationLabel(pair.correlation))} ({pair.dataPoints} {t('correlationMatrix.dataPts')})</Text>
+              {/* ── Correlation Heatmap ──────────────────────── */}
+              <Card title={t('correlationMatrix.heatmapTitle')} subtitle={t('correlationMatrix.heatmapSubtitle')} style={styles.sectionCard}>
+                <View style={styles.heatmapContainer}>
+                  <CorrelationHeatmap
+                    symbols={result.symbols}
+                    matrix={result.matrix}
+                    onCellTap={handleCellTap}
+                  />
+                </View>
+
+                {/* ── Color Legend ───────────────────────────── */}
+                <View style={styles.legendContainer}>
+                  <View style={styles.legendRow}>
+                    <LinearGradient
+                      colors={['#004DE6', '#3B82F6', '#93C5FD', '#E2E8F0', '#FEE2E2', '#FCA5A5', '#EF4444', '#DC2626']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.legendGradient}
+                    />
+                  </View>
+                  <View style={styles.legendLabels}>
+                    <Text style={styles.legendLabel}>{t('correlationMatrix.legendNeg1')}</Text>
+                    <Text style={styles.legendLabel}>{t('correlationMatrix.legend0')}</Text>
+                    <Text style={styles.legendLabel}>{t('correlationMatrix.legendPos1')}</Text>
+                  </View>
+                </View>
+
+                {/* ── Selected Pair Detail ───────────────────── */}
+                {selectedPair && (
+                  <Animated.View entering={FadeInDown.springify()} style={styles.selectedPairCard}>
+                    <View style={styles.selectedPairHeader}>
+                      <Text style={styles.selectedPairTitle}>
+                        {selectedPair.asset1} ↔ {selectedPair.asset2}
+                      </Text>
+                      <Text style={[
+                        styles.selectedPairValue,
+                        { color: getHeatColor(selectedPair.correlation) },
+                      ]}>
+                        {formatCorr(selectedPair.correlation)}
+                      </Text>
+                    </View>
+                    <Text style={styles.selectedPairLabel}>                      {t(getCorrelationLabel(selectedPair.correlation))}{' '}
+                      {selectedPair.correlation > 0 ? t('correlationMatrix.positiveCorrelation') : t('correlationMatrix.negativeCorrelation')}
+                    </Text>
+                    <Text style={styles.selectedPairDesc}>
+                      {selectedPair.correlation > 0.7
+                        ? t('correlationMatrix.pairDescVeryHigh')
+                        : selectedPair.correlation > 0.4
+                        ? t('correlationMatrix.pairDescHigh')
+                        : selectedPair.correlation > 0
+                        ? t('correlationMatrix.pairDescModerate')
+                        : selectedPair.correlation > -0.4
+                        ? t('correlationMatrix.pairDescLow')
+                        : t('correlationMatrix.pairDescNegative')}
+                    </Text>
+                  </Animated.View>
+                )}
+              </Card>
+
+              {/* ── Diversification Assessment ───────────────── */}
+              <Card title={t('correlationMatrix.assessmentTitle')} style={styles.sectionCard}>
+                <View style={styles.assessmentContent}>
+                  <View style={styles.assessmentRow}>
+                    <Text style={styles.assessmentLabel}>{t('correlationMatrix.diversificationScoreLabel')}</Text>
+                    <View style={styles.scoreBarContainer}>
+                      <View style={styles.scoreBarBg}>
+                        <View
+                          style={[
+                            styles.scoreBarFill,
+                            {
+                              width: `${result.diversificationScore}%`,
+                              backgroundColor: result.diversificationScore >= 60 ? '#00C853' : result.diversificationScore >= 40 ? '#FFC107' : '#FF1744',
+                            },
+                          ]}
+                        />
                       </View>
-                      <View style={[styles.pairBadge, { backgroundColor: getHeatColor(pair.correlation) + '20' }]}>
+                      <Text style={[styles.scoreBarText, {
+                        color: result.diversificationScore >= 60 ? '#00C853' : result.diversificationScore >= 40 ? '#FFC107' : '#FF1744',
+                      }]}>
+                        {result.diversificationScore}/100
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.assessmentDivider} />
+                  <View style={styles.assessmentRow}>
+                    <Text style={styles.assessmentLabel}>{t('correlationMatrix.avgCrossCorrelation')}</Text>
+                    <Text style={styles.assessmentValue}>{result.averageCorrelation.toFixed(3)}</Text>
+                  </View>
+                  <View style={styles.assessmentDivider} />
+                  <View style={styles.assessmentRow}>
+                    <Text style={styles.assessmentLabel}>{t('correlationMatrix.highlyCorrelatedPairs')}</Text>
+                    <Text style={[styles.assessmentValue, {
+                      color: result.highCorrelationPairs.length > 0 ? '#FFC107' : '#00C853',
+                    }]}>
+                      {result.highCorrelationPairs.length}
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+
+              {/* ── High Correlation Pairs ────────────────────── */}
+              {result.highCorrelationPairs.length > 0 && (
+                <Card title={t('correlationMatrix.highCorrPairsTitle')} subtitle={t('correlationMatrix.highCorrPairsSubtitle')} style={styles.sectionCard}>
+                  <View style={styles.pairsContent}>
+                    {result.highCorrelationPairs.map((pair, i) => (
+                      <Animated.View
+                        key={`pair-${i}`}
+                        entering={FadeInDown.delay(100 + i * 60).springify()}
+                        style={styles.pairRow}
+                      >
+                        <View style={styles.pairIcon}>
+                          <Ionicons name="warning" size={18} color="#FFC107" />
+                        </View>
+                        <View style={styles.pairInfo}>
+                          <Text style={styles.pairName}>{pair.asset1} ↔ {pair.asset2}</Text>
+                          <Text style={styles.pairLabel}>{t('correlationMatrix.correlationLabel')}: {(pair.correlation * 100).toFixed(0)}%</Text>
+                        </View>
                         <Text style={[styles.pairValue, { color: getHeatColor(pair.correlation) }]}>
                           {formatCorr(pair.correlation)}
                         </Text>
+                      </Animated.View>
+                    ))}
+                  </View>
+                </Card>
+              )}
+
+              {/* ── Recommendations ──────────────────────────── */}
+              <Card title={t('correlationMatrix.recommendationsTitle')} style={styles.sectionCard}>
+                <View style={styles.recommendationsContent}>
+                  {result.recommendations.map((rec, i) => (
+                    <Animated.View
+                      key={`rec-${i}`}
+                      entering={FadeInDown.delay(100 + i * 80).springify()}
+                      style={styles.recRow}
+                    >
+                      <View style={styles.recBullet}>
+                        <View style={styles.recDot} />
                       </View>
+                      <Text style={styles.recText}>{rec}</Text>
                     </Animated.View>
                   ))}
                 </View>
               </Card>
-            )}
-          </Animated.View>
-        )}
 
-        <View style={{ height: 80 }} />
-      </ScrollView>
-    </View>
+              {/* ── All Pairs Table ──────────────────────────── */}
+              {result.pairs.length > 0 && (
+                <Card title={t('correlationMatrix.allPairsTitle')} style={styles.sectionCard}>
+                  <View style={styles.pairsContent}>
+                    {result.pairs.map((pair, i) => (
+                      <Animated.View
+                        key={`allpair-${i}`}
+                        entering={FadeInDown.delay(100 + i * 40).springify()}
+                        style={styles.pairRow}
+                      >
+                        <View style={styles.pairInfo}>
+                          <Text style={styles.pairName}>{pair.asset1} ↔ {pair.asset2}</Text>
+                          <Text style={styles.pairLabel}>{t(getCorrelationLabel(pair.correlation))} ({pair.dataPoints} {t('correlationMatrix.dataPts')})</Text>
+                        </View>
+                        <View style={[styles.pairBadge, { backgroundColor: getHeatColor(pair.correlation) + '20' }]}>
+                          <Text style={[styles.pairValue, { color: getHeatColor(pair.correlation) }]}>
+                            {formatCorr(pair.correlation)}
+                          </Text>
+                        </View>
+                      </Animated.View>
+                    ))}
+                  </View>
+                </Card>
+              )}
+            </Animated.View>
+          )}
+
+          <View style={{ height: 80 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -527,10 +529,6 @@ function CorrelationHeatmap({
 // ══════════════════════════════════════════════════════════════
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingBottom: 100,
     paddingHorizontal: SPACING.xl,

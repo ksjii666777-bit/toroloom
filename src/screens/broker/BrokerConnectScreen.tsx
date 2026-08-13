@@ -35,6 +35,7 @@ import { api, snapTradeApi } from '../../services/api';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import { useT } from '../../hooks/useT';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - 48) / 2; // 2 columns with 16px padding each side
@@ -382,260 +383,262 @@ export default function BrokerConnectScreen({ navigation }: any) {
   // ── Page loading indicator ─────────────────────────────────
   if (connectionState.isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('brokerConnect.checkingStatus')}</Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>{t('brokerConnect.checkingStatus')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* ── Header ────────────────────────────────────────── */}
-      <View style={[styles.header, { paddingTop: 60 + insets.top }]}>
-        <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </AnimatedPressable>
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>{t('brokerConnect.title')}</Text>
-          <Text style={styles.headerSubtitle}>{t('brokerConnect.headerSubtitle')}</Text>
-        </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* ── Connected State Banner ───────────────────────── */}
-        {connectionState.connected && (
-          <Animated.View style={[styles.connectedBanner, { opacity: fadeAnim }]}>
-            <LinearGradient
-              colors={GRADIENTS.success}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.connectedGradient}
-            >
-              <Ionicons name="checkmark-circle" size={24} color="#fff" />
-              <View style={styles.connectedInfo}>
-                <Text style={styles.connectedTitle}>
-                  {t('brokerConnect.connectedTo', { broker: connectionState.label })}
-                </Text>
-                <Text style={styles.connectedDate}>
-                  {t('brokerConnect.oauthSessionActive')}
-                </Text>
-              </View>
-              <TouchableOpacity onPress={handleDisconnect} style={styles.disconnectBtn}>
-                <Text style={styles.disconnectText}>{t('brokerConnect.disconnect')}</Text>
-              </TouchableOpacity>
-            </LinearGradient>
-          </Animated.View>
-        )}
+  {/* ── Header ────────────────────────────────────────── */}
+        <View style={[styles.header]}>
+          <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </AnimatedPressable>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>{t('brokerConnect.title')}</Text>
+            <Text style={styles.headerSubtitle}>{t('brokerConnect.headerSubtitle')}</Text>
+          </View>
+        </View>
 
-        {/* ── Section Title ────────────────────────────────── */}
-        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          <Text style={styles.sectionTitle}>{t('brokerConnect.chooseBroker')}</Text>            <Text style={styles.sectionSubtitle}>
-            {connectionState.connected
-              ? t('brokerConnect.switchBroker')
-              : t('brokerConnect.selectBrokerToConnect')}
-          </Text>
-        </Animated.View>
-
-        {/* ── Broker Grid ──────────────────────────────────── */}
-        <View style={styles.brokerGrid}>
-          {BROKERS.map((broker) => {
-            const isConnected = connectionState.connected && connectionState.brokerType === broker.type;
-            const scaleAnim = scaleAnims.current[broker.type];
-            const cardGlow = glowOps.current[broker.type];
-
-            return (
-              <Animated.View
-                key={broker.type}
-                style={[
-                  styles.brokerCardWrapper,
-                  {
-                    opacity: fadeAnim,
-                    transform: [
-                      { translateY: slideAnim },
-                      { scale: isConnected ? 0.97 : 1 },
-                    ],
-                  },
-                ]}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ── Connected State Banner ───────────────────────── */}
+          {connectionState.connected && (
+            <Animated.View style={[styles.connectedBanner, { opacity: fadeAnim }]}>
+              <LinearGradient
+                colors={GRADIENTS.success}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.connectedGradient}
               >
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  onPressIn={() => {
-                    Animated.spring(scaleAnim, { toValue: 0.94, useNativeDriver: true }).start();
-                  }}
-                  onPressOut={() => {
-                    Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
-                  }}
-                  onPress={() => {
-                    if (isConnected) {
-                      handleDisconnect();
-                    } else {
-                      openSnapTradeConnect(broker);
-                    }
-                  }}
-                >
-                  <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-                    <LinearGradient
-                      colors={broker.gradient}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1.2 }}
-                      style={styles.brokerCard}
-                    >
-                      {/* Glow effect when connected */}
-                      {isConnected && (
-                        <View style={[styles.connectedGlow, { opacity: cardGlow }]} />
-                      )}
+                <Ionicons name="checkmark-circle" size={24} color="#fff" />
+                <View style={styles.connectedInfo}>
+                  <Text style={styles.connectedTitle}>
+                    {t('brokerConnect.connectedTo', { broker: connectionState.label })}
+                  </Text>
+                  <Text style={styles.connectedDate}>
+                    {t('brokerConnect.oauthSessionActive')}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={handleDisconnect} style={styles.disconnectBtn}>
+                  <Text style={styles.disconnectText}>{t('brokerConnect.disconnect')}</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </Animated.View>
+          )}
 
-                      {/* Broker Icon */}
-                      <View style={styles.brokerIconRow}>
-                        <View style={styles.brokerIconCircle}>
-                          <Text style={styles.brokerIconText}>{broker.icon}</Text>
-                        </View>
+          {/* ── Section Title ────────────────────────────────── */}
+          <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+            <Text style={styles.sectionTitle}>{t('brokerConnect.chooseBroker')}</Text>            <Text style={styles.sectionSubtitle}>
+              {connectionState.connected
+                ? t('brokerConnect.switchBroker')
+                : t('brokerConnect.selectBrokerToConnect')}
+            </Text>
+          </Animated.View>
+
+          {/* ── Broker Grid ──────────────────────────────────── */}
+          <View style={styles.brokerGrid}>
+            {BROKERS.map((broker) => {
+              const isConnected = connectionState.connected && connectionState.brokerType === broker.type;
+              const scaleAnim = scaleAnims.current[broker.type];
+              const cardGlow = glowOps.current[broker.type];
+
+              return (
+                <Animated.View
+                  key={broker.type}
+                  style={[
+                    styles.brokerCardWrapper,
+                    {
+                      opacity: fadeAnim,
+                      transform: [
+                        { translateY: slideAnim },
+                        { scale: isConnected ? 0.97 : 1 },
+                      ],
+                    },
+                  ]}
+                >
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPressIn={() => {
+                      Animated.spring(scaleAnim, { toValue: 0.94, useNativeDriver: true }).start();
+                    }}
+                    onPressOut={() => {
+                      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
+                    }}
+                    onPress={() => {
+                      if (isConnected) {
+                        handleDisconnect();
+                      } else {
+                        openSnapTradeConnect(broker);
+                      }
+                    }}
+                  >
+                    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                      <LinearGradient
+                        colors={broker.gradient}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1.2 }}
+                        style={styles.brokerCard}
+                      >
+                        {/* Glow effect when connected */}
                         {isConnected && (
-                          <View style={styles.connectedBadge}>
-                            <Ionicons name="checkmark" size={12} color="#fff" />
+                          <View style={[styles.connectedGlow, { opacity: cardGlow }]} />
+                        )}
+
+                        {/* Broker Icon */}
+                        <View style={styles.brokerIconRow}>
+                          <View style={styles.brokerIconCircle}>
+                            <Text style={styles.brokerIconText}>{broker.icon}</Text>
+                          </View>
+                          {isConnected && (
+                            <View style={styles.connectedBadge}>
+                              <Ionicons name="checkmark" size={12} color="#fff" />
+                            </View>
+                          )}
+                        </View>
+
+                        {/* Broker Info */}
+                        <Text style={styles.brokerLabel}>{broker.label}</Text>
+                        <Text style={styles.brokerTagline} numberOfLines={2}>
+                          {broker.tagline}
+                        </Text>
+
+                        {/* Features */}
+                        <View style={styles.featureList}>
+                          {broker.features.map((feature, i) => (
+                            <View key={`${feature}-${i}`} style={styles.featureItem}>
+                              <Text style={styles.featureDot}>•</Text>
+                              <Text style={styles.featureText} numberOfLines={1}>{feature}</Text>
+                            </View>
+                          ))}
+                        </View>
+
+                        {/* Connection status button */}
+                        <View style={[
+                          styles.connectBadgeContainer,
+                          isConnected && styles.connectBadgeContainerConnected,
+                        ]}>
+                          <Text style={[
+                            styles.connectBadgeText,
+                            isConnected && styles.connectBadgeTextConnected,
+                          ]}>
+                            {isConnected ? t('brokerConnect.connected') : t('brokerConnect.oauthConnect')}
+                          </Text>
+                        </View>
+
+                        {/* OAuth indicator */}
+                        {!isConnected && (
+                          <View style={styles.oauthIndicator}>
+                            <Ionicons name="shield-checkmark" size={10} color="rgba(255,255,255,0.6)" />
+                            <Text style={styles.oauthText}>{t('brokerConnect.oauthSecure')}</Text>
                           </View>
                         )}
-                      </View>
-
-                      {/* Broker Info */}
-                      <Text style={styles.brokerLabel}>{broker.label}</Text>
-                      <Text style={styles.brokerTagline} numberOfLines={2}>
-                        {broker.tagline}
-                      </Text>
-
-                      {/* Features */}
-                      <View style={styles.featureList}>
-                        {broker.features.map((feature, i) => (
-                          <View key={`${feature}-${i}`} style={styles.featureItem}>
-                            <Text style={styles.featureDot}>•</Text>
-                            <Text style={styles.featureText} numberOfLines={1}>{feature}</Text>
-                          </View>
-                        ))}
-                      </View>
-
-                      {/* Connection status button */}
-                      <View style={[
-                        styles.connectBadgeContainer,
-                        isConnected && styles.connectBadgeContainerConnected,
-                      ]}>
-                        <Text style={[
-                          styles.connectBadgeText,
-                          isConnected && styles.connectBadgeTextConnected,
-                        ]}>
-                          {isConnected ? t('brokerConnect.connected') : t('brokerConnect.oauthConnect')}
-                        </Text>
-                      </View>
-
-                      {/* OAuth indicator */}
-                      {!isConnected && (
-                        <View style={styles.oauthIndicator}>
-                          <Ionicons name="shield-checkmark" size={10} color="rgba(255,255,255,0.6)" />
-                          <Text style={styles.oauthText}>{t('brokerConnect.oauthSecure')}</Text>
-                        </View>
-                      )}
-                    </LinearGradient>
-                  </Animated.View>
-                </TouchableOpacity>
-              </Animated.View>
-            );
-          })}
-        </View>
-
-        {/* ── SnapTrade Info Box ────────────────────────────── */}
-        <Animated.View style={[styles.infoBox, { opacity: fadeAnim }]}>
-          <Ionicons name="information-circle" size={18} color={colors.primary} />
-          <Text style={styles.infoText}>
-            {t('brokerConnect.snapTradeInfo')}
-          </Text>
-        </Animated.View>
-
-        <View style={{ height: 60 }} />
-      </ScrollView>
-
-      {/* ── OAuth WebView (legacy fallback) ──────────────────── */}
-      <Modal
-        visible={showWebView}
-        animationType="slide"
-        onRequestClose={() => setShowWebView(false)}
-      >
-        <View style={[styles.webViewContainer, { backgroundColor: colors.bg }]}>
-          <View style={[styles.webViewHeader, { backgroundColor: colors.bgSecondary, paddingTop: 60 + insets.top }]}>
-            <TouchableOpacity onPress={() => setShowWebView(false)} style={styles.webViewBack}>
-              <Ionicons name="close" size={24} color={colors.text} />
-            </TouchableOpacity>
-            <Text style={styles.webViewTitle}>
-              {t('brokerConnect.connectBroker', { name: selectedBroker?.label })}
-            </Text>
-            <View style={{ width: 24 }} />
+                      </LinearGradient>
+                    </Animated.View>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })}
           </View>
-          <WebView
-            source={{ uri: webViewUrl }}
-            style={styles.webView}
-            onNavigationStateChange={handleWebViewNav}
-            onError={handleWebViewError}
-            javaScriptEnabled
-            domStorageEnabled
-            startInLoadingState
-            renderLoading={() => (
-              <View style={styles.webViewLoading}>
-                <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={[styles.webViewLoadingText, { color: colors.textMuted }]}>
-                  {t('brokerConnect.loadingLogin', { broker: selectedBroker?.label })}
-                </Text>
-              </View>
-            )}
-          />
-        </View>
-      </Modal>
 
-      {/* ── Connecting Overlay ──────────────────────────────── */}
-      {isConnectingSnapTrade && (
-        <View style={styles.successOverlay}>
-          <Animated.View style={styles.successContent}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={styles.successTitle}>{t('brokerConnect.connecting')}</Text>
-            <Text style={styles.successSubtitle}>
-              {t('brokerConnect.completeLoginBrowser')}
+          {/* ── SnapTrade Info Box ────────────────────────────── */}
+          <Animated.View style={[styles.infoBox, { opacity: fadeAnim }]}>
+            <Ionicons name="information-circle" size={18} color={colors.primary} />
+            <Text style={styles.infoText}>
+              {t('brokerConnect.snapTradeInfo')}
             </Text>
           </Animated.View>
-        </View>
-      )}
 
-      {/* ── Success Animation ───────────────────────────────── */}
-      {showSuccess && (
-        <View style={styles.successOverlay}>
-          <Animated.View style={styles.successContent}>
-            <LinearGradient
-              colors={GRADIENTS.success}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.successCircle}
-            >
-              <Ionicons name="checkmark" size={40} color="#fff" />
-            </LinearGradient>
-            <Text style={styles.successTitle}>{t('brokerConnect.connectedExclam')}</Text>
-            <Text style={styles.successSubtitle}>
-              {t('brokerConnect.accountLinked', { broker: selectedBroker?.label })}
-            </Text>
-          </Animated.View>
-        </View>
-      )}
-    </View>
+          <View style={{ height: 60 }} />
+        </ScrollView>
+
+        {/* ── OAuth WebView (legacy fallback) ──────────────────── */}
+        <Modal
+          visible={showWebView}
+          animationType="slide"
+          onRequestClose={() => setShowWebView(false)}
+        >
+          <View style={[styles.webViewContainer, { backgroundColor: colors.bg }]}>
+            <View style={[styles.webViewHeader, { backgroundColor: colors.bgSecondary, paddingTop: 60 + insets.top }]}>
+              <TouchableOpacity onPress={() => setShowWebView(false)} style={styles.webViewBack}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+              <Text style={styles.webViewTitle}>
+                {t('brokerConnect.connectBroker', { name: selectedBroker?.label })}
+              </Text>
+              <View style={{ width: 24 }} />
+            </View>
+            <WebView
+              source={{ uri: webViewUrl }}
+              style={styles.webView}
+              onNavigationStateChange={handleWebViewNav}
+              onError={handleWebViewError}
+              javaScriptEnabled
+              domStorageEnabled
+              startInLoadingState
+              renderLoading={() => (
+                <View style={styles.webViewLoading}>
+                  <ActivityIndicator size="large" color={colors.primary} />
+                  <Text style={[styles.webViewLoadingText, { color: colors.textMuted }]}>
+                    {t('brokerConnect.loadingLogin', { broker: selectedBroker?.label })}
+                  </Text>
+                </View>
+              )}
+            />
+          </View>
+        </Modal>
+
+        {/* ── Connecting Overlay ──────────────────────────────── */}
+        {isConnectingSnapTrade && (
+          <View style={styles.successOverlay}>
+            <Animated.View style={styles.successContent}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={styles.successTitle}>{t('brokerConnect.connecting')}</Text>
+              <Text style={styles.successSubtitle}>
+                {t('brokerConnect.completeLoginBrowser')}
+              </Text>
+            </Animated.View>
+          </View>
+        )}
+
+        {/* ── Success Animation ───────────────────────────────── */}
+        {showSuccess && (
+          <View style={styles.successOverlay}>
+            <Animated.View style={styles.successContent}>
+              <LinearGradient
+                colors={GRADIENTS.success}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.successCircle}
+              >
+                <Ionicons name="checkmark" size={40} color="#fff" />
+              </LinearGradient>
+              <Text style={styles.successTitle}>{t('brokerConnect.connectedExclam')}</Text>
+              <Text style={styles.successSubtitle}>
+                {t('brokerConnect.accountLinked', { broker: selectedBroker?.label })}
+              </Text>
+            </Animated.View>
+          </View>
+        )}
+      </AppScreen>
   );
 }
 
 // ── Styles ────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.xl,

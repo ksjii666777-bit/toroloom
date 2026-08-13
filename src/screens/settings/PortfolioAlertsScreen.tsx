@@ -22,6 +22,7 @@ import { formatCurrency} from '../../utils/formatters';
 import { sendPortfolioAlert } from '../../services/notificationService';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 Dimensions.get('window');
@@ -445,372 +446,370 @@ export default function PortfolioAlertsScreen({ navigation }: NativeStackScreenP
   const disabledRules = portfolioAlertRules.filter(r => !r.enabled);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={styles.headerInfo}>
-            <Text style={styles.title}>{t('portfolioAlerts.title')}</Text>
-            <Text style={styles.subtitle}>{t('portfolioAlerts.subtitle')}</Text>
-          </View>
-        </View>
-      </LinearGradient>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Active Alerts */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {t('portfolioAlerts.activeAlerts')} ({enabledRules.length})
-          </Text>
-          {enabledRules.length > 0 ? (
-            enabledRules.map(renderAlertCard)
-          ) : (
-            <View style={styles.emptyCard}>
-              <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
-              <Text style={styles.emptyTitle}>{t('portfolioAlerts.noActiveAlerts')}</Text>
-              <Text style={styles.emptyDesc}>{t('portfolioAlerts.noActiveAlertsDesc')}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <LinearGradient colors={[colors.bgSecondary, colors.bg]} style={styles.header}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={styles.headerInfo}>
+              <Text style={styles.title}>{t('portfolioAlerts.title')}</Text>
+              <Text style={styles.subtitle}>{t('portfolioAlerts.subtitle')}</Text>
             </View>
-          )}
-        </View>
-
-        {/* Add Alert Types */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('portfolioAlerts.addAlertRules')}</Text>
-          <View style={styles.addGrid}>
-            {ALERT_KINDS.map((config) => {
-              const exists = portfolioAlertRules.some(r => r.kind === config.kind && r.enabled);
-              return (
-                <Pressable
-                  key={config.kind}
-                  disabled={exists}
-                  onPress={() => handleAddRule(config.kind)}
-                >
-                  <View style={[styles.addCardIcon, { backgroundColor: config.color + '20' }]}>
-                    <Ionicons name={config.icon as keyof typeof Ionicons.glyphMap} size={24} color={exists ? colors.textMuted : config.color} />
-                  </View>
-                  <Text style={[styles.addCardLabel, exists && { color: colors.textMuted }]}>
-                    {config.label}
-                  </Text>
-                  <Text style={styles.addCardDesc}>{config.desc}</Text>
-                  {exists && (
-                    <View style={styles.addedBadge}>
-                      <Ionicons name="checkmark-circle" size={14} color={colors.marketUp} />
-                      <Text style={styles.addedBadgeText}>{t('portfolioAlerts.active')}</Text>
-                    </View>
-                  )}
-                </Pressable>
-              );
-            })}
           </View>
-        </View>
+        </LinearGradient>
 
-        {/* Disabled Alerts */}
-        {disabledRules.length > 0 && (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Active Alerts */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('portfolioAlerts.pausedAlerts')} ({disabledRules.length})</Text>
-            {disabledRules.map(renderAlertCard)}
-          </View>
-        )}
-
-        {/* ── Alert Trigger History ────────────────────── */}
-        {alertTriggerHistory.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.historyHeader}>
-              <Text style={styles.sectionTitle}>
-                {t('portfolioAlerts.triggerHistory')} ({alertTriggerHistory.length})
-              </Text>
-              <Pressable onPress={clearAlertTriggerHistory} style={styles.historyClearBtn}>
-                <Ionicons name="trash-outline" size={14} color={colors.danger} />
-                <Text style={styles.historyClearText}>{t('portfolioAlerts.clear')}</Text>
-              </Pressable>
-            </View>
-            {alertTriggerHistory.slice(0, 50).map((entry, i) => {
-              const config = ALERT_KINDS.find(c => c.kind === entry.kind);
-              const entryColor = config?.color || colors.primary;
-              return (
-                <View key={`${entry.ruleId}_${i}`} style={styles.historyCard}>
-                  <View style={styles.historyLeft}>
-                    <View style={[styles.historyDot, { backgroundColor: entryColor }]} />
-                    <View style={styles.historyInfo}>
-                      <Text style={styles.historyRuleLabel} numberOfLines={1}>{entry.ruleLabel}</Text>
-                      <Text style={styles.historySummary} numberOfLines={1}>{entry.summary}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.historyRight}>
-                    <Text style={styles.historyTime}>
-                      {new Date(entry.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                    </Text>
-                    <Text style={[styles.historyValue, {
-                      color: entry.value >= 0 ? colors.marketUp : colors.marketDown,
-                    }]}>
-                      {entry.kind === 'portfolio_pnl_abs'
-                        ? `${entry.value < 0 ? '-' : ''}₹${Math.abs(entry.value).toLocaleString('en-IN')}`
-                        : entry.kind === 'consecutive_loss_days'
-                          ? `${entry.value}d`
-                          : `${entry.value >= 0 ? '+' : ''}${entry.value.toFixed(1)}%`
-                      }
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-            {alertTriggerHistory.length > 50 && (
-              <Text style={styles.historyMoreText}>+{alertTriggerHistory.length - 50} more</Text>
+            <Text style={styles.sectionTitle}>
+              {t('portfolioAlerts.activeAlerts')} ({enabledRules.length})
+            </Text>
+            {enabledRules.length > 0 ? (
+              enabledRules.map(renderAlertCard)
+            ) : (
+              <View style={styles.emptyCard}>
+                <Ionicons name="notifications-off-outline" size={40} color={colors.textMuted} />
+                <Text style={styles.emptyTitle}>{t('portfolioAlerts.noActiveAlerts')}</Text>
+                <Text style={styles.emptyDesc}>{t('portfolioAlerts.noActiveAlertsDesc')}</Text>
+              </View>
             )}
           </View>
-        )}
 
-        {/* Info Card */}
-        <View style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Ionicons name="information-circle" size={20} color="#6C63FF" />
-            <Text style={styles.infoText}>
-              Portfolio alerts are evaluated in real-time using WebSocket price data. Alerts trigger once per rule — toggle the rule off/on to re-arm it.
-            </Text>
-          </View>
-          <View style={styles.infoDivider} />
-          <View style={styles.infoRow}>
-            <Ionicons name="notifications" size={20} color="#FFC107" />
-            <Text style={styles.infoText}>
-              Make sure "Price Alerts" are enabled in Notification Preferences for these to fire.
-            </Text>
-          </View>
-          <View style={styles.infoDivider} />
-          <View style={styles.infoRow}>
-            <Ionicons name="refresh" size={20} color="#00D2FF" />
-            <Text style={styles.infoText}>
-              Rules automatically re-arm at the start of each trading day.
-            </Text>
-          </View>
-        </View>
-
-        {/* ── Quiet Hours ──────────────────────────── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('portfolioAlerts.quietHours')}</Text>
-          <Pressable style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>
-            <View style={[styles.quietHoursIcon, {
-              backgroundColor: isInQuietHours(preferences)
-                ? '#6C63FF20'
-                : colors.bgInput,
-            }]}>
-              <Ionicons
-                name={isInQuietHours(preferences) ? 'moon' : 'sunny-outline'}
-                size={22}
-                color={isInQuietHours(preferences) ? '#6C63FF' : colors.textMuted}
-              />
-            </View>
-            <View style={styles.quietHoursInfo}>
-              <Text style={styles.quietHoursLabel}>
-                {isInQuietHours(preferences)
-                  ? '🔇 Quiet hours active'
-                  : '🔊 Quiet hours off'}
-              </Text>
-              <Text style={styles.quietHoursDesc}>
-                {preferences.quietHoursStart && preferences.quietHoursEnd
-                  ? `Silent from ${preferences.quietHoursStart} to ${preferences.quietHoursEnd} — push notifications are suppressed during this window`
-                  : 'Push notifications fire immediately. Set quiet hours in Notification Preferences.'}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-          </Pressable>
-        </View>
-
-        {/* ── Quick-Add Defaults ──────────────────────── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('portfolioAlerts.quickAddDefaults')}</Text>
-          <View style={styles.quickAddCard}>
-            <View style={styles.quickAddRow}>
-              <View style={styles.quickAddInfo}>
-                <Text style={styles.quickAddLabel}>{t('portfolioAlerts.dayGainThreshold')}</Text>
-                <Text style={styles.quickAddDesc}>{t('portfolioAlerts.dayGainThresholdDesc')}</Text>
-              </View>
-              <View style={styles.quickAddControls}>
-                <Pressable onPress={() => { const next = Math.max(2, quickAddDayGainThreshold - 1); setQuickAddThreshold('day_gain', next); }}>
-                  <Ionicons name="remove" size={16} color={colors.primary} />
-                </Pressable>
-                <View style={styles.quickAddValueWrap}>
-                  <Text style={[styles.quickAddValue, { color: '#FFC107' }]}>{quickAddDayGainThreshold}%</Text>
-                </View>
-                <Pressable onPress={() => { const next = Math.min(50, quickAddDayGainThreshold + 1); setQuickAddThreshold('day_gain', next); }}>
-                  <Ionicons name="add" size={16} color={colors.primary} />
-                </Pressable>
-              </View>
-            </View>
-            <View style={styles.quickAddDivider} />
-            <View style={styles.quickAddRow}>
-              <View style={styles.quickAddInfo}>
-                <Text style={styles.quickAddLabel}>{t('portfolioAlerts.pnlThreshold')}</Text>
-                <Text style={styles.quickAddDesc}>{t('portfolioAlerts.pnlThresholdDesc')}</Text>
-              </View>
-              <View style={styles.quickAddControls}>
-                <Pressable onPress={() => { const next = Math.max(5, quickAddPnLThreshold - 5); setQuickAddThreshold('pnl', next); }}>
-                  <Ionicons name="remove" size={16} color={colors.primary} />
-                </Pressable>
-                <View style={styles.quickAddValueWrap}>
-                  <Text style={[styles.quickAddValue, { color: '#00C853' }]}>{quickAddPnLThreshold}%</Text>
-                </View>
-                <Pressable onPress={() => { const next = Math.min(100, quickAddPnLThreshold + 5); setQuickAddThreshold('pnl', next); }}>
-                  <Ionicons name="add" size={16} color={colors.primary} />
-                </Pressable>
-              </View>
+          {/* Add Alert Types */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('portfolioAlerts.addAlertRules')}</Text>
+            <View style={styles.addGrid}>
+              {ALERT_KINDS.map((config) => {
+                const exists = portfolioAlertRules.some(r => r.kind === config.kind && r.enabled);
+                return (
+                  <Pressable
+                    key={config.kind}
+                    disabled={exists}
+                    onPress={() => handleAddRule(config.kind)}
+                  >
+                    <View style={[styles.addCardIcon, { backgroundColor: config.color + '20' }]}>
+                      <Ionicons name={config.icon as keyof typeof Ionicons.glyphMap} size={24} color={exists ? colors.textMuted : config.color} />
+                    </View>
+                    <Text style={[styles.addCardLabel, exists && { color: colors.textMuted }]}>
+                      {config.label}
+                    </Text>
+                    <Text style={styles.addCardDesc}>{config.desc}</Text>
+                    {exists && (
+                      <View style={styles.addedBadge}>
+                        <Ionicons name="checkmark-circle" size={14} color={colors.marketUp} />
+                        <Text style={styles.addedBadgeText}>{t('portfolioAlerts.active')}</Text>
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
-        </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
+          {/* Disabled Alerts */}
+          {disabledRules.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('portfolioAlerts.pausedAlerts')} ({disabledRules.length})</Text>
+              {disabledRules.map(renderAlertCard)}
+            </View>
+          )}
 
-      {/* ── Stock Picker Modal (Multi-Select) ───────────────── */}
-      <Modal
-        visible={stockPickerVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setStockPickerVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
-            <View style={styles.modalHeader}>
-              <View>
-                <Text style={styles.modalTitle}>{t('portfolioAlerts.selectHoldings')}</Text>
-                <Text style={styles.modalSubtitle}>
-                  {selectedStockIds.length} of {holdings.length} selected
+          {/* ── Alert Trigger History ────────────────────── */}
+          {alertTriggerHistory.length > 0 && (
+            <View style={styles.section}>
+              <View style={styles.historyHeader}>
+                <Text style={styles.sectionTitle}>
+                  {t('portfolioAlerts.triggerHistory')} ({alertTriggerHistory.length})
                 </Text>
-              </View>
-              <View style={styles.modalHeaderActions}>
-                <Pressable
-                  onPress={() => {
-                    // Select all selectable (non-already-alerted) holdings
-                    const activeKind = pendingKind
-                      || (stockPickerForRule
-                        ? portfolioAlertRules.find(r => r.id === stockPickerForRule)?.kind
-                        : null);
-                    const alertedIds = new Set<string>();
-                    if (activeKind) {
-                      portfolioAlertRules
-                        .filter(r => r.id !== stockPickerForRule && r.kind === activeKind && r.enabled && r.stockIds?.length)
-                        .forEach(r => r.stockIds!.forEach(sid => alertedIds.add(sid)));
-                    }
-                    setSelectedStockIds(
-                      holdings
-                        .filter(h => !alertedIds.has(h.stockId))
-                        .map(h => h.stockId)
-                    );
-                  }}
-                >
-                  <Ionicons name="checkbox-outline" size={16} color={colors.primary} />
-                  <Text style={styles.modalActionText}>All</Text>
-                </Pressable>
-                <Pressable onPress={() => setSelectedStockIds([])}>
-                  <Ionicons name="remove-circle-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.modalActionText, { color: colors.textMuted }]}>{t('portfolioAlerts.none')}</Text>
-                </Pressable>
-                <Pressable onPress={() => setStockPickerVisible(false)}>
-                  <Ionicons name="close" size={24} color={colors.text} />
+                <Pressable onPress={clearAlertTriggerHistory} style={styles.historyClearBtn}>
+                  <Ionicons name="trash-outline" size={14} color={colors.danger} />
+                  <Text style={styles.historyClearText}>{t('portfolioAlerts.clear')}</Text>
                 </Pressable>
               </View>
-            </View>
-
-            {/* Search Bar */}
-            <View style={styles.searchBarContainer}>
-              <Ionicons name="search" size={16} color={colors.textMuted} style={styles.searchIcon} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder={t('portfolioAlerts.searchPlaceholder')}
-                placeholderTextColor={colors.textMuted + '60'}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                autoCapitalize="characters"
-                autoCorrect={false}
-              />
-              {searchQuery.length > 0 && (
-                <Pressable onPress={() => setSearchQuery('')} style={styles.searchClearBtn}>
-                  <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-                </Pressable>
-              )}
-            </View>
-
-            <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
-              {(() => {
-                // Filter holdings by search query
-                const query = searchQuery.trim().toLowerCase();
-                const filteredHoldings = query
-                  ? holdings.filter(h =>
-                      h.symbol.toLowerCase().includes(query) ||
-                      h.name.toLowerCase().includes(query)
-                    )
-                  : holdings;
-
-                if (filteredHoldings.length === 0) {
-                  return (
-                    <View style={styles.modalEmpty}>
-                      <Ionicons
-                        name={query ? 'search-outline' : 'briefcase-outline'}
-                        size={32}
-                        color={colors.textMuted}
-                      />
-                      <Text style={styles.modalEmptyText}>
-                        {query ? `No holdings matching "${searchQuery}"` : 'No holdings yet'}
+              {alertTriggerHistory.slice(0, 50).map((entry, i) => {
+                const config = ALERT_KINDS.find(c => c.kind === entry.kind);
+                const entryColor = config?.color || colors.primary;
+                return (
+                  <View key={`${entry.ruleId}_${i}`} style={styles.historyCard}>
+                    <View style={styles.historyLeft}>
+                      <View style={[styles.historyDot, { backgroundColor: entryColor }]} />
+                      <View style={styles.historyInfo}>
+                        <Text style={styles.historyRuleLabel} numberOfLines={1}>{entry.ruleLabel}</Text>
+                        <Text style={styles.historySummary} numberOfLines={1}>{entry.summary}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.historyRight}>
+                      <Text style={styles.historyTime}>
+                        {new Date(entry.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </Text>
+                      <Text style={[styles.historyValue, {
+                        color: entry.value >= 0 ? colors.marketUp : colors.marketDown,
+                      }]}>
+                        {entry.kind === 'portfolio_pnl_abs'
+                          ? `${entry.value < 0 ? '-' : ''}₹${Math.abs(entry.value).toLocaleString('en-IN')}`
+                          : entry.kind === 'consecutive_loss_days'
+                            ? `${entry.value}d`
+                            : `${entry.value >= 0 ? '+' : ''}${entry.value.toFixed(1)}%`
+                        }
                       </Text>
                     </View>
-                  );
-                }
+                  </View>
+                );
+              })}
+              {alertTriggerHistory.length > 50 && (
+                <Text style={styles.historyMoreText}>+{alertTriggerHistory.length - 50} more</Text>
+              )}
+            </View>
+          )}
 
-                // Compute which stockIds already have active alerts of the current kind
-                const activeKind = pendingKind || (stockPickerForRule
-                  ? portfolioAlertRules.find(r => r.id === stockPickerForRule)?.kind
-                  : null);
-                const alertedIds = new Set<string>();
-                if (activeKind) {
-                  portfolioAlertRules
-                    .filter(r => r.id !== stockPickerForRule && r.kind === activeKind && r.enabled && r.stockIds?.length)
-                    .forEach(r => r.stockIds!.forEach(sid => alertedIds.add(sid)));
-                }
+          {/* Info Card */}
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Ionicons name="information-circle" size={20} color="#6C63FF" />
+              <Text style={styles.infoText}>
+                Portfolio alerts are evaluated in real-time using WebSocket price data. Alerts trigger once per rule — toggle the rule off/on to re-arm it.
+              </Text>
+            </View>
+            <View style={styles.infoDivider} />
+            <View style={styles.infoRow}>
+              <Ionicons name="notifications" size={20} color="#FFC107" />
+              <Text style={styles.infoText}>
+                Make sure "Price Alerts" are enabled in Notification Preferences for these to fire.
+              </Text>
+            </View>
+            <View style={styles.infoDivider} />
+            <View style={styles.infoRow}>
+              <Ionicons name="refresh" size={20} color="#00D2FF" />
+              <Text style={styles.infoText}>
+                Rules automatically re-arm at the start of each trading day.
+              </Text>
+            </View>
+          </View>
 
-                const selectedStockIdsSet = new Set(selectedStockIds);
-                return filteredHoldings.filter(h => !alertedIds.has(h.stockId)).map(h => {
-                  const isSelected = selectedStockIdsSet.has(h.stockId);
-                  return (
-                    <Pressable key={h.stockId} onPress={() => toggleStockSelection(h.stockId)} style={styles.modalItem}>
-                      <View style={styles.modalItemInfo}>
-                        <Text style={[styles.modalItemSymbol, { color: colors.text }]}>{h.symbol}</Text>
-                        <Text style={[styles.modalItemName, { color: colors.textMuted }]} numberOfLines={1}>{h.name}</Text>
-                      </View>
-                      <Ionicons
-                        name={isSelected ? 'checkbox' : 'square-outline'}
-                        size={22}
-                        color={isSelected ? colors.primary : colors.textMuted}
-                      />
-                    </Pressable>
-                  );
-                });
-              })()}
-            </ScrollView>
-
-            {/* Confirm Button */}
-            <Pressable
-              style={[styles.confirmBtn, { backgroundColor: colors.primary, opacity: selectedStockIds.length > 0 ? 1 : 0.5 }]}
-              onPress={handleConfirmStocks}
-              disabled={selectedStockIds.length === 0}
-            >
-              <Ionicons name="checkmark-circle" size={20} color="#FFF" />
-              <Text style={styles.confirmBtnText}>Confirm ({selectedStockIds.length})</Text>
+          {/* ── Quiet Hours ──────────────────────────── */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('portfolioAlerts.quietHours')}</Text>
+            <Pressable style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>
+              <View style={[styles.quietHoursIcon, {
+                backgroundColor: isInQuietHours(preferences)
+                  ? '#6C63FF20'
+                  : colors.bgInput,
+              }]}>
+                <Ionicons
+                  name={isInQuietHours(preferences) ? 'moon' : 'sunny-outline'}
+                  size={22}
+                  color={isInQuietHours(preferences) ? '#6C63FF' : colors.textMuted}
+                />
+              </View>
+              <View style={styles.quietHoursInfo}>
+                <Text style={styles.quietHoursLabel}>
+                  {isInQuietHours(preferences)
+                    ? '🔇 Quiet hours active'
+                    : '🔊 Quiet hours off'}
+                </Text>
+                <Text style={styles.quietHoursDesc}>
+                  {preferences.quietHoursStart && preferences.quietHoursEnd
+                    ? `Silent from ${preferences.quietHoursStart} to ${preferences.quietHoursEnd} — push notifications are suppressed during this window`
+                    : 'Push notifications fire immediately. Set quiet hours in Notification Preferences.'}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
             </Pressable>
           </View>
-        </View>
-      </Modal>
-    </View>
+
+          {/* ── Quick-Add Defaults ──────────────────────── */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('portfolioAlerts.quickAddDefaults')}</Text>
+            <View style={styles.quickAddCard}>
+              <View style={styles.quickAddRow}>
+                <View style={styles.quickAddInfo}>
+                  <Text style={styles.quickAddLabel}>{t('portfolioAlerts.dayGainThreshold')}</Text>
+                  <Text style={styles.quickAddDesc}>{t('portfolioAlerts.dayGainThresholdDesc')}</Text>
+                </View>
+                <View style={styles.quickAddControls}>
+                  <Pressable onPress={() => { const next = Math.max(2, quickAddDayGainThreshold - 1); setQuickAddThreshold('day_gain', next); }}>
+                    <Ionicons name="remove" size={16} color={colors.primary} />
+                  </Pressable>
+                  <View style={styles.quickAddValueWrap}>
+                    <Text style={[styles.quickAddValue, { color: '#FFC107' }]}>{quickAddDayGainThreshold}%</Text>
+                  </View>
+                  <Pressable onPress={() => { const next = Math.min(50, quickAddDayGainThreshold + 1); setQuickAddThreshold('day_gain', next); }}>
+                    <Ionicons name="add" size={16} color={colors.primary} />
+                  </Pressable>
+                </View>
+              </View>
+              <View style={styles.quickAddDivider} />
+              <View style={styles.quickAddRow}>
+                <View style={styles.quickAddInfo}>
+                  <Text style={styles.quickAddLabel}>{t('portfolioAlerts.pnlThreshold')}</Text>
+                  <Text style={styles.quickAddDesc}>{t('portfolioAlerts.pnlThresholdDesc')}</Text>
+                </View>
+                <View style={styles.quickAddControls}>
+                  <Pressable onPress={() => { const next = Math.max(5, quickAddPnLThreshold - 5); setQuickAddThreshold('pnl', next); }}>
+                    <Ionicons name="remove" size={16} color={colors.primary} />
+                  </Pressable>
+                  <View style={styles.quickAddValueWrap}>
+                    <Text style={[styles.quickAddValue, { color: '#00C853' }]}>{quickAddPnLThreshold}%</Text>
+                  </View>
+                  <Pressable onPress={() => { const next = Math.min(100, quickAddPnLThreshold + 5); setQuickAddThreshold('pnl', next); }}>
+                    <Ionicons name="add" size={16} color={colors.primary} />
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+
+        {/* ── Stock Picker Modal (Multi-Select) ───────────────── */}
+        <Modal
+          visible={stockPickerVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setStockPickerVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
+              <View style={styles.modalHeader}>
+                <View>
+                  <Text style={styles.modalTitle}>{t('portfolioAlerts.selectHoldings')}</Text>
+                  <Text style={styles.modalSubtitle}>
+                    {selectedStockIds.length} of {holdings.length} selected
+                  </Text>
+                </View>
+                <View style={styles.modalHeaderActions}>
+                  <Pressable
+                    onPress={() => {
+                      // Select all selectable (non-already-alerted) holdings
+                      const activeKind = pendingKind
+                        || (stockPickerForRule
+                          ? portfolioAlertRules.find(r => r.id === stockPickerForRule)?.kind
+                          : null);
+                      const alertedIds = new Set<string>();
+                      if (activeKind) {
+                        portfolioAlertRules
+                          .filter(r => r.id !== stockPickerForRule && r.kind === activeKind && r.enabled && r.stockIds?.length)
+                          .forEach(r => r.stockIds!.forEach(sid => alertedIds.add(sid)));
+                      }
+                      setSelectedStockIds(
+                        holdings
+                          .filter(h => !alertedIds.has(h.stockId))
+                          .map(h => h.stockId)
+                      );
+                    }}
+                  >
+                    <Ionicons name="checkbox-outline" size={16} color={colors.primary} />
+                    <Text style={styles.modalActionText}>All</Text>
+                  </Pressable>
+                  <Pressable onPress={() => setSelectedStockIds([])}>
+                    <Ionicons name="remove-circle-outline" size={16} color={colors.textMuted} />
+                    <Text style={[styles.modalActionText, { color: colors.textMuted }]}>{t('portfolioAlerts.none')}</Text>
+                  </Pressable>
+                  <Pressable onPress={() => setStockPickerVisible(false)}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* Search Bar */}
+              <View style={styles.searchBarContainer}>
+                <Ionicons name="search" size={16} color={colors.textMuted} style={styles.searchIcon} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder={t('portfolioAlerts.searchPlaceholder')}
+                  placeholderTextColor={colors.textMuted + '60'}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                />
+                {searchQuery.length > 0 && (
+                  <Pressable onPress={() => setSearchQuery('')} style={styles.searchClearBtn}>
+                    <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+                  </Pressable>
+                )}
+              </View>
+
+              <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
+                {(() => {
+                  // Filter holdings by search query
+                  const query = searchQuery.trim().toLowerCase();
+                  const filteredHoldings = query
+                    ? holdings.filter(h =>
+                        h.symbol.toLowerCase().includes(query) ||
+                        h.name.toLowerCase().includes(query)
+                      )
+                    : holdings;
+
+                  if (filteredHoldings.length === 0) {
+                    return (
+                      <View style={styles.modalEmpty}>
+                        <Ionicons
+                          name={query ? 'search-outline' : 'briefcase-outline'}
+                          size={32}
+                          color={colors.textMuted}
+                        />
+                        <Text style={styles.modalEmptyText}>
+                          {query ? `No holdings matching "${searchQuery}"` : 'No holdings yet'}
+                        </Text>
+                      </View>
+                    );
+                  }
+
+                  // Compute which stockIds already have active alerts of the current kind
+                  const activeKind = pendingKind || (stockPickerForRule
+                    ? portfolioAlertRules.find(r => r.id === stockPickerForRule)?.kind
+                    : null);
+                  const alertedIds = new Set<string>();
+                  if (activeKind) {
+                    portfolioAlertRules
+                      .filter(r => r.id !== stockPickerForRule && r.kind === activeKind && r.enabled && r.stockIds?.length)
+                      .forEach(r => r.stockIds!.forEach(sid => alertedIds.add(sid)));
+                  }
+
+                  const selectedStockIdsSet = new Set(selectedStockIds);
+                  return filteredHoldings.filter(h => !alertedIds.has(h.stockId)).map(h => {
+                    const isSelected = selectedStockIdsSet.has(h.stockId);
+                    return (
+                      <Pressable key={h.stockId} onPress={() => toggleStockSelection(h.stockId)} style={styles.modalItem}>
+                        <View style={styles.modalItemInfo}>
+                          <Text style={[styles.modalItemSymbol, { color: colors.text }]}>{h.symbol}</Text>
+                          <Text style={[styles.modalItemName, { color: colors.textMuted }]} numberOfLines={1}>{h.name}</Text>
+                        </View>
+                        <Ionicons
+                          name={isSelected ? 'checkbox' : 'square-outline'}
+                          size={22}
+                          color={isSelected ? colors.primary : colors.textMuted}
+                        />
+                      </Pressable>
+                    );
+                  });
+                })()}
+              </ScrollView>
+
+              {/* Confirm Button */}
+              <Pressable
+                style={[styles.confirmBtn, { backgroundColor: colors.primary, opacity: selectedStockIds.length > 0 ? 1 : 0.5 }]}
+                onPress={handleConfirmStocks}
+                disabled={selectedStockIds.length === 0}
+              >
+                <Ionicons name="checkmark-circle" size={20} color="#FFF" />
+                <Text style={styles.confirmBtnText}>Confirm ({selectedStockIds.length})</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+      </AppScreen>
   );
 }const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
     header: {
-      paddingTop: 60,
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       paddingHorizontal: SPACING.xl,
       paddingBottom: SPACING.lg,
     },
