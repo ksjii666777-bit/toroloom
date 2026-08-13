@@ -29,6 +29,7 @@ import Card from '../../components/ui/Card';
 import { kycCallbackStore } from '../../store/kycCallbackStore';
 import type {AadhaarOtpResponse, AadhaarVerifyResponse, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 type FlowStep = 'aadhaar_input' | 'otp_input' | 'verified';
 
@@ -194,217 +195,219 @@ export default function AadhaarVerificationScreen({ navigation }: NativeStackScr
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.title}>{t('kyc.aadhaarTitle')}</Text>
-          <View style={styles.stepIndicator}>
-            <Text style={styles.stepText}>
-              {flowStep === 'aadhaar_input' ? 'Step 1 of 2' : flowStep === 'otp_input' ? 'Step 2 of 2' : 'Complete'}
-            </Text>
-          </View>
-        </View>
+      <AppScreen scroll={false} padded={false}>
 
-        {/* Flow Indicator */}
-        <View style={styles.progressBar}>
-          <View style={[styles.progressDot, styles.progressDotActive]} />
-          <View style={[styles.progressLine, (flowStep === 'otp_input' || flowStep === 'verified') && styles.progressLineActive]} />
-          <View style={[styles.progressDot, (flowStep === 'otp_input' || flowStep === 'verified') && styles.progressDotActive]} />
-          <View style={[styles.progressLine, flowStep === 'verified' && styles.progressLineActive]} />
-          <View style={[styles.progressDot, flowStep === 'verified' && styles.progressDotActive]} />
-        </View>
-
-        {flowStep === 'aadhaar_input' && (
-          <>
-            {/* Info */}
-            <Card style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
-                <Text style={styles.infoText}>
-                  {t('kyc.aadhaarInfo')}
-                </Text>
-              </View>
-            </Card>
-
-            {/* Aadhaar Input */}
-            <View style={styles.inputSection}>
-              <Text style={styles.inputLabel}>{t('kyc.enterAadhaarNumber')}</Text>
-              <View style={[styles.inputContainer, { borderColor: error ? colors.danger : colors.border }]}>
-                <Ionicons name="finger-print" size={20} color={colors.primary} />
-                <TextInput
-                  style={styles.input}
-                  value={aadhaarNumber}
-                  onChangeText={handleAadhaarChange}
-                  placeholder="XXXX XXXX XXXX"
-                  placeholderTextColor={colors.textMuted}
-                  keyboardType="number-pad"
-                  maxLength={14}
-                  editable={!isLoading}
-                />
-              </View>
-              <Text style={styles.inputHint}>12-digit number found on your Aadhaar card</Text>
-            </View>
-
-            {/* Consent Checkbox */}
-            <TouchableOpacity
-              style={styles.consentRow}
-              onPress={() => setConsentGiven(!consentGiven)}
-              disabled={isLoading}
-            >
-              <View style={[styles.checkbox, consentGiven && styles.checkboxActive]}>
-                {consentGiven && <Ionicons name="checkmark" size={16} color={colors.white} />}
-              </View>
-              <Text style={styles.consentText}>
-                I consent to verify my Aadhaar details for KYC purposes. I understand that
-                only my masked Aadhaar data (last 4 digits, year of birth, state) will be used.
-              </Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
-
-            {/* Send OTP Button */}
-            <AnimatedPressable
-              onPress={handleSendOtp}
-              disabled={!isAadhaarValid || !consentGiven || isLoading}
-              haptic="medium"
-              scaleTo={0.97}
-              style={{ opacity: isAadhaarValid && consentGiven && !isLoading ? 1 : 0.5 }}
-            >
-              <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
-                <Ionicons name="send" size={20} color={colors.white} />
-                <Text style={styles.actionBtnText}>{isLoading ? 'Sending OTP...' : 'Send OTP'}</Text>
-              </LinearGradient>
-            </AnimatedPressable>
-          </>
-        )}
-
-        {flowStep === 'otp_input' && (
-          <>
-            {/* OTP Info */}
-            <Card style={styles.infoCard}>
-              <Text style={styles.otpSentText}>
-                An OTP has been sent to the mobile number registered with Aadhaar ending with{' '}
-                <Text style={{ ...FONTS.bold, color: colors.primary }}>XXXX{cleanedAadhaar.slice(-4)}</Text>
+            <Text style={styles.title}>{t('kyc.aadhaarTitle')}</Text>
+            <View style={styles.stepIndicator}>
+              <Text style={styles.stepText}>
+                {flowStep === 'aadhaar_input' ? 'Step 1 of 2' : flowStep === 'otp_input' ? 'Step 2 of 2' : 'Complete'}
               </Text>
-              {otpTimer > 0 && (
-                <Text style={styles.otpTimerText}>
-                  OTP expires in {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-                </Text>
-              )}
-              {otpTimer === 0 && (
-                <TouchableOpacity onPress={handleResendOtp}>
-                  <Text style={styles.resendText}>{t('kyc.otpExpired')}</Text>
-                </TouchableOpacity>
-              )}
-            </Card>
-
-            {/* OTP Input */}
-            <View style={styles.otpSection}>
-              <Text style={styles.inputLabel}>
-                For demo/mock: use <Text style={{ fontFamily: 'monospace', color: colors.primary }}>123456</Text>
-              </Text>
-              <View style={styles.otpRow}>
-                {otp.map((digit, index) => (              <View key={index} style={[
-                    styles.otpBox,
-                    { borderColor: digit ? colors.primary : colors.border },
-                    otp[index] && styles.otpBoxFilled,
-                  ]}>
-                    <TextInput
-                      ref={(ref) => { otpInputRefs.current[index] = ref; }}
-                      style={styles.otpInput}
-                      value={digit}
-                      onChangeText={(v) => handleOtpDigitChange(index, v)}
-                      onKeyPress={({ nativeEvent }) => handleOtpKeyPress(index, nativeEvent.key)}
-                      keyboardType="number-pad"
-                      maxLength={1}
-                      editable={!isLoading}
-                    />
-                  </View>
-                ))}
-              </View>
             </View>
-
-            {/* Verify OTP Button */}
-            <AnimatedPressable
-              onPress={handleVerifyOtp}
-              disabled={!isOtpComplete || isLoading}
-              haptic="medium"
-              scaleTo={0.97}
-              style={{ opacity: isOtpComplete && !isLoading ? 1 : 0.5, marginTop: SPACING.lg }}
-            >
-              <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
-                <Ionicons name="shield-checkmark" size={20} color={colors.white} />
-                <Text style={styles.actionBtnText}>{isLoading ? 'Verifying...' : 'Verify OTP'}</Text>
-              </LinearGradient>
-            </AnimatedPressable>
-          </>
-        )}
-
-        {flowStep === 'verified' && verifyResponse && (
-          <>
-            {/* Success */}
-            <Card style={styles.resultCard}>
-              <View style={styles.resultHeader}>
-                <View style={[styles.resultIcon, { backgroundColor: colors.success + '20' }]}>
-                  <Ionicons name="checkmark-circle" size={48} color={colors.success} />
-                </View>
-                <Text style={styles.resultTitle}>{t('kyc.aadhaarVerifiedTitle')}</Text>
-              </View>
-              <Text style={styles.resultSubtitle}>{t('kyc.aadhaarVerifiedMsg')}</Text>
-
-              <View style={styles.resultDivider} />
-
-              <View style={styles.resultDetails}>
-                <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>{t('kyc.aadhaarNumberLabel')}</Text>
-                  <Text style={styles.resultValue}>XXXX XXXX {verifyResponse.lastFourDigits}</Text>
-                </View>
-                <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>{t('kyc.yearOfBirth')}</Text>
-                  <Text style={styles.resultValue}>{verifyResponse.yearOfBirth || 'N/A'}</Text>
-                </View>
-                <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>{t('kyc.gender')}</Text>
-                  <Text style={styles.resultValue}>{verifyResponse.gender || 'N/A'}</Text>
-                </View>
-                <View style={styles.resultRow}>
-                  <Text style={styles.resultLabel}>{t('kyc.state')}</Text>
-                  <Text style={styles.resultValue}>{verifyResponse.state || 'N/A'}</Text>
-                </View>
-              </View>
-            </Card>
-
-            {/* Continue */}
-            <AnimatedPressable onPress={handleContinue} haptic="medium" scaleTo={0.97}>
-              <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
-                <Text style={styles.continueBtnText}>{t('kyc.continueAction')}</Text>
-                <Ionicons name="arrow-forward" size={20} color={colors.white} />
-              </LinearGradient>
-            </AnimatedPressable>
-          </>
-        )}
-
-        {/* Error */}
-        {error && (
-          <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle" size={18} color={colors.danger} />
-            <Text style={styles.errorText}>{error}</Text>
           </View>
-        )}
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {/* Flow Indicator */}
+          <View style={styles.progressBar}>
+            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={[styles.progressLine, (flowStep === 'otp_input' || flowStep === 'verified') && styles.progressLineActive]} />
+            <View style={[styles.progressDot, (flowStep === 'otp_input' || flowStep === 'verified') && styles.progressDotActive]} />
+            <View style={[styles.progressLine, flowStep === 'verified' && styles.progressLineActive]} />
+            <View style={[styles.progressDot, flowStep === 'verified' && styles.progressDotActive]} />
+          </View>
+
+          {flowStep === 'aadhaar_input' && (
+            <>
+              {/* Info */}
+              <Card style={styles.infoCard}>
+                <View style={styles.infoRow}>
+                  <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
+                  <Text style={styles.infoText}>
+                    {t('kyc.aadhaarInfo')}
+                  </Text>
+                </View>
+              </Card>
+
+              {/* Aadhaar Input */}
+              <View style={styles.inputSection}>
+                <Text style={styles.inputLabel}>{t('kyc.enterAadhaarNumber')}</Text>
+                <View style={[styles.inputContainer, { borderColor: error ? colors.danger : colors.border }]}>
+                  <Ionicons name="finger-print" size={20} color={colors.primary} />
+                  <TextInput
+                    style={styles.input}
+                    value={aadhaarNumber}
+                    onChangeText={handleAadhaarChange}
+                    placeholder="XXXX XXXX XXXX"
+                    placeholderTextColor={colors.textMuted}
+                    keyboardType="number-pad"
+                    maxLength={14}
+                    editable={!isLoading}
+                  />
+                </View>
+                <Text style={styles.inputHint}>12-digit number found on your Aadhaar card</Text>
+              </View>
+
+              {/* Consent Checkbox */}
+              <TouchableOpacity
+                style={styles.consentRow}
+                onPress={() => setConsentGiven(!consentGiven)}
+                disabled={isLoading}
+              >
+                <View style={[styles.checkbox, consentGiven && styles.checkboxActive]}>
+                  {consentGiven && <Ionicons name="checkmark" size={16} color={colors.white} />}
+                </View>
+                <Text style={styles.consentText}>
+                  I consent to verify my Aadhaar details for KYC purposes. I understand that
+                  only my masked Aadhaar data (last 4 digits, year of birth, state) will be used.
+                </Text>
+              </TouchableOpacity>
+
+              {/* Send OTP Button */}
+              <AnimatedPressable
+                onPress={handleSendOtp}
+                disabled={!isAadhaarValid || !consentGiven || isLoading}
+                haptic="medium"
+                scaleTo={0.97}
+                style={{ opacity: isAadhaarValid && consentGiven && !isLoading ? 1 : 0.5 }}
+              >
+                <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
+                  <Ionicons name="send" size={20} color={colors.white} />
+                  <Text style={styles.actionBtnText}>{isLoading ? 'Sending OTP...' : 'Send OTP'}</Text>
+                </LinearGradient>
+              </AnimatedPressable>
+            </>
+          )}
+
+          {flowStep === 'otp_input' && (
+            <>
+              {/* OTP Info */}
+              <Card style={styles.infoCard}>
+                <Text style={styles.otpSentText}>
+                  An OTP has been sent to the mobile number registered with Aadhaar ending with{' '}
+                  <Text style={{ ...FONTS.bold, color: colors.primary }}>XXXX{cleanedAadhaar.slice(-4)}</Text>
+                </Text>
+                {otpTimer > 0 && (
+                  <Text style={styles.otpTimerText}>
+                    OTP expires in {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                  </Text>
+                )}
+                {otpTimer === 0 && (
+                  <TouchableOpacity onPress={handleResendOtp}>
+                    <Text style={styles.resendText}>{t('kyc.otpExpired')}</Text>
+                  </TouchableOpacity>
+                )}
+              </Card>
+
+              {/* OTP Input */}
+              <View style={styles.otpSection}>
+                <Text style={styles.inputLabel}>
+                  For demo/mock: use <Text style={{ fontFamily: 'monospace', color: colors.primary }}>123456</Text>
+                </Text>
+                <View style={styles.otpRow}>
+                  {otp.map((digit, index) => (              <View key={index} style={[
+                      styles.otpBox,
+                      { borderColor: digit ? colors.primary : colors.border },
+                      otp[index] && styles.otpBoxFilled,
+                    ]}>
+                      <TextInput
+                        ref={(ref) => { otpInputRefs.current[index] = ref; }}
+                        style={styles.otpInput}
+                        value={digit}
+                        onChangeText={(v) => handleOtpDigitChange(index, v)}
+                        onKeyPress={({ nativeEvent }) => handleOtpKeyPress(index, nativeEvent.key)}
+                        keyboardType="number-pad"
+                        maxLength={1}
+                        editable={!isLoading}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {/* Verify OTP Button */}
+              <AnimatedPressable
+                onPress={handleVerifyOtp}
+                disabled={!isOtpComplete || isLoading}
+                haptic="medium"
+                scaleTo={0.97}
+                style={{ opacity: isOtpComplete && !isLoading ? 1 : 0.5, marginTop: SPACING.lg }}
+              >
+                <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
+                  <Ionicons name="shield-checkmark" size={20} color={colors.white} />
+                  <Text style={styles.actionBtnText}>{isLoading ? 'Verifying...' : 'Verify OTP'}</Text>
+                </LinearGradient>
+              </AnimatedPressable>
+            </>
+          )}
+
+          {flowStep === 'verified' && verifyResponse && (
+            <>
+              {/* Success */}
+              <Card style={styles.resultCard}>
+                <View style={styles.resultHeader}>
+                  <View style={[styles.resultIcon, { backgroundColor: colors.success + '20' }]}>
+                    <Ionicons name="checkmark-circle" size={48} color={colors.success} />
+                  </View>
+                  <Text style={styles.resultTitle}>{t('kyc.aadhaarVerifiedTitle')}</Text>
+                </View>
+                <Text style={styles.resultSubtitle}>{t('kyc.aadhaarVerifiedMsg')}</Text>
+
+                <View style={styles.resultDivider} />
+
+                <View style={styles.resultDetails}>
+                  <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>{t('kyc.aadhaarNumberLabel')}</Text>
+                    <Text style={styles.resultValue}>XXXX XXXX {verifyResponse.lastFourDigits}</Text>
+                  </View>
+                  <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>{t('kyc.yearOfBirth')}</Text>
+                    <Text style={styles.resultValue}>{verifyResponse.yearOfBirth || 'N/A'}</Text>
+                  </View>
+                  <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>{t('kyc.gender')}</Text>
+                    <Text style={styles.resultValue}>{verifyResponse.gender || 'N/A'}</Text>
+                  </View>
+                  <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>{t('kyc.state')}</Text>
+                    <Text style={styles.resultValue}>{verifyResponse.state || 'N/A'}</Text>
+                  </View>
+                </View>
+              </Card>
+
+              {/* Continue */}
+              <AnimatedPressable onPress={handleContinue} haptic="medium" scaleTo={0.97}>
+                <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
+                  <Text style={styles.continueBtnText}>{t('kyc.continueAction')}</Text>
+                  <Ionicons name="arrow-forward" size={20} color={colors.white} />
+                </LinearGradient>
+              </AnimatedPressable>
+            </>
+          )}
+
+          {/* Error */}
+          {error && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={18} color={colors.danger} />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          )}
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+    
+      </AppScreen></KeyboardAvoidingView>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
     scrollContent: { paddingHorizontal: SPACING.xl, paddingBottom: 20 },
 
     header: {

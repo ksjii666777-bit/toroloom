@@ -24,6 +24,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 import { formatCurrency, hexToRgba } from '../../utils/formatters';
 import Button from '../../components/ui/Button';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import { api, ApiError } from '../../services/api/client';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -254,7 +255,8 @@ export default function PlaceOrderScreen({ route, navigation }: NativeStackScree
 
   if (!stock) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <AppScreen scroll={false} padded={false}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Ionicons name="alert-circle" size={48} color={colors.textMuted} />
         <Text style={[styles.stockSymbol, { marginTop: SPACING.md, color: colors.textMuted }]}>
           {t('trading.stockNotFound')}
@@ -264,7 +266,8 @@ export default function PlaceOrderScreen({ route, navigation }: NativeStackScree
             <Text style={{ color: colors.white, ...FONTS.medium, fontSize: FONTS.size.md }}>{t('trading.goBack')}</Text>
           </View>
         </AnimatedPressable>
-      </View>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -315,8 +318,8 @@ export default function PlaceOrderScreen({ route, navigation }: NativeStackScree
   );
 
   return (
-    <Pressable onPress={Keyboard.dismiss} accessible={false} style={styles.container}>
-      {/* Header */}
+    <Pressable onPress={Keyboard.dismiss} accessible={false} style={{ flex: 1 }}>
+      <AppScreen padded={false} header={
       <LinearGradient
         colors={tradeType === 'buy' ? GRADIENTS.primary : GRADIENTS.secondary}
         start={{ x: 0, y: 0 }}
@@ -358,6 +361,35 @@ export default function PlaceOrderScreen({ route, navigation }: NativeStackScree
       </View>
     </View>
       </LinearGradient>
+      } footer={
+      <LinearGradient
+        colors={[hexToRgba(colors.bg, 0), colors.bg]}
+        style={styles.bottomBar}
+      >
+        <View style={styles.bottomRow}>
+          <View style={styles.bottomLeft}>
+            <Text style={styles.bottomLabel}>
+              {qtyNum > 0 ? t('trading.total') : t('trading.availableBalance')}
+            </Text>
+            <Text style={styles.bottomAmount}>
+              {qtyNum > 0 ? formatCurrency(grandTotal) : formatCurrency(availableBalance)}
+            </Text>
+          </View>
+          <Button
+            title={isProcessing
+              ? t('trading.processing')
+              : `${tradeType === 'buy' ? t('trading.buy') : t('trading.sell')} ${qtyNum > 0 ? qtyNum : ''} ${stock.symbol}`
+            }
+            onPress={handlePlaceOrder}
+            variant={tradeType === 'buy' ? 'primary' : 'danger'}
+            size="large"              disabled={!canPlaceOrder}
+            loading={isProcessing}
+            testID="placeOrderBtn"
+            style={{ minWidth: width * 0.45, borderRadius: BORDER_RADIUS.full }}
+          />
+        </View>
+      </LinearGradient>
+      }>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -561,35 +593,6 @@ export default function PlaceOrderScreen({ route, navigation }: NativeStackScree
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Bottom Action Bar */}
-      <LinearGradient
-        colors={[hexToRgba(colors.bg, 0), colors.bg]}
-        style={styles.bottomBar}
-      >
-        <View style={styles.bottomRow}>
-          <View style={styles.bottomLeft}>
-            <Text style={styles.bottomLabel}>
-              {qtyNum > 0 ? t('trading.total') : t('trading.availableBalance')}
-            </Text>
-            <Text style={styles.bottomAmount}>
-              {qtyNum > 0 ? formatCurrency(grandTotal) : formatCurrency(availableBalance)}
-            </Text>
-          </View>
-          <Button
-            title={isProcessing
-              ? t('trading.processing')
-              : `${tradeType === 'buy' ? t('trading.buy') : t('trading.sell')} ${qtyNum > 0 ? qtyNum : ''} ${stock.symbol}`
-            }
-            onPress={handlePlaceOrder}
-            variant={tradeType === 'buy' ? 'primary' : 'danger'}
-            size="large"              disabled={!canPlaceOrder}
-            loading={isProcessing}
-            testID="placeOrderBtn"
-            style={{ minWidth: width * 0.45, borderRadius: BORDER_RADIUS.full }}
-          />
-        </View>
-      </LinearGradient>
-
       {/* Order Confirmation Modal */}
       {showConfirmation && (
         <View style={styles.modalOverlay} testID="confirmationModal">
@@ -646,15 +649,12 @@ export default function PlaceOrderScreen({ route, navigation }: NativeStackScree
           </Animated.View>
         </View>
       )}
+      </AppScreen>
     </Pressable>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     padding: SPACING.xl,
     paddingBottom: 20,
@@ -662,7 +662,8 @@ const createStyles = (colors: any) => StyleSheet.create({
 
   // ── Header ──
   header: {
-    paddingTop: 56,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.lg,
     borderBottomLeftRadius: BORDER_RADIUS.xl,

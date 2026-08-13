@@ -40,6 +40,7 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import {
   pickAndParseContractNote,
   pickAndParseBatchContractNotes,
@@ -307,8 +308,8 @@ export default function ContractNoteUploadScreen({ navigation, route }: NativeSt
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* ── Header ────────────────────────────────────────── */}
+    <AppScreen padded={false} contentStyle={styles.scrollContent} header={
+      /* ── Header ────────────────────────────────────────── */
       <View style={[styles.header, { paddingTop: 60 + insets.top }]}>
         <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
@@ -320,11 +321,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: NativeSt
           </Text>
         </View>
       </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+    }>
         {/* ── Action Buttons ──────────────────────────────────── */}
         <Animated.View style={[{ opacity: fadeAnim }]}>
           {/* Upload Card */}
@@ -960,8 +957,7 @@ export default function ContractNoteUploadScreen({ navigation, route }: NativeSt
         )}
 
         <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -1004,10 +1000,6 @@ function formatDate(iso: string): string {
 
 const createStyles = () =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: MIDNIGHT_BG,
-    },
     header: {
       flexDirection: 'row',
       alignItems: 'center',

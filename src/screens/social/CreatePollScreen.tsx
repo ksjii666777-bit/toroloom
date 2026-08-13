@@ -13,6 +13,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {PollCategory, PollDuration, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const DURATION_OPTIONS: { value: PollDuration; label: string; desc: string }[] = [
   { value: 24,  label: '1 Day',   desc: 'Quick poll' },
@@ -80,212 +81,212 @@ export default function CreatePollScreen({ navigation }: NativeStackScreenProps<
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
-              <Ionicons name="close" size={24} color={colors.text} />
-            </AnimatedPressable>
-            <Text style={styles.headerTitle}>{t('createPoll.title')}</Text>
-            <AnimatedPressable onPress={handleSubmit} haptic="medium" scaleTo={0.92}>
-              <View style={[styles.publishBtn, !canSubmit && { opacity: 0.5 }]}>
-                <Text style={styles.publishBtnText}>{t('createPoll.publish')}</Text>
-              </View>
-            </AnimatedPressable>
-          </View>
-        </View>
+      <AppScreen scroll={false} padded={false}>
 
-        {/* ── Question ── */}
-        <Animated.View entering={FadeInDown.springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('createPoll.question')}</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder={t('createPoll.askPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            value={question}
-            onChangeText={setQuestion}
-            maxLength={200}
-            multiline
-          />
-          <Text style={styles.charCount}>{t('createPoll.charCount', { count: question.length })}</Text>
-        </Animated.View>
-
-        {/* ── Options ── */}
-        <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>{t('createPoll.options', { count: options.length, max: MAX_OPTIONS })}</Text>
-            {options.length < MAX_OPTIONS && (
-              <AnimatedPressable onPress={handleAddOption} haptic="light" scaleTo={0.92}>
-                <View style={styles.addOptionBtn}>
-                  <Ionicons name="add" size={16} color={colors.primary} />
-                  <Text style={styles.addOptionBtnText}>{t('createPoll.add')}</Text>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.92}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </AnimatedPressable>
+              <Text style={styles.headerTitle}>{t('createPoll.title')}</Text>
+              <AnimatedPressable onPress={handleSubmit} haptic="medium" scaleTo={0.92}>
+                <View style={[styles.publishBtn, !canSubmit && { opacity: 0.5 }]}>
+                  <Text style={styles.publishBtnText}>{t('createPoll.publish')}</Text>
                 </View>
               </AnimatedPressable>
-            )}
+            </View>
           </View>
 
-          {options.map((option, idx) => (
-            <Animated.View
-              key={`opt_${idx}`}
-              entering={FadeInDown.delay(idx * 30).springify()}
-              layout={LinearTransition.springify()}
-            >
-              <View style={styles.optionRow}>
-                <View style={[styles.optionNumber, { backgroundColor: colors.primary + '20' }]}>
-                  <Text style={[styles.optionNumberText, { color: colors.primary }]}>{idx + 1}</Text>
+          {/* ── Question ── */}
+          <Animated.View entering={FadeInDown.springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('createPoll.question')}</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('createPoll.askPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              value={question}
+              onChangeText={setQuestion}
+              maxLength={200}
+              multiline
+            />
+            <Text style={styles.charCount}>{t('createPoll.charCount', { count: question.length })}</Text>
+          </Animated.View>
+
+          {/* ── Options ── */}
+          <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>{t('createPoll.options', { count: options.length, max: MAX_OPTIONS })}</Text>
+              {options.length < MAX_OPTIONS && (
+                <AnimatedPressable onPress={handleAddOption} haptic="light" scaleTo={0.92}>
+                  <View style={styles.addOptionBtn}>
+                    <Ionicons name="add" size={16} color={colors.primary} />
+                    <Text style={styles.addOptionBtnText}>{t('createPoll.add')}</Text>
+                  </View>
+                </AnimatedPressable>
+              )}
+            </View>
+
+            {options.map((option, idx) => (
+              <Animated.View
+                key={`opt_${idx}`}
+                entering={FadeInDown.delay(idx * 30).springify()}
+                layout={LinearTransition.springify()}
+              >
+                <View style={styles.optionRow}>
+                  <View style={[styles.optionNumber, { backgroundColor: colors.primary + '20' }]}>
+                    <Text style={[styles.optionNumberText, { color: colors.primary }]}>{idx + 1}</Text>
+                  </View>
+                  <TextInput
+                    style={[styles.textInput, { flex: 1 }]}
+                    placeholder={t('createPoll.optionPlaceholder', { number: idx + 1 })}
+                    placeholderTextColor={colors.textMuted}
+                    value={option}
+                    onChangeText={(val) => handleOptionChange(idx, val)}
+                    maxLength={100}
+                  />
+                  {options.length > MIN_OPTIONS && (
+                    <AnimatedPressable onPress={() => handleRemoveOption(idx)} haptic="warning" scaleTo={0.88}>
+                      <Ionicons name="close-circle" size={20} color={colors.danger} />
+                    </AnimatedPressable>
+                  )}
                 </View>
-                <TextInput
-                  style={[styles.textInput, { flex: 1 }]}
-                  placeholder={t('createPoll.optionPlaceholder', { number: idx + 1 })}
-                  placeholderTextColor={colors.textMuted}
-                  value={option}
-                  onChangeText={(val) => handleOptionChange(idx, val)}
-                  maxLength={100}
-                />
-                {options.length > MIN_OPTIONS && (
-                  <AnimatedPressable onPress={() => handleRemoveOption(idx)} haptic="warning" scaleTo={0.88}>
-                    <Ionicons name="close-circle" size={20} color={colors.danger} />
+              </Animated.View>
+            ))}
+          </Animated.View>
+
+          {/* ── Category ── */}
+          <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('createPoll.category')}</Text>
+            <View style={styles.chipRow}>
+              {Object.values(POLL_CATEGORIES).map(meta => {
+                const isActive = selectedCategory === meta.category;
+                return (
+                  <AnimatedPressable
+                    key={meta.category}
+                    onPress={() => setSelectedCategory(meta.category)}
+                    haptic="selection"
+                    scaleTo={0.94}
+                  >
+                    <View style={[
+                      styles.categoryChip,
+                      isActive && { backgroundColor: meta.color + '25', borderColor: meta.color },
+                    ]}>
+                      <Ionicons name={meta.icon as any} size={16} color={isActive ? meta.color : colors.textMuted} />
+                      <Text style={[
+                        styles.categoryChipText,
+                        isActive && { color: meta.color },
+                      ]}>{meta.label}</Text>
+                    </View>
                   </AnimatedPressable>
-                )}
-              </View>
-            </Animated.View>
-          ))}
-        </Animated.View>
-
-        {/* ── Category ── */}
-        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('createPoll.category')}</Text>
-          <View style={styles.chipRow}>
-            {Object.values(POLL_CATEGORIES).map(meta => {
-              const isActive = selectedCategory === meta.category;
-              return (
-                <AnimatedPressable
-                  key={meta.category}
-                  onPress={() => setSelectedCategory(meta.category)}
-                  haptic="selection"
-                  scaleTo={0.94}
-                >
-                  <View style={[
-                    styles.categoryChip,
-                    isActive && { backgroundColor: meta.color + '25', borderColor: meta.color },
-                  ]}>
-                    <Ionicons name={meta.icon as any} size={16} color={isActive ? meta.color : colors.textMuted} />
-                    <Text style={[
-                      styles.categoryChipText,
-                      isActive && { color: meta.color },
-                    ]}>{meta.label}</Text>
-                  </View>
-                </AnimatedPressable>
-              );
-            })}
-          </View>
-        </Animated.View>
-
-        {/* ── Duration ── */}
-        <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('createPoll.duration')}</Text>
-          <View style={styles.durationRow}>
-            {DURATION_OPTIONS.map(opt => {
-              const isActive = selectedDuration === opt.value;
-              return (
-                <AnimatedPressable
-                  key={opt.value}
-                  onPress={() => setSelectedDuration(opt.value)}
-                  haptic="selection"
-                  scaleTo={0.94}
-                >
-                  <View style={[
-                    styles.durationCard,
-                    isActive && { backgroundColor: colors.primary + '20', borderColor: colors.primary },
-                  ]}>
-                    <Text style={[
-                      styles.durationValue,
-                      isActive && { color: colors.primary },
-                    ]}>
-                      {opt.label.split(' ')[0]}
-                    </Text>
-                    <Text style={[
-                      styles.durationUnit,
-                      isActive && { color: colors.primary + 'CC' },
-                    ]}>
-                      {opt.label.split(' ')[1]}
-                    </Text>
-                    <Text style={[
-                      styles.durationDesc,
-                      isActive && { color: colors.primary + '99' },
-                    ]}>
-                      {opt.desc}
-                    </Text>
-                  </View>
-                </AnimatedPressable>
-              );
-            })}
-          </View>
-        </Animated.View>
-
-        {/* ── Tags ── */}
-        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('createPoll.tagsOptional')}</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder={t('createPoll.tagsPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            value={tagsText}
-            onChangeText={setTagsText}
-          />
-          <Text style={styles.charCount}>{t('createPoll.tagsHint')}</Text>
-        </Animated.View>
-
-        {/* ── Preview ── */}
-        <Animated.View entering={FadeInDown.delay(250).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('createPoll.preview')}</Text>
-          <View style={[styles.previewCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-            <Text style={[styles.previewQuestion, { color: colors.text }]}>
-              {question.trim() || t('createPoll.previewPlaceholder')}
-            </Text>
-            <View style={styles.previewOptions}>
-              {options.filter(o => o.trim()).map((opt, i) => (
-                <View key={i} style={[styles.previewOption, { borderColor: colors.divider }]}>
-                  <Text style={[styles.previewOptionText, { color: colors.textSecondary }]}>
-                    {opt}
-                  </Text>
-                </View>
-              ))}
+                );
+              })}
             </View>
-            <View style={[styles.previewFooter, { borderTopColor: colors.divider }]}>
-              <Text style={[styles.previewMeta, { color: colors.textMuted }]}>
-                {POLL_CATEGORIES[selectedCategory].label} · {DURATION_OPTIONS.find(d => d.value === selectedDuration)?.label}
+          </Animated.View>
+
+          {/* ── Duration ── */}
+          <Animated.View entering={FadeInDown.delay(150).springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('createPoll.duration')}</Text>
+            <View style={styles.durationRow}>
+              {DURATION_OPTIONS.map(opt => {
+                const isActive = selectedDuration === opt.value;
+                return (
+                  <AnimatedPressable
+                    key={opt.value}
+                    onPress={() => setSelectedDuration(opt.value)}
+                    haptic="selection"
+                    scaleTo={0.94}
+                  >
+                    <View style={[
+                      styles.durationCard,
+                      isActive && { backgroundColor: colors.primary + '20', borderColor: colors.primary },
+                    ]}>
+                      <Text style={[
+                        styles.durationValue,
+                        isActive && { color: colors.primary },
+                      ]}>
+                        {opt.label.split(' ')[0]}
+                      </Text>
+                      <Text style={[
+                        styles.durationUnit,
+                        isActive && { color: colors.primary + 'CC' },
+                      ]}>
+                        {opt.label.split(' ')[1]}
+                      </Text>
+                      <Text style={[
+                        styles.durationDesc,
+                        isActive && { color: colors.primary + '99' },
+                      ]}>
+                        {opt.desc}
+                      </Text>
+                    </View>
+                  </AnimatedPressable>
+                );
+              })}
+            </View>
+          </Animated.View>
+
+          {/* ── Tags ── */}
+          <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('createPoll.tagsOptional')}</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('createPoll.tagsPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              value={tagsText}
+              onChangeText={setTagsText}
+            />
+            <Text style={styles.charCount}>{t('createPoll.tagsHint')}</Text>
+          </Animated.View>
+
+          {/* ── Preview ── */}
+          <Animated.View entering={FadeInDown.delay(250).springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('createPoll.preview')}</Text>
+            <View style={[styles.previewCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+              <Text style={[styles.previewQuestion, { color: colors.text }]}>
+                {question.trim() || t('createPoll.previewPlaceholder')}
               </Text>
-              <Text style={[styles.previewVotes, { color: colors.textMuted }]}>{t('createPoll.votes', { count: 0 })}</Text>
+              <View style={styles.previewOptions}>
+                {options.filter(o => o.trim()).map((opt, i) => (
+                  <View key={i} style={[styles.previewOption, { borderColor: colors.divider }]}>
+                    <Text style={[styles.previewOptionText, { color: colors.textSecondary }]}>
+                      {opt}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+              <View style={[styles.previewFooter, { borderTopColor: colors.divider }]}>
+                <Text style={[styles.previewMeta, { color: colors.textMuted }]}>
+                  {POLL_CATEGORIES[selectedCategory].label} · {DURATION_OPTIONS.find(d => d.value === selectedDuration)?.label}
+                </Text>
+                <Text style={[styles.previewVotes, { color: colors.textMuted }]}>{t('createPoll.votes', { count: 0 })}</Text>
+              </View>
             </View>
-          </View>
-        </Animated.View>
+          </Animated.View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+    
+      </AppScreen></KeyboardAvoidingView>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   headerRow: {

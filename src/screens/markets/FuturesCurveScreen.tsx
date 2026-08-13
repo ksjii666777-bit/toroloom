@@ -36,6 +36,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { getFuturesCurve } from '../../services/api';
 import type {FuturesCurveData, FuturesCurvePoint, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -600,228 +601,229 @@ export default function FuturesCurveScreen({ navigation }: NativeStackScreenProp
   const totalBasisChange = farContract ? farContract.price - nearContract.price : 0;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
-        <View style={styles.headerTop}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.text }]}>{t('futuresCurve.title')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              {t('futuresCurve.subtitle')}
-            </Text>
-          </View>
-        </View>
-
-        {/* Symbol Tabs */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.symbolScroll}>
-          {SYMBOLS.map((sym) => {
-            const isActive = selectedSymbol === sym;
-            return (
-              <Pressable
-                key={sym}
-                onPress={() => handleSymbolChange(sym)}
-                style={[
-                  styles.symbolChip,
-                  {
-                    backgroundColor: isActive ? colors.primary + '20' : colors.bgInput,
-                    borderColor: isActive ? colors.primary + '40' : colors.border,
-                  },
-                ]}
-              >
-                <Text style={[
-                  styles.symbolChipText,
-                  { color: isActive ? colors.primary : colors.textMuted },
-                ]}>
-                  {sym}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Curve Status Banner ── */}
-        <View style={[styles.statusBanner, { backgroundColor: curveColor + '12', borderColor: curveColor + '30' }]}>
-          <Text style={styles.statusEmoji}>{curveEmoji}</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.statusTitle, { color: curveColor }]}>
-              {curveLabel}
-            </Text>
-            <Text style={[styles.statusDesc, { color: colors.textSecondary }]}>
-              {isContango
-                ? t('futuresCurve.contangoAnalysis')
-                : t('futuresCurve.backwardationAnalysis')}
-            </Text>
-          </View>
-        </View>
-
-        {/* ── Key Metrics ── */}
-        <View style={styles.statsRow}>
-          <StatCard
-            icon={curveEmoji}
-            label={t('futuresCurve.curveType')}
-            value={curveLabel}
-            color={curveColor}
-          />
-          <StatCard
-            icon="🎯"
-            label={t('futuresCurve.spotPrice')}
-            value={`₹${(data.spotPrice / 1000).toFixed(1)}K`}
-            color="#FFC107"
-          />
-          <StatCard
-            icon="📊"
-            label={t('futuresCurve.nearMonth')}
-            value={`₹${(nearContract.price / 1000).toFixed(1)}K`}
-            color="#3B82F6"
-          />
-        </View>
-
-        <View style={styles.statsRow}>
-          <StatCard
-            icon="📏"
-            label={t('futuresCurve.curveSlope')}
-            value={`${isContango ? '+' : ''}${data.slope}/mth`}
-            color={curveColor}
-          />
-          <StatCard
-            icon="📈"
-            label={t('futuresCurve.totalOi')}
-            value={`${(data.totalOpenInterest / 10000000).toFixed(1)}Cr`}
-            color="#8B5CF6"
-          />
-          <StatCard
-            icon="🔷"
-            label={t('futuresCurve.maxOiExpiry')}
-            value={data.maxOiExpiry}
-            color="#00E676"
-          />
-        </View>
-
-        {/* ── SVG Chart ── */}
-        <View style={[styles.chartCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.chartHeader}>
-            <Text style={[styles.chartTitle, { color: colors.text }]}>
-              {selectedSymbol} {t('futuresCurve.title')}
-            </Text>
-            <View style={[styles.curveBadge, { backgroundColor: curveColor + '20' }]}>
-              <Text style={[styles.curveBadgeText, { color: curveColor }]}>
-                {isContango ? '▲' : '▼'} {Math.abs(data.slope)} pts/mth
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header, { backgroundColor: colors.bgSecondary }]}>
+          <View style={styles.headerTop}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.title, { color: colors.text }]}>{t('futuresCurve.title')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                {t('futuresCurve.subtitle')}
               </Text>
             </View>
           </View>
-          <FuturesCurveChart data={data} colors={colors} />
+
+          {/* Symbol Tabs */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.symbolScroll}>
+            {SYMBOLS.map((sym) => {
+              const isActive = selectedSymbol === sym;
+              return (
+                <Pressable
+                  key={sym}
+                  onPress={() => handleSymbolChange(sym)}
+                  style={[
+                    styles.symbolChip,
+                    {
+                      backgroundColor: isActive ? colors.primary + '20' : colors.bgInput,
+                      borderColor: isActive ? colors.primary + '40' : colors.border,
+                    },
+                  ]}
+                >
+                  <Text style={[
+                    styles.symbolChipText,
+                    { color: isActive ? colors.primary : colors.textMuted },
+                  ]}>
+                    {sym}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
 
-        {/* ── Data Table ── */}
-        <View style={[styles.tableCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.tableTitle, { color: colors.text }]}>
-            {t('futuresCurve.contractDetails')}
-          </Text>
-
-          {/* Column headers */}
-          <View style={[styles.tableHeader, { borderBottomColor: colors.divider, backgroundColor: colors.bgInput }]}>
-            <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.expiry')}</Text>
-            <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.price')}</Text>
-            <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.basis')}</Text>
-            <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.oi')}</Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* ── Curve Status Banner ── */}
+          <View style={[styles.statusBanner, { backgroundColor: curveColor + '12', borderColor: curveColor + '30' }]}>
+            <Text style={styles.statusEmoji}>{curveEmoji}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.statusTitle, { color: curveColor }]}>
+                {curveLabel}
+              </Text>
+              <Text style={[styles.statusDesc, { color: colors.textSecondary }]}>
+                {isContango
+                  ? t('futuresCurve.contangoAnalysis')
+                  : t('futuresCurve.backwardationAnalysis')}
+              </Text>
+            </View>
           </View>
 
-          {data.points.map((point, i) => (
-            <CurveTableRow
-              key={point.expiryLabel}
-              point={point}
-              isFirst={i === 0}
-              isLast={i === data.points.length - 1}
-              isContango={isContango}
-              colors={colors}
+          {/* ── Key Metrics ── */}
+          <View style={styles.statsRow}>
+            <StatCard
+              icon={curveEmoji}
+              label={t('futuresCurve.curveType')}
+              value={curveLabel}
+              color={curveColor}
             />
-          ))}
-        </View>
-
-        {/* ── Analysis Section ── */}
-        <View style={[styles.analysisCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={[styles.analysisTitle, { color: colors.text }]}>
-            {t('futuresCurve.analysisTitle')}
-          </Text>
-
-          <View style={[styles.insightRow, { borderBottomColor: colors.divider }]}>
-            <View style={styles.insightDot}>
-              <View style={[styles.insightDotInner, { backgroundColor: curveColor }]} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.curveShape')}</Text>
-              <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
-                {isContango
-                  ? t('futuresCurve.curveShapeContango', { symbol: selectedSymbol })
-                  : t('futuresCurve.curveShapeBackwardation', { symbol: selectedSymbol })}
-              </Text>
-            </View>
+            <StatCard
+              icon="🎯"
+              label={t('futuresCurve.spotPrice')}
+              value={`₹${(data.spotPrice / 1000).toFixed(1)}K`}
+              color="#FFC107"
+            />
+            <StatCard
+              icon="📊"
+              label={t('futuresCurve.nearMonth')}
+              value={`₹${(nearContract.price / 1000).toFixed(1)}K`}
+              color="#3B82F6"
+            />
           </View>
 
-          <View style={[styles.insightRow, { borderBottomColor: colors.divider }]}>
-            <View style={styles.insightDot}>
-              <View style={[styles.insightDotInner, { backgroundColor: '#3B82F6' }]} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.basisAnalysis')}</Text>
-              <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
-                {isContango
-                  ? t('futuresCurve.nearMonthBasis', { sign: nearContract.basis >= 0 ? '+' : '', basis: nearContract.basis.toFixed(1), percent: (nearContract.basisPercent >= 0 ? '+' : '') + nearContract.basisPercent.toFixed(2) })
-                  : t('futuresCurve.nearMonthBasisBack', { sign: nearContract.basis >= 0 ? '+' : '', basis: nearContract.basis.toFixed(1), percent: (nearContract.basisPercent >= 0 ? '+' : '') + nearContract.basisPercent.toFixed(2) })}
-              </Text>
-            </View>
+          <View style={styles.statsRow}>
+            <StatCard
+              icon="📏"
+              label={t('futuresCurve.curveSlope')}
+              value={`${isContango ? '+' : ''}${data.slope}/mth`}
+              color={curveColor}
+            />
+            <StatCard
+              icon="📈"
+              label={t('futuresCurve.totalOi')}
+              value={`${(data.totalOpenInterest / 10000000).toFixed(1)}Cr`}
+              color="#8B5CF6"
+            />
+            <StatCard
+              icon="🔷"
+              label={t('futuresCurve.maxOiExpiry')}
+              value={data.maxOiExpiry}
+              color="#00E676"
+            />
           </View>
 
-          <View style={[styles.insightRow, { borderBottomColor: colors.divider }]}>
-            <View style={styles.insightDot}>
-              <View style={[styles.insightDotInner, { backgroundColor: '#8B5CF6' }]} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.openInterest')}</Text>
-              <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
-                {t('futuresCurve.totalOiText', { oi: (data.totalOpenInterest / 10000000).toFixed(1), expiry: data.maxOiExpiry })}
-                {isContango
-                  ? t('futuresCurve.oiRolloverContango')
-                  : t('futuresCurve.oiActiveTrading')}
+          {/* ── SVG Chart ── */}
+          <View style={[styles.chartCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.chartHeader}>
+              <Text style={[styles.chartTitle, { color: colors.text }]}>
+                {selectedSymbol} {t('futuresCurve.title')}
               </Text>
+              <View style={[styles.curveBadge, { backgroundColor: curveColor + '20' }]}>
+                <Text style={[styles.curveBadgeText, { color: curveColor }]}>
+                  {isContango ? '▲' : '▼'} {Math.abs(data.slope)} pts/mth
+                </Text>
+              </View>
             </View>
+            <FuturesCurveChart data={data} colors={colors} />
           </View>
 
-          <View style={styles.insightRow}>
-            <View style={styles.insightDot}>
-              <View style={[styles.insightDotInner, { backgroundColor: '#FFC107' }]} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.slope')}</Text>
-              <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
-                {t('futuresCurve.slopeText', { sign: isContango ? '+' : '', pts: String(data.slope), totalSign: totalBasisChange >= 0 ? '+' : '', total: totalBasisChange.toFixed(1) })}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Info Note ── */}
-        <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Ionicons name="information-circle" size={18} color={colors.primary} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.infoTitle, { color: colors.text }]}>{t('futuresCurve.whatIsFuturesCurve')}</Text>
-            <Text style={[styles.infoText, { color: colors.textMuted }]}>
-              {t('futuresCurve.whatIsDesc')}{'\n\n'}
-              <Text style={{ fontWeight: '700' }}>{t('futuresCurve.contango')}</Text>: {t('futuresCurve.contangoDesc')}{'\n'}
-              <Text style={{ fontWeight: '700' }}>{t('futuresCurve.backwardation')}</Text>: {t('futuresCurve.backwardationDesc')}{'\n\n'}
-              {t('futuresCurve.curveSteepnessDesc')}
+          {/* ── Data Table ── */}
+          <View style={[styles.tableCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.tableTitle, { color: colors.text }]}>
+              {t('futuresCurve.contractDetails')}
             </Text>
-          </View>
-        </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
-    </View>
+            {/* Column headers */}
+            <View style={[styles.tableHeader, { borderBottomColor: colors.divider, backgroundColor: colors.bgInput }]}>
+              <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.expiry')}</Text>
+              <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.price')}</Text>
+              <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.basis')}</Text>
+              <Text style={[styles.headerCell, { color: colors.textMuted }]}>{t('futuresCurve.oi')}</Text>
+            </View>
+
+            {data.points.map((point, i) => (
+              <CurveTableRow
+                key={point.expiryLabel}
+                point={point}
+                isFirst={i === 0}
+                isLast={i === data.points.length - 1}
+                isContango={isContango}
+                colors={colors}
+              />
+            ))}
+          </View>
+
+          {/* ── Analysis Section ── */}
+          <View style={[styles.analysisCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.analysisTitle, { color: colors.text }]}>
+              {t('futuresCurve.analysisTitle')}
+            </Text>
+
+            <View style={[styles.insightRow, { borderBottomColor: colors.divider }]}>
+              <View style={styles.insightDot}>
+                <View style={[styles.insightDotInner, { backgroundColor: curveColor }]} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.curveShape')}</Text>
+                <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
+                  {isContango
+                    ? t('futuresCurve.curveShapeContango', { symbol: selectedSymbol })
+                    : t('futuresCurve.curveShapeBackwardation', { symbol: selectedSymbol })}
+                </Text>
+              </View>
+            </View>
+
+            <View style={[styles.insightRow, { borderBottomColor: colors.divider }]}>
+              <View style={styles.insightDot}>
+                <View style={[styles.insightDotInner, { backgroundColor: '#3B82F6' }]} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.basisAnalysis')}</Text>
+                <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
+                  {isContango
+                    ? t('futuresCurve.nearMonthBasis', { sign: nearContract.basis >= 0 ? '+' : '', basis: nearContract.basis.toFixed(1), percent: (nearContract.basisPercent >= 0 ? '+' : '') + nearContract.basisPercent.toFixed(2) })
+                    : t('futuresCurve.nearMonthBasisBack', { sign: nearContract.basis >= 0 ? '+' : '', basis: nearContract.basis.toFixed(1), percent: (nearContract.basisPercent >= 0 ? '+' : '') + nearContract.basisPercent.toFixed(2) })}
+                </Text>
+              </View>
+            </View>
+
+            <View style={[styles.insightRow, { borderBottomColor: colors.divider }]}>
+              <View style={styles.insightDot}>
+                <View style={[styles.insightDotInner, { backgroundColor: '#8B5CF6' }]} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.openInterest')}</Text>
+                <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
+                  {t('futuresCurve.totalOiText', { oi: (data.totalOpenInterest / 10000000).toFixed(1), expiry: data.maxOiExpiry })}
+                  {isContango
+                    ? t('futuresCurve.oiRolloverContango')
+                    : t('futuresCurve.oiActiveTrading')}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.insightRow}>
+              <View style={styles.insightDot}>
+                <View style={[styles.insightDotInner, { backgroundColor: '#FFC107' }]} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.insightLabel, { color: colors.text }]}>{t('futuresCurve.slope')}</Text>
+                <Text style={[styles.insightValue, { color: colors.textSecondary }]}>
+                  {t('futuresCurve.slopeText', { sign: isContango ? '+' : '', pts: String(data.slope), totalSign: totalBasisChange >= 0 ? '+' : '', total: totalBasisChange.toFixed(1) })}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* ── Info Note ── */}
+          <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Ionicons name="information-circle" size={18} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.infoTitle, { color: colors.text }]}>{t('futuresCurve.whatIsFuturesCurve')}</Text>
+              <Text style={[styles.infoText, { color: colors.textMuted }]}>
+                {t('futuresCurve.whatIsDesc')}{'\n\n'}
+                <Text style={{ fontWeight: '700' }}>{t('futuresCurve.contango')}</Text>: {t('futuresCurve.contangoDesc')}{'\n'}
+                <Text style={{ fontWeight: '700' }}>{t('futuresCurve.backwardation')}</Text>: {t('futuresCurve.backwardationDesc')}{'\n\n'}
+                {t('futuresCurve.curveSteepnessDesc')}
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
@@ -830,7 +832,6 @@ export default function FuturesCurveScreen({ navigation }: NativeStackScreenProp
 // ═════════════════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     padding: SPACING.xl,
     paddingTop: 60,

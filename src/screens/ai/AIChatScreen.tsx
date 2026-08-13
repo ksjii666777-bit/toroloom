@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
+import AppScreen from '../../components/ui/AppScreen';
 import { usePortfolioStore } from '../../store/portfolioStore';
 import { useMarketStore } from '../../store/marketStore';
 import { useMutualFundStore } from '../../store/mutualFundStore';
@@ -347,12 +348,12 @@ export default function AIChatScreen({ navigation }: NativeStackScreenProps<Root
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.bg }]}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
+      <AppScreen scroll={false} padded={false} header={
+      <View style={[styles.header, { backgroundColor: colors.bgSecondary, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: colors.bgCard }]}>
           <Ionicons name="arrow-back" size={20} color={colors.text} />
         </Pressable>
@@ -389,8 +390,33 @@ export default function AIChatScreen({ navigation }: NativeStackScreenProps<Root
           <Ionicons name="refresh" size={18} color={colors.textMuted} />
         </Pressable>
       </View>
-
-      {/* Messages */}
+      } footer={
+      <View style={[styles.inputBar, { backgroundColor: colors.bgSecondary, borderTopColor: colors.border }]}>
+        <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+          <TextInput
+            style={[styles.input, { color: colors.text }]}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder={t('ai.askPortfolio')}
+            placeholderTextColor={colors.textMuted}
+            multiline
+            maxLength={500}
+            blurOnSubmit
+          />
+          <Pressable
+            style={[styles.sendBtn, { backgroundColor: inputText.trim() ? colors.primary : colors.bgCard }]}
+            onPress={() => handleSend()}
+            disabled={!inputText.trim() || isThinking}
+          >
+            <Ionicons
+              name="send"
+              size={18}
+              color={inputText.trim() ? colors.white : colors.textMuted}
+            />
+          </Pressable>
+        </View>
+      </View>
+      }>
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -435,32 +461,7 @@ export default function AIChatScreen({ navigation }: NativeStackScreenProps<Root
         }
       />
 
-      {/* Input bar */}
-      <View style={[styles.inputBar, { backgroundColor: colors.bgSecondary, borderTopColor: colors.border, paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <View style={[styles.inputRow, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-          <TextInput
-            style={[styles.input, { color: colors.text }]}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder={t('ai.askPortfolio')}
-            placeholderTextColor={colors.textMuted}
-            multiline
-            maxLength={500}
-            blurOnSubmit
-          />
-          <Pressable
-            style={[styles.sendBtn, { backgroundColor: inputText.trim() ? colors.primary : colors.bgCard }]}
-            onPress={() => handleSend()}
-            disabled={!inputText.trim() || isThinking}
-          >
-            <Ionicons
-              name="send"
-              size={18}
-              color={inputText.trim() ? colors.white : colors.textMuted}
-            />
-          </Pressable>
-        </View>
-      </View>
+    </AppScreen>
     </KeyboardAvoidingView>
   );
 }

@@ -27,6 +27,7 @@ import { useT } from '../../hooks/useT';
 import { kycApi } from '../../services/api/kyc';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import Card from '../../components/ui/Card';
 import { kycCallbackStore } from '../../store/kycCallbackStore';
 import type {DigiLockerDocument, RootStackParamList} from '../../types';
@@ -116,14 +117,14 @@ export default function DigiLockerScreen({ navigation }: NativeStackScreenProps<
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-      {/* Header */}
+    <AppScreen padded={false} contentStyle={styles.scrollContent} header={
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.title}>{t('kyc.digilocker')}</Text>
       </View>
+    }>
 
       {/* Info Card */}
       <Card style={styles.infoCard}>
@@ -238,13 +239,12 @@ export default function DigiLockerScreen({ navigation }: NativeStackScreenProps<
       )}
 
       <View style={{ height: 60 }} />
-    </ScrollView>
+    </AppScreen>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
     scrollContent: { paddingHorizontal: SPACING.xl, paddingBottom: 20 },
 
     header: {

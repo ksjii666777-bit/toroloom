@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { useT } from '../../hooks/useT';
+import AppScreen from '../../components/ui/AppScreen';
 import { useChatStore } from '../../store/chatStore';
 import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import type {ChatMessage, RootStackParamList} from '../../types';
@@ -72,11 +73,11 @@ export default function ChatRoomScreen({ navigation, route }: NativeStackScreenP
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.bg }]}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.bgSecondary, borderColor: colors.border, paddingTop: insets.top + 8 }]}>
+      <AppScreen scroll={false} padded={false} header={
+      <View style={[styles.header, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
         <Pressable onPress={() => navigation.goBack?.()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
@@ -89,8 +90,23 @@ export default function ChatRoomScreen({ navigation, route }: NativeStackScreenP
           )}
         </View>
       </View>
-
-      {/* Messages */}
+      } footer={
+      <View style={[styles.inputBar, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
+        <TextInput
+          style={[styles.chatInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder={t('community.typeMessage')}
+          placeholderTextColor={colors.textMuted}
+        />
+        <Pressable
+          style={[styles.sendBtn, { backgroundColor: colors.primary }]}
+          onPress={handleSend}
+        >
+          <Ionicons name="send" size={18} color="#FFF" />
+        </Pressable>
+      </View>
+      }>
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={styles.listContent}
@@ -143,29 +159,12 @@ export default function ChatRoomScreen({ navigation, route }: NativeStackScreenP
           </Text>
         </View>
       )}
-
-      {/* Input Bar */}
-      <View style={[styles.inputBar, { backgroundColor: colors.bgSecondary, borderColor: colors.border }]}>
-        <TextInput
-          style={[styles.chatInput, { backgroundColor: colors.bgInput, color: colors.text, borderColor: colors.border }]}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder={t('community.typeMessage')}
-          placeholderTextColor={colors.textMuted}
-        />
-        <Pressable
-          style={[styles.sendBtn, { backgroundColor: colors.primary }]}
-          onPress={handleSend}
-        >
-          <Ionicons name="send" size={18} color="#FFF" />
-        </Pressable>
-      </View>
+    </AppScreen>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

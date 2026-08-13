@@ -32,6 +32,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import Svg, { Rect, Text as SvgText, Circle, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 // ──── Widget Preview Component ─────────────────────────────────────────────
@@ -241,323 +242,320 @@ export default function WidgetSettingsScreen({ navigation }: NativeStackScreenPr
   ];
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </Pressable>
-        <View style={styles.headerTextContainer}>
-          <Text style={styles.headerTitle}>{t('widgetSettings.title')}</Text>
-          <Text style={styles.headerSubtitle}>{t('widgetSettings.subtitle')}</Text>
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* ── Widget Preview ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={styles.sectionTitle}>{t('widgetSettings.preview')}</Text>
-          <WidgetPreview
-            size={selectedSize}
-            snapshot={snapshot}
-            prefs={prefs}
-            colors={colors}
-          />
-          <Text style={[styles.hint, { color: colors.textMuted }]}>
-            {selectedSize === 'small' ? t('widgetSettings.hintSmall') :
-             selectedSize === 'medium' ? t('widgetSettings.hintMedium') :
-             t('widgetSettings.hintLarge')}
-          </Text>
-        </View>
-
-        {/* ── Size Selector ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={styles.sectionTitle}>{t('widgetSettings.widgetSize')}</Text>
-          <View style={styles.sizeRow}>
-            {sizeOptions.map(opt => {
-              const isActive = selectedSize === opt.key;
-              return (
-                <Pressable
-                  key={opt.key}
-                  onPress={() => { setSelectedSize(opt.key); updatePref({ defaultSize: opt.key }); }}
-                  style={[
-                    styles.sizeOption,
-                    {
-                      borderColor: isActive ? colors.primary : colors.border,
-                      backgroundColor: isActive ? colors.primary + '12' : 'transparent',
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name={opt.key === 'small' ? 'apps' : 'grid'}
-                    size={20}
-                    color={isActive ? colors.primary : colors.textSecondary}
-                  />
-                  <Text style={[styles.sizeLabel, { color: isActive ? colors.primary : colors.text }]}>
-                    {opt.label}
-                  </Text>
-                  <Text style={[styles.sizeDesc, { color: isActive ? colors.primary + 'AA' : colors.textMuted }]}>
-                    {opt.desc}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* ── Display Options ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <Text style={styles.sectionTitle}>{t('widgetSettings.displayOptions')}</Text>
-
-          {/* Show P&L */}
-          <View style={styles.settingRow}>
-            <View style={styles.settingLeft}>
-              <View style={[styles.settingIconBlock, { backgroundColor: '#00E67620' }]}>
-                <Ionicons name="trending-up" size={18} color="#00E676" />
-              </View>
-              <View>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.showPnL')}</Text>
-                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  {t('widgetSettings.showPnLDesc')}
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={prefs.showPnL}
-              onValueChange={(v) => updatePref({ showPnL: v })}
-              trackColor={{ false: colors.bgInput, true: colors.primary + '60' }}
-              thumbColor={prefs.showPnL ? colors.primary : colors.textMuted}
-            />
-          </View>
-
-          {/* Theme */}
-          <View style={[styles.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
-            <View style={styles.settingLeft}>
-              <View style={[styles.settingIconBlock, { backgroundColor: '#8B5CF620' }]}>
-                <Ionicons name={prefs.theme === 'dark' ? 'moon' : 'sunny'} size={18} color="#8B5CF6" />
-              </View>
-              <View>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.widgetTheme')}</Text>
-                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  {prefs.theme === 'dark' ? t('widgetSettings.darkTheme') : t('widgetSettings.lightTheme')}
-                </Text>
-              </View>
-            </View>
-            <Pressable onPress={() => updatePref({ theme: prefs.theme === 'dark' ? 'light' : 'dark' })}>
-              <View style={[
-                styles.themeThumb,
-                { left: prefs.theme === 'dark' ? 2 : undefined, right: prefs.theme === 'light' ? 2 : undefined },
-              ]} />
-              <Text style={styles.themeLabel}>
-                {prefs.theme === 'dark' ? '🌙' : '☀️'}
-              </Text>
-            </Pressable>
-          </View>
-
-          {/* Highlighted Metric */}
-          <View style={[styles.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
-            <View style={styles.settingLeft}>
-              <View style={[styles.settingIconBlock, { backgroundColor: '#3B82F620' }]}>
-                <Ionicons name="analytics" size={18} color="#3B82F6" />
-              </View>
-              <View>
-                <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.highlightedMetric')}</Text>
-                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                  {t('widgetSettings.highlightedMetricDesc')}
-                </Text>
-              </View>
-            </View>
-          </View>
-          <View style={styles.metricRow}>
-            {metricOptions.map(opt => {
-              const isActive = prefs.highlightedMetric === opt.key;
-              return (
-                <Pressable
-                  key={opt.key}
-                  onPress={() => updatePref({ highlightedMetric: opt.key })}
-                  style={[
-                    styles.metricOption,
-                    {
-                      borderColor: isActive ? colors.primary : colors.border,
-                      backgroundColor: isActive ? colors.primary + '15' : colors.bgCardLight,
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name={opt.icon as any}
-                    size={16}
-                    color={isActive ? colors.primary : colors.textSecondary}
-                  />
-                  <Text style={[styles.metricLabel, { color: isActive ? colors.primary : colors.textSecondary }]}>
-                    {opt.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* ── Privacy — Hidden Symbols ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>{t('widgetSettings.privacy')}</Text>
-            <Pressable onPress={() => setShowHiddenPicker(!showHiddenPicker)}>
-              <Text style={[styles.editButton, { color: colors.primary }]}>
-                {showHiddenPicker ? t('widgetSettings.done') : t('widgetSettings.edit')}
-              </Text>
-            </Pressable>
-          </View>
-
-          <Text style={[styles.settingDesc, { color: colors.textMuted, marginBottom: SPACING.md }]}>
-            {t('widgetSettings.privacyDesc')}
-          </Text>
-
-          {prefs.hiddenSymbols.length > 0 ? (
-            <View style={styles.hiddenChips}>
-              {prefs.hiddenSymbols.map(sym => (
-                <View key={sym} style={[styles.hiddenChip, { backgroundColor: colors.marketDown + '20', borderColor: colors.marketDown + '40' }]}>
-                  <Ionicons name="eye-off" size={12} color={colors.marketDown} />
-                  <Text style={[styles.hiddenChipText, { color: colors.marketDown }]}>{sym}</Text>
-                  <Pressable onPress={() => toggleHiddenSymbol(sym)}>
-                    <Ionicons name="close-circle" size={14} color={colors.marketDown} />
-                  </Pressable>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              {t('widgetSettings.noHiddenSymbols')}
-            </Text>
-          )}
-
-          {/* Symbol Picker */}
-          {showHiddenPicker && (
-            <Animated.View entering={FadeInUp.duration(300)} style={[styles.symbolPicker, { borderTopColor: colors.divider }]}>
-              <Text style={[styles.pickerLabel, { color: colors.textSecondary }]}>
-                {t('widgetSettings.tapToHide')}
-              </Text>
-              <View style={styles.symbolGrid}>
-                {(() => {
-                  const hiddenSymbolsSet = new Set(prefs.hiddenSymbols);
-                  return allSymbols.map(sym => {
-                    const isHidden = hiddenSymbolsSet.has(sym);
-                    return (
-                    <Pressable
-                      key={sym}
-                      style={[
-                        styles.symbolChip,
-                        {
-                          borderColor: isHidden ? colors.marketDown + '40' : colors.border,
-                          backgroundColor: isHidden ? colors.marketDown + '10' : colors.bgCardLight,
-                        },
-                      ]}
-                      onPress={() => toggleHiddenSymbol(sym)}
-                    >
-                      <Ionicons
-                        name={isHidden ? 'eye-off' : 'eye'}
-                        size={12}
-                        color={isHidden ? colors.marketDown : colors.textSecondary}
-                      />
-                      <Text style={[styles.symbolChipText, {
-                        color: isHidden ? colors.marketDown : colors.text,
-                        textDecorationLine: isHidden ? 'line-through' : 'none',
-                      }]}>
-                        {sym}
-                      </Text>
-                    </Pressable>
-                  );
-                  });
-                })()}
-              </View>
-            </Animated.View>
-          )}
-        </View>
-
-        {/* ── Add Widget Guide ── */}
-        <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>{t('widgetSettings.addToHomeScreen')}</Text>
-          </View>
-
-          <Text style={[styles.settingDesc, { color: colors.textMuted, marginBottom: SPACING.lg }]}>
-            {t('widgetSettings.addToHomeScreenDesc')}
-          </Text>
-
-          {Platform.select({
-            ios: (
-              <View style={styles.stepsList}>
-                {[
-                  { icon: 'hand-left', text: t('widgetSettings.iosStep1') },
-                  { icon: 'add-circle', text: t('widgetSettings.iosStep2') },
-                  { icon: 'search', text: t('widgetSettings.iosStep3') },
-                  { icon: 'options', text: t('widgetSettings.iosStep4') },
-                  { icon: 'checkmark-circle', text: t('widgetSettings.iosStep5') },
-                ].map((step, i) => (
-                  <View key={`wgt_${i}`} style={styles.stepRow}>
-                    <View style={[styles.stepNumber, { backgroundColor: colors.primary + '20' }]}>
-                      <Text style={[styles.stepNumberText, { color: colors.primary }]}>{i + 1}</Text>
-                    </View>
-                    <Ionicons name={step.icon as any} size={16} color={colors.primary} style={{ marginRight: SPACING.sm }} />
-                    <Text style={[styles.stepText, { color: colors.textSecondary }]}>{step.text}</Text>
-                  </View>
-                ))}
-              </View>
-            ),
-            android: (
-              <View style={styles.stepsList}>
-                {[
-                  { icon: 'hand-left', text: t('widgetSettings.androidStep1') },
-                  { icon: 'apps', text: t('widgetSettings.androidStep2') },
-                  { icon: 'search', text: t('widgetSettings.androidStep3') },
-                  { icon: 'add-circle', text: t('widgetSettings.androidStep4') },
-                ].map((step, i) => (
-                  <View key={`wgt_${i}`} style={styles.stepRow}>
-                    <View style={[styles.stepNumber, { backgroundColor: colors.primary + '20' }]}>
-                      <Text style={[styles.stepNumberText, { color: colors.primary }]}>{i + 1}</Text>
-                    </View>
-                    <Ionicons name={step.icon as any} size={16} color={colors.primary} style={{ marginRight: SPACING.sm }} />
-                    <Text style={[styles.stepText, { color: colors.textSecondary }]}>{step.text}</Text>
-                  </View>
-                ))}
-              </View>
-            ),
-            default: (
-              <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
-                {t('widgetSettings.widgetDefault')}
-              </Text>
-            ),
-          })}
-
-          <Pressable
-            style={({pressed}) => [[styles.addWidgetBtn, { backgroundColor: colors.primary }], {opacity: pressed ? 0.7 : 1}]}
-            onPress={showAddWidgetGuide}
-          >
-            <Ionicons name="add-circle" size={20} color="#FFF" />
-            <Text style={styles.addWidgetBtnText}>{t('widgetSettings.showInstructions')}</Text>
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>{t('widgetSettings.title')}</Text>
+            <Text style={styles.headerSubtitle}>{t('widgetSettings.subtitle')}</Text>
+          </View>
         </View>
 
-        {/* ── Info Card ── */}
-        <View style={[styles.infoCard, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
-          <Ionicons name="information-circle" size={18} color={colors.primary} />
-          <Text style={[styles.infoText, { color: colors.textMuted }]}>
-            {t('widgetSettings.widgetInfo')}
-          </Text>
-        </View>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* ── Widget Preview ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={styles.sectionTitle}>{t('widgetSettings.preview')}</Text>
+            <WidgetPreview
+              size={selectedSize}
+              snapshot={snapshot}
+              prefs={prefs}
+              colors={colors}
+            />
+            <Text style={[styles.hint, { color: colors.textMuted }]}>
+              {selectedSize === 'small' ? t('widgetSettings.hintSmall') :
+               selectedSize === 'medium' ? t('widgetSettings.hintMedium') :
+               t('widgetSettings.hintLarge')}
+            </Text>
+          </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          {/* ── Size Selector ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={styles.sectionTitle}>{t('widgetSettings.widgetSize')}</Text>
+            <View style={styles.sizeRow}>
+              {sizeOptions.map(opt => {
+                const isActive = selectedSize === opt.key;
+                return (
+                  <Pressable
+                    key={opt.key}
+                    onPress={() => { setSelectedSize(opt.key); updatePref({ defaultSize: opt.key }); }}
+                    style={[
+                      styles.sizeOption,
+                      {
+                        borderColor: isActive ? colors.primary : colors.border,
+                        backgroundColor: isActive ? colors.primary + '12' : 'transparent',
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={opt.key === 'small' ? 'apps' : 'grid'}
+                      size={20}
+                      color={isActive ? colors.primary : colors.textSecondary}
+                    />
+                    <Text style={[styles.sizeLabel, { color: isActive ? colors.primary : colors.text }]}>
+                      {opt.label}
+                    </Text>
+                    <Text style={[styles.sizeDesc, { color: isActive ? colors.primary + 'AA' : colors.textMuted }]}>
+                      {opt.desc}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* ── Display Options ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={styles.sectionTitle}>{t('widgetSettings.displayOptions')}</Text>
+
+            {/* Show P&L */}
+            <View style={styles.settingRow}>
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIconBlock, { backgroundColor: '#00E67620' }]}>
+                  <Ionicons name="trending-up" size={18} color="#00E676" />
+                </View>
+                <View>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.showPnL')}</Text>
+                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                    {t('widgetSettings.showPnLDesc')}
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={prefs.showPnL}
+                onValueChange={(v) => updatePref({ showPnL: v })}
+                trackColor={{ false: colors.bgInput, true: colors.primary + '60' }}
+                thumbColor={prefs.showPnL ? colors.primary : colors.textMuted}
+              />
+            </View>
+
+            {/* Theme */}
+            <View style={[styles.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIconBlock, { backgroundColor: '#8B5CF620' }]}>
+                  <Ionicons name={prefs.theme === 'dark' ? 'moon' : 'sunny'} size={18} color="#8B5CF6" />
+                </View>
+                <View>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.widgetTheme')}</Text>
+                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                    {prefs.theme === 'dark' ? t('widgetSettings.darkTheme') : t('widgetSettings.lightTheme')}
+                  </Text>
+                </View>
+              </View>
+              <Pressable onPress={() => updatePref({ theme: prefs.theme === 'dark' ? 'light' : 'dark' })}>
+                <View style={[
+                  styles.themeThumb,
+                  { left: prefs.theme === 'dark' ? 2 : undefined, right: prefs.theme === 'light' ? 2 : undefined },
+                ]} />
+                <Text style={styles.themeLabel}>
+                  {prefs.theme === 'dark' ? '🌙' : '☀️'}
+                </Text>
+              </Pressable>
+            </View>
+
+            {/* Highlighted Metric */}
+            <View style={[styles.settingRow, { borderTopWidth: 1, borderTopColor: colors.divider }]}>
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIconBlock, { backgroundColor: '#3B82F620' }]}>
+                  <Ionicons name="analytics" size={18} color="#3B82F6" />
+                </View>
+                <View>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>{t('widgetSettings.highlightedMetric')}</Text>
+                  <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                    {t('widgetSettings.highlightedMetricDesc')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.metricRow}>
+              {metricOptions.map(opt => {
+                const isActive = prefs.highlightedMetric === opt.key;
+                return (
+                  <Pressable
+                    key={opt.key}
+                    onPress={() => updatePref({ highlightedMetric: opt.key })}
+                    style={[
+                      styles.metricOption,
+                      {
+                        borderColor: isActive ? colors.primary : colors.border,
+                        backgroundColor: isActive ? colors.primary + '15' : colors.bgCardLight,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={opt.icon as any}
+                      size={16}
+                      color={isActive ? colors.primary : colors.textSecondary}
+                    />
+                    <Text style={[styles.metricLabel, { color: isActive ? colors.primary : colors.textSecondary }]}>
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* ── Privacy — Hidden Symbols ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>{t('widgetSettings.privacy')}</Text>
+              <Pressable onPress={() => setShowHiddenPicker(!showHiddenPicker)}>
+                <Text style={[styles.editButton, { color: colors.primary }]}>
+                  {showHiddenPicker ? t('widgetSettings.done') : t('widgetSettings.edit')}
+                </Text>
+              </Pressable>
+            </View>
+
+            <Text style={[styles.settingDesc, { color: colors.textMuted, marginBottom: SPACING.md }]}>
+              {t('widgetSettings.privacyDesc')}
+            </Text>
+
+            {prefs.hiddenSymbols.length > 0 ? (
+              <View style={styles.hiddenChips}>
+                {prefs.hiddenSymbols.map(sym => (
+                  <View key={sym} style={[styles.hiddenChip, { backgroundColor: colors.marketDown + '20', borderColor: colors.marketDown + '40' }]}>
+                    <Ionicons name="eye-off" size={12} color={colors.marketDown} />
+                    <Text style={[styles.hiddenChipText, { color: colors.marketDown }]}>{sym}</Text>
+                    <Pressable onPress={() => toggleHiddenSymbol(sym)}>
+                      <Ionicons name="close-circle" size={14} color={colors.marketDown} />
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                {t('widgetSettings.noHiddenSymbols')}
+              </Text>
+            )}
+
+            {/* Symbol Picker */}
+            {showHiddenPicker && (
+              <Animated.View entering={FadeInUp.duration(300)} style={[styles.symbolPicker, { borderTopColor: colors.divider }]}>
+                <Text style={[styles.pickerLabel, { color: colors.textSecondary }]}>
+                  {t('widgetSettings.tapToHide')}
+                </Text>
+                <View style={styles.symbolGrid}>
+                  {(() => {
+                    const hiddenSymbolsSet = new Set(prefs.hiddenSymbols);
+                    return allSymbols.map(sym => {
+                      const isHidden = hiddenSymbolsSet.has(sym);
+                      return (
+                      <Pressable
+                        key={sym}
+                        style={[
+                          styles.symbolChip,
+                          {
+                            borderColor: isHidden ? colors.marketDown + '40' : colors.border,
+                            backgroundColor: isHidden ? colors.marketDown + '10' : colors.bgCardLight,
+                          },
+                        ]}
+                        onPress={() => toggleHiddenSymbol(sym)}
+                      >
+                        <Ionicons
+                          name={isHidden ? 'eye-off' : 'eye'}
+                          size={12}
+                          color={isHidden ? colors.marketDown : colors.textSecondary}
+                        />
+                        <Text style={[styles.symbolChipText, {
+                          color: isHidden ? colors.marketDown : colors.text,
+                          textDecorationLine: isHidden ? 'line-through' : 'none',
+                        }]}>
+                          {sym}
+                        </Text>
+                      </Pressable>
+                    );
+                    });
+                  })()}
+                </View>
+              </Animated.View>
+            )}
+          </View>
+
+          {/* ── Add Widget Guide ── */}
+          <View style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>{t('widgetSettings.addToHomeScreen')}</Text>
+            </View>
+
+            <Text style={[styles.settingDesc, { color: colors.textMuted, marginBottom: SPACING.lg }]}>
+              {t('widgetSettings.addToHomeScreenDesc')}
+            </Text>
+
+            {Platform.select({
+              ios: (
+                <View style={styles.stepsList}>
+                  {[
+                    { icon: 'hand-left', text: t('widgetSettings.iosStep1') },
+                    { icon: 'add-circle', text: t('widgetSettings.iosStep2') },
+                    { icon: 'search', text: t('widgetSettings.iosStep3') },
+                    { icon: 'options', text: t('widgetSettings.iosStep4') },
+                    { icon: 'checkmark-circle', text: t('widgetSettings.iosStep5') },
+                  ].map((step, i) => (
+                    <View key={`wgt_${i}`} style={styles.stepRow}>
+                      <View style={[styles.stepNumber, { backgroundColor: colors.primary + '20' }]}>
+                        <Text style={[styles.stepNumberText, { color: colors.primary }]}>{i + 1}</Text>
+                      </View>
+                      <Ionicons name={step.icon as any} size={16} color={colors.primary} style={{ marginRight: SPACING.sm }} />
+                      <Text style={[styles.stepText, { color: colors.textSecondary }]}>{step.text}</Text>
+                    </View>
+                  ))}
+                </View>
+              ),
+              android: (
+                <View style={styles.stepsList}>
+                  {[
+                    { icon: 'hand-left', text: t('widgetSettings.androidStep1') },
+                    { icon: 'apps', text: t('widgetSettings.androidStep2') },
+                    { icon: 'search', text: t('widgetSettings.androidStep3') },
+                    { icon: 'add-circle', text: t('widgetSettings.androidStep4') },
+                  ].map((step, i) => (
+                    <View key={`wgt_${i}`} style={styles.stepRow}>
+                      <View style={[styles.stepNumber, { backgroundColor: colors.primary + '20' }]}>
+                        <Text style={[styles.stepNumberText, { color: colors.primary }]}>{i + 1}</Text>
+                      </View>
+                      <Ionicons name={step.icon as any} size={16} color={colors.primary} style={{ marginRight: SPACING.sm }} />
+                      <Text style={[styles.stepText, { color: colors.textSecondary }]}>{step.text}</Text>
+                    </View>
+                  ))}
+                </View>
+              ),
+              default: (
+                <Text style={[styles.settingDesc, { color: colors.textMuted }]}>
+                  {t('widgetSettings.widgetDefault')}
+                </Text>
+              ),
+            })}
+
+            <Pressable
+              style={({pressed}) => [[styles.addWidgetBtn, { backgroundColor: colors.primary }], {opacity: pressed ? 0.7 : 1}]}
+              onPress={showAddWidgetGuide}
+            >
+              <Ionicons name="add-circle" size={20} color="#FFF" />
+              <Text style={styles.addWidgetBtnText}>{t('widgetSettings.showInstructions')}</Text>
+            </Pressable>
+          </View>
+
+          {/* ── Info Card ── */}
+          <View style={[styles.infoCard, { backgroundColor: colors.bgCardLight, borderColor: colors.border }]}>
+            <Ionicons name="information-circle" size={18} color={colors.primary} />
+            <Text style={[styles.infoText, { color: colors.textMuted }]}>
+              {t('widgetSettings.widgetInfo')}
+            </Text>
+          </View>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

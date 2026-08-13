@@ -12,6 +12,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type {CourseDraftLesson, QuizQuestion, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const COURSE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
 const COURSE_CATEGORIES = [
@@ -81,9 +82,12 @@ export default function CreateCourseScreen({ route, navigation }: NativeStackScr
 
   if (!course) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: colors.textMuted }}>{t('education.courseNotFound')}</Text>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Text style={{ color: colors.textMuted }}>{t('education.courseNotFound')}</Text>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -134,217 +138,220 @@ export default function CreateCourseScreen({ route, navigation }: NativeStackScr
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
-        ref={scrollRef}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <AnimatedPressable onPress={() => { doSave(); navigation.goBack(); }} haptic="light" scaleTo={0.92}>
-              <Ionicons name="close" size={24} color={colors.text} />
-            </AnimatedPressable>
-            <Text style={styles.headerTitle}>
-              {title.trim() || t('education.createCourseTitle')}
+      <AppScreen scroll={false} padded={false}>
+
+        <ScrollView
+          ref={scrollRef}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <AnimatedPressable onPress={() => { doSave(); navigation.goBack(); }} haptic="light" scaleTo={0.92}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </AnimatedPressable>
+              <Text style={styles.headerTitle}>
+                {title.trim() || t('education.createCourseTitle')}
+              </Text>
+              <AnimatedPressable onPress={handlePublish} haptic="medium" scaleTo={0.92}>
+                <View style={styles.publishBtn}>
+                  <Text style={styles.publishBtnText}>{t('education.submit')}</Text>
+                </View>
+              </AnimatedPressable>
+            </View>
+            <Text style={styles.headerSubtitle}>
+              {course.publishStatus === 'published' ? t('education.published') :
+               course.submittedForReview ? t('education.underReview') : t('education.draft')}
             </Text>
-            <AnimatedPressable onPress={handlePublish} haptic="medium" scaleTo={0.92}>
-              <View style={styles.publishBtn}>
-                <Text style={styles.publishBtnText}>{t('education.submit')}</Text>
+          </View>
+
+          {/* ── Basic Info ── */}
+          <Animated.View entering={FadeInDown.springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('education.basicInfo')}</Text>
+
+            <Text style={styles.inputLabel}>{t('education.courseTitle')}</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('education.courseTitlePlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              value={title}
+              onChangeText={setTitle}
+              maxLength={100}
+            />
+
+            <Text style={styles.inputLabel}>{t('education.description')}</Text>
+            <TextInput
+              style={[styles.textInput, styles.textArea]}
+              placeholder={t('education.descriptionPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={4}
+              maxLength={500}
+            />
+
+            {/* Thumbnail Picker */}
+            <Text style={styles.inputLabel}>{t('education.iconThumbnail')}</Text>
+            <View style={styles.thumbnailRow}>
+              {THUMBNAIL_OPTIONS.map(emoji => (
+                <AnimatedPressable
+                  key={emoji}
+                  onPress={() => setSelectedThumbnail(emoji)}
+                  haptic="selection"
+                  scaleTo={0.88}
+                >
+                  <View style={[
+                    styles.thumbnailOption,
+                    selectedThumbnail === emoji && {
+                      backgroundColor: colors.primary + '30',
+                      borderColor: colors.primary,
+                    },
+                  ]}>
+                    <Text style={styles.thumbnailEmoji}>{emoji}</Text>
+                  </View>
+                </AnimatedPressable>
+              ))}
+            </View>
+          </Animated.View>
+
+          {/* ── Level & Category ── */}
+          <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('education.levelCategory')}</Text>
+
+            <Text style={styles.inputLabel}>{t('education.difficulty')}</Text>
+            <View style={styles.chipRow}>
+              {COURSE_LEVELS.map(level => (
+                <AnimatedPressable
+                  key={level}
+                  onPress={() => setSelectedLevel(level)}
+                  haptic="selection"
+                  scaleTo={0.94}
+                >
+                  <View style={[
+                    styles.levelChip,
+                    selectedLevel === level && {
+                      backgroundColor: colors.primary + '30',
+                      borderColor: colors.primary,
+                    },
+                  ]}>
+                    <Text style={[
+                      styles.levelChipText,
+                      selectedLevel === level && { color: colors.primary },
+                    ]}>
+                      {t('education.' + level)}
+                    </Text>
+                  </View>
+                </AnimatedPressable>
+              ))}
+            </View>
+
+            <Text style={styles.inputLabel}>{t('education.category')}</Text>
+            <View style={styles.chipRow}>
+              {COURSE_CATEGORIES.map(cat => (
+                <AnimatedPressable
+                  key={cat}
+                  onPress={() => setSelectedCategory(cat)}
+                  haptic="selection"
+                  scaleTo={0.94}
+                >
+                  <View style={[
+                    styles.categoryChip,
+                    selectedCategory === cat && {
+                      backgroundColor: colors.primary + '30',
+                      borderColor: colors.primary,
+                    },
+                  ]}>
+                    <Text style={[
+                      styles.categoryChipText,
+                      selectedCategory === cat && { color: colors.primary },
+                    ]}>
+                      {cat}
+                    </Text>
+                  </View>
+                </AnimatedPressable>
+              ))}
+            </View>
+
+            <Text style={styles.inputLabel}>{t('education.tagsCommaSeparated')}</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('education.tagsPlaceholder')}
+              placeholderTextColor={colors.textMuted}
+              value={tagsText}
+              onChangeText={setTagsText}
+            />
+          </Animated.View>
+
+          {/* ── Lessons ── */}
+          <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>{t('education.lessonsLabel')} ({lessons.length})</Text>
+              <AnimatedPressable onPress={handleAddLesson} haptic="light" scaleTo={0.92}>
+                <View style={styles.addLessonBtn}>
+                  <Ionicons name="add" size={18} color="#fff" />
+                  <Text style={styles.addLessonBtnText}>{t('education.addLesson')}</Text>
+                </View>
+              </AnimatedPressable>
+            </View>
+
+            {lessons.length === 0 ? (
+              <View style={styles.emptyLessons}>
+                <Ionicons name="document-text-outline" size={40} color={colors.textMuted} />
+                <Text style={styles.emptyLessonsText}>{t('education.noLessonsYet')}</Text>
+              </View>
+            ) : (
+              lessons.map((lesson, idx) => (
+                <Animated.View
+                  key={lesson.id}
+                  entering={FadeInDown.delay(idx * 30).springify()}
+                  layout={LinearTransition.springify()}
+                >
+                  <LessonEditor
+                    lesson={lesson}
+                    index={idx}
+                    courseId={course.id}
+                    isExpanded={expandedLessonId === lesson.id}
+                    onToggleExpand={() => toggleExpandLesson(lesson.id)}
+                    onUpdate={(updates) => updateLesson(course.id, lesson.id, updates)}
+                    onRemove={() => {
+                      Alert.alert(t('education.removeLesson'), t('education.removeLessonConfirm', { title: lesson.title || t('education.untitledLesson') }), [
+                        { text: t('app.cancel'), style: 'cancel' },
+                        { text: t('app.delete'), style: 'destructive', onPress: () => removeLesson(course.id, lesson.id) },
+                      ]);
+                    }}
+                    onAddQuiz={() => addQuizToLesson(course.id, lesson.id)}
+                    onRemoveQuiz={() => removeQuizFromLesson(course.id, lesson.id)}
+                    onAddQuestion={() => addQuestionToQuiz(course.id, lesson.id)}
+                    onUpdateQuestion={(qId, updates) => updateQuizQuestion(course.id, lesson.id, qId, updates)}
+                    onRemoveQuestion={(qId) => removeQuestionFromQuiz(course.id, lesson.id, qId)}
+                    colors={colors}
+                    styles={styles}
+                  />
+                </Animated.View>
+              ))
+            )}
+          </Animated.View>
+
+          {/* ── Actions ── */}
+          <View style={styles.section}>
+            <AnimatedPressable onPress={doSave} haptic="medium" scaleTo={0.97}>
+              <View style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+                <Ionicons name="save-outline" size={20} color="#fff" />
+                <Text style={styles.actionBtnText}>{t('education.saveDraft')}</Text>
               </View>
             </AnimatedPressable>
           </View>
-          <Text style={styles.headerSubtitle}>
-            {course.publishStatus === 'published' ? t('education.published') :
-             course.submittedForReview ? t('education.underReview') : t('education.draft')}
-          </Text>
-        </View>
 
-        {/* ── Basic Info ── */}
-        <Animated.View entering={FadeInDown.springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('education.basicInfo')}</Text>
-
-          <Text style={styles.inputLabel}>{t('education.courseTitle')}</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder={t('education.courseTitlePlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            value={title}
-            onChangeText={setTitle}
-            maxLength={100}
-          />
-
-          <Text style={styles.inputLabel}>{t('education.description')}</Text>
-          <TextInput
-            style={[styles.textInput, styles.textArea]}
-            placeholder={t('education.descriptionPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-            maxLength={500}
-          />
-
-          {/* Thumbnail Picker */}
-          <Text style={styles.inputLabel}>{t('education.iconThumbnail')}</Text>
-          <View style={styles.thumbnailRow}>
-            {THUMBNAIL_OPTIONS.map(emoji => (
-              <AnimatedPressable
-                key={emoji}
-                onPress={() => setSelectedThumbnail(emoji)}
-                haptic="selection"
-                scaleTo={0.88}
-              >
-                <View style={[
-                  styles.thumbnailOption,
-                  selectedThumbnail === emoji && {
-                    backgroundColor: colors.primary + '30',
-                    borderColor: colors.primary,
-                  },
-                ]}>
-                  <Text style={styles.thumbnailEmoji}>{emoji}</Text>
-                </View>
-              </AnimatedPressable>
-            ))}
-          </View>
-        </Animated.View>
-
-        {/* ── Level & Category ── */}
-        <Animated.View entering={FadeInDown.delay(50).springify()} style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('education.levelCategory')}</Text>
-
-          <Text style={styles.inputLabel}>{t('education.difficulty')}</Text>
-          <View style={styles.chipRow}>
-            {COURSE_LEVELS.map(level => (
-              <AnimatedPressable
-                key={level}
-                onPress={() => setSelectedLevel(level)}
-                haptic="selection"
-                scaleTo={0.94}
-              >
-                <View style={[
-                  styles.levelChip,
-                  selectedLevel === level && {
-                    backgroundColor: colors.primary + '30',
-                    borderColor: colors.primary,
-                  },
-                ]}>
-                  <Text style={[
-                    styles.levelChipText,
-                    selectedLevel === level && { color: colors.primary },
-                  ]}>
-                    {t('education.' + level)}
-                  </Text>
-                </View>
-              </AnimatedPressable>
-            ))}
-          </View>
-
-          <Text style={styles.inputLabel}>{t('education.category')}</Text>
-          <View style={styles.chipRow}>
-            {COURSE_CATEGORIES.map(cat => (
-              <AnimatedPressable
-                key={cat}
-                onPress={() => setSelectedCategory(cat)}
-                haptic="selection"
-                scaleTo={0.94}
-              >
-                <View style={[
-                  styles.categoryChip,
-                  selectedCategory === cat && {
-                    backgroundColor: colors.primary + '30',
-                    borderColor: colors.primary,
-                  },
-                ]}>
-                  <Text style={[
-                    styles.categoryChipText,
-                    selectedCategory === cat && { color: colors.primary },
-                  ]}>
-                    {cat}
-                  </Text>
-                </View>
-              </AnimatedPressable>
-            ))}
-          </View>
-
-          <Text style={styles.inputLabel}>{t('education.tagsCommaSeparated')}</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder={t('education.tagsPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            value={tagsText}
-            onChangeText={setTagsText}
-          />
-        </Animated.View>
-
-        {/* ── Lessons ── */}
-        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>{t('education.lessonsLabel')} ({lessons.length})</Text>
-            <AnimatedPressable onPress={handleAddLesson} haptic="light" scaleTo={0.92}>
-              <View style={styles.addLessonBtn}>
-                <Ionicons name="add" size={18} color="#fff" />
-                <Text style={styles.addLessonBtnText}>{t('education.addLesson')}</Text>
-              </View>
-            </AnimatedPressable>
-          </View>
-
-          {lessons.length === 0 ? (
-            <View style={styles.emptyLessons}>
-              <Ionicons name="document-text-outline" size={40} color={colors.textMuted} />
-              <Text style={styles.emptyLessonsText}>{t('education.noLessonsYet')}</Text>
-            </View>
-          ) : (
-            lessons.map((lesson, idx) => (
-              <Animated.View
-                key={lesson.id}
-                entering={FadeInDown.delay(idx * 30).springify()}
-                layout={LinearTransition.springify()}
-              >
-                <LessonEditor
-                  lesson={lesson}
-                  index={idx}
-                  courseId={course.id}
-                  isExpanded={expandedLessonId === lesson.id}
-                  onToggleExpand={() => toggleExpandLesson(lesson.id)}
-                  onUpdate={(updates) => updateLesson(course.id, lesson.id, updates)}
-                  onRemove={() => {
-                    Alert.alert(t('education.removeLesson'), t('education.removeLessonConfirm', { title: lesson.title || t('education.untitledLesson') }), [
-                      { text: t('app.cancel'), style: 'cancel' },
-                      { text: t('app.delete'), style: 'destructive', onPress: () => removeLesson(course.id, lesson.id) },
-                    ]);
-                  }}
-                  onAddQuiz={() => addQuizToLesson(course.id, lesson.id)}
-                  onRemoveQuiz={() => removeQuizFromLesson(course.id, lesson.id)}
-                  onAddQuestion={() => addQuestionToQuiz(course.id, lesson.id)}
-                  onUpdateQuestion={(qId, updates) => updateQuizQuestion(course.id, lesson.id, qId, updates)}
-                  onRemoveQuestion={(qId) => removeQuestionFromQuiz(course.id, lesson.id, qId)}
-                  colors={colors}
-                  styles={styles}
-                />
-              </Animated.View>
-            ))
-          )}
-        </Animated.View>
-
-        {/* ── Actions ── */}
-        <View style={styles.section}>
-          <AnimatedPressable onPress={doSave} haptic="medium" scaleTo={0.97}>
-            <View style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
-              <Ionicons name="save-outline" size={20} color="#fff" />
-              <Text style={styles.actionBtnText}>{t('education.saveDraft')}</Text>
-            </View>
-          </AnimatedPressable>
-        </View>
-
-        <View style={{ height: 120 }} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <View style={{ height: 120 }} />
+        </ScrollView>
+    
+      </AppScreen></KeyboardAvoidingView>
   );
 }
 
@@ -584,16 +591,13 @@ function QuizEditor({
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,
   },
   header: {
-    paddingTop: 60,
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
   headerRow: {

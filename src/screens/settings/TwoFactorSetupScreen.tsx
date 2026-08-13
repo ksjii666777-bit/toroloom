@@ -31,6 +31,7 @@ import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import Card from '../../components/ui/Card';
 import type {TwoFactorSetupData, TwoFactorStatus, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 const QR_SIZE = Math.min(width - SPACING.xl * 4, 220);
@@ -541,89 +542,91 @@ export default function TwoFactorSetupScreen({ navigation }: NativeStackScreenPr
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.title}>{t('twoFactor.title')}</Text>
-        </View>
+      <AppScreen scroll={false} padded={false}>
 
-        {flowStep === 'loading' && renderLoadingStep()}
-        {flowStep === 'setup' && renderSetupStep()}
-        {flowStep === 'backup_codes' && renderBackupCodesStep()}
-        {flowStep === 'manage' && renderManageStep()}
-
-        {/* Error */}
-        {error && !disableCodeModal && (
-          <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle" size={18} color={colors.danger} />
-            <Text style={styles.errorText}>{error}</Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} accessibilityLabel="Go back">
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={styles.title}>{t('twoFactor.title')}</Text>
           </View>
-        )}
 
-        {/* Disable 2FA Verification Modal */}
-        <Modal visible={disableCodeModal} transparent animationType="fade">
-          <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
-              <View style={styles.modalHeader}>
-                <Ionicons name="shield-outline" size={32} color={colors.danger} />
-                <Text style={styles.modalTitle}>{t('twoFactor.disable')}</Text>
-                <Text style={styles.modalSubtitle}>{t('twoFactor.disableModalDesc')}</Text>
-              </View>
+          {flowStep === 'loading' && renderLoadingStep()}
+          {flowStep === 'setup' && renderSetupStep()}
+          {flowStep === 'backup_codes' && renderBackupCodesStep()}
+          {flowStep === 'manage' && renderManageStep()}
 
-              <TextInput
-                style={[styles.modalInput, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
-                value={disableCodeInput}
-                onChangeText={(t) => { setDisableCodeInput(t); setError(null); }}
-                placeholder={t('twoFactor.enterCode')}
-                placeholderTextColor={colors.textMuted}
-                autoCapitalize="characters"
-                autoCorrect={false}
-                editable={!isLoading}
-              />
-
-              {error && (
-                <Text style={[styles.modalError, { color: colors.danger }]}>{error}</Text>
-              )}
-
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  style={[styles.modalBtn, { borderColor: colors.border }]}
-                  onPress={() => { setDisableCodeModal(false); setDisableCodeInput(''); setError(null); }}
-                  disabled={isLoading}
-                >
-                  <Text style={[styles.modalBtnText, { color: colors.textMuted }]}>{t('app.cancel')}</Text>
-                </TouchableOpacity>
-                <AnimatedPressable
-                  onPress={handleConfirmDisable}
-                  disabled={!disableCodeInput.trim() || isLoading}
-                  haptic="medium"
-                  scaleTo={0.97}
-                  style={{ flex: 1, opacity: disableCodeInput.trim() && !isLoading ? 1 : 0.5 }}
-                >
-                  <LinearGradient colors={GRADIENTS.danger} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.modalActionBtn}>
-                    <Text style={styles.modalActionBtnText}>{isLoading ? t('twoFactor.disabling') : t('twoFactor.disable2fa')}</Text>
-                  </LinearGradient>
-                </AnimatedPressable>
-              </View>
+          {/* Error */}
+          {error && !disableCodeModal && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={18} color={colors.danger} />
+              <Text style={styles.errorText}>{error}</Text>
             </View>
-          </KeyboardAvoidingView>
-        </Modal>
+          )}
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {/* Disable 2FA Verification Modal */}
+          <Modal visible={disableCodeModal} transparent animationType="fade">
+            <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+              <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
+                <View style={styles.modalHeader}>
+                  <Ionicons name="shield-outline" size={32} color={colors.danger} />
+                  <Text style={styles.modalTitle}>{t('twoFactor.disable')}</Text>
+                  <Text style={styles.modalSubtitle}>{t('twoFactor.disableModalDesc')}</Text>
+                </View>
+
+                <TextInput
+                  style={[styles.modalInput, { backgroundColor: colors.bgInput, borderColor: colors.border, color: colors.text }]}
+                  value={disableCodeInput}
+                  onChangeText={(t) => { setDisableCodeInput(t); setError(null); }}
+                  placeholder={t('twoFactor.enterCode')}
+                  placeholderTextColor={colors.textMuted}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  editable={!isLoading}
+                />
+
+                {error && (
+                  <Text style={[styles.modalError, { color: colors.danger }]}>{error}</Text>
+                )}
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={[styles.modalBtn, { borderColor: colors.border }]}
+                    onPress={() => { setDisableCodeModal(false); setDisableCodeInput(''); setError(null); }}
+                    disabled={isLoading}
+                  >
+                    <Text style={[styles.modalBtnText, { color: colors.textMuted }]}>{t('app.cancel')}</Text>
+                  </TouchableOpacity>
+                  <AnimatedPressable
+                    onPress={handleConfirmDisable}
+                    disabled={!disableCodeInput.trim() || isLoading}
+                    haptic="medium"
+                    scaleTo={0.97}
+                    style={{ flex: 1, opacity: disableCodeInput.trim() && !isLoading ? 1 : 0.5 }}
+                  >
+                    <LinearGradient colors={GRADIENTS.danger} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.modalActionBtn}>
+                      <Text style={styles.modalActionBtnText}>{isLoading ? t('twoFactor.disabling') : t('twoFactor.disable2fa')}</Text>
+                    </LinearGradient>
+                  </AnimatedPressable>
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </Modal>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+    
+      </AppScreen></KeyboardAvoidingView>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
     scrollContent: { paddingHorizontal: SPACING.xl, paddingBottom: 20 },
 
     // Header

@@ -11,6 +11,7 @@ import { useT } from '../../hooks/useT';
 import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
 import { LINKED_BANKS, WITHDRAW_PRESETS } from '../../services/mockDataService';
@@ -118,7 +119,8 @@ export default function WithdrawScreen({ navigation }: NativeStackScreenProps<Ro
 
   if (isSuccess) {
     return (
-      <View style={[styles.container, styles.successContainer]}>
+      <AppScreen scroll={false} padded={false}>
+        <View style={[styles.successContainer, { flex: 1 }]}>
         <View style={styles.successContent}>
           <View style={styles.successIconWrap}>
             <LinearGradient colors={GRADIENTS.danger} style={styles.successIconBg}>
@@ -161,15 +163,15 @@ export default function WithdrawScreen({ navigation }: NativeStackScreenProps<Ro
             <Text style={styles.viewHistoryText}>{t('funds.withdrawViewHistory')}</Text>
           </TouchableOpacity>
         </View>
-      </View>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+    <AppScreen scroll={false} padded={false} header={
+      <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.white} />
         </TouchableOpacity>
@@ -178,7 +180,7 @@ export default function WithdrawScreen({ navigation }: NativeStackScreenProps<Ro
           <Ionicons name="time-outline" size={24} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
-
+    }>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Balance Card */}
         <LinearGradient colors={GRADIENTS.danger} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.balanceCard}>
@@ -373,16 +375,12 @@ export default function WithdrawScreen({ navigation }: NativeStackScreenProps<Ro
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </View>
+    </AppScreen>
     </TouchableWithoutFeedback>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,

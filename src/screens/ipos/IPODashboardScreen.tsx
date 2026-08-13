@@ -18,6 +18,7 @@ import { useIPOStore } from '../../store/ipoStore';
 import type {IPOItem, IPOApplication, RootStackParamList} from '../../types';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 // ──── Constants ────────────────────────────────────────────────────────────
 
@@ -782,7 +783,6 @@ const modalStyles = StyleSheet.create({
 export default function IPODashboardScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'IPODashboard'>) {
   const { colors } = useTheme();
   const { t } = useT();
-  const insets = useSafeAreaInsets();
   const { ipos, applications, toggleBookmark } = useIPOStore();
   const getApplicationStats = useIPOStore((s) => s.getApplicationStats);
 
@@ -813,230 +813,230 @@ export default function IPODashboardScreen({ navigation }: NativeStackScreenProp
   }), [ipos]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={[styles.title, { color: colors.text }]}>{t('ipos.dashboard')}</Text>
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-              {counts.open > 0
-                ? t('ipos.subtitleSummary', { open: counts.open, upcoming: counts.upcoming, listed: counts.listed })
-                : t('ipos.appsTracked', { count: applications.length })}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={20} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Tab Toggle */}
-        <View style={[styles.tabRow, { backgroundColor: colors.bgInput }]}>
-          <TouchableOpacity
-            style={[styles.tabBtn, activeTab === 'active' && { backgroundColor: colors.primary }]}
-            onPress={() => setActiveTab('active')}
-          >
-            <Ionicons
-              name="rocket"
-              size={14}
-              color={activeTab === 'active' ? '#FFFFFF' : colors.textMuted}
-            />
-            <Text style={[styles.tabText, { color: activeTab === 'active' ? '#FFFFFF' : colors.textMuted }]}>
-              {t('ipos.activeIPOs')}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tabBtn, activeTab === 'myapps' && { backgroundColor: colors.primary }]}
-            onPress={() => setActiveTab('myapps')}
-          >
-            <Ionicons
-              name="document-text"
-              size={14}
-              color={activeTab === 'myapps' ? '#FFFFFF' : colors.textMuted}
-            />
-            <Text style={[styles.tabText, { color: activeTab === 'myapps' ? '#FFFFFF' : colors.textMuted }]}>
-              {t('ipos.myApps', { count: applications.length })}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {activeTab === 'active' ? (
-        <>
-          {/* Filter Chips */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterRow}
-          >
-            {FILTERS.map((f) => (
-              <TouchableOpacity
-                key={f.key}
-                style={[styles.filterChip, {
-                  backgroundColor: activeFilter === f.key ? colors.primary : colors.bgCardLight,
-                  borderColor: activeFilter === f.key ? colors.primary : colors.border,
-                }]}
-                onPress={() => setActiveFilter(f.key)}
-              >
-                <Ionicons
-                  name={f.icon as any}
-                  size={13}
-                  color={activeFilter === f.key ? '#FFFFFF' : colors.textSecondary}
-                />
-                <Text style={[styles.filterText, {
-                  color: activeFilter === f.key ? '#FFFFFF' : colors.textSecondary,
-                }]}>
-                  {t(f.tKey)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          {/* IPO List */}
-          {filteredIPOs.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="rocket-outline" size={48} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('ipos.noIPOs')}</Text>
-              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                {t('ipos.noIPOsSub')}
+          <AppScreen scroll={false} padded={false}
+      >
+  {/* Header */}
+        <View style={[styles.header]}>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={[styles.title, { color: colors.text }]}>{t('ipos.dashboard')}</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                {counts.open > 0
+                  ? t('ipos.subtitleSummary', { open: counts.open, upcoming: counts.upcoming, listed: counts.listed })
+                  : t('ipos.appsTracked', { count: applications.length })}
               </Text>
             </View>
-          ) : (
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.listContent}
+            <TouchableOpacity
+              style={[styles.backBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+              onPress={() => navigation.goBack()}
             >
-              <Text style={[styles.countText, { color: colors.textMuted }]}>
-                {t('ipos.showingCount', { count: filteredIPOs.length })}
-              </Text>
-              {filteredIPOs.map((ipo) => (
-                <IPOCard
-                  key={ipo.id}
-                  ipo={ipo}
-                  colors={colors}
-                  onPress={() => navigation.navigate('IPODetail', { ipoId: ipo.id })}
-                  onApply={
-                    ipo.subscriptionStatus === 'open' || ipo.subscriptionStatus === 'listing_today'
-                      ? () => setApplyModalIPO(ipo)
-                      : undefined
-                  }
-                  onBookmark={() => toggleBookmark(ipo.id)}
-                />
-              ))}
-              <View style={{ height: 100 }} />
-            </ScrollView>
-          )}
-        </>
-      ) : (
-        <>
-          {/* Application Stats */}
-          {applications.length > 0 && (
-            <View style={[styles.statsRow, { paddingHorizontal: SPACING.xl }]}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: SPACING.sm }}>
-                <View style={[styles.statChip, { backgroundColor: '#3B82F620', borderColor: '#3B82F640' }]}>
-                  <Text style={[styles.statChipValue, { color: '#3B82F6' }]}>{stats.total}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.total')}</Text>
-                </View>
-                <View style={[styles.statChip, { backgroundColor: '#3B82F620', borderColor: '#3B82F640' }]}>
-                  <Text style={[styles.statChipValue, { color: '#3B82F6' }]}>{stats.submitted}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appSubmitted')}</Text>
-                </View>
-                <View style={[styles.statChip, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
-                  <Text style={[styles.statChipValue, { color: '#00E676' }]}>{stats.allotted}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appAllotted')}</Text>
-                </View>
-                <View style={[styles.statChip, { backgroundColor: '#FF525220', borderColor: '#FF525240' }]}>
-                  <Text style={[styles.statChipValue, { color: '#FF5252' }]}>{stats.notAllotted}</Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appNotAllotted')}</Text>
-                </View>
-                <View style={[styles.statChip, { backgroundColor: '#FFAB4020', borderColor: '#FFAB4040' }]}>
-                  <Text style={[styles.statChipValue, { color: '#FFAB40' }]}>
-                    {formatCompact(stats.totalInvestment)}
-                  </Text>
-                  <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.invested')}</Text>
-                </View>
-                {stats.profitFromAllotted > 0 && (
-                  <View style={[styles.statChip, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
-                    <Text style={[styles.statChipValue, { color: '#00E676' }]}>
-                      +{formatCompact(stats.profitFromAllotted)}
-                    </Text>
-                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.profit')}</Text>
-                  </View>
-                )}
-              </ScrollView>
-            </View>
-          )}
+              <Ionicons name="arrow-back" size={20} color={colors.text} />
+            </TouchableOpacity>
+          </View>
 
-          {/* Application Filter */}
-          {applications.length > 1 && (
-            <View style={styles.appFilterRow}>
-              {(['all', 'submitted', 'allotted', 'not_allotted'] as const).map((f) => (
+          {/* Tab Toggle */}
+          <View style={[styles.tabRow, { backgroundColor: colors.bgInput }]}>
+            <TouchableOpacity
+              style={[styles.tabBtn, activeTab === 'active' && { backgroundColor: colors.primary }]}
+              onPress={() => setActiveTab('active')}
+            >
+              <Ionicons
+                name="rocket"
+                size={14}
+                color={activeTab === 'active' ? '#FFFFFF' : colors.textMuted}
+              />
+              <Text style={[styles.tabText, { color: activeTab === 'active' ? '#FFFFFF' : colors.textMuted }]}>
+                {t('ipos.activeIPOs')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tabBtn, activeTab === 'myapps' && { backgroundColor: colors.primary }]}
+              onPress={() => setActiveTab('myapps')}
+            >
+              <Ionicons
+                name="document-text"
+                size={14}
+                color={activeTab === 'myapps' ? '#FFFFFF' : colors.textMuted}
+              />
+              <Text style={[styles.tabText, { color: activeTab === 'myapps' ? '#FFFFFF' : colors.textMuted }]}>
+                {t('ipos.myApps', { count: applications.length })}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {activeTab === 'active' ? (
+          <>
+            {/* Filter Chips */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filterRow}
+            >
+              {FILTERS.map((f) => (
                 <TouchableOpacity
-                  key={f}
-                  style={[styles.appFilterChip, {
-                    backgroundColor: appFilter === f ? colors.primary : colors.bgCardLight,
-                    borderColor: appFilter === f ? colors.primary : colors.border,
+                  key={f.key}
+                  style={[styles.filterChip, {
+                    backgroundColor: activeFilter === f.key ? colors.primary : colors.bgCardLight,
+                    borderColor: activeFilter === f.key ? colors.primary : colors.border,
                   }]}
-                  onPress={() => setAppFilter(f)}
+                  onPress={() => setActiveFilter(f.key)}
                 >
-                  <Text style={[styles.appFilterText, {
-                    color: appFilter === f ? '#FFFFFF' : colors.textMuted,
+                  <Ionicons
+                    name={f.icon as any}
+                    size={13}
+                    color={activeFilter === f.key ? '#FFFFFF' : colors.textSecondary}
+                  />
+                  <Text style={[styles.filterText, {
+                    color: activeFilter === f.key ? '#FFFFFF' : colors.textSecondary,
                   }]}>
-                    {f === 'all' ? t('ipos.filterAll') : f === 'submitted' ? t('ipos.filterActive') : f === 'allotted' ? '✅' : '❌'}
+                    {t(f.tKey)}
                   </Text>
                 </TouchableOpacity>
               ))}
-            </View>
-          )}
-
-          {/* Applications List */}
-          {filteredApps.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="document-text-outline" size={48} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('ipos.noApplications')}</Text>
-              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                {t('ipos.noAppsSub')}
-              </Text>
-            </View>
-          ) : (
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.listContent}
-            >
-              <Text style={[styles.countText, { color: colors.textMuted }]}>
-                {t('ipos.appCount', { count: filteredApps.length })}
-              </Text>
-              {filteredApps.map((app) => (
-                <ApplicationCard
-                  key={app.id}
-                  app={app}
-                  colors={colors}
-                />
-              ))}
-              <View style={{ height: 100 }} />
             </ScrollView>
-          )}
-        </>
-      )}
 
-      {/* UPI Apply Modal */}
-      <UPIApplyModal
-        ipo={applyModalIPO}
-        visible={!!applyModalIPO}
-        onClose={() => setApplyModalIPO(null)}
-        colors={colors}
-      />
-    </View>
+            {/* IPO List */}
+            {filteredIPOs.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="rocket-outline" size={48} color={colors.textMuted} />
+                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('ipos.noIPOs')}</Text>
+                <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
+                  {t('ipos.noIPOsSub')}
+                </Text>
+              </View>
+            ) : (
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.listContent}
+              >
+                <Text style={[styles.countText, { color: colors.textMuted }]}>
+                  {t('ipos.showingCount', { count: filteredIPOs.length })}
+                </Text>
+                {filteredIPOs.map((ipo) => (
+                  <IPOCard
+                    key={ipo.id}
+                    ipo={ipo}
+                    colors={colors}
+                    onPress={() => navigation.navigate('IPODetail', { ipoId: ipo.id })}
+                    onApply={
+                      ipo.subscriptionStatus === 'open' || ipo.subscriptionStatus === 'listing_today'
+                        ? () => setApplyModalIPO(ipo)
+                        : undefined
+                    }
+                    onBookmark={() => toggleBookmark(ipo.id)}
+                  />
+                ))}
+                <View style={{ height: 100 }} />
+              </ScrollView>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Application Stats */}
+            {applications.length > 0 && (
+              <View style={[styles.statsRow, { paddingHorizontal: SPACING.xl }]}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: SPACING.sm }}>
+                  <View style={[styles.statChip, { backgroundColor: '#3B82F620', borderColor: '#3B82F640' }]}>
+                    <Text style={[styles.statChipValue, { color: '#3B82F6' }]}>{stats.total}</Text>
+                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.total')}</Text>
+                  </View>
+                  <View style={[styles.statChip, { backgroundColor: '#3B82F620', borderColor: '#3B82F640' }]}>
+                    <Text style={[styles.statChipValue, { color: '#3B82F6' }]}>{stats.submitted}</Text>
+                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appSubmitted')}</Text>
+                  </View>
+                  <View style={[styles.statChip, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
+                    <Text style={[styles.statChipValue, { color: '#00E676' }]}>{stats.allotted}</Text>
+                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appAllotted')}</Text>
+                  </View>
+                  <View style={[styles.statChip, { backgroundColor: '#FF525220', borderColor: '#FF525240' }]}>
+                    <Text style={[styles.statChipValue, { color: '#FF5252' }]}>{stats.notAllotted}</Text>
+                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.appNotAllotted')}</Text>
+                  </View>
+                  <View style={[styles.statChip, { backgroundColor: '#FFAB4020', borderColor: '#FFAB4040' }]}>
+                    <Text style={[styles.statChipValue, { color: '#FFAB40' }]}>
+                      {formatCompact(stats.totalInvestment)}
+                    </Text>
+                    <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.invested')}</Text>
+                  </View>
+                  {stats.profitFromAllotted > 0 && (
+                    <View style={[styles.statChip, { backgroundColor: '#00E67620', borderColor: '#00E67640' }]}>
+                      <Text style={[styles.statChipValue, { color: '#00E676' }]}>
+                        +{formatCompact(stats.profitFromAllotted)}
+                      </Text>
+                      <Text style={[styles.statChipLabel, { color: colors.textMuted }]}>{t('ipos.profit')}</Text>
+                    </View>
+                  )}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Application Filter */}
+            {applications.length > 1 && (
+              <View style={styles.appFilterRow}>
+                {(['all', 'submitted', 'allotted', 'not_allotted'] as const).map((f) => (
+                  <TouchableOpacity
+                    key={f}
+                    style={[styles.appFilterChip, {
+                      backgroundColor: appFilter === f ? colors.primary : colors.bgCardLight,
+                      borderColor: appFilter === f ? colors.primary : colors.border,
+                    }]}
+                    onPress={() => setAppFilter(f)}
+                  >
+                    <Text style={[styles.appFilterText, {
+                      color: appFilter === f ? '#FFFFFF' : colors.textMuted,
+                    }]}>
+                      {f === 'all' ? t('ipos.filterAll') : f === 'submitted' ? t('ipos.filterActive') : f === 'allotted' ? '✅' : '❌'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Applications List */}
+            {filteredApps.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="document-text-outline" size={48} color={colors.textMuted} />
+                <Text style={[styles.emptyTitle, { color: colors.textMuted }]}>{t('ipos.noApplications')}</Text>
+                <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
+                  {t('ipos.noAppsSub')}
+                </Text>
+              </View>
+            ) : (
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.listContent}
+              >
+                <Text style={[styles.countText, { color: colors.textMuted }]}>
+                  {t('ipos.appCount', { count: filteredApps.length })}
+                </Text>
+                {filteredApps.map((app) => (
+                  <ApplicationCard
+                    key={app.id}
+                    app={app}
+                    colors={colors}
+                  />
+                ))}
+                <View style={{ height: 100 }} />
+              </ScrollView>
+            )}
+          </>
+        )}
+
+        {/* UPI Apply Modal */}
+        <UPIApplyModal
+          ipo={applyModalIPO}
+          visible={!!applyModalIPO}
+          onClose={() => setApplyModalIPO(null)}
+          colors={colors}
+        />
+      </AppScreen>
   );
 }
 
 // ──── Styles ───────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.sm },
   headerTop: {
     flexDirection: 'row', justifyContent: 'space-between',

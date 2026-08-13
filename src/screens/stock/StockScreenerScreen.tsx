@@ -44,6 +44,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme'
 
 import StockItem from '../../components/StockItem';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import { useStaggeredAnimation } from '../../hooks/useStaggeredAnimation';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
@@ -808,9 +809,8 @@ export default function StockScreenerScreen({ navigation }: NativeStackScreenPro
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+    <AppScreen scroll={false} padded={false} header={
+      <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
@@ -825,7 +825,7 @@ export default function StockScreenerScreen({ navigation }: NativeStackScreenPro
           </TouchableOpacity>
         )}
       </View>
-
+    }>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -1292,16 +1292,12 @@ export default function StockScreenerScreen({ navigation }: NativeStackScreenPro
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-    </View>
+    </AppScreen>
     </TouchableWithoutFeedback>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,

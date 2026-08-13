@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import AppScreen from '../../components/ui/AppScreen';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
@@ -49,9 +50,10 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <AppScreen scroll={false} padded={false}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -182,16 +184,13 @@ export default function SignupScreen({ navigation, route }: SignupScreenProps) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </AppScreen>
     </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: SPACING.xxxl,

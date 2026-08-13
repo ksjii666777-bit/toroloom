@@ -32,6 +32,7 @@ import { useT } from '../../hooks/useT';
 import { useBiometricStore } from '../../store/biometricStore';
 import { biometricAuth } from '../../services/biometricService';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import { newIdempotencyKey } from '../../utils/idempotency';
 import TradingViewChart from '../../components/TradingViewChart';
 import PositionLevelsOverlay from '../../components/PositionLevelsOverlay';
@@ -259,7 +260,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: NativeStackS
   // ── Confirmation View ──
   if (showConfirmation && orderResult) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <View style={[styles.confirmContainer, { paddingTop: 60 + insets.top }]}>
           <Animated.View entering={FadeInDown.duration(400)} style={styles.confirmContent}>
             <LinearGradient
@@ -330,13 +331,13 @@ export default function SnapTradeOrderScreen({ route, navigation }: NativeStackS
   }
 
   return (
-    <Pressable onPress={Keyboard.dismiss} style={[styles.container, { backgroundColor: colors.bg }]}>
-      {/* Header */}
+    <Pressable onPress={Keyboard.dismiss} style={{ flex: 1 }}>
+      <AppScreen padded={false} contentStyle={styles.scrollContent} header={
       <LinearGradient
         colors={gradientColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.header, { paddingTop: 60 + insets.top }]}
+        style={styles.header}
       >
         <View style={styles.headerRow}>
           <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93}>
@@ -364,7 +365,7 @@ export default function SnapTradeOrderScreen({ route, navigation }: NativeStackS
           </Pressable>
         </View>
       </LinearGradient>
-
+      }>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -625,15 +626,17 @@ export default function SnapTradeOrderScreen({ route, navigation }: NativeStackS
 
         <View style={{ height: 60 }} />
       </ScrollView>
+      </AppScreen>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
 
   // Header
   header: {
+    // AppScreen already pads for the status-bar/safe-area inset
+    paddingTop: SPACING.xl,
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.lg,
   },

@@ -12,6 +12,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useFundStore } from '../../store/fundStore';
 import { paymentsApi } from '../../services/api/payments';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 import { COLORS, SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import { formatCurrency} from '../../utils/formatters';
 import { LINKED_UPI_ACCOUNTS, RECENT_UPI_CONTACTS, UPI_PRESETS } from '../../services/mockDataService';
@@ -193,7 +194,8 @@ export default function UPIScreen({ navigation }: NativeStackScreenProps<RootSta
 
   if (isSuccess) {
     return (
-      <View style={[styles.container, styles.successContainer]}>
+      <AppScreen scroll={false} padded={false}>
+        <View style={[styles.successContainer, { flex: 1 }]}>
         <View style={styles.successContent}>
           <View style={styles.successIconWrap}>
             <LinearGradient colors={GRADIENTS.accent} style={styles.successIconBg}>
@@ -241,15 +243,15 @@ export default function UPIScreen({ navigation }: NativeStackScreenProps<RootSta
             </LinearGradient>
           </TouchableOpacity>
         </View>
-      </View>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+    <AppScreen scroll={false} padded={false} header={
+      <View style={styles.header}>
         <TouchableOpacity
           style={[styles.backBtn, { backgroundColor: colors.bgCard }]}
           onPress={() => navigation.goBack()}
@@ -265,7 +267,7 @@ export default function UPIScreen({ navigation }: NativeStackScreenProps<RootSta
           <Ionicons name="qr-code-outline" size={22} color={colors.primary} />
         </TouchableOpacity>
       </View>
-
+    }>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* UPI ID Selector */}
         <LinearGradient colors={GRADIENTS.accent} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.upiCard}>
@@ -505,16 +507,12 @@ export default function UPIScreen({ navigation }: NativeStackScreenProps<RootSta
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </View>
+    </AppScreen>
     </TouchableWithoutFeedback>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,

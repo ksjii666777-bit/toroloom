@@ -39,6 +39,7 @@ import { useT } from '../../hooks/useT';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS } from '../../constants/theme';
 import AnimatedPressable from '../../components/ui/AnimatedPressable';
+import AppScreen from '../../components/ui/AppScreen';
 
 import { brokerProxyApi, snapTradeApi } from '../../services/api';
 import { log } from '../../utils/logger';
@@ -367,19 +368,20 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
   // ── Loading State ───────────────────────────────────────────
   if (isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <AppScreen scroll={false} padded={false}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color={NEON_CYAN} />
         <Text style={[styles.loadingText, { color: 'rgba(255,255,255,0.5)' }]}>
           {t('brokerConnect.checkingStatus')}
         </Text>
-      </View>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: 60 + insets.top }]}>
+    <AppScreen padded={false} contentStyle={styles.scrollContent} header={
+      <View style={styles.header}>
         <AnimatedPressable onPress={() => navigation.goBack()} haptic="light" scaleTo={0.93} accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </AnimatedPressable>
@@ -390,7 +392,7 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
           </Text>
         </View>
       </View>
-
+    }>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Premium Status Pills */}
         <Animated.View style={[styles.statusPillsRow, { opacity: fadeAnim }]}>
@@ -590,7 +592,7 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
           </Animated.View>
         </View>
       )}
-    </View>
+    </AppScreen>
   );
 }
 
@@ -598,11 +600,9 @@ export default function ConnectBrokerView({ navigation }: NativeStackScreenProps
 
 const createStyles = (_colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: MIDNIGHT_BG,
-    },
     header: {
+      // AppScreen already pads for the status-bar/safe-area inset
+      paddingTop: SPACING.xl,
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: SPACING.xl,

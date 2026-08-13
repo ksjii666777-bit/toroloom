@@ -34,6 +34,7 @@ import PnLChart from '../../components/PnLChart';
 import Badge from '../../components/ui/Badge';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type {TraderProfile, TraderPublicTrade, TraderPnLPoint, RootStackParamList} from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -339,13 +340,16 @@ export default function TraderProfileScreen({ navigation, route }: NativeStackSc
 
   if (!trader) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('traderProfile.traderNotFound')}</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={[styles.backBtnText, { color: colors.primary }]}>{t('traderProfile.goBack')}</Text>
-        </TouchableOpacity>
-      </View>
+            <AppScreen scroll={false} padded={false}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Ionicons name="sad-outline" size={48} color={colors.textMuted} />
+          <Text style={[styles.emptyText, { marginTop: SPACING.md }]}>{t('traderProfile.traderNotFound')}</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Text style={[styles.backBtnText, { color: colors.primary }]}>{t('traderProfile.goBack')}</Text>
+          </TouchableOpacity>
+        </View>
+      </AppScreen>
     );
   }
 
@@ -354,256 +358,257 @@ export default function TraderProfileScreen({ navigation, route }: NativeStackSc
   const totalPnlPositive = trader.totalPnl >= 0;
 
   return (
-    <View style={styles.container}>
-      {/* Sticky Header */}
-      <View style={styles.stickyHeader}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>{trader.name}</Text>
-        <TouchableOpacity onPress={handleShare} style={styles.shareBtn}>
-          <Ionicons name="share-outline" size={20} color={colors.text} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        style={styles.scrollContent}
-        contentContainerStyle={styles.scrollInner}
-        showsVerticalScrollIndicator={false}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* ─── Trader Banner ─── */}
-        <LinearGradient
-          colors={GRADIENTS.primary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.banner}
+  {/* Sticky Header */}
+        <View style={styles.stickyHeader}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle} numberOfLines={1}>{trader.name}</Text>
+          <TouchableOpacity onPress={handleShare} style={styles.shareBtn}>
+            <Ionicons name="share-outline" size={20} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          style={styles.scrollContent}
+          contentContainerStyle={styles.scrollInner}
+          showsVerticalScrollIndicator={false}
         >
-          <View style={styles.bannerRow}>
-            <View style={styles.avatarLarge}>
-              <Text style={styles.avatarText}>{trader.name[0]}</Text>
-            </View>
-            <View style={styles.bannerInfo}>
-              <View style={styles.nameRow}>
-                <Text style={styles.name}>{trader.name}</Text>
-                {trader.verified && (
-                  <View style={styles.verifiedBadge}>
-                    <Ionicons name="checkmark-circle" size={16} color="#00E676" />
-                    <Text style={styles.verifiedLabel}>{t('traderProfile.verified')}</Text>
-                  </View>
-                )}
+          {/* ─── Trader Banner ─── */}
+          <LinearGradient
+            colors={GRADIENTS.primary}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.banner}
+          >
+            <View style={styles.bannerRow}>
+              <View style={styles.avatarLarge}>
+                <Text style={styles.avatarText}>{trader.name[0]}</Text>
               </View>
-              <Text style={styles.bio} numberOfLines={2}>{trader.bio}</Text>
-              <View style={styles.tagRow}>
-                <Badge label={trader.strategy.replace(/_/g, ' · ')} variant="primary" size="medium" />
-                <View style={[styles.riskBadge, {
-                  backgroundColor: trader.riskScore === 'low' ? '#00E67620' : trader.riskScore === 'moderate' ? '#FFAB4020' : '#FF525220',
-                }]}>
-                  <Text style={[styles.riskText, {
-                    color: trader.riskScore === 'low' ? '#00E676' : trader.riskScore === 'moderate' ? '#FFAB40' : '#FF5252',
+              <View style={styles.bannerInfo}>
+                <View style={styles.nameRow}>
+                  <Text style={styles.name}>{trader.name}</Text>
+                  {trader.verified && (
+                    <View style={styles.verifiedBadge}>
+                      <Ionicons name="checkmark-circle" size={16} color="#00E676" />
+                      <Text style={styles.verifiedLabel}>{t('traderProfile.verified')}</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.bio} numberOfLines={2}>{trader.bio}</Text>
+                <View style={styles.tagRow}>
+                  <Badge label={trader.strategy.replace(/_/g, ' · ')} variant="primary" size="medium" />
+                  <View style={[styles.riskBadge, {
+                    backgroundColor: trader.riskScore === 'low' ? '#00E67620' : trader.riskScore === 'moderate' ? '#FFAB4020' : '#FF525220',
                   }]}>
-                    {trader.riskScore === 'low' ? t('traderProfile.lowRisk') : trader.riskScore === 'moderate' ? t('traderProfile.moderate') : t('traderProfile.highRisk')}
-                  </Text>
+                    <Text style={[styles.riskText, {
+                      color: trader.riskScore === 'low' ? '#00E676' : trader.riskScore === 'moderate' ? '#FFAB40' : '#FF5252',
+                    }]}>
+                      {trader.riskScore === 'low' ? t('traderProfile.lowRisk') : trader.riskScore === 'moderate' ? t('traderProfile.moderate') : t('traderProfile.highRisk')}
+                    </Text>
+                  </View>
+                  <Text style={styles.expText}>{t('traderProfile.yrExp', { count: trader.experienceYears })}</Text>
                 </View>
-                <Text style={styles.expText}>{t('traderProfile.yrExp', { count: trader.experienceYears })}</Text>
               </View>
             </View>
+            {/* Badges */}
+            {trader.badges.length > 0 && (
+              <View style={styles.badgesRow}>
+                {trader.badges.map(b => (
+                  <View key={b} style={styles.badgeChip}>
+                    <Ionicons name="ribbon" size={10} color="#FFD700" />
+                    <Text style={styles.badgeChipText}>{b}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </LinearGradient>
+
+          {/* ─── Stats Grid ─── */}
+          <View style={styles.statsGrid}>
+            {[
+              { label: t('traderProfile.totalPnl'), value: `${totalPnlPositive ? '+' : ''}₹${(trader.totalPnl / 100000).toFixed(1)}L`, color: totalPnlPositive ? colors.marketUp : colors.marketDown },
+              { label: t('traderProfile.returns'), value: `${trader.totalPnlPercent >= 0 ? '+' : ''}${trader.totalPnlPercent.toFixed(1)}%`, color: trader.totalPnlPercent >= 0 ? colors.marketUp : colors.marketDown },
+              { label: t('traderProfile.winRate'), value: `${trader.winRate.toFixed(0)}%`, color: trader.winRate >= 60 ? colors.marketUp : colors.marketDown },
+              { label: t('traderProfile.monthly'), value: `${trader.monthlyReturn >= 0 ? '+' : ''}${trader.monthlyReturn.toFixed(1)}%`, color: trader.monthlyReturn >= 0 ? colors.marketUp : colors.marketDown },
+              { label: t('traderProfile.followers'), value: trader.followers >= 1000 ? `${(trader.followers / 1000).toFixed(1)}K` : `${trader.followers}`, color: colors.text },
+              { label: t('traderProfile.trades'), value: trader.totalTrades.toLocaleString(), color: colors.text },
+              { label: t('traderProfile.maxDd'), value: `${trader.maxDrawdown.toFixed(1)}%`, color: colors.danger },
+              { label: t('traderProfile.avgHold'), value: `${trader.avgHoldingDays.toFixed(1)}d`, color: colors.text },
+              { label: t('traderProfile.copyTraders'), value: trader.copyTraders >= 1000 ? `${(trader.copyTraders / 1000).toFixed(1)}K` : `${trader.copyTraders}`, color: colors.primary },
+            ].map((stat) => (
+              <View key={stat.label} style={[styles.statBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{stat.label}</Text>
+              </View>
+            ))}
           </View>
-          {/* Badges */}
-          {trader.badges.length > 0 && (
-            <View style={styles.badgesRow}>
-              {trader.badges.map(b => (
-                <View key={b} style={styles.badgeChip}>
-                  <Ionicons name="ribbon" size={10} color="#FFD700" />
-                  <Text style={styles.badgeChipText}>{b}</Text>
-                </View>
+
+          {/* ─── P&L Chart ─── */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="pulse" size={18} color={colors.primary} />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.pnlHistory')}</Text>
+            </View>
+            <PnLChart
+              data={pnlHistory.map(p => ({ date: p.date, value: p.cumulativePnl, cumulativePnl: p.cumulativePnl }))}
+              height={200}
+              timeframe={chartTimeframe}
+              onTimeframeChange={setChartTimeframe}
+            />
+          </View>
+
+          {/* ─── Performance Analytics ─── */}
+          <PerformanceAnalyticsCard trader={trader} />
+
+          {/* ─── Top Stocks ─── */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="business" size={18} color={colors.primary} />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.topStocks')}</Text>
+            </View>
+            <View style={styles.topStocksRow}>
+              {trader.topStocks.map(s => (
+                <TouchableOpacity
+                  key={s}
+                  style={[styles.stockChip, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}
+                  onPress={() => navigation.navigate('StockDetail', { stockId: s, symbol: s })}
+                >
+                  <Text style={[styles.stockChipText, { color: colors.primary }]}>{s}</Text>
+                </TouchableOpacity>
               ))}
             </View>
-          )}
-        </LinearGradient>
+          </View>
 
-        {/* ─── Stats Grid ─── */}
-        <View style={styles.statsGrid}>
-          {[
-            { label: t('traderProfile.totalPnl'), value: `${totalPnlPositive ? '+' : ''}₹${(trader.totalPnl / 100000).toFixed(1)}L`, color: totalPnlPositive ? colors.marketUp : colors.marketDown },
-            { label: t('traderProfile.returns'), value: `${trader.totalPnlPercent >= 0 ? '+' : ''}${trader.totalPnlPercent.toFixed(1)}%`, color: trader.totalPnlPercent >= 0 ? colors.marketUp : colors.marketDown },
-            { label: t('traderProfile.winRate'), value: `${trader.winRate.toFixed(0)}%`, color: trader.winRate >= 60 ? colors.marketUp : colors.marketDown },
-            { label: t('traderProfile.monthly'), value: `${trader.monthlyReturn >= 0 ? '+' : ''}${trader.monthlyReturn.toFixed(1)}%`, color: trader.monthlyReturn >= 0 ? colors.marketUp : colors.marketDown },
-            { label: t('traderProfile.followers'), value: trader.followers >= 1000 ? `${(trader.followers / 1000).toFixed(1)}K` : `${trader.followers}`, color: colors.text },
-            { label: t('traderProfile.trades'), value: trader.totalTrades.toLocaleString(), color: colors.text },
-            { label: t('traderProfile.maxDd'), value: `${trader.maxDrawdown.toFixed(1)}%`, color: colors.danger },
-            { label: t('traderProfile.avgHold'), value: `${trader.avgHoldingDays.toFixed(1)}d`, color: colors.text },
-            { label: t('traderProfile.copyTraders'), value: trader.copyTraders >= 1000 ? `${(trader.copyTraders / 1000).toFixed(1)}K` : `${trader.copyTraders}`, color: colors.primary },
-          ].map((stat) => (
-            <View key={stat.label} style={[styles.statBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-              <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{stat.label}</Text>
+          {/* ─── Trade History ─── */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="swap-horizontal" size={18} color={colors.primary} />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.tradeHistory')}</Text>
+              <Text style={[styles.tradeCount, { color: colors.textMuted }]}>{t('traderProfile.tradeCount', { count: trades.length })}</Text>
             </View>
-          ))}
-        </View>
 
-        {/* ─── P&L Chart ─── */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="pulse" size={18} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.pnlHistory')}</Text>
-          </View>
-          <PnLChart
-            data={pnlHistory.map(p => ({ date: p.date, value: p.cumulativePnl, cumulativePnl: p.cumulativePnl }))}
-            height={200}
-            timeframe={chartTimeframe}
-            onTimeframeChange={setChartTimeframe}
-          />
-        </View>
+            {/* Summary row */}
+            <View style={[styles.tradeSummary, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
+              <View style={styles.tradeSummaryItem}>
+                <Text style={[styles.tradeSummaryValue, { color: colors.marketUp }]}>
+                  {trades.filter(t => t.pnl > 0 && !t.isOpen).length}
+                </Text>
+                <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.won')}</Text>
+              </View>
+              <View style={styles.tradeSummaryItem}>
+                <Text style={[styles.tradeSummaryValue, { color: colors.marketDown }]}>
+                  {trades.filter(t => t.pnl <= 0 && !t.isOpen).length}
+                </Text>
+                <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.lost')}</Text>
+              </View>
+              <View style={styles.tradeSummaryItem}>
+                <Text style={[styles.tradeSummaryValue, { color: colors.primary }]}>
+                  {trades.filter(t => t.isOpen).length}
+                </Text>
+                <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.openLabel')}</Text>
+              </View>
+              <View style={styles.tradeSummaryItem}>
+                <Text style={[styles.tradeSummaryValue, {
+                  color: trades.filter(t => !t.isOpen).reduce((s, t) => s + t.pnl, 0) >= 0 ? colors.marketUp : colors.marketDown,
+                }]}>
+                  {formatCurrency(trades.filter(t => !t.isOpen).reduce((s, t) => s + t.pnl, 0), true)}
+                </Text>
+                <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.netPnl')}</Text>
+              </View>
+            </View>
 
-        {/* ─── Performance Analytics ─── */}
-        <PerformanceAnalyticsCard trader={trader} />
+            {/* Trade list */}
+            <View style={styles.tradeList}>
+              {displayedTrades.map(trade => (
+                <TradeRow key={trade.id} trade={trade} colors={colors} />
+              ))}
+            </View>
 
-        {/* ─── Top Stocks ─── */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="business" size={18} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.topStocks')}</Text>
-          </View>
-          <View style={styles.topStocksRow}>
-            {trader.topStocks.map(s => (
+            {trades.length > 10 && !showAllTrades && (
               <TouchableOpacity
-                key={s}
-                style={[styles.stockChip, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}
-                onPress={() => navigation.navigate('StockDetail', { stockId: s, symbol: s })}
+                style={[styles.showMoreBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                onPress={() => setShowAllTrades(true)}
               >
-                <Text style={[styles.stockChipText, { color: colors.primary }]}>{s}</Text>
+                <Text style={[styles.showMoreText, { color: colors.primary }]}>
+                  {t('traderProfile.showAll', { count: trades.length })}
+                </Text>
+                <Ionicons name="chevron-down" size={16} color={colors.primary} />
               </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* ─── Trade History ─── */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="swap-horizontal" size={18} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('traderProfile.tradeHistory')}</Text>
-            <Text style={[styles.tradeCount, { color: colors.textMuted }]}>{t('traderProfile.tradeCount', { count: trades.length })}</Text>
-          </View>
-
-          {/* Summary row */}
-          <View style={[styles.tradeSummary, { backgroundColor: colors.bgInput, borderColor: colors.border }]}>
-            <View style={styles.tradeSummaryItem}>
-              <Text style={[styles.tradeSummaryValue, { color: colors.marketUp }]}>
-                {trades.filter(t => t.pnl > 0 && !t.isOpen).length}
-              </Text>
-              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.won')}</Text>
-            </View>
-            <View style={styles.tradeSummaryItem}>
-              <Text style={[styles.tradeSummaryValue, { color: colors.marketDown }]}>
-                {trades.filter(t => t.pnl <= 0 && !t.isOpen).length}
-              </Text>
-              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.lost')}</Text>
-            </View>
-            <View style={styles.tradeSummaryItem}>
-              <Text style={[styles.tradeSummaryValue, { color: colors.primary }]}>
-                {trades.filter(t => t.isOpen).length}
-              </Text>
-              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.openLabel')}</Text>
-            </View>
-            <View style={styles.tradeSummaryItem}>
-              <Text style={[styles.tradeSummaryValue, {
-                color: trades.filter(t => !t.isOpen).reduce((s, t) => s + t.pnl, 0) >= 0 ? colors.marketUp : colors.marketDown,
-              }]}>
-                {formatCurrency(trades.filter(t => !t.isOpen).reduce((s, t) => s + t.pnl, 0), true)}
-              </Text>
-              <Text style={[styles.tradeSummaryLabel, { color: colors.textMuted }]}>{t('traderProfile.netPnl')}</Text>
-            </View>
+            )}
+            {showAllTrades && trades.length > 10 && (
+              <TouchableOpacity
+                style={[styles.showMoreBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
+                onPress={() => setShowAllTrades(false)}
+              >
+                <Text style={[styles.showMoreText, { color: colors.primary }]}>{t('traderProfile.showLess')}</Text>
+                <Ionicons name="chevron-up" size={16} color={colors.primary} />
+              </TouchableOpacity>
+            )}
           </View>
 
-          {/* Trade list */}
-          <View style={styles.tradeList}>
-            {displayedTrades.map(trade => (
-              <TradeRow key={trade.id} trade={trade} colors={colors} />
-            ))}
-          </View>
+          <View style={{ height: 100 }} />
+        </ScrollView>
 
-          {trades.length > 10 && !showAllTrades && (
-            <TouchableOpacity
-              style={[styles.showMoreBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              onPress={() => setShowAllTrades(true)}
+        {/* ─── Sticky Bottom Actions ─── */}
+        <LinearGradient
+          colors={[colors.bg + '00', colors.bg, colors.bg]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 0.3 }}
+          style={styles.bottomActionsWrapper}
+        >
+          <View style={styles.bottomActions}>
+            <AnimatedPressable
+              onPress={handleFollow}
+              haptic="light"
+              scaleTo={0.95}
+              style={{ flex: 1 }}
             >
-              <Text style={[styles.showMoreText, { color: colors.primary }]}>
-                {t('traderProfile.showAll', { count: trades.length })}
-              </Text>
-              <Ionicons name="chevron-down" size={16} color={colors.primary} />
-            </TouchableOpacity>
-          )}
-          {showAllTrades && trades.length > 10 && (
-            <TouchableOpacity
-              style={[styles.showMoreBtn, { backgroundColor: colors.bgInput, borderColor: colors.border }]}
-              onPress={() => setShowAllTrades(false)}
-            >
-              <Text style={[styles.showMoreText, { color: colors.primary }]}>{t('traderProfile.showLess')}</Text>
-              <Ionicons name="chevron-up" size={16} color={colors.primary} />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
-      {/* ─── Sticky Bottom Actions ─── */}
-      <LinearGradient
-        colors={[colors.bg + '00', colors.bg, colors.bg]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 0.3 }}
-        style={styles.bottomActionsWrapper}
-      >
-        <View style={styles.bottomActions}>
-          <AnimatedPressable
-            onPress={handleFollow}
-            haptic="light"
-            scaleTo={0.95}
-            style={{ flex: 1 }}
-          >
-            <View style={[
-              styles.followBtn,
-              isFollowed && styles.followBtnActive,
-            ]}>
-              <Ionicons
-                name={isFollowed ? 'people' : 'person-add-outline'}
-                size={20}
-                color={isFollowed ? colors.white : colors.primary}
-              />
-              <Text style={[
-                styles.followBtnText,
-                isFollowed && styles.followBtnTextActive,
+              <View style={[
+                styles.followBtn,
+                isFollowed && styles.followBtnActive,
               ]}>
-                {isFollowed ? t('traderProfile.following') : t('traderProfile.followBtn')}
-              </Text>
-            </View>
-          </AnimatedPressable>
+                <Ionicons
+                  name={isFollowed ? 'people' : 'person-add-outline'}
+                  size={20}
+                  color={isFollowed ? colors.white : colors.primary}
+                />
+                <Text style={[
+                  styles.followBtnText,
+                  isFollowed && styles.followBtnTextActive,
+                ]}>
+                  {isFollowed ? t('traderProfile.following') : t('traderProfile.followBtn')}
+                </Text>
+              </View>
+            </AnimatedPressable>
 
-          <AnimatedPressable
-            onPress={handleStartCopy}
-            haptic="medium"
-            scaleTo={0.95}
-            style={{ flex: 1.5 }}
-          >
-            <LinearGradient
-              colors={isCopying ? ['#4CAF50', '#388E3C'] : GRADIENTS.primary}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.copyBtn}
+            <AnimatedPressable
+              onPress={handleStartCopy}
+              haptic="medium"
+              scaleTo={0.95}
+              style={{ flex: 1.5 }}
             >
-              <Ionicons
-                name={isCopying ? 'checkmark-circle' : 'copy-outline'}
-                size={20}
-                color={colors.white}
-              />
-              <Text style={styles.copyBtnText}>
-                {isCopying ? t('traderProfile.copying') : t('traderProfile.copyTrader')}
-              </Text>
-            </LinearGradient>
-          </AnimatedPressable>
-        </View>
-      </LinearGradient>
-    </View>
+              <LinearGradient
+                colors={isCopying ? ['#4CAF50', '#388E3C'] : GRADIENTS.primary}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.copyBtn}
+              >
+                <Ionicons
+                  name={isCopying ? 'checkmark-circle' : 'copy-outline'}
+                  size={20}
+                  color={colors.white}
+                />
+                <Text style={styles.copyBtnText}>
+                  {isCopying ? t('traderProfile.copying') : t('traderProfile.copyTrader')}
+                </Text>
+              </LinearGradient>
+            </AnimatedPressable>
+          </View>
+        </LinearGradient>
+      </AppScreen>
   );
 }
 
@@ -611,7 +616,6 @@ export default function TraderProfileScreen({ navigation, route }: NativeStackSc
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
 
     // ── Sticky Header ──
     stickyHeader: {

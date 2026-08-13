@@ -30,6 +30,7 @@ import { kycCallbackStore } from '../../store/kycCallbackStore';
 import { useKycStore, LinkedBankStoreAccount } from '../../store/kycStore';
 import type {IFSCVerificationResult, AccountVerificationResult, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 // IFSC regex: 4 letters + 0 + 6 alphanumeric
 const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
@@ -619,68 +620,70 @@ export default function BankLinkingScreen({ navigation }: NativeStackScreenProps
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} testID="back-button">
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <View style={styles.headerInfo}>
-            <Text style={styles.title}>
-              {flowStep === 'manage' ? t('kyc.manageBanks') : t('kyc.bankLinkingTitle')}
-            </Text>
-            {flowStep !== 'manage' && (
-              <Text style={styles.stepText}>
-                {flowStep === 'ifsc' ? t('kyc.step1') :
-                 flowStep === 'account' ? t('kyc.step2') :
-                 flowStep === 'verify' ? t('kyc.step3') : t('kyc.stepComplete')}
+      <AppScreen scroll={false} padded={false}>
+
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} testID="back-button">
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <View style={styles.headerInfo}>
+              <Text style={styles.title}>
+                {flowStep === 'manage' ? t('kyc.manageBanks') : t('kyc.bankLinkingTitle')}
               </Text>
+              {flowStep !== 'manage' && (
+                <Text style={styles.stepText}>
+                  {flowStep === 'ifsc' ? t('kyc.step1') :
+                   flowStep === 'account' ? t('kyc.step2') :
+                   flowStep === 'verify' ? t('kyc.step3') : t('kyc.stepComplete')}
+                </Text>
+              )}
+            </View>
+            {linkedBanks.length > 0 && flowStep !== 'manage' && (
+              <TouchableOpacity onPress={() => setFlowStep('manage')} style={styles.manageBtn} testID="manage-banks-btn">
+                <Ionicons name="settings-outline" size={20} color={colors.primary} />
+              </TouchableOpacity>
             )}
           </View>
-          {linkedBanks.length > 0 && flowStep !== 'manage' && (
-            <TouchableOpacity onPress={() => setFlowStep('manage')} style={styles.manageBtn} testID="manage-banks-btn">
-              <Ionicons name="settings-outline" size={20} color={colors.primary} />
-            </TouchableOpacity>
+
+          {/* Progress Bar */}
+          {flowStep !== 'manage' && flowStep !== 'linked' && (
+            <View style={styles.progressBar}>
+              <View style={[styles.progressDot, styles.progressDotActive]} />
+              <View style={[styles.progressLine, (flowStep === 'account' || flowStep === 'verify') && styles.progressLineActive]} />
+              <View style={[styles.progressDot, (flowStep === 'account' || flowStep === 'verify') && styles.progressDotActive]} />
+              <View style={[styles.progressLine, flowStep === 'verify' && styles.progressLineActive]} />
+              <View style={[styles.progressDot, flowStep === 'verify' && styles.progressDotActive]} />
+            </View>
           )}
-        </View>
 
-        {/* Progress Bar */}
-        {flowStep !== 'manage' && flowStep !== 'linked' && (
-          <View style={styles.progressBar}>
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={[styles.progressLine, (flowStep === 'account' || flowStep === 'verify') && styles.progressLineActive]} />
-            <View style={[styles.progressDot, (flowStep === 'account' || flowStep === 'verify') && styles.progressDotActive]} />
-            <View style={[styles.progressLine, flowStep === 'verify' && styles.progressLineActive]} />
-            <View style={[styles.progressDot, flowStep === 'verify' && styles.progressDotActive]} />
-          </View>
-        )}
+          {flowStep === 'ifsc' && renderIFSCStep()}
+          {flowStep === 'account' && renderAccountStep()}
+          {flowStep === 'verify' && renderVerifyStep()}
+          {flowStep === 'linked' && renderLinkedStep()}
+          {flowStep === 'manage' && renderManageStep()}
 
-        {flowStep === 'ifsc' && renderIFSCStep()}
-        {flowStep === 'account' && renderAccountStep()}
-        {flowStep === 'verify' && renderVerifyStep()}
-        {flowStep === 'linked' && renderLinkedStep()}
-        {flowStep === 'manage' && renderManageStep()}
+          {/* Error */}
+          {error && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={18} color={colors.danger} />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          )}
 
-        {/* Error */}
-        {error && (
-          <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle" size={18} color={colors.danger} />
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <View style={{ height: 60 }} />
+        </ScrollView>
+    
+      </AppScreen></KeyboardAvoidingView>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
     scrollContent: { paddingHorizontal: SPACING.xl, paddingBottom: 20 },
 
     // Header

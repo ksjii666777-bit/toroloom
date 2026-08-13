@@ -8,6 +8,7 @@ import { SPACING, FONTS, BORDER_RADIUS, GRADIENTS, COLORS } from '../../constant
 import { supportApi, FAQ } from '../../services/api/support';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 
@@ -107,162 +108,159 @@ export default function HelpScreen({ navigation }: NativeStackScreenProps<RootSt
   }, []);
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        ref={scrollRef}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+          <AppScreen scroll={false} padded={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <View style={styles.headerContent}>
-            <Text style={styles.title}>{t('help.title')}</Text>
-            <Text style={styles.subtitle}>{t('help.subtitle')}</Text>
-          </View>
-        </View>
-
-        {/* Search Bar */}
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color={searchQuery ? colors.primary : colors.textMuted} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t('help.searchArticles')}
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-          />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery('')} style={styles.searchClear}>
-              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+  <ScrollView
+          ref={scrollRef}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </Pressable>
-          )}
-        </View>
-
-        {/* Quick Topics */}
-        <Text style={styles.sectionTitle}>{t('help.quickHelp')}</Text>
-        <View style={styles.topicsGrid}>
-          {quickTopics.map((topic) => (
-            <Pressable key={topic.label} style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
-              <View style={[styles.topicIcon, { backgroundColor: topic.color + '20' }]}>
-                <Ionicons name={topic.icon as keyof typeof Ionicons.glyphMap} size={22} color={topic.color} />
-              </View>
-              <Text style={styles.topicLabel}>{t(`help.${topic.label}`)}</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* Contact Options */}
-        <Text style={styles.sectionTitle}>{t('help.contactUs')}</Text>
-        <View style={styles.contactRow}>
-          {contactOptions.map((option) => (
-            <Pressable key={option.label}
-            >
-              <LinearGradient colors={option.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
-                <Ionicons name={option.icon as keyof typeof Ionicons.glyphMap} size={22} color={COLORS.white} />
-              </LinearGradient>
-              <Text style={styles.contactLabel}>{t(`help.${option.label}`)}</Text>
-              <Text style={styles.contactDetail}>{t(`help.${option.detail}`)}</Text>
-              <Text style={styles.contactHours}>{t(`help.${option.hours}`)}</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* FAQ Section */}
-        <View style={styles.faqSection} onLayout={onFaqSectionLayout}>
-          <View style={styles.faqHeader}>
-            <Text style={styles.sectionTitle}>{t('help.faq')}</Text>
-            <Text style={styles.faqCount}>
-              {loadingFaqs
-                ? t('help.loading')
-                : filteredFaqs.length < faqs.length
-                  ? t('help.ofCount', { count: filteredFaqs.length, total: faqs.length })
-                  : t('help.articlesCount', { count: faqs.length })}
-            </Text>
-          </View>
-
-          {loadingFaqs ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={styles.loadingText}>{t('help.loadingArticles')}</Text>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>{t('help.title')}</Text>
+              <Text style={styles.subtitle}>{t('help.subtitle')}</Text>
             </View>
-          ) : filteredFaqs.length > 0 ? (
-            filteredFaqs.map((faq, _i) => {
-            const isExpanded = expandedFaq === faq.id;
-            return (
-              <Pressable key={faq.id} style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>
-                <View style={styles.faqQuestionRow}>
-                  <Text style={styles.faqQuestion}>{faq.question}</Text>
-                  <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={18}
-                    color={isExpanded ? colors.primary : colors.textMuted}
-                  />
-                </View>
-                {isExpanded && (
-                  <View style={styles.faqAnswerContainer}>
-                    <Text style={styles.faqAnswer}>{faq.answer}</Text>
-                  </View>
-                )}
+          </View>
+
+          {/* Search Bar */}
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={18} color={searchQuery ? colors.primary : colors.textMuted} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder={t('help.searchArticles')}
+              placeholderTextColor={colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')} style={styles.searchClear}>
+                <Ionicons name="close-circle" size={18} color={colors.textMuted} />
               </Pressable>
-            );
-          })
-          ) : (
-            <View style={styles.noResults}>
-              <Ionicons name="search-outline" size={48} color={colors.textMuted} />
-              <Text style={styles.noResultsTitle}>{t('help.noResults')}</Text>
-              <Text style={styles.noResultsSubtitle}>
-                {t('help.noResultsSubtitle')}
+            )}
+          </View>
+
+          {/* Quick Topics */}
+          <Text style={styles.sectionTitle}>{t('help.quickHelp')}</Text>
+          <View style={styles.topicsGrid}>
+            {quickTopics.map((topic) => (
+              <Pressable key={topic.label} style={({pressed}) => ({opacity: pressed ? 0.6 : 1})}>
+                <View style={[styles.topicIcon, { backgroundColor: topic.color + '20' }]}>
+                  <Ionicons name={topic.icon as keyof typeof Ionicons.glyphMap} size={22} color={topic.color} />
+                </View>
+                <Text style={styles.topicLabel}>{t(`help.${topic.label}`)}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Contact Options */}
+          <Text style={styles.sectionTitle}>{t('help.contactUs')}</Text>
+          <View style={styles.contactRow}>
+            {contactOptions.map((option) => (
+              <Pressable key={option.label}
+              >
+                <LinearGradient colors={option.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
+                  <Ionicons name={option.icon as keyof typeof Ionicons.glyphMap} size={22} color={COLORS.white} />
+                </LinearGradient>
+                <Text style={styles.contactLabel}>{t(`help.${option.label}`)}</Text>
+                <Text style={styles.contactDetail}>{t(`help.${option.detail}`)}</Text>
+                <Text style={styles.contactHours}>{t(`help.${option.hours}`)}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* FAQ Section */}
+          <View style={styles.faqSection} onLayout={onFaqSectionLayout}>
+            <View style={styles.faqHeader}>
+              <Text style={styles.sectionTitle}>{t('help.faq')}</Text>
+              <Text style={styles.faqCount}>
+                {loadingFaqs
+                  ? t('help.loading')
+                  : filteredFaqs.length < faqs.length
+                    ? t('help.ofCount', { count: filteredFaqs.length, total: faqs.length })
+                    : t('help.articlesCount', { count: faqs.length })}
               </Text>
             </View>
-          )}
-        </View>
 
-        {/* App Info */}
-        <View style={styles.appInfoCard}>
-          <View style={styles.appInfoRow}>
-            <View>
-              <Text style={styles.appInfoLabel}>{t('help.appVersion')}</Text>
-              <Text style={styles.appInfoValue}>{t('help.appVersionValue')}</Text>
-            </View>
-            <View style={styles.appInfoDivider} />
-            <View>
-              <Text style={styles.appInfoLabel}>{t('help.lastUpdated')}</Text>
-              <Text style={styles.appInfoValue}>{t('help.lastUpdatedValue')}</Text>
-            </View>
+            {loadingFaqs ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text style={styles.loadingText}>{t('help.loadingArticles')}</Text>
+              </View>
+            ) : filteredFaqs.length > 0 ? (
+              filteredFaqs.map((faq, _i) => {
+              const isExpanded = expandedFaq === faq.id;
+              return (
+                <Pressable key={faq.id} style={({pressed}) => ({opacity: pressed ? 0.7 : 1})}>
+                  <View style={styles.faqQuestionRow}>
+                    <Text style={styles.faqQuestion}>{faq.question}</Text>
+                    <Ionicons
+                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={18}
+                      color={isExpanded ? colors.primary : colors.textMuted}
+                    />
+                  </View>
+                  {isExpanded && (
+                    <View style={styles.faqAnswerContainer}>
+                      <Text style={styles.faqAnswer}>{faq.answer}</Text>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })
+            ) : (
+              <View style={styles.noResults}>
+                <Ionicons name="search-outline" size={48} color={colors.textMuted} />
+                <Text style={styles.noResultsTitle}>{t('help.noResults')}</Text>
+                <Text style={styles.noResultsSubtitle}>
+                  {t('help.noResultsSubtitle')}
+                </Text>
+              </View>
+            )}
           </View>
-          <View style={styles.footerLinks}>
-            <Pressable style={styles.footerLink}>
-              <Text style={styles.footerLinkText}>{t('help.privacyPolicy')}</Text>
-            </Pressable>
-            <View style={styles.footerLinkDot} />
-            <Pressable style={styles.footerLink}>
-              <Text style={styles.footerLinkText}>{t('help.termsOfService')}</Text>
-            </Pressable>
-            <View style={styles.footerLinkDot} />
-            <Pressable style={styles.footerLink}>
-              <Text style={styles.footerLinkText}>{t('help.licenses')}</Text>
-            </Pressable>
-          </View>
-          <Text style={styles.copyright}>{t('help.copyright')}</Text>
-        </View>
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </View>
+          {/* App Info */}
+          <View style={styles.appInfoCard}>
+            <View style={styles.appInfoRow}>
+              <View>
+                <Text style={styles.appInfoLabel}>{t('help.appVersion')}</Text>
+                <Text style={styles.appInfoValue}>{t('help.appVersionValue')}</Text>
+              </View>
+              <View style={styles.appInfoDivider} />
+              <View>
+                <Text style={styles.appInfoLabel}>{t('help.lastUpdated')}</Text>
+                <Text style={styles.appInfoValue}>{t('help.lastUpdatedValue')}</Text>
+              </View>
+            </View>
+            <View style={styles.footerLinks}>
+              <Pressable style={styles.footerLink}>
+                <Text style={styles.footerLinkText}>{t('help.privacyPolicy')}</Text>
+              </Pressable>
+              <View style={styles.footerLinkDot} />
+              <Pressable style={styles.footerLink}>
+                <Text style={styles.footerLinkText}>{t('help.termsOfService')}</Text>
+              </Pressable>
+              <View style={styles.footerLinkDot} />
+              <Pressable style={styles.footerLink}>
+                <Text style={styles.footerLinkText}>{t('help.licenses')}</Text>
+              </Pressable>
+            </View>
+            <Text style={styles.copyright}>{t('help.copyright')}</Text>
+          </View>
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     paddingHorizontal: SPACING.xl,
     paddingBottom: 20,

@@ -9,6 +9,7 @@ import ToroloomLogo from '../../components/ui/ToroloomLogo';
 import { SPACING, FONTS, BORDER_RADIUS} from '../../constants/theme';
 import { useAuthStore } from '../../store/authStore';
 import { useT } from '../../hooks/useT';
+import AppScreen from '../../components/ui/AppScreen';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
@@ -39,9 +40,10 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <AppScreen scroll={false} padded={false}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -141,16 +143,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           </Pressable>
         </View>
       </ScrollView>
+      </AppScreen>
     </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: SPACING.xxxl,

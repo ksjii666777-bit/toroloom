@@ -11,6 +11,7 @@ import { tickerProvider } from '../../services/tickerProvider';
 import { Trade } from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
+import AppScreen from '../../components/ui/AppScreen';
 
 
 const { width } = Dimensions.get('window');
@@ -55,163 +56,161 @@ export default function TradeHistoryScreen({ navigation }: NativeStackScreenProp
   const totalTrades = trades.length;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.headerContent}>
-          <Text style={styles.title}>{t('trading.tradeHistory')}</Text>
-          <Text style={styles.subtitle}>{t('trading.totalTrades', { count: totalTrades })}</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.openOrdersBtn}
-          onPress={() => navigation.navigate('OpenOrders')}
-        >
-          <Ionicons name="clipboard-outline" size={18} color={colors.primary} />
-          <Text style={styles.openOrdersBtnText}>{t('trading.openOrdersBtn')}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Stats Cards */}
-      <View style={styles.statsRow}>
-        <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
-          <Text style={styles.statCardLabel}>{t('trading.totalBuys')}</Text>
-          <Text style={styles.statCardValue}>{formatCurrency(totalBuyValue, true)}</Text>
-          <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'buy').length} {t('trading.orders')}</Text>
-        </LinearGradient>
-        <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
-          <Text style={styles.statCardLabel}>{t('trading.totalSells')}</Text>
-          <Text style={styles.statCardValue}>{formatCurrency(totalSellValue, true)}</Text>
-          <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'sell').length} {t('trading.orders')}</Text>
-        </LinearGradient>
-      </View>
-
-      {/* Search */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('trading.searchPlaceholder')}
-          placeholderTextColor={colors.textMuted}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+          <AppScreen scroll={false} padded={false}
+      header={
+  <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Filter Tabs */}
-      <View style={styles.filterRow}>
-        {(['all', 'buy', 'sell'] as FilterType[]).map(f => (
-          <TouchableOpacity
-            key={f}
-            style={[styles.filterChip, filter === f && styles.filterChipActive]}
-            onPress={() => setFilter(f)}
-          >
-            <View style={[styles.filterDot, {
-              backgroundColor: f === 'all' ? colors.primary : f === 'buy' ? colors.marketUp : colors.marketDown,
-              opacity: filter === f ? 1 : 0.5,
-            }]} />
-            <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-              {f === 'all' ? t('trading.all') : f === 'buy' ? t('trading.buy') : t('trading.sell')}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Trade List */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {groupedTrades.length > 0 ? (
-          groupedTrades.map(([dateKey, dateTrades]) => {
-            const dayPnl = dateTrades.reduce((sum, t) =>
-              sum + (t.type === 'sell' ? t.total : -t.total), 0
-            );
-            const displayDate = new Date(dateKey).toDateString() === new Date().toDateString()
-              ? 'Today'
-              : new Date(dateKey).toDateString() === new Date(Date.now() - 86400000).toDateString()
-              ? 'Yesterday'
-              : formatDate(dateKey, 'dd MMM yyyy');
-
-            // Convert displayDate to use t() when it's 'Today' or 'Yesterday'
-            const displayDateT = displayDate === 'Today' ? t('trading.today') : displayDate === 'Yesterday' ? t('trading.yesterday') : displayDate;
-
-            return (
-              <View key={dateKey} style={styles.dateGroup}>
-                <View style={styles.dateHeader}>
-                  <Text style={styles.dateTitle}>{displayDateT}</Text>
-                  <Text style={[styles.datePnl, { color: dayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
-                    {dayPnl >= 0 ? '+' : ''}{formatCurrency(dayPnl, true)}
-                  </Text>
-                </View>
-                {dateTrades.map(trade => (
-                  <TouchableOpacity
-                    key={trade.id}
-                    style={styles.tradeItem}
-                    onPress={() => {
-                      // Hybrid Ticker Provider — pre-select the traded symbol so
-                      // the SnapTrade order panel opens pre-filled with the same
-                      // instrument, chart and execution price. Indian equities → NSE.
-                      tickerProvider.selectSymbol({
-                        symbol: trade.symbol,
-                        exchange: 'NSE',
-                        name: trade.name,
-                        price: trade.price,
-                      });
-                      navigation.navigate('StockDetail', { stockId: trade.stockId, symbol: trade.symbol });
-                    }}
-                  >
-                    <View style={styles.tradeLeft}>
-                      <View style={[styles.tradeTypeBadge, {
-                        backgroundColor: trade.type === 'buy' ? '#00C85320' : '#FF174420',
-                      }]}>
-                        <Ionicons
-                          name={trade.type === 'buy' ? 'arrow-down' : 'arrow-up'}
-                          size={16}
-                          color={trade.type === 'buy' ? colors.marketUp : colors.marketDown}
-                        />
-                      </View>
-                      <View>
-                        <Text style={styles.tradeSymbol}>{trade.symbol}</Text>
-                        <Text style={styles.tradeName} numberOfLines={1}>{trade.name}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.tradeRight}>
-                      <Text style={styles.tradeQty}>{trade.quantity} @ {formatCurrency(trade.price)}</Text>
-                      <Text style={[styles.tradeTotal, {
-                        color: trade.type === 'buy' ? colors.textSecondary : colors.marketUp,
-                      }]}>
-                        {trade.type === 'buy' ? '-' : '+'}{formatCurrency(trade.total, true)}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            );
-          })
-        ) : (
-          <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
-            <Text style={styles.emptyTitle}>{t('trading.noTradesFound')}</Text>
-            <Text style={styles.emptySubtitle}>
-              {searchQuery ? t('trading.differentSearchTerm') : t('trading.startTrading')}
-            </Text>
+          <View style={styles.headerContent}>
+            <Text style={styles.title}>{t('trading.tradeHistory')}</Text>
+            <Text style={styles.subtitle}>{t('trading.totalTrades', { count: totalTrades })}</Text>
           </View>
-        )}
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+          <TouchableOpacity
+            style={styles.openOrdersBtn}
+            onPress={() => navigation.navigate('OpenOrders')}
+          >
+            <Ionicons name="clipboard-outline" size={18} color={colors.primary} />
+            <Text style={styles.openOrdersBtnText}>{t('trading.openOrdersBtn')}</Text>
+          </TouchableOpacity>
+        </View>
+      }
+      >
+  {/* Stats Cards */}
+        <View style={styles.statsRow}>
+          <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
+            <Text style={styles.statCardLabel}>{t('trading.totalBuys')}</Text>
+            <Text style={styles.statCardValue}>{formatCurrency(totalBuyValue, true)}</Text>
+            <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'buy').length} {t('trading.orders')}</Text>
+          </LinearGradient>
+          <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
+            <Text style={styles.statCardLabel}>{t('trading.totalSells')}</Text>
+            <Text style={styles.statCardValue}>{formatCurrency(totalSellValue, true)}</Text>
+            <Text style={styles.statCardSub}>{trades.filter(t => t.type === 'sell').length} {t('trading.orders')}</Text>
+          </LinearGradient>
+        </View>
+
+        {/* Search */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder={t('trading.searchPlaceholder')}
+            placeholderTextColor={colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Filter Tabs */}
+        <View style={styles.filterRow}>
+          {(['all', 'buy', 'sell'] as FilterType[]).map(f => (
+            <TouchableOpacity
+              key={f}
+              style={[styles.filterChip, filter === f && styles.filterChipActive]}
+              onPress={() => setFilter(f)}
+            >
+              <View style={[styles.filterDot, {
+                backgroundColor: f === 'all' ? colors.primary : f === 'buy' ? colors.marketUp : colors.marketDown,
+                opacity: filter === f ? 1 : 0.5,
+              }]} />
+              <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
+                {f === 'all' ? t('trading.all') : f === 'buy' ? t('trading.buy') : t('trading.sell')}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Trade List */}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {groupedTrades.length > 0 ? (
+            groupedTrades.map(([dateKey, dateTrades]) => {
+              const dayPnl = dateTrades.reduce((sum, t) =>
+                sum + (t.type === 'sell' ? t.total : -t.total), 0
+              );
+              const displayDate = new Date(dateKey).toDateString() === new Date().toDateString()
+                ? 'Today'
+                : new Date(dateKey).toDateString() === new Date(Date.now() - 86400000).toDateString()
+                ? 'Yesterday'
+                : formatDate(dateKey, 'dd MMM yyyy');
+
+              // Convert displayDate to use t() when it's 'Today' or 'Yesterday'
+              const displayDateT = displayDate === 'Today' ? t('trading.today') : displayDate === 'Yesterday' ? t('trading.yesterday') : displayDate;
+
+              return (
+                <View key={dateKey} style={styles.dateGroup}>
+                  <View style={styles.dateHeader}>
+                    <Text style={styles.dateTitle}>{displayDateT}</Text>
+                    <Text style={[styles.datePnl, { color: dayPnl >= 0 ? colors.marketUp : colors.marketDown }]}>
+                      {dayPnl >= 0 ? '+' : ''}{formatCurrency(dayPnl, true)}
+                    </Text>
+                  </View>
+                  {dateTrades.map(trade => (
+                    <TouchableOpacity
+                      key={trade.id}
+                      style={styles.tradeItem}
+                      onPress={() => {
+                        // Hybrid Ticker Provider — pre-select the traded symbol so
+                        // the SnapTrade order panel opens pre-filled with the same
+                        // instrument, chart and execution price. Indian equities → NSE.
+                        tickerProvider.selectSymbol({
+                          symbol: trade.symbol,
+                          exchange: 'NSE',
+                          name: trade.name,
+                          price: trade.price,
+                        });
+                        navigation.navigate('StockDetail', { stockId: trade.stockId, symbol: trade.symbol });
+                      }}
+                    >
+                      <View style={styles.tradeLeft}>
+                        <View style={[styles.tradeTypeBadge, {
+                          backgroundColor: trade.type === 'buy' ? '#00C85320' : '#FF174420',
+                        }]}>
+                          <Ionicons
+                            name={trade.type === 'buy' ? 'arrow-down' : 'arrow-up'}
+                            size={16}
+                            color={trade.type === 'buy' ? colors.marketUp : colors.marketDown}
+                          />
+                        </View>
+                        <View>
+                          <Text style={styles.tradeSymbol}>{trade.symbol}</Text>
+                          <Text style={styles.tradeName} numberOfLines={1}>{trade.name}</Text>
+                        </View>
+                      </View>
+                      <View style={styles.tradeRight}>
+                        <Text style={styles.tradeQty}>{trade.quantity} @ {formatCurrency(trade.price)}</Text>
+                        <Text style={[styles.tradeTotal, {
+                          color: trade.type === 'buy' ? colors.textSecondary : colors.marketUp,
+                        }]}>
+                          {trade.type === 'buy' ? '-' : '+'}{formatCurrency(trade.total, true)}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              );
+            })
+          ) : (
+            <View style={styles.emptyState}>
+              <Ionicons name="receipt-outline" size={64} color={colors.textMuted} />
+              <Text style={styles.emptyTitle}>{t('trading.noTradesFound')}</Text>
+              <Text style={styles.emptySubtitle}>
+                {searchQuery ? t('trading.differentSearchTerm') : t('trading.startTrading')}
+              </Text>
+            </View>
+          )}
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </AppScreen>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

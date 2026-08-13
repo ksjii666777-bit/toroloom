@@ -19,6 +19,7 @@ import { SPACING, FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { analytics } from '../../services/analytics';
 import * as Haptics from 'expo-haptics';
 import { renderIllustration } from '../../components/onboarding/onboardingUtils';
+import AppScreen from '../../components/ui/AppScreen';
 import OnboardingLottie from '../../components/onboarding/OnboardingLottie';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types';
@@ -995,7 +996,7 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <AppScreen scroll={false} padded={false} contentStyle={{ backgroundColor: '#0B0F19' }}>
       {/* Top Bar — Skip + Page Indicator + Lottie Toggle */}
       <Animated.View style={[styles.topBar, contentStyle]}>
         <Pressable onPress={handleSkip} style={styles.skipBtn}>
@@ -1195,7 +1196,7 @@ export default function OnboardingScreen({ navigation: _navigation  }: NativeSta
           </Pressable>
         </View>
       </Animated.View>
-    </View>
+    </AppScreen>
   );
 }
 
@@ -1753,11 +1754,6 @@ const demoStyles = StyleSheet.create({
 // ────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0B0F19',
-  },
-
   // ── Top Bar ──
   topBar: {
     flexDirection: 'row',

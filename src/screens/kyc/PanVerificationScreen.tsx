@@ -27,6 +27,7 @@ import Card from '../../components/ui/Card';
 import { kycCallbackStore } from '../../store/kycCallbackStore';
 import type {PanVerificationResult, RootStackParamList} from '../../types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import AppScreen from '../../components/ui/AppScreen';
 
 // PAN regex: 5 uppercase letters, 4 digits, 1 uppercase letter
 const PAN_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
@@ -91,182 +92,184 @@ export default function PanVerificationScreen({ navigation }: NativeStackScreenP
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.title}>{t('kyc.panVerification')}</Text>
-        </View>
+      <AppScreen scroll={false} padded={false}>
 
-        {/* Info Section */}
-        <Card style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Ionicons name="information-circle" size={20} color={colors.primary} />
-            <Text style={styles.infoText}>
-              {t('kyc.panInfo')}
-            </Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={styles.title}>{t('kyc.panVerification')}</Text>
           </View>
-          <View style={styles.formatRow}>
-            <Text style={styles.formatLabel}>{t('kyc.panFormatLabel')}</Text>
-            <Text style={styles.formatExample}>ABCDE1234F</Text>
-          </View>
-        </Card>
 
-        {/* Input Section */}
-        <View style={styles.inputSection}>
-          <Text style={styles.inputLabel}>{t('kyc.enterPanNumber')}</Text>
-          <View style={[styles.inputContainer, { borderColor: error ? colors.danger : result?.isVerified ? colors.success : colors.border }]}>
-            <TextInput
-              style={styles.input}
-              value={panNumber}
-              onChangeText={handlePanChange}
-              placeholder="ABCDE1234F"
-              placeholderTextColor={colors.textMuted}
-              autoCapitalize="characters"
-              maxLength={10}
-              autoCorrect={false}
-              editable={!isVerifying}
-            />
-            {panNumber.length > 0 && (
-              <View style={[styles.inputStatus, {
-                backgroundColor: isFormatValid
-                  ? (isVerified ? colors.success + '20' : colors.primary + '20')
-                  : colors.danger + '20',
-              }]}>
-                <Ionicons
-                  name={isFormatValid ? (isVerified ? 'checkmark-circle' : 'ellipse') : 'close-circle'}
-                  size={18}
-                  color={isFormatValid ? (isVerified ? colors.success : colors.primary) : colors.danger}
-                />
-              </View>
-            )}
-          </View>
-          <Text style={styles.inputHint}>
-            {panNumber.length === 0
-              ? t('kyc.panHintEmpty')
-              : isFormatValid
-                ? t('kyc.panValidFormat')
-                : t('kyc.panHintChars', { count: 10 - panNumber.length })}
-          </Text>
-        </View>
-
-        {/* Verify Button */}
-        <AnimatedPressable
-          onPress={handleVerify}
-          disabled={!isFormatValid || isVerifying}
-          haptic="medium"
-          scaleTo={0.97}
-          style={{ opacity: isFormatValid && !isVerifying ? 1 : 0.5 }}
-        >
-          <LinearGradient
-            colors={isVerifying ? ['#666', '#888'] : GRADIENTS.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.verifyBtn}
-          >
-            {isVerifying ? (
-              <Ionicons name="sync" size={22} color={colors.white} />
-            ) : (
-              <Ionicons name="shield-checkmark" size={22} color={colors.white} />
-            )}
-            <Text style={styles.verifyBtnText}>
-              {isVerifying ? t('kyc.verifying') : t('kyc.verifyPan')}
-            </Text>
-          </LinearGradient>
-        </AnimatedPressable>
-
-        {/* Error */}
-        {error && (
-          <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle" size={18} color={colors.danger} />
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-
-        {/* Success Result */}
-        {result && isVerified && (
-          <Card style={styles.resultCard}>
-            <View style={styles.resultHeader}>
-              <View style={[styles.resultIcon, { backgroundColor: colors.success + '20' }]}>
-                <Ionicons name="checkmark-circle" size={32} color={colors.success} />
-              </View>
-              <View style={styles.resultInfo}>
-                <Text style={styles.resultTitle}>{t('kyc.panVerifiedTitle')}</Text>
-                <Text style={styles.resultSubtitle}>{t('kyc.panVerifiedSuccess')}</Text>
-              </View>
+          {/* Info Section */}
+          <Card style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Ionicons name="information-circle" size={20} color={colors.primary} />
+              <Text style={styles.infoText}>
+                {t('kyc.panInfo')}
+              </Text>
             </View>
+            <View style={styles.formatRow}>
+              <Text style={styles.formatLabel}>{t('kyc.panFormatLabel')}</Text>
+              <Text style={styles.formatExample}>ABCDE1234F</Text>
+            </View>
+          </Card>
 
-            <View style={styles.resultDivider} />
+          {/* Input Section */}
+          <View style={styles.inputSection}>
+            <Text style={styles.inputLabel}>{t('kyc.enterPanNumber')}</Text>
+            <View style={[styles.inputContainer, { borderColor: error ? colors.danger : result?.isVerified ? colors.success : colors.border }]}>
+              <TextInput
+                style={styles.input}
+                value={panNumber}
+                onChangeText={handlePanChange}
+                placeholder="ABCDE1234F"
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="characters"
+                maxLength={10}
+                autoCorrect={false}
+                editable={!isVerifying}
+              />
+              {panNumber.length > 0 && (
+                <View style={[styles.inputStatus, {
+                  backgroundColor: isFormatValid
+                    ? (isVerified ? colors.success + '20' : colors.primary + '20')
+                    : colors.danger + '20',
+                }]}>
+                  <Ionicons
+                    name={isFormatValid ? (isVerified ? 'checkmark-circle' : 'ellipse') : 'close-circle'}
+                    size={18}
+                    color={isFormatValid ? (isVerified ? colors.success : colors.primary) : colors.danger}
+                  />
+                </View>
+              )}
+            </View>
+            <Text style={styles.inputHint}>
+              {panNumber.length === 0
+                ? t('kyc.panHintEmpty')
+                : isFormatValid
+                  ? t('kyc.panValidFormat')
+                  : t('kyc.panHintChars', { count: 10 - panNumber.length })}
+            </Text>
+          </View>
 
-            <View style={styles.resultDetails}>
-              <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>{t('kyc.panNumberLabel')}</Text>
-                <Text style={styles.resultValue}>{result.panNumber}</Text>
-              </View>
-              <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>{t('kyc.nameOnPan')}</Text>
-                <Text style={styles.resultValue}>{result.nameOnPan || result.fullName}</Text>
-              </View>
-              <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>{t('kyc.category')}</Text>
-                <Text style={styles.resultValue}>{result.category || t('kyc.individual')}</Text>
-              </View>
-              <View style={styles.resultRow}>
-                <Text style={styles.resultLabel}>{t('kyc.status')}</Text>
-                <View style={[styles.statusBadge, { backgroundColor: colors.success + '20' }]}>
-                  <Text style={[styles.statusBadgeText, { color: colors.success }]}>{t('kyc.valid')}</Text>
+          {/* Verify Button */}
+          <AnimatedPressable
+            onPress={handleVerify}
+            disabled={!isFormatValid || isVerifying}
+            haptic="medium"
+            scaleTo={0.97}
+            style={{ opacity: isFormatValid && !isVerifying ? 1 : 0.5 }}
+          >
+            <LinearGradient
+              colors={isVerifying ? ['#666', '#888'] : GRADIENTS.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.verifyBtn}
+            >
+              {isVerifying ? (
+                <Ionicons name="sync" size={22} color={colors.white} />
+              ) : (
+                <Ionicons name="shield-checkmark" size={22} color={colors.white} />
+              )}
+              <Text style={styles.verifyBtnText}>
+                {isVerifying ? t('kyc.verifying') : t('kyc.verifyPan')}
+              </Text>
+            </LinearGradient>
+          </AnimatedPressable>
+
+          {/* Error */}
+          {error && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={18} color={colors.danger} />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          )}
+
+          {/* Success Result */}
+          {result && isVerified && (
+            <Card style={styles.resultCard}>
+              <View style={styles.resultHeader}>
+                <View style={[styles.resultIcon, { backgroundColor: colors.success + '20' }]}>
+                  <Ionicons name="checkmark-circle" size={32} color={colors.success} />
+                </View>
+                <View style={styles.resultInfo}>
+                  <Text style={styles.resultTitle}>{t('kyc.panVerifiedTitle')}</Text>
+                  <Text style={styles.resultSubtitle}>{t('kyc.panVerifiedSuccess')}</Text>
                 </View>
               </View>
-            </View>
 
-            {/* Continue Button */}
-            <AnimatedPressable
-              onPress={handleContinue}
-              haptic="medium"
-              scaleTo={0.97}
-              style={{ marginTop: SPACING.lg }}
-            >
-              <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
-                <Text style={styles.continueBtnText}>{t('kyc.continueAction')}</Text>
-                <Ionicons name="arrow-forward" size={20} color={colors.white} />
-              </LinearGradient>
-            </AnimatedPressable>
-          </Card>
-        )}
+              <View style={styles.resultDivider} />
 
-        {/* Failure Result */}
-        {result && !isVerified && (
-          <Card style={styles.resultCard}>
-            <View style={styles.resultHeader}>
-              <View style={[styles.resultIcon, { backgroundColor: colors.danger + '20' }]}>
-                <Ionicons name="close-circle" size={32} color={colors.danger} />
+              <View style={styles.resultDetails}>
+                <View style={styles.resultRow}>
+                  <Text style={styles.resultLabel}>{t('kyc.panNumberLabel')}</Text>
+                  <Text style={styles.resultValue}>{result.panNumber}</Text>
+                </View>
+                <View style={styles.resultRow}>
+                  <Text style={styles.resultLabel}>{t('kyc.nameOnPan')}</Text>
+                  <Text style={styles.resultValue}>{result.nameOnPan || result.fullName}</Text>
+                </View>
+                <View style={styles.resultRow}>
+                  <Text style={styles.resultLabel}>{t('kyc.category')}</Text>
+                  <Text style={styles.resultValue}>{result.category || t('kyc.individual')}</Text>
+                </View>
+                <View style={styles.resultRow}>
+                  <Text style={styles.resultLabel}>{t('kyc.status')}</Text>
+                  <View style={[styles.statusBadge, { backgroundColor: colors.success + '20' }]}>
+                    <Text style={[styles.statusBadgeText, { color: colors.success }]}>{t('kyc.valid')}</Text>
+                  </View>
+                </View>
               </View>
-              <View style={styles.resultInfo}>
-                <Text style={[styles.resultTitle, { color: colors.danger }]}>{t('kyc.verificationFailed')}</Text>
-                <Text style={styles.resultSubtitle}>
-                  {result.status === 'INVALID'
-                    ? t('kyc.panInvalid')
-                    : t('kyc.panNotFound')}
-                </Text>
-              </View>
-            </View>
-          </Card>
-        )}
 
-        <View style={{ height: 60 }} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+              {/* Continue Button */}
+              <AnimatedPressable
+                onPress={handleContinue}
+                haptic="medium"
+                scaleTo={0.97}
+                style={{ marginTop: SPACING.lg }}
+              >
+                <LinearGradient colors={GRADIENTS.success} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.continueBtn}>
+                  <Text style={styles.continueBtnText}>{t('kyc.continueAction')}</Text>
+                  <Ionicons name="arrow-forward" size={20} color={colors.white} />
+                </LinearGradient>
+              </AnimatedPressable>
+            </Card>
+          )}
+
+          {/* Failure Result */}
+          {result && !isVerified && (
+            <Card style={styles.resultCard}>
+              <View style={styles.resultHeader}>
+                <View style={[styles.resultIcon, { backgroundColor: colors.danger + '20' }]}>
+                  <Ionicons name="close-circle" size={32} color={colors.danger} />
+                </View>
+                <View style={styles.resultInfo}>
+                  <Text style={[styles.resultTitle, { color: colors.danger }]}>{t('kyc.verificationFailed')}</Text>
+                  <Text style={styles.resultSubtitle}>
+                    {result.status === 'INVALID'
+                      ? t('kyc.panInvalid')
+                      : t('kyc.panNotFound')}
+                  </Text>
+                </View>
+              </View>
+            </Card>
+          )}
+
+          <View style={{ height: 60 }} />
+        </ScrollView>
+    
+      </AppScreen></KeyboardAvoidingView>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
     scrollContent: { paddingHorizontal: SPACING.xl, paddingBottom: 20 },
 
     // Header
